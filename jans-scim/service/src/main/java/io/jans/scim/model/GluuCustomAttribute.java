@@ -21,7 +21,7 @@ import jakarta.xml.bind.annotation.XmlTransient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.model.attribute.AttributeDataType;
 
 /**
@@ -31,7 +31,7 @@ import io.jans.model.attribute.AttributeDataType;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlSeeAlso({GluuAttribute.class})
+@XmlSeeAlso({JansAttribute.class})
 public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomAttribute> {
 
 	private static final long serialVersionUID = 1468440094325406153L;
@@ -39,7 +39,7 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 	private String name;
 	private String[] values;
 
-	private transient GluuAttribute metadata;
+	private transient JansAttribute metadata;
 
 	private transient boolean newAttribute = false;
 
@@ -248,11 +248,11 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 		this.name = name;
 	}
 
-	public GluuAttribute getMetadata() {
+	public JansAttribute getMetadata() {
 		return metadata;
 	}
 
-	public void setMetadata(GluuAttribute metadata) {
+	public void setMetadata(JansAttribute metadata) {
 		this.metadata = metadata;
 		
 		if (this.metadata != null) {

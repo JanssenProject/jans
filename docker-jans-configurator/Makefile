@@ -1,27 +1,25 @@
-CN_VERSION?=1.0.16-SNAPSHOT
-IMAGE_NAME=ghcr.io/janssenproject/jans/configurator
-DEV_VERSION?=$(shell echo ${CN_VERSION} | cut -d '-' -f 1)_dev
+IMAGE_VERSION?=$(shell grep -Po 'org.opencontainers.image.version="\K.*?(?=")' Dockerfile)_dev
+IMAGE_URL=$(shell grep -Po 'org.opencontainers.image.url="\K.*?(?=")' Dockerfile)
+IMAGE?=${IMAGE_URL}:${IMAGE_VERSION}
 
-# pass extra build args, i.e. `make build-dev BUILD_ARGS="--no-cache"`
-BUILD_ARGS?=
-
-# pass extra trivy args, i.e. `make trivy-scan TRIVY_ARGS="-f json"`
-TRIVY_ARGS?=
-
-# pass extra grype args, i.e. `make grype-scan GRYPE_ARGS="-o json"`
-GRYPE_ARGS?=
+# pass extra args to the targets, for example:
+#
+# - `make build-dev ARGS="--no-cache"`
+# - `make trivy-scan TRIVY_ARGS="-f json"`
+# - `make grype-scan GRYPE_ARGS="-o json"`
+ARGS?=
 
 .PHONY: test clean all build-dev trivy-scan grype-scan
 .DEFAULT_GOAL := build-dev
 
 build-dev:
-	@echo "[I] Building OCI image ${IMAGE_NAME}:${DEV_VERSION}"
-	@docker build --rm --force-rm ${BUILD_ARGS} -t ${IMAGE_NAME}:${DEV_VERSION} .
+	@echo "[I] Building OCI image ${IMAGE}"
+	@docker build --rm --force-rm ${ARGS} -t ${IMAGE} .
 
 trivy-scan:
-	@echo "[I] Scanning OCI image ${IMAGE_NAME}:${DEV_VERSION} using trivy"
-	@trivy image --security-checks vuln ${TRIVY_ARGS} ${IMAGE_NAME}:${DEV_VERSION}
+	@echo "[I] Scanning OCI image ${IMAGE} using trivy"
+	@trivy image --security-checks vuln ${ARGS} ${IMAGE}
 
 grype-scan:
-	@echo "[I] Scanning OCI image ${IMAGE_NAME}:${DEV_VERSION} using grype"
-	@grype -v ${GRYPE_ARGS} ${IMAGE_NAME}:${DEV_VERSION}
+	@echo "[I] Scanning OCI image ${IMAGE} using grype"
+	@grype -v ${ARGS} ${IMAGE}

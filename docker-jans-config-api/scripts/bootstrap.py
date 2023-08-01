@@ -235,8 +235,11 @@ def configure_logging():
         else:
             config[key] = file_aliases[key]
 
-    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
-        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+    if any([
+        as_boolean(custom_config.get("enable_stdout_log_prefix")),
+        as_boolean(os.environ.get("CN_ENABLE_STDOUT_LOG_PREFIX")),
+    ]):
+        config["log_prefix"] = "${sys:config_api.log.console.prefix}%X{config_api.log.console.group} - "
 
     with open("/app/templates/log4j2.xml") as f:
         txt = f.read()
@@ -266,7 +269,7 @@ def configure_admin_ui_logging():
 
     # ensure custom config is ``dict`` type
     if not isinstance(custom_config, dict):
-        logger.warning("Invalid data type for CN_CONFIG_API_APP_LOGGERS; fallback to defaults")
+        logger.warning("Invalid data type for CN_ADMIN_UI_PLUGIN_LOGGERS; fallback to defaults")
         custom_config = {}
 
     # list of supported levels; OFF is not supported
@@ -305,8 +308,11 @@ def configure_admin_ui_logging():
         else:
             config[key] = file_aliases[key]
 
-    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
-        config["log_prefix"] = "${sys:log.console.prefix.admin-ui}%X{log.console.group.admin-ui} - "
+    if any([
+        as_boolean(custom_config.get("enable_stdout_log_prefix")),
+        as_boolean(os.environ.get("CN_ENABLE_STDOUT_LOG_PREFIX")),
+    ]):
+        config["log_prefix"] = "${sys:admin_ui.log.console.prefix}%X{admin_ui.log.console.group} - "
 
     with open("/app/plugins/admin-ui/log4j2-adminui.xml") as f:
         txt = f.read()
@@ -424,6 +430,24 @@ class PersistenceSetup:
             ).decode()
             self.manager.secret.set("jca_client_encoded_pw", ctx["jca_client_encoded_pw"])
 
+        # test client
+        ctx["test_client_id"] = self.manager.config.get("test_client_id")
+        if not ctx["test_client_id"]:
+            ctx["test_client_id"] = f"{uuid4()}"
+            self.manager.config.set("test_client_id", ctx["test_client_id"])
+
+        ctx["test_client_pw"] = self.manager.secret.get("test_client_pw")
+        if not ctx["test_client_pw"]:
+            ctx["test_client_pw"] = get_random_chars()
+            self.manager.secret.set("test_client_pw", ctx["test_client_pw"])
+
+        ctx["test_client_encoded_pw"] = self.manager.secret.get("test_client_encoded_pw")
+        if not ctx["test_client_encoded_pw"]:
+            ctx["test_client_encoded_pw"] = encode_text(
+                ctx["test_client_pw"], self.manager.secret.get("encoded_salt"),
+            ).decode()
+            self.manager.secret.set("test_client_encoded_pw", ctx["test_client_encoded_pw"])
+
         # pre-populate config_api_dynamic_conf_base64
         with open("/app/templates/jans-config-api/dynamic-conf.json") as f:
             tmpl = Template(f.read())
@@ -462,7 +486,7 @@ class PersistenceSetup:
             logger.info("Missing scopes creation is enabled!")
             self.generate_scopes_ldif()
 
-        files = ["config.ldif", "scopes.ldif", "clients.ldif", "scim-scopes.ldif"]
+        files = ["config.ldif", "scopes.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
 
         for file_ in ldif_files:

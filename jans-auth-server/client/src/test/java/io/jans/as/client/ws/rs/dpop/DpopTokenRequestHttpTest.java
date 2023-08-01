@@ -65,6 +65,36 @@ public class DpopTokenRequestHttpTest extends BaseTest {
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
             "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
+    public void testDPoP_whenClientRequiredDpop_shouldGetErrorIfMakeRequestWithoutDpop(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret) throws Exception {
+        showTitle("testDPoP_whenClientRequiredDpop_shouldGetErrorIfMakeRequestWithoutDpop");
+
+        List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
+
+        // 1. Dynamic Registration
+        String clientId = dynamicRegistration(redirectUris, sectorIdentifierUri, clientJwksUri, responseTypes, true);
+
+        // 2. Request authorization
+        String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
+
+        boolean error = false;
+        try {
+            // 3. Request access token using the authorization code.
+            TokenResponse tokenResponse = requestAccessToken(redirectUri, authorizationCode, null);
+            error = false;
+        } catch (Throwable e) {
+            error = true;
+        }
+
+        assertTrue(error, "Request without DPoP must fail when client's dpopBoundAccessToken is set to true.");
+    }
+
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
+            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Test
     public void testDPoP_RS256(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
             final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
@@ -615,6 +645,10 @@ public class DpopTokenRequestHttpTest extends BaseTest {
     }
 
     private String dynamicRegistration(String redirectUris, String sectorIdentifierUri, String clientJwksUri, List<ResponseType> responseTypes) {
+        return dynamicRegistration(redirectUris, sectorIdentifierUri, clientJwksUri, responseTypes, false);
+    }
+
+    private String dynamicRegistration(String redirectUris, String sectorIdentifierUri, String clientJwksUri, List<ResponseType> responseTypes, boolean requireDpop) {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
@@ -623,6 +657,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setAccessTokenAsJwt(true); // Enable for JWK Thumbprint Confirmation Method
+        registerRequest.setDpopBoundAccessToken(requireDpop);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

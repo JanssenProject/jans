@@ -26,7 +26,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=e36171ea583b9375f518666bfb6839dae2cc2fca
+ENV JANS_SOURCE_VERSION=ae059fe0018c3a7a059c2431e63ab0bd90d1f314
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -57,7 +57,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/*.ldif /app/templates \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
-    && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
+    && cp ${JANS_SETUP_DIR}/static/jans-link/o_site.ldif /app/templates/o_site.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
 # cleanup

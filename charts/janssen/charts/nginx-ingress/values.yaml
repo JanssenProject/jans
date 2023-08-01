@@ -64,9 +64,8 @@ ingress:
   # nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
   # Specify if certificates are passed to upstream server
   # nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
-  additionalAnnotations:
-    # -- Required annotation below. Use kubernetes.io/ingress.class: "public" for microk8s.
-    kubernetes.io/ingress.class: "nginx"
+  additionalAnnotations: { }
+  ingressClassName: nginx
   hosts:
   - demoexample.jans.io
   tls:

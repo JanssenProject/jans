@@ -248,13 +248,16 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         ldif_files = (ox_auth_test_ldif, scim_test_ldif, ox_auth_test_user_ldif, scim_test_user_ldif)
         self.dbUtils.import_ldif(ldif_files)
 
-        apache_user = 'www-data' if base.clone_type == 'deb' else 'apache'
-
         # Client keys deployment
-        base.download('https://raw.githubusercontent.com/JanssenProject/jans/a970d88d81f920973f3ba812db97448f135090a9/jans-auth-server/client/src/test/resources/jans_test_client_keys.zip', '/var/www/html/jans_test_client_keys.zip')
+        target_jwks_fn = os.path.join(base.current_app.HttpdInstaller.server_root, 'jans_test_client_keys.zip')
+        base.download('https://github.com/JanssenProject/jans/raw/main/jans-auth-server/client/src/test/resources/jans_test_client_keys.zip', target_jwks_fn)
+        self.run([paths.cmd_unzip, '-o', target_jwks_fn, '-d', base.current_app.HttpdInstaller.server_root])
+        self.removeFile(target_jwks_fn)
+        self.run([paths.cmd_chmod, '-R', '660', '/var/www/html/jans-auth-client'])
+        self.run([paths.cmd_chmod, 'ug+X', '/var/www/html/jans-auth-client'])
 
-        self.run([paths.cmd_unzip, '-o', '/var/www/html/jans_test_client_keys.zip', '-d', '/var/www/html/'])
-        self.run([paths.cmd_rm, '-rf', 'jans_test_client_keys.zip'])
+        self.chown(os.path.join(base.current_app.HttpdInstaller.server_root, 'jans-auth-client'), base.current_app.HttpdInstaller.apache_user, base.current_app.HttpdInstaller.apache_group, recursive=True)
+
         self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
         self.run([paths.cmd_chmod, '-R', '660', '/var/www/html/jans-auth-client'])
         self.run([paths.cmd_chmod, 'ug+X', '/var/www/html/jans-auth-client'])

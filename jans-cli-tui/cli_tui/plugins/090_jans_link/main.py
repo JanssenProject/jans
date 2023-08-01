@@ -191,7 +191,7 @@ class Plugin(DialogUtils):
         self.edit_source_config_dialog()
 
     def create_widgets(self):
-        self.schema = self.app.cli_object.get_schema_from_reference('Jans Link Plugin', '#/components/schemas/JansLinkConfiguration')
+        self.schema = self.app.cli_object.get_schema_from_reference('Jans Link Plugin', '#/components/schemas/AppConfiguration')
 
         mappings_title = _("Mappings:")
         add_mapping_title = _("Add Mapping")
@@ -480,7 +480,7 @@ class Plugin(DialogUtils):
         asyncio.ensure_future(coroutine())
 
 
-    def get_ldap_config_entries(self, data, widget_style=None):
+    def get_ldap_config_entries(self, data, widget_style=cli_style.white_bg_widget):
 
         ldap_config_entires = [
 

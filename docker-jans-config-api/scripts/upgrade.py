@@ -93,6 +93,17 @@ def _transform_api_dynamic_config(conf):
             },
         ]
         should_update = True
+
+    # current plugin names to lookup to
+    plugins_names = tuple(plugin["name"] for plugin in conf["plugins"])
+
+    if "jans-link" not in plugins_names:
+        conf["plugins"].append({
+            "name": "jans-link",
+            "description": "jans-link plugin",
+            "className": "io.jans.configapi.plugin.link.rest.ApiApplication",
+        })
+        should_update = True
     return conf, should_update
 
 
@@ -286,8 +297,9 @@ class Upgrade:
         self.update_api_dynamic_config()
 
         # add missing scopes into internal config-api client (if enabled)
-        if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
-            self.update_client_scopes()
+        # if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
+        self.update_client_scopes()
+        self.update_test_client_scopes()
 
     def update_client_redirect_uri(self):
         kwargs = {}
@@ -382,6 +394,58 @@ class Upgrade:
         # find missing scopes from the client
         diff = list(set(new_client_scopes).difference(client_scopes))
 
+        if diff:
+            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                entry.attrs["jansScope"]["v"] = client_scopes + diff
+            else:
+                entry.attrs["jansScope"] = client_scopes + diff
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_test_client_scopes(self):
+        test_client_id = self.manager.config.get("test_client_id")
+        id_ = f"inum={test_client_id},ou=clients,o=jans"
+        kwargs = {}
+
+        # search_entries(self, key, filter_="", attrs=None, **kwargs)
+        if self.backend.type in ("sql", "spanner"):
+            id_ = doc_id_from_dn(id_)
+            kwargs = {"table_name": "jansClnt"}
+        elif self.backend.type == "couchbase":
+            id_ = id_from_dn(id_)
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+            client_scopes = entry.attrs["jansScope"]["v"]
+        else:
+            client_scopes = entry.attrs["jansScope"]
+
+        if not isinstance(client_scopes, list):
+            client_scopes = [client_scopes]
+
+        if self.backend.type in ("sql", "spanner"):
+            scopes = [
+                scope_entry.attrs["dn"]
+                for scope_entry in self.backend.search_entries("", **{"table_name": "jansScope"})
+            ]
+        elif self.backend.type == "couchbase":
+            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+            scopes = [
+                scope_entry.attrs["dn"]
+                for scope_entry in self.backend.search_entries("", filter_="WHERE objectClass='jansScope'", **{"bucket": bucket})
+            ]
+        else:
+            scopes = [
+                scope_entry.id
+                for scope_entry in self.backend.search_entries("ou=scopes,o=jans")
+            ]
+
+        # find missing scopes from the client
+        diff = list(set(scopes).difference(client_scopes))
         if diff:
             if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
                 entry.attrs["jansScope"]["v"] = client_scopes + diff

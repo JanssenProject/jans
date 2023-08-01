@@ -221,13 +221,15 @@ def uninstall_jans():
     print("Uninstalling Jannsen Server...")
     for service in os.listdir(jetty_home):
         if os.path.exists(os.path.join(jetty_home, service)):
+            print("Stopping", service)
+            os.system('systemctl stop ' + service)
+            os.system('systemctl disable ' + service)
+
             default_fn = os.path.join('/etc/default/', service)
             if os.path.exists(default_fn):
                 print("Removing", default_fn)
                 os.remove(default_fn)
-            print("Stopping", service)
-            os.system('systemctl stop ' + service)
-            os.system('systemctl disable ' + service)
+
             unit_fn = os.path.join('/etc/systemd/system', service + '.service')
             if os.path.exists(unit_fn):
                 os.remove(unit_fn)

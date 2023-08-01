@@ -431,8 +431,8 @@ paths:
     get:
       tags:
       - Attribute
-      summary: Gets a list of Gluu attributes.
-      description: Gets a list of Gluu attributes.
+      summary: Gets a list of Jans attributes.
+      description: Gets a list of Jans attributes.
       operationId: get-attributes
       parameters:
       - name: limit
@@ -582,11 +582,11 @@ paths:
       description: Updates an existing attribute
       operationId: put-attributes
       requestBody:
-        description: GluuAttribute object
+        description: JansAttribute object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GluuAttribute'
+              $ref: '#/components/schemas/JansAttribute'
             examples:
               Request example:
                 description: Request example
@@ -624,7 +624,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -670,11 +670,11 @@ paths:
       description: Adds a new attribute
       operationId: post-attributes
       requestBody:
-        description: GluuAttribute object
+        description: JansAttribute object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GluuAttribute'
+              $ref: '#/components/schemas/JansAttribute'
             examples:
               Request example:
                 description: Request example
@@ -712,7 +712,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -771,7 +771,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -844,8 +844,8 @@ paths:
     patch:
       tags:
       - Attribute
-      summary: Partially modify a GluuAttribute
-      description: Partially modify a GluuAttribute
+      summary: Partially modify a JansAttribute
+      description: Partially modify a JansAttribute
       operationId: patch-attributes-by-inum
       parameters:
       - name: inum
@@ -869,11 +869,11 @@ paths:
                   [ {op:replace, path: displayName, value: "CustomAttribute" } ]
       responses:
         "200":
-          description: Updated GluuAttribute
+          description: Updated JansAttribute
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -7348,7 +7348,7 @@ components:
           format: int32
         regexp:
           type: string
-    GluuAttribute:
+    JansAttribute:
       required:
       - dataType
       - description
@@ -7450,15 +7450,15 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanView:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanEdit:
-          type: boolean
         userCanAccess:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -8157,6 +8157,11 @@ components:
         dpopJtiCacheTime:
           type: integer
           format: int32
+        dpopUseNonce:
+          type: boolean
+        dpopNonceCacheTime:
+          type: integer
+          format: int32
         allowIdTokenWithoutImplicitGrantType:
           type: boolean
         discoveryCacheLifetimeInMinutes:
@@ -8201,8 +8206,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8212,6 +8215,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8901,6 +8906,8 @@ components:
           format: int32
         requirePar:
           type: boolean
+        dpopBoundAccessToken:
+          type: boolean
         jansAuthSignedRespAlg:
           type: string
         jansAuthEncRespAlg:
@@ -8949,10 +8956,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -9189,14 +9196,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

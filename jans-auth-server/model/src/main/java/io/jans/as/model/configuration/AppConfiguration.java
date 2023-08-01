@@ -797,6 +797,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Demonstration of Proof-of-Possession (DPoP) cache time", defaultValue = "3600")
     private int dpopJtiCacheTime = 3600;
 
+    @DocProperty(description = "Demonstration of Proof-of-Possession (DPoP) use nonce", defaultValue = "false")
+    private Boolean dpopUseNonce = false;
+
+    @DocProperty(description = "Demonstration of Proof-of-Possession (DPoP) nonce cache time", defaultValue = "3600")
+    private int dpopNonceCacheTime = 3600;
+
     @DocProperty(description = "Specifies if a token without implicit grant types is allowed")
     private Boolean allowIdTokenWithoutImplicitGrantType;
 
@@ -848,6 +854,23 @@ public class AppConfiguration implements Configuration {
 
     public void setDateFormatterPatterns(Map<String, String> dateFormatterPatterns) {
         this.dateFormatterPatterns = dateFormatterPatterns;
+    }
+
+    public Boolean getDpopUseNonce() {
+        if (dpopUseNonce == null) dpopUseNonce = false;
+        return dpopUseNonce;
+    }
+
+    public void setDpopUseNonce(Boolean dpopUseNonce) {
+        this.dpopUseNonce = dpopUseNonce;
+    }
+
+    public int getDpopNonceCacheTime() {
+        return dpopNonceCacheTime;
+    }
+
+    public void setDpopNonceCacheTime(int dpopNonceCacheTime) {
+        this.dpopNonceCacheTime = dpopNonceCacheTime;
     }
 
     public List<SsaValidationConfig> getDcrSsaValidationConfigs() {

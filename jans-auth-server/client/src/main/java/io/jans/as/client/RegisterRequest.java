@@ -125,6 +125,7 @@ public class RegisterRequest extends BaseRequest {
     private Integer accessTokenLifetime;
     private Integer parLifetime;
     private Boolean requirePar;
+    private Boolean dpopBoundAccessToken;
     private String softwareId;
     private String softwareVersion;
     private String softwareStatement;
@@ -1305,6 +1306,24 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Gets dpopBoundAccessToken
+     *
+     * @return dpopBoundAccessToken
+     */
+    public Boolean getDpopBoundAccessToken() {
+        return dpopBoundAccessToken;
+    }
+
+    /**
+     * Sets dpopBoundAccessToken
+     *
+     * @param dpopBoundAccessToken dpop bound access token
+     */
+    public void setDpopBoundAccessToken(Boolean dpopBoundAccessToken) {
+        this.dpopBoundAccessToken = dpopBoundAccessToken;
+    }
+
+    /**
      * Returns a unique identifier string (UUID) assigned by the client developer or software publisher used by
      * registration endpoints to identify the client software to be dynamically registered.
      *
@@ -1617,6 +1636,7 @@ public class RegisterRequest extends BaseRequest {
         result.setAccessTokenLifetime(integerOrNull(requestObject, ACCESS_TOKEN_LIFETIME.toString()));
         result.setParLifetime(integerOrNull(requestObject, PAR_LIFETIME.toString()));
         result.setRequirePar(booleanOrNull(requestObject, REQUIRE_PAR.toString()));
+        result.setDpopBoundAccessToken(booleanOrNull(requestObject, DPOP_BOUND_ACCESS_TOKEN.toString()));
         result.setDefaultMaxAge(integerOrNull(requestObject, DEFAULT_MAX_AGE.toString()));
         result.setLifetime(integerOrNull(requestObject, LIFETIME.toString()));
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
@@ -1936,6 +1956,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (requirePar != null) {
             function.apply(REQUIRE_PAR.toString(), requirePar.toString());
+        }
+        if (dpopBoundAccessToken != null) {
+            function.apply(DPOP_BOUND_ACCESS_TOKEN.toString(), dpopBoundAccessToken.toString());
         }
 
         if (redirectUrisRegex != null) {

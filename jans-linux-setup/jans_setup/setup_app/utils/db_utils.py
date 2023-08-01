@@ -323,17 +323,19 @@ class DBUtils:
             self.log_ldap_result(ldap_operation_result)
 
         elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+            typed_val = self.get_rdbm_val(component, value)
             result = self.get_sqlalchObj_for_dn(dn)
             table_name = result.objectClass
             sqlalchemy_table = self.Base.classes[table_name]
             sqlalchemyObj = self.session.query(sqlalchemy_table).filter(sqlalchemy_table.dn ==dn).first()
             cur_val = getattr(sqlalchemyObj, component)
-            setattr(sqlalchemyObj, component, value)
+            setattr(sqlalchemyObj, component, typed_val)
             self.session.commit()
 
         elif self.moddb == BackendTypes.SPANNER:
             table = self.get_spanner_table_for_dn(dn)
             doc_id = self.get_doc_id_from_dn(dn)
+            typed_val = self.get_rdbm_val(component, value, rdbm_type='spanner')
             self.spanner_client.write_data(table=table, columns=['doc_id', component], values=[doc_id, value], mutation='update')
 
         elif self.moddb == BackendTypes.COUCHBASE:
@@ -361,8 +363,9 @@ class DBUtils:
             base.logIt("Querying LDAP for dn {}".format(dn))
             result = self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
             if result:
-                key, document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
-                return document
+                key_document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
+                if key_document:
+                    return key_document[1]
 
         else:
             bucket = self.get_bucket_for_dn(dn)
@@ -772,17 +775,18 @@ class DBUtils:
     def get_rdbm_val(self, key, val, rdbm_type=None):
 
         data_type = self.get_attr_sql_data_type(key)
+        val_ = val[0] if isinstance(val, list) or isinstance(val, tuple) else val
 
         if data_type in ('SMALLINT', 'BOOL', 'BOOLEAN'):
-            if val[0].lower() in ('1', 'on', 'true', 'yes', 'ok'):
+            if val_.lower() in ('1', 'on', 'true', 'yes', 'ok'):
                 return 1 if data_type == 'SMALLINT' else True
             return 0 if data_type == 'SMALLINT' else False
 
         if data_type == 'INT':
-            return int(val[0])
+            return int(val_)
 
         if data_type in ('DATETIME(3)', 'TIMESTAMP'):
-            dval = val[0].strip('Z')
+            dval = val_.strip('Z')
             sep= 'T' if rdbm_type == 'spanner' else ' '
             postfix = 'Z' if rdbm_type == 'spanner' else ''
             return "{}-{}-{}{}{}:{}:{}{}{}".format(dval[0:4], dval[4:6], dval[6:8], sep, dval[8:10], dval[10:12], dval[12:14], dval[14:17], postfix)
@@ -797,7 +801,7 @@ class DBUtils:
         if data_type in ('ARRAY<STRING(MAX)>', 'JSONB'):
             return val
 
-        return val[0]
+        return val_
 
     def get_clean_objcet_class(self, entry):
 

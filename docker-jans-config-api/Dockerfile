@@ -43,7 +43,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.0.16-SNAPSHOT
-ENV CN_BUILD_DATE='2023-07-12 12:45'
+ENV CN_BUILD_DATE='2023-07-13 14:46'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -90,6 +90,10 @@ ENV USER_MGT_PLUGIN_BUILD_DATE='2023-07-12 12:47'
 ENV USER_MGT_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/${CN_VERSION}/user-mgt-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${USER_MGT_PLUGIN_SOURCE_URL} -O /usr/share/java/user-mgt-plugin.jar
 
+ENV JANS_LINK_PLUGIN_BUILD_DATE='2023-07-12 15:50'
+ENV JANS_LINK_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/jans-link-plugin/${CN_VERSION}/jans-link-plugin-${CN_VERSION}-distribution.jar
+RUN wget -q ${JANS_LINK_PLUGIN_SOURCE_URL} -O /usr/share/java/jans-link-plugin.jar
+
 # ======
 # Python
 # ======
@@ -110,7 +114,7 @@ COPY conf/prometheus-config.yaml /opt/prometheus/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=e36171ea583b9375f518666bfb6839dae2cc2fca
+ENV JANS_SOURCE_VERSION=c1b199cf16cd1863ec2f271080daae1d4e660c02
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
