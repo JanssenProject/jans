@@ -8,15 +8,16 @@ package io.jans.as.server.session.ws.rs;
 
 import io.jans.as.client.service.ClientFactory;
 import io.jans.as.model.util.Util;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Form;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,6 +47,22 @@ public class EndSessionUtils {
             log.debug("Backchannel RP response, status: {}, backchannel_logout_uri: {}", response.getStatus(), backchannelLogoutUri);
         } catch (Exception e) {
             log.error("Failed to call backchannel_logout_uri" + backchannelLogoutUri + ", message: " + e.getMessage(), e);
+        }
+    }
+
+    public static String appendState(String uri, String state) {
+        if (StringUtils.isBlank(state)) {
+            return uri;
+        }
+
+        if (uri.contains("?")) {
+            if (uri.contains("state=")) {
+                return uri;
+            } else {
+                return uri + "&state=" + state;
+            }
+        } else {
+            return uri + "?state=" + state;
         }
     }
 
