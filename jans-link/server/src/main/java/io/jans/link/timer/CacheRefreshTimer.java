@@ -219,6 +219,11 @@ public class CacheRefreshTimer {
 			return false;
 		}
 
+		if(null == currentConfiguration.getSourceConfigs()){
+			log.info("Source Config is null, nothing to load ");
+			return false;
+		}
+
 		String cacheRefreshServerIpAddress = currentConfiguration.getServerIpAddress();
 		// if (StringHelper.isEmpty(cacheRefreshServerIpAddress)) {
 		// log.debug("There is no master Cache Refresh server");
@@ -1135,6 +1140,10 @@ public class CacheRefreshTimer {
 
 	private LdapServerConnection[] prepareLdapServerConnections(CacheRefreshConfiguration cacheRefreshConfiguration,
 			List<GluuLdapConfiguration> ldapConfigurations) {
+		if(null == ldapConfigurations ){
+			return null;
+		}
+
 		LdapServerConnection[] ldapServerConnections = new LdapServerConnection[ldapConfigurations.size()];
 		for (int i = 0; i < ldapConfigurations.size(); i++) {
 			ldapServerConnections[i] = prepareLdapServerConnection(cacheRefreshConfiguration,
