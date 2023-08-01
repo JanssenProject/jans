@@ -48,7 +48,6 @@ public class AppConfiguration extends CacheRefreshConfiguration {
     // in seconds
     private int cleanServiceInterval;
     private boolean linkEnabled;
-	private String serverIpAddress;
     private String pollingInterval;
 
     private Date lastUpdate;
@@ -63,14 +62,6 @@ public class AppConfiguration extends CacheRefreshConfiguration {
 
     public void setLinkEnabled(boolean linkEnabled) {
         this.linkEnabled = linkEnabled;
-    }
-
-    public String getServerIpAddress() {
-        return serverIpAddress;
-    }
-
-    public void setServerIpAddress(String serverIpAddress) {
-        this.serverIpAddress = serverIpAddress;
     }
 
     public String getPollingInterval() {

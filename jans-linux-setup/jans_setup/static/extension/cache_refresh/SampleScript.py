@@ -33,7 +33,7 @@ class CacheRefresh(CacheRefreshType):
     def isStartProcess(self, configurationAttributes):
         print "Cache refresh. Is start process method"
 
-        return False
+        return True
     
     # Get bind credentials required to access source server 
     #   configId is the source server
