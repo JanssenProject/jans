@@ -11,7 +11,9 @@ import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
+
 import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
@@ -56,8 +58,9 @@ public class SamlService {
 
     @Inject
     SamlIdpService samlIdpService;
-
+    
     @Inject
+    MetadataValidationTimer metadataValidationTimer;
 
     public String getTrustRelationshipDn() {
         return samlConfigService.getTrustRelationshipDn();
@@ -308,7 +311,7 @@ public class SamlService {
         log.info("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
         String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
         if (StringHelper.isNotEmpty(result)) {
-            // metadataValidationTimer.queue(result);
+            metadataValidationTimer.queue(result);
         } else {
             log.error("Failed to save SP meta-data file. Please check if you provide correct file");
         }
