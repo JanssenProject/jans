@@ -19,8 +19,8 @@ This extension is for convenient testing of authentication flows on browser.
 
 1. Change directory to the project directory (`/jans-tarp`).
 2. Run `npm install`.
-3. Run `npm run build`. It will create Chrome and Firefox builds in `/jans-tarp/dist` directory.
-4. To pack the build into a zip file run `npm run pack`. This command will create zip in `/jans-tarp/release`.
+3. Run `npm run build`. It will create Chrome and Firefox build in `/jans-tarp/dist/chrome` and `/jans-tarp/dist/firefox` directories respectively.
+4. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/jans-tarp/release`.
 
 ## Install in browser
 
@@ -32,7 +32,7 @@ This extension is for convenient testing of authentication flows on browser.
 
 ### Firefox
 
-1. In Firefox, open the about:debugging page.
+1. In Firefox, open the `about:debugging`` page.
 2. Click the `This Firefox option`.
 3. Click the `Load Temporary Add-on button`, then select the `jans-tarp-firefox-v{}.zip` zip file from `/jans-tarp/release/`.
 
