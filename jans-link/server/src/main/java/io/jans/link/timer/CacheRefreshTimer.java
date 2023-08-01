@@ -193,7 +193,6 @@ public class CacheRefreshTimer {
 	public void processInt() {
 		AppConfiguration currentConfiguration = getConfigurationFactory().getAppConfiguration();
 		try {
-			currentConfiguration.setServerIpAddress("255.255.255.255");
 			if (!isStartCacheRefresh(currentConfiguration)) {
 				log.info("Starting conditions aren't reached");
 				return;
@@ -210,6 +209,13 @@ public class CacheRefreshTimer {
 	}
 
 	private boolean isStartCacheRefresh(AppConfiguration currentConfiguration) {
+
+		// Check if cache refresh specific configuration was loaded
+		if (currentConfiguration == null) {
+			log.info("Failed to start cache refresh. Can't loading configuration from oxTrustCacheRefresh.properties");
+			return false;
+		}
+
 		if (!currentConfiguration.isLinkEnabled()) {
 			return false;
 		}
@@ -219,46 +225,10 @@ public class CacheRefreshTimer {
 			return false;
 		}
 
-		String cacheRefreshServerIpAddress = currentConfiguration.getServerIpAddress();
-		// if (StringHelper.isEmpty(cacheRefreshServerIpAddress)) {
-		// log.debug("There is no master Cache Refresh server");
-		// return false;
-		// }
-
-		// Compare server IP address with cacheRefreshServerIp
-		boolean cacheRefreshServer = false;
-		try {
-			Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-			for (NetworkInterface networkInterface : Collections.list(nets)) {
-				Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
-				for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-					if (StringHelper.equals(cacheRefreshServerIpAddress, inetAddress.getHostAddress())) {
-						cacheRefreshServer = true;
-						break;
-					}
-				}
-
-				if (cacheRefreshServer) {
-					break;
-				}
-			}
-		} catch (SocketException ex) {
-			log.error("Failed to enumerate server IP addresses"+ ex);
-		}
-
-		if (!cacheRefreshServer) {
-			cacheRefreshServer = externalCacheRefreshService.executeExternalIsStartProcessMethods();
-			cacheRefreshServer = true;
-		}
-
-		if (!cacheRefreshServer) {
-			log.info("This server isn't master Cache Refresh server");
-			return false;
-		}
-
-		// Check if cache refresh specific configuration was loaded
-		if (currentConfiguration == null) {
-			log.info("Failed to start cache refresh. Can't loading configuration from oxTrustCacheRefresh.properties");
+		//exceute external script IsStartProcess
+		boolean IsStartProcess = externalCacheRefreshService.executeExternalIsStartProcessMethods();
+		if(!IsStartProcess){
+			log.info("failed to start jans link as external script IsStartProcess returns: " + IsStartProcess);
 			return false;
 		}
 
