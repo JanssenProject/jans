@@ -317,13 +317,4 @@ public class SamlService {
 
     }
 
-    /*
-     * public String getSpNewMetadataFileName(TrustRelationship trustRel) { return
-     * getSpNewMetadataFileName(trustRel.getInum()); }
-     * 
-     * public String getSpNewMetadataFileName(String inum) { String relationshipInum
-     * = StringHelper.removePunctuation(inum); return
-     * String.format(getSpMetadataFilePattern(), relationshipInum); }
-     */
-
 }

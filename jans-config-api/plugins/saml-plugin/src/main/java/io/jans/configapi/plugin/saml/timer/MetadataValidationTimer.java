@@ -170,11 +170,10 @@ public class MetadataValidationTimer {
     }
 
     /**
-     * @param shib3IdpTempmetadataFolder
-     * @param shib3IdpMetadataFolder
+     * @param tempmetadataFolder
+     * @param metadataFolder
      */
-    private boolean validateMetadata(String shib3IdpTempmetadataFolder, String shib3IdpMetadataFolder)
-            throws Exception {
+    private boolean validateMetadata(String tempmetadataFolder, String metadataFolder) throws Exception {
         boolean result = false;
         log.trace("Starting metadata validation process.");
 
@@ -187,9 +186,9 @@ public class MetadataValidationTimer {
 
         synchronized (this) {
             if (StringHelper.isNotEmpty(metadataFN)) {
-                String metadataPath = shib3IdpTempmetadataFolder + metadataFN;
+                String metadataPath = tempmetadataFolder + metadataFN;
                 String destinationMetadataName = metadataFN.replaceAll(".{4}\\..{4}$", "");
-                String destinationMetadataPath = shib3IdpMetadataFolder + destinationMetadataName;
+                String destinationMetadataPath = metadataFolder + destinationMetadataName;
 
                 TrustRelationship tr = samlService
                         .getTrustByUnpunctuatedInum(metadataFN.split("-" + samlIdpService.getSpMetadataFile())[0]);
@@ -218,19 +217,18 @@ public class MetadataValidationTimer {
                 if (errorHandler.isValid()) {
                     tr.setValidationLog(errorHandler.getLog());
                     tr.setValidationStatus(ValidationStatus.SUCCESS);
-                    /*
-                     * if (samlIdpService.renameMetadata(metadataPath, destinationMetadataPath)) {
-                     * log.error("Failed to move metadata file to location:" +
-                     * destinationMetadataPath); tr.setStatus(GluuStatus.INACTIVE); } else {
-                     * tr.setSpMetaDataFN(destinationMetadataName); }
-                     */
-                    // boolean federation = samlIdpService.isFederation(tr);
-                    // tr.setFederation(federation);
+
+                    if (samlIdpService.renameMetadata(metadataPath, destinationMetadataPath)) {
+                        log.error("Failed to move metadata file to location:" + destinationMetadataPath);
+                        tr.setStatus(GluuStatus.INACTIVE);
+                    } else {
+                        tr.setSpMetaDataFN(destinationMetadataName);
+                    }
+
                     String metadataFile = samlIdpService.getIdpMetadataDir() + tr.getSpMetaDataFN();
 
-                    // List<String> entityIdList =
-                    // samlMetadataParser.getEntityIdFromMetadataFile(metadataFile);
-                    List<String> entityIdList = null;
+                    List<String> entityIdList = samlMetadataParser.getEntityIdFromMetadataFile(metadataFile);
+
                     Set<String> entityIdSet = new TreeSet<String>();
                     Set<String> duplicatesSet = new TreeSet<String>();
                     if (entityIdList != null && !entityIdList.isEmpty()) {
@@ -253,7 +251,6 @@ public class MetadataValidationTimer {
                                 + Arrays.toString(duplicatesSet.toArray()));
                     }
                     tr.setValidationLog(validationLog);
-                    // tr.setUniqueGluuEntityId(entityIdSet);
                     tr.setStatus(GluuStatus.ACTIVE);
 
                     samlService.updateTrustRelationship(tr);
@@ -267,8 +264,7 @@ public class MetadataValidationTimer {
                     } else {
                         tr.setSpMetaDataFN(destinationMetadataName);
                     }
-                    // boolean federation = samlIdpService.isFederation(tr);
-                    // tr.setFederation(federation);
+
                     String metadataFile = samlIdpService.getIdpMetadataDir() + tr.getSpMetaDataFN();
 
                     List<String> entityIdList = samlMetadataParser.getEntityIdFromMetadataFile(metadataFile);
@@ -281,7 +277,6 @@ public class MetadataValidationTimer {
                         }
                     }
 
-                    // tr.setUniqueGluuEntityId(entityIdSet);
                     tr.setStatus(GluuStatus.ACTIVE);
                     validationLog = tr.getValidationLog();
                     if (!duplicatesSet.isEmpty()) {
