@@ -284,3 +284,12 @@ setting up a profile for the server module.
 
 1. Under `jans-scim/client/profiles` directory, create a new directory and name it `janssen2.op.io`
 2. Copy the contents of `scim-client/client` directory into the newly created `janssen2.op.io` directory
+
+Post this, remove the `scim-client` directory.
+
+Now as the profile is setup, to build the `jans-scim` module and run tests, 
+use the command below:
+
+  ```
+  mvn -Dcfg=janssen2.op.io test
+  ```
