@@ -192,7 +192,7 @@ Follow the steps below to configure the profile for the client module. The same
 steps should be followed for
 setting up a profile for the server module.
 
-1. Under `jans-auth-server/client/profile` module, create a new directory and name it `janssen2.op.io`
+1. Under `jans-auth-server/client/profiles` directory, create a new directory and name it `janssen2.op.io`
 2. Copy the contents of `jans-auth/client` directory into the newly created `janssen2.op.io` directory
 3. Copy keystore file `/client/profiles/default/client_keystore.p12` from `default` directory to
    the `janssen2.op.io` directory
@@ -257,3 +257,30 @@ maven command.
 ```shell
 mvn clean compile install
 ```
+
+#### Configuring the SCIM module
+
+This module does not require a profile setup. It can be built with the below
+maven command.
+
+##### Profile setup for client and server modules
+
+Many Janssen Server modules and sub-modules use test configuration stored in a
+directory named `profile`. The profile
+directory contains files that hold important information required to run tests.
+Developers can create one or more
+profiles and use them to run tests against different Janssen Servers.
+
+Since Janssen Server has been installed with test data, the installer also
+created the profile files required to run
+the test.
+For SCIM/client module, these files are kept on the VM under
+`/opt/jans/jans-setup/output/test/scim-client` directory. Copy over this directory
+to any location on the developer workstation.
+
+Follow the steps below to configure the profile for the client module. The same
+steps should be followed for
+setting up a profile for the server module.
+
+1. Under `jans-scim/client/profiles` directory, create a new directory and name it `janssen2.op.io`
+2. Copy the contents of `scim-client/client` directory into the newly created `janssen2.op.io` directory
