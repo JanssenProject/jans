@@ -277,6 +277,8 @@ COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
+RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
+
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
@@ -289,8 +291,6 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
     && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
-    && chmod 664 /opt/jetty/etc/jetty.xml \
-    && chmod 664 /opt/jetty/etc/webdefault.xml \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/agama \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/custom \
     && chown -R 1000:0 /opt/jans/python/libs \
