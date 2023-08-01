@@ -242,7 +242,6 @@ class Plugin(DialogUtils):
                                     ],
                                     height=5, width=D(),
                                     ),
-                                self.app.getTitledText(_("Server IP Address"), name='serverIpAddress', value=self.data.get('serverIpAddress',''), jans_help=self.app.get_help_from_schema(self.schema, 'serverIpAddress'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget),
                                 self.app.getTitledText(_("Polling Interval (minutes)"), name='pollingInterval', value=self.data.get('pollingInterval') or '20', jans_help=self.app.get_help_from_schema(self.schema, 'pollingInterval'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, text_type='integer'),
                                 self.app.getTitledText(_("Snapshot Directory"), name='snapshotFolder', value=self.data.get('snapshotFolder',''), jans_help=self.app.get_help_from_schema(self.schema, 'snapshotFolder'), style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget),
                                 self.app.getTitledText(_("Snapshot Count"), name='snapshotMaxCount', value=self.data.get('snapshotMaxCount', '10'), jans_help=self.app.get_help_from_schema(self.schema, 'snapshotMaxCount'), style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget, text_type='integer'),
