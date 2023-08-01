@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "jans-tarp",
   "version": "1.0.0",
-  "description": "Relying Party tool in form of a Chrome Extension.",
+  "description": "Relying Party tool in form of a Firefox Extension.",
   "icons": {
     "16": "icon.png",
     "32": "icon.png",
@@ -22,5 +22,10 @@
   "host_permissions": [
     "*://*/*"
   ],
-  "options_page": "options.html"
+  "options_page": "options.html",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "jans-tarp@gluu.org"
+    }
+  }
 }
