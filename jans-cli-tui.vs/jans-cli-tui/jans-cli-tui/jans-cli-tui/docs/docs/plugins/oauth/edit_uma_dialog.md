@@ -1,1 +1,0 @@
-::: plugins.010_oxauth.view_uma_dialog
