@@ -98,8 +98,12 @@ docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known
 echo -e "Testing fido2-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/fido2-configuration
 echo -e "copying reports.. \n"
-docker exec docker-jans-monolith-jans-1 ls -l /opt/jans/jans-setup/output/test/jans-auth
-docker cp docker-jans-monolith-jans-1:/opt/jans/jans-setup/output/test/jans-auth/*testng-results.xml /tmp/reports
+mkdir -p /tmp/reports || echo "reports folder exists"
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/client/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-client-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/agama/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-agama-model-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/test-model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-test-model-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-model-testng-results.xml
+
 EOF
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."
