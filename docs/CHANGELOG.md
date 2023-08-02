@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.0.16](https://github.com/JanssenProject/jans/compare/docs-v1.0.15...docs-v1.0.16) (2023-08-02)
+
+
+### Features
+
+* add dcr load test ([#5566](https://github.com/JanssenProject/jans/issues/5566)) ([0cfd4dd](https://github.com/JanssenProject/jans/commit/0cfd4dda546ce766bb10b852f84f33c884e32c9f))
+* add new methnod to fido2 extension to allow modify json ([#5683](https://github.com/JanssenProject/jans/issues/5683)) ([256675b](https://github.com/JanssenProject/jans/commit/256675b2ad9e195ea793eee00257ed400f815a56)), closes [#5680](https://github.com/JanssenProject/jans/issues/5680)
+* add new methnod to fido2 extension to allow modify json ([#5686](https://github.com/JanssenProject/jans/issues/5686)) ([6f56e51](https://github.com/JanssenProject/jans/commit/6f56e51706c0e44cd3a9baffa8d2758898b994ba)), closes [#5680](https://github.com/JanssenProject/jans/issues/5680)
+* **jans-auth-server:** automatically provision scopes if they are present in the SSA for trusted issuer [#5164](https://github.com/JanssenProject/jans/issues/5164) ([#5553](https://github.com/JanssenProject/jans/issues/5553)) ([abaa10f](https://github.com/JanssenProject/jans/commit/abaa10f785c6318685f7a9d0129bae4a33dc79c4))
+* **jans-linux-setup:** gluu/flex casa installer ([#5590](https://github.com/JanssenProject/jans/issues/5590)) ([2ce1152](https://github.com/JanssenProject/jans/commit/2ce11527485cece5dea4c714ae8f03b1b19510b1))
+
+
+### Bug Fixes
+
+* **docker-jans:** add test client with all scopes to CN-based setup ([#5682](https://github.com/JanssenProject/jans/issues/5682)) ([a81d301](https://github.com/JanssenProject/jans/commit/a81d301651643afce85be7d750897391bd097d33))
+* **docs:** autogenerate docs ([#5515](https://github.com/JanssenProject/jans/issues/5515)) ([25f9566](https://github.com/JanssenProject/jans/commit/25f95667422d2eed828fb4afbae378a1cac71f32))
+* **docs:** autogenerate docs ([#5749](https://github.com/JanssenProject/jans/issues/5749)) ([9a29ec1](https://github.com/JanssenProject/jans/commit/9a29ec194b80ecbd06a5a9f4ea34434492bb5cd1))
+* enlarge column `adsPrjDeplDetails` ([#5644](https://github.com/JanssenProject/jans/issues/5644)) ([ae059fe](https://github.com/JanssenProject/jans/commit/ae059fe0018c3a7a059c2431e63ab0bd90d1f314))
+* **jans-linux-setup:** casa install option --with-casa ([#5598](https://github.com/JanssenProject/jans/issues/5598)) ([4758bf5](https://github.com/JanssenProject/jans/commit/4758bf577bd61746c80d63ee8624fa19cdb3aeed))
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
 ## [1.0.15](https://github.com/JanssenProject/jans/compare/docs-v1.0.14...docs-v1.0.15) (2023-07-12)
 
 
