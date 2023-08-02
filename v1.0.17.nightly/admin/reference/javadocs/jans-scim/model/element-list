@@ -1,0 +1,16 @@
+io.jans.scim.model.conf
+io.jans.scim.model.exception
+io.jans.scim.model.scim
+io.jans.scim.model.scim2
+io.jans.scim.model.scim2.annotations
+io.jans.scim.model.scim2.bulk
+io.jans.scim.model.scim2.extensions
+io.jans.scim.model.scim2.fido
+io.jans.scim.model.scim2.group
+io.jans.scim.model.scim2.patch
+io.jans.scim.model.scim2.provider.config
+io.jans.scim.model.scim2.provider.resourcetypes
+io.jans.scim.model.scim2.provider.schema
+io.jans.scim.model.scim2.user
+io.jans.scim.model.scim2.util
+io.jans.scim.ws.rs.scim2
