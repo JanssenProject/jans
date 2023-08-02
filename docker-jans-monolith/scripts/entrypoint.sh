@@ -121,8 +121,6 @@ prepare_auth_server_test() {
 }
 
 prepare_java_tests() {
-  echo "*****  Installing maven!!   *****"
-  apt-get install -y maven
   echo "*****   Running Java tests!!   *****"
   echo "*****   Running Auth server tests!!   *****"
   prepare_auth_server_test
