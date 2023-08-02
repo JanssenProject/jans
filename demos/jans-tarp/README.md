@@ -13,7 +13,7 @@ This extension is for convenient testing of authentication flows on browser.
 
 ## Prerequisite
 
-- Node.js (v18.15.0) 
+- Node.js (>= v18.15.0) 
 
 ## Build
 
