@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.16-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.15-1...docker-jans-auth-server-v1.0.16-1) (2023-08-02)
+
+
+### Features
+
+* **docker-jans:** add dpop nonce ([#5640](https://github.com/JanssenProject/jans/issues/5640)) ([15bb0c1](https://github.com/JanssenProject/jans/commit/15bb0c1e019522aa3a911c1784dae53afb90d408))
+
+
+### Bug Fixes
+
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
 ## [1.0.15-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.14-1...docker-jans-auth-server-v1.0.15-1) (2023-07-12)
 
 
