@@ -65,6 +65,7 @@
 		<module>common</module>
 		<module>shared</module>
 		<module>server</module>
+		<module>server-fips</module>
 		<module>plugins</module>
 	</modules>
 
@@ -598,6 +599,11 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>buildnumber-maven-plugin</artifactId>
 					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>3.1.0</version>
 				</plugin>
 			</plugins>
 
