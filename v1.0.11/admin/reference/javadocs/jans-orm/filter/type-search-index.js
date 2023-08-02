@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"io.jans.orm.search.filter","l":"Filter"},{"p":"io.jans.orm.search.filter","l":"FilterProcessor"},{"p":"io.jans.orm.search.filter","l":"FilterType"}]
