@@ -45,7 +45,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Link
 # ====
 
-ENV CN_VERSION=1.0.16-SNAPSHOT
+ENV CN_VERSION=1.0.17-SNAPSHOT
 ENV CN_BUILD_DATE='2023-07-13'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-link/${CN_VERSION}/jans-link-${CN_VERSION}.war
 
@@ -61,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-link/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=c1b199cf16cd1863ec2f271080daae1d4e660c02
+ENV JANS_SOURCE_VERSION=9a29ec194b80ecbd06a5a9f4ea34434492bb5cd1
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -203,7 +203,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/link" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.16" \
+    org.opencontainers.image.version="1.0.17" \
     org.opencontainers.image.title="Janssen Link" \
     org.opencontainers.image.description=""
 

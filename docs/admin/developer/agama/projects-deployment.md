@@ -66,7 +66,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Method|POST|
 |Path params|`name` (the project's name)|
 |Body|The binary contents of a `.gama` file; example [here](#sample-file). Ensure to use header `Content-Type: application/zip`|
-|Output|Textual explanation, e.g. `A deployment task for project XXX  has been queued. Use the GET endpoint to poll status`|
+|Output|Textual explanation, e.g. `A deployment task for project XXX has been queued. Use the GET endpoint to poll status`|
 |Status|202 (the task was created and scheduled for deployment), 409 (there is a task already for this project and it hasn't finished yet), 400 (a param is missing)|
 
 
