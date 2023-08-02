@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.15...jans-cli-tui-v1.0.16) (2023-08-02)
+
+
+### Features
+
+* add new methnod to fido2 extension to allow modify json ([#5688](https://github.com/JanssenProject/jans/issues/5688)) ([e0984ef](https://github.com/JanssenProject/jans/commit/e0984ef852b7f15bb1938b09f49e3fba0fc1c047)), closes [#5680](https://github.com/JanssenProject/jans/issues/5680)
+* **jans-cli-tui:** Jans Link interface ([#5417](https://github.com/JanssenProject/jans/issues/5417)) ([2128dad](https://github.com/JanssenProject/jans/commit/2128dad6670f772a58377642c96d8b95f3edbcba))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** change schema reference JansLinkConfiguration to AppConfiguration ([#5653](https://github.com/JanssenProject/jans/issues/5653)) ([ad64cb5](https://github.com/JanssenProject/jans/commit/ad64cb5824fef174fbb58577b24f45fcf21d1d41))
+* **jans-cli-tui:** get information for Agama and AgamaConfiguration ([#5530](https://github.com/JanssenProject/jans/issues/5530)) ([6807e11](https://github.com/JanssenProject/jans/commit/6807e1100566006aef6b803c955d1841c8e8b891))
+* **jans-cli-tui:** inumdb server in jans link ([#5581](https://github.com/JanssenProject/jans/issues/5581)) ([8f0c66e](https://github.com/JanssenProject/jans/commit/8f0c66ef9d6a4423446c018891a94fc562d19297))
+* **jans-cli-tui:** remove serverIpAddress from link configuration ([#5714](https://github.com/JanssenProject/jans/issues/5714)) ([1d0bc2c](https://github.com/JanssenProject/jans/commit/1d0bc2c4d165fbd156f94235466cca5776248bd4))
+* **jans-cli-tui:** schema retreiveal with whitespace in path ([#5601](https://github.com/JanssenProject/jans/issues/5601)) ([9a83244](https://github.com/JanssenProject/jans/commit/9a8324476987dc6f1d7d2cea2528ccb9e583b903))
+* **jans-cli-tui:** source ldap server dialog ([#5614](https://github.com/JanssenProject/jans/issues/5614)) ([897d45f](https://github.com/JanssenProject/jans/commit/897d45f6dc80ad0607d839882557b07a6183ec52))
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
 ## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.14...jans-cli-tui-v1.0.15) (2023-07-12)
 
 
