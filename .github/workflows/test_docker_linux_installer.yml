@@ -79,6 +79,9 @@ jobs:
         cd terraform-provider-jans
         go install github.com/jstemmer/go-junit-report/v2@latest
         go test -v 2>&1 ./... | go-junit-report > ${{ matrix.persistence-backends }}report.xml
+        
+        echo "Running jans-auth-server tests"
+        docker exec -ti docker-jans-monolith-jans-1 mvn -Dcfg="demoexample.jans.io" -Dmaven.test.skip=false test -f /tmp/jans/jans-auth-server
 
     - uses: actions/upload-artifact@v2  # upload test results
       id: upload-go-test-results

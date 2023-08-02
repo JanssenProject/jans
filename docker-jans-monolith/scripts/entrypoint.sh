@@ -82,7 +82,7 @@ check_installed_jans() {
   fi
 }
 
-run_auth_server_test() {
+prepare_auth_server_test() {
     WORKING_DIRECTORY=$PWD
     echo "*****   cloning jans auth server folder!!   *****"
     rm -rf /tmp/jans || echo "Jans isn't cloned yet..Cloning"\
@@ -117,18 +117,16 @@ run_auth_server_test() {
     && TrustStorePW=$(grep -Po '(?<=defaultTrustStorePW=)\S+' /opt/jans/jans-setup/setup.properties.last) \
     && keytool -import -trustcacerts -noprompt -keypass "$TrustStorePW" jv-alias "${CN_HOSTNAME}" -keystore /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts -file /tmp/httpd.crt \
     && echo "Running the tests" \
-    && mkdir -p /testresults || echo "folder exists" \
-    && mvn -Dcfg="${CN_HOSTNAME}" -Dmaven.test.skip=false test \
     && cd "$WORKING_DIRECTORY"
 }
 
-run_java_tests() {
+prepare_java_tests() {
   if [[ "${RUN_JAVA_TESTS}" == "true" ]]; then
     echo "*****  Installing maven!!   *****"
     apt-get install -y maven
     echo "*****   Running Java tests!!   *****"
     echo "*****   Running Auth server tests!!   *****"
-    run_auth_server_test
+    prepare_auth_server_test
     echo "*****   Java tests completed!!   *****"
   else
     echo "Maven has not been installed. Enable RUN_JAVA_TESTS to run tests."
@@ -145,7 +143,7 @@ start_services() {
 
 check_installed_jans
 start_services
-run_java_tests
+prepare_java_tests
 
 # use -F option to follow (and retry) logs
 tail -F /opt/jans/jetty/jans-auth/logs/*.log \
