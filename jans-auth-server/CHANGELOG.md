@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.15...jans-auth-server-v1.0.16) (2023-08-02)
+
+
+### Features
+
+* add new methnod to fido2 extension to allow modify json ([#5686](https://github.com/JanssenProject/jans/issues/5686)) ([6f56e51](https://github.com/JanssenProject/jans/commit/6f56e51706c0e44cd3a9baffa8d2758898b994ba)), closes [#5680](https://github.com/JanssenProject/jans/issues/5680)
+* add proxy support to HttpService2 ([#5586](https://github.com/JanssenProject/jans/issues/5586)) ([0fb05b3](https://github.com/JanssenProject/jans/commit/0fb05b3a6d5d363ecacf61ce456e145b69b4f3bf))
+* **jans-auth-server:** added DPoP-Nonce and client level dpop control "dpop_bound_access_tokens" ([#5607](https://github.com/JanssenProject/jans/issues/5607)) ([cc5a47a](https://github.com/JanssenProject/jans/commit/cc5a47a082b68f6655335e29559fd69f3c80e434))
+* **jans-auth-server:** automatically provision scopes if they are present in the SSA for trusted issuer [#5164](https://github.com/JanssenProject/jans/issues/5164) ([#5553](https://github.com/JanssenProject/jans/issues/5553)) ([abaa10f](https://github.com/JanssenProject/jans/commit/abaa10f785c6318685f7a9d0129bae4a33dc79c4))
+
+
+### Bug Fixes
+
+* authentication Filter should not process OPTIONS request ([#5525](https://github.com/JanssenProject/jans/issues/5525)) ([aed5e4f](https://github.com/JanssenProject/jans/commit/aed5e4f52cc0ac6d0f278a6813e698068cd4ec9e)), closes [#5524](https://github.com/JanssenProject/jans/issues/5524)
+* **jans-auth-server:** if scopes are missed in grant_type=refresh_token AS must take scopes from previous grant [#5462](https://github.com/JanssenProject/jans/issues/5462) ([#5630](https://github.com/JanssenProject/jans/issues/5630)) ([7032bb6](https://github.com/JanssenProject/jans/commit/7032bb6f0263ca056c7357fed708aaeb9d63df52))
+* **jans-auth-server:** npe during client registration [#5559](https://github.com/JanssenProject/jans/issues/5559) ([#5560](https://github.com/JanssenProject/jans/issues/5560)) ([9477aee](https://github.com/JanssenProject/jans/commit/9477aeecb7ce4ea0634a5724f5d309261f88d21b))
+* **jans-auth-server:** state is not always returned on redirect from /end_session endpoint [#5704](https://github.com/JanssenProject/jans/issues/5704) ([#5707](https://github.com/JanssenProject/jans/issues/5707)) ([ebf6fc8](https://github.com/JanssenProject/jans/commit/ebf6fc851d2b7187af7c79c7bfd471f35e4b131a))
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
 ## 1.0.15 (2023-07-12)
 
 
