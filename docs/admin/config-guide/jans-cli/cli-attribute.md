@@ -28,10 +28,10 @@ Operation ID: get-attributes
   fieldValuePair: Field and value pair for seraching [string]
 Operation ID: put-attributes
   Description: Updates an existing attribute
-  Schema: GluuAttribute
+  Schema: JansAttribute
 Operation ID: post-attributes
   Description: Adds a new attribute
-  Schema: GluuAttribute
+  Schema: JansAttribute
 Operation ID: get-attributes-by-inum
   Description: Gets an attribute based on inum
   Parameters:
@@ -41,7 +41,7 @@ Operation ID: delete-attributes-by-inum
   Parameters:
   inum: Attribute Id [string]
 Operation ID: patch-attributes-by-inum
-  Description: Partially modify a GluuAttribute
+  Description: Partially modify a JansAttribute
   Parameters:
   inum: Attribute Id [string]
   Schema: Array of PatchRequest
@@ -232,11 +232,11 @@ To create SSO for certain applications, you may need to add custom attributes to
 ```text
 Operation ID: post-attributes
   Description: Adds a new attribute
-  Schema: GluuAttribute
+  Schema: JansAttribute
 ```
 Before adding a new attribute, let's get sample `schema`:
 ```commandline
-/opt/jans/jans-cli/config-cli.py --schema GluuAttribute > /tmp/attribute.json
+/opt/jans/jans-cli/config-cli.py --schema JansAttribute > /tmp/attribute.json
 ```  
 It will return as below:
 
@@ -351,7 +351,7 @@ It will create a new attribute into the Attribute list with updated `inum & dn`:
 This operation-id can be used to update an existing attribute information. The Janssen Server administrator can make changes to attributes, such as changing their status to `active/inactive` by using this operation-ID. Let's look at the schema:
 
 ```
-/opt/jans/jans-cli/config-cli.py --schema GluuAttribute > /tmp/attrib.json
+/opt/jans/jans-cli/config-cli.py --schema JansAttribute > /tmp/attrib.json
 ```
 
 You must see the similar schema while performed in `post-attributes` operation.
@@ -493,7 +493,7 @@ This operation can also used for updating an existing attribute by using its `in
 
 ```
 Operation ID: patch-attributes-by-inum
-  Description: Partially modify a GluuAttribute.
+  Description: Partially modify a JansAttribute.
   url-suffix: inum
   Schema: Array of PatchRequest
 ```
