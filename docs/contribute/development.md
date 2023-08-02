@@ -172,18 +172,19 @@ Each module has its own set of
 tests.
 Below are the instructions for configuring each module for tests.
 
+!!! info "What is a Profile directory?"
+    - To run integration tests, the developer workspace needs to know details about he Janssen Server agaist which the tests are to be run. 
+    - Janssen Server workspace holds this information in `source-base/module/sub-module/profiles` directory.
+    - The `profiles` directory can contain one or more sub-directories, each representing a profile(i.e a target Janssen Server). These profile directories are used to hold files that contain important information required to run tests. 
+    - Developers can create one or more profiles and use them to run tests
+    against different Janssen Servers. 
+    - This guide uses Janssen Server hostname,
+     `janssen.op.io`, as profile name.
+
 #### Configuring the jans-auth-server module
 
 Configuring `jans-auth-server` module involves setting up profiles for `client`,
 `server` and `agama` sub-modules.
-
-##### Profile setup for client and server modules
-
-Many Janssen Server modules and sub-modules use test configuration stored in a 
-directory named `profile`. The profile
-directory contains files that hold important information required to run tests. 
-Developers can create one or more
-profiles and use them to run tests against different Janssen Servers. This guide uses Janssen Server host name, `janssen.op.io`, as profile name.
 
 Follow the steps below to configure the profile for the client and server sub-modules.
 
@@ -192,11 +193,12 @@ Follow the steps below to configure the profile for the client and server sub-mo
     cd source-base/jans-auth-server
    ```
 1. As a precautionary measure, let's first remove any old profile artifacts 
-from the workspace.
+from the `jans-auth-server` workspace.
    ```shell
    rm -rf ./jans-auth
    rm -rf ./client/profiles/janssen.op.io
    rm -rf ./server/profiles/janssen.op.io
+   rm -rf ./agama/engine/profiles/janssen.op.io
    ```
 
 1. Since Janssen Server has been installed with test data, the installer also
@@ -205,15 +207,17 @@ from the workspace.
    These files are kept on the VM under
    `/opt/jans/jans-setup/output/test/jans-auth` directory. Copy over `jans-auth` directory from Janssen Server VM
    to `source-base/jans-auth-server` on developer workstation.
-2. Create new profile directories for `client` and `server` sub-modules.
+2. Create new profile directories.
    ```shell
    mkdir -p ./client/profiles/janssen.op.io
    mkdir -p ./server/profiles/janssen.op.io
+   mkdir -p ./agama/engine/profiles/janssen.op.io
    ```
-2. Copy the contents of `jans-auth/client` directory into the newly created `janssen.op.io` directory
+2. Copy the contents of `jans-auth` directory into the respective sub-module's `janssen.op.io` profile directory
    ```shell
    cp ./jans-auth/client/* ./client/profiles/janssen.op.io
    cp ./jans-auth/server/* ./server/profiles/janssen.op.io
+   cp ./jans-auth/config-agama-test.properties ./agama/engine/profiles/janssen.op.io/config-agama-test.properties
    ```
 3. Copy keystore file `profiles/default/client_keystore.p12` from `default` profile directory to
    the `janssen.op.io` profile directory
@@ -221,21 +225,6 @@ from the workspace.
    cp -f ./client/profiles/default/client_keystore.p12 ./client/profiles/janssen.op.io
    cp -f ./server/profiles/default/client_keystore.p12 ./server/profiles/janssen.op.io
    ```
-
-##### Profile setup for agama sub-module
-
-Agama module code resides under `source-base/jans-auth-server/agama` directory.
-
-Follow the steps below from `agama` directory to configure the module to run the
-integration tests.
-
-1. Remove existing profile if any by deleting and recreating the directory 
-   `engine/profiles/janssen.op.io`
-2. Copy the file `jans-auth/config-agama-test.properties` to the 
-   `engine/profiles/janssen.op.io/` directory
-
-Once the above steps have been followed, the local copy of `jans-auth` directory
-that was copied from `janssen.op.io` can be deleted.
 
 ##### Running The Tests
 
