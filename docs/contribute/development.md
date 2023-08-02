@@ -57,25 +57,24 @@ against an installed Janssen Server.
 ### Component Setup
 
 Instructions in this guide can be used if Janssen Server is installed on a VM. 
-Either locally on the developer workstation
-itself(as shown below) or on a remote cloud VM.
+Developers can use a virtualization software (like VMWare) or use LxD containers to create VM on developer workstation or use a remote cloud VM.
 
 ![Component Diagram](../assets/image-run-integration-test-from-workspace-06122022.png)
 
 ### Install Janssen Server
 
-Install the Janssen server using one of the methods described in the 
-installation guide. Note the points below when
+Install the Janssen server using one of the methods described in the
+VM installation guide. Note the points below when
 following installation instructions.
 
 - Make a note
   of the `host name` that you assign to the Janssen server during the 
-  installation. For this guide, the Janssen hostname would be `janssen2.op.io`
+  installation. For this guide, the Janssen hostname would be `janssen.op.io`
 - Choose to install with test data load. This can be achieved by using 
   the `-t` switch when invoking the setup script
   from installation instructions.
 
-Use the [VM installation guide](../admin/install/vm-install/README.md) for a 
+Use the [VM installation guide](../admin/install/vm-install/README.md) for the 
 complete set of instructions.
 
 Once the installation is complete, check if the `.well-known` end-points of the
@@ -87,13 +86,13 @@ from the developer's machine.
     Based on developer setup it may be necessary to add appropriate IP-HOST 
     mapping to the developer workstation. For instance, on a Linux-based 
     developer workstation, this means adding a mapping to `/etc/hosts` file. 
-    Make sure that VM's IP is mapped to a FQDN like `janssen2.op.io`. Refering 
+    Make sure that VM's IP is mapped to a FQDN like `janssen.op.io`. Refering 
     to VM with `localhost` or just IP will not work.
 
 URI for OpenID configuration `.well-known` endpoint:
 
   ```
-  https://janssen2.op.io/jans-auth/.well-known/openid-configuration
+  https://janssen.op.io/jans-auth/.well-known/openid-configuration
   ```
 
 The response received should be JSON formatted Janssen configuration details, 
@@ -102,16 +101,16 @@ similar to those below.
   ```
   {
   "request_parameter_supported" : true,
-  "pushed_authorization_request_endpoint" : "https://janssen2.op.io/jans-auth/restv1/par",
-  "introspection_endpoint" : "https://janssen2.op.io/jans-auth/restv1/introspection",
+  "pushed_authorization_request_endpoint" : "https://janssen.op.io/jans-auth/restv1/par",
+  "introspection_endpoint" : "https://janssen.op.io/jans-auth/restv1/introspection",
   "claims_parameter_supported" : false,
-  "issuer" : "https://janssen2.op.io",
+  "issuer" : "https://janssen.op.io",
   "userinfo_encryption_enc_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
   "id_token_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
-  "authorization_endpoint" : "https://janssen2.op.io/jans-auth/restv1/authorize",
+  "authorization_endpoint" : "https://janssen.op.io/jans-auth/restv1/authorize",
   "service_documentation" : "http://jans.org/docs",
   "authorization_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
-  "id_generation_endpoint" : "https://janssen2.op.io/jans-auth/restv1/id",
+  "id_generation_endpoint" : "https://janssen.op.io/jans-auth/restv1/id",
   "claims_supported" : [ "street_address", "country", "zoneinfo", "birthdate", "role", "gender", "user_name", "formatted", "phone_mobile_number", "preferred_username", "inum", "locale", "updated_at", "post_office_box", "nickname", "preferred_language", "email", "website", "email_verified", "profile", "locality", "room_number", "phone_number_verified", "given_name", "middle_name", "picture", "name", "phone_number", "postal_code", "region", "family_name", "jansAdminUIRole" ],
   "scope_to_claims_mapping" : [ {
     "user_name" : [ "user_name" ]
@@ -141,7 +140,7 @@ needs to have the appropriate
 certificate installed. Update cacerts using the steps below:
 
 
-- extract certificate for Janssen server with name `janssen2.op.io`
+- extract certificate for Janssen server with name `janssen.op.io`
   ```
   openssl s_client -connect test.local.jans.io:443 2>&1 |sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/httpd.crt
   ```
@@ -152,7 +151,7 @@ certificate installed. Update cacerts using the steps below:
   will prompt for cert store password. Provide
   the correct password. The default password is `changeit`.
   ```
-  keytool -import -alias janssen2.op.io -keystore /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts -file /tmp/httpd.crt
+  keytool -import -alias janssen.op.io -keystore /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts -file /tmp/httpd.crt
   ``` 
 
 ### Configure developer workspace
@@ -192,10 +191,10 @@ Follow the steps below to configure the profile for the client module. The same
 steps should be followed for
 setting up a profile for the server module.
 
-1. Under `jans-auth-server/client/profiles` directory, create a new directory and name it `janssen2.op.io`
-2. Copy the contents of `jans-auth/client` directory into the newly created `janssen2.op.io` directory
+1. Under `jans-auth-server/client/profiles` directory, create a new directory and name it `janssen.op.io`
+2. Copy the contents of `jans-auth/client` directory into the newly created `janssen.op.io` directory
 3. Copy keystore file `/client/profiles/default/client_keystore.p12` from `default` directory to
-   the `janssen2.op.io` directory
+   the `janssen.op.io` directory
 
 ##### Profile setup for agama sub-module
 
@@ -205,12 +204,12 @@ Follow the steps below from `agama` directory to configure the module to run the
 integration tests.
 
 1. Remove existing profile if any by deleting and recreating the directory 
-   `engine/profiles/janssen2.op.io`
+   `engine/profiles/janssen.op.io`
 2. Copy the file `jans-auth/config-agama-test.properties` to the 
-   `engine/profiles/janssen2.op.io/` directory
+   `engine/profiles/janssen.op.io/` directory
 
 Once the above steps have been followed, the local copy of `jans-auth` directory
-that was copied from `janssen2.op.io` can be deleted.
+that was copied from `janssen.op.io` can be deleted.
 
 ##### Running The Tests
 
@@ -219,7 +218,7 @@ For example, to run integration tests for `jans-auth-server` module, run the
 following maven command at the directory level:
 
   ```
-  mvn -Dcfg=janssen2.op.io test
+  mvn -Dcfg=janssen.op.io test
   ```
 
 #### Configuring the jans-core module
@@ -282,8 +281,8 @@ Follow the steps below to configure the profile for the client module. The same
 steps should be followed for
 setting up a profile for the server module.
 
-1. Under `jans-scim/client/profiles` directory, create a new directory and name it `janssen2.op.io`
-2. Copy the contents of `scim-client/client` directory into the newly created `janssen2.op.io` directory
+1. Under `jans-scim/client/profiles` directory, create a new directory and name it `janssen.op.io`
+2. Copy the contents of `scim-client/client` directory into the newly created `janssen.op.io` directory
 
 Post this, remove the `scim-client` directory.
 
@@ -291,5 +290,5 @@ Now as the profile is setup, to build the `jans-scim` module and run tests,
 use the command below:
 
   ```
-  mvn -Dcfg=janssen2.op.io test
+  mvn -Dcfg=janssen.op.io test
   ```
