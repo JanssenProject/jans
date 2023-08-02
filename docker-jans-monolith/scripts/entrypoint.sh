@@ -121,7 +121,7 @@ prepare_auth_server_test() {
 }
 
 prepare_java_tests() {
-  if [[ "${PREPARE_JAVA_TESTS}" == "true" ]]; then
+  if [[ "${PREPARE_JAVA_TESTS}" == true ]]; then
     echo "*****  Installing maven!!   *****"
     apt-get install -y maven
     echo "*****   Running Java tests!!   *****"
