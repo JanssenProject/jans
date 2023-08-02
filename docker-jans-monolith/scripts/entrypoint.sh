@@ -111,7 +111,6 @@ prepare_auth_server_test() {
     && mv config-agama-test.properties ./engine/profiles/"${CN_HOSTNAME}"/config-agama-test.properties  \
     && cd .. \
     && echo "Checking if the compilation and install is ok without running the tests" \
-    && mvn -Dcfg="${CN_HOSTNAME}" -Dmaven.test.skip=true -fae clean compile install \
     && echo "Installing the jans cert in local keystore" \
     && openssl s_client -connect "${CN_HOSTNAME}":443 2>&1 |sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/httpd.crt \
     && TrustStorePW=$(grep -Po '(?<=defaultTrustStorePW=)\S+' /opt/jans/jans-setup/setup.properties.last) \
