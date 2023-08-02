@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.15...jans-config-api-v1.0.16) (2023-08-02)
+
+
+### Features
+
+* adding PKCE in admin-ui authentication (Admin UI plugin) [#5595](https://github.com/JanssenProject/jans/issues/5595) ([#5596](https://github.com/JanssenProject/jans/issues/5596)) ([2a1f11e](https://github.com/JanssenProject/jans/commit/2a1f11ef7932dab8129fb7afe7a85603bb4681a5))
+* **config-api:** jans-link plugin changes to use jans-link module ([#5626](https://github.com/JanssenProject/jans/issues/5626)) ([f96ca52](https://github.com/JanssenProject/jans/commit/f96ca524ebdc642e09724e9d30159078c4d6c5ea))
+
+
+### Bug Fixes
+
+* **config-api:** jans link fix for DN change ([#5543](https://github.com/JanssenProject/jans/issues/5543)) ([40e9d4e](https://github.com/JanssenProject/jans/commit/40e9d4e429ad579b80aec375ab6374ba9a0df9b7))
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
 ## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.14...jans-config-api-v1.0.15) (2023-07-12)
 
 
