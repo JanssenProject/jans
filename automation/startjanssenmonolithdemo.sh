@@ -57,8 +57,9 @@ if [[ "$JANS_BUILD_COMMIT" ]]; then
 
   # as JANS_SOURCE_VERSION is changed, allow docker compose to rebuild image on-the-fly
   # and use the respective image instead of the default image
-  python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-mysql-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
-  python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-postgres-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
+  python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-mysql-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; data['services']['jans']['stdin_open'] = 'true' ; data['services']['jans']['tty'] = 'true' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
+  python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-postgres-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; data['services']['jans']['stdin_open'] = 'true' ; data['services']['jans']['tty'] = 'true' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
+  python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-ldap-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; data['services']['jans']['stdin_open'] = 'true' ; data['services']['jans']['tty'] = 'true' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
 fi
 # --
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
