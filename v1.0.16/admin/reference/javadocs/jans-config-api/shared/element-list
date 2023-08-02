@@ -1,0 +1,6 @@
+io.jans.configapi.core.interceptor
+io.jans.configapi.core.model
+io.jans.configapi.core.protect
+io.jans.configapi.core.rest
+io.jans.configapi.core.service
+io.jans.configapi.core.util
