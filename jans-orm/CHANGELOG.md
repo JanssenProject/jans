@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.15...jans-orm-v1.0.16) (2023-08-02)
+
+
+### Features
+
+* update filters in test to conform latest ORm Filter API ([#5669](https://github.com/JanssenProject/jans/issues/5669)) ([a2aebe2](https://github.com/JanssenProject/jans/commit/a2aebe2995474b3940af2e03d372bd06095006b8))
+
+
+### Bug Fixes
+
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
+
+### Documentation
+
+* demo script application_session (session audit) has been added; ([#5558](https://github.com/JanssenProject/jans/issues/5558)) ([5027518](https://github.com/JanssenProject/jans/commit/5027518b88b4c01ba26b39a974e1f77de9d6643d))
+
 ## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.14...jans-orm-v1.0.15) (2023-07-12)
 
 
