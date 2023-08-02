@@ -99,6 +99,7 @@ echo -e "Testing fido2-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/fido2-configuration
 echo -e "copying reports.. \n"
 mkdir -p /tmp/reports || echo "reports folder exists"
+docker exec -ti docker-jans-monolith-jans-1 mvn -Dcfg="demoexample.jans.io" -Dmaven.test.skip=false test -f /tmp/jans/jans-auth-server
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/client/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-client-testng-results.xml
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/agama/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-agama-model-testng-results.xml
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/test-model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-test-model-testng-results.xml
