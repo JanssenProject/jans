@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>1.0.16</version>
+	<version>1.0.17-SNAPSHOT</version>
 
     <distributionManagement>
 	  <repository>
@@ -394,7 +394,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>1.0.16</version>
+				<version>1.0.17-SNAPSHOT</version>
 			</dependency> -->
 
 			<!-- hibernate -->
