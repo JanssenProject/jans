@@ -89,12 +89,13 @@ if [ "$jans_status" == '"unhealthy"' ]; then
     docker logs docker-jans-monolith-jans-1
     exit 1
 fi
-cat << EOF > testendpoints.sh
-echo -e "Testing openid-configuration endpoint.. \n"
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' -k https://${JANS_FQDN}/jans-config-api/api/v1/health/ready)" != "200" ]]; do
+code=$(curl -s -o /dev/null -w ''%{http_code}'' -k https://${JANS_FQDN}/jans-config-api/api/v1/health/ready)
+while [[ "$code" != "200" ]]; do
   echo "Waiting for https://${JANS_FQDN}/jans-config-api/api/v1/health/ready to respond with 200"
   sleep 5
 done
+cat << EOF > testendpoints.sh
+echo -e "Testing openid-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/openid-configuration
 echo -e "Testing scim-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/scim-configuration
@@ -105,7 +106,7 @@ mkdir -p /tmp/reports || echo "reports folder exists"
 while ! docker exec docker-jans-monolith-jans-1 test -f "/tmp/httpd.crt"; do
   sleep 5
 done
-docker exec docker-jans-monolith-jans-1 mvn -Dcfg="${CN_HOSTNAME}" -Dmaven.test.skip=true -fae clean compile install
+docker exec docker-jans-monolith-jans-1 mvn -Dcfg="${JANS_FQDN}" -Dmaven.test.skip=true -fae clean compile install -f /tmp/jans/jans-auth-server
 docker exec docker-jans-monolith-jans-1 mvn -Dcfg="demoexample.jans.io" -Dmaven.test.skip=false test -f /tmp/jans/jans-auth-server
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/client/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-client-testng-results.xml
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/agama/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-agama-model-testng-results.xml
