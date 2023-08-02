@@ -47,7 +47,6 @@ Installation depends on the set of environment variables shown below. These envi
 | `TEST_CLIENT_SECRET`       | Secret for test client                                                                                                                                               | `1t5Fin3#security`                               |
 | `TEST_CLIENT_TRUSTED`      | Trust test client                                                                                                                                                    | `true`                                           |
 | `TEST_CLIENT_REDIRECT_URI` | **Not Implemented yet** Redirect URI for test client. Multiple uri's with comma may be provided, if not provided redirect uris will be same as the config-api-client | ``                                               |
-| `PREPARE_JAVA_TESTS`           | Installs maven and runs java tests for the services                                                                                                                  | `false`                                          |
 
 
 ## How to run
