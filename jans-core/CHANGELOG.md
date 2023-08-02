@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.15...jans-core-v1.0.16) (2023-08-02)
+
+
+### Features
+
+* add new methnod to fido2 extension to allow modify json ([#5683](https://github.com/JanssenProject/jans/issues/5683)) ([256675b](https://github.com/JanssenProject/jans/commit/256675b2ad9e195ea793eee00257ed400f815a56)), closes [#5680](https://github.com/JanssenProject/jans/issues/5680)
+
+
+### Bug Fixes
+
+* authentication Filter should not process OPTIONS request ([#5525](https://github.com/JanssenProject/jans/issues/5525)) ([aed5e4f](https://github.com/JanssenProject/jans/commit/aed5e4f52cc0ac6d0f278a6813e698068cd4ec9e)), closes [#5524](https://github.com/JanssenProject/jans/issues/5524)
+* **jans-core:** db document Store fixes [#5619](https://github.com/JanssenProject/jans/issues/5619) ([#5620](https://github.com/JanssenProject/jans/issues/5620)) ([1bdbbd5](https://github.com/JanssenProject/jans/commit/1bdbbd5ab9910d6697c6bcdc6e230cebb9c369a9))
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
 ## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.14...jans-core-v1.0.15) (2023-07-12)
 
 
