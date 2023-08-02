@@ -41,6 +41,7 @@ install_jans() {
   echo "test_client_id=${TEST_CLIENT_ID}"| tee -a setup.properties > /dev/null
   echo "test_client_pw=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null
   echo "test_client_trusted=""$([[ ${TEST_CLIENT_TRUSTED} == true ]] && echo True || echo True)" | tee -a setup.properties > /dev/null
+  echo "loadTestData=True" | tee -a setup.properties > /dev/null
   if [[ "${CN_INSTALL_MYSQL}" == "true" ]] || [[ "${CN_INSTALL_PGSQL}" == "true" ]]; then
     echo "Installing with RDBMS"
     echo "rdbm_install=2" | tee -a setup.properties > /dev/null
@@ -65,8 +66,8 @@ install_jans() {
   echo "*****   PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"
   echo "Executing https://raw.githubusercontent.com/JanssenProject/jans/${JANS_SOURCE_VERSION}/jans-linux-setup/jans_setup/install.py > install.py"
   curl https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
-  echo "Executing python3 install.py -yes --args=-f setup.properties -n -t"
-  python3 install.py -yes --args="-f setup.properties -n -t"
+  echo "Executing python3 install.py -yes --args=-f setup.properties -n"
+  python3 install.py -yes --args="-f setup.properties -n"
   echo "*****   Setup script completed!!    *****"
 
 }
