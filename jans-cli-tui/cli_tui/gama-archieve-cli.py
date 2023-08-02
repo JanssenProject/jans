@@ -41,11 +41,6 @@ for i, efn in enumerate(exclude_files):
         exclude_files[i] = os.path.join(argsp.directory, efn)
 
 
-
-#print("exclude_extensions:", exclude_extensions)
-#print("exclude_dirs:", exclude_dirs)
-#print("exclude_files:", exclude_files)
-
 if not agama_path.is_dir():
     print("{} is not a directory".format(agama_path))
     sys.exit()
@@ -83,9 +78,8 @@ flow_files = []
 flows = []
 
 for fpath, rpath in file_list:
-   if fpath.is_file():
-        if rpath.suffix == '.flow' and rpath.parts[0] == 'code':
-            flow_files.append((fpath, rpath))
+   if fpath.is_file() and rpath.suffix == '.flow' and rpath.parts[0] == 'code':
+        flow_files.append((fpath, rpath))
 
 for mdir in mandatory_dirs:
     if not mandatory_dirs[mdir]:
@@ -101,8 +95,8 @@ def strip_quotation(s):
     if s:
         if s[0] == '"':
             return s.strip('"')
-        elif s[0] == '"':
-            return s.strip('"')
+        elif s[0] == "'":
+            return s.strip("'")
 
     return s
 
