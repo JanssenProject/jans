@@ -3,8 +3,9 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const autoprefixer = require('autoprefixer')
+const { merge } = require('webpack-merge')
 
-module.exports = {
+const commonConfig = {
     entry: {
         popup: path.resolve('src/popup/index.tsx'),
         options: path.resolve('src/options/index.tsx'),
@@ -44,14 +45,28 @@ module.exports = {
             },
         ]
     },
+    resolve: {
+        extensions: ['.tsx', '.js', '.ts']
+    },
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+        }
+    }
+}
+const chromeConfig = merge(commonConfig, {
     "plugins": [
         new CleanWebpackPlugin({
             cleanStaleWebpackAssets: false
         }),
         new CopyPlugin({
             patterns: [{
-                from: path.resolve('src/static'),
-                to: path.resolve('dist')
+                from: path.resolve('src/static/icon.png'),
+                to: path.resolve('dist/chrome')
+            },
+            {
+                from: path.resolve('src/static/chrome'),
+                to: path.resolve('dist/chrome')
             }]
         }),
         ...getHtmlPlugins([
@@ -60,19 +75,38 @@ module.exports = {
             'newTab'
         ])
     ],
-    resolve: {
-        extensions: ['.tsx', '.js', '.ts']
-    },
     output: {
         filename: '[name].js',
-        path: path.join(__dirname, 'dist')
-    },
-    optimization: {
-        splitChunks: {
-            chunks: 'all',
-        }
+        path: path.join(__dirname, 'dist/chrome')
     }
-}
+})
+
+const firefoxConfig = merge(commonConfig, {
+    "plugins": [
+        new CleanWebpackPlugin({
+            cleanStaleWebpackAssets: false
+        }),
+        new CopyPlugin({
+            patterns: [{
+                from: path.resolve('src/static/icon.png'),
+                to: path.resolve('dist/firefox')
+            },
+            {
+                from: path.resolve('src/static/firefox'),
+                to: path.resolve('dist/firefox')
+            }]
+        }),
+        ...getHtmlPlugins([
+            'popup',
+            'options',
+            'newTab'
+        ])
+    ],
+    output: {
+        filename: '[name].js',
+        path: path.join(__dirname, 'dist/firefox')
+    }
+})
 
 function getHtmlPlugins(chunks) {
     return chunks.map(chunk => new HtmlPlugin({
@@ -81,3 +115,5 @@ function getHtmlPlugins(chunks) {
         chunks: [chunk]
     }))
 }
+
+module.exports = { chromeConfig, firefoxConfig };

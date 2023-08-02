@@ -9,16 +9,15 @@
     "48": "icon.png",
     "128": "icon.png"
   },
-  "background": {
-    "service_worker": "background.js"
-  },
+
   "action": {
     "default_title": "jans-tarp",
     "default_popup": "popup.html"
   },
   "permissions": [
     "storage",
-    "identity"
+    "identity",
+    "tabs"
   ],
   "host_permissions": [
     "*://*/*"
