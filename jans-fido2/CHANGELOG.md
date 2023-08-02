@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.15...jans-fido2-v1.0.16) (2023-08-02)
+
+
+### Features
+
+* add new methnod to fido2 extension to allow modify json ([#5683](https://github.com/JanssenProject/jans/issues/5683)) ([256675b](https://github.com/JanssenProject/jans/commit/256675b2ad9e195ea793eee00257ed400f815a56)), closes [#5680](https://github.com/JanssenProject/jans/issues/5680)
+* add new methnod to fido2 extension to allow modify json ([#5686](https://github.com/JanssenProject/jans/issues/5686)) ([6f56e51](https://github.com/JanssenProject/jans/commit/6f56e51706c0e44cd3a9baffa8d2758898b994ba)), closes [#5680](https://github.com/JanssenProject/jans/issues/5680)
+
+
+### Bug Fixes
+
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+* use filter by RP if it's SG request ([#5575](https://github.com/JanssenProject/jans/issues/5575)) ([2739f96](https://github.com/JanssenProject/jans/commit/2739f969f2b628b9409ad77ce438227c7685475b))
+
 ## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.14...jans-fido2-v1.0.15) (2023-07-12)
 
 
