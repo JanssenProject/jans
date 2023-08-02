@@ -7450,6 +7450,8 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        adminCanAccess:
+          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
@@ -7458,11 +7460,9 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanAccess:
-          type: boolean
         whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8206,6 +8206,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8215,8 +8217,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8956,10 +8956,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -9168,7 +9168,7 @@ components:
           - update_token
           - config_api_auth
           - modify_ssa_response
-          - fido2_interception
+          - fido2_extension
         programmingLanguage:
           type: string
           enum:
