@@ -96,8 +96,10 @@ tags:
 | displayValuesSupported | A list of the display parameter values that the OpenID Provider supports | [Details](#displayvaluessupported) |
 | dnName | DN of certificate issuer | [Details](#dnname) |
 | dpopJtiCacheTime | Demonstration of Proof-of-Possession (DPoP) cache time | [Details](#dpopjticachetime) |
+| dpopNonceCacheTime | Demonstration of Proof-of-Possession (DPoP) nonce cache time | [Details](#dpopnoncecachetime) |
 | dpopSigningAlgValuesSupported | Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported | [Details](#dpopsigningalgvaluessupported) |
 | dpopTimeframe | Demonstration of Proof-of-Possession (DPoP) timeout | [Details](#dpoptimeframe) |
+| dpopUseNonce | Demonstration of Proof-of-Possession (DPoP) use nonce | [Details](#dpopusenonce) |
 | dynamicGrantTypeDefault | This list details which OAuth 2.0 grant types can be set up with the client registration API | [Details](#dynamicgranttypedefault) |
 | dynamicRegistrationAllowedPasswordGrantScopes | List of grant scopes for dynamic registration | [Details](#dynamicregistrationallowedpasswordgrantscopes) |
 | dynamicRegistrationCustomAttributes | This list details the custom attributes allowed for dynamic registration | [Details](#dynamicregistrationcustomattributes) |
@@ -236,6 +238,7 @@ tags:
 | sessionIdUnauthenticatedUnusedLifetime | The lifetime for unused unauthenticated session states | [Details](#sessionidunauthenticatedunusedlifetime) |
 | sessionIdUnusedLifetime | The lifetime for unused session states | [Details](#sessionidunusedlifetime) |
 | shareSubjectIdBetweenClientsWithSameSectorId | When true, clients with the same Sector ID also share the same Subject ID | [Details](#sharesubjectidbetweenclientswithsamesectorid) |
+| skipAuthenticationFilterOptionsMethod | Force Authentication Filtker to process OPTIONS request | [Details](#skipauthenticationfilteroptionsmethod) |
 | skipAuthorizationForOpenIdScopeAndPairwiseId | Choose whether to skip authorization if a client has an OpenId scope and a pairwise ID | [Details](#skipauthorizationforopenidscopeandpairwiseid) |
 | skipRefreshTokenDuringRefreshing | Boolean value specifying whether to skip refreshing tokens on refreshing | [Details](#skiprefreshtokenduringrefreshing) |
 | softwareStatementValidationClaimName | Validation claim name for software statement | [Details](#softwarestatementvalidationclaimname) |
@@ -1051,6 +1054,15 @@ tags:
 - Default value: 3600
 
 
+### dpopNonceCacheTime
+
+- Description: Demonstration of Proof-of-Possession (DPoP) nonce cache time
+
+- Required: No
+
+- Default value: 3600
+
+
 ### dpopSigningAlgValuesSupported
 
 - Description: Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported
@@ -1067,6 +1079,15 @@ tags:
 - Required: No
 
 - Default value: 5
+
+
+### dpopUseNonce
+
+- Description: Demonstration of Proof-of-Possession (DPoP) use nonce
+
+- Required: No
+
+- Default value: false
 
 
 ### dynamicGrantTypeDefault
@@ -2309,6 +2330,15 @@ tags:
 - Required: No
 
 - Default value: false
+
+
+### skipAuthenticationFilterOptionsMethod
+
+- Description: Force Authentication Filtker to process OPTIONS request
+
+- Required: No
+
+- Default value: true
 
 
 ### skipAuthorizationForOpenIdScopeAndPairwiseId
