@@ -17,6 +17,15 @@ if [[ -z $EXT_IP ]]; then
   EXT_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
 fi
 
+wait_for_services() {
+  code=404
+  while [[ "$code" != "200" ]]; do
+    echo "Waiting for https://${JANS_FQDN}/$1 to respond with 200"
+    code=$(curl -s -o /dev/null -w ''%{http_code}'' -k https://"${JANS_FQDN}"/"$1")
+    sleep 5
+  done
+}
+
 sudo apt-get update
 # Install Docker and Docker compose plugin
 sudo apt-get remove docker docker-engine docker.io containerd runc -y || echo "Docker doesn't exist..installing.."
@@ -89,11 +98,10 @@ if [ "$jans_status" == '"unhealthy"' ]; then
     docker logs docker-jans-monolith-jans-1
     exit 1
 fi
-code=$(curl -s -o /dev/null -w ''%{http_code}'' -k https://${JANS_FQDN}/jans-config-api/api/v1/health/ready)
-while [[ "$code" != "200" ]]; do
-  echo "Waiting for https://${JANS_FQDN}/jans-config-api/api/v1/health/ready to respond with 200"
-  sleep 5
-done
+wait_for_services jans-config-api/api/v1/health/ready
+wait_for_services jans-scim/sys/health-check
+wait_for_services jans-fido2/sys/health-check
+
 cat << EOF > testendpoints.sh
 echo -e "Testing openid-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/openid-configuration
