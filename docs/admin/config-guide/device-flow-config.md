@@ -2,8 +2,7 @@
 tags:
   - administration
   - configuration
-  - cli
-  - commandline
+  - device flow
 ---
 
 ## This content is in progress

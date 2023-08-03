@@ -2,6 +2,7 @@
 tags:
   - administration
   - configuration
+  - tools
   - cli
   - commandline
 ---

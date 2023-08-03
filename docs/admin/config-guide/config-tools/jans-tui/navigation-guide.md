@@ -1,10 +1,10 @@
 ---
 tags:
-- installation
 - administration
 - configuration
-- config
+- tools
 - tui
+- text base UI
 ---
 
 ## General Structure:

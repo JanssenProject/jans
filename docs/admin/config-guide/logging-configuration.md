@@ -2,9 +2,7 @@
 tags:
   - administration
   - configuration
-  - cli
-  - commandline
-  - logs
+  - logging
 ---
 
 # Log Management

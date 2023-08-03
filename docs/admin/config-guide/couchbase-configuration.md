@@ -2,8 +2,6 @@
 tags:
   - administration
   - configuration
-  - cli
-  - commandline
   - couchbase
 ---
 

@@ -2,9 +2,8 @@
 tags:
   - administration
   - configuration
-  - cli
-  - commandline
   - JWK
+  - json web keys
 ---
 
 # JSON Web Key (JWK)

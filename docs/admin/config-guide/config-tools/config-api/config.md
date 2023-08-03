@@ -1,6 +1,7 @@
 ---
 tags:
   - administration
+  - tools
   - config-api
   - configuration
 ---

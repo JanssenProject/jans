@@ -2,9 +2,11 @@
 tags:
   - administration
   - configuration
+  - tools
   - cli
+  - tui
   - commandline
-  - user
+  - logging
 ---
 
 # Using TUI Command Line Log
