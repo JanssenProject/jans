@@ -14,7 +14,8 @@ jobs:
         name: Go Tests
         path: '*report.xml'
         reporter: java-junit
-    - name: Publish Test Report
+    - name: Java Test Report
+      if: always()
       uses: scacap/action-surefire-report@v1
       with:
         report_paths: '*testng-results.xml'
