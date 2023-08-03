@@ -81,7 +81,7 @@ Algorithms supported by Janssen Server are listed in the response of Janssen Ser
 [configuration endpoint](../endpoints/configuration.md). From the response, the claim 
 `token_endpoint_auth_signing_alg_values_supported` lists the supported algorithms.
 
-To specify preferred algorithm for a client, using [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md),
+To specify preferred algorithm for a client, using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md),
 navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> TODO: which exact properties.
 
 ## private_key_jwt
@@ -132,7 +132,7 @@ can be found at [jwt.io](https://jwt.io/libraries). Psudocode implementation for
 Janssen Server clients can specify signing and encryption keys using client configuration. Clients can either specify
 JWKS as value or as reference URI. 
 
-To specify JWKS values or reference URI, using [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md),
+To specify JWKS values or reference URI, using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md),
 navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> set value for `Client JWKS URI` or 
 `Client JWKS`.
 
