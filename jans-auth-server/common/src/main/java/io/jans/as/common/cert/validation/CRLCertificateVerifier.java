@@ -27,9 +27,7 @@ import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.x509.NoSuchParserException;
-import org.bouncycastle.x509.util.StreamParsingException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +70,7 @@ public class CRLCertificateVerifier implements CertificateVerifier {
         this.maxCrlSize = maxCrlSize;
 
         CacheLoader<String, X509CRL> checkedLoader = new CacheLoader<String, X509CRL>() {
-            public X509CRL load(String crlURL) throws CertificateException, CRLException, NoSuchProviderException, NoSuchParserException, StreamParsingException, IOException, ExecutionException {
+            public X509CRL load(String crlURL) throws CertificateException, CRLException, NoSuchProviderException, IOException, ExecutionException {
                 X509CRL result = requestCRL(crlURL);
                 Preconditions.checkNotNull(result);
 
@@ -234,7 +232,7 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 
     @SuppressWarnings({"deprecation", "resource"})
     private BigInteger getCrlNumber(X509CRL crl) throws IOException {
-        byte[] crlNumberExtensionValue = crl.getExtensionValue(X509Extensions.CRLNumber.getId());
+        byte[] crlNumberExtensionValue = crl.getExtensionValue(Extension.cRLNumber.getId());
         if (crlNumberExtensionValue == null) {
             return null;
         }
