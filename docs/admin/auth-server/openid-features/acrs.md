@@ -47,7 +47,7 @@ All Janssen Server deployments have `default_ldap_server` ACR which can be enabl
 remote LDAP-based IDP (e.g. ActiveDirectory). By default, this ACR is disabled. This ACR can only authenticate against
 LDAP-based IDP or a local LDAP.
 
-Use the instructions provided in jans-cli [LDAP configuration options](../../config-guide/jans-cli/cli-ldap-configuration.md) documentation to learn how to enable and configure ACRs that use external LDAP as IDP.
+Use the instructions provided in jans-cli [LDAP configuration options](../../config-guide/ldap-configuration.md) documentation to learn how to enable and configure ACRs that use external LDAP as IDP.
 
 ### 3. Script-based ACRs
 
@@ -112,17 +112,17 @@ flowchart TD
   the request. This parameter is defined in the OpenId Connect core specification,
   section [3.1.2.1](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest).
 - If the `acr_values` parameter is not received with the request, then Janssen Server uses the
-  value from the `Default ACR` configuration [from the client](#client-configuration)
+  value from the `Default ACR` configuration [from the client](#1-client-level-acr-)
 - If Janssen Server doesn't find `acr_values` request parameter nor does it find the `Default ACR` configured for the
   client, then the Janssen Server checks the server configuration property
   [useHighestLevelScriptIfAcrScriptNotFound](../../reference/json/properties/janssenauthserver-properties.md#usehighestlevelscriptifacrscriptnotfound).
   If this property is set to true, then Janssen Server invokes the authentication mechanism for which the corresponding
-  [person authentication script](#script-based-acrs) is enabled. Choosing the script with the highest
+  [person authentication script](#3-script-based-acrs) is enabled. Choosing the script with the highest
   [level](#acr-precedence-levels).
 - If no script can be invoked or the `useHighestLevelScriptIfAcrScriptNotFound` property is set to false,
-  then the Janssen Server authenticates using the [default ACR for the server](#server-configuration).
+  then the Janssen Server authenticates using the [default ACR for the server](#2-server-level-acr).
 - If the default ACR for the server is not configured by the Janssen Server administrator, or it can not be invoked due
-  to any reason, then the Janssen Server uses the [internal server ACR](#internal-janssen-server-acr) to authenticate
+  to any reason, then the Janssen Server uses the [internal server ACR](#1-internal-janssen-server-acr) to authenticate
   the end-user.
 
 ## Want to contribute?

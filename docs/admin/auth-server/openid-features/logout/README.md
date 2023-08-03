@@ -35,7 +35,7 @@ Front-channel logout or back-channel logouts are the mechanisms used by OP to in
 Which kind of logout mechanism is used by the client(RP) is dictated by the client's configuration on Janssen Server.
 
 When using
-[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the client, navigate via `Auth Server`->
+[Janssen Text-based UI(TUI)](../../../config-guide/config-tools/jans-tui/README.md) to configure the client, navigate via `Auth Server`->
 `Clients`->`logout` as shown in the image below:
 
 ![](../../../../assets/image-logout-client-config.png)

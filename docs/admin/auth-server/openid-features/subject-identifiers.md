@@ -59,7 +59,7 @@ To enable client level customization, the Janssen Server property
 should be set to `true` and also the desired attribute should be part of the list
 defined by the Janssen Server property
 [subjectIdentifiersPerClientSupported](../../reference/json/properties/janssenauthserver-properties.md#subjectidentifiersperclientsupported).
-Both these properties can be set by the administrator using [TUI](../../config-guide/jans-tui/README.md).
+Both these properties can be set by the administrator using [TUI](../../config-guide/config-tools/jans-tui/README.md).
 
 ## Pairwise Subject Identifiers
 
