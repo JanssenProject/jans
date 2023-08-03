@@ -95,7 +95,7 @@ By using this line, you can create user via `jans-config.py`, [see for example](
 ## Standalone Installation
 
 Configure the Janssen server using the `jans-cli-tui` a Text based User Interface app which can be installed on any remote Linux machine.
-There are two ways using CLI on remote Linux machine:
+There are two ways of achieving this:
 
 
 ### 1. Build pyz self executable file
