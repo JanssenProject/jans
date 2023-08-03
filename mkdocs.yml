@@ -106,40 +106,41 @@ nav:
   - Terraform and IaC:
     - admin/terraform/README.md   
   - Configuration Guide:
-    - Config API:
-      - admin/config-guide/config-api/README.md
-      - Settings: admin/config-guide/config-api/config.md
-      - Attributes: admin/config-guide/config-api/attribute.md
-      - Security: admin/config-guide/config-api/security.md
-      - Logs: admin/config-guide/config-api/logs.md
-      - Monitoring: admin/config-guide/config-api/monitoring.md
-      - Plugins: admin/config-guide/config-api/plugins.md
-    - CURL Guide: admin/config-guide/curl.md
-    - Text-Based User Interface (TUI):
-      - admin/config-guide/jans-tui/README.md
-      - Navigation Guide: admin/config-guide/jans-tui/navigation-guide.md
-    - Command Line Interface (CLI):
-      - admin/config-guide/jans-cli/README.md
-      - Standalone Installation: admin/config-guide/jans-cli/install.md
-      - Attribute: admin/config-guide/jans-cli/cli-attribute.md
-      - Default Authentication: admin/config-guide/jans-cli/cli-default-authentication-method.md
-      - Cache Configuration: admin/config-guide/jans-cli/cli-cache-configuration.md
-      - Auth Server Configuration: admin/config-guide/jans-cli/cli-jans-authorization-server.md
-      - FIDO2 Configuration: admin/config-guide/jans-cli/cli-janssen-fido2-configuration.md
-      - Logging: admin/config-guide/jans-cli/cli-logging-configuration.md
-      - JSON Web Key: admin/config-guide/jans-cli/cli-jwk-json-web-key-jwk.md
-      - LDAP Configuration: admin/config-guide/jans-cli/cli-ldap-configuration.md
-      - Couchbase Configuration: admin/config-guide/jans-cli/cli-couchbase-configuration.md
-      - OAuth Scope Management: admin/config-guide/jans-cli/cli-oauthscopes.md
-      - UMA Management: admin/config-guide/jans-cli/cli-oauthumaresources.md
-      - OpenID Connect Client Configuration: admin/config-guide/jans-cli/cli-openid-connect-client-configuration.md
-      - SMTP Configuration: admin/config-guide/jans-cli/cli-smtp-configuration.md
-      - Custom Scripts: admin/config-guide/jans-cli/cli-custom-scripts.md
-      - SCIM User Resources: admin/config-guide/jans-cli/cli-user.md
-      - SCIM Group Management: admin/config-guide/jans-cli/cli-group.md
-      - Authentication via Device Flow: admin/config-guide/jans-cli/device-flow.md
+    - Configuration Tools:
+      - Config API:
+        - admin/config-guide/config-api/README.md
+        - Settings: admin/config-guide/config-api/config.md
+        - Attributes: admin/config-guide/config-api/attribute.md
+        - Security: admin/config-guide/config-api/security.md
+        - Logs: admin/config-guide/config-api/logs.md
+        - Monitoring: admin/config-guide/config-api/monitoring.md
+        - Plugins: admin/config-guide/config-api/plugins.md
+      - CURL Guide: admin/config-guide/curl.md
+      - Text-Based User Interface (TUI):
+        - admin/config-guide/jans-tui/README.md
+        - Navigation Guide: admin/config-guide/jans-tui/navigation-guide.md
+      - Command Line Interface (CLI):
+        - admin/config-guide/jans-cli/README.md
       - CLI For Agama Developer Studio: admin/config-guide/jans-cli/cli-agama.md
-    - SCIM CLI: admin/config-guide/scim-cli.md
+      - SCIM CLI: admin/config-guide/scim-cli.md
+    - Standalone Installation: admin/config-guide/jans-cli/install.md
+    - Attribute: admin/config-guide/cli-attribute.md
+    - Default Authentication: admin/config-guide/cli-default-authentication-method.md
+    - Cache Configuration: admin/config-guide/cli-cache-configuration.md
+    - Auth Server Configuration: admin/config-guide/cli-jans-authorization-server.md
+    - FIDO2 Configuration: admin/config-guide/cli-janssen-fido2-configuration.md
+    - Logging: admin/config-guide/cli-logging-configuration.md
+    - JSON Web Key: admin/config-guide/cli-jwk-json-web-key-jwk.md
+    - LDAP Configuration: admin/config-guide/cli-ldap-configuration.md
+    - Couchbase Configuration: admin/config-guide/cli-couchbase-configuration.md
+    - OAuth Scope Management: admin/config-guide/cli-oauthscopes.md
+    - UMA Management: admin/config-guide/cli-oauthumaresources.md
+    - OpenID Connect Client Configuration: admin/config-guide/cli-openid-connect-client-configuration.md
+    - SMTP Configuration: admin/config-guide/cli-smtp-configuration.md
+    - Custom Scripts: admin/config-guide/cli-custom-scripts.md
+    - SCIM User Resources: admin/config-guide/cli-user.md
+    - SCIM Group Management: admin/config-guide/cli-group.md
+    - Authentication via Device Flow: admin/config-guide/device-flow.md
   - Database Guide:
     - admin/reference/database/README.md
     - RDBMS Erwin Table: admin/reference/database/rdbms-erwin.md

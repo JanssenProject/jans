@@ -9,7 +9,7 @@ tags:
 
 # Log Management
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../jans-cli/README.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](jans-cli/README.md)
 
 To `view/update` logging configuration, let's get the information of logging Configuration.
 
@@ -78,7 +78,7 @@ nano /tmp/log-config.json
 
 Here I have updated `loggingLevel` to `DEBUG` and `enabledOAuditLogging` to `true` as below image.
 
-![updated logging](../../../assets/image-cl-update-logging-03042021.png)
+![updated logging](../../assets/image-cl-update-logging-03042021.png)
 
 
 Let's do the operation:

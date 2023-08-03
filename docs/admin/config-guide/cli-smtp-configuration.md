@@ -9,7 +9,7 @@ tags:
 
 # SMTP Configuration
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../jans-cli/README.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](jans-cli/README.md)
 
 Let's get the information of **SMTP Configuration** using Janssen CLI.
 
@@ -74,7 +74,7 @@ It will create a `.json` file. Let's modify this file:
 nano /tmp/smtp.json
 ```
 
-![smtp update configuration](../../../assets/image-cl-update-smtp-03042021.png)
+![smtp update configuration](../../assets/image-cl-update-smtp-03042021.png)
 
 You can update each of its properties. To perform this operation, run the following command:
 

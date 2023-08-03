@@ -9,7 +9,7 @@ tags:
 
 # OAuth Scopes
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../jans-cli/README.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](jans-cli/README.md)
 
 Let's get information for a task **OAuthScopes**
 
@@ -167,7 +167,7 @@ Now edit file `tmp/scope.json` with an editor (like **nano**). As an example we 
 "description": "Test Scope created by jans-cli",
 ```
 
-![jans-cl Edit scope.json](../../../assets/image-cl-oauthscope-json-03042021.png) 
+![jans-cl Edit scope.json](../../assets/image-cl-oauthscope-json-03042021.png) 
 
 It is time to post the data:
 
@@ -280,7 +280,7 @@ Operation ID: patch-oauth-scopes-by-id
   Schema: Array of /components/schemas/PatchRequest
  ```
  
-This means we need schema `/components/schemas/PatchRequest`, be careful it states **Array of**, so we will make an array of this schema, in case you need multiple changes with patch method, you can put as many as of this schema into array. To know more about `PatchRequest` schema, please visit this [link](../jans-cli/README.md#patch-request-schema).
+This means we need schema `/components/schemas/PatchRequest`, be careful it states **Array of**, so we will make an array of this schema, in case you need multiple changes with patch method, you can put as many as of this schema into array. To know more about `PatchRequest` schema, please visit this [link](jans-cli/README.md#patch-request-schema).
 
 Let's Get schema:
 
@@ -290,7 +290,7 @@ Let's Get schema:
 
 We can edit this json as follows (remember to make it an array):
 
-![jans-cl Edit patch.json](../../../assets/image-cl-oauthscope-patch-json-03042021.png)
+![jans-cl Edit patch.json](../../assets/image-cl-oauthscope-patch-json-03042021.png)
 
 Let's do the operation:
 
