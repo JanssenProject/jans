@@ -109,13 +109,16 @@ echo -e "Testing scim-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/scim-configuration
 echo -e "Testing fido2-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/fido2-configuration
-echo -e "copying reports.. \n"
 mkdir -p /tmp/reports || echo "reports folder exists"
 while ! docker exec docker-jans-monolith-jans-1 test -f "/tmp/httpd.crt"; do
+  echo "Waiting for the container to run java test preparations"
   sleep 5
 done
-docker exec docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae clean compile install -f /tmp/jans/jans-auth-server
-docker exec docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false test -f /tmp/jans/jans-auth-server
+echo -e "Running build.. \n"
+docker exec docker-jans-monolith-jans-1 cd /tmp/jans/jans-auth-server && mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae clean compile install
+echo -e "Running tests.. \n"
+docker exec docker-jans-monolith-jans-1 cd /tmp/jans/jans-auth-server && mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false test
+echo -e "copying reports.. \n"
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/client/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-client-testng-results.xml
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/agama/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-agama-model-testng-results.xml
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/test-model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-test-model-testng-results.xml
