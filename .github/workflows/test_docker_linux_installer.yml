@@ -93,4 +93,4 @@ jobs:
       if: success() || failure()        # run this step even if previous step failed
       with:
         name: java-test-results
-        path: ./tmp/reports/*.xml
+        path: /tmp/reports/*.xml
