@@ -115,9 +115,9 @@ while ! docker exec docker-jans-monolith-jans-1 test -f "/tmp/httpd.crt"; do
   sleep 5
 done
 echo -e "Running build.. \n"
-docker exec docker-jans-monolith-jans-1 -w /tmp/jans/jans-auth-server mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae clean compile install
+docker exec -w /tmp/jans/jans-auth-server docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae clean compile install
 echo -e "Running tests.. \n"
-docker exec docker-jans-monolith-jans-1 -w /tmp/jans/jans-auth-server mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false test
+docker exec -w /tmp/jans/jans-auth-server docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false test
 echo -e "copying reports.. \n"
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/client/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-client-testng-results.xml
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/agama/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-agama-model-testng-results.xml
