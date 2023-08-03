@@ -51,9 +51,14 @@ jobs:
 
     - name: Test Jans monolith demo
       run: |
+        checkout="${{ github.sha }}"
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "Using main branch"
+          checkout="main"
+        fi
         ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
         sudo chmod u+x automation/startjanssenmonolithdemo.sh
-        sudo bash ./automation/startjanssenmonolithdemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} $ip ${{ github.sha }}
+        sudo bash ./automation/startjanssenmonolithdemo.sh "demoexample.jans.io" "${{ matrix.persistence-backends }}" "${ip}" "${checkout}"
         persistence=$(echo "${{ matrix.persistence-backends }}" | tr '[:upper:]' '[:lower:]')
         
         echo "generating rdbms docs for ${{ matrix.persistence-backends }}..."
