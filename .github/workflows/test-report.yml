@@ -12,5 +12,8 @@ jobs:
       with:
         artifact: go-test-results
         name: Go Tests
-        path: '*.xml'
+        path: '*report.xml'
         reporter: java-junit
+    - name: Publish Test Report
+      uses: scacap/action-surefire-report@v1
+      report_paths: '*testng-results.xml'

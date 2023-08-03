@@ -17,6 +17,15 @@ if [[ -z $EXT_IP ]]; then
   EXT_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
 fi
 
+wait_for_services() {
+  code=404
+  while [[ "$code" != "200" ]]; do
+    echo "Waiting for https://${JANS_FQDN}/$1 to respond with 200"
+    code=$(curl -s -o /dev/null -w ''%{http_code}'' -k https://"${JANS_FQDN}"/"$1")
+    sleep 5
+  done
+}
+
 sudo apt-get update
 # Install Docker and Docker compose plugin
 sudo apt-get remove docker docker-engine docker.io containerd runc -y || echo "Docker doesn't exist..installing.."
@@ -41,7 +50,7 @@ rm -rf /tmp/jans || echo "/tmp/jans doesn't exist"
 git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
-    && git checkout main \
+    && git checkout "$JANS_BUILD_COMMIT" \
     && git sparse-checkout set docker-jans-monolith \
     && cd "$WORKING_DIRECTORY"
 
@@ -59,6 +68,7 @@ if [[ "$JANS_BUILD_COMMIT" ]]; then
   # and use the respective image instead of the default image
   python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-mysql-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
   python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-postgres-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
+  python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-ldap-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
 fi
 # --
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
@@ -88,8 +98,10 @@ if [ "$jans_status" == '"unhealthy"' ]; then
     docker logs docker-jans-monolith-jans-1
     exit 1
 fi
-echo "Will be ready in exactly 3 mins"
-sleep 180
+wait_for_services jans-config-api/api/v1/health/ready
+wait_for_services jans-scim/sys/health-check
+wait_for_services jans-fido2/sys/health-check
+
 cat << EOF > testendpoints.sh
 echo -e "Testing openid-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/openid-configuration
@@ -97,6 +109,21 @@ echo -e "Testing scim-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/scim-configuration
 echo -e "Testing fido2-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/fido2-configuration
+mkdir -p /tmp/reports || echo "reports folder exists"
+while ! docker exec docker-jans-monolith-jans-1 test -f "/tmp/httpd.crt"; do
+  echo "Waiting for the container to run java test preparations"
+  sleep 5
+done
+echo -e "Running build.. \n"
+docker exec -w /tmp/jans/jans-auth-server docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae clean compile install
+echo -e "Running tests.. \n"
+docker exec -w /tmp/jans/jans-auth-server docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false test
+echo -e "copying reports.. \n"
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/client/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-client-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/agama/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-agama-model-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/test-model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-test-model-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-model-testng-results.xml
+
 EOF
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."
