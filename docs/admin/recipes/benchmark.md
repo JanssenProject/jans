@@ -287,7 +287,7 @@ Create the client needed to run the test by executing the following. Make sure t
     ```
 3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder.
 
-4. Download or build [config-cli-tui](../config-guide/jans-tui/README.md) and run:
+4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
     ```bash
     # Notice the namespace is jans here . Change it if it was changed during installation of janssen previously
@@ -375,7 +375,7 @@ Create the client needed to run the test by executing the following. Make sure t
 
 3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
 
-4. Download or build [config-cli-tui](../config-guide/jans-tui/README.md) and run:
+4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
     ```bash
     # Notice the namespace is jans here . Change it if it was changed during installation of janssen previously
@@ -464,7 +464,7 @@ Create the client needed to run the test by executing the following. Make sure t
 3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
 
 
-4. Download or build [config-cli-tui](../config-guide/jans-tui/README.md) and run:
+4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
     ```bash
     # Notice the namespace is jans here . Change it if it was changed during installation of janssen previously
