@@ -33,6 +33,7 @@ public class AppConfiguration implements Configuration {
     public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
+    public static final String DEFAULT_AUTHORIZATION_CHALLENGE_ACR = "default_challenge";
 
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
@@ -844,6 +845,12 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Enable/Disable block authorizations that originate from Webview (Mobile apps).", defaultValue = "false")
     private Boolean blockWebviewAuthorizationEnabled = false;
+
+    @DocProperty(description = "Authorization Challenge Endpoint Default ACR if no value is specified in acr_values request parameter.", defaultValue = DEFAULT_AUTHORIZATION_CHALLENGE_ACR)
+    private String authorizationChallengeDefaultAcr;
+
+    @DocProperty(description = "Boolean value specifying whether to generate session_id (AS object and cookie) during authorization at Authorization Challenge Endpoint", defaultValue = "false")
+    private Boolean authorizationChallengeShouldGenerateSession = false;
 
     @DocProperty(description = "List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc.")
     private Map<String, String> dateFormatterPatterns = new HashMap<>();
@@ -3268,6 +3275,24 @@ public class AppConfiguration implements Configuration {
 
     public void setSsaConfiguration(SsaConfiguration ssaConfiguration) {
         this.ssaConfiguration = ssaConfiguration;
+    }
+
+    public Boolean getAuthorizationChallengeShouldGenerateSession() {
+        if (authorizationChallengeShouldGenerateSession == null) authorizationChallengeShouldGenerateSession = false;
+        return authorizationChallengeShouldGenerateSession;
+    }
+
+    public void setAuthorizationChallengeShouldGenerateSession(Boolean authorizationChallengeShouldGenerateSession) {
+        this.authorizationChallengeShouldGenerateSession = authorizationChallengeShouldGenerateSession;
+    }
+
+    public String getAuthorizationChallengeDefaultAcr() {
+        if (authorizationChallengeDefaultAcr == null) authorizationChallengeDefaultAcr = DEFAULT_AUTHORIZATION_CHALLENGE_ACR;
+        return authorizationChallengeDefaultAcr;
+    }
+
+    public void setAuthorizationChallengeDefaultAcr(String authorizationChallengeDefaultAcr) {
+        this.authorizationChallengeDefaultAcr = authorizationChallengeDefaultAcr;
     }
 
     public Boolean getBlockWebviewAuthorizationEnabled() {

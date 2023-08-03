@@ -79,6 +79,7 @@ public class DeviceSession extends DeletableEntity implements Serializable {
     }
 
     public DeviceSessionAttributes getAttributes() {
+        if (attributes == null) attributes = new DeviceSessionAttributes();
         return attributes;
     }
 
