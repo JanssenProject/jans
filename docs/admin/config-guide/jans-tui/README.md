@@ -94,38 +94,53 @@ By using this line, you can create user via `jans-config.py`, [see for example](
 
 ## Standalone Installation
 
-Installation of a Jans TUI ( Text-Based User Interface ) need a Jans server to be installed as base. After that download and build Jans-ClI-TUI and make it.
+Configure the Janssen server using the `jans-cli-tui` a Text based User Interface app which can be installed on any PC
 
-### Build:
+### To Build
+```
+pip3 install shiv
+wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip -O jans-main.zip
+unzip jans-main.zip
+cd jans-main/jans-cli-tui/
+make zipapp
+```
 
-1. Install dependencies
-
-    ```sh
-    apt install -y wget unzip python3-pip python3-dev
-    pip3 install shiv
-    ```
-
-2. Download the repository:
-
-    ```sh
-    wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip
-    ```
-
-3. Unzip package, and change to directory
-
-    ```sh
-    unzip main.zip
-    cd jans-main/jans-cli-tui
-    ```
-
-4. Build
-
-    ```sh
-    make zipapp
-    ```
-
-You can verify with the following command line if everything is done successfully.
+### To Execute
 
 ```
-python3 jans-cli-tui.pyz
+./jans-cli-tui.pyz
 ```
+
+You will be prompted for credentials if you do not have ` ~/.config/jans-cli.ini`. 
+Contact your administrator for credentials.
+
+```
+cat /opt/jans/jans-setup/setup.properties.last | grep tui_client
+tui_client_encoded_pw=4jnkODv3KRV6xNm1oGQ8+g\=\=
+tui_client_id=2000.eac308d1-95e3-4e38-87cf-1532af310a9e
+tui_client_pw=GnEkCqg4Vsks
+```
+
+### Installing with pip from GitHub
+
+```
+pip3 install https://github.com/JanssenProject/jans/archive/refs/heads/main.zip#subdirectory=jans-cli-tui
+```
+
+Execute:
+
+```
+config-cli-tui
+```
+
+Obtain Credidentials for CLI from the Janssen server:
+
+```
+# cat /opt/jans/jans-setup/setup.properties.last | grep tui_client
+tui_client_encoded_pw=dDpwNN3lv94JF+ibgVFT7A\=\=
+tui_client_id=2000.076aa5d9-fa8d-42a0-90d2-b83b5ea535d5
+tui_client_pw=mrF8tcBd6m9Q
+```
+
+`tui_client_id` is the **Client ID** and `tui_client_pw` is the **Client Secret**
+
