@@ -11,7 +11,7 @@ tags:
 
 > Prerequisite: Know how to use the Janssen CLI in [command-line mode](jans-cli/README.md)
 
-If your janssen server backend is connected with couchbase database then you can go with these operations instead of [LDAP configuration](cli-ldap-configuration.md).
+If your janssen server backend is connected with couchbase database then you can go with these operations instead of [LDAP configuration](ldap-configuration.md).
 
 Let's get the couchbase database configuration operations details:
 

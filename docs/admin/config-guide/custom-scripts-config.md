@@ -189,7 +189,7 @@ Operation ID: put-config-scripts
   Description: Updates a custom script.
   Schema: /components/schemas/CustomScript
 ```
-As we created a custom script in the [above](cli-custom-scripts.md#adds-a-new-custom-script), let's update that one. So we know the `dn:inum=61aef81b-b22d-42c0-89d5-b098c976a2b7,ou=scripts,o=jans` and `inum:61aef81b-b22d-42c0-89d5-b098c976a2b7` here. In this case, I have modified as below:
+As we created a custom script in the [above](custom-scripts-config.md#adds-a-new-custom-script), let's update that one. So we know the `dn:inum=61aef81b-b22d-42c0-89d5-b098c976a2b7,ou=scripts,o=jans` and `inum:61aef81b-b22d-42c0-89d5-b098c976a2b7` here. In this case, I have modified as below:
 
 ```
 {
@@ -284,7 +284,7 @@ For an example, let's find all the scripts of `CLIENT_REGISTRATION` type. So, th
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:CLIENT_REGISTRATION
 ```
 
-It returns all the custom scripts that are related to the `CLIENT_REGISTRATION` type available in the Janssen Server. You will find the name of all the types [here](cli-custom-scripts.md#name-of-the-type-of-scripts)
+It returns all the custom scripts that are related to the `CLIENT_REGISTRATION` type available in the Janssen Server. You will find the name of all the types [here](custom-scripts-config.md#name-of-the-type-of-scripts)
 
 ## Get Custom Scripts by it's `inum`
 
@@ -350,7 +350,7 @@ Getting access token for scope https://jans.io/oauth/config/scripts.readonly
 
 ## How to delete Custom Script?
 
-Well, we can delete any custom script also in deed. In that case, we need to remember the `inum` value of the custom script we want to delete. In the above we [added](cli-custom-scripts.md#adds-a-new-custom-script), [updated](cli-custom-scripts.md#update-an-existing-custom-script) a custom script. We know the `inum` value, so let's delete this one.
+Well, we can delete any custom script also in deed. In that case, we need to remember the `inum` value of the custom script we want to delete. In the above we [added](custom-scripts-config.md#adds-a-new-custom-script), [updated](custom-scripts-config.md#update-an-existing-custom-script) a custom script. We know the `inum` value, so let's delete this one.
 
 Command line: 
 

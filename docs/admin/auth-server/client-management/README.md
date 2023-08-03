@@ -88,6 +88,6 @@ Refer to complete documentation [here](../../config-guide/jans-tui/README.md)
 ### D. Using curl commands
 
 To add a client via `curl`, see the information on the
-[curl documentation page](../../config-guide/curl.md).
+[curl documentation page](../../config-guide/curl-guide.md).
 
 

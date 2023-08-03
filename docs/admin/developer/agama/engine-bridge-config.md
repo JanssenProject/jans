@@ -19,7 +19,7 @@ By default, both components are disabled. To activate them do the following:
 
 ## Engine configuration
 
-Some aspects of the engine are configurable and they are integral part of the Jans authentication server's JSON configuration - specifically the section labeled `agamaConfiguration`. To learn how to perform changes in the server's configuration click [here](../../config-guide/cli-jans-authorization-server.md).
+Some aspects of the engine are configurable and they are integral part of the Jans authentication server's JSON configuration - specifically the section labeled `agamaConfiguration`. To learn how to perform changes in the server's configuration click [here](../../config-guide/jans-authorization-server-config.md).
 
 The properties of Agama engine configuration are described in the following:
 
@@ -52,7 +52,7 @@ The properties of Agama engine configuration are described in the following:
 
 There are a few configuration properties admins can set to modify the behavior of the bridge:
 
-- `cust_param_name`: The name of the request parameter - in the authentication request - that will carry the name of the flow to launch. Ensure to register the given parameter name in the [server configuration](../../config-guide/cli-jans-authorization-server.md) (property `authorizationRequestCustomAllowedParameters`) beforehand
+- `cust_param_name`: The name of the request parameter - in the authentication request - that will carry the name of the flow to launch. Ensure to register the given parameter name in the [server configuration](../../config-guide/jans-authorization-server-config.md) (property `authorizationRequestCustomAllowedParameters`) beforehand
 
 - `default_flow_name`: If the relying party (RP) is not able to send custom parameters or omits the flow name in the authentication request, the value of this property will be assumed to be the flow to launch by default
 

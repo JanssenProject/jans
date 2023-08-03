@@ -89,7 +89,7 @@ We will have following line in `cli_cmd.log`:
 /usr/bin/python3 /opt/jans/jans-cli/cli/config_cli.py --operation-id post-user --data '{"customObjectClasses": ["top", "jansPerson"], "customAttributes": [{"name": "middleName", "multiValued": false, "values": [""]}, {"name": "sn", "multiValued": false, "values": ["Watts"]}, {"name": "nickname", "multiValued": false, "values": [""]}], "mail": "ewatts@foo.org", "userId": "ewatts", "displayName": "Emelia Watts", "givenName": "Emelia", "userPassword": "TopSecret", "jansStatus": "active"}'
 ```
 
-By using this line, you can create user via `jans-config.py`, [see for example](../cli-using-command-line-log.md)
+By using this line, you can create user via `jans-config.py`, [see for example](using-command-line-log.md)
 
 
 ## Standalone Installation
