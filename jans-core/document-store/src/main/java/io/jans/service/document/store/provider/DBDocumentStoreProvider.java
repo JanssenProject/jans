@@ -1,17 +1,5 @@
 package io.jans.service.document.store.provider;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.conf.DBDocumentStoreConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
@@ -22,6 +10,14 @@ import io.jans.util.StringHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * @author Shekhar L. on 29/10/2022
