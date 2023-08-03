@@ -48,15 +48,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 'name' : NAME_STR,
                 'files' : [
                     {
-                        'path' : os.path.join(self.jetty_home, 'etc/webdefault.xml'),
-                        'replace' : [
-                            {
-                                'pattern' : r'(\<param-name\>dirAllowed<\/param-name\>)(\s*)(\<param-value\>)true(\<\/param-value\>)',
-                                'update' : r'\1\2\3false\4'
-                            }
-                        ]
-                    },
-                    {
                         'path' : os.path.join(self.jetty_home, 'etc/jetty.xml'),
                         'replace' : [
                             {

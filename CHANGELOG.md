@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.16](https://github.com/JanssenProject/jans/compare/v1.0.16...v1.0.16) (2023-08-02)
+
+
+### Features
+
+* **jans-cli-tui:** agama-cli ([#5715](https://github.com/JanssenProject/jans/issues/5715)) ([5fec965](https://github.com/JanssenProject/jans/commit/5fec965f18429882ec0dc3686a5f83b6f9fb6086))
+
+
+### Bug Fixes
+
+* **docs:** autogenerate docs ([#5749](https://github.com/JanssenProject/jans/issues/5749)) ([9a29ec1](https://github.com/JanssenProject/jans/commit/9a29ec194b80ecbd06a5a9f4ea34434492bb5cd1))
+* **jans-linux-setup:** load test data with setup.properties ([#5723](https://github.com/JanssenProject/jans/issues/5723)) ([b2fa5de](https://github.com/JanssenProject/jans/commit/b2fa5de84c6a9917e0ec0a57a529924b4409ba66))
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
 ## [1.0.15](https://github.com/JanssenProject/jans/compare/v1.0.15...v1.0.15) (2023-07-12)
 
 
