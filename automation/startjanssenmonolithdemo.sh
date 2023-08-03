@@ -114,8 +114,8 @@ mkdir -p /tmp/reports || echo "reports folder exists"
 while ! docker exec docker-jans-monolith-jans-1 test -f "/tmp/httpd.crt"; do
   sleep 5
 done
-docker exec docker-jans-monolith-jans-1 mvn -Dcfg="${JANS_FQDN}" -Dmaven.test.skip=true -fae clean compile install -f /tmp/jans/jans-auth-server
-docker exec docker-jans-monolith-jans-1 mvn -Dcfg="demoexample.jans.io" -Dmaven.test.skip=false test -f /tmp/jans/jans-auth-server
+docker exec docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae clean compile install -f /tmp/jans/jans-auth-server
+docker exec docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false test -f /tmp/jans/jans-auth-server
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/client/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-client-testng-results.xml
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/agama/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-agama-model-testng-results.xml
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/test-model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-test-model-testng-results.xml
