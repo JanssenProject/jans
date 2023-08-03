@@ -37,9 +37,9 @@ expire the client, and several other options that impact security.
 ## Client Management Tools
 A client can be created (and managed) by using one of the following tools offered by the Jans Auth server:
 
-* [Jans Config API](../../config-guide/config-api/README.md)
-* [Command Line Tool (CLI)](../../config-guide/jans-cli/README.md)
-* [Jans Text UI (TUI)](../../config-guide/jans-tui/README.md)
+* [Jans Config API](../../config-guide/config-tools/config-api/README.md)
+* [Command Line Tool (CLI)](../../config-guide/config-tools/jans-cli/README.md)
+* [Jans Text UI (TUI)](../../config-guide/config-tools/jans-tui/README.md)
 * [OpenID Connect Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html)
 
 The choice of tool should be made based on your business requirement. 
@@ -73,7 +73,7 @@ Below is a one liner to add a client.
 ```
 
 For more information about how to use
-the Jans-CLI, see the [docs](../../config-guide/jans-cli/README.md)
+the Jans-CLI, see the [docs](../../config-guide/config-tools/jans-cli/README.md)
 
 ### C. TUI
 
@@ -83,11 +83,11 @@ with various sections to input client details.
 
 ![](../../../assets/Jans_TUI_Auth_Server_Add_new_client.png)
 
-Refer to complete documentation [here](../../config-guide/jans-tui/README.md)
+Refer to complete documentation [here](../../config-guide/config-tools/jans-tui/README.md)
 
 ### D. Using curl commands
 
 To add a client via `curl`, see the information on the
-[curl documentation page](../../config-guide/curl-guide.md).
+[curl documentation page](../../config-guide/config-tools/curl-guide.md).
 
 

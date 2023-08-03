@@ -9,7 +9,7 @@ tags:
 
 # Default Authentication Method
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](jans-cli/README.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](config-tools/jans-cli/README.md)
 
 Let's get the information of **Default Authentication Method**:
 

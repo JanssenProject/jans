@@ -13,7 +13,7 @@ The engine and the bridge are two of the components part of the Agama Framework 
 
 By default, both components are disabled. To activate them do the following:
 
-- Open [TUI](../../config-guide/jans-tui/README.md)
+- Open [TUI](../../config-guide/config-tools/jans-tui/README.md)
 - Navigate to `Auth Server` > `properties` > `agamaConfiguration` > check `enabled` > `save`
 - Navigate to `Scripts` > Search 'agama' > Select the script and hit enter > check `enabled` > `save` 
 
@@ -23,7 +23,7 @@ Some aspects of the engine are configurable and they are integral part of the Ja
 
 The properties of Agama engine configuration are described in the following:
 
-- `enabled`: A boolean value that specifies if the engine is enabled. Read more about [engine availability](#engine-availability) above 
+- `enabled`: A boolean value that specifies if the engine is enabled. Read more about [engine availability](#availability) above 
 
 - `templatesPath`: A path relative to `/opt/jans/jetty/jans-auth/server/agama` that serves as the root of Agama flow pages. Default value is `/ftl`
 
@@ -31,7 +31,9 @@ The properties of Agama engine configuration are described in the following:
 
 - `serializerType`: A low-level property related to [continuations](./advanced-usages.md#other-engine-characteristics) serialization. Set this to `null` if your flows present crashes due to issues with Java serialization. Default value is `KRYO`
 
-- `maxItemsLoggedInCollections`: When a list or map is [logged](../../../language-reference.md#logging) in a flow, only the first few items are included in the output. You can use this property to increase that limit. Default value is `9`
+- `maxItemsLoggedInCollections`: When a list or map is [logged](../../../agama/language-reference.md#logging)
+  in 
+  a flow, only the first few items are included in the output. You can use this property to increase that limit. Default value is `9`
 
 - `pageMismatchErrorPage`: A path relative to `/opt/jans/jetty/jans-auth/server/agama` containing the location of the page shown when an unexpected URL is requested while a flow is in course. Default value is `mismatch.ftlh`
 

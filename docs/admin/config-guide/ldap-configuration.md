@@ -10,7 +10,7 @@ tags:
 
 # Lightweight Directory Access Protocol (LDAP) Configuration
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](jans-cli/README.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](config-tools/jans-cli/README.md)
 
 Let's run the following command to get operation-id details of LDAP Database COnfiguration.
 
@@ -264,7 +264,7 @@ If required, We can patch single information of a ldap database configuration by
 /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest > patch.json
 ```
 
-We know already that this operation support three types of value `op`, `path` and `value` to be replaced. For more info visit this [link](jans-cli/README.md#patch-request-schema)
+We know already that this operation support three types of value `op`, `path` and `value` to be replaced. For more info visit this [link](config-tools/jans-cli/README.md#patch-request-schema)
 
 
 For example, let's say, we want to change the level of the `test_ldap` configuration. So, Let's update the patch file as below:
