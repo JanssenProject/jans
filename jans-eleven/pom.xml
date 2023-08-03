@@ -27,6 +27,7 @@
 		<jans.bom.version>${project.version}</jans.bom.version>
 
 		<jetty.version>11.0.15</jetty.version>
+		<bouncycastle.version>1.70</bouncycastle.version>
 	</properties>
 
 	<scm>
@@ -66,8 +67,9 @@
 		<module>model</module>
 		<module>client</module>
 		<module>server</module>
+		<module>server-fips</module>
 	</modules>
-	
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -166,6 +168,21 @@
 					<groupId>org.eclipse.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
 					<version>${jetty.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>buildnumber-maven-plugin</artifactId>
+					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>pl.project13.maven</groupId>
+					<artifactId>git-commit-id-plugin</artifactId>
+					<version>4.9.10</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>3.1.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

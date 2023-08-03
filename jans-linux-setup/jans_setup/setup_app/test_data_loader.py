@@ -47,7 +47,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.run(' '.join(args), shell=True)
 
         args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
-                '-cp', Config.non_setup_properties['oxauth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
+                '-cp', self.get_key_gen_client_cmd(), Config.non_setup_properties['key_gen_path'],
                 '-key_ops_type', 'ALL',
                 '-keystore', client_keystore_fn,
                 '-keypasswd', 'secret',
@@ -253,8 +253,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         base.download('https://github.com/JanssenProject/jans/raw/main/jans-auth-server/client/src/test/resources/jans_test_client_keys.zip', target_jwks_fn)
         self.run([paths.cmd_unzip, '-o', target_jwks_fn, '-d', base.current_app.HttpdInstaller.server_root])
         self.removeFile(target_jwks_fn)
+        self.run([paths.cmd_chmod, '-R', '660', '/var/www/html/jans-auth-client'])
+        self.run([paths.cmd_chmod, 'ug+X', '/var/www/html/jans-auth-client'])
 
         self.chown(os.path.join(base.current_app.HttpdInstaller.server_root, 'jans-auth-client'), base.current_app.HttpdInstaller.apache_user, base.current_app.HttpdInstaller.apache_group, recursive=True)
+
+        self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
+        self.run([paths.cmd_chmod, '-R', '660', '/var/www/html/jans-auth-client'])
+        self.run([paths.cmd_chmod, 'ug+X', '/var/www/html/jans-auth-client'])
 
         Config.pbar.progress(self.service_name, "Updating oxauth config", False)
         oxAuthConfDynamic_changes = {
@@ -365,6 +371,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     ldif_writer.unparse(dn, entry)
 
             self.copyFile(tmp_fn, openDjSchemaFolder)
+
+            for test_schema in ('102-oxauth_test.ldif', '103-scim_test.ldif', '77-customAttributes.ldif'):
+                self.run([paths.cmd_chown, '{0}:{0}'.format(Config.ldap_user), os.path.join(openDjSchemaFolder, test_schema)])
 
             self.logIt("Making opndj listen all interfaces")
             ldap_operation_result = self.dbUtils.ldap_conn.modify(

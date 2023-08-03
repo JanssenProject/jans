@@ -15,6 +15,7 @@
 /jans-bom/ @yurem @yuriyz
 /jans-core/ @yurem @yuriyz
 /jans-orm/ @yurem @yuriyz
+/jans-notify/ @yurem
 /jans-eleven/ @yuriyz
 /jans-auth-server/ @yurem @yuriyz
 /jans-fido2/ @yurem
@@ -24,6 +25,5 @@
 /jans-linux-setup/ @devrimyatar @smansoft @yuriyz @yurem
 /jans-linux-setup/jans_setup/setup_app/version.py @moabu
 /jans-linux-setup/static/scripts/admin_ui_plugin.py @devrimyatar @duttarnab
-/jans-cache-refresh/ @yurem @shekhar16
 /agama/ @jgomer2001
 /demos/jans-tent/ @christian-hawk

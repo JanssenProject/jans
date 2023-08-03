@@ -1,13 +1,21 @@
+
+import pydevd
+import debugpy
+
 import os
 import glob
-import random
-import string
 import uuid
 import shutil
 import json
 import tempfile
+import zipfile
+import re
+import random
+import string
+import sys
 
 from urllib.parse import urlparse
+from pathlib import Path
 
 from setup_app import paths
 from setup_app.utils import base
@@ -17,12 +25,34 @@ from setup_app.static import AppType, InstallOption, SetupProfiles
 
 class JansAuthInstaller(JettyInstaller):
 
+#    source_files = [
+#                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['ox_version']))),
+#                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version'])))
+#                    ]
+
+#    source_fips_files = [
+#                    (os.path.join(Config.dist_jans_dir, 'jans-auth-fips.war'), "http://192.168.64.4/jans/jans-auth-server-fips.war"),
+#                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-without-provider-dependencies.jar'), "http://192.168.64.4/jans/jans-auth-client-jar-without-provider-dependencies.jar")
+#                    ]
+
+#    source_files = [
+#                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-server.war')),
+#                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-client-jar-with-dependencies.jar')),
+#                    (os.path.join(Config.dist_jans_dir, 'jans-fido2-client.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['ox_version']))),
+#                    (os.path.join(Config.dist_app_dir, 'twilio.jar'), os.path.join(base.current_app.app_info['TWILIO_MAVEN'], '{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION']))),
+#                   ]
+
     source_files = [
-                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['ox_version']))),
-                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version']))),
-                    (os.path.join(Config.dist_jans_dir, 'jans-fido2-client.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['ox_version']))),
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-server.war')),
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-client-jar-with-dependencies.jar')),
+                    (os.path.join(Config.dist_jans_dir, 'jans-fido2-client.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/Fido2-Client.jar')),
                     (os.path.join(Config.dist_app_dir, 'twilio.jar'), os.path.join(base.current_app.app_info['TWILIO_MAVEN'], '{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION']))),
                    ]
+
+    source_fips_files = [
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-fips.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-server-fips.war')),
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-without-provider-dependencies.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-client-jar-without-provider-dependencies.jar'))
+                    ]
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
@@ -42,7 +72,7 @@ class JansAuthInstaller(JettyInstaller):
         self.oxauth_static_conf_json = os.path.join(self.templates_folder, 'jans-auth-static-conf.json')
         self.oxauth_error_json = os.path.join(self.templates_folder, 'jans-auth-errors.json')
         self.oxauth_openid_jwks_fn = os.path.join(self.output_folder, 'jans-auth-keys.json')
-        self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.' + Config.default_store_type.lower())
+        self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, self.get_keystore_fn('jans-auth-keys'))
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
         self.agama_root = os.path.join(self.jetty_base, self.service_name, 'agama')
@@ -52,11 +82,23 @@ class JansAuthInstaller(JettyInstaller):
             Config.enable_ob_auth_script = '0' if base.argsp.disable_ob_auth_script else '1'
             Config.jwks_uri = base.argsp.jwks_uri
 
+    def pre_install(self):
+        if Config.profile == SetupProfiles.DISA_STIG:
+            self.extract_bcfips_jars()
+            Config.init_ext()
+
+            self.logIt("Config.opendj_truststore_format = %s" % Config.opendj_truststore_format)
+
     def install(self):
         self.logIt("Copying auth.war into jetty webapps folder...")
         self.make_pairwise_calculation_salt()
+        self.init_key_gen()
+        self.make_pairwise_calculation_salt()
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
-        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
+
+        src_file = self.source_files[0][0] if Config.profile != SetupProfiles.DISA_STIG else self.source_fips_files[0][0]
+        self.copyFile(src_file, os.path.join(self.jetty_service_webapps, '%s%s' % (self.service_name, Path(self.source_files[0][0]).suffix)))
+
         self.external_libs()
         self.setup_agama()
         self.enable()
@@ -71,14 +113,10 @@ class JansAuthInstaller(JettyInstaller):
         Config.encoded_admin_password = self.ldap_encode(Config.admin_password)
 
         self.logIt("Generating OAuth openid keys", pbar=self.service_name)
-
-        jwks = self.gen_openid_jwks_jks_keys(
-                    jks_path=self.oxauth_openid_jks_fn,
-                    jks_pwd=Config.oxauth_openid_jks_pass,
-                    key_expiration=2,
-                    key_algs=Config.default_sig_key_algs,
-                    enc_keys=Config.default_enc_key_algs
-                    )
+        sig_keys = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
+        enc_keys = 'RSA1_5 RSA-OAEP ECDH-ES'
+    
+        jwks = self.gen_openid_data_store_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
         if Config.get('use_external_key'):
@@ -137,13 +175,23 @@ class JansAuthInstaller(JettyInstaller):
 
         self.prepare_base64_extension_scripts()
 
+        self.logIt("self.oxauth_openid_jwks_fn      = {}".format(self.oxauth_openid_jwks_fn))
+
         Config.templateRenderingDict['oxauth_config_base64'] = self.generate_base64_ldap_file(self.oxauth_config_json)
         Config.templateRenderingDict['oxauth_static_conf_base64'] = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
         Config.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(self.oxauth_error_json)
         Config.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
+        
+        self.logIt("Config.templateRenderingDict[oxauth_config_base64]      = {}".format(self.generate_base64_ldap_file(self.oxauth_config_json)))
+        self.logIt("Config.templateRenderingDict[oxauth_static_conf_base64] = {}".format(self.generate_base64_ldap_file(self.oxauth_static_conf_json)))
+        self.logIt("Config.templateRenderingDict[oxauth_error_base64]       = {}".format(self.generate_base64_ldap_file(self.oxauth_error_json)))
+        self.logIt("Config.templateRenderingDict[oxauth_openid_key_base64]  = {}".format(self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)))
+
+#        debugpy.breakpoint();
 
         self.ldif_scripts = os.path.join(Config.output_dir, 'scripts.ldif')
         self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.output_dir)
+        
         for temp in (self.ldif_config, self.ldif_role_scope_mappings):
             self.renderTemplateInOut(temp, self.templates_folder, self.output_folder)
 
@@ -183,7 +231,7 @@ class JansAuthInstaller(JettyInstaller):
             tmp_fn = os.path.join(tmp_dir, jwks_addr+'.crt')
             self.writeFile(tmp_fn, open_banking_cert)
             self.run([Config.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
-                      Config.defaultTrustStoreFN, '-storepass', 'changeit', 
+                      Config.default_trust_store_fn, '-storepass', 'changeit', 
                       '-noprompt', '-alias', alias, '-file', tmp_fn])
 
 
@@ -215,5 +263,39 @@ class JansAuthInstaller(JettyInstaller):
         tmp_dir = os.path.join(Config.templateFolder, 'jetty')
         src_xml = os.path.join(tmp_dir, 'agama_web_resources.xml')
         self.renderTemplateInOut(src_xml, tmp_dir, self.jetty_service_webapps)
+
         self.chown(os.path.join(self.jetty_service_webapps, os.path.basename(src_xml)), Config.jetty_user, Config.jetty_group)
+
+    def extract_bcfips_jars(self):
+
+        war_zip = zipfile.ZipFile(self.source_fips_files[0][0], "r")
+        for fn in war_zip.namelist():
+            if re.search('bc-fips-(.*?).jar$', fn) or re.search('bcpkix-fips-(.*?).jar$', fn):
+                file_name = os.path.basename(fn)
+                target_fn = os.path.join(Config.dist_app_dir, file_name)
+                file_content = war_zip.read(fn)
+                with open(target_fn, 'wb') as w:
+                    w.write(file_content)
+        war_zip.close()
+
+    def init_key_gen(self):
+
+        self.logIt("Determining key generator path")
+        if Config.profile == SetupProfiles.DISA_STIG:
+            client_file = Config.non_setup_properties['jans_auth_client_noprivder_jar_fn']
+        else:
+            client_file = Config.non_setup_properties['jans_auth_client_jar_fn']
+        jans_auth_client_jar_zf = zipfile.ZipFile(client_file)
+        for f in jans_auth_client_jar_zf.namelist():
+            if os.path.basename(f) == 'KeyGenerator.class':
+                p, e = os.path.splitext(f)
+                Config.non_setup_properties['key_gen_path'] = p.replace(os.path.sep, '.')
+            elif os.path.basename(f) == 'KeyExporter.class':
+                p, e = os.path.splitext(f)
+                Config.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
+
+        if (not 'key_gen_path' in Config.non_setup_properties) or (not 'key_export_path' in Config.non_setup_properties):
+            self.logIt("Can't determine key generator and/or key exporter path form {}".format(client_file), True, True)
+        else:
+            self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 

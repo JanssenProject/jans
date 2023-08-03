@@ -4,10 +4,14 @@ import time
 import pprint
 import inspect
 import json
+import glob
+import shutil
+
+from pathlib import Path
 from collections import OrderedDict
 
 from setup_app.paths import INSTALL_DIR, LOG_DIR
-from setup_app.static import InstallTypes
+from setup_app.static import InstallTypes, SetupProfiles
 from setup_app.utils.printVersion import get_war_info
 from setup_app.utils import base
 
@@ -36,6 +40,12 @@ class Config:
     jetty_base = os.path.join(jansOptFolder, 'jetty')
     dist_app_dir = os.path.join(distFolder, 'app')
     dist_jans_dir = os.path.join(distFolder, 'jans')
+
+
+    default_store_type = 'pkcs12'
+    opendj_truststore_format = 'pkcs12'
+    default_client_test_store_type = 'pkcs12'
+    
 
     installed_instance = False
 
@@ -79,6 +89,8 @@ class Config:
         self.install_dir = install_dir
         self.data_dir = os.path.join(self.install_dir, 'setup_app/data')
         self.profile = base.current_app.profile 
+        
+        self.use_existing_java = base.argsp.j
 
         self.thread_queue = None
         self.jetty_user = self.jetty_group = 'jetty'
@@ -87,6 +99,11 @@ class Config:
         self.backend_service = 'network.target'
         self.dump_config_on_error = False
 
+        self.jans_group = 'jans'
+
+        self.user_group = '{}:{}'.format(self.jetty_user, self.jans_group)
+
+        self.dump_config_on_error = False
         if not self.output_dir:
             self.output_dir = os.path.join(install_dir, 'output')
 
@@ -95,7 +112,8 @@ class Config:
             self.ldap_base_dir = os.path.join(base.snap_common, 'opendj')
             self.jetty_user = 'root'
 
-        self.default_store_type = 'PKCS12'
+        self.default_store_type = 'pkcs12'
+        self.opendj_truststore_format = 'pkcs12'
 
         #create dummy progress bar that logs to file in case not defined
         progress_log_file = os.path.join(LOG_DIR, 'progress-bar.log')
@@ -134,6 +152,21 @@ class Config:
                                         'oxd_port': '8443',
                                         'server_time_zone': 'UTC' + time.strftime("%z"),
                                      }
+
+        # java commands
+        if self.profile == SetupProfiles.DISA_STIG:
+            self.use_existing_java = True
+            self.cmd_java = shutil.which('java')
+            self.jre_home = Path(self.cmd_java).resolve().parent.parent.as_posix()
+            self.cmd_keytool = shutil.which('keytool')
+            self.cmd_jar = shutil.which('jar')
+            self.default_store_type = 'bcfks'
+            self.opendj_truststore_format = base.argsp.opendj_keystore_type
+            self.default_client_test_store_type = 'pkcs12'
+        else:
+            self.cmd_java = os.path.join(self.jre_home, 'bin/java')
+            self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
+            self.cmd_jar = os.path.join(self.jre_home, 'bin/jar') 
 
         # java commands
         self.cmd_java = os.path.join(self.jre_home, 'bin/java')
@@ -253,11 +286,14 @@ class Config:
         self.encoded_ldapTrustStorePass = None
 
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
-        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.pkcs12')
+        if self.opendj_truststore_format.lower() == 'pkcs11':
+            self.opendj_trust_store_fn = self.opendj_cert_fn
+        else:
+            self.opendj_trust_store_fn = os.path.join(self.certFolder, 'opendj.' + self.opendj_truststore_format)
 
         self.oxd_package = base.determine_package(os.path.join(self.dist_jans_dir, 'oxd-server*.tgz'))
 
-        self.opendj_p12_pass = None
+        self.opendj_truststore_pass = None
 
         self.ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = 'localhost'
@@ -278,8 +314,8 @@ class Config:
         self.redhat_services = ['httpd', 'rsyslog']
         self.debian_services = ['apache2', 'rsyslog']
 
-        self.defaultTrustStoreFN = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
-        self.defaultTrustStorePW = 'changeit'
+        self.default_trust_store_fn = os.path.join(self.jre_home, 'lib/security/cacerts')
+        self.default_trust_store_pw = 'changeit'
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
@@ -316,7 +352,7 @@ class Config:
         self.default_enc_key_algs = 'RSA1_5 RSA-OAEP ECDH-ES'
         self.default_key_expiration = 365
 
-        self.smtp_jks_fn = os.path.join(self.certFolder, 'smtp-keys.' + self.default_store_type.lower())
+        self.smtp_jks_fn = os.path.join(self.certFolder, 'smtp-keys' + '.' + Config.default_store_type)
         self.smtp_alias = 'smtp_sig_ec256'
         self.smtp_signing_alg = 'SHA256withECDSA'
 
@@ -345,8 +381,6 @@ class Config:
 
         if self.profile != OPENBANKING_PROFILE:
             self.ce_templates[self.ox_ldap_properties] = True
-            self.ce_templates[self.ldap_setup_properties] = False
-
 
         self.service_requirements = {
                         'opendj': ['', 70],
@@ -421,7 +455,15 @@ class Config:
             self.mapping_locations = { group: 'ldap' for group in self.couchbaseBucketDict }
 
         self.non_setup_properties = {
-            'oxauth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
+            'java_truststore_aliases': [],
+            'jans_auth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'),
+            'jans_auth_client_noprivder_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-without-provider-dependencies.jar')
                 }
 
         Config.addPostSetupService = []
+
+    @classmethod
+    def init_ext(cls):
+
+        cls.bc_fips_jar = max(glob.glob(os.path.join(cls.dist_app_dir, 'bc-fips-*.jar')))
+        cls.bcpkix_fips_jar = max(glob.glob(os.path.join(cls.dist_app_dir, 'bcpkix-fips-*.jar')))

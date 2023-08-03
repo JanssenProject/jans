@@ -16,31 +16,31 @@ for l in open(prop_file):
 
 
 def delete_key(suffix):
-    defaultTrustStorePW = 'changeit'
-    defaultTrustStoreFN = '/opt/jre/jre/lib/security/cacerts'
+    default_trust_store_pw = 'changeit'
+    default_trust_store_fn = '/opt/jre/jre/lib/security/cacerts'
     cert = '/etc/certs/{0}.crt'.format(suffix)
 
     if os.path.exists(cert):
         cmd=' '.join([
                         '/opt/jre/bin/keytool', "-delete", "-alias",
                         "%s_%s" % (prop['hostname'], suffix),
-                        "-keystore", defaultTrustStoreFN,
-                        "-storepass", defaultTrustStorePW
+                        "-keystore", default_trust_store_fn,
+                        "-storepass", default_trust_store_pw
                         ])
         os.system(cmd)
 
 
 def import_key(suffix):
-    defaultTrustStorePW = 'changeit'
-    defaultTrustStoreFN = '/opt/jre/jre/lib/security/cacerts'
+    default_trust_store_pw = 'changeit'
+    default_trust_store_fn = '/opt/jre/jre/lib/security/cacerts'
     certFolder = '/etc/certs'
     public_certificate = '%s/%s.crt' % (certFolder, suffix)
     cmd =' '.join([
                     '/opt/jre/bin/keytool', "-import", "-trustcacerts",
                     "-alias", "%s_%s" % (prop['hostname'], suffix),
                     "-file", public_certificate, "-keystore",
-                    defaultTrustStoreFN,
-                    "-storepass", defaultTrustStorePW, "-noprompt"
+                    default_trust_store_fn,
+                    "-storepass", default_trust_store_pw, "-noprompt"
                     ])
 
     os.system(cmd)

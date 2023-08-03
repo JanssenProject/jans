@@ -7,13 +7,13 @@
 	<packaging>pom</packaging>
 	<version>1.0.17-SNAPSHOT</version>
 	<name>Jans authentication server parent</name>
-    <distributionManagement>
-	  <repository>
-          <id>github</id>
-          <name>GitHub Packages</name>
-          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
-      </repository>
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+		</repository>
+	</distributionManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -41,10 +41,10 @@
 
 		<jetty.version>11.0.15</jetty.version>
 
-        <arquillian.version>1.4.0.Final</arquillian.version>
-        <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
-        <arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
-        <arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
+		<arquillian.version>1.4.0.Final</arquillian.version>
+		<arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
+		<arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
+		<arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
 		<arquillian.test.version>1.7.0.Alpha10</arquillian.test.version>
 		<arquillian.jetty.embedded.11.version>1.0.0.CR4</arquillian.jetty.embedded.11.version>
 		<arquillian.ingwar.tools.version>1.2.0</arquillian.ingwar.tools.version>
@@ -60,8 +60,8 @@
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<weld.version>4.0.3.Final</weld.version>
 		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
-        <jboss-jaxrs-api_3.0_spec.version>1.0.1.Final</jboss-jaxrs-api_3.0_spec.version>
-    </properties>
+		<jboss-jaxrs-api_3.0_spec.version>1.0.1.Final</jboss-jaxrs-api_3.0_spec.version>
+	</properties>
 
 	<prerequisites>
 		<maven>${maven.min-version}</maven>
@@ -74,10 +74,10 @@
 			<url>https://repo1.maven.org/maven2</url>
 		</repository>
 		<repository>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
 			<id>jans</id>
 			<name>Janssen project repository</name>
 			<url>https://maven.jans.io/maven</url>
@@ -106,17 +106,18 @@
 	</scm>
 
 	<modules>
-        <module>model</module>
-        <module>agama/model</module>
-        <module>persistence-model</module>
-        <module>test-model</module>
-        <module>client</module>
-        <module>static</module>
-        <module>common</module>
-        <module>agama/engine</module>
-        <module>agama/inboundID</module>
-        <module>server</module>
-    </modules>
+		<module>model</module>
+		<module>agama/model</module>
+		<module>persistence-model</module>
+		<module>test-model</module>
+		<module>client</module>
+		<module>static</module>
+		<module>common</module>
+		<module>agama/engine</module>
+		<module>agama/inboundID</module>
+		<module>server</module>
+		<module>server-fips</module>
+	</modules>
 
 	<dependencyManagement>
 		<dependencies>
@@ -128,11 +129,11 @@
                 <type>pom</type>
             </dependency>
 
-            <dependency>
-                <groupId>net.agkn</groupId>
-                <artifactId>hll</artifactId>
-                <version>1.6.0</version>
-            </dependency>
+			<dependency>
+				<groupId>net.agkn</groupId>
+				<artifactId>hll</artifactId>
+				<version>1.6.0</version>
+			</dependency>
 
 			<!-- Weld -->
 			<dependency>
@@ -143,7 +144,7 @@
 				<type>pom</type>
 			</dependency>
 
-         	<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
+			<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
 			<dependency>
 				<groupId>com.wywy</groupId>
 				<artifactId>log4j-plugin-fluency</artifactId>
@@ -206,6 +207,11 @@
 				<artifactId>jans-notify-client</artifactId>
 				<version>${jans-notify.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-doc</artifactId>
+				<version>${jans-core.version}</version>
+			</dependency>
 
 			<!-- Omnifaces -->
 			<!-- <dependency>
@@ -260,99 +266,99 @@
 				<version>3.9.0</version>
 			</dependency>
 
-            <!-- Test -->
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-java</artifactId>
-			<version>3.141.59</version>
-			<scope>test</scope>
-		</dependency>
-            <dependency>
-                <groupId>org.bitbucket.b_c</groupId>
-                <artifactId>jose4j</artifactId>
-                <version>0.7.9</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains</groupId>
-                <artifactId>annotations</artifactId>
-                <version>23.0.0</version>
-            </dependency>
-
-	        <dependency>
-	            <groupId>org.eclipse.jetty</groupId>
-	            <artifactId>jetty-webapp</artifactId>
-	            <version>${jetty.version}</version>
-	            <scope>provided</scope>
-	        </dependency>
-
-	        <dependency>
-	            <groupId>org.eclipse.jetty</groupId>
-	            <artifactId>jetty-deploy</artifactId>
-	            <version>${jetty.version}</version>
-	            <scope>provided</scope>
-	        </dependency>
-
-	        <dependency>
-	            <!-- Jetty annotations needed for Servlet 3.1 support -->
-	            <groupId>org.eclipse.jetty</groupId>
-	            <artifactId>jetty-annotations</artifactId>
-	            <version>${jetty.version}</version>
-	            <scope>provided</scope>
-	        </dependency>
-
-	        <dependency>
-	            <!-- Jetty plus and naming required for testing resource injections -->
-	            <groupId>org.eclipse.jetty</groupId>
-	            <artifactId>jetty-plus</artifactId>
-	            <version>${jetty.version}</version>
-	            <scope>provided</scope>
-	        </dependency>
-
-            <dependency>
-                <groupId>org.jboss.shrinkwrap.resolver</groupId>
-                <artifactId>shrinkwrap-resolver-bom</artifactId>
-                <version>${shrinkwrap.version}</version>
-                <type>pom</type>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.shrinkwrap.resolver</groupId>
-                <artifactId>shrinkwrap-resolver-depchain</artifactId>
-                <version>${shrinkwrap.version}</version>
-                <type>pom</type>
-                <scope>test</scope>
+			<!-- Test -->
+			<dependency>
+				<groupId>org.seleniumhq.selenium</groupId>
+				<artifactId>selenium-java</artifactId>
+				<version>3.141.59</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.bitbucket.b_c</groupId>
+				<artifactId>jose4j</artifactId>
+				<version>0.7.9</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jetbrains</groupId>
+				<artifactId>annotations</artifactId>
+				<version>23.0.0</version>
 			</dependency>
 
-            <dependency>
-                <groupId>org.jboss.arquillian</groupId>
-                <artifactId>arquillian-bom</artifactId>
-                <version>${arquillian.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-webapp</artifactId>
+				<version>${jetty.version}</version>
+				<scope>provided</scope>
+			</dependency>
 
-            <dependency>
-                <groupId>org.jboss.arquillian.graphene</groupId>
-                <artifactId>graphene-webdriver</artifactId>
-                <version>${arquillian.graphene.version}</version>
-                <type>pom</type>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.extension</groupId>
-                <artifactId>arquillian-drone-bom</artifactId>
-                <version>${arquillian.drone.version}</version>
-                <type>pom</type>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.extension</groupId>
-                <artifactId>arquillian-drone-webdriver-depchain</artifactId>
-                <version>${arquillian.drone.version}</version>
-                <type>pom</type>
-                <scope>test</scope>
-            </dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-deploy</artifactId>
+				<version>${jetty.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<!-- Jetty annotations needed for Servlet 3.1 support -->
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-annotations</artifactId>
+				<version>${jetty.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<!-- Jetty plus and naming required for testing resource injections -->
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-plus</artifactId>
+				<version>${jetty.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.shrinkwrap.resolver</groupId>
+				<artifactId>shrinkwrap-resolver-bom</artifactId>
+				<version>${shrinkwrap.version}</version>
+				<type>pom</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.shrinkwrap.resolver</groupId>
+				<artifactId>shrinkwrap-resolver-depchain</artifactId>
+				<version>${shrinkwrap.version}</version>
+				<type>pom</type>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.arquillian</groupId>
+				<artifactId>arquillian-bom</artifactId>
+				<version>${arquillian.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.arquillian.graphene</groupId>
+				<artifactId>graphene-webdriver</artifactId>
+				<version>${arquillian.graphene.version}</version>
+				<type>pom</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.arquillian.extension</groupId>
+				<artifactId>arquillian-drone-bom</artifactId>
+				<version>${arquillian.drone.version}</version>
+				<type>pom</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.arquillian.extension</groupId>
+				<artifactId>arquillian-drone-webdriver-depchain</artifactId>
+				<version>${arquillian.drone.version}</version>
+				<type>pom</type>
+				<scope>test</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.jboss.arquillian.extension</groupId>
 				<artifactId>arquillian-rest-client-impl-3x</artifactId>
@@ -360,10 +366,10 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-			    <groupId>org.eu.ingwar.tools</groupId>
-			    <artifactId>arquillian-suite-extension</artifactId>
-			    <version>1.2.0</version>
-			    <scope>test</scope>
+				<groupId>org.eu.ingwar.tools</groupId>
+				<artifactId>arquillian-suite-extension</artifactId>
+				<version>1.2.0</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -385,6 +391,12 @@
 			</dependency>
 
 			<!-- Documentation -->
+			<dependency>
+				<groupId>com.wordnik</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>${swagger.version}</version>
+				<scope>provided</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-client-microprofile</artifactId>
@@ -530,6 +542,16 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>buildnumber-maven-plugin</artifactId>
 					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>pl.project13.maven</groupId>
+					<artifactId>git-commit-id-plugin</artifactId>
+					<version>4.9.10</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>3.1.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

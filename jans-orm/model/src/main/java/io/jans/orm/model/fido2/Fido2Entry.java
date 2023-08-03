@@ -36,7 +36,7 @@ public class Fido2Entry extends BaseEntry {
     private String challange;
 
     @AttributeName(name = "jansCodeChallengeHash")
-    private String challengeHash;
+    private Integer challengeHash;
 
     @AttributeName(name = "creationDate")
     private Date creationDate;
@@ -122,11 +122,11 @@ public class Fido2Entry extends BaseEntry {
 		this.sessionStateId = sessionStateId;
 	}
 
-	public String getChallengeHash() {
+	public Integer getChallengeHash() {
 		return challengeHash;
 	}
 
-	public void setChallengeHash(String challengeHash) {
+	public void setChallengeHash(Integer challengeHash) {
 		this.challengeHash = challengeHash;
 	}
 

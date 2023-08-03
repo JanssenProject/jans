@@ -12,6 +12,7 @@ on:
       - 'jans-core/**'
       - 'jans-eleven/**'
       - 'jans-fido2/**'
+      - 'jans-notify/**'
       - 'jans-orm/**'
       - 'jans-scim/**'
 
@@ -26,6 +27,7 @@ on:
       - 'jans-core/**'
       - 'jans-eleven/**'
       - 'jans-fido2/**'
+      - 'jans-notify/**'
       - 'jans-orm/**'
       - 'jans-scim/**'
 jobs:
@@ -36,7 +38,7 @@ jobs:
     strategy:
       max-parallel: 11
       matrix:
-        fldrpath: ['jans-bom','agama','jans-fido2','jans-core','jans-eleven','jans-auth-server','jans-orm','jans-config-api','jans-scim']
+        fldrpath: ['jans-bom','agama','jans-fido2','jans-core','jans-eleven','jans-notify','jans-auth-server','jans-orm','jans-config-api','jans-scim']
     steps:
     - name : Variables
       run: |

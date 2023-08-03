@@ -20,6 +20,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import io.jans.fido2.model.cert.CertificateHolder;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.slf4j.Logger;
 
 /**
@@ -40,17 +42,31 @@ public class KeyStoreCreator {
 		new SecureRandom().nextBytes(password);
 
 		try {
-			KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+			KeyStore ks = null;
+
+			SecurityProviderUtility.SecurityModeType securityModeType = SecurityProviderUtility.getSecurityMode();
+			switch (securityModeType) {
+			case BCPROV_SECURITY_MODE: {
+				ks = KeyStore.getInstance(KeyStore.getDefaultType());
+				break;
+			}
+			case BCFIPS_SECURITY_MODE: {
+				ks = KeyStore.getInstance("BCFKS", SecurityProviderUtility.getBCProvider());
+				break;
+			}
+			}
+
 			ks.load(null, base64Service.encodeToString(password).toCharArray());
 
+			final KeyStore ksFin = ks;
 			certificates.stream().forEach(ch -> {
 				try {
-					ks.setCertificateEntry(ch.getAlias(), ch.getCert());
+					ksFin.setCertificateEntry(ch.getAlias(), ch.getCert());
 				} catch (KeyStoreException e) {
 					log.warn("Can't load certificate {} {}", ch.getAlias(), e.getMessage());
 				}
 			});
-			return ks;
+			return ksFin;
 		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
 			throw new RuntimeException(e);
 		}
@@ -61,21 +77,35 @@ public class KeyStoreCreator {
 		new SecureRandom().nextBytes(password);
 
 		try {
-			KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+			KeyStore ks = null;
+
+			SecurityProviderUtility.SecurityModeType securityModeType = SecurityProviderUtility.getSecurityMode();
+			switch (securityModeType) {
+			case BCPROV_SECURITY_MODE: {
+				ks = KeyStore.getInstance(KeyStore.getDefaultType());
+				break;
+			}
+			case BCFIPS_SECURITY_MODE: {
+				ks = KeyStore.getInstance("BCFKS", SecurityProviderUtility.getBCProvider());
+				break;
+			}
+			}
+
 			ks.load(null, base64Service.encodeToString(password).toCharArray());
 
 			AtomicInteger counter = new AtomicInteger(0);
 
+			final KeyStore ksFin = ks;
 			certificates.stream().forEach(ch -> {
 				String alias = aaguid + "-" + counter.incrementAndGet();
 				try {
-					ks.setCertificateEntry(alias, ch);
+					ksFin.setCertificateEntry(alias, ch);
 				} catch (KeyStoreException e) {
 					log.warn("Can't load certificate {} {}", alias, e.getMessage());
 				}
 			});
 
-			return ks;
+			return ksFin;
 		} catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException ex) {
 			log.error("Failed to creae KeyStore", ex);
 			throw new RuntimeException(ex);

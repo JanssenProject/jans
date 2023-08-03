@@ -174,3 +174,12 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         if not os.path.exists(self.oxd_root):
             self.run([paths.cmd_mkdir, self.oxd_root])
 
+    def import_oxd_certificate(self):
+        oxd_yaml = self.get_yaml_config()
+        oxd_alias = 'oxd_' + self.oxd_hostname.replace('.','_')
+        oxd_cert_fn = os.path.join(Config.outputFolder, '{}.pem'.format(oxd_alias))
+        # let's delete if alias exists
+        self.delete_key(oxd_alias)
+        store_alias = 'localhost' if self.oxd_hostname == 'localhost' else Config.hostname
+        self.export_cert_from_store(store_alias, oxd_yaml['server']['applicationConnectors'][0]['keyStorePath'], self.oxd_keystore_passw, oxd_cert_fn)
+        self.import_cert_to_java_truststore(oxd_alias, oxd_cert_fn)

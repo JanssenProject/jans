@@ -8,6 +8,8 @@ import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +28,10 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CertificateVerifierTest {
+
+    static {
+        Security.addProvider(SecurityProviderUtility.getBCProvider());
+    }
 
     @InjectMocks
     private CertificateVerifier certificateVerifier;

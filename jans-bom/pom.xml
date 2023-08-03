@@ -281,9 +281,31 @@
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcutil-jdk15on</artifactId>
+				<version>${bc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcmail-jdk15on</artifactId>
 				<version>${bc.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bc-fips</artifactId>
+				<version>1.0.2.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-fips</artifactId>
+				<version>1.0.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcmail-fips</artifactId>
+				<version>1.0.4</version>
+			</dependency>
+
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
@@ -325,6 +347,7 @@
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>${jakarta.xml.bind.api.version}</version>
 			</dependency>
+
 
 		<!-- 	<dependency>
 				<groupId>javax.enterprise</groupId>

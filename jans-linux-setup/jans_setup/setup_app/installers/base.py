@@ -1,6 +1,13 @@
+
+import pydevd
+import debugpy
+
 import os
 import uuid
 import inspect
+
+from distutils.version import LooseVersion
+from pathlib import Path
 
 from setup_app import paths
 from setup_app.utils import base
@@ -8,6 +15,7 @@ from setup_app.config import Config
 from setup_app.utils.db_utils import dbUtils
 from setup_app.utils.progress import jansProgress
 from setup_app.utils.printVersion import get_war_info
+from setup_app.static import SetupProfiles
 
 class BaseInstaller:
     needdb = True
@@ -15,6 +23,10 @@ class BaseInstaller:
 
     def register_progess(self):
         jansProgress.register(self)
+
+    def pre_installation(self):
+        self.check_for_download()
+        self.pre_install()
 
     def start_installation(self):
         if not hasattr(self, 'pbar_text'):
@@ -53,13 +65,14 @@ class BaseInstaller:
         self.service_post_setup()
 
     def update_rendering_dict(self):
+#        debugpy.breakpoint();
         mydict = {}
         for obj_name, obj in inspect.getmembers(self):
             if obj_name in ('dbUtils',):
                 continue
             if not obj_name.startswith('__') and (not callable(obj)):
                 mydict[obj_name] = obj
-
+#        debugpy.breakpoint();
         Config.templateRenderingDict.update(mydict)
 
 
@@ -180,13 +193,14 @@ class BaseInstaller:
     def update_backend(self):
         pass
 
-
     def check_for_download(self):
         # execute for each installer
+        force_download = False
         if base.argsp.force_download:
-            self.download_files(force=True)
-        else:
-            self.download_files()
+            force_download = True
+        self.download_files(force = force_download)
+        if Config.profile == SetupProfiles.DISA_STIG:
+            self.download_fips_files(force = force_download)
 
     def download_file(self, url, src):
         Config.pbar.progress(self.service_name, "Downloading {}".format(os.path.basename(src)))
@@ -205,6 +219,33 @@ class BaseInstaller:
                 if force or not os.path.exists(src):
                     self.download_file(url, src)
 
+    def download_fips_files(self, force=False, downloads=[]):
+        if hasattr(self, 'source_fips_files'):
+            for i, item in enumerate(self.source_fips_files[:]):
+                src = item[0]
+                url = item[1]
+                src_name = os.path.basename(src)
+
+                if downloads and not src_name in downloads:
+                    continue
+
+                if force or not os.path.exists(src):
+                    self.download_file(url, src)
+
+    def profile_templates(self, temp_dir=None, recursive=False):
+        if not temp_dir:
+            if not hasattr(self, 'templates_folder'):
+                return
+            temp_dir = self.templates_folder
+
+        glob_param = '*.' + Config.profile
+        if recursive:
+            glob_param = '**/' + glob_param
+
+        for temp_p in Path(temp_dir).glob(glob_param):
+            target_p = temp_p.with_suffix('')
+            base.logIt("Renaming {} to {}".format(temp_p, target_p))
+            temp_p.rename(target_p)
 
     def create_user(self):
         pass
@@ -213,6 +254,12 @@ class BaseInstaller:
         pass
     
     def copy_static(self):
+        pass
+
+    def pre_install(self):
+        pass
+
+    def install(self):
         pass
 
     def installed(self):

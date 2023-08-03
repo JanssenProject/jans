@@ -27,16 +27,17 @@ import java.security.SignatureException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXParameters;
-import java.security.cert.PKIXRevocationChecker;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -48,6 +49,15 @@ import jakarta.inject.Inject;
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.service.Base64Service;
+
+import io.jans.util.security.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility.SecurityModeType;
+
+import java.security.cert.PKIXRevocationChecker;
+
+import java.security.cert.CollectionCertStoreParameters;
+
+import org.python.icu.util.Calendar;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -81,52 +91,138 @@ public class CertificateVerifier {
                 throw new Fido2MissingAttestationCertException("Trust anchors certs list is empty!");
             }
 
-            PKIXParameters params = new PKIXParameters(trustAnchors);
-            CertPathValidator cpv = certificateService.instanceCertPathValidatorPKIX();
+            if (SecurityModeType.BCFIPS_SECURITY_MODE == SecurityProviderUtility.getSecurityMode()) {
+                PKIXParameters params = new PKIXParameters(trustAnchors);
 
-            PKIXRevocationChecker rc = (PKIXRevocationChecker) cpv.getRevocationChecker();
-            rc.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL, PKIXRevocationChecker.Option.PREFER_CRLS));
-            params.addCertPathChecker(rc);
+                CertPathValidator cpv = CertPathValidator.getInstance("PKIX", SecurityProviderUtility.getBCProvider());
 
-            CertificateFactory certFactory = certificateService.instanceCertificateFactoryX509();
-            CertPath certPath = certFactory.generateCertPath(certs);
-
-            X509Certificate cert = verifyPath(cpv, certPath, params);
-            if (cert != null) {
-                return cert;
-            } else {
-                params = new PKIXParameters(trustAnchors);
-                cpv = certificateService.instanceCertPathValidatorPKIX();
-                rc = (PKIXRevocationChecker) cpv.getRevocationChecker();
-                rc.setOptions(Collections.emptySet());
+                /**
+                 *  Provider bc-fips doesn't support usage of Revocation Lists.
+                 *  For example, this call:
+                 *  PKIXRevocationChecker pkixRc = (PKIXRevocationChecker) validator.getRevocationChecker();
+                 *  throws Exception: Unsupported Operation
+                 */
                 params.setRevocationEnabled(false);
                 params.addCertPathChecker(null);
 
-                return verifyPath(cpv, certPath, params);
+                CertificateFactory certFactory = CertificateFactory.getInstance("X.509", SecurityProviderUtility.getBCProvider());
+                CertPath certPath = certFactory.generateCertPath(certs);
+
+                X509Certificate cert = verifyPath(cpv, certPath, params);
+                if (cert != null) {
+                    return cert;
+                } else {
+                    throw new Fido2RuntimeException("Problem with certificate");
+                }
             }
-        } catch (InvalidAlgorithmParameterException | CertificateException e) {
+            else {
+                /**
+                 * There are some differences, if we use
+                 *      return CertificateFactory.getInstance(type, SecurityProviderUtility.getBCProvider());
+                 * and
+                 *      return CertificateFactory.getInstance(type);
+                 *
+                 * 1. return CertificateFactory.getInstance(type, SecurityProviderUtility.getBCProvider());
+                 *      In this case, SecurityProviderUtility.getBCProvider() returns reference to the object
+                 *      of the "BC" or "BCFIPS" crypto provider, that is used as Provider, by CertificateFactory
+                 *      object;
+                 *
+                 * 2. return CertificateFactory.getInstance(type);
+                 *      "Sun" crypto provider is used by default;
+                 *
+                 * Same if we use:
+                 *      return CertPathValidator.getInstance(algorithm, SecurityProviderUtility.getBCProvider());
+                 * and
+                 *      return CertPathValidator.getInstance(algorithm);
+                 */
+                CollectionCertStoreParameters params = new CollectionCertStoreParameters(certs);
+
+                CertStore store = CertStore.getInstance("Collection", params, SecurityProviderUtility.getBCProvider());
+
+                CertificateFactory certFactory = certificateService.instanceCertificateFactoryX509();
+
+                CertPath certPath = certFactory.generateCertPath(certs);
+
+                CertPathValidator validator = certificateService.instanceCertPathValidatorPKIX();
+                PKIXParameters pkixParams = new PKIXParameters(trustAnchors);
+
+                PKIXRevocationChecker pkixRc = (PKIXRevocationChecker) validator.getRevocationChecker();
+                pkixRc.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL, PKIXRevocationChecker.Option.PREFER_CRLS));                    
+
+                pkixParams.addCertPathChecker(pkixRc);
+                pkixParams.setRevocationEnabled(true);
+                pkixParams.addCertStore(store);
+                pkixParams.setDate(Calendar.getInstance().getTime());
+
+                X509Certificate cert = verifyPath(validator, certPath, pkixParams);
+                if (cert != null) {
+                    return cert;
+                } else {
+                    pkixParams = new PKIXParameters(trustAnchors);
+                    validator = certificateService.instanceCertPathValidatorPKIX();
+                    pkixRc = (PKIXRevocationChecker) validator.getRevocationChecker();
+                    pkixRc.setOptions(Collections.emptySet());
+                    pkixParams.setRevocationEnabled(false);
+                    pkixParams.addCertPathChecker(null);
+
+                    return verifyPath(validator, certPath, pkixParams);
+                }
+            }
+        } catch (InvalidAlgorithmParameterException | CertificateException | NoSuchAlgorithmException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
             throw new Fido2RuntimeException("Problem with certificate");
         }
     }
 
     private X509Certificate verifyPath(CertPathValidator cpv, CertPath certPath, PKIXParameters params) {
-    	if (certPath.getCertificates().size() == 0) {
-    		return null;
-    	}
+        if (certPath.getCertificates().size() == 0) {
+            return null;
+        }
 
-    	try {
+        try {
             cpv.validate(certPath, params);
             return (X509Certificate) certPath.getCertificates().get(0);
-        } catch (CertPathValidatorException ex) {
-            if (ex.getReason() == CertPathValidatorException.BasicReason.UNDETERMINED_REVOCATION_STATUS) {
-                log.warn("Cert not validated against the root {}", ex.getMessage());
-                return null;
-            } else {
+        }
+        /**
+         * There are some differences, if we use
+         *      return CertPathValidator.getInstance(algorithm, SecurityProviderUtility.getBCProvider());
+         * or
+         *      return CertPathValidator.getInstance(algorithm);
+         * during creating of the instance of the CertPathValidator.
+         *
+         * If "BC" provider is used,
+         *      CertPathValidatorException with reason: CertPathValidatorException.BasicReason.UNSPECIFIED
+         *      can be generated if JAVA_HOME/conf/security/java.security doesn't contain:
+         *      ocsp.enable = true
+         * even if PKIXRevocationChecker.Option.PREFER_CRLS is used.
+         *
+         * If "BC" provider is used,
+         *      CertPathValidatorException with reason: CertPathValidatorException.BasicReason.UNSPECIFIED
+         *      can be generated with detailMessage:
+         *      "no OCSP response found for any certificate".
+         *
+         * So, it's better to define list of exception reasons, definitely generated when Cert is not Validated
+         * and "throw Fido2RuntimeException" otherwise "return null".    
+         */
+         catch (CertPathValidatorException ex) {
+            List<CertPathValidatorException.BasicReason> reasons = Arrays.asList(
+                    CertPathValidatorException.BasicReason.EXPIRED,
+                    CertPathValidatorException.BasicReason.NOT_YET_VALID,
+                    CertPathValidatorException.BasicReason.REVOKED,
+                    CertPathValidatorException.BasicReason.INVALID_SIGNATURE,
+                    CertPathValidatorException.BasicReason.ALGORITHM_CONSTRAINED);
+            if (reasons.contains(ex.getReason())) {
                 log.error("Cert not validated against the root {}", ex.getMessage());
                 throw new Fido2RuntimeException("Problem with certificate " + ex.getMessage());
             }
-        } catch (InvalidAlgorithmParameterException e) {
+            // CertPathValidatorException.BasicReason.UNSPECIFIED
+            // CertPathValidatorException.BasicReason.UNDETERMINED_REVOCATION_STATUS
+            else {
+                log.warn("Cert not validated against the root {}", ex.getMessage());
+                return null;
+            }
+        }
+        catch (InvalidAlgorithmParameterException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
             throw new Fido2RuntimeException("Problem with certificate");
         }

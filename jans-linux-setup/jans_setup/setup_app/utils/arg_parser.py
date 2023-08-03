@@ -7,8 +7,12 @@ from setup_app import static
 from setup_app.version import __version__
 from setup_app.utils import base
 
+JANS_PROFILE = 'jans'
 OPENBANKING_PROFILE = 'openbanking'
+DISA_STIG_PROFILE = 'disa-stig'
+
 PROFILE = os.environ.get('JANS_PROFILE')
+#PROFILE = DISA_STIG_PROFILE
 
 parser_description='''Use this script to configure your Jans Server and to add initial data required for
 oxAuth and oxTrust to start. If setup.properties is found in this folder, these
@@ -24,6 +28,7 @@ parser.add_argument('-n', help="No interactive prompt before install starts. Run
 parser.add_argument('-N', '--no-httpd', help="No apache httpd server", action='store_true')
 parser.add_argument('-u', help="Update hosts file with IP address / hostname", action='store_true')
 parser.add_argument('-csx', help="Collect setup properties, save and exit", action='store_true')
+parser.add_argument('-j', help="Use Java existing on system", action='store_true')
 rdbm_group = parser.add_mutually_exclusive_group()
 rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql', 'spanner'], help="Enables using remote RDBM server")
 rdbm_group.add_argument('-local-rdbm', choices=['mysql', 'pgsql'], help="Enables installing/configuring local RDBM server")
@@ -63,7 +68,7 @@ parser.add_argument('--import-ldif', help="Render ldif templates from directory 
 parser.add_argument('-enable-script', action='append', help="inum of script to enable", required=False)
 parser.add_argument('-disable-script', action='append', help="inum of script to disable", required=False)
 
-if PROFILE != OPENBANKING_PROFILE:
+if PROFILE == JANS_PROFILE or PROFILE == DISA_STIG_PROFILE:
 
     parser.add_argument('-stm', '--enable-scim-test-mode', help="Enable Scim Test Mode", action='store_true')
     parser.add_argument('-w', help="Get the development head war files", action='store_true')
@@ -90,7 +95,6 @@ if PROFILE != OPENBANKING_PROFILE:
 
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
-    parser.add_argument('--install-eleven', help="Install Eleven Server", action='store_true')
     parser.add_argument('--install-jans-link', help="Install Link Server", action='store_true')
     parser.add_argument('--with-casa', help="Install Gluu/Flex Casa Server", action='store_true')
 
@@ -113,7 +117,16 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('-test-client-redirect-uri', help="Redirect URI for test client")
     parser.add_argument('--test-client-trusted', help="Make test client trusted", action='store_true')
 
-else:
+if PROFILE == JANS_PROFILE:
+
+    parser.add_argument('--install-eleven', help="Install Eleven Server", action='store_true')
+
+if PROFILE == DISA_STIG_PROFILE:
+
+    parser.add_argument('-opendj-keystore-type', help="OpenDJ keystore type (Ony for 'disa-stig' profile)", choices=['pkcs11', 'bcfks'], default='bcfks')
+
+if PROFILE == OPENBANKING_PROFILE:
+
     # openbanking
     parser.add_argument('--no-external-key', help="Don't use external key", action='store_true')
     parser.add_argument('-ob-key-fn', help="Openbanking key filename", default='/root/obsigning-axV5umCvTMBMjPwjFQgEvb_NO_UPLOAD.key')
@@ -122,7 +135,6 @@ else:
     parser.add_argument('-static-kid', help="Openbanking static kid")
     parser.add_argument('-jwks-uri', help="Openbanking jwksUri", default="https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/axV5umCvTMBMjPwjFQgEvb.jwks")
     parser.add_argument('--disable-ob-auth-script', help="Disable Openbanking authentication script and use default backend", action='store_true')
-
 
 def add_to_me(you):
 

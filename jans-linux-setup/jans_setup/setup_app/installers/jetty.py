@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 from setup_app import paths
 from setup_app.utils import base
-from setup_app.static import AppType, InstallOption
+from setup_app.static import AppType, InstallOption, SetupProfiles
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
@@ -23,7 +23,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     jetty_base = Config.jetty_base
     jetty_app_configuration = base.readJsonFile(os.path.join(paths.DATA_DIR, 'jetty_app_configuration.json'), ordered=True)
 
-    jetty_link = 'https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/{0}/jetty-home-{0}.tar.gz'.format(base.current_app.app_info['JETTY_VERSION'])
+    #jetty_link = 'https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/{0}/jetty-home-{0}.tar.gz'.format(base.current_app.app_info['JETTY_VERSION'])
+    jetty_link = os.path.join(base.current_app.app_info['BASE_SERVER'], 'jetty-home-11.0.11.tar.gz')
     source_files = [
             (os.path.join(Config.dist_app_dir, os.path.basename(jetty_link)), jetty_link),
             ]
@@ -83,6 +84,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
         self.run([paths.cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
 
+        self.chown(jettyDestinationPath, Config.jetty_user, Config.jetty_group, recursive=True)
+
         self.applyChangesInFiles(self.app_custom_changes[NAME_STR])
 
         self.chown(jettyDestinationPath, Config.jetty_user, Config.jetty_group, recursive=True)
@@ -100,6 +103,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.copyFile("%s/system/initd/jetty.sh" % Config.staticFolder, self.jetty_bin_sh_fn)
         self.chown(self.jetty_bin_sh_fn, Config.jetty_user, Config.jetty_group, recursive=True)
         self.run([paths.cmd_chmod, '-R', '755', self.jetty_bin_sh_fn])
+        
+        self.chown(jetty_dist, Config.jetty_user, Config.jetty_group, recursive=True)
 
     def get_jetty_info(self):
         # first try latest versions
@@ -146,6 +151,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         else:
             # we need this, because this method may be called externally
             jettyArchive, jetty_dist = self.get_jetty_info()
+            
+        Config.templateRenderingDict['service_user'] = Config.jetty_user            
 
         self.logIt("Preparing %s service base folders" % service_name)
         self.run([paths.cmd_mkdir, '-p', jetty_service_base])
@@ -182,7 +189,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         jetty_service_configuration = os.path.join(Config.output_dir, NAME_STR, service_name)
         self.copyFile(jetty_service_configuration, Config.os_default)
-        self.chown(os.path.join(Config.os_default, service_name), Config.root_user)
+        self.chown(os.path.join(Config.os_default, service_name), Config.user_group)
 
         # Render web reources file
         try:
@@ -240,6 +247,10 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         self.write_webapps_xml()
         self.configure_extra_libs(self.source_files[0][0])
+
+        if Config.profile == SetupProfiles.DISA_STIG:
+            additional_rules = []
+            self.fapolicyd_access(Config.templateRenderingDict['service_user'], jetty_service_base, additional_rules)
 
     def set_jetty_param(self, jettyServiceName, jetty_param, jetty_val, inifile='start.ini'):
 

@@ -11,7 +11,9 @@ from setup_app.installers.base import BaseInstaller
 
 class JythonInstaller(BaseInstaller, SetupUtils):
 
-    jython_link = 'https://maven.gluu.org/maven/org/gluufederation/jython-installer/{0}/jython-installer-{0}.jar'.format(base.current_app.app_info['JYTHON_VERSION'])
+    # jython_link = 'https://maven.gluu.org/maven/org/gluufederation/jython-installer/{0}/jython-installer-{0}.jar'.format(base.current_app.app_info['JYTHON_VERSION'])
+    jython_link = os.path.join(base.current_app.app_info['BASE_SERVER'], 'jython-installer-2.7.3.jar')
+
     source_files = [
             (os.path.join(Config.dist_app_dir, os.path.basename(jython_link)), jython_link),
             ]
@@ -50,5 +52,5 @@ class JythonInstaller(BaseInstaller, SetupUtils):
             self.logIt("Error installing jython-installer-%s.jar" % jython_version)
 
         self.run([paths.cmd_ln, '-sf', '/opt/jython-%s' % jython_version, Config.jython_home])
-        self.run([paths.cmd_chown, '-R', 'root:root', '/opt/jython-%s' % jython_version])
-        self.run([paths.cmd_chown, '-h', 'root:root', Config.jython_home])
+        self.run([paths.cmd_chown, '-R', Config.user_group, '/opt/jython-%s' % jython_version])
+        self.run([paths.cmd_chown, '-h', Config.user_group, Config.jython_home])

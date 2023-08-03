@@ -9,6 +9,7 @@ package io.jans.fido2.service;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import io.jans.util.security.SecurityProviderUtility;
 import jakarta.enterprise.context.ApplicationScoped;
 
 /**
@@ -20,7 +21,7 @@ public class DigestService {
 
     public byte[] hashSha256(byte[] bytes) {
         try {
-            return MessageDigest.getInstance("SHA-256").digest(bytes);
+            return MessageDigest.getInstance("SHA-256", SecurityProviderUtility.getBCProvider()).digest(bytes);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

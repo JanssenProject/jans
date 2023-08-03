@@ -9,13 +9,15 @@ import re
 import requests
 import zipfile
 import site
+import random
+import string
 
 from pathlib import Path
 
 from setup_app import paths
 from setup_app import static
 from setup_app.utils import base
-from setup_app.static import InstallTypes, AppType, InstallOption
+from setup_app.static import InstallTypes, AppType, InstallOption, SetupProfiles
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.ldif_utils import create_client_ldif
@@ -72,14 +74,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
             txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installHttpd' in Config.addPostSetupService else '') + "\n"
             txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
             txt += 'Install Jans Config API'.ljust(30) + repr(Config.install_config_api).rjust(35) + "\n"
-            if Config.profile == 'jans':
+            if Config.profile == 'jans' or  Config.profile == 'disa-stig':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Jans Link Server'.ljust(30) + repr(Config.install_jans_link).rjust(35) + (' *' if 'install_jans_link' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Gluu/Flex Casa Server'.ljust(30) + repr(Config.install_casa).rjust(35) + (' *' if 'install_casa' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
 
-            if Config.profile == 'jans' and Config.installEleven:
+            if Config.profile == 'jans' and Config.installEleven or Config.profile == 'disa-stig' and Config.installEleven:
                 txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
 
             if base.argsp.t:
@@ -97,8 +99,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         s = s + "%s\n%s\n%s\n\n" % (key, "-" * len(key), val)
             return s
 
-
     def initialize(self):
+        self.logIt("jans.initialize()...")
         self.service_name = 'jans'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
@@ -109,14 +111,25 @@ class JansInstaller(BaseInstaller, SetupUtils):
             print("Please ensure that you are running this script inside Jans container.")
             sys.exit(1)
 
-        #Download jans-auth-client-jar-with-dependencies
-        if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
-            oxauth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['ox_version'])
+#        client_jar_files = [
+#                    os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['ox_version']),
+#                    os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-without-provider-dependencies.jar').format(base.current_app.app_info['ox_version'])
+#                   ]
+
+        client_jar_files = [
+                    os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-client-jar-without-provider-dependencies.jar'),
+                    os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-client-jar-with-dependencies.jar')
+                   ]
+
+        client_jar_file = Config.non_setup_properties['jans_auth_client_noprivder_jar_fn'] if Config.profile == SetupProfiles.DISA_STIG else Config.non_setup_properties['jans_auth_client_jar_fn']
+
+        if not os.path.exists(client_jar_file):
+            oxauth_client_jar_url = client_jar_files[0 if Config.profile == SetupProfiles.DISA_STIG else 1]
             self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
-            base.download(oxauth_client_jar_url, Config.non_setup_properties['oxauth_client_jar_fn'])
+            base.download(oxauth_client_jar_url, client_jar_file)
 
         self.logIt("Determining key generator path")
-        oxauth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['oxauth_client_jar_fn'])
+        oxauth_client_jar_zf = zipfile.ZipFile(client_jar_file)
 
         for f in oxauth_client_jar_zf.namelist():
             if os.path.basename(f) == 'KeyGenerator.class':
@@ -127,13 +140,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 Config.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
 
         if (not 'key_gen_path' in Config.non_setup_properties) or (not 'key_export_path' in Config.non_setup_properties):
-            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['oxauth_client_jar_fn']), True, True)
+            self.logIt("Can't determine key generator and/or key exporter path form {}".format(client_jar_file), True, True)
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
-
         self.extract_scripts()
 
+        if not Config.installed_instance and Config.profile == static.SetupProfiles.DISA_STIG:
+            self.remove_pkcs11_keys()
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
@@ -161,12 +175,21 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def makeFolders(self):
         # Create these folder on all instances
+        
+        scripts_dist_dir = os.path.join(Config.distFolder, 'scripts')
+        
         for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
                         Config.jansOptPythonFolder, Config.configFolder, Config.certFolder,
-                        Config.output_dir, Config.os_default, os.path.join(Config.distFolder, 'scripts')):
+                        Config.output_dir, Config.os_default, Config.dist_app_dir, scripts_dist_dir):
 
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
+                
+        if os.path.exists(Config.distFolder):
+            self.run([paths.cmd_chown, Config.user_group, Config.distFolder])
+
+        if os.path.exists(scripts_dist_dir):
+            self.run([paths.cmd_chown, Config.user_group, scripts_dist_dir])
 
         if not base.snap:
             self.run([paths.cmd_chown, '-R', 'root:jans', Config.certFolder])
@@ -210,6 +233,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
         except:
             self.logIt("Error writing salt", True, True)
 
+        if not Config.get('pairwiseCalculationKey') or enforce:
+            Config.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
+        if not Config.get('pairwiseCalculationSalt') or enforce:
+            Config.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
+
     def render_templates(self, templates=None):
         self.logIt("Rendering templates")
 
@@ -220,6 +248,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             Config.ce_templates[Config.ox_ldap_properties] = False
 
         for fullPath in templates:
+            self.logIt("Rendering templates: fullPath = {0}".format(fullPath))
             try:
                 self.renderTemplate(fullPath)
             except:
@@ -532,9 +561,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.writeFile(os.path.join(base.snap_common, 'etc/hosts.jans'), Config.ip + '\t' + Config.hostname)
 
         else:
-            self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
+            self.run([paths.cmd_chown, '-R', 'jetty:jans', Config.certFolder])
             self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
-            self.run([paths.cmd_chmod, 'u+X', Config.certFolder])
+            self.run([paths.cmd_chmod, 'ug+X', Config.certFolder])
+
+            self.chown(Config.jansOptFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
 
             self.chown(Config.jansBaseFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
             for p in Path(Config.jansBaseFolder).rglob("*"):
@@ -588,7 +619,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def extract_scripts(self):
         base.extract_from_zip(base.current_app.jans_zip, 'docs/script-catalog', Config.script_catalog_dir)
 
-
     def generate_smtp_config(self):
         self.logIt("Generating smtp keys", pbar=self.service_name)
 
@@ -597,9 +627,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
             try:
                 Config.smtp_jks_pass_enc = self.obscure(Config.smtp_jks_pass)
             except Exception as e:
-                self.logIt("JansInstaller. __init__ failed. Reason: %s" % str(e), errorLog=True)
+                self.logIt("JansInstaller. generate_smtp_config failed. Reason: %s" % str(e), errorLog=True)
 
-
+        try:
+            salt_text = 'encodeSalt = {}'.format(Config.encode_salt)
+            self.writeFile(Config.salt_fn, salt_text)
+        except:
+            self.logIt("Error writing salt", True, True)
+                
         cmd_cert_gen = [Config.cmd_keytool, '-genkeypair',
                         '-alias', Config.smtp_alias,
                         '-keyalg', 'ec',
@@ -611,6 +646,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         '-keypass', Config.smtp_jks_pass,
                         '-storepass', Config.smtp_jks_pass,
                         '-dname', 'CN=SMTP CA Certificate'
+                    ]
+
+        if Config.profile == SetupProfiles.DISA_STIG:
+            fips_provider = self.get_keytool_provider()
+            cmd_cert_gen += [
+                        '-providername', fips_provider['-providername'],
+                        '-provider', fips_provider['-providerclass'],
+                        '-providerpath', fips_provider['-providerpath']
                     ]
 
         self.run(cmd_cert_gen)
@@ -639,3 +682,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         Config.templateRenderingDict[order_var_str] = 'jans-auth.service'
                     else:
                         Config.templateRenderingDict['order_jans_auth_service'] =  'jans-eleven.service' if Config.installEleven else  Config.backend_service
+
+    def genRandomString(self, N):
+        return ''.join(random.SystemRandom().choice(string.ascii_lowercase
+                                                    + string.ascii_uppercase
+                                                    + string.digits) for _ in range(N))
+

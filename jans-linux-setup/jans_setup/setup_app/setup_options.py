@@ -14,7 +14,7 @@ def get_setup_options():
         'installOxAuth': True,
         'install_config_api': True,
         'installHTTPD': True,
-        'install_scim_server': True if base.current_app.profile == 'jans' else False,
+        'install_scim_server': True if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig' else False,
         'installOxd': False,
         'installFido2': True,
         'installEleven': False,
@@ -62,7 +62,7 @@ def get_setup_options():
         if base.argsp.rdbm_password:
             setupOptions['rdbm_password'] = base.argsp.rdbm_password
 
-        if base.current_app.profile == 'jans':
+        if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig':
             if base.argsp.spanner_project:
                 setupOptions['spanner_project'] = base.argsp.spanner_project
             if base.argsp.spanner_instance:
@@ -75,7 +75,7 @@ def get_setup_options():
                 setupOptions['google_application_credentials'] = base.argsp.google_application_credentials
 
 
-    if base.current_app.profile == 'jans':
+    if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig':
         if base.argsp.disable_local_ldap:
             setupOptions['opendj_install'] = InstallTypes.NONE
 
@@ -99,9 +99,6 @@ def get_setup_options():
 
         if base.argsp.no_fido2:
             setupOptions['installFido2'] = False
-
-        if base.argsp.install_eleven:
-            setupOptions['installEleven'] = True
 
         if base.argsp.install_jans_link:
             setupOptions['install_jans_link'] = True
@@ -154,6 +151,9 @@ def get_setup_options():
 
         setupOptions['properties_password'] = base.argsp.properties_password
 
+    if base.current_app.profile == 'jans' and base.argsp.install_eleven:
+        setupOptions['installEleven'] = True
+
     if base.current_app.profile == SetupProfiles.OPENBANKING:
         setupOptions['opendj_install'] = InstallTypes.NONE
         setupOptions['static_kid'] = base.argsp.static_kid
@@ -164,8 +164,6 @@ def get_setup_options():
 
         if base.argsp.no_external_key:
             setupOptions['use_external_key'] = False
-
-
 
     if base.argsp.ip_address:
         setupOptions['ip'] = base.argsp.ip_address

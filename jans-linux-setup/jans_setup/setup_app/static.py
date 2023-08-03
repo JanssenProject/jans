@@ -44,7 +44,7 @@ class InstallOption:
 class SetupProfiles:
     JANS = 'jans'
     OPENBANKING   = 'openbanking'
-
+    DISA_STIG = 'disa-stig'
 
 COMPLETED = -99
 ERROR = -101
@@ -53,3 +53,4 @@ suggested_mem_size = 3.7 # in GB
 suggested_number_of_cpu = 2
 suggested_free_disk_space = 40 #in GB
 file_max = 64000
+fapolicyd_rule_tmp = 'allow perm=any uid={} : dir={}'

@@ -65,7 +65,7 @@ public class KeySignatureVerifierTest {
 		String key = FileUtils.readFileToString(new File("./target/test-classes/keys/secp256r1/public.pem"), StandardCharsets.UTF_8);
 	    String publicKeyPEM = key.replace("-----BEGIN PUBLIC KEY-----", "").replaceAll(System.lineSeparator(), "").replace("-----END PUBLIC KEY-----", "");
 
-	    KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
+	    KeyFactory keyFactory = KeyFactory.getInstance("EC", SecurityProviderUtility.getBCProvider());
 	    X509EncodedKeySpec keySpec = new X509EncodedKeySpec(base64Service.decode(publicKeyPEM));
 	    PublicKey publicKey = keyFactory.generatePublic(keySpec);
 	    
@@ -73,7 +73,7 @@ public class KeySignatureVerifierTest {
 				StandardCharsets.UTF_8).replaceAll(System.lineSeparator(), ""));
 		byte[] signedBytes = FileUtils.readFileToString(new File("./target/test-classes/keys/secp256r1/data.txt"), StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8);
 
-		Signature ecdsaSignature = Signature.getInstance("SHA256withECDSA", "BC");
+		Signature ecdsaSignature = Signature.getInstance("SHA256withECDSA", SecurityProviderUtility.getBCProvider());
 		ecdsaSignature.initVerify(publicKey);
 		ecdsaSignature.update(signedBytes);
 

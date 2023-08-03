@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+import pydevd
+import debugpy
+
 import readline
 import os
 import sys
@@ -15,6 +18,12 @@ import warnings
 
 from pathlib import Path
 from queue import Queue
+from setup_app.static import SetupProfiles
+
+from setup_app.utils import base
+
+#debugpy.listen(("0.0.0.0",5678));
+#debugpy.wait_for_client();
 
 warnings.filterwarnings("ignore")
 
@@ -36,7 +45,7 @@ if os.path.exists(profile_fn):
     with open(profile_fn) as f:
         profile = f.read().strip()
 else:
-    profile = 'jans'
+    profile = SetupProfiles.JANS
 
 os.environ['LC_ALL'] = 'C'
 os.environ['JANS_PROFILE'] = profile
@@ -80,7 +89,6 @@ if paths.IAMPACKAGED:
 from setup_app import static
 
 # second import module base, this makes some initial settings
-from setup_app.utils import base
 base.current_app.profile = profile
 
 # we will access args via base module
@@ -127,7 +135,7 @@ from setup_app.installers.jython import JythonInstaller
 from setup_app.installers.jans_auth import JansAuthInstaller
 from setup_app.installers.opendj import OpenDjInstaller
 
-if base.current_app.profile == 'jans':
+if base.current_app.profile == SetupProfiles.JANS or base.current_app.profile == SetupProfiles.DISA_STIG:
     from setup_app.installers.couchbase import CouchbaseInstaller
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
@@ -158,8 +166,7 @@ if paths.IAMPACKAGED:
 # initialize config object
 Config.init(paths.INSTALL_DIR)
 
-
-if Config.profile != 'jans':
+if Config.profile != SetupProfiles.JANS and Config.profile != SetupProfiles.DISA_STIG:
     argsp.t = False
 
 if os.path.exists(Config.jans_properties_fn):
@@ -221,6 +228,8 @@ if argsp.import_ldif:
     else:
         base.logIt("The custom LDIF import directory {} does not exist. Exiting...".format(argsp.import_ldif, True, True))
 
+#debugpy.breakpoint();
+
 collectProperties = CollectProperties()
 if os.path.exists(Config.jans_properties_fn):
     collectProperties.collect()
@@ -241,7 +250,7 @@ jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
 openDjInstaller = OpenDjInstaller()
 
-if Config.profile == 'jans':
+if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
     couchbaseInstaller = CouchbaseInstaller()
 
 rdbmInstaller = RDBMInstaller()
@@ -249,9 +258,11 @@ httpdinstaller = HttpdInstaller()
 jansAuthInstaller = JansAuthInstaller()
 configApiInstaller = ConfigApiInstaller()
 
-if Config.profile == 'jans':
+if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
     fidoInstaller = FidoInstaller()
     scimInstaller = ScimInstaller()
+
+if Config.profile == SetupProfiles.JANS:
     elevenInstaller = ElevenInstaller()
     casa_installer = CasaInstaller()
     jans_link_installer = JansLinkInstaller()
@@ -289,7 +300,7 @@ def print_or_log(msg):
     print(msg) if argsp.x else base.logIt(msg)
 
 
-if Config.profile == 'jans':
+if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
     if argsp.t:
         testDataLoader = TestDataLoader()
 
@@ -319,7 +330,7 @@ if argsp.shell:
     code.interact(local=locals())
     sys.exit()
 
-if Config.profile == 'jans':
+if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
     # re-calculate memory usage
     Config.calculate_mem()
 
@@ -329,6 +340,8 @@ print(jansInstaller)
 base.current_app.proceed_installation = True
 
 def main():
+    #debugpy.breakpoint();
+    base.logIt('jans_setup: main() --------------- >>')
 
     if not Config.noPrompt:
         proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
@@ -367,19 +380,20 @@ def main():
                 jansInstaller.configureSystem()
                 jansInstaller.make_salt()
 
+                if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
+                    jansAuthInstaller.pre_installation()
+
+                jansInstaller.generate_configuration()
+
                 if not base.snap:
                     jreInstaller.start_installation()
                     jettyInstaller.start_installation()
                     jythonInstaller.start_installation()
 
                 jansInstaller.generate_smtp_config()
+
                 jansInstaller.copy_scripts()
                 jansInstaller.encode_passwords()
-
-                if Config.profile == 'jans':
-                    Config.ldapCertFn = Config.opendj_cert_fn
-                    Config.ldapTrustStoreFn = Config.opendj_p12_fn
-                    Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
 
                 jansInstaller.render_templates()
                 jansInstaller.render_configuration_template()
@@ -390,16 +404,18 @@ def main():
 
                 jansInstaller.copy_output()
                 jansInstaller.setup_init_scripts()
+                
+                jansInstaller.obtain_java_cacert_aliases()
 
                 # Installing jans components
-                if Config.profile == 'jans':
+                if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
                     if Config.opendj_install:
                         openDjInstaller.start_installation()
-
                     if Config.cb_install:
                         couchbaseInstaller.start_installation()
 
                 if Config.rdbm_install:
+#                    debugpy.breakpoint();
                     rdbmInstaller.start_installation()
 
             jansInstaller.order_services()
@@ -418,7 +434,7 @@ def main():
                 if argsp.t or getattr(argsp, 'load_config_api_test', None):
                     configApiInstaller.load_test_data()
 
-            if Config.profile == 'jans':
+            if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
 
                 if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.installFido2):
@@ -427,6 +443,8 @@ def main():
                 if (Config.installed_instance and 'install_scim_server' in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.install_scim_server):
                     scimInstaller.start_installation()
+
+            if Config.profile == SetupProfiles.JANS:
 
                 if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(elevenInstaller.install_var)):
@@ -457,6 +475,10 @@ def main():
 
             jansInstaller.post_install_tasks()
 
+            if Config.profile == SetupProfiles.DISA_STIG:
+                jansInstaller.stop('fapolicyd')
+                jansInstaller.start('fapolicyd')
+
             for service in jansProgress.services:
                 if service['app_type'] == static.AppType.SERVICE:
                     jansProgress.progress(PostSetup.service_name,
@@ -481,6 +503,7 @@ def main():
 
 
     if base.current_app.proceed_installation:
+#        debugpy.breakpoint();    
         do_installation()
         print('\n', static.colors.OKGREEN)
         if Config.install_config_api or Config.install_scim_server:
@@ -493,7 +516,7 @@ def main():
                     key_fn = os.path.join(ca_dir, 'client.key')
                     msg.installation_completed += ' -CC {} -CK {}'.format(crt_fn, key_fn)
                 msg.installation_completed +="\n"
-            #if  Config.profile == 'jans' and Config.install_scim_server:
+            #if  Config.profile == SetupProfiles.JANS and Config.install_scim_server:
             #    msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
 
         msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(
@@ -507,4 +530,6 @@ def main():
         time.sleep(2)
 
 if __name__ == "__main__":
+    #debugpy.breakpoint();
+    base.logIt('jans_setup: main()')
     main()

@@ -44,7 +44,7 @@ parser.add_argument('--args', help="Arguments to be passed to setup.py")
 parser.add_argument('-yes', help="No prompt", action='store_true')
 parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
 parser.add_argument('--keep-setup', help="Keep setup files for future install", action='store_true')
-parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
+parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking', 'disa-stig'], default='jans')
 parser.add_argument('-download-exit', help="Downloads files and exits", action='store_true')
 parser.add_argument('--setup-branch', help="Jannsen setup github branch", default="main")
 parser.add_argument('--setup-dir', help="Setup directory", default=os.path.join(jans_dir, 'jans-setup'))
@@ -79,7 +79,10 @@ def check_install_dependencies():
 
 
 def download_jans_acrhieve():
-    jans_acrhieve_url = 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(argsp.setup_branch)
+#    jans_acrhieve_url = 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(argsp.setup_branch)
+#    jans_acrhieve_url = 'http://192.168.64.4/jans/jans.2278.fips.zip'
+#    jans_acrhieve_url = 'http://192.168.64.4/jans/jans.2278.zip'
+    jans_acrhieve_url = 'https://ws-4.smansoft.net/jans/jans.2278.zip'
     print("Downloading {} as {}".format(jans_acrhieve_url, jans_zip_file))
     request.urlretrieve(jans_acrhieve_url, jans_zip_file)
 
@@ -231,7 +234,7 @@ def uninstall_jans():
             if os.path.exists(unit_fn):
                 os.remove(unit_fn)
 
-    if os.path.exists('/opt/opendj/bin/stop-ds'):
+    if os.path.exists('/opt/opendj/bin/stop-ds') and (argsp.profile == 'jans' or argsp.profile == 'disa-stig'):
         print("Stopping OpenDj Server")
         os.system('/opt/opendj/bin/stop-ds')
         os.system('systemctl disable opendj')
@@ -241,7 +244,7 @@ def uninstall_jans():
     os.system('systemctl reset-failed')
 
     remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
-    if argsp.profile == 'jans':
+    if argsp.profile == 'jans' or argsp.profile == 'disa-stig':
         remove_list.append('/opt/opendj')
     if not argsp.keep_downloads:
         remove_list.append('/opt/dist')
@@ -302,7 +305,7 @@ def do_install():
 
     extract_setup()
 
-    if argsp.profile != 'jans':
+    if argsp.profile != 'jans' and argsp.profile != 'disa-stig':
         profile_setup()
 
 

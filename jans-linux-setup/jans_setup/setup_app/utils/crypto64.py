@@ -1,3 +1,7 @@
+
+import pydevd
+import debugpy
+
 import os
 import re
 import base64
@@ -37,24 +41,49 @@ class Crypto64:
         decrypted = cipher.decrypt(base64.b64decode(data), padmode=PAD_PKCS5)
         return decrypted.decode('utf-8')
 
-    def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None, truststore_pw='changeit'):
+    def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None):
         self.logIt('Generating Certificate for %s' % suffix)
-        key_with_password = '%s/%s.key.orig' % (Config.certFolder, suffix)
+        key_with_password = os.path.join(Config.certFolder, suffix + '.key.orig')
+        key_without_password = os.path.join(Config.certFolder, suffix + '.key.noenc')
         key = '%s/%s.key' % (Config.certFolder, suffix)
         csr = '%s/%s.csr' % (Config.certFolder, suffix)
         public_certificate = '%s/%s.crt' % (Config.certFolder, suffix)
         if not truststore_fn:
-            truststore_fn = Config.defaultTrustStoreFN
+            truststore_fn = Config.default_trust_store_fn
 
-        self.run([paths.cmd_openssl,
+        if Config.profile == static.SetupProfiles.DISA_STIG:
+            self.run([paths.cmd_openssl,
                   'genrsa',
-                  '-des3',
+                  '-out',
+                  key_without_password,
+                  ])
+
+            self.run([paths.cmd_openssl,
+                  'pkey',
+                  '-in',
+                  key_without_password,
                   '-out',
                   key_with_password,
+                  '-des3',
                   '-passout',
                   'pass:%s' % password,
-                  '2048'
                   ])
+
+            # remove unencrypted key
+            os.remove(key_without_password)
+
+        else:
+
+            self.run([paths.cmd_openssl,
+                      'genrsa',
+                      '-des3',
+                      '-out',
+                      key_with_password,
+                      '-passout',
+                      'pass:%s' % password,
+                      '2048'
+                      ])
+
         self.run([paths.cmd_openssl,
                   'rsa',
                   '-in',
@@ -96,11 +125,9 @@ class Crypto64:
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key])
         self.run([paths.cmd_chmod, '700', key])
 
-        self.run([Config.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_%s" % (Config.hostname, suffix), \
-                  "-file", public_certificate, "-keystore", truststore_fn, \
-                  "-storepass", truststore_pw, "-noprompt"])
-
-        return key, csr, public_certificate
+        alias = "%s_%s" % (Config.hostname, suffix)
+        self.delete_key(alias, truststore_fn)
+        self.import_cert_to_java_truststore(alias, public_certificate)
 
     def gen_ca(self, ca_suffix='ca'):
         self.logIt('Generating CA Certificate')
@@ -157,6 +184,9 @@ class Crypto64:
 
 
     def prepare_base64_extension_scripts(self, extensions=[]):
+
+#        debugpy.breakpoint();
+
         self.logIt("Preparing scripts")
         # Remove extensionFolder when all scripts are moved to script_catalog_dir
         for path_ in (Config.extensionFolder, Config.script_catalog_dir):
@@ -167,12 +197,18 @@ class Crypto64:
                     extension_name = ep.stem.lower()
                     extension_script_name = '{}_{}'.format(extension_type, extension_name)
 
+                    self.logIt('extension_script_name = {}'.format(extension_script_name))
+
                     if extensions and extension_script_name in extensions:
                         continue
 
                     # Prepare key for dictionary
                     base64_script_file = self.generate_base64_file(ep.as_posix(), 1)
+                    self.logIt('base64_script_file = {}'.format(base64_script_file))
+
                     Config.templateRenderingDict[extension_script_name] = base64_script_file
+
+        self.logIt("Config.templateRenderingDict = {}".format(Config.templateRenderingDict))
 
 
     def generate_base64_file(self, fn, num_spaces):
@@ -225,7 +261,6 @@ class Crypto64:
 
         self.run(import_cmd)
 
-
     def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
         self.logIt("Generating oxAuth OpenID Connect keys")
 
@@ -256,8 +291,63 @@ class Crypto64:
         if jks_path.lower().endswith('.jks'):
             args += ['-keystore_type', 'JKS']
 
-        cmd = ' '.join(args)
+        cmd = " ".join([Config.cmd_java,
+                        "-Dlog4j.defaultInitOverride=true",
+                        "-cp", self.get_key_gen_client_cmd(), 
+                        Config.non_setup_properties['key_gen_path'],
+                        '-key_ops_type', 'ALL',
+                        "-keystore",
+                        jks_path,
+                        "-keypasswd",
+                        jks_pwd,
+                        "-sig_keys",
+                        "%s" % key_algs,
+                        "-enc_keys",
+                        "%s" % enc_keys,
+                        "-dnname",
+                        '"%s"' % dn_name,
+                        "-expiration",
+                        "%s" % key_expiration])
+
         output = self.run([cmd], shell=True)
+
+        if output:
+            return output.splitlines()
+
+    def gen_openid_data_store_keys(self, data_store_path, data_store_pwd, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
+        self.logIt("Generating oxAuth OpenID Connect keys")
+
+        if dn_name == None:
+            dn_name = Config.default_openid_jks_dn_name
+
+        if key_algs == None:
+            key_algs = Config.default_sig_key_algs
+
+        if key_expiration == None:
+            key_expiration = Config.default_key_expiration
+
+        if not enc_keys:
+            enc_keys = Config.default_enc_key_algs
+
+        args = [Config.cmd_java,
+                        "-Dlog4j.defaultInitOverride=true",
+                        "-cp", self.get_key_gen_client_cmd(),
+                        Config.non_setup_properties['key_gen_path'],
+                        '-key_ops_type', 'ALL',
+                        "-keystore",
+                        data_store_path,
+                        "-keypasswd",
+                        data_store_pwd,
+                        "-sig_keys",
+                        "%s" % key_algs,
+                        "-enc_keys",
+                        "%s" % enc_keys,
+                        "-dnname",
+                        '"%s"' % dn_name,
+                        "-expiration",
+                        "%s" % key_expiration]
+
+        output = self.run([' '.join(args)], shell=True)
 
         if output:
             return output.splitlines()
@@ -267,8 +357,7 @@ class Crypto64:
 
         cmd = " ".join([Config.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
-                        "-cp",
-                        Config.non_setup_properties['oxauth_client_jar_fn'], 
+                        "-cp", self.get_key_gen_client_cmd(),
                         Config.non_setup_properties['key_export_path'],
                         '-key_ops_type', 'ALL',
                         "-keystore",
@@ -321,8 +410,9 @@ class Crypto64:
                 Config.encoded_ox_ldap_pw = self.obscure(Config.ldapPass)
             if Config.get('cb_password'):
                 Config.encoded_cb_password = self.obscure(Config.cb_password)
-            if Config.get('opendj_p12_pass'):
-                Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
+            if not Config.get('opendj_truststore_pass'):
+                Config.opendj_truststore_pass = os.urandom(6).hex()
+            Config.opendj_truststore_pass_enc = self.obscure(Config.opendj_truststore_pass)
         except:
             self.logIt("Error encoding passwords", True, True)
 
@@ -367,3 +457,118 @@ class Crypto64:
         except Exception as e:
             print("{}Can't download certificate{}".format(static.colors.DANGER, static.colors.ENDC))
             print(e)
+
+    def remove_pkcs11_keys(self, keys=['server-cert', 'admin-cert', 'dummy']):
+        output = self.run([Config.cmd_keytool, '-list', '-keystore', 'NONE', '-storetype', 'PKCS11', '-storepass', 'changeit'])
+        for l in output.splitlines():
+            ls = l.strip()
+            if ls.startswith(tuple(keys)):
+                alias = ls.split(',')[0]
+                if alias in keys:
+                    self.run([Config.cmd_keytool, '-delete', '-alias', alias, '-keystore', 'NONE', '-storetype', 'PKCS11', '-storepass', 'changeit'])
+
+    def delete_key(self, alias, truststore_fn=None):
+        if not truststore_fn:
+            truststore_fn = Config.default_trust_store_fn
+
+        if truststore_fn == Config.default_trust_store_fn and alias in Config.non_setup_properties['java_truststore_aliases']:
+            self.run([Config.cmd_keytool, "-delete", "-trustcacerts", "-alias", alias,
+                    "-keystore", truststore_fn,
+                    "-storepass", "changeit", "-noprompt"])
+
+    def export_cert_from_store(self, alias, truststore_fn, storepass, target_fn):
+        self.logIt("Exporting certificate from {} to {} with alias {}".format(truststore_fn, target_fn, alias))
+        cmd = [Config.cmd_keytool, "-exportcert", "-rfc",
+                    "-alias", alias,
+                    "-keystore", truststore_fn,
+                    "-storepass", storepass,
+                    "-file", target_fn]
+
+        cmd += self.get_keytool_provider(as_list=True)
+        self.run(cmd)
+
+    def import_cert_to_java_truststore(self, alias, cert_fn):
+        self.run([Config.cmd_keytool, '-import', '-trustcacerts',
+                    '-keystore', Config.default_trust_store_fn,
+                    '-storepass', 'changeit','-noprompt',
+                    '-alias', alias,
+                    '-file', cert_fn])
+
+    def obtain_java_cacert_aliases(self):
+        output = self.run([Config.cmd_keytool, '-list',
+                    '-keystore', Config.default_trust_store_fn,
+                    '-storepass', 'changeit', '-noprompt'])
+
+        for l in output.splitlines():
+            ls = l.strip().rstrip(',')
+            if ls.endswith('trustedCertEntry'):
+                sep = ls.split(',')
+                Config.non_setup_properties['java_truststore_aliases'].append(sep[0])
+
+    def get_keytool_provider(self, as_list=False):
+#        provider_dict  = OrderedDict([('-storetype', Config.default_store_type)])
+        provider_dict  = OrderedDict()
+
+        if Config.profile == static.SetupProfiles.DISA_STIG:
+            provider_dict['-providername'] = 'BCFIPS'
+            provider_dict['-providerpath'] = '{}:{}'.format(Config.bc_fips_jar, Config.bcpkix_fips_jar)
+            provider_dict['-providerclass'] = 'org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider'
+
+        if as_list:
+            ret_val = []
+            for item in provider_dict.items():
+                ret_val.append(item[0])
+                ret_val.append(item[1])
+            return ret_val
+
+        return provider_dict
+
+    def get_key_gen_client_cmd(self):
+        if Config.profile == static.SetupProfiles.DISA_STIG:
+            client_cmd = '{}:{}:{}'.format(
+                        Config.non_setup_properties['jans_auth_client_noprivder_jar_fn'],
+                        Config.bc_fips_jar,
+                        Config.bcpkix_fips_jar
+                        )
+        else:
+            client_cmd = Config.non_setup_properties['jans_auth_client_jar_fn']
+        return client_cmd
+
+    def gen_openid_data_store_keys(self, data_store_path, data_store_pwd, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
+        self.logIt("Generating oxAuth OpenID Connect keys")
+
+        if dn_name == None:
+            dn_name = Config.default_openid_jks_dn_name
+
+        if key_algs == None:
+            key_algs = Config.default_sig_key_algs
+
+        if key_expiration == None:
+            key_expiration = Config.default_key_expiration
+
+        if not enc_keys:
+            enc_keys = Config.default_enc_key_algs
+
+        args = [Config.cmd_java,
+                        "-Dlog4j.defaultInitOverride=true",
+                        "-cp", self.get_key_gen_client_cmd(),
+                        Config.non_setup_properties['key_gen_path'],
+                        '-key_ops_type', 'ALL',
+                        "-keystore",
+                        data_store_path,
+                        "-keypasswd",
+                        data_store_pwd,
+                        "-sig_keys",
+                        "%s" % key_algs,
+                        "-enc_keys",
+                        "%s" % enc_keys,
+                        "-dnname",
+                        '"%s"' % dn_name,
+                        "-expiration",
+                        "%s" % key_expiration]
+
+        output = self.run([' '.join(args)], shell=True)
+
+        if output:
+            return output.splitlines()
+
