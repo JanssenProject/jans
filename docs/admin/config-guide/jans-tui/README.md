@@ -130,7 +130,7 @@ pip3 install https://github.com/JanssenProject/jans/archive/refs/heads/main.zip#
 Execute:
 
 ```
-config-cli-tui
+jans-cli-tui
 ```
 
 Obtain Credidentials for CLI from the Janssen server:
