@@ -7,12 +7,9 @@
 package io.jans.configapi.plugin.saml.configuration;
 
 import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.configapi.security.api.ApiProtectionService;
-import io.jans.configapi.security.service.AuthorizationService;
-import io.jans.configapi.service.status.StatusCheckerTimer;
 import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.service.timer.QuartzSchedulerManager;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.BeforeDestroyed;
@@ -44,17 +41,9 @@ public class SamlAppInitializer {
     @Inject
     SamlConfigurationFactory samlConfigurationFactory;
 
-    @Inject
-    private PersistanceFactoryService persistanceFactoryService;
 
     @Inject
-    private ApiProtectionService apiProtectionService;
-
-    @Inject
-    private Instance<AuthorizationService> authorizationServiceInstance;
-
-    @Inject
-    StatusCheckerTimer statusCheckerTimer;
+    QuartzSchedulerManager quartzSchedulerManager;
     
     @Inject
     MetadataValidationTimer metadataValidationTimer;
@@ -66,9 +55,22 @@ public class SamlAppInitializer {
 
         // configuration
         this.samlConfigurationFactory.create();
+        initSchedulerService();
         metadataValidationTimer.initTimer();
 
         log.info("==============  SAML Plugin IS UP AND RUNNING ===================");
+    }
+    
+
+    protected void initSchedulerService() {
+        log.debug("Initializing Scheduler Service");
+        quartzSchedulerManager.start();
+
+        String disableScheduler = System.getProperties().getProperty("gluu.disable.scheduler");
+        if (Boolean.parseBoolean(disableScheduler)) {
+            this.log.warn("Suspending Quartz Scheduler Service...");
+            quartzSchedulerManager.standby();
+        }
     }
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
