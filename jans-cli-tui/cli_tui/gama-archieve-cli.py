@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 import json
@@ -12,7 +14,7 @@ parser.add_argument('directory', help="Directory containing agama project files"
 parser.add_argument('-exclude-extension', help="Exclude files having this extension", action='append')
 parser.add_argument('-exclude-file', help="Exclude files having this name", action='append')
 parser.add_argument('-exclude-dir', help="Exclude files in this directory", action='append')
-parser.add_argument('-agama-archive-name', help="Output file name of project archive. If excluded archive name will be created based on directory")
+parser.add_argument('-agama-archieve-name', help="Output file name of project archieve. If excluded archieve name will be created based on directory")
 argsp = parser.parse_args()
 
 
@@ -39,17 +41,12 @@ for i, efn in enumerate(exclude_files):
         exclude_files[i] = os.path.join(argsp.directory, efn)
 
 
-
-#print("exclude_extensions:", exclude_extensions)
-#print("exclude_dirs:", exclude_dirs)
-#print("exclude_files:", exclude_files)
-
 if not agama_path.is_dir():
     print("{} is not a directory".format(agama_path))
     sys.exit()
 
-if argsp.agama_archive_name:
-    agama_zip_fn = argsp.agama_archive_name
+if argsp.agama_archieve_name:
+    agama_zip_fn = argsp.agama_archieve_name
 else:
     agama_zip_fn = agama_path.name
 
@@ -81,9 +78,8 @@ flow_files = []
 flows = []
 
 for fpath, rpath in file_list:
-   if fpath.is_file():
-        if rpath.suffix == '.flow' and rpath.parts[0] == 'code':
-            flow_files.append((fpath, rpath))
+   if fpath.is_file() and rpath.suffix == '.flow' and rpath.parts[0] == 'code':
+        flow_files.append((fpath, rpath))
 
 for mdir in mandatory_dirs:
     if not mandatory_dirs[mdir]:
@@ -99,8 +95,8 @@ def strip_quotation(s):
     if s:
         if s[0] == '"':
             return s.strip('"')
-        elif s[0] == '"':
-            return s.strip('"')
+        elif s[0] == "'":
+            return s.strip("'")
 
     return s
 
@@ -201,7 +197,7 @@ sha256sum_fn = agama_zip_fn + '.sha256sum'
 with open(sha256sum_fn, 'w') as w:
     w.write(sha256hash)
 
-print("All seems good. Archive {} and signature file {} were created".format(agama_zip_fn, sha256sum_fn))
+print("All seems good. Archieve {} and signature file {} were created".format(agama_zip_fn, sha256sum_fn))
 
 
 

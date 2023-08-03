@@ -8,13 +8,13 @@
 	<version>1.0.17-SNAPSHOT</version>
 	<name>Fido2 API</name>
 
-    <distributionManagement>
-	  <repository>
-          <id>github</id>
-          <name>GitHub Packages</name>
-          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
-      </repository>
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+		<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+		</repository>
+	</distributionManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -71,6 +71,7 @@
 		<module>model</module>
 		<module>client</module>
 		<module>server</module>
+		<module>server-fips</module>
 	</modules>
 	
 	<dependencyManagement>
@@ -94,11 +95,11 @@
 				<artifactId>jans-auth-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-            <dependency>
-                <groupId>io.jans</groupId>
-                <artifactId>jans-auth-client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-auth-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-fido2-model</artifactId>
@@ -214,6 +215,11 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>buildnumber-maven-plugin</artifactId>
 					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>3.1.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
