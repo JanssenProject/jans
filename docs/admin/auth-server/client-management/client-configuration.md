@@ -97,8 +97,8 @@ Claim `grant_types_supported` lists all the supported grant types in the respons
 ### Configuring Grant Type For Client
 
 Janssen Server will allow requests from a client with grant types that the client is configured to use. Client can be
-configured to use or not use certain grant types using [CLI](../../config-guide/jans-cli/README.md) or 
-[TUI](../../config-guide/jans-tui/README.md) tools.
+configured to use or not use certain grant types using [CLI](../../config-guide/config-tools/jans-cli/README.md) or 
+[TUI](../../config-guide/config-tools/jans-tui/README.md) tools.
 
 ### Recommendations For Using Grant Types and Flows
 

@@ -13,7 +13,7 @@ left navigation panel).
 
 ## Setting Property Values
 
-An administrator can set properties using [TUI](../../../config-guide/jans-tui/README.md). Each module has its own property
+An administrator can set properties using [TUI](../../../config-guide/config-tools/jans-tui/README.md). Each module has its own property
 configuration section in TUI.
 
 Properties are primarily of two types based on how the change in the value is loaded in the module at runtime.

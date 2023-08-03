@@ -61,10 +61,11 @@ In cloud native architecture, the load testing is executed via k8s pods.
 
 For load testing with Authorization Code Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/authorization_code_flow.jmx) is used.
 
-See [Authorization code flow recipe](../../recipes/benchmark/#authorization-code-flow) for details.
+See [Authorization code flow recipe](../recipes/benchmark.md#authorization-code-flow) for details.
 
 ### Resource Owner Password Grant (ROPC) Flow jmeter load test
 
 For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx) is used.  
 
-See [ROPC flow recipe](../../recipes/benchmark/#resource-owner-password-credentials-ropc-flow) for details.
+See [ROPC flow recipe](../recipes/benchmark.md
+resource-owner-password-credentials-ropc-flow) for details.

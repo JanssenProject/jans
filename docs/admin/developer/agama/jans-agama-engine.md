@@ -61,7 +61,7 @@ When the authentication succeeds, the whole contents of `data` are stored in the
 
 ### How timeouts work
 
-Authentication flows are normally short-lived. They usually span no more than a few minutes. In Agama, the maximum amount of time an end-user can take to fully complete a flow is driven by the [configuration of the authentication server](../../config-guide/jans-cli/cli-jans-authorization-server.md), specifically the `sessionIdUnauthenticatedUnusedLifetime` property which is measured in seconds. As an example, if this value is 120, any attempt to authenticate taking more than two minutes will throw the given error page.
+Authentication flows are normally short-lived. They usually span no more than a few minutes. In Agama, the maximum amount of time an end-user can take to fully complete a flow is driven by the [configuration of the authentication server](../../config-guide/jans-authorization-server-config.md), specifically the `sessionIdUnauthenticatedUnusedLifetime` property which is measured in seconds. As an example, if this value is 120, any attempt to authenticate taking more than two minutes will throw the given error page.
 
 Moreover, when a flow specifies its own timeout in the [header](../../../agama/language-reference.md#header-basics) the effective timeout is the smallest value between `sessionIdUnauthenticatedUnusedLifetime` and the value in the header.
 
@@ -83,7 +83,7 @@ The following table details the location of log data. Paths are relative to dire
 |`Log` instructions|`jans-auth_script.log`|This log also contains the output of `print` statements used in standard Jython custom scripts of Jans Server|
 |Foreign code|`jans-auth.log`|Usage of [slf4j](https://slf4j.org) recommended. Proper visualization of logging statements may require customization of the server [loggers](../../auth-server/logging/log4j2.md) (Log4j2 descriptor)|
 
-Depending on the specificity required, you may have to change the logging level so more or less details appear in the logs. This can be done by altering the `loggingLevel` property of the [auth server configuration](../../config-guide/jans-cli/cli-jans-authorization-server.md). `DEBUG` usually suffices for troubleshooting.
+Depending on the specificity required, you may have to change the logging level so more or less details appear in the logs. This can be done by altering the `loggingLevel` property of the [auth server configuration](../../config-guide/jans-authorization-server-config.md). `DEBUG` usually suffices for troubleshooting.
 
 The available levels for statements issued with the `Log` instruction are:
 

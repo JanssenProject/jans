@@ -15,7 +15,7 @@ Navigate through the left navigation panel to see the complete list of feature f
 
 ## Using Feature Flags
 
-An administrator can enable or disable feature flags using [TUI](../../../config-guide/jans-tui/README.md). New value
+An administrator can enable or disable feature flags using [TUI](../../../config-guide/config-tools/jans-tui/README.md). New value
 of the feature flag will be dynamically loaded at an interval of 30 seconds.
 
 

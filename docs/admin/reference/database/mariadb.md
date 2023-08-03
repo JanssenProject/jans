@@ -17,5 +17,5 @@ ADD CONSTRAINT customJsonColumn CHECK(JSON_VALID("customJsonColumn"));
 
 If ORM find `JSON_VALID` in column definition it works with it as with **JSON** column.
 
-More details about this ORM is in [MySQLthis](.//mysql-config.md) documentation.
+More details about this ORM is in [MySQLthis](./mysql-config.md) documentation.
 

@@ -17,7 +17,7 @@ in practice. [OAuth 2.1](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
 ## Configuration
 
 A client can use the password grant if it is enabled in the configuration. An administrator can use
-[TUI](../../config-guide/jans-tui/README.md) to enable password grant for a client.
+[TUI](../../config-guide/config-tools/jans-tui/README.md) to enable password grant for a client.
 
 ![](../../../assets/image-tui-client-registration-basic.png)
 

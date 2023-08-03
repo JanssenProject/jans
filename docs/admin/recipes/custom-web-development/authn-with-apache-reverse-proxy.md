@@ -53,7 +53,7 @@ In this section, we will register a new OpenID Connect client on Janssen server.
 
 Here we will use manual client registration.
 
-To register a new OpenID connect client on the Janssen server, we will use `jans-cli` tool provided by the Janssen server. `jans-cli` has a menu-driven interface that makes it easy to configure the Janssen server. Here we will use the menu-driven approach to register a new client. To further understand how to use menu-driven approach and get complete list of supported command-line operations, refer to [jans-cli documentation](../../../admin/config-guide/jans-cli/README.md).
+To register a new OpenID connect client on the Janssen server, we will use `jans-cli` tool provided by the Janssen server. `jans-cli` has a menu-driven interface that makes it easy to configure the Janssen server. Here we will use the menu-driven approach to register a new client. To further understand how to use menu-driven approach and get complete list of supported command-line operations, refer to [jans-cli documentation](../../config-guide/config-tools/jans-cli/README.md).
 
   - Run the command below on Janssen server to enter interactive mode.
 
