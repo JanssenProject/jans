@@ -13,7 +13,7 @@ tags:
 </br>
 
 <p align="center">
- <img src="../../../assets/image-using-jans-cli-comp-04222022.png">
+ <img src="../../../../assets/image-using-jans-cli-comp-04222022.png">
 </p>
 
 Using this mode is more difficult than the TUI. If needed, help options are available by typing:  

@@ -70,4 +70,4 @@ Content-Type: application/json
 
 ## Application logs
 Application log can be verified if application is started properly.
-[Refer here](./logs.md) for more details.
+[Refer here](logs.md) for more details.
