@@ -92,5 +92,5 @@ jobs:
       id: upload-java-test-results
       if: success() || failure()        # run this step even if previous step failed
       with:
-        name: go-test-results
+        name: java-test-results
         path: ./tmp/reports/*.xml
