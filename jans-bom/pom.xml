@@ -731,6 +731,22 @@
                 <artifactId>xmltooling</artifactId>
                 <version>1.4.4</version>
             </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-xmlsec-api</artifactId>
+                <version>3.4.6</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-security-api</artifactId>
+                <version>3.4.6</version>
+            </dependency>
+  <!--          <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-core</artifactId>
+                <version>3.4.6</version>
+            </dependency>-->
+            
 			<dependency>
 			    <groupId>org.apache.santuario</groupId>
 			    <artifactId>xmlsec</artifactId>

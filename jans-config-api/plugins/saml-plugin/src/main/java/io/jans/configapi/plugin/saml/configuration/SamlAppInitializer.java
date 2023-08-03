@@ -10,6 +10,7 @@ import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.service.status.StatusCheckerTimer;
+import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.service.PersistanceFactoryService;
 
@@ -54,6 +55,9 @@ public class SamlAppInitializer {
 
     @Inject
     StatusCheckerTimer statusCheckerTimer;
+    
+    @Inject
+    MetadataValidationTimer metadataValidationTimer;
 
 
     public void onAppStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
@@ -62,6 +66,7 @@ public class SamlAppInitializer {
 
         // configuration
         this.samlConfigurationFactory.create();
+        metadataValidationTimer.initTimer();
 
         log.info("==============  SAML Plugin IS UP AND RUNNING ===================");
     }

@@ -45,7 +45,10 @@
 			<version>${jans.version}</version>
 		</dependency>
 		
-		
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+		</dependency>
 		<!-- Microprofile -->
 		<dependency>
 			<groupId>io.smallrye</groupId>
@@ -113,6 +116,14 @@
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-saml-api</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-xmlsec-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-security-api</artifactId>
+        </dependency>
 	    <dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>xmltooling</artifactId>
@@ -177,6 +188,7 @@
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core-jakarta</artifactId>
 		</dependency>
+
 
 	</dependencies>
 
