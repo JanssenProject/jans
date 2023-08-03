@@ -70,8 +70,9 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'cli', 'config_cli.py')])
         self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'jans_cli_tui.py')])
 
-        self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'gama-archieve-cli.py')])
-        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'gama-archieve-cli.py'), os.path.join(Config.jansOptBinFolder, 'gama-archieve-cli.py')])
+        gama_archiever_fn = 'gama-archieve-cli.py'
+        self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, gama_archiever_fn)])
+        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, gama_archiever_fn), os.path.join(Config.jansOptBinFolder, gama_archiever_fn)])
 
         #extract python libraries
         base.extract_from_zip(self.source_files[0][0], 'jwt', os.path.join(self.pylib_dir, 'jwt'))
