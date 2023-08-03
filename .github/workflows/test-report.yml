@@ -9,13 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: dorny/test-reporter@v1
+      id: go
       with:
         artifact: go-test-results
         name: Go Tests
         path: '*report.xml'
         reporter: java-junit
-    - name: Java Test Report
+    - uses: dorny/test-reporter@v1
+      id: java
       if: always()
-      uses: scacap/action-surefire-report@v1
       with:
-        report_paths: '*testng-results.xml'
+        artifact: java-test-results
+        name: Java Tests
+        path: '*testng-results.xml'
+        reporter: java-junit
