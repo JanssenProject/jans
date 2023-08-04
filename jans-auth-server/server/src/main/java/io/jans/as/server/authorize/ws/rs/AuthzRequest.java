@@ -1,6 +1,7 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.DeviceSession;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
@@ -46,6 +47,9 @@ public class AuthzRequest {
     private String claims;
     private String authReqId;
     private String httpMethod;
+    private String deviceSession;
+    private DeviceSession deviceSessionObject;
+    private boolean useDeviceSession;
     private HttpServletRequest httpRequest;
     private HttpServletResponse httpResponse;
     private SecurityContext securityContext;
@@ -55,6 +59,30 @@ public class AuthzRequest {
     private Client client;
     private OAuth2AuditLog auditLog;
     private boolean promptFromJwt;
+
+    public DeviceSession getDeviceSessionObject() {
+        return deviceSessionObject;
+    }
+
+    public void setDeviceSessionObject(DeviceSession deviceSessionObject) {
+        this.deviceSessionObject = deviceSessionObject;
+    }
+
+    public boolean isUseDeviceSession() {
+        return useDeviceSession;
+    }
+
+    public void setUseDeviceSession(boolean useDeviceSession) {
+        this.useDeviceSession = useDeviceSession;
+    }
+
+    public String getDeviceSession() {
+        return deviceSession;
+    }
+
+    public void setDeviceSession(String deviceSession) {
+        this.deviceSession = deviceSession;
+    }
 
     public boolean isPromptFromJwt() {
         return promptFromJwt;
@@ -368,6 +396,7 @@ public class AuthzRequest {
                 ", idTokenHint='" + idTokenHint + '\'' +
                 ", loginHint='" + loginHint + '\'' +
                 ", acrValues='" + acrValues + '\'' +
+                ", deviceSession='" + deviceSession + '\'' +
                 ", amrValues='" + amrValues + '\'' +
                 ", request='" + request + '\'' +
                 ", requestUri='" + requestUri + '\'' +
@@ -376,6 +405,7 @@ public class AuthzRequest {
                 ", codeChallenge='" + codeChallenge + '\'' +
                 ", codeChallengeMethod='" + codeChallengeMethod + '\'' +
                 ", customResponseHeaders='" + customResponseHeaders + '\'' +
+                ", customParameters='" + customParameters+ '\'' +
                 ", claims='" + claims + '\'' +
                 ", authReqId='" + authReqId + '\'' +
                 ", httpRequest=" + httpRequest +

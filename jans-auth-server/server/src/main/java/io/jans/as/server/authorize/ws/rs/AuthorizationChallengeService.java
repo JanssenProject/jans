@@ -1,9 +1,12 @@
 package io.jans.as.server.authorize.ws.rs;
 
+import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.authorize.AuthorizationChallengeResponse;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.crypto.binding.TokenBindingParseException;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -12,6 +15,10 @@ import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.common.AuthorizationCodeGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.common.ExecutionContext;
+import io.jans.as.server.security.Identity;
+import io.jans.as.server.service.CookieService;
+import io.jans.as.server.service.RequestParameterService;
+import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalAuthorizationChallengeService;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.enterprise.context.RequestScoped;
@@ -20,11 +27,16 @@ import jakarta.inject.Named;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
+
+import static io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl.getGenericRequestMap;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
 /**
  * @author Yuriy Z
@@ -60,6 +72,24 @@ public class AuthorizationChallengeService {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    @Inject
+    private DeviceSessionService deviceSessionService;
+
+    @Inject
+    private Identity identity;
+
+    @Inject
+    private SessionIdService sessionIdService;
+
+    @Inject
+    private AppConfiguration appConfiguration;
+
+    @Inject
+    private RequestParameterService requestParameterService;
+
+    @Inject
+    private CookieService cookieService;
+
     public Response requestAuthorization(AuthzRequest authzRequest) {
         log.debug("Attempting to request authz challenge: {}", authzRequest);
 
@@ -80,26 +110,49 @@ public class AuthorizationChallengeService {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
     }
 
+    public void prepareAuthzRequest(AuthzRequest authzRequest) {
+        authzRequest.setScope(ServerUtil.urlDecode(authzRequest.getScope()));
+
+        if (StringUtils.isNotBlank(authzRequest.getDeviceSession())) {
+            authzRequest.setDeviceSessionObject(deviceSessionService.getDeviceSession(authzRequest.getDeviceSession()));
+        }
+    }
+
     public Response authorize(AuthzRequest authzRequest) throws IOException, TokenBindingParseException {
         final String state = authzRequest.getState();
-        authzRequest.setScope(ServerUtil.urlDecode(authzRequest.getScope()));
-        String tokenBindingHeader = authzRequest.getHttpRequest().getHeader("Sec-Token-Binding");
+        final String tokenBindingHeader = authzRequest.getHttpRequest().getHeader("Sec-Token-Binding");
+
+        prepareAuthzRequest(authzRequest);
+
+        SessionId sessionUser = identity.getSessionId();
+        User user = sessionIdService.getUser(sessionUser);
 
         final Client client = authorizeRestWebServiceValidator.validateClient(authzRequest, false);
         authorizationChallengeValidator.validateGrantType(client, state);
         Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
 
         final ExecutionContext executionContext = ExecutionContext.of(authzRequest);
-        final boolean ok = externalAuthorizationChallengeService.externalAuthorize(executionContext);
-        if (!ok) {
-            log.debug("Not allowed by authorization challenge script, client_id {}.", client.getClientId());
-            throw new WebApplicationException(errorResponseFactory
-                    .newErrorResponse(Response.Status.BAD_REQUEST)
-                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, state, "No allowed by authorization challenge script."))
-                    .build());
+
+        if (user == null) {
+            log.trace("Executing external authentication challenge");
+
+            final boolean ok = externalAuthorizationChallengeService.externalAuthorize(executionContext);
+            if (!ok) {
+                log.debug("Not allowed by authorization challenge script, client_id {}.", client.getClientId());
+                throw new WebApplicationException(errorResponseFactory
+                        .newErrorResponse(Response.Status.BAD_REQUEST)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, state, "No allowed by authorization challenge script."))
+                        .build());
+            }
+
+            user = executionContext.getUser() != null ? executionContext.getUser() : new User();
+
+            // generate session if not exist and if allowed by config
+            if (sessionUser == null) {
+                sessionUser = generateAuthenticateSessionWithCookie(authzRequest, user);
+            }
         }
 
-        User user = executionContext.getUser() != null ? executionContext.getUser() : new User();
         String grantAcr = executionContext.getScript() != null ? executionContext.getScript().getName() : authzRequest.getAcrValues();
 
         AuthorizationCodeGrant authorizationGrant = authorizationGrantList.createAuthorizationCodeGrant(user, client, new Date());
@@ -110,13 +163,37 @@ public class AuthorizationChallengeService {
         authorizationGrant.setCodeChallenge(authzRequest.getCodeChallenge());
         authorizationGrant.setCodeChallengeMethod(authzRequest.getCodeChallengeMethod());
         authorizationGrant.setClaims(authzRequest.getClaims());
-        authorizationGrant.setSessionDn("no_session_for_authorization_challenge"); // no need for session as at Authorization Endpoint
+        authorizationGrant.setSessionDn(sessionUser != null ? sessionUser.getDn() : "no_session_for_authorization_challenge"); // no need for session as at Authorization Endpoint
         authorizationGrant.setAcrValues(grantAcr);
         authorizationGrant.save();
 
         String authorizationCode = authorizationGrant.getAuthorizationCode().getCode();
 
         return createSuccessfulResponse(authorizationCode);
+    }
+
+    private SessionId generateAuthenticateSessionWithCookie(AuthzRequest authzRequest, User user) {
+        if (user == null) {
+            log.trace("Skip session_id generation because user is null");
+            return null;
+        }
+        if (isFalse(appConfiguration.getAuthorizationChallengeShouldGenerateSession())) {
+            log.trace("Skip session_id generation because it's not allowed by AS configuration ('authorizationChallengeShouldGenerateSession=false')");
+            return null;
+        }
+
+        Map<String, String> genericRequestMap = getGenericRequestMap(authzRequest.getHttpRequest());
+
+        Map<String, String> parameterMap = Maps.newHashMap(genericRequestMap);
+        Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+
+        SessionId sessionUser = sessionIdService.generateAuthenticatedSessionId(authzRequest.getHttpRequest(), user.getDn(), authzRequest.getPrompt());
+        sessionUser.setSessionAttributes(requestParameterMap);
+
+        cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
+        sessionIdService.updateSessionId(sessionUser);
+
+        return sessionUser;
     }
 
     public Response createSuccessfulResponse(String authorizationCode) throws IOException {
