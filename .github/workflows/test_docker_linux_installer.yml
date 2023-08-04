@@ -92,4 +92,4 @@ jobs:
       if: always()
       uses: scacap/action-surefire-report@v1
       with:
-        report_paths: '**/tmp/reports/*.xml'
+        report_paths: '/tmp/reports/*.xml'
