@@ -8743,6 +8743,7 @@ nav:
     - Security Considerations: admin/scim/security.md
     - Bulk Adding Users: admin/scim/bulk-users.md
     - Adding Custom Attributes: admin/scim/custom-attributes.md
+  - Link Guide: admin/link/README.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md
