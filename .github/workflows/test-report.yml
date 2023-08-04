@@ -9,8 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: dorny/test-reporter@v1
+      id: go
       with:
         artifact: go-test-results
         name: Go Tests
-        path: '*.xml'
+        path: '*report.xml'
+        reporter: java-junit
+    - uses: dorny/test-reporter@v1
+      id: java
+      if: always()
+      with:
+        artifact: java-test-results
+        name: Java Tests
+        path: '*testng-results.xml'
         reporter: java-junit
