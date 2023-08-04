@@ -15,11 +15,18 @@ jobs:
         name: Go Tests
         path: '*report.xml'
         reporter: java-junit
-    - uses: dorny/test-reporter@v1
-      id: java
+    - uses: actions/download-artifact@v3
       if: always()
       with:
-        artifact: java-test-results
-        name: Java Tests
-        path: '*testng-results.xml'
-        reporter: java-junit
+        name: java-test-results
+        path: /tmp/java-test-results
+    - name: Unzip artifact
+      if: always()
+      run: |
+        unzip -o /tmp/java-test-results/java-test-results.zip -d /tmp/java-test-results
+        ls -la /tmp/java-test-results
+    - name: Publish Test Report
+      if: always()
+      uses: scacap/action-surefire-report@v1
+      with:
+        report_paths: '**/tmp/java-test-results/*testng-results.xml'
