@@ -81,16 +81,15 @@ jobs:
         go test -v 2>&1 ./... | go-junit-report > ${{ matrix.persistence-backends }}report.xml
 
 
-    - uses: actions/upload-artifact@v2  # upload test results
+    - uses: actions/upload-artifact@v2
       id: upload-go-test-results
-      if: success() || failure()        # run this step even if previous step failed
+      if: success() || failure()
       with:
         name: go-test-results
         path: ./terraform-provider-jans/${{ matrix.persistence-backends }}report.xml
 
-    - uses: actions/upload-artifact@v2  # upload test results
-      id: upload-java-test-results
-      if: success() || failure()        # run this step even if previous step failed
+    - name: Publish Java Test Report
+      if: always()
+      uses: scacap/action-surefire-report@v1
       with:
-        name: java-test-results
-        path: /tmp/reports/*.xml
+        report_paths: '**/tmp/reports/*.xml'
