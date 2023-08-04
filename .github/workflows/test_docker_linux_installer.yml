@@ -88,9 +88,9 @@ jobs:
         name: go-test-results
         path: ./terraform-provider-jans/${{ matrix.persistence-backends }}report.xml
 
-    - name: Publish Java Test Report
-      if: always()
-      uses: starburstdata/action-testng-report@v1
+    - uses: actions/upload-artifact@v2
+      id: upload-java-test-results
+      if: success() || failure()
       with:
-        report_paths: '/tmp/reports/*.xml'
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        name: java-test-results
+        path: /tmp/reports
