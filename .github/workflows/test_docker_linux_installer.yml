@@ -96,7 +96,8 @@ jobs:
       if: >-
           github.event.pull_request.head.repo.full_name == github.repository ||
           github.event_name == 'workflow_dispatch' ||
-          github.event_name == 'push'      id: go
+          github.event_name == 'push'
+      id: go
       with:
         name: Go ${{ matrix.persistence-backends }} Tests
         path: './terraform-provider-jans/${{ matrix.persistence-backends }}report.xml'
