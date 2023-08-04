@@ -90,6 +90,6 @@ jobs:
 
     - name: Publish Java Test Report
       if: always()
-      uses: scacap/action-surefire-report@v1
+      uses: starburstdata/action-testng-report@v1
       with:
         report_paths: '/tmp/reports/*.xml'
