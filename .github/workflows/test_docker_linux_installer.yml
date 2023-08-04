@@ -93,3 +93,4 @@ jobs:
       uses: starburstdata/action-testng-report@v1
       with:
         report_paths: '/tmp/reports/*.xml'
+        github_token: ${{ secrets.GITHUB_TOKEN }}
