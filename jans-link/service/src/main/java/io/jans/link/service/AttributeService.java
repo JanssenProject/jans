@@ -1,7 +1,7 @@
 /*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2014, Janssen Project
  */
 
 package io.jans.link.service;
@@ -10,7 +10,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 import io.jans.link.constants.JansConstants;
 import io.jans.model.JansCustomAttribute;
 import io.jans.link.model.config.AppConfiguration;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.model.GluuAttributeUsageType;
 import io.jans.model.GluuUserRole;
 import io.jans.model.attribute.AttributeDataType;
@@ -53,9 +53,9 @@ public class AttributeService extends io.jans.service.AttributeService {
      * @return List of person attributes
      */
     @SuppressWarnings("unchecked")
-    public List<GluuAttribute> getAllPersonAttributes(GluuUserRole gluuUserRole) {
+    public List<JansAttribute> getAllPersonAttributes(GluuUserRole gluuUserRole) {
         String key = JansConstants.CACHE_ATTRIBUTE_PERSON_KEY_LIST + "_" + gluuUserRole.getValue();
-        List<GluuAttribute> attributeList = (List<GluuAttribute>) cacheService.get(key);
+        List<JansAttribute> attributeList = (List<JansAttribute>) cacheService.get(key);
         if (attributeList == null) {
             attributeList = getAllPersonAtributesImpl(gluuUserRole, getAllAttributes());
             cacheService.put(key, attributeList);
@@ -70,12 +70,12 @@ public class AttributeService extends io.jans.service.AttributeService {
      *            List of attributes
      * @return List of organization attributes
      */
-    private List<GluuAttribute> getAllPersonAtributesImpl(GluuUserRole gluuUserRole,
-            Collection<GluuAttribute> attributes) {
-        List<GluuAttribute> attributeList = new ArrayList<GluuAttribute>();
+    private List<JansAttribute> getAllPersonAtributesImpl(GluuUserRole gluuUserRole,
+            Collection<JansAttribute> attributes) {
+        List<JansAttribute> attributeList = new ArrayList<JansAttribute>();
         String[] objectClassTypes = appConfiguration.getPersonObjectClassTypes();
         log.debug("objectClassTypes={}", Arrays.toString(objectClassTypes));
-        for (GluuAttribute attribute : attributes) {
+        for (JansAttribute attribute : attributes) {
             if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), appConfiguration.getPersonCustomObjectClass())
                     && (GluuUserRole.ADMIN == gluuUserRole)) {
                 attribute.setCustom(true);
@@ -94,9 +94,9 @@ public class AttributeService extends io.jans.service.AttributeService {
     }
 
     @SuppressWarnings("unchecked")
-    public List<GluuAttribute> getAllActiveAttributes(GluuUserRole gluuUserRole) {
+    public List<JansAttribute> getAllActiveAttributes(GluuUserRole gluuUserRole) {
         String key = JansConstants.CACHE_ATTRIBUTE_PERSON_KEY_LIST + "_" + gluuUserRole.getValue();
-        List<GluuAttribute> attributeList = (List<GluuAttribute>) cacheService.get(key);
+        List<JansAttribute> attributeList = (List<JansAttribute>) cacheService.get(key);
         if (attributeList == null) {
             attributeList = getAllPersonAtributes(gluuUserRole, getAllAttributes());
             cacheService.put(key, attributeList);
@@ -106,16 +106,16 @@ public class AttributeService extends io.jans.service.AttributeService {
 
     public boolean attributeWithSameNameDontExist(String name) {
         Filter nameFilter = Filter.createEqualityFilter("name", name);
-        List<GluuAttribute> result = persistenceEntryManager.findEntries(getDnForAttribute(null), GluuAttribute.class,
+        List<JansAttribute> result = persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                 nameFilter, null);
         return (result != null && !result.isEmpty()) ? false : true;
     }
 
-    private List<GluuAttribute> getAllPersonAtributes(GluuUserRole gluuUserRole, Collection<GluuAttribute> attributes) {
-        List<GluuAttribute> attributeList = new ArrayList<GluuAttribute>();
+    private List<JansAttribute> getAllPersonAtributes(GluuUserRole gluuUserRole, Collection<JansAttribute> attributes) {
+        List<JansAttribute> attributeList = new ArrayList<JansAttribute>();
         String[] objectClassTypes = appConfiguration.getPersonObjectClassTypes();
         log.debug("objectClassTypes={}", Arrays.toString(objectClassTypes));
-        for (GluuAttribute attribute : attributes) {
+        for (JansAttribute attribute : attributes) {
             if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), appConfiguration.getPersonCustomObjectClass())
                     && (GluuUserRole.ADMIN == gluuUserRole)) {
                 attribute.setCustom(true);
@@ -138,9 +138,9 @@ public class AttributeService extends io.jans.service.AttributeService {
      * @return List of contact attributes
      */
     @SuppressWarnings("unchecked")
-    public List<GluuAttribute> getAllContactAttributes(GluuUserRole gluuUserRole) {
+    public List<JansAttribute> getAllContactAttributes(GluuUserRole gluuUserRole) {
         String key = JansConstants.CACHE_ATTRIBUTE_CONTACT_KEY_LIST + "_" + gluuUserRole.getValue();
-        List<GluuAttribute> attributeList = (List<GluuAttribute>) cacheService.get(key);
+        List<JansAttribute> attributeList = (List<JansAttribute>) cacheService.get(key);
         if (attributeList == null) {
             attributeList = getAllContactAtributesImpl(gluuUserRole, getAllAttributes());
             cacheService.put(key, attributeList);
@@ -155,11 +155,11 @@ public class AttributeService extends io.jans.service.AttributeService {
      *            List of attributes
      * @return List of contact attributes
      */
-    private List<GluuAttribute> getAllContactAtributesImpl(GluuUserRole gluuUserRole,
-            Collection<GluuAttribute> attributes) {
-        List<GluuAttribute> returnAttributeList = new ArrayList<GluuAttribute>();
+    private List<JansAttribute> getAllContactAtributesImpl(GluuUserRole gluuUserRole,
+            Collection<JansAttribute> attributes) {
+        List<JansAttribute> returnAttributeList = new ArrayList<JansAttribute>();
         String[] objectClassTypes = appConfiguration.getContactObjectClassTypes();
-        for (GluuAttribute attribute : attributes) {
+        for (JansAttribute attribute : attributes) {
             if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), appConfiguration.getPersonCustomObjectClass())
                     && (GluuUserRole.ADMIN == gluuUserRole)) {
                 attribute.setCustom(true);
@@ -201,9 +201,9 @@ public class AttributeService extends io.jans.service.AttributeService {
      *            List of attributes
      * @return List of origins
      */
-    public List<String> getAllAttributeOrigins(Collection<GluuAttribute> attributes) {
+    public List<String> getAllAttributeOrigins(Collection<JansAttribute> attributes) {
         List<String> attributeOriginList = new ArrayList<String>();
-        for (GluuAttribute attribute : attributes) {
+        for (JansAttribute attribute : attributes) {
             String origin = attribute.getOrigin();
             if (!attributeOriginList.contains(origin)) {
                 attributeOriginList.add(attribute.getOrigin());
@@ -248,12 +248,12 @@ public class AttributeService extends io.jans.service.AttributeService {
      * @return List of cusomt attributes
      */
     @SuppressWarnings("unchecked")
-    public List<GluuAttribute> getCustomAttributes() {
-        List<GluuAttribute> attributeList = (List<GluuAttribute>) cacheService
+    public List<JansAttribute> getCustomAttributes() {
+        List<JansAttribute> attributeList = (List<JansAttribute>) cacheService
                 .get(JansConstants.CACHE_ATTRIBUTE_CUSTOM_KEY_LIST);
         if (attributeList == null) {
-            attributeList = new ArrayList<GluuAttribute>();
-            for (GluuAttribute attribute : getAllAttributes()) {
+            attributeList = new ArrayList<JansAttribute>();
+            for (JansAttribute attribute : getAllAttributes()) {
                 if (attribute.isCustom()) {
                     attributeList.add(attribute);
                 }
@@ -270,12 +270,12 @@ public class AttributeService extends io.jans.service.AttributeService {
      *            Inum
      * @return Attribute
      */
-    public GluuAttribute getAttributeByInum(String inum) {
+    public JansAttribute getAttributeByInum(String inum) {
         return getAttributeByInum(inum, getAllAtributesImpl(getDnForAttribute(null)));
     }
 
-    public GluuAttribute getAttributeByInum(String inum, List<GluuAttribute> attributes) {
-        for (GluuAttribute attribute : attributes) {
+    public JansAttribute getAttributeByInum(String inum, List<JansAttribute> attributes) {
+        for (JansAttribute attribute : attributes) {
             if (attribute.getInum().equals(inum)) {
                 return attribute;
             }
@@ -299,12 +299,12 @@ public class AttributeService extends io.jans.service.AttributeService {
         return new GluuAttributeUsageType[] { GluuAttributeUsageType.OPENID };
     }
 
-    public boolean containsAttribute(GluuAttribute attribute) {
+    public boolean containsAttribute(JansAttribute attribute) {
         return persistenceEntryManager.contains(attribute);
     }
 
     public boolean containsAttribute(String dn) {
-        return persistenceEntryManager.contains(dn, GluuAttribute.class);
+        return persistenceEntryManager.contains(dn, JansAttribute.class);
     }
 
     public String generateInumForNewAttribute() {
@@ -349,10 +349,10 @@ public class AttributeService extends io.jans.service.AttributeService {
     }
 
     @Override
-    protected List<GluuAttribute> getAllAtributesImpl(String baseDn) {
-        List<GluuAttribute> attributeList = persistenceEntryManager.findEntries(baseDn, GluuAttribute.class, null);
+    protected List<JansAttribute> getAllAtributesImpl(String baseDn) {
+        List<JansAttribute> attributeList = persistenceEntryManager.findEntries(baseDn, JansAttribute.class, null);
         String customOrigin = getCustomOrigin();
-        for (GluuAttribute attribute : attributeList) {
+        for (JansAttribute attribute : attributeList) {
             attribute.setCustom(customOrigin.equals(attribute.getOrigin()));
         }
 
@@ -367,13 +367,13 @@ public class AttributeService extends io.jans.service.AttributeService {
      * @param attributes
      *            List of attributes
      */
-    public void setAttributeMetadata(List<JansCustomAttribute> customAttributes, List<GluuAttribute> attributes) {
+    public void setAttributeMetadata(List<JansCustomAttribute> customAttributes, List<JansAttribute> attributes) {
         if ((customAttributes == null) || (attributes == null)) {
             return;
         }
 
         for (JansCustomAttribute personAttribute : customAttributes) {
-            GluuAttribute tmpAttribute = getAttributeByName(personAttribute.getName(), attributes);
+            JansAttribute tmpAttribute = getAttributeByName(personAttribute.getName(), attributes);
             if (tmpAttribute == null) {
                 log.warn("Failed to find attribute '{}' metadata", personAttribute.getName());
             }
@@ -386,13 +386,13 @@ public class AttributeService extends io.jans.service.AttributeService {
      *
      */
     public List<JansCustomAttribute> getCustomAttributesByAttributeDNs(List<String> attributeDNs,
-            HashMap<String, GluuAttribute> attributesByDNs) {
+            HashMap<String, JansAttribute> attributesByDNs) {
         List<JansCustomAttribute> customAttributes = new ArrayList<JansCustomAttribute>();
         if (attributeDNs == null) {
             return customAttributes;
         }
         for (String releasedAttributeDn : attributeDNs) {
-            GluuAttribute attribute = attributesByDNs.get(releasedAttributeDn);
+            JansAttribute attribute = attributesByDNs.get(releasedAttributeDn);
             if (attribute != null) {
                 JansCustomAttribute customAttribute = new JansCustomAttribute(attribute.getName(), releasedAttributeDn);
                 customAttribute.setMetadata(attribute);
@@ -402,9 +402,9 @@ public class AttributeService extends io.jans.service.AttributeService {
         return customAttributes;
     }
 
-    public HashMap<String, GluuAttribute> getAttributeMapByDNs(List<GluuAttribute> attributes) {
-        HashMap<String, GluuAttribute> attributeDns = new HashMap<String, GluuAttribute>();
-        for (GluuAttribute attribute : attributes) {
+    public HashMap<String, JansAttribute> getAttributeMapByDNs(List<JansAttribute> attributes) {
+        HashMap<String, JansAttribute> attributeDns = new HashMap<String, JansAttribute>();
+        for (JansAttribute attribute : attributes) {
             attributeDns.put(attribute.getDn(), attribute);
         }
         return attributeDns;
@@ -436,8 +436,8 @@ public class AttributeService extends io.jans.service.AttributeService {
      * @return
      */
     @SuppressWarnings({ "deprecation", "unchecked" })
-    public List<GluuAttribute> getAllActivePersonAttributes(GluuUserRole admin) {
-        List<GluuAttribute> activeAttributeList = (List<GluuAttribute>) cacheService
+    public List<JansAttribute> getAllActivePersonAttributes(GluuUserRole admin) {
+        List<JansAttribute> activeAttributeList = (List<JansAttribute>) cacheService
                 .get(OxConstants.CACHE_ACTIVE_ATTRIBUTE_NAME, OxConstants.CACHE_ACTIVE_ATTRIBUTE_KEY_LIST);
         if (activeAttributeList == null) {
             activeAttributeList = getAllActiveAtributesImpl(admin);
@@ -450,15 +450,15 @@ public class AttributeService extends io.jans.service.AttributeService {
      * @return
      * @throws LDAPException
      */
-    private List<GluuAttribute> getAllActiveAtributesImpl(GluuUserRole gluuUserRole) {
+    private List<JansAttribute> getAllActiveAtributesImpl(GluuUserRole gluuUserRole) {
         Filter filter = Filter.createEqualityFilter("gluuStatus", "active");
-        List<GluuAttribute> attributeList = persistenceEntryManager.findEntries(getDnForAttribute(null),
-                GluuAttribute.class, filter);
+        List<JansAttribute> attributeList = persistenceEntryManager.findEntries(getDnForAttribute(null),
+                JansAttribute.class, filter);
         String customOrigin = getCustomOrigin();
         String[] objectClassTypes = appConfiguration.getPersonObjectClassTypes();
         log.debug("objectClassTypes={}", Arrays.toString(objectClassTypes));
-        List<GluuAttribute> returnAttributeList = new ArrayList<GluuAttribute>();
-        for (GluuAttribute attribute : attributeList) {
+        List<JansAttribute> returnAttributeList = new ArrayList<JansAttribute>();
+        for (JansAttribute attribute : attributeList) {
             if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), appConfiguration.getPersonCustomObjectClass())
                     && (GluuUserRole.ADMIN == gluuUserRole)) {
                 attribute.setCustom(true);
@@ -486,23 +486,23 @@ public class AttributeService extends io.jans.service.AttributeService {
      * @return List of groups
      * @throws Exception
      */
-    public List<GluuAttribute> searchAttributes(String pattern, int sizeLimit) throws Exception {
+    public List<JansAttribute> searchAttributes(String pattern, int sizeLimit) throws Exception {
         String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(JansConstants.displayName, null, targetArray, null);
         Filter descriptionFilter = Filter.createSubstringFilter(JansConstants.description, null, targetArray, null);
         Filter nameFilter = Filter.createSubstringFilter(JansConstants.attributeName, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
-        List<GluuAttribute> result = persistenceEntryManager.findEntries(getDnForAttribute(null), GluuAttribute.class,
+        List<JansAttribute> result = persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                 searchFilter, sizeLimit);
         String customOrigin = getCustomOrigin();
-        for (GluuAttribute attribute : result) {
+        for (JansAttribute attribute : result) {
             attribute.setCustom(customOrigin.equals(attribute.getOrigin()));
         }
 
         return result;
     }
 
-    public List<GluuAttribute> searchPersonAttributes(String pattern, int sizeLimit) throws Exception {
+    public List<JansAttribute> searchPersonAttributes(String pattern, int sizeLimit) throws Exception {
         String[] objectClassTypes = appConfiguration.getPersonObjectClassTypes();
         String[] targetArray = new String[] { pattern };
         List<Filter> originFilters = new ArrayList<Filter>();
@@ -515,11 +515,11 @@ public class AttributeService extends io.jans.service.AttributeService {
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
         Filter originFilter = Filter.createORFilter(originFilters.toArray(new Filter[0]));
         Filter filter = Filter.createANDFilter(searchFilter, originFilter);
-        return persistenceEntryManager.findEntries(getDnForAttribute(null), GluuAttribute.class, filter, sizeLimit);
+        return persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class, filter, sizeLimit);
     }
 
-    public GluuAttribute getAttributeByDn(String Dn) throws Exception {
-        return persistenceEntryManager.find(GluuAttribute.class, Dn);
+    public JansAttribute getAttributeByDn(String Dn) throws Exception {
+        return persistenceEntryManager.find(JansAttribute.class, Dn);
     }
 
     public GluuUserRole[] getAttributeEditTypes() {

@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.0.16-SNAPSHOT</version>
+		<version>1.0.17-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -250,7 +250,6 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-deploy</artifactId>
-			<version>${jetty.version}</version>
 		</dependency>
 
 		<!-- Jython -->

@@ -30,7 +30,7 @@ To fix a serialization problem, try some of the following:
 - Check if the value held by the variable is needed for RRF/RFAC or some upcoming statement. If that's not the case, simply set it to `null` before RRF/RFAC occurs
 - Adjust the given class so it is "serialization" friendlier. With kryo, classes are not required to implement the `java.io.Serializable` interface 
 - Find a replacement for the problematic class
-- As a last resort, set `serializerType` property of the [engine](./engine-bridge-config.md#engine-config) to `null`. Note this will switch to standard Java serialization. This setting applies globally for all your flows
+- As a last resort, set `serializerType` property of the [engine](./engine-bridge-config.md#engine-configuration) to `null`. Note this will switch to standard Java serialization. This setting applies globally for all your flows
 
 ## Classes added on the fly
 
@@ -109,7 +109,7 @@ When a project is re-deployed, a flow remains unchanged if it comes with errors 
 
 ### Why are the contents of a list or map logged partially?
 
-This is to avoid traversing big structures fully. You can increase the value of `maxItemsLoggedInCollections` in the [engine configuration](./engine-bridge-config.md#engine-config).
+This is to avoid traversing big structures fully. You can increase the value of `maxItemsLoggedInCollections` in the [engine configuration](./engine-bridge-config.md#engine-configuration).
 
 ### How to add two numbers or compare numeric values in Agama?
 
@@ -130,7 +130,7 @@ Call java.lang.String#join "" strings
 
 See the examples in the Looping section of the [language reference](../../../agama/language-reference.md#looping).
 
-## How to know the number of iterations carried out by a loop once it has finished?
+### How to know the number of iterations carried out by a loop once it has finished?
 
 You can assign this value to a variable at the top of your loop declaration. See the examples in the Looping section of the [language reference](../../../agama/language-reference.md#looping).
 

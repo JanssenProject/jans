@@ -208,6 +208,9 @@ class PropertiesUtils(SetupUtils):
         if p.get('enable-script'):
             base.argsp.enable_script = p['enable-script'].split()
 
+        if p.get('loadTestData'):
+            base.argsp.t = True
+
         if p.get('rdbm_type') == 'pgsql' and not p.get('rdbm_port'):
             p['rdbm_port'] = '5432'
 

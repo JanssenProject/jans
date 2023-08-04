@@ -55,7 +55,7 @@ the OpenAPI specification of
 ## Disabling The Endpoint Using Feature Flag
 
 `PAR` endpoint can be enabled or disabled using [PAR feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#par).
-Use [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
+Use [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/config-tools/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
 disable `PAR` flag as required.
@@ -67,7 +67,7 @@ disable `PAR` flag as required.
 ### Global Janssen Server configuration properties
 
 PAR endpoint can be further configured using Janssen Server configuration properties listed below. It can be configured via
-[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) (navigate to `Auth Server`->`Properties`), admin UI or directly in persistence layer.
+[Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) (navigate to `Auth Server`->`Properties`), admin UI or directly in persistence layer.
 
 - [mtlsParEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsparendpoint) - Mutual TLS (mTLS) Pushed Authorization Requests (PAR) endpoint URL
 - [parEndpoint](../../reference/json/properties/janssenauthserver-properties.md#parendpoint) - Pushed Authorization Requests (PAR) Endpoint location

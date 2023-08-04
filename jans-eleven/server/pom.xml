@@ -9,7 +9,7 @@
 	<parent>
 		<artifactId>jans-eleven-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.0.16-SNAPSHOT</version>
+		<version>1.0.17-SNAPSHOT</version>
 	</parent>
 
 	<build>
@@ -49,6 +49,10 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
 		</dependency>
 
 		<!-- Google -->

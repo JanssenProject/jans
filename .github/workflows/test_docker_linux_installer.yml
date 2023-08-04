@@ -53,7 +53,7 @@ jobs:
       run: |
         ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
         sudo chmod u+x automation/startjanssenmonolithdemo.sh
-        sudo bash ./automation/startjanssenmonolithdemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} $ip ${{ github.sha }}
+        sudo bash ./automation/startjanssenmonolithdemo.sh "demoexample.jans.io" "${{ matrix.persistence-backends }}" "${ip}" "${{ github.sha }}"
         persistence=$(echo "${{ matrix.persistence-backends }}" | tr '[:upper:]' '[:lower:]')
         
         echo "generating rdbms docs for ${{ matrix.persistence-backends }}..."
@@ -80,8 +80,16 @@ jobs:
         go install github.com/jstemmer/go-junit-report/v2@latest
         go test -v 2>&1 ./... | go-junit-report > ${{ matrix.persistence-backends }}report.xml
 
-    - uses: actions/upload-artifact@v2  # upload test results
-      if: success() || failure()        # run this step even if previous step failed
+
+    - uses: actions/upload-artifact@v2
+      id: upload-go-test-results
+      if: success() || failure()
       with:
         name: go-test-results
         path: ./terraform-provider-jans/${{ matrix.persistence-backends }}report.xml
+
+    - name: Publish Java Test Report
+      if: always()
+      uses: scacap/action-surefire-report@v1
+      with:
+        report_paths: '/tmp/reports/*.xml'

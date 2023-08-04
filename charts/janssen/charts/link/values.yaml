@@ -31,7 +31,7 @@ image:
   # -- Image  to use for deploying.
   repository: ghcr.io/janssenproject/jans/link
   # -- Image  tag to use for deploying.
-  tag: 1.0.16_dev
+  tag: 1.0.17_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
@@ -57,20 +57,22 @@ service:
   sessionAffinityConfig:
     clientIP:
       timeoutSeconds: 10800
-# -- Configure the liveness healthcheck for the auth server if needed.
+# -- Configure the liveness healthcheck for the link if needed.
 livenessProbe:
   # -- Executes the python3 healthcheck.
-  httpGet:
-    path: /jans-link/api/v1/health/live
-    port: 9091
+  exec:
+    command:
+      - python3
+      - /app/scripts/healthcheck.py
   initialDelaySeconds: 30
   periodSeconds: 30
   timeoutSeconds: 5
-# -- Configure the readiness healthcheck for the auth server if needed.
+# -- Configure the readiness healthcheck for the link if needed.
 readinessProbe:
-  httpGet:
-    path: /jans-link/api/v1/health/ready
-    port: 9091
+  exec:
+    command:
+      - python3
+      - /app/scripts/healthcheck.py
   initialDelaySeconds: 25
   periodSeconds: 25
   timeoutSeconds: 5

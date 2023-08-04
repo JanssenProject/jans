@@ -431,8 +431,8 @@ paths:
     get:
       tags:
       - Attribute
-      summary: Gets a list of Gluu attributes.
-      description: Gets a list of Gluu attributes.
+      summary: Gets a list of Jans attributes.
+      description: Gets a list of Jans attributes.
       operationId: get-attributes
       parameters:
       - name: limit
@@ -582,11 +582,11 @@ paths:
       description: Updates an existing attribute
       operationId: put-attributes
       requestBody:
-        description: GluuAttribute object
+        description: JansAttribute object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GluuAttribute'
+              $ref: '#/components/schemas/JansAttribute'
             examples:
               Request example:
                 description: Request example
@@ -624,7 +624,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -670,11 +670,11 @@ paths:
       description: Adds a new attribute
       operationId: post-attributes
       requestBody:
-        description: GluuAttribute object
+        description: JansAttribute object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GluuAttribute'
+              $ref: '#/components/schemas/JansAttribute'
             examples:
               Request example:
                 description: Request example
@@ -712,7 +712,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -771,7 +771,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -844,8 +844,8 @@ paths:
     patch:
       tags:
       - Attribute
-      summary: Partially modify a GluuAttribute
-      description: Partially modify a GluuAttribute
+      summary: Partially modify a JansAttribute
+      description: Partially modify a JansAttribute
       operationId: patch-attributes-by-inum
       parameters:
       - name: inum
@@ -869,11 +869,11 @@ paths:
                   [ {op:replace, path: displayName, value: "CustomAttribute" } ]
       responses:
         "200":
-          description: Updated GluuAttribute
+          description: Updated JansAttribute
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -7348,7 +7348,7 @@ components:
           format: int32
         regexp:
           type: string
-    GluuAttribute:
+    JansAttribute:
       required:
       - dataType
       - description
@@ -7450,19 +7450,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanEdit:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
+        adminCanEdit:
+          type: boolean
         userCanAccess:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
-        adminCanAccess:
+        whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8206,6 +8206,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8215,8 +8217,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9168,7 +9168,7 @@ components:
           - update_token
           - config_api_auth
           - modify_ssa_response
-          - fido2_interception
+          - fido2_extension
         programmingLanguage:
           type: string
           enum:

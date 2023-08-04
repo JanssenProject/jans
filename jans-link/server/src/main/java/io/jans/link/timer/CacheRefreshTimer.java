@@ -214,8 +214,13 @@ public class CacheRefreshTimer {
 			return false;
 		}
 
-		long poolingInterval = StringHelper.toInteger(currentConfiguration.getPollingInterval()) * 60 * 1000;
+		long poolingInterval = StringHelper.toInteger(currentConfiguration.getPollingInterval());
 		if (poolingInterval < 0) {
+			return false;
+		}
+
+		if(null == currentConfiguration.getSourceConfigs()){
+			log.info("Source Config is null, nothing to load ");
 			return false;
 		}
 
@@ -263,6 +268,7 @@ public class CacheRefreshTimer {
 		}
 
 		long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
+		timeDiffrence = timeDiffrence/1000;
 
 		return timeDiffrence >= poolingInterval;
 	}
@@ -1134,6 +1140,10 @@ public class CacheRefreshTimer {
 
 	private LdapServerConnection[] prepareLdapServerConnections(CacheRefreshConfiguration cacheRefreshConfiguration,
 			List<GluuLdapConfiguration> ldapConfigurations) {
+		if(null == ldapConfigurations ){
+			return null;
+		}
+
 		LdapServerConnection[] ldapServerConnections = new LdapServerConnection[ldapConfigurations.size()];
 		for (int i = 0; i < ldapConfigurations.size(); i++) {
 			ldapServerConnections[i] = prepareLdapServerConnection(cacheRefreshConfiguration,
