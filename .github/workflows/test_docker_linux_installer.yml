@@ -80,17 +80,24 @@ jobs:
         go install github.com/jstemmer/go-junit-report/v2@latest
         go test -v 2>&1 ./... | go-junit-report > ${{ matrix.persistence-backends }}report.xml
 
-
-    - uses: actions/upload-artifact@v2
-      id: upload-go-test-results
-      if: success() || failure()
+    - uses: dorny/test-reporter@v1
+      if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+      id: java
       with:
-        name: go-test-results
-        path: ./terraform-provider-jans/${{ matrix.persistence-backends }}report.xml
+        if: >-
+          github.event.pull_request.head.repo.full_name == github.repository ||
+          github.event_name == 'workflow_dispatch' ||
+          github.event_name == 'push'
+        name: Java ${{ matrix.persistence-backends }} Tests
+        path: '/tmp/reports/*.xml'
+        reporter: java-junit
 
-    - uses: actions/upload-artifact@v2
-      id: upload-java-test-results
-      if: success() || failure()
+    - uses: dorny/test-reporter@v1
+      if: >-
+          github.event.pull_request.head.repo.full_name == github.repository ||
+          github.event_name == 'workflow_dispatch' ||
+          github.event_name == 'push'      id: go
       with:
-        name: java-test-results
-        path: /tmp/reports
+        name: Go ${{ matrix.persistence-backends }} Tests
+        path: './terraform-provider-jans/${{ matrix.persistence-backends }}report.xml'
+        reporter: java-junit
