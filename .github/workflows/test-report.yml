@@ -15,14 +15,18 @@ jobs:
         name: Go Tests
         path: '*report.xml'
         reporter: java-junit
+    - name: Checkout repository
+      uses: actions/checkout@v2
     - name: Download artifacts
       if: always()
       uses: actions/download-artifact@v3
       with:
+        name: java-test-results
         path: /tmp/results
     - name: Unzip test results
       if: always()
       run: |
+        ls
         ls -la /tmp/results
         unzip -o /tmp/results/java-test-results.zip
         ls -la
