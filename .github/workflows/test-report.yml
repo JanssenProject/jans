@@ -15,3 +15,22 @@ jobs:
         name: Go Tests
         path: '*report.xml'
         reporter: java-junit
+    - name: Download artifacts
+      if: always()
+      uses: actions/download-artifact@v3
+      with:
+        path: /tmp/results
+    - name: Unzip test results
+      if: always()
+      run: |
+        ls -la /tmp/results
+        unzip -o /tmp/results/java-test-results.zip
+        ls -la
+    - uses: dorny/test-reporter@v1
+      if: always()
+      id: java
+      with:
+        artifact: go-test-results
+        name: MYSQL Tests
+        path: 'MYSQL-jans-auth-client-testng-results.xml'
+        reporter: java-junit
