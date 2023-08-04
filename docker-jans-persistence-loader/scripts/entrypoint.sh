@@ -1,5 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env sh
+
 set -e
 
-python3 /app/scripts/wait.py
-exec python3 /app/scripts/bootstrap.py
+# get script directory
+basedir=$(dirname "$(readlink -f -- "$0")")
+
+python3 "$basedir/wait.py"
+exec python3 "$basedir/bootstrap.py"
