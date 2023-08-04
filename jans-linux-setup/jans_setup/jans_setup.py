@@ -79,6 +79,10 @@ if paths.IAMPACKAGED:
 
 from setup_app import static
 
+if argsp.encode_salt and len(argsp.encode_salt) != 24:
+    print("{}Length of encde salt should be 24 characters.{}".format(static.colors.DANGER, static.colors.ENDC))
+    sys.exit()
+
 # second import module base, this makes some initial settings
 from setup_app.utils import base
 base.current_app.profile = profile
