@@ -11,6 +11,8 @@ on:
       - main
     paths:
       - "jans-linux-setup/**"
+permissions:
+  checks: write
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -80,19 +82,22 @@ jobs:
         go install github.com/jstemmer/go-junit-report/v2@latest
         go test -v 2>&1 ./... | go-junit-report > ${{ matrix.persistence-backends }}report.xml
 
-    - uses: dorny/test-reporter@v1
-      if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-      id: java
+    - id: java
+      continue-on-error: true
+      if: >-
+        github.event.pull_request.head.repo.full_name == github.repository ||
+        github.event_name == 'workflow_dispatch' ||
+        github.event_name == 'push'
+      name: Publish Java ${{ matrix.persistence-backends }} Test Report
+      uses: mikepenz/action-junit-report@v3
       with:
-        if: >-
-          github.event.pull_request.head.repo.full_name == github.repository ||
-          github.event_name == 'workflow_dispatch' ||
-          github.event_name == 'push'
-        name: Java ${{ matrix.persistence-backends }} Tests
-        path: '/tmp/reports/*.xml'
-        reporter: java-junit
+        report_paths: '/tmp/reports/*.xml'
+        test_files_prefix: true
+        detailed_summary: true
+        check_name: Java ${{ matrix.persistence-backends }} Tests
 
     - uses: dorny/test-reporter@v1
+      continue-on-error: true
       if: >-
           github.event.pull_request.head.repo.full_name == github.repository ||
           github.event_name == 'workflow_dispatch' ||
