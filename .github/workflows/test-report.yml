@@ -31,6 +31,6 @@ jobs:
       id: java
       with:
         artifact: go-test-results
-        name: Java Tests
+        name: MYSQL Tests
         path: 'MYSQL-jans-auth-client-testng-results.xml'
         reporter: java-junit
