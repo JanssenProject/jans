@@ -70,10 +70,10 @@ Copying: ./jans-fido2/client/target/Fido2-Client.jar to ./_out/Fido2-Client.jar
 OK
 --------------------------------------
 --------------------------------------
-SRC_FPATHS[9] = ./jans-scim/server/target/jans-scim-server-1.0.16-SNAPSHOT.war
-DST_FPATHS[9] = ./_out/jans-scim-server-1.0.16-SNAPSHOT.war
-Copying: ./jans-scim/server/target/jans-scim-server-1.0.16-SNAPSHOT.war to ./_out/jans-scim-server-1.0.16-SNAPSHOT.war
-'./jans-scim/server/target/jans-scim-server-1.0.16-SNAPSHOT.war' -> './_out/jans-scim-server-1.0.16-SNAPSHOT.war'
+SRC_FPATHS[9] = ./jans-scim/server/target/jans-scim-server-1.0.17-SNAPSHOT.war
+DST_FPATHS[9] = ./_out/jans-scim-server-1.0.17-SNAPSHOT.war
+Copying: ./jans-scim/server/target/jans-scim-server-1.0.17-SNAPSHOT.war to ./_out/jans-scim-server-1.0.17-SNAPSHOT.war
+'./jans-scim/server/target/jans-scim-server-1.0.17-SNAPSHOT.war' -> './_out/jans-scim-server-1.0.17-SNAPSHOT.war'
 OK
 --------------------------------------
 --------------------------------------
@@ -105,38 +105,38 @@ Copying: ./jans-config-api/plugins/admin-ui-plugin/target/admin-ui-plugin-distri
 OK
 --------------------------------------
 --------------------------------------
-SRC_FPATHS[14] = ./jans-config-api/plugins/fido2-plugin/target/fido2-plugin-1.0.16-SNAPSHOT-distribution.jar
-DST_FPATHS[14] = ./_out/_plugins/fido2-plugin-1.0.16-SNAPSHOT-distribution.jar
-Copying: ./jans-config-api/plugins/fido2-plugin/target/fido2-plugin-1.0.16-SNAPSHOT-distribution.jar to ./_out/_plugins/fido2-plugin-1.0.16-SNAPSHOT-distribution.jar
-'./jans-config-api/plugins/fido2-plugin/target/fido2-plugin-1.0.16-SNAPSHOT-distribution.jar' -> './_out/_plugins/fido2-plugin-1.0.16-SNAPSHOT-distribution.jar'
+SRC_FPATHS[14] = ./jans-config-api/plugins/fido2-plugin/target/fido2-plugin-1.0.17-SNAPSHOT-distribution.jar
+DST_FPATHS[14] = ./_out/_plugins/fido2-plugin-1.0.17-SNAPSHOT-distribution.jar
+Copying: ./jans-config-api/plugins/fido2-plugin/target/fido2-plugin-1.0.17-SNAPSHOT-distribution.jar to ./_out/_plugins/fido2-plugin-1.0.17-SNAPSHOT-distribution.jar
+'./jans-config-api/plugins/fido2-plugin/target/fido2-plugin-1.0.17-SNAPSHOT-distribution.jar' -> './_out/_plugins/fido2-plugin-1.0.17-SNAPSHOT-distribution.jar'
 OK
 --------------------------------------
 --------------------------------------
-SRC_FPATHS[15] = ./jans-config-api/plugins/scim-plugin/target/scim-plugin-1.0.16-SNAPSHOT-distribution.jar
-DST_FPATHS[15] = ./_out/_plugins/scim-plugin-1.0.16-SNAPSHOT-distribution.jar
-Copying: ./jans-config-api/plugins/scim-plugin/target/scim-plugin-1.0.16-SNAPSHOT-distribution.jar to ./_out/_plugins/scim-plugin-1.0.16-SNAPSHOT-distribution.jar
-'./jans-config-api/plugins/scim-plugin/target/scim-plugin-1.0.16-SNAPSHOT-distribution.jar' -> './_out/_plugins/scim-plugin-1.0.16-SNAPSHOT-distribution.jar'
+SRC_FPATHS[15] = ./jans-config-api/plugins/scim-plugin/target/scim-plugin-1.0.17-SNAPSHOT-distribution.jar
+DST_FPATHS[15] = ./_out/_plugins/scim-plugin-1.0.17-SNAPSHOT-distribution.jar
+Copying: ./jans-config-api/plugins/scim-plugin/target/scim-plugin-1.0.17-SNAPSHOT-distribution.jar to ./_out/_plugins/scim-plugin-1.0.17-SNAPSHOT-distribution.jar
+'./jans-config-api/plugins/scim-plugin/target/scim-plugin-1.0.17-SNAPSHOT-distribution.jar' -> './_out/_plugins/scim-plugin-1.0.17-SNAPSHOT-distribution.jar'
 OK
 --------------------------------------
 --------------------------------------
-SRC_FPATHS[16] = ./jans-config-api/plugins/user-mgt-plugin/target/user-mgt-plugin-1.0.16-SNAPSHOT-distribution.jar
-DST_FPATHS[16] = ./_out/_plugins/user-mgt-plugin-1.0.16-SNAPSHOT-distribution.jar
-Copying: ./jans-config-api/plugins/user-mgt-plugin/target/user-mgt-plugin-1.0.16-SNAPSHOT-distribution.jar to ./_out/_plugins/user-mgt-plugin-1.0.16-SNAPSHOT-distribution.jar
-'./jans-config-api/plugins/user-mgt-plugin/target/user-mgt-plugin-1.0.16-SNAPSHOT-distribution.jar' -> './_out/_plugins/user-mgt-plugin-1.0.16-SNAPSHOT-distribution.jar'
+SRC_FPATHS[16] = ./jans-config-api/plugins/user-mgt-plugin/target/user-mgt-plugin-1.0.17-SNAPSHOT-distribution.jar
+DST_FPATHS[16] = ./_out/_plugins/user-mgt-plugin-1.0.17-SNAPSHOT-distribution.jar
+Copying: ./jans-config-api/plugins/user-mgt-plugin/target/user-mgt-plugin-1.0.17-SNAPSHOT-distribution.jar to ./_out/_plugins/user-mgt-plugin-1.0.17-SNAPSHOT-distribution.jar
+'./jans-config-api/plugins/user-mgt-plugin/target/user-mgt-plugin-1.0.17-SNAPSHOT-distribution.jar' -> './_out/_plugins/user-mgt-plugin-1.0.17-SNAPSHOT-distribution.jar'
 OK
 --------------------------------------
 --------------------------------------
-SRC_FPATHS[17] = ./jans-orm/spanner-libs/target/jans-orm-spanner-libs-1.0.16-SNAPSHOT-distribution.zip
-DST_FPATHS[17] = ./_out/jans-orm-spanner-libs-1.0.16-SNAPSHOT-distribution.zip
-Copying: ./jans-orm/spanner-libs/target/jans-orm-spanner-libs-1.0.16-SNAPSHOT-distribution.zip to ./_out/jans-orm-spanner-libs-1.0.16-SNAPSHOT-distribution.zip
-'./jans-orm/spanner-libs/target/jans-orm-spanner-libs-1.0.16-SNAPSHOT-distribution.zip' -> './_out/jans-orm-spanner-libs-1.0.16-SNAPSHOT-distribution.zip'
+SRC_FPATHS[17] = ./jans-orm/spanner-libs/target/jans-orm-spanner-libs-1.0.17-SNAPSHOT-distribution.zip
+DST_FPATHS[17] = ./_out/jans-orm-spanner-libs-1.0.17-SNAPSHOT-distribution.zip
+Copying: ./jans-orm/spanner-libs/target/jans-orm-spanner-libs-1.0.17-SNAPSHOT-distribution.zip to ./_out/jans-orm-spanner-libs-1.0.17-SNAPSHOT-distribution.zip
+'./jans-orm/spanner-libs/target/jans-orm-spanner-libs-1.0.17-SNAPSHOT-distribution.zip' -> './_out/jans-orm-spanner-libs-1.0.17-SNAPSHOT-distribution.zip'
 OK
 --------------------------------------
 --------------------------------------
-SRC_FPATHS[18] = ./jans-link/server/target/jans-link-server-1.0.16-SNAPSHOT.war
-DST_FPATHS[18] = ./_out/jans-link-server-1.0.16-SNAPSHOT.war
-Copying: ./jans-link/server/target/jans-link-server-1.0.16-SNAPSHOT.war to ./_out/jans-link-server-1.0.16-SNAPSHOT.war
-'./jans-link/server/target/jans-link-server-1.0.16-SNAPSHOT.war' -> './_out/jans-link-server-1.0.16-SNAPSHOT.war'
+SRC_FPATHS[18] = ./jans-link/server/target/jans-link-server-1.0.17-SNAPSHOT.war
+DST_FPATHS[18] = ./_out/jans-link-server-1.0.17-SNAPSHOT.war
+Copying: ./jans-link/server/target/jans-link-server-1.0.17-SNAPSHOT.war to ./_out/jans-link-server-1.0.17-SNAPSHOT.war
+'./jans-link/server/target/jans-link-server-1.0.17-SNAPSHOT.war' -> './_out/jans-link-server-1.0.17-SNAPSHOT.war'
 OK
 --------------------------------------
 --------------------------------------
@@ -147,10 +147,10 @@ Copying: ./jans-link/server-fips/target/jans-link-server-fips.war to ./_out/jans
 OK
 --------------------------------------
 --------------------------------------
-SRC_FPATHS[20] = ./jans-link/service/target/jans-link-service-1.0.16-SNAPSHOT.jar
-DST_FPATHS[20] = ./_out/jans-link-service-1.0.16-SNAPSHOT.jar
-Copying: ./jans-link/service/target/jans-link-service-1.0.16-SNAPSHOT.jar to ./_out/jans-link-service-1.0.16-SNAPSHOT.jar
-'./jans-link/service/target/jans-link-service-1.0.16-SNAPSHOT.jar' -> './_out/jans-link-service-1.0.16-SNAPSHOT.jar'
+SRC_FPATHS[20] = ./jans-link/service/target/jans-link-service-1.0.17-SNAPSHOT.jar
+DST_FPATHS[20] = ./_out/jans-link-service-1.0.17-SNAPSHOT.jar
+Copying: ./jans-link/service/target/jans-link-service-1.0.17-SNAPSHOT.jar to ./_out/jans-link-service-1.0.17-SNAPSHOT.jar
+'./jans-link/service/target/jans-link-service-1.0.17-SNAPSHOT.jar' -> './_out/jans-link-service-1.0.17-SNAPSHOT.jar'
 OK
 --------------------------------------
 --------------------------------------
