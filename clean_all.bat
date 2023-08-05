@@ -31,3 +31,7 @@ cd ..
 cd .\\jans-config-api
 cmd /C mvn -Dmaven.test.skip=true -Ddependency-check.skip=true clean
 cd ..
+
+cd .\\jans-eleven
+cmd /C mvn -Dmaven.test.skip=true -Ddependency-check.skip=true clean
+cd ..

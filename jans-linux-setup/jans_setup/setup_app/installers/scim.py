@@ -18,7 +18,7 @@ class ScimInstaller(JettyInstaller):
 #            ]
 
     source_files = [
-            (os.path.join(Config.dist_jans_dir, 'jans-scim.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-scim-server-1.0.16-SNAPSHOT.war')),
+            (os.path.join(Config.dist_jans_dir, 'jans-scim.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-scim-server-1.0.17-SNAPSHOT.war')),
             ]
 
     source_fips_files = [
