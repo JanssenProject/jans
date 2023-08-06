@@ -90,9 +90,9 @@
 				<configuration>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>external</shadedClassifierName>   
-<!--                    
+<!--
 					<minimizeJar>true</minimizeJar>
--->                    
+-->
 					<createDependencyReducedPom>false</createDependencyReducedPom>
 					<createSourcesJar>false</createSourcesJar>
 				</configuration>

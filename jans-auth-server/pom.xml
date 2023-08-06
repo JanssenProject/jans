@@ -106,18 +106,18 @@
 	</scm>
 
 	<modules>
-		<module>model</module>
-		<module>agama/model</module>
-		<module>persistence-model</module>
-		<module>test-model</module>
-		<module>client</module>
-		<module>static</module>
-		<module>common</module>
-		<module>agama/engine</module>
-		<module>agama/inboundID</module>
-		<module>server</module>
-		<module>server-fips</module>
-	</modules>
+        <module>model</module>
+        <module>agama/model</module>
+        <module>persistence-model</module>
+        <module>test-model</module>
+        <module>client</module>
+        <module>static</module>
+        <module>common</module>
+        <module>agama/engine</module>
+        <module>agama/inboundID</module>
+        <module>server</module>
+        <module>server-fips</module>
+    </modules>
 
 	<dependencyManagement>
 		<dependencies>

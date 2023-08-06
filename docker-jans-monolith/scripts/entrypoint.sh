@@ -41,6 +41,7 @@ install_jans() {
   echo "test_client_id=${TEST_CLIENT_ID}"| tee -a setup.properties > /dev/null
   echo "test_client_pw=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null1
   echo "test_client_trusted=""$([[ ${TEST_CLIENT_TRUSTED} == true ]] && echo True || echo True)" | tee -a setup.properties > /dev/null
+  echo "loadTestData=True" | tee -a setup.properties > /dev/null
   if [[ "${CN_INSTALL_MYSQL}" == "true" ]] || [[ "${CN_INSTALL_PGSQL}" == "true" ]]; then
     echo "Installing with RDBMS"
     echo "rdbm_install=2" | tee -a setup.properties > /dev/null
@@ -65,7 +66,7 @@ install_jans() {
   echo "*****   PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"
   echo "Executing https://raw.githubusercontent.com/JanssenProject/jans/${JANS_SOURCE_VERSION}/jans-linux-setup/jans_setup/install.py > install.py"
   curl https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
-  echo "Executing python3 install.py -yes --args=-f setup.properties -n -test-client-id=${TEST_CLIENT_ID} -test-client-secret=${TEST_CLIENT_SECRET} --test-client-trusted"
+  echo "Executing python3 install.py -yes --args=-f setup.properties -n"
   python3 install.py -yes --args="-f setup.properties -n"
   echo "*****   Setup script completed!!    *****"
 
@@ -81,6 +82,49 @@ check_installed_jans() {
   fi
 }
 
+prepare_auth_server_test() {
+    WORKING_DIRECTORY=$PWD
+    echo "*****   cloning jans auth server folder!!   *****"
+    rm -rf /tmp/jans || echo "Jans isn't cloned yet..Cloning"\
+    && git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout "${JANS_SOURCE_VERSION}" \
+    && git sparse-checkout set jans-auth-server \
+    && cd jans-auth-server \
+    && echo "Copying auth server test profiles from ephemeral server" \
+    && cp -R /opt/jans/jans-setup/output/test/jans-auth ./ \
+    && echo "Creating auth server profile folders" \
+    && mkdir -p ./client/profiles/"${CN_HOSTNAME}" \
+    && mkdir -p ./server/profiles/"${CN_HOSTNAME}" \
+    && echo "Copying auth server profile files" \
+    && cp ./jans-auth/client/* ./client/profiles/"${CN_HOSTNAME}" \
+    && cp ./jans-auth/server/* ./server/profiles"/${CN_HOSTNAME}" \
+    && echo "Copying auth server keystores from default profile" \
+    && cp -f ./client/profiles/default/client_keystore.p12 ./client/profiles/"${CN_HOSTNAME}" \
+    && cp -f ./server/profiles/default/client_keystore.p12 ./server/profiles/"${CN_HOSTNAME}" \
+    && echo "Removing test profile folder" \
+    && rm -rf ./jans-auth \
+    && cd agama \
+    && cp /opt/jans/jans-setup/output/test/jans-auth/config-agama-test.properties . \
+    && mkdir -p ./engine/profiles/"${CN_HOSTNAME}" \
+    && mv config-agama-test.properties ./engine/profiles/"${CN_HOSTNAME}"/config-agama-test.properties  \
+    && cd .. \
+    && echo "Checking if the compilation and install is ok without running the tests" \
+    && echo "Installing the jans cert in local keystore" \
+    && openssl s_client -connect "${CN_HOSTNAME}":443 2>&1 |sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/httpd.crt \
+    && TrustStorePW=$(grep -Po '(?<=defaultTrustStorePW=)\S+' /opt/jans/jans-setup/setup.properties.last) \
+    && keytool -import -trustcacerts -noprompt -storepass "${TrustStorePW}" -alias "${CN_HOSTNAME}" -keystore /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts -file /tmp/httpd.crt \
+    && cd "$WORKING_DIRECTORY"
+}
+
+prepare_java_tests() {
+  echo "*****   Running Java tests!!   *****"
+  echo "*****   Running Auth server tests!!   *****"
+  prepare_auth_server_test
+  echo "*****   Java tests completed!!   *****"
+}
+
 start_services() {
   /etc/init.d/apache2 start
   /opt/dist/scripts/jans-auth start
@@ -91,6 +135,7 @@ start_services() {
 
 check_installed_jans
 start_services
+prepare_java_tests || "Java test preparations failed!!"
 
 # use -F option to follow (and retry) logs
 tail -F /opt/jans/jetty/jans-auth/logs/*.log \
