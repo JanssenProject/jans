@@ -253,14 +253,11 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         base.download('https://github.com/JanssenProject/jans/raw/main/jans-auth-server/client/src/test/resources/jans_test_client_keys.zip', target_jwks_fn)
         self.run([paths.cmd_unzip, '-o', target_jwks_fn, '-d', base.current_app.HttpdInstaller.server_root])
         self.removeFile(target_jwks_fn)
+        self.run([paths.cmd_chown, '-R', base.current_app.HttpdInstaller.apache_user+":"+base.current_app.HttpdInstaller.apache_group, '/var/www/html/jans-auth-client'])
         self.run([paths.cmd_chmod, '-R', '660', '/var/www/html/jans-auth-client'])
         self.run([paths.cmd_chmod, 'ug+X', '/var/www/html/jans-auth-client'])
 
         self.chown(os.path.join(base.current_app.HttpdInstaller.server_root, 'jans-auth-client'), base.current_app.HttpdInstaller.apache_user, base.current_app.HttpdInstaller.apache_group, recursive=True)
-
-        self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
-        self.run([paths.cmd_chmod, '-R', '660', '/var/www/html/jans-auth-client'])
-        self.run([paths.cmd_chmod, 'ug+X', '/var/www/html/jans-auth-client'])
 
         Config.pbar.progress(self.service_name, "Updating oxauth config", False)
         oxAuthConfDynamic_changes = {

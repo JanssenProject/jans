@@ -22,13 +22,11 @@
             <class name="io.jans.as.model.uma.JsonLogicNodeParserTest" />
         </classes>
     </test>
-<!--
     <test name="JWK Thumbprint Computation Test" enabled="true">
         <classes>
             <class name="io.jans.as.model.jwk.JSONWebKeyTest"/>
         </classes>
     </test>
--->
 
     <!-- Util tests -->
     <test name="Base64Util Test" enabled="true">
@@ -46,13 +44,11 @@
             <class name="io.jans.as.model.util.CertUtilsTest"/>
         </classes>
     </test>
-<!--
     <test name="HashUtil Test" enabled="true">
         <classes>
             <class name="io.jans.as.model.util.HashUtilTest"/>
         </classes>
     </test>
--->
     <test name="JwtUtil Test" enabled="true">
         <classes>
             <class name="io.jans.as.model.util.JwtUtilTest"/>
