@@ -11,7 +11,7 @@ tags:
 Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Supported versions
-- Red Hat Enterprise Linus 8 (RHEL 8)
+- Red Hat Enterprise Linux 8 (RHEL 8)
 
 ## Install the Package
 
