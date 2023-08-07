@@ -17,8 +17,7 @@ import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
-
-import io.jans.util.security.SecurityProviderUtility;import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.apache.http.HttpStatus;
 import org.json.JSONObject;
@@ -39,10 +38,6 @@ import static org.testng.Assert.*;
 
 @Listeners(MockitoTestNGListener.class)
 public class SsaServiceTest {
-	
-    static {
-    	SecurityProviderUtility.installBCProvider();
-    }	
 
     @Mock
     private Logger log;
@@ -72,59 +67,6 @@ public class SsaServiceTest {
 
     @BeforeMethod
     public void setUp() {
-        Security.addProvider(SecurityProviderUtility.getBCProvider());
-        cryptoProvider = new AbstractCryptoProvider() {
-
-            @Override
-            public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException {
-                return null;
-            }
-
-            @Override
-            public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength) throws CryptoProviderException {
-                return null;
-            }
-
-            @Override
-            public String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException {
-                try {
-                    RSAPrivateKey privateKey = ((RSAKey) JWK.parse(senderJwkJson)).toRSAPrivateKey();
-                    Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), SecurityProviderUtility.getBCProvider());
-                    signature.initSign(privateKey);
-                    signature.update(signingInput.getBytes());
-
-                    return Base64Util.base64urlencode(signature.sign());
-                } catch (JOSEException | ParseException | NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
-                    throw new CryptoProviderException(e);
-                }
-            }
-
-            @Override
-            public boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException {
-                return false;
-            }
-
-            @Override
-            public boolean deleteKey(String keyId) throws CryptoProviderException {
-                return false;
-            }
-
-            @Override
-            public boolean containsKey(String keyId) {
-                return false;
-            }
-
-            @Override
-            public PrivateKey getPrivateKey(String keyId) throws CryptoProviderException {
-                return null;
-            }
-
-            @Override
-            public PublicKey getPublicKey(String alias) throws CryptoProviderException {
-                return null;
-            }
-        };
-
         Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.HOUR, 24);
         ssa = new Ssa();
