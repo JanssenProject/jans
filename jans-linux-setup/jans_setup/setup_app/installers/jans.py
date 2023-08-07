@@ -584,6 +584,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
             cmd = [setsebool_cmd] + se_pol.split()
             self.run(cmd)
 
+        Config.post_messages.append("The following SELinux Policies were applied:\n{}".format( '\n'.join([ '  * ' + p for p in selinux_policies])))
+
     def enable_scripts(self, inums, enable=True):
         if inums:
             for inum in inums:
