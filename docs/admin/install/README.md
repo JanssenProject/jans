@@ -47,12 +47,14 @@ database. If you intend to deploy a Janssen Server in production for high
 concurrency, make sure you benchmark the exact flows you expect to serve
 in production. 
 
-## SELinux
+## SELinux Policy
 
-Janssen servers bind to localhost and apache web server forwards requests to 
-Janssen servers (reverse proxy). If you have SELinux enabled VM, apache can't
-forwards requests to Jansses server. Therefore setup script adds the following
-SELinux policy:
+Janssen Server installs and uses the Apache web server as a `reverse proxy`. 
+While the Janssen Server itself will bind to `localhost`, the Apache reverse 
+proxy listens to external interfaces and forwards the 
+request to the Janssen Server. If you have SELinux enabled VM, 
+then the Apache web server can't forward the request to Janssen Server. 
+Therefore setup script adds the following SELinux policy:
 
 ```
 httpd_can_network_connect 1 -P
