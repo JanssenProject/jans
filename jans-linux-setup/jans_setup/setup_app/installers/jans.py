@@ -200,6 +200,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 self.run([paths.cmd_chmod, '644', Config.sysemProfile])
 
     def make_salt(self):
+        if base.argsp.encode_salt:
+            self.logIt("Salt {} is provided via argument".format(base.argsp.encode_salt))
+            Config.encode_salt = base.argsp.encode_salt
+
         if not Config.encode_salt:
             Config.encode_salt= self.getPW() + self.getPW()
 

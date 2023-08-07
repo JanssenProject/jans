@@ -23,15 +23,15 @@ See the [Config API Guide](../config-api/README.md for more information.
 1. API - you can call the configuration endpoints with the API tool of your
 choice, like `curl`. With this mechanism, you can use client credential grant
 to obtain an OAuth token--just make sure it has the required scope to call the
-method / endpoint. See the [Curl Guide](../config-guide/curl.md) for more
+method / endpoint. See the [Curl Guide](../config-guide/config-tools/curl-guide.md) for more
 info.
 2. CLI - The CLI, or Command Line Interface, calls the API for you. It uses the
 device flow to authenticate the person who is behind the config changes. See the
-[Configuration CLI Guide](../config-guide/jans-cli/README.md) for more info.
+[Configuration CLI Guide](../config-guide/config-tools/jans-cli/README.md) for more info.
 3. TUI - The TUI, or Text User Interface, is a menu-based interactive tool that
 provides a more intuitive experience. When you make changes via the TUI, it also
 creates a log of the equivalent CLI command, in case you want a shortcut next
-time around. See the [TUI Guide](../config-guide/jans-tui/README.md)
+time around. See the [TUI Guide](../config-guide/config-tools/jans-tui/README.md)
 for more info.
 
 ## Client versus Server Configuration

@@ -25,9 +25,11 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.security.AlgorithmParameters;
+import java.security.Principal;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -185,5 +187,28 @@ public class CertUtils {
         X500Name n2 = new X500Name(BCStyleExtended.INSTANCE, rdn2);
 
         return n1.equals(n2);
+    }
+
+    public static X509Certificate getIssuer(final X509Certificate certificate, final List<X509Certificate> issuers) {
+
+        Principal certPrincipal = certificate.getIssuerDN();
+
+        X509Certificate issuer = null;
+
+        for (int i = 0; i < issuers.size(); i++) {
+            X509Certificate currIssuer = issuers.get(i);
+            Principal currIssuerPrincipal = currIssuer.getSubjectDN();
+
+            if (certPrincipal.equals(currIssuerPrincipal)) {
+                issuer = currIssuer;
+                break;
+            }
+        }
+
+        if (issuer == null) {
+            issuer = certificate;
+        }
+
+        return issuer;
     }
 }

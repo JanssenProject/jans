@@ -7454,15 +7454,15 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
