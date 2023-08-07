@@ -46,3 +46,14 @@ may need to tweak some of the configuration dials for your system or the
 database. If you intend to deploy a Janssen Server in production for high
 concurrency, make sure you benchmark the exact flows you expect to serve
 in production. 
+
+## SELinux
+
+Janssen servers bind to localhost and apache web server forwards requests to 
+Janssen servers (reverse proxy). If you have SELinux enabled VM, apache can't
+forwards requests to Jansses server. Therefore setup script adds the following
+SELinux policy:
+
+```
+httpd_can_network_connect 1 -P
+```
