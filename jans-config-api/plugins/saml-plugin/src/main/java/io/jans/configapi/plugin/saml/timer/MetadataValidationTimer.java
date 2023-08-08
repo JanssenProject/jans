@@ -114,14 +114,13 @@ public class MetadataValidationTimer {
         boolean result = validateMetadata(samlIdpService.getIdpMetadataTempDir(), samlIdpService.getIdpMetadataDir());
         log.debug("Metadata validation finished with result: '{}'", result);
 
-        if (result) {
-            regenerateConfigurationFiles();
-        }
     }
 
     public void queue(String fileName) {
         synchronized (metadataUpdates) {
-            metadataUpdates.add(fileName);
+            if(!metadataUpdates.contains(fileName)) {
+                metadataUpdates.add(fileName);
+            }
         }
     }
 
@@ -159,37 +158,29 @@ public class MetadataValidationTimer {
         }
     }
 
-    private void regenerateConfigurationFiles() {
-        boolean createConfig = samlAppConfiguration.isConfigGeneration();
-        if (createConfig) {
-            List<TrustRelationship> trustRelationships = samlService.getAllActiveTrustRelationships();
-            // samlIdpService.generateConfigurationFiles(trustRelationships);
-
-            log.info("IDP config generation files finished. TR count: '{}'", trustRelationships.size());
-        }
-    }
-
     /**
      * @param tempmetadataFolder
      * @param metadataFolder
      */
     private boolean validateMetadata(String tempmetadataFolder, String metadataFolder) throws Exception {
         boolean result = false;
-        log.trace("Starting metadata validation process.");
+        log.error("Starting metadata validation process.");
 
         String metadataFN = null;
         synchronized (metadataUpdates) {
             if (!metadataUpdates.isEmpty()) {
                 metadataFN = metadataUpdates.poll();
+       
             }
         }
+        log.error("metadataFN:{}", metadataFN);
 
         synchronized (this) {
             if (StringHelper.isNotEmpty(metadataFN)) {
                 String metadataPath = tempmetadataFolder + metadataFN;
                 String destinationMetadataName = metadataFN.replaceAll(".{4}\\..{4}$", "");
                 String destinationMetadataPath = metadataFolder + destinationMetadataName;
-
+                log.error("metadataFN:{}, metadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}", metadataFN, metadataPath, destinationMetadataName, destinationMetadataPath);
                 TrustRelationship tr = samlService
                         .getTrustByUnpunctuatedInum(metadataFN.split("-" + samlIdpService.getSpMetadataFile())[0]);
                 if (tr == null) {
@@ -199,6 +190,8 @@ public class MetadataValidationTimer {
                 tr.setValidationStatus(ValidationStatus.PENDING);
                 samlService.updateTrustRelationship(tr);
 
+                log.error("metadataFN:{}, metadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}", metadataFN, metadataPath, destinationMetadataName, destinationMetadataPath);
+                
                 GluuErrorHandler errorHandler = null;
                 List<String> validationLog = null;
                 try {

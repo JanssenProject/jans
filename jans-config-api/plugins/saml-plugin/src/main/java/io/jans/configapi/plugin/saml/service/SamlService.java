@@ -28,11 +28,16 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.AgeFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -308,8 +313,10 @@ public class SamlService {
 
         }
         InputStream targetStream = file;
-        log.info("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
+        log.error("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
+        
         String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
+        log.error("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
         if (StringHelper.isNotEmpty(result)) {
             metadataValidationTimer.queue(result);
         } else {
@@ -318,6 +325,26 @@ public class SamlService {
 
         return false;
 
+    }
+    
+    private void processOldMetaFilesFiles(String directory) {
+        log.error("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
+      
+        if (Files.exists(Paths.get(directory))) {
+            log.error("directory:{} does exists)", directory);
+            File folder = new File(directory);
+            File[] files = folder.listFiles();
+            log.error("files:{}", files);
+            if(files!=null && files.length>0) {
+                
+               for(File file: files) {
+                   log.error("file:{}, file.getName():{}", file, file.getName());
+                  metadataValidationTimer.queue(file.getName());
+               }
+            }
+            
+            
+        }
     }
 
 }
