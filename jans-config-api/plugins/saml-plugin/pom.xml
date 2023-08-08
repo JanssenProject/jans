@@ -92,10 +92,10 @@
      	    <groupId>jakarta.ws.rs</groupId>
      		<artifactId>jakarta.ws.rs-api</artifactId>
    		</dependency>		
-		<dependency>
+<!--		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-multipart-provider</artifactId>
-		</dependency>
+		</dependency>-->
 		
 		<!-- apache -->
 		 <dependency>
