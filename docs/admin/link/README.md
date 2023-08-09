@@ -1,7 +1,7 @@
 ---
 tags:
   - administration
-  - upgrade
+  - link
 ---
 
 ## This content is in progress

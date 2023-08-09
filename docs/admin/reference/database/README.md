@@ -19,9 +19,9 @@ Jans has next persistence modules out-of-the-box:
 -  [Couchbase](./cb-config.md)
 -  [Spanner](./spanner-config.md)
 -  [MySQL](./mysql-config.md)
--  [PostreSQL](./postgres-config.md)
+-  [PostreSQL](./pgsql-config.md)
 -  [MariaDB](./mariadb.md)
--  [Hybrid](./postgres-config.md). This is virtual DB layer which allows to combine few DB types based on record type.
+-  [Hybrid](./pgsql-config.md). This is virtual DB layer which allows to combine few DB types based on record type.
 
 ## Configuration
 
