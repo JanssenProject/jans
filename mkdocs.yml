@@ -164,9 +164,10 @@ nav:
       - Spanner Configuration: admin/reference/database/spanner-config.md
       - Spanner Operation: admin/reference/database/spanner-ops.md
     - PostgreSQL:
-      - PostgreSQL Schema: admin/reference/database/postgres-schema.md
-      - PostgreSQL Configuration: admin/reference/database/postgres-config.md
-      - PostgreSQL Operation: admin/reference/database/postgres-ops.md
+      - PostgreSQL Schema: admin/reference/database/pgsql-schema.md
+      - PostgreSQL Indexes: admin/reference/database/pgsql-schema-indexes.md
+      - PostgreSQL Configuration: admin/reference/database/pgsql-config.md
+      - PostgreSQL Operation: admin/reference/database/pgsql-ops.md
     - Converting Data: admin/reference/database/converting-data.md
   - Auth Server Admin Guide:
     - admin/auth-server/README.md
@@ -8793,9 +8794,9 @@ nav:
 plugins:
 - tags
 - search
-- git-revision-date-localized:
-    enable_creation_date: true
-    type: timeago
+#- git-revision-date-localized:
+#    enable_creation_date: true
+#    type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
