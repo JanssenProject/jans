@@ -17,8 +17,6 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class DeviceSessionService {
 
-    public static final String[] OBJECT_CLASSES = new String[]{"jansClnt"};
-
     @Inject
     private Logger log;
 
