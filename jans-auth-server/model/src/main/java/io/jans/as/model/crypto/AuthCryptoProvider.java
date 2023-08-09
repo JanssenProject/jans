@@ -36,6 +36,10 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+
+//import org.bouncycastle.jcajce.interfaces.EdDSAKey;
+//import org.bouncycastle.jcajce.spec.EdDSAParameterSpec;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -68,10 +72,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.EdECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
-import java.security.spec.NamedParameterSpec;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -469,15 +471,17 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                 keyGen.initialize(keyLength, new SecureRandom());
                 break;
             case EC:
-                ECGenParameterSpec eccgen = new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias());
+                ECGenParameterSpec ecSpec = new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias());
                 keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), SecurityProviderUtility.getBCProvider());
-                keyGen.initialize(eccgen, new SecureRandom());
+                keyGen.initialize(ecSpec, new SecureRandom());
                 break;
+/*                
             case ED:
-                NamedParameterSpec edSpec = new NamedParameterSpec(signatureAlgorithm.getCurve().getAlias());
+                EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getCurve().getAlias());
                 keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), SecurityProviderUtility.getBCProvider());
                 keyGen.initialize(edSpec, new SecureRandom());
                 break;
+*/                
             default:
                 throw new IllegalStateException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
 
@@ -573,15 +577,17 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             }
             jsonObject.put(JWKParameter.X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
             jsonObject.put(JWKParameter.Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
-        } else if (use == Use.SIGNATURE && publicKey instanceof EdECPublicKey) {
-            EdECPublicKey edEcPublicKey = (EdECPublicKey) publicKey;
+        }
+/*        
+        else if (use == Use.SIGNATURE && publicKey instanceof EdDSAKey) {
+            EdDSAKey edDSAPublicKey = (EdDSAKey) publicKey;
             SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
             jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
-            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(edEcPublicKey.getEncoded()));
+            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(edDSAPublicKey.getEncoded()));
             // EdDSA keys (EdDSAPublicKey, EDDSAPrivateKey) don't use BigInteger, but only byte[],
             // so Base64Util.base64urlencode, but not Base64Util.base64urlencodeUnsignedBigInt is used.
         }
-
+*/
         JSONArray x5c = new JSONArray();
         x5c.put(Base64.encodeBase64String(cert.getEncoded()));
         jsonObject.put(JWKParameter.CERTIFICATE_CHAIN, x5c);
