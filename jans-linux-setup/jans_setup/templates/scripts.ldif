@@ -546,7 +546,7 @@ jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
 jansRevision: 11
-jansScr::%(authorization_challenge)s
+jansScr::%(authorization_challenge_authorizationchallenge)s
 jansScrTyp: authorization_challenge
 
 dn: inum=BADA-BADA,ou=scripts,o=jans
