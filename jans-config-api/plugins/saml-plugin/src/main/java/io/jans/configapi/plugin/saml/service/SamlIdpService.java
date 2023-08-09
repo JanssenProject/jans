@@ -22,6 +22,7 @@ import org.opensaml.saml.common.xml.SAMLSchemaBuilder;
 import org.opensaml.saml.common.xml.SAMLSchemaBuilder.SAML1Version;
 import org.opensaml.xml.parse.XMLParserException;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javax.xml.validation.Schema;
@@ -51,6 +52,17 @@ public class SamlIdpService {
     private LocalDocumentStoreService localDocumentStoreService;
 
     private Schema samlSchema;
+    
+    @PostConstruct
+    public void create() {
+        SAMLSchemaBuilder samlSchemaBuilder = new SAMLSchemaBuilder(SAML1Version.SAML_11);
+        try {
+            this.samlSchema = samlSchemaBuilder.getSAMLSchema();
+            logger.error("samlSchema", samlSchema);
+        } catch (SAXException ex) {
+            logger.error("Failed to load SAMLSchema - ", ex);
+        }
+    }
 
     public boolean isLocalDocumentStoreType() {
         return documentStoreService.getProviderType() == DocumentStoreType.LOCAL;

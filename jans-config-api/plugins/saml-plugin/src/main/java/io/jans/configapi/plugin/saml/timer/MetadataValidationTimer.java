@@ -118,8 +118,9 @@ public class MetadataValidationTimer {
 
     public void queue(String fileName) {
         synchronized (metadataUpdates) {
-            log.debug("fileNamem:{}, metadataUpdates.contains(fileName):{}",fileName, metadataUpdates.contains(fileName));
-            if(!metadataUpdates.contains(fileName)) {
+            log.debug("fileNamem:{}, metadataUpdates.contains(fileName):{}", fileName,
+                    metadataUpdates.contains(fileName));
+            if (!metadataUpdates.contains(fileName)) {
                 metadataUpdates.add(fileName);
             }
         }
@@ -171,7 +172,7 @@ public class MetadataValidationTimer {
         synchronized (metadataUpdates) {
             if (!metadataUpdates.isEmpty()) {
                 metadataFN = metadataUpdates.poll();
-       
+
             }
         }
         log.error("metadataFN:{}", metadataFN);
@@ -181,18 +182,22 @@ public class MetadataValidationTimer {
                 String metadataPath = tempmetadataFolder + metadataFN;
                 String destinationMetadataName = metadataFN.replaceAll(".{4}\\..{4}$", "");
                 String destinationMetadataPath = metadataFolder + destinationMetadataName;
-                log.error("metadataFN:{}, metadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}", metadataFN, metadataPath, destinationMetadataName, destinationMetadataPath);
+                log.error("metadataFN:{}, metadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}",
+                        metadataFN, metadataPath, destinationMetadataName, destinationMetadataPath);
                 TrustRelationship tr = samlService
                         .getTrustByUnpunctuatedInum(metadataFN.split("-" + samlIdpService.getSpMetadataFile())[0]);
+                log.error("TrustRelationship found with name:{} is:{}",metadataFN, tr);
                 if (tr == null) {
+                    log.error("No TrustRelationship found with name:{}",metadataFN);
                     metadataUpdates.add(metadataFN);
                     return false;
                 }
                 tr.setValidationStatus(ValidationStatus.PENDING);
                 samlService.updateTrustRelationship(tr);
 
-                log.error("metadataFN:{}, metadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}", metadataFN, metadataPath, destinationMetadataName, destinationMetadataPath);
-                
+                log.error("metadataFN:{}, metadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}",
+                        metadataFN, metadataPath, destinationMetadataName, destinationMetadataPath);
+
                 GluuErrorHandler errorHandler = null;
                 List<String> validationLog = null;
                 try {
@@ -201,20 +206,23 @@ public class MetadataValidationTimer {
                 } catch (Exception e) {
                     tr.setValidationStatus(ValidationStatus.FAILED);
                     tr.setStatus(GluuStatus.INACTIVE);
-                    validationLog = new ArrayList<String>();
+                    validationLog = this.getValidationLog(validationLog);
                     validationLog.add(e.getMessage());
                     log.error("Validation of " + tr.getInum() + " failed: " + e.getMessage());
                     tr.setValidationLog(validationLog);
                     samlService.updateTrustRelationship(tr);
                     return false;
                 }
-                
-                if(errorHandler==null) {
+
+                if (errorHandler == null) {
                     return false;
                 }
-                log.error("validateMetadata result errorHandler.isValid():{}, errorHandler.getLog():{}, errorHandler.toString():{}", errorHandler.isValid(), errorHandler.getLog(), errorHandler.toString());
-                log.error("samlAppConfiguration.isIgnoreValidation():{} errorHandler.isInternalError():{}", samlAppConfiguration.isIgnoreValidation(), errorHandler.isInternalError());
-                
+                log.error(
+                        "validateMetadata result errorHandler.isValid():{}, errorHandler.getLog():{}, errorHandler.toString():{}",
+                        errorHandler.isValid(), errorHandler.getLog(), errorHandler.toString());
+                log.error("samlAppConfiguration.isIgnoreValidation():{} errorHandler.isInternalError():{}",
+                        samlAppConfiguration.isIgnoreValidation(), errorHandler.isInternalError());
+
                 if (errorHandler.isValid()) {
                     log.error("validate Metadata file processing");
                     tr.setValidationLog(errorHandler.getLog());
@@ -222,20 +230,22 @@ public class MetadataValidationTimer {
 
                     log.error("Move metadata file:{} to location:{}", metadataPath, destinationMetadataPath);
                     boolean renamed = samlIdpService.renameMetadata(metadataPath, destinationMetadataPath);
-                    
-                    log.error("Staus of moving file:{} to location:{} is :{}", metadataPath, destinationMetadataPath, renamed);
-                    
+
+                    log.error("Staus of moving file:{} to location:{} is :{}", metadataPath, destinationMetadataPath,
+                            renamed);
+
                     if (renamed) {
-                        log.error("Failed to move metadata file:{} to location:{}", metadataPath, destinationMetadataPath);
+                        log.error("Failed to move metadata file:{} to location:{}", metadataPath,
+                                destinationMetadataPath);
                         tr.setStatus(GluuStatus.INACTIVE);
                     } else {
                         tr.setSpMetaDataFN(destinationMetadataName);
                     }
 
                     String metadataFile = samlIdpService.getIdpMetadataDir() + tr.getSpMetaDataFN();
-                    log.error("After successfully moving metadataFile :{}",metadataFile);
+                    log.error("After successfully moving metadataFile :{}", metadataFile);
                     List<String> entityIdList = samlMetadataParser.getEntityIdFromMetadataFile(metadataFile);
-                    log.error("Success entityIdList :{}",entityIdList);
+                    log.error("Success entityIdList :{}", entityIdList);
                     Set<String> entityIdSet = new TreeSet<String>();
                     Set<String> duplicatesSet = new TreeSet<String>();
                     if (entityIdList != null && !entityIdList.isEmpty()) {
@@ -246,7 +256,7 @@ public class MetadataValidationTimer {
                             }
                         }
                     }
-                    log.error("Success duplicatesSet :{}",duplicatesSet);
+                    log.error("Success duplicatesSet :{}", duplicatesSet);
                     if (!duplicatesSet.isEmpty()) {
                         validationLog = tr.getValidationLog();
                         if (validationLog != null) {
@@ -265,50 +275,62 @@ public class MetadataValidationTimer {
                 } else if (samlAppConfiguration.isIgnoreValidation() || errorHandler.isInternalError()) {
                     tr.setValidationLog(new ArrayList<String>(new HashSet<String>(errorHandler.getLog())));
                     tr.setValidationStatus(ValidationStatus.FAILED);
-                    if (samlIdpService.renameMetadata(metadataPath, destinationMetadataPath)) {
-                        log.error("Failed to move metadata file to location:" + destinationMetadataPath);
+                    boolean fileRenamed = samlIdpService.renameMetadata(metadataPath, destinationMetadataPath);
+                    log.error("Status of trustRelationship updated to Failed, File copy from:{} to:{}, status:()",
+                            metadataPath, destinationMetadataPath, fileRenamed);
+                    if (!fileRenamed) {
+                        log.error(
+                                "Updating trustRelationship status to Inactive as metadata:{} could not be copied to:{}",
+                                metadataPath, destinationMetadataPath);
                         tr.setStatus(GluuStatus.INACTIVE);
                     } else {
                         tr.setSpMetaDataFN(destinationMetadataName);
-                        log.error("Failed validation for destinationMetadataPath:{}" + destinationMetadataPath);
+                        log.error("Validation error for metadata file ignored as isIgnoreValidation:{}"
+                                + samlAppConfiguration.isIgnoreValidation());
                     }
 
                     String metadataFile = samlIdpService.getIdpMetadataDir() + tr.getSpMetaDataFN();
-                    log.error("Failed status metadataFile :{}",metadataFile);
-                    
+                    log.error("metadataFile:{}", metadataFile);
+
                     List<String> entityIdList = samlMetadataParser.getEntityIdFromMetadataFile(metadataFile);
-                    log.error("Failed status entityIdList :{}",entityIdList);
+                    log.error("entityIdList:{}", entityIdList);
                     Set<String> duplicatesSet = new TreeSet<String>();
                     Set<String> entityIdSet = new TreeSet<String>();
 
-                    for (String entityId : entityIdList) {
-                        if (!entityIdSet.add(entityId)) {
-                            duplicatesSet.add(entityId);
+                    if (entityIdList != null && !entityIdList.isEmpty()) {
+                        for (String entityId : entityIdList) {
+                            if (!entityIdSet.add(entityId)) {
+                                duplicatesSet.add(entityId);
+                            }
                         }
                     }
 
                     tr.setStatus(GluuStatus.ACTIVE);
                     validationLog = tr.getValidationLog();
+                    log.error("duplicatesSet:{}", duplicatesSet);
                     if (!duplicatesSet.isEmpty()) {
+                        validationLog = this.getValidationLog(validationLog);
                         validationLog.add("This metadata contains multiple instances of entityId: "
                                 + Arrays.toString(duplicatesSet.toArray()));
                     }
-
+                    log.error("errorHandler.isInternalError():{}", errorHandler.isInternalError());
                     if (errorHandler.isInternalError()) {
                         validationLog = tr.getValidationLog();
-
+                        validationLog = this.getValidationLog(validationLog);
                         validationLog.add(
                                 "Warning: cannot validate metadata. Check internet connetion ans www.w3.org availability.");
 
+                        log.error("errorHandler.getLog():{}", errorHandler.getLog());
                         // update log with warning
-                        for (String warningLogMessage : errorHandler.getLog())
+                        for (String warningLogMessage : errorHandler.getLog()) {
                             validationLog.add("Warning: " + warningLogMessage);
+                        }
                     }
-                    log.error("Failed status validationLog :{}",validationLog);
+                    log.error("Updating TrustRelationship:{} , validationLog :{}", tr, validationLog);
                     samlService.updateTrustRelationship(tr);
                     result = true;
                 } else {
-                    log.error("Unhandled  metadataFN:{}",metadataFN);
+                    log.error("Unhandled  metadataFN:{}", metadataFN);
                     tr.setValidationLog(new ArrayList<String>(new HashSet<String>(errorHandler.getLog())));
                     tr.setValidationStatus(ValidationStatus.FAILED);
                     tr.setStatus(GluuStatus.INACTIVE);
@@ -320,4 +342,11 @@ public class MetadataValidationTimer {
         return result;
     }
 
+    private List<String> getValidationLog(List<String> validationLog) {
+        log.error("validationLog:{}", validationLog);
+        if (validationLog == null) {
+            validationLog = new LinkedList<String>();
+        }
+        return validationLog;
+    }
 }
