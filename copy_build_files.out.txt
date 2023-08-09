@@ -136,26 +136,23 @@ OK
 SRC_FPATHS[18] = ./jans-link/server/target/jans-link-server-1.0.17-SNAPSHOT.war
 DST_FPATHS[18] = ./_out/jans-link-server-1.0.17-SNAPSHOT.war
 Copying: ./jans-link/server/target/jans-link-server-1.0.17-SNAPSHOT.war to ./_out/jans-link-server-1.0.17-SNAPSHOT.war
-'./jans-link/server/target/jans-link-server-1.0.17-SNAPSHOT.war' -> './_out/jans-link-server-1.0.17-SNAPSHOT.war'
-OK
+Error
 --------------------------------------
 --------------------------------------
 SRC_FPATHS[19] = ./jans-link/server-fips/target/jans-link-server-fips.war
 DST_FPATHS[19] = ./_out/jans-link-server-fips.war
 Copying: ./jans-link/server-fips/target/jans-link-server-fips.war to ./_out/jans-link-server-fips.war
-'./jans-link/server-fips/target/jans-link-server-fips.war' -> './_out/jans-link-server-fips.war'
-OK
+Error
 --------------------------------------
 --------------------------------------
 SRC_FPATHS[20] = ./jans-link/service/target/jans-link-service-1.0.17-SNAPSHOT.jar
 DST_FPATHS[20] = ./_out/jans-link-service-1.0.17-SNAPSHOT.jar
 Copying: ./jans-link/service/target/jans-link-service-1.0.17-SNAPSHOT.jar to ./_out/jans-link-service-1.0.17-SNAPSHOT.jar
-'./jans-link/service/target/jans-link-service-1.0.17-SNAPSHOT.jar' -> './_out/jans-link-service-1.0.17-SNAPSHOT.jar'
-OK
+Error
 --------------------------------------
 --------------------------------------
 Result:
 NUM ALL    = 21
-NUM OK     = 21
-NUM ERROR  = 0
+NUM OK     = 18
+NUM ERROR  = 3
 --------------------------------------

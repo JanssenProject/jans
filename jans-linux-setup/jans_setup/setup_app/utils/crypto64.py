@@ -215,10 +215,14 @@ class Crypto64:
         self.logIt('Loading file %s' % fn)
         plain_file_b64encoded_text = None
         try:
+            self.logIt("fn = {}".format(fn))
             plain_file_text = self.readFile(fn, rmode='rb')
+            self.logIt("plain_file_text = {}".format(plain_file_text))
             plain_file_b64encoded_text = base64.b64encode(plain_file_text).decode('utf-8').strip()
         except:
             self.logIt("Error loading file", True)
+
+        self.logIt("plain_file_b64encoded_text = {}".format(plain_file_b64encoded_text))
 
         if num_spaces > 0:
             plain_file_b64encoded_text = self.reindent(plain_file_b64encoded_text, num_spaces)

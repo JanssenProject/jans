@@ -89,8 +89,7 @@ class Config:
         self.install_dir = install_dir
         self.data_dir = os.path.join(self.install_dir, 'setup_app/data')
         self.profile = base.current_app.profile 
-        
-        self.use_existing_java = base.argsp.j
+        self.use_existing_java = True
 
         self.thread_queue = None
         self.jetty_user = self.jetty_group = 'jetty'
@@ -155,7 +154,6 @@ class Config:
 
         # java commands
         if self.profile == SetupProfiles.DISA_STIG:
-            self.use_existing_java = True
             self.cmd_java = shutil.which('java')
             self.jre_home = Path(self.cmd_java).resolve().parent.parent.as_posix()
             self.cmd_keytool = shutil.which('keytool')

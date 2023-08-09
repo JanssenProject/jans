@@ -255,7 +255,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.removeFile(target_jwks_fn)
         self.run([paths.cmd_chown, '-R', base.current_app.HttpdInstaller.apache_user+":"+base.current_app.HttpdInstaller.apache_group, '/var/www/html/jans-auth-client'])
         self.run([paths.cmd_chmod, '-R', '660', '/var/www/html/jans-auth-client'])
-        self.run([paths.cmd_chmod, 'ug+X', '/var/www/html/jans-auth-client'])
+        self.run([paths.cmd_chmod, '-R', 'ug+X', '/var/www/html/jans-auth-client'])
 
         self.chown(os.path.join(base.current_app.HttpdInstaller.server_root, 'jans-auth-client'), base.current_app.HttpdInstaller.apache_user, base.current_app.HttpdInstaller.apache_group, recursive=True)
 

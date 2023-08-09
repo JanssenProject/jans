@@ -31,8 +31,7 @@ class JreInstaller(BaseInstaller, SetupUtils):
                 ]
 
     def install(self):
-    
-        if not Config.use_existing_java:    
+        if Config.profile != SetupProfiles.DISA_STIG:
             if Config.java_type == 'jdk':
                 open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.9.1%2B1/OpenJDK11U-jdk_x64_linux_hotspot_11.0.9.1_1.tar.gz'
                 target_fn = os.path.join(Config.dist_app_dir, os.path.basename(open_jdk_archive_link))

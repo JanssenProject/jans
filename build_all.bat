@@ -20,9 +20,9 @@ cd .\\jans-fido2
 cmd /C mvn -Dmaven.test.skip=true -Ddependency-check.skip=true clean compile install
 cd ..
 
-cd .\\jans-link
-cmd /C mvn -Dmaven.test.skip=true -Ddependency-check.skip=true clean compile install
-cd ..
+rem cd .\\jans-link
+rem cmd /C mvn -Dmaven.test.skip=true -Ddependency-check.skip=true clean compile install
+rem cd ..
 
 cd .\\jans-auth-server
 cmd /C mvn -Dmaven.test.skip=true -Ddependency-check.skip=true clean compile install
