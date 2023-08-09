@@ -322,6 +322,8 @@ public class SamlService {
         log.error("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
         if (StringHelper.isNotEmpty(result)) {
             metadataValidationTimer.queue(result);
+            //process files in temp that were not processed earlier
+            processUnprocessedMetadataFiles();
         } else {
             log.error("Failed to save SP meta-data file. Please check if you provide correct file");
         }
@@ -330,7 +332,9 @@ public class SamlService {
 
     }
 
-    private void processOldMetaFilesFiles(String directory) {
+    public void processUnprocessedMetadataFiles() {
+        log.error("processing unprocessed metadata files ");
+        String directory = samlIdpService.getIdpMetadataTempDir();
         log.error("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
 
         if (Files.exists(Paths.get(directory))) {

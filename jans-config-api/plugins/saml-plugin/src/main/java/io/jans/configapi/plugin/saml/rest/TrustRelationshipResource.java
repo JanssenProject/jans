@@ -168,4 +168,22 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.noContent().build();
     }
 
+    @Operation(summary = "Process unprocessed metadata files", description = "Process unprocessed metadata files", operationId = "post-metadata-files", tags = {
+            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.SAML_WRITE_ACCESS }))
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @Path(Constants.ID_PATH_PARAM)
+    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
+    @DELETE
+    public Response processMetadataFiles() {
+
+        logger.info("process metadata files");
+
+        samlService.processUnprocessedMetadataFiles();
+
+        return Response.ok().build();
+    }
+
 }

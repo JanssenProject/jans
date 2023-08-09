@@ -160,6 +160,7 @@ public class SamlIdpService {
     }
 
     public boolean renameMetadata(String metadataPath, String destinationMetadataPath) {
+        logger.error("Rename metadata file documentStoreService:{},metadataPath:{}, destinationMetadataPath:{}", documentStoreService, metadataPath, destinationMetadataPath);
         try {
             return documentStoreService.renameDocument(metadataPath, destinationMetadataPath);
         } catch (Exception ex) {

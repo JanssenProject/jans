@@ -172,19 +172,12 @@ paths:
     delete:
       tags:
       - SAML - Trust Relationship
-      summary: Delete TrustRelationship
-      description: Delete TrustRelationship
-      operationId: put-trust-relationship
-      parameters:
-      - name: id
-        in: path
-        description: Unique Id of Trust Relationship
-        required: true
-        schema:
-          type: string
+      summary: Process unprocessed metadata files
+      description: Process unprocessed metadata files
+      operationId: post-metadata-files
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
         "401":
           description: Unauthorized
         "500":
@@ -220,7 +213,7 @@ paths:
       - SAML - Trust Relationship
       summary: Update TrustRelationship
       description: Update TrustRelationship
-      operationId: put-trust-relationship_1
+      operationId: put-trust-relationship
       requestBody:
         description: Trust Relationship object
         content:
@@ -377,8 +370,6 @@ components:
           - federation
           - manual
           - mdq
-        spMetaDataFN:
-          type: string
         spMetaDataURL:
           type: string
         metaLocation:
