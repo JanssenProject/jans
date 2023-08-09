@@ -8,10 +8,12 @@ package io.jans.keycloak.link.service.config;
 
 import io.jans.exception.ConfigurationException;
 import io.jans.keycloak.link.model.config.*;
+import io.jans.model.SmtpConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.*;
 import io.jans.service.timer.event.TimerEvent;
@@ -57,6 +59,10 @@ public class ConfigurationFactory {
 
 	@Inject
 	private Instance<Configuration> configurationInstance;
+    
+    private SmtpConfiguration smtpConfiguration = new SmtpConfiguration();
+
+	private CacheConfiguration cacheConfiguration = new CacheConfiguration();
 
 	public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
 	public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
@@ -232,6 +238,18 @@ public class ConfigurationFactory {
 	public StaticConfiguration getStaticConfiguration() {
 		return staticConf;
 	}
+
+	@Produces
+	@ApplicationScoped
+	public SmtpConfiguration getSmtpConfiguration() {
+		return smtpConfiguration;
+	}
+
+    @Produces
+    @ApplicationScoped
+    public CacheConfiguration getCacheConfiguration() {
+        return cacheConfiguration;
+    }
 
 	public BaseDnConfiguration getBaseDn() {
 		return getStaticConfiguration().getBaseDn();
