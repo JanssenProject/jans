@@ -63,7 +63,7 @@ public class SamlService {
 
     @Inject
     SamlIdpService samlIdpService;
-    
+
     @Inject
     MetadataValidationTimer metadataValidationTimer;
 
@@ -104,7 +104,7 @@ public class SamlService {
     public List<TrustRelationship> getAllTrustRelationships() {
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, null);
     }
-    
+
     public List<TrustRelationship> getAllActiveTrustRelationships() {
         TrustRelationship trustRelationship = new TrustRelationship();
         trustRelationship.setBaseDn(getDnForTrustRelationship(null));
@@ -139,7 +139,7 @@ public class SamlService {
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, null,
                 sizeLimit);
     }
-    
+
     public TrustRelationship getTrustByUnpunctuatedInum(String unpunctuated) {
         for (TrustRelationship trust : getAllTrustRelationships()) {
             if (StringHelper.removePunctuation(trust.getInum()).equals(unpunctuated)) {
@@ -210,16 +210,18 @@ public class SamlService {
 
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) throws IOException{
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) throws IOException {
         return addTrustRelationship(trustRelationship, null);
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, InputStream file) throws IOException{
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, InputStream file)
+            throws IOException {
         log.info("Add new trustRelationship:{}, file:{}", trustRelationship, file);
+
         setTrustRelationshipDefaultValue(trustRelationship, false);
         persistenceEntryManager.persist(trustRelationship);
 
-        if (file != null && file.available()>0) {
+        if (file != null && file.available() > 0) {
             saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
         }
 
@@ -230,11 +232,12 @@ public class SamlService {
         return updateTrustRelationship(trustRelationship, null);
     }
 
-    public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship, InputStream file) throws IOException {
+    public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship, InputStream file)
+            throws IOException {
         setTrustRelationshipDefaultValue(trustRelationship, true);
         persistenceEntryManager.merge(trustRelationship);
 
-        if (file != null && file.available()>0) {
+        if (file != null && file.available() > 0) {
             saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
         }
 
@@ -284,7 +287,7 @@ public class SamlService {
             }
             String filePath = samlIdpService.getSpMetadataFilePath(spMetadataFileName);
             log.debug("filePath:{}", filePath);
-            
+
             if (filePath == null) {
                 log.debug("The trust relationship {} has an invalid Metadata file storage path",
                         trustRelationship.getInum());
@@ -295,7 +298,7 @@ public class SamlService {
 
                 File newFile = new File(filePath);
                 log.debug("newFile:{}", newFile);
-                
+
                 if (!newFile.exists()) {
                     log.debug(
                             "The trust relationship {} metadata used local storage but the SP metadata file `{}` was not found",
@@ -306,15 +309,15 @@ public class SamlService {
             return true;
         }
         if (emptySpMetadataFileName) {
-            log.info("emptySpMetadataFileName:{}", emptySpMetadataFileName);
+            log.error("emptySpMetadataFileName:{}", emptySpMetadataFileName);
             spMetadataFileName = samlIdpService.getSpNewMetadataFileName(trustRelationship);
-            log.info("spMetadataFileName:{}", spMetadataFileName);
+            log.error("spMetadataFileName:{}", spMetadataFileName);
             trustRelationship.setSpMetaDataFN(spMetadataFileName);
 
         }
         InputStream targetStream = file;
         log.error("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
-        
+
         String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
         log.error("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
         if (StringHelper.isNotEmpty(result)) {
@@ -326,24 +329,23 @@ public class SamlService {
         return false;
 
     }
-    
+
     private void processOldMetaFilesFiles(String directory) {
         log.error("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
-      
+
         if (Files.exists(Paths.get(directory))) {
             log.error("directory:{} does exists)", directory);
             File folder = new File(directory);
             File[] files = folder.listFiles();
             log.error("files:{}", files);
-            if(files!=null && files.length>0) {
-                
-               for(File file: files) {
-                   log.error("file:{}, file.getName():{}", file, file.getName());
-                  metadataValidationTimer.queue(file.getName());
-               }
+            if (files != null && files.length > 0) {
+
+                for (File file : files) {
+                    log.error("file:{}, file.getName():{}", file, file.getName());
+                    metadataValidationTimer.queue(file.getName());
+                }
             }
-            
-            
+
         }
     }
 

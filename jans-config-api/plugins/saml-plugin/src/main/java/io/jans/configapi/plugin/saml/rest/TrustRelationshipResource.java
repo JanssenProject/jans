@@ -116,6 +116,7 @@ public class TrustRelationshipResource extends BaseResource {
         String inum = samlService.generateInumForNewRelationship();
         trustRelationship.setInum(inum);
         trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
+
         trustRelationship = samlService.addTrustRelationship(trustRelationship, metaDataFile);
 
         logger.info("Create created by TrustRelationship:{}", trustRelationship);

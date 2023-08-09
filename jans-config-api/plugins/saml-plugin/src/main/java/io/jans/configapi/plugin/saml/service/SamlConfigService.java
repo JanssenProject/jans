@@ -123,7 +123,7 @@ public class SamlConfigService {
                 return selectedIdpConfig;
             }
             selectedIdpConfig = idpConfigs.stream()
-                    .filter(e -> e.getConfigId() != null && e.getConfigId().equals(selectedIdp)).findAny().orElse(null);
+                    .filter(e -> e.getConfigId() != null && e.getConfigId().equalsIgnoreCase(selectedIdp)).findAny().orElse(null);
         }
         return selectedIdpConfig;
     }

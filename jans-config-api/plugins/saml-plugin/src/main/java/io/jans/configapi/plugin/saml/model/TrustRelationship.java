@@ -6,10 +6,6 @@
 
 package io.jans.configapi.plugin.saml.model;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -18,12 +14,19 @@ import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
+import io.swagger.v3.oas.annotations.Hidden;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.io.Serializable;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansSAMLconfig")
@@ -108,6 +111,7 @@ public class TrustRelationship extends Entry implements Serializable {
      * Trust Relationship file location of metadata
      */
     @AttributeName(name = "jansSAMLspMetaDataFN")
+    @Hidden
     private String spMetaDataFN;
 
     @AttributeName(name = "jansSAMLspMetaDataURL")
