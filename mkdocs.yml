@@ -64,6 +64,7 @@ nav:
     - Passwordless Authentication: admin/planning/passwordless-auth.md
     - Machine-to-Machine Authentication: admin/planning/machine-to-machine.md
   - Installation:
+    - admin/install/README.md
     - VM Installation:
       - admin/install/vm-install/README.md
       - VM Requirements: admin/install/vm-install/vm-requirements.md
@@ -163,9 +164,10 @@ nav:
       - Spanner Configuration: admin/reference/database/spanner-config.md
       - Spanner Operation: admin/reference/database/spanner-ops.md
     - PostgreSQL:
-      - PostgreSQL Schema: admin/reference/database/postgres-schema.md
-      - PostgreSQL Configuration: admin/reference/database/postgres-config.md
-      - PostgreSQL Operation: admin/reference/database/postgres-ops.md
+      - PostgreSQL Schema: admin/reference/database/pgsql-schema.md
+      - PostgreSQL Indexes: admin/reference/database/pgsql-schema-indexes.md
+      - PostgreSQL Configuration: admin/reference/database/pgsql-config.md
+      - PostgreSQL Operation: admin/reference/database/pgsql-ops.md
     - Converting Data: admin/reference/database/converting-data.md
   - Auth Server Admin Guide:
     - admin/auth-server/README.md
@@ -8743,6 +8745,7 @@ nav:
     - Security Considerations: admin/scim/security.md
     - Bulk Adding Users: admin/scim/bulk-users.md
     - Adding Custom Attributes: admin/scim/custom-attributes.md
+  - Link Guide: admin/link/README.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md
@@ -8753,8 +8756,6 @@ nav:
     - Locking or Disabling Accounts: admin/recipes/locking-accounts.md
     - Stepped-up Authentication: admin/recipes/stepped-up-authn.md
     - User Journeys: admin/recipes/ACRouter.md
-  - Upgrade Guide:
-    - admin/upgrade/README.md
   - User Management:
       - admin/usermgmt/README.md
       - Using SCIM: admin/usermgmt/usermgmt-scim.md
