@@ -11,7 +11,7 @@ from utils import prepare_template_ctx
 from hooks import get_ldif_mappings_hook
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("couchbase_setup")
+logger = logging.getLogger("persistence-loader")
 
 
 def get_bucket_mappings(manager):

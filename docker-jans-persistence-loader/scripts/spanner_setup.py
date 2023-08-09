@@ -13,7 +13,7 @@ from hooks import get_ldif_mappings_hook
 FIELD_RE = re.compile(r"[^0-9a-zA-Z\s]+")
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("spanner_setup")
+logger = logging.getLogger("persistence-loader")
 
 
 class SpannerBackend:
