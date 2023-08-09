@@ -21,7 +21,7 @@ from utils import get_role_scope_mappings
 from hooks import transform_auth_dynamic_config_hook
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("persistence-loader")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
