@@ -12,6 +12,11 @@ public enum CommonErrorResponseType implements IErrorType {
     INVALID_REQUEST("invalid_request"),
 
     /**
+     * The request contains invalid domain or don't match
+     */
+    INVALID_DOMAIN("invalid_domain"),
+
+    /**
      * Unknown or not found error.
      */
     UNKNOWN_ERROR("unknown_error"),

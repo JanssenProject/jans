@@ -6,6 +6,7 @@
 
 package io.jans.fido2.ws.rs.controller;
 
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -13,7 +14,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.core.Response.Status;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.DataMapperService;
@@ -36,11 +36,14 @@ public class ConfigurationController {
     @Inject
     private DataMapperService dataMapperService;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
 	@GET
 	@Produces({ "application/json" })
 	public Response getConfiguration() {
         if (appConfiguration.getFido2Configuration() == null) {
-            return Response.status(Status.FORBIDDEN).build();
+            throw errorResponseFactory.forbiddenException();
         }
 
 	    final String baseEndpointUri = appConfiguration.getBaseEndpoint();

@@ -18,7 +18,7 @@ public enum AssertionErrorResponseType implements IErrorType {
     /**
      * The request contains an unsupported authentication type
      */
-    INVALID_AUTHENTICATE_TYPE("invalid_authenticate_type"),
+    UNSUPPORTED_AUTHENTICATION_TYPE("unsupported_authentication_type"),
 
     /**
      * The request contains conflicts with Super Gluu parameters
@@ -29,11 +29,6 @@ public enum AssertionErrorResponseType implements IErrorType {
      * Can't find associated key(s)
      */
     KEYS_NOT_FOUND("keys_not_found"),
-
-    /**
-     * Auto enrollment is disabled
-     */
-    AUTO_ENROLLMENT_DISABLED("auto_enrollment_disabled"),
     ;
 
     private final String paramName;

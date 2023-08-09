@@ -6,6 +6,7 @@ import io.jans.as.model.error.DefaultErrorResponse;
 import io.jans.as.model.error.ErrorMessage;
 import io.jans.as.model.error.IErrorType;
 import io.jans.fido2.model.assertion.AssertionErrorResponseType;
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.conf.AppConfiguration;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
@@ -57,6 +58,10 @@ public class ErrorResponseFactory implements Configuration {
         return createWebApplicationException(BAD_REQUEST, type, reason);
     }
 
+    public WebApplicationException badRequestException(IErrorType type, String reason, Throwable e) {
+        return createWebApplicationException(BAD_REQUEST, type, reason, e);
+    }
+
     public WebApplicationException notFoundException(IErrorType type, String reason) {
         return createWebApplicationException(NOT_FOUND, type, reason);
     }
@@ -99,6 +104,8 @@ public class ErrorResponseFactory implements Configuration {
                 list = messages.getCommon();
             } else if (type instanceof AssertionErrorResponseType) {
                 list = messages.getAssertion();
+            } else if (type instanceof AttestationErrorResponseType) {
+                list = messages.getAttestation();
             }
             if (list != null) {
                 final ErrorMessage m = getError(list, type);

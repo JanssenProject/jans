@@ -15,12 +15,13 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.shared.UserService;
 import io.jans.orm.PersistenceEntryManager;
@@ -55,6 +56,9 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
     @Inject
     private PersistenceEntryManager persistenceEntryManager;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     public void save(Fido2RegistrationData registrationData) {
         Fido2RegistrationEntry registrationEntry = buildFido2RegistrationEntry(registrationData, false);
 
@@ -71,7 +75,7 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
 	            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
 	                user = userService.addDefaultUser(userName);
 	            } else {
-	                throw new Fido2RuntimeException("Auto user enrollment was disabled. User not exists!");
+	                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");
 	            }
 	        }
 	        userInum = userService.getUserInum(user);

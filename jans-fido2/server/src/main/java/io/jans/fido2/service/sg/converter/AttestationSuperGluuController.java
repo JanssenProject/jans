@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateEncodingException;
 
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.assertion.AssertionErrorResponseType;
 import org.apache.commons.lang3.ArrayUtils;
@@ -119,7 +120,7 @@ public class AttestationSuperGluuController {
         boolean valid = userSessionIdService.isValidSessionId(sessionId, userName);
         if (!valid) {
             String reasonError = String.format("session_id '%s' is invalid", sessionId);
-            throw errorResponseFactory.badRequestException(AssertionErrorResponseType.INVALID_SESSION_ID, reasonError);
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_SESSION_ID, reasonError);
         }
 
         ObjectNode params = dataMapperService.createObjectNode();
@@ -206,7 +207,7 @@ public class AttestationSuperGluuController {
         try {
             registerResponse = dataMapperService.readValue(registerResponseString, RegisterResponse.class);
         } catch (IOException ex) {
-            throw new Fido2RpRuntimeException("Failed to parse options attestation request", ex);
+            throw errorResponseFactory.invalidRequest("Failed to parse options attestation request", ex);
         }
 
         return registerResponse;
@@ -214,7 +215,7 @@ public class AttestationSuperGluuController {
 
 	public ObjectNode buildFido2AttestationVerifyResponse(String userName, RegisterResponse registerResponse) {
 		if (!ArrayUtils.contains(RawRegistrationService.SUPPORTED_REGISTER_TYPES, registerResponse.getClientData().getTyp())) {
-            throw new Fido2RuntimeException("Invalid options attestation request type");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.UNSUPPORTED_REGISTER_TYPE, "Invalid options attestation request type");
         }
 
         ObjectNode params = dataMapperService.createObjectNode();
@@ -262,9 +263,9 @@ public class AttestationSuperGluuController {
 
 	        response.put("attestationObject", base64Service.urlEncodeToString(dataMapperService.cborWriteAsBytes(attestationObject)));
 		} catch (CertificateEncodingException e) {
-            throw new Fido2RuntimeException("Failed during encoding attestationCertificate");
+            throw errorResponseFactory.invalidRequest("Failed during encoding attestationCertificate", e);
 		} catch (IOException e) {
-            throw new Fido2RuntimeException("Failed to prepare attestationObject");
+            throw errorResponseFactory.invalidRequest("Failed to prepare attestationObject", e);
 		}
 
         log.debug("Prepared U2F_V2 attestation verify request: {}", params);

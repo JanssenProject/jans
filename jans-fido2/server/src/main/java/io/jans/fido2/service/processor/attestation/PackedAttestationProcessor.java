@@ -25,13 +25,14 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
 import io.jans.fido2.ctap.AttestationFormat;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
@@ -78,6 +79,9 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
     @Inject
     private CertificateService certificateService;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     @Override
     public AttestationFormat getAttestationFormat() {
         return AttestationFormat.packed;
@@ -95,7 +99,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
 
             X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates);
             if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
-                throw new Fido2RuntimeException(
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
                         "Packed full attestation but no certificates in metadata for authenticator " + Hex.encodeHexString(authData.getAaguid()));
             }
 
@@ -106,11 +110,11 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
             authenticatorDataVerifier.verifyPackedAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, verifiedCert, alg);
 
             if (certificateVerifier.isSelfSigned(verifiedCert)) {
-                throw new Fido2RuntimeException("Self signed certificate");
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Self signed certificate");
             }
         } else if (attStmt.hasNonNull("ecdaaKeyId")) {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
-            throw new UnsupportedOperationException(ecdaaKeyId + " is not supported");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, ecdaaKeyId + " is not supported");
         } else {
             PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
             authenticatorDataVerifier.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);

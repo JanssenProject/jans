@@ -186,7 +186,7 @@ public class AssertionSuperGluuController {
 
     public ObjectNode buildFido2AuthenticationVerifyResponse(String userName, String authenticateResponseString, AuthenticateResponse authenticateResponse) {
         if (!ArrayUtils.contains(RawAuthenticationService.SUPPORTED_AUTHENTICATE_TYPES, authenticateResponse.getClientData().getTyp())) {
-            throw errorResponseFactory.badRequestException(AssertionErrorResponseType.INVALID_AUTHENTICATE_TYPE, "Invalid options attestation request type");
+            throw errorResponseFactory.badRequestException(AssertionErrorResponseType.UNSUPPORTED_AUTHENTICATION_TYPE, "Invalid options attestation request type");
         }
 
         boolean oneStep = StringHelper.isEmpty(userName);

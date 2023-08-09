@@ -26,6 +26,10 @@ public class Fido2ErrorMessages implements Configuration {
     @XmlElement(name = "error")
     private List<ErrorMessage> assertion;
 
+    @XmlElementWrapper(name = "attestation")
+    @XmlElement(name = "error")
+    private List<ErrorMessage> attestation;
+
     public List<ErrorMessage> getCommon() {
         return common;
     }
@@ -40,5 +44,13 @@ public class Fido2ErrorMessages implements Configuration {
 
     public void setAssertion(List<ErrorMessage> assertion) {
         this.assertion = assertion;
+    }
+
+    public List<ErrorMessage> getAttestation() {
+        return attestation;
+    }
+
+    public void setAttestation(List<ErrorMessage> attestation) {
+        this.attestation = attestation;
     }
 }
