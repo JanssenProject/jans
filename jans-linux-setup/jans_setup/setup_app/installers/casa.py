@@ -166,5 +166,6 @@ class CasaInstaller(JettyInstaller):
         return scopes_list
 
     def service_post_setup(self):
+        self.writeFile(os.path.join(self.jetty_service_dir, '.administrable'), '', backup=False)
         self.chown(self.pylib_dir, Config.jetty_user, Config.jetty_group, recursive=True)
         self.chown(self.jetty_service_dir, Config.jetty_user, Config.jetty_group, recursive=True)
