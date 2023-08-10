@@ -21,7 +21,7 @@ import jakarta.ws.rs.core.Response;
  *
  * @author Yuriy Z
  */
-@Path("/")
+@Path("/authorization_challenge")
 public class AuthorizationChallengeEndpoint {
 
     @Inject
@@ -31,7 +31,6 @@ public class AuthorizationChallengeEndpoint {
     private AuthorizationChallengeService authorizationChallengeService;
 
     @POST
-    @Path("/authorization_challenge")
     @Produces({MediaType.APPLICATION_JSON})
     public Response requestAuthorizationPost(
             @FormParam("client_id") String clientId,
