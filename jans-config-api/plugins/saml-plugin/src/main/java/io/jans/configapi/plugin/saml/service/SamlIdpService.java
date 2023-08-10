@@ -57,9 +57,10 @@ public class SamlIdpService {
     public void create() {
         SAMLSchemaBuilder samlSchemaBuilder = new SAMLSchemaBuilder(SAML1Version.SAML_11);
         try {
-            this.samlSchema = samlSchemaBuilder.getSAMLSchema();
+            //this.samlSchema = samlSchemaBuilder.getSAMLSchema();
             logger.error("samlSchema", samlSchema);
-        } catch (SAXException ex) {
+        //} catch (SAXException ex) {
+        } catch (Exception ex) {
             logger.error("Failed to load SAMLSchema - ", ex);
         }
     }
