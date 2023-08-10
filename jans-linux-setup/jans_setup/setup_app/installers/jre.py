@@ -14,7 +14,7 @@ from setup_app.pylib.jproperties import Properties
 
 class JreInstaller(BaseInstaller, SetupUtils):
 
-    amazon_corretto_link = 'https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(base.current_app.app_info['AMAZON_CORRETTO_VERSION'])
+    amazon_corretto_link = 'https://corretto.aws/downloads/latest/amazon-corretto-{}-x64-linux-jdk.tar.gz'.format(base.current_app.app_info['AMAZON_CORRETTO_VERSION'])
     source_files = [
             (os.path.join(Config.dist_app_dir, os.path.basename(amazon_corretto_link)), amazon_corretto_link),
             ]
