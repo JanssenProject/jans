@@ -7452,15 +7452,15 @@ components:
           type: string
         adminCanView:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
-        adminCanEdit:
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8206,6 +8206,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8215,8 +8217,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
