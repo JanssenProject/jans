@@ -44,6 +44,7 @@ from setup_app.utils import arg_parser
 
 argsp = arg_parser.get_parser()
 
+
 # first import paths and make changes if necassary
 from setup_app import paths
 
@@ -92,6 +93,9 @@ base.argsp = argsp
 
 if 'SETUP_BRANCH' not in base.current_app.app_info:
     base.current_app.app_info['SETUP_BRANCH'] = argsp.setup_branch
+
+if argsp.java_version:
+    base.current_app.app_info['AMAZON_CORRETTO_VERSION'] = argsp.java_version
 
 base.current_app.app_info['ox_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
 
