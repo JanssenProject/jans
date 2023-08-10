@@ -578,7 +578,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             jsonObject.put(JWKParameter.X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
             jsonObject.put(JWKParameter.Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
         }
-/*        
+/*
         else if (use == Use.SIGNATURE && publicKey instanceof EdDSAKey) {
             EdDSAKey edDSAPublicKey = (EdDSAKey) publicKey;
             SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
