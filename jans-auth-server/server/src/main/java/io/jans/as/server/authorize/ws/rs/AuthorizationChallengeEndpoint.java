@@ -54,7 +54,7 @@ public class AuthorizationChallengeEndpoint {
         authzRequest.setState(state);
         authzRequest.setNonce(nonce);
         authzRequest.setPrompt(prompt);
-        authzRequest.setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(authzRequest.getHttpRequest().getQueryString())));
+        authzRequest.setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString())));
         authzRequest.setHttpRequest(httpRequest);
         authzRequest.setHttpResponse(httpResponse);
 
