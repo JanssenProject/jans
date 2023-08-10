@@ -55,14 +55,14 @@ public class ConfigurationController {
         ObjectNode attestation = dataMapperService.createObjectNode();
         response.set("attestation", attestation);
         attestation.put("base_path", baseEndpointUri + "/attestation");
-        attestation.put("options_enpoint", baseEndpointUri + "/attestation/options");
-        attestation.put("result_enpoint", baseEndpointUri + "/attestation/result");
+        attestation.put("options_endpoint", baseEndpointUri + "/attestation/options");
+        attestation.put("result_endpoint", baseEndpointUri + "/attestation/result");
 
         ObjectNode assertion = dataMapperService.createObjectNode();
         response.set("assertion", assertion);
         assertion.put("base_path", baseEndpointUri + "/assertion");
-        assertion.put("options_enpoint", baseEndpointUri + "/assertion/options");
-        assertion.put("result_enpoint", baseEndpointUri + "/assertion/result");
+        assertion.put("options_endpoint", baseEndpointUri + "/assertion/options");
+        assertion.put("result_endpoint", baseEndpointUri + "/assertion/result");
         
         if (appConfiguration.isSuperGluuEnabled()) {
         	response.put("super_gluu_registration_endpoint", baseEndpointUri + "/attestation/registration");
