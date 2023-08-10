@@ -69,6 +69,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
 
         final boolean ok = entryManager.authenticate(user.getDn(), User.class, password);
         if (ok) {
+            context.getExecutionContext().setUser(user); // <- IMPORTANT : without user set, user relation will not be associated with token
             scriptLogger.trace("User {} is authenticated successfully.", username);
             return true;
         }
