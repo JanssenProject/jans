@@ -60,7 +60,7 @@ public class ExternalTypeCreator {
             for (URL url : urls) {
                 CompilerUtils.addClassPath(url.getFile());
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("FAILED to output class loader urls", e);
         }
     }
@@ -76,7 +76,7 @@ public class ExternalTypeCreator {
             } else {
                 externalType = createExternalTypeFromStringWithPythonException(customScript);
             }
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             log.error("Failed to prepare external type '{}', exception: '{}'", customScriptInum, ExceptionUtils.getStackTrace(ex));
             log.error("Script '{}'", customScript.getScript());
             saveScriptError(customScript, ex, true);
