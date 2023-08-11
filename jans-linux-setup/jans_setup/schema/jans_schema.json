@@ -3741,6 +3741,29 @@
     {
       "kind": "STRUCTURAL",
       "may": [
+        "jansId",
+        "jansUsrDN",
+        "creationDate",
+        "exp",
+        "del",
+        "clnId",
+        "attr"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansDeviceSess"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
         "displayName",
         "inum",
         "owner",
