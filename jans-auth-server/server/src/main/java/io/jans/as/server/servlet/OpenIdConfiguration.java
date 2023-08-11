@@ -106,6 +106,7 @@ public class OpenIdConfiguration extends HttpServlet {
 
             jsonObj.put(ISSUER, appConfiguration.getIssuer());
             jsonObj.put(AUTHORIZATION_ENDPOINT, appConfiguration.getAuthorizationEndpoint());
+            jsonObj.put(AUTHORIZATION_CHALLENGE_ENDPOINT, appConfiguration.getAuthorizationChallengeEndpoint());
             jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
             jsonObj.put(JWKS_URI, appConfiguration.getJwksUri());
             jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
@@ -268,6 +269,8 @@ public class OpenIdConfiguration extends HttpServlet {
 
         if (StringUtils.isNotBlank(appConfiguration.getMtlsAuthorizationEndpoint()))
             aliases.put(AUTHORIZATION_ENDPOINT, appConfiguration.getMtlsAuthorizationEndpoint());
+        if (StringUtils.isNotBlank(appConfiguration.getMtlsAuthorizationChallengeEndpoint()))
+            aliases.put(AUTHORIZATION_CHALLENGE_ENDPOINT, appConfiguration.getMtlsAuthorizationChallengeEndpoint());
         if (StringUtils.isNotBlank(appConfiguration.getMtlsTokenEndpoint()))
             aliases.put(TOKEN_ENDPOINT, appConfiguration.getMtlsTokenEndpoint());
         if (StringUtils.isNotBlank(appConfiguration.getMtlsJwksUri()))

@@ -38,6 +38,7 @@ public class Constants {
     public static final String CLIENT_ASSERTION_TYPE = "client_assertion_type";
     public static final String CLIENT_ID = "client_id";
     public static final String DEVICE_AUTHORIZATION = "device_authorization";
+    public static final String AUTHORIZATION_CODE = "authorization_code";
 
     public static final String LOG_FOUND = "Found '{}' entries";
 
