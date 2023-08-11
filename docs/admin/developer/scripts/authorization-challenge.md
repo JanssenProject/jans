@@ -1,3 +1,67 @@
+---
+tags:
+  - administration
+  - developer
+  - scripts
+---
+
+# Authorization Challenge Custom Script
+
+## Overview
+
+The Jans-Auth server implements [OAuth 2.0 for First-Party Native Applications](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-00.html).
+This script is used to control/customize Authorization Challenge Endpoint.
+
+## Behavior
+
+In request to Authorization Challenge Endpoint to is expected to have `acr_values` request parameter which specifies name of the custom script.
+If parameter is absent or AS can't find script with this name then it falls back to script with name `default_challenge`.
+
+This script is provided during installation and performs basic `username`/`password` authentication.
+
+```
+POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+Host: yuriyz-fond-skink.gluu.info
+
+client_id=999e13b8-f4a2-4fed-ad3c-6c88bd2c92ea&scope=openid+profile+address+email+phone+user_name&state=b4a41b29-51c8-4354-9c8c-fda38b4dbd43&nonce=3a56f8d0-f78e-4b15-857c-3e792801be68&acr_values=&request_session_id=false&password=secret&username=admin
+```
+
+There is **authorizationChallengeDefaultAcr** AS configuration property which allows to change fallback script name from `default_challenge` to some other value (value must be valid script name present on AS).
+
+
+## Interface
+The Authorization Challenage script implements the [AuthorizationChallenageType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authzchallenge/AuthorizationChallengeType.java) interface. This extends methods from the base script type in addition to adding new methods:
+
+### Inherited Methods
+| Method header | Method description |
+|:-----|:------|
+| `def init(self, customScript, configurationAttributes)` | This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc |
+| `def destroy(self, configurationAttributes)` | This method is called once to destroy events. It can be used to free resource and objects created in the `init()` method |
+| `def getApiVersion(self, configurationAttributes, customScript)` | The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10 |
+
+### New methods
+| Method header | Method description |
+|:-----|:------|
+|`def authorize(self, context)`| Called when the request is received. |
+
+`authorize` method returns true/false which indicates to server whether to issue `authorization_code` in response or not.
+
+If parameters is not present then error has to be created and `false` returned.
+If all is good script has to return `true` and it's strongly recommended to set user `context.getExecutionContext().setUser(user);` so AS can keep tracking what exactly user is authenticated.
+
+
+### Objects
+| Object name | Object description |
+|:-----|:------|
+|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
+|`context`| [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalScriptContext.java) |
+
+
+## Common Use Case: Authorize user by username/password 
+
+### Script Type: Java
+
+```java
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.session.DeviceSession;
 import io.jans.as.server.authorize.ws.rs.DeviceSessionService;
@@ -175,3 +239,8 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         return 11;
     }
 }
+
+```
+
+### Sample Scripts
+- [AuthorizationChallenge](../../../script-catalog/authorization_challenge/AuthorizationChallenge.java)
