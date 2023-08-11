@@ -125,7 +125,7 @@ nav:
       - CLI For Agama Developer Studio: admin/config-guide/jans-cli/cli-agama.md
       - SCIM CLI: admin/config-guide/scim-cli.md
     - Standalone Installation: admin/config-guide/jans-cli/install.md
-    - Attribute: admin/config-guide/cli-attribute.md
+    - Attribute: admin/config-guide/attribute-configuration.md
     - Default Authentication: admin/config-guide/default-authentication-method-config.md
     - Cache Configuration: admin/config-guide/cache-configuration.md
     - Auth Server Configuration: admin/config-guide/jans-authorization-server-config.md
