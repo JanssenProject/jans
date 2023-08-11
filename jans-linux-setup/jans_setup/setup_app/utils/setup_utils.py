@@ -635,3 +635,6 @@ class SetupUtils(Crypto64):
 
     def get_client_test_keystore_fn(self, keystore_name):
         return keystore_name + '.' + Config.default_client_test_store_type
+
+    def get_server_test_keystore_fn(self, keystore_name):
+        return keystore_name + '.' + Config.default_server_test_store_type

@@ -18,6 +18,7 @@ from setup_app.utils.ldif_utils import myLdifParser, schema2json
 from setup_app.pylib.schema import ObjectClass
 from setup_app.pylib.ldif4.ldif import LDIFWriter
 from setup_app.pylib.jproperties import Properties
+from setup_app.static import SetupProfiles
 
 class TestDataLoader(BaseInstaller, SetupUtils):
 
@@ -31,6 +32,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.install_var = 'loadTestData'
         self.register_progess()
         self.template_base = os.path.join(Config.templateFolder, 'test')
+        self.server_keystore_fn = self.get_server_test_keystore_fn('server_keystore')
+        Config.templateRenderingDict['server_keystore_fn'] = self.server_keystore_fn
 
     def create_test_client_keystore(self):
         self.logIt("Creating client_keystore.p12")
@@ -63,6 +66,84 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.copyFile(client_keystore_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
         self.copyFile(keys_json_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
 
+    def create_test_server_keystore(self):
+        self.logIt("Creating " + self.server_keystore_fn)
+
+        server_keystore_fp = os.path.join(Config.output_dir, 'test/jans-auth/client/' + self.server_keystore_fn)
+        keys_json_fp =  os.path.join(Config.output_dir, 'test/jans-auth/client/keys_server_keystore.json')
+
+        args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore',
+                    server_keystore_fp, '-storepass', 'secret', '-keypass',
+                    'secret', '-dname',
+                    "'{}'".format(Config.default_openid_jks_dn_name),
+                    '-storetype', Config.default_store_type
+                    ]
+
+        if Config.profile == SetupProfiles.DISA_STIG:
+            fips_provider = self.get_keytool_provider()
+            args += [
+                        '-providername', fips_provider['-providername'],
+                        '-provider', fips_provider['-providerclass'],
+                        '-providerpath', fips_provider['-providerpath']
+                    ]
+
+        self.run(' '.join(args), shell=True)
+
+        args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
+                '-cp', self.get_key_gen_client_cmd(), Config.non_setup_properties['key_gen_path'],
+                '-key_ops_type', 'ALL',
+                '-keystore', server_keystore_fp,
+                '-keypasswd', 'secret',
+                '-sig_keys', Config.default_sig_key_algs,
+                '-enc_keys', Config.default_enc_key_algs,
+                '-dnname', "'{}'".format(Config.default_openid_jks_dn_name),
+                '-expiration', '365','>', keys_json_fp]
+
+        cmd = ' '.join(args)
+
+        self.run(cmd, shell=True)
+
+        self.copyFile(server_keystore_fp, os.path.join(Config.output_dir, 'test/jans-auth/server'))
+        self.copyFile(keys_json_fp, os.path.join(Config.output_dir, 'test/jans-auth/server'))
+
+    def generate_smtp_config(self):
+        self.logIt("Generating smtp keys", pbar=self.service_name)
+
+        if not Config.get('smtp_jks_pass'):
+            Config.smtp_jks_pass = self.getPW()
+            try:
+                Config.smtp_jks_pass_enc = self.obscure(Config.smtp_jks_pass)
+            except Exception as e:
+                self.logIt("JansInstaller. generate_smtp_config failed. Reason: %s" % str(e), errorLog=True)
+
+        try:
+            salt_text = 'encodeSalt = {}'.format(Config.encode_salt)
+            self.writeFile(Config.salt_fn, salt_text)
+        except:
+            self.logIt("Error writing salt", True, True)
+
+        cmd_cert_gen = [Config.cmd_keytool, '-genkeypair',
+                        '-alias', Config.smtp_alias,
+                        '-keyalg', 'ec',
+                        '-groupname', 'secp256r1',
+                        '-sigalg', Config.smtp_signing_alg,
+                        '-validity', '3650',
+                        '-storetype', Config.default_store_type,
+                        '-keystore', Config.smtp_jks_fn,
+                        '-keypass', Config.smtp_jks_pass,
+                        '-storepass', Config.smtp_jks_pass,
+                        '-dname', 'CN=SMTP CA Certificate'
+                    ]
+
+        if Config.profile == SetupProfiles.DISA_STIG:
+            fips_provider = self.get_keytool_provider()
+            cmd_cert_gen += [
+                        '-providername', fips_provider['-providername'],
+                        '-provider', fips_provider['-providerclass'],
+                        '-providerpath', fips_provider['-providerpath']
+                    ]
+
+        self.run(cmd_cert_gen)
 
     def enable_cusom_scripts(self):
         self.logIt("Enabling custom scripts")
@@ -434,9 +515,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             self.dbUtils.set_configuration('jansDbAuth', oxIDPAuthentication_js)
 
         self.create_test_client_keystore()
+        self.create_test_server_keystore()
 
         self.load_agama_test_data()
-
 
         # Disable token binding module
         if base.os_name in ('ubuntu18', 'ubuntu20'):

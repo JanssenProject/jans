@@ -45,7 +45,7 @@ class Config:
     default_store_type = 'pkcs12'
     opendj_truststore_format = 'pkcs12'
     default_client_test_store_type = 'pkcs12'
-    
+    default_server_test_store_type = 'pkcs12'
 
     installed_instance = False
 
@@ -161,6 +161,7 @@ class Config:
             self.default_store_type = 'bcfks'
             self.opendj_truststore_format = base.argsp.opendj_keystore_type
             self.default_client_test_store_type = 'pkcs12'
+            self.default_server_test_store_type = 'bcfks'
         else:
             self.cmd_java = os.path.join(self.jre_home, 'bin/java')
             self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
