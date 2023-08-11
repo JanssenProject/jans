@@ -555,8 +555,20 @@ public class AuthzRequestService {
         authzRequest.setRedirectUriResponse(redirectUriResponse);
     }
 
+    public static boolean canLogWebApplicationException(WebApplicationException e) {
+        if (e == null || e.getResponse() == null) {
+            return false;
+        }
+        final int status = e.getResponse().getStatus();
+        return status != 302;
+    }
+
     public void createOauth2AuditLog(AuthzRequest authzRequest) {
-        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(authzRequest.getHttpRequest()), Action.USER_AUTHORIZATION);
+        createOauth2AuditLog(authzRequest, Action.USER_AUTHORIZATION);
+    }
+
+    public void createOauth2AuditLog(AuthzRequest authzRequest, Action action) {
+        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(authzRequest.getHttpRequest()), action);
         oAuth2AuditLog.setClientId(authzRequest.getClientId());
         oAuth2AuditLog.setScope(authzRequest.getScope());
 

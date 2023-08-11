@@ -18,6 +18,84 @@ tags:
     description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint. Server is tightly coupled with Gluu Admin UI.
 
 paths:
+  /authorization_challenge:
+    post:
+      tags:
+        - Authorization Challenge
+      summary: The Authorization Challenge Endpoint performs Authentication of the End-User by native application to obtain an authorization code.
+      description: The Authorization Challenge Endpoint performs Authentication of the End-User by native application to obtain an authorization code.
+      operationId: post_authorize_challenge
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - client_id
+              properties:
+                client_id:
+                  type: string
+                  description: OAuth 2.0 Client Identifier valid at the Authorization Server.
+                scope:
+                  type: string
+                  description: OpenID Connect requests MUST contain the openid scope value. If the openid scope value is not present, the behavior is entirely unspecified. Other scope values MAY be present.
+                device_session:
+                  type: string
+                  description: If the client has previously obtained a device session
+                use_device_session:
+                  type: boolean
+                  description: If return back in response device_session. By default AS does not return device_session
+                state:
+                  type: string
+                  description: Opaque value used to maintain state between the request and the callback.
+                nonce:
+                  type: string
+                  description: String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
+                login_hint:
+                  type: string
+                  description: Hint to the Authorization Server about the login identifier the End-User might use to log in (if necessary).
+                acr_values:
+                  type: string
+                  description: Requested Authentication Context Class Reference values. Space-separated string that specifies the acr values that the Authorization Server is being requested to use for processing this Authentication Request, with the values appearing in order of preference.
+                amr_values:
+                  type: string
+                  description: AMR Values.
+                request_session_id:
+                  type: string
+                  description: Request session id.
+                session_id:
+                  type: string
+                  description: Session id of this call.
+                origin_headers:
+                  type: string
+                  description: Origin headers. Used in custom workflows.
+                custom_response_headers:
+                  type: string
+                  description: Custom Response Headers.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: AuthorizationChallengeResponse
+                description: Authorization Challenge Response
+                required:
+                  - authorization_code
+                type: object
+                properties:
+                  authorization_code:
+                    type: string
+                    description: Authorization Code
+                    example: uY29tL2F1dGhlbnRpY
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
   /authorize:
     get:
       tags:
