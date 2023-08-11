@@ -535,6 +535,20 @@ jansRevision: 11
 jansScr::%(discovery_discovery)s
 jansScrTyp: discovery
 
+dn: inum=0300-BA99,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Default Authorization Challenge Java Script
+displayName: default_challenge
+inum: 0300-BA99
+jansEnabled: true
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansProgLng: java
+jansRevision: 11
+jansScr::%(authorization_challenge_authorizationchallenge)s
+jansScrTyp: authorization_challenge
+
 dn: inum=BADA-BADA,ou=scripts,o=jans
 objectClass: jansCustomScr
 objectClass: top

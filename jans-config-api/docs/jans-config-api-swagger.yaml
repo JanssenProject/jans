@@ -7451,19 +7451,33 @@ components:
         tooltip:
           type: string
         whitePagesCanView:
+<<<<<<< HEAD
+=======
           type: boolean
-        adminCanView:
+        adminCanEdit:
           type: boolean
+        adminCanAccess:
+>>>>>>> dec9dc768906ffecfc9848f4cec123a3c9ea9a17
+          type: boolean
+        userCanEdit:
+          type: boolean
+<<<<<<< HEAD
         userCanAccess:
           type: boolean
         adminCanEdit:
+=======
+        adminCanView:
+>>>>>>> dec9dc768906ffecfc9848f4cec123a3c9ea9a17
           type: boolean
         userCanEdit:
           type: boolean
         userCanView:
           type: boolean
+<<<<<<< HEAD
         adminCanAccess:
           type: boolean
+=======
+>>>>>>> dec9dc768906ffecfc9848f4cec123a3c9ea9a17
         baseDn:
           type: string
     PatchRequest:
@@ -8206,8 +8220,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8217,6 +8229,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9196,14 +9210,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:

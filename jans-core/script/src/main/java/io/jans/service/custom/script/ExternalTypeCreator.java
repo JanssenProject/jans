@@ -60,7 +60,7 @@ public class ExternalTypeCreator {
             for (URL url : urls) {
                 CompilerUtils.addClassPath(url.getFile());
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("FAILED to output class loader urls", e);
         }
     }
@@ -69,25 +69,29 @@ public class ExternalTypeCreator {
                                                Map<String, SimpleCustomProperty> configurationAttributes) {
         String customScriptInum = customScript.getInum();
 
-        BaseExternalType externalType;
+        BaseExternalType externalType = null;
+        Throwable loadException = null; 
         try {
             if (customScript.getProgrammingLanguage() == ProgrammingLanguage.JAVA) {
                 externalType = createExternalTypeWithJava(customScript);
             } else {
                 externalType = createExternalTypeFromStringWithPythonException(customScript);
             }
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
+        	loadException = ex;
             log.error("Failed to prepare external type '{}', exception: '{}'", customScriptInum, ExceptionUtils.getStackTrace(ex));
             log.error("Script '{}'", customScript.getScript());
-            saveScriptError(customScript, ex, true);
-            return null;
         }
 
         externalType = initExternalType(externalType, customScript, configurationAttributes);
 
         if (externalType == null) {
+        	if (loadException == null) {
+        		loadException = new Exception("Using default external type class");
+        	}
+        	
             log.debug("Using default external type class");
-            saveScriptError(customScript, new Exception("Using default external type class"), true);
+            saveScriptError(customScript, loadException, true);
             externalType = customScript.getScriptType().getDefaultImplementation();
         } else {
             clearScriptError(customScript);
@@ -152,11 +156,11 @@ public class ExternalTypeCreator {
         }
     }
 
-    public void saveScriptError(CustomScript customScript, Exception exception) {
+    public void saveScriptError(CustomScript customScript, Throwable exception) {
         saveScriptError(customScript, exception, false);
     }
 
-    public void saveScriptError(CustomScript customScript, Exception exception, boolean overwrite) {
+    public void saveScriptError(CustomScript customScript, Throwable exception, boolean overwrite) {
         try {
             saveScriptErrorImpl(customScript, exception, overwrite);
         } catch (Exception ex) {
@@ -164,7 +168,7 @@ public class ExternalTypeCreator {
         }
     }
 
-    protected void saveScriptErrorImpl(CustomScript customScript, Exception exception, boolean overwrite) {
+    protected void saveScriptErrorImpl(CustomScript customScript, Throwable exception, boolean overwrite) {
         // Load entry from DN
         String customScriptDn = customScript.getDn();
         Class<? extends CustomScript> scriptType = customScript.getScriptType().getCustomScriptModel();
