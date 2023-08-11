@@ -109,22 +109,21 @@ nav:
   - Configuration Guide:
     - Configuration Tools:
       - Config API:
-        - admin/config-guide/config-api/README.md
-        - Settings: admin/config-guide/config-api/config.md
-        - Attributes: admin/config-guide/config-api/attribute.md
-        - Security: admin/config-guide/config-api/security.md
-        - Logs: admin/config-guide/config-api/logs.md
-        - Monitoring: admin/config-guide/config-api/monitoring.md
-        - Plugins: admin/config-guide/config-api/plugins.md
-      - CURL Guide: admin/config-guide/curl-guide.md
+        - admin/config-guide/config-tools/config-api/README.md
+        - Settings: admin/config-guide/config-tools/config-api/config.md
+        - Attributes: admin/config-guide/config-tools/config-api/attribute.md
+        - Security: admin/config-guide/config-tools/config-api/security.md
+        - Logs: admin/config-guide/config-tools/config-api/logs.md
+        - Monitoring: admin/config-guide/config-tools/config-api/monitoring.md
+        - Plugins: admin/config-guide/config-tools/config-api/plugins.md
+      - CURL Guide: admin/config-guide/config-tools/curl-guide.md
       - Text-Based User Interface (TUI):
-        - admin/config-guide/jans-tui/README.md
-        - Navigation Guide: admin/config-guide/jans-tui/navigation-guide.md
+        - admin/config-guide/config-tools/jans-tui/README.md
+        - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
       - Command Line Interface (CLI):
-        - admin/config-guide/jans-cli/README.md
-      - CLI For Agama Developer Studio: admin/config-guide/jans-cli/cli-agama.md
-      - SCIM CLI: admin/config-guide/scim-cli.md
-    - Standalone Installation: admin/config-guide/jans-cli/install.md
+        - admin/config-guide/config-tools/jans-cli/README.md
+      - CLI For Agama Developer Studio: admin/config-guide/config-tools/jans-cli/cli-agama.md
+      - SCIM CLI: admin/config-guide/config-tools/scim-cli.md
     - Attribute: admin/config-guide/attribute-configuration.md
     - Default Authentication: admin/config-guide/default-authentication-method-config.md
     - Cache Configuration: admin/config-guide/cache-configuration.md
