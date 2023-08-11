@@ -73,6 +73,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import static io.jans.as.model.util.StringUtils.implode;
+import static io.jans.as.server.authorize.ws.rs.AuthzRequestService.canLogWebApplicationException;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.BooleanUtils.toBoolean;
 
@@ -174,8 +175,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
-        authorizeRestWebServiceValidator.validateNotWebView(httpRequest);
-
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setHttpMethod(HttpMethod.GET);
         authzRequest.setScope(scope);
@@ -218,8 +217,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
-        authorizeRestWebServiceValidator.validateNotWebView(httpRequest);
-
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setHttpMethod(HttpMethod.POST);
         authzRequest.setScope(scope);
@@ -254,6 +251,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private Response requestAuthorization(AuthzRequest authzRequest) {
+        authorizeRestWebServiceValidator.validateNotWebView(authzRequest.getHttpRequest());
+
         authzRequest.setScope(ServerUtil.urlDecode(authzRequest.getScope())); // it may be encoded -> decode
 
         authzRequestService.createOauth2AuditLog(authzRequest);
@@ -300,14 +299,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
         return builder.build();
-    }
-
-    private static boolean canLogWebApplicationException(WebApplicationException e) {
-        if (e == null || e.getResponse() == null) {
-            return false;
-        }
-        final int status = e.getResponse().getStatus();
-        return status != 302;
     }
 
     private ResponseBuilder authorize(AuthzRequest authzRequest) throws AcrChangedException, SearchException, TokenBindingParseException {
@@ -857,7 +848,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private Map<String, String> getGenericRequestMap(HttpServletRequest httpRequest) {
+    public static Map<String, String> getGenericRequestMap(HttpServletRequest httpRequest) {
         Map<String, String> result = new HashMap<>();
         for (Entry<String, String[]> entry : httpRequest.getParameterMap().entrySet()) {
             result.put(entry.getKey(), entry.getValue()[0]);

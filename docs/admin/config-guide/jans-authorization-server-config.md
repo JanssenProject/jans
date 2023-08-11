@@ -52,6 +52,7 @@ It returns all the information of the Jans Authorization server.
   "issuer": "https://example.jans.io",
   "baseEndpoint": "https://example.jans.io/jans-auth/restv1",
   "authorizationEndpoint": "https://example.jans.io/jans-auth/restv1/authorize",
+  "authorizationChallengeEndpoint":"https://example.jans.io/jans-auth/restv1/authorization_challenge",
   "tokenEndpoint": "https://example.jans.io/jans-auth/restv1/token",
   "tokenRevocationEndpoint": "https://example.jans.io/jans-auth/restv1/revoke",
   "userInfoEndpoint": "https://example.jans.io/jans-auth/restv1/userinfo",

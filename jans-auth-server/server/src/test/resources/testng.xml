@@ -30,6 +30,7 @@
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidatorTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImplTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeActionTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthorizationChallengeValidatorTest" />
 
             <!-- REGISTER -->
             <class name="io.jans.as.server.register.ws.rs.SsaValidationConfigServiceTest" />

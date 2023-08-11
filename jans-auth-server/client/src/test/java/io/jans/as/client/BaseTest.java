@@ -89,6 +89,7 @@ public abstract class BaseTest {
     protected HtmlUnitDriver driver;
 
     protected String authorizationEndpoint;
+    protected String authorizationChallengeEndpoint;
     protected String authorizationPageEndpoint;
     protected String gluuConfigurationEndpoint;
     protected String tokenEndpoint;
@@ -291,6 +292,14 @@ public abstract class BaseTest {
 
     public void setAuthorizationEndpoint(String authorizationEndpoint) {
         this.authorizationEndpoint = authorizationEndpoint;
+    }
+
+    public String getAuthorizationChallengeEndpoint() {
+        return authorizationChallengeEndpoint;
+    }
+
+    public void setAuthorizationChallengeEndpoint(String authorizationChallengeEndpoint) {
+        this.authorizationChallengeEndpoint = authorizationChallengeEndpoint;
     }
 
     public String getTokenEndpoint() {
@@ -971,6 +980,7 @@ public abstract class BaseTest {
             Asserter.assertOpenIdConfigurationResponse(response);
 
             authorizationEndpoint = response.getAuthorizationEndpoint();
+            authorizationChallengeEndpoint = response.getAuthorizationChallengeEndpoint();
             tokenEndpoint = response.getTokenEndpoint();
             tokenRevocationEndpoint = response.getRevocationEndpoint();
             userInfoEndpoint = response.getUserInfoEndpoint();
@@ -992,6 +1002,7 @@ public abstract class BaseTest {
             showTitle("Loading configuration endpoints from properties file");
 
             authorizationEndpoint = context.getCurrentXmlTest().getParameter("authorizationEndpoint");
+            authorizationChallengeEndpoint = context.getCurrentXmlTest().getParameter("authorizationChallengeEndpoint");
             tokenEndpoint = context.getCurrentXmlTest().getParameter("tokenEndpoint");
             tokenRevocationEndpoint = context.getCurrentXmlTest().getParameter("tokenRevocationEndpoint");
             userInfoEndpoint = context.getCurrentXmlTest().getParameter("userInfoEndpoint");

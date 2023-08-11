@@ -7,12 +7,15 @@
 package io.jans.as.server.service.external.context;
 
 import io.jans.as.model.util.Util;
+import io.jans.as.server.authorize.ws.rs.AuthzRequest;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.CustomEntry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.net.util.SubnetUtils;
@@ -30,9 +33,16 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
 
     private static final Logger log = LoggerFactory.getLogger(ExternalScriptContext.class);
 
-    private final PersistenceEntryManager ldapEntryManager;
+    private final PersistenceEntryManager persistenceEntryManager;
+
+    private ExecutionContext executionContext;
 
     private NoLogWebApplicationException webApplicationException;
+
+    public ExternalScriptContext(ExecutionContext executionContext) {
+        this(executionContext.getHttpRequest(), executionContext.getHttpResponse());
+        this.executionContext = executionContext;
+    }
 
     public ExternalScriptContext(HttpServletRequest httpRequest) {
         this(httpRequest, null);
@@ -40,11 +50,19 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
 
     public ExternalScriptContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         super(httpRequest, httpResponse);
-        this.ldapEntryManager = ServerUtil.getLdapManager();
+        this.persistenceEntryManager = ServerUtil.getLdapManager();
+    }
+
+    public ExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    public AuthzRequest getAuthzRequest() {
+        return executionContext != null ? executionContext.getAuthzRequest() : null;
     }
 
     public PersistenceEntryManager getPersistenceEntryManager() {
-        return ldapEntryManager;
+        return persistenceEntryManager;
     }
 
     public boolean isInNetwork(String cidrNotation) {
@@ -58,7 +76,7 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
 
     protected CustomEntry getEntryByDn(String dn, String... ldapReturnAttributes) {
         try {
-            return ldapEntryManager.find(dn, CustomEntry.class, ldapReturnAttributes);
+            return persistenceEntryManager.find(dn, CustomEntry.class, ldapReturnAttributes);
         } catch (EntryPersistenceException epe) {
             log.error("Failed to find entry '{}'", dn);
         }
@@ -88,10 +106,14 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
     }
 
     public NoLogWebApplicationException createWebApplicationException(int status, String entity) {
+        final CacheControl cacheControl = new CacheControl();
+        cacheControl.setNoStore(true);
+
         this.webApplicationException = new NoLogWebApplicationException(Response
                 .status(status)
                 .entity(entity)
                 .type(MediaType.APPLICATION_JSON_TYPE)
+                .cacheControl(cacheControl)
                 .build());
         return this.webApplicationException;
     }

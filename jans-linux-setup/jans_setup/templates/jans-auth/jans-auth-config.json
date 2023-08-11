@@ -2,6 +2,7 @@
     "issuer":"https://%(hostname)s",
     "baseEndpoint":"https://%(hostname)s/jans-auth/restv1",
     "authorizationEndpoint":"https://%(hostname)s/jans-auth/restv1/authorize",
+    "authorizationChallengeEndpoint":"https://%(hostname)s/jans-auth/restv1/authorization_challenge",
     "tokenEndpoint":"https://%(hostname)s/jans-auth/restv1/token",
     "tokenRevocationEndpoint": "https://%(hostname)s/jans-auth/restv1/revoke",
     "userInfoEndpoint":"https://%(hostname)s/jans-auth/restv1/userinfo",

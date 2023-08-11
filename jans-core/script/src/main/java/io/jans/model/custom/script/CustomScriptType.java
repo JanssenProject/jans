@@ -13,6 +13,8 @@ import io.jans.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
 import io.jans.model.custom.script.type.authz.ConsentGatheringType;
 import io.jans.model.custom.script.type.authz.DummyConsentGatheringType;
+import io.jans.model.custom.script.type.authzchallenge.AuthorizationChallengeType;
+import io.jans.model.custom.script.type.authzchallenge.DummyAuthorizationChallengeType;
 import io.jans.model.custom.script.type.ciba.DummyEndUserNotificationType;
 import io.jans.model.custom.script.type.ciba.EndUserNotificationType;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
@@ -70,6 +72,7 @@ public enum CustomScriptType implements AttributeEnum {
 
     PERSON_AUTHENTICATION("person_authentication", "Person Authentication", PersonAuthenticationType.class, AuthenticationCustomScript.class,
             "PersonAuthentication", new DummyPersonAuthenticationType()),
+    AUTHORIZATION_CHALLENGE("authorization_challenge", "Authorization Challenge", AuthorizationChallengeType.class, CustomScript.class, "AuthorizationChallenge", new DummyAuthorizationChallengeType()),
     INTROSPECTION("introspection", "Introspection", IntrospectionType.class, CustomScript.class, "Introspection", new DummyIntrospectionType()),
     RESOURCE_OWNER_PASSWORD_CREDENTIALS("resource_owner_password_credentials", "Resource Owner Password Credentials", ResourceOwnerPasswordCredentialsType.class, CustomScript.class, "ResourceOwnerPasswordCredentials", new DummyResourceOwnerPasswordCredentialsType()),
     APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession",

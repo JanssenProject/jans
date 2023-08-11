@@ -24,6 +24,10 @@ import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.util.Util;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.logging.log4j.ThreadContext;
 import org.jetbrains.annotations.NotNull;
@@ -31,9 +35,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -120,6 +121,15 @@ public class ErrorResponseFactory implements Configuration {
                 .entity(errorAsJson(TokenErrorResponseType.ACCESS_DENIED, "Feature flag is disabled on server."))
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .build());
+    }
+
+    public Response.ResponseBuilder newErrorResponse(Response.Status status) {
+        final CacheControl cacheControl = new CacheControl();
+        cacheControl.setNoStore(true);
+
+        return Response.status(status)
+                .cacheControl(cacheControl)
+                .type(MediaType.APPLICATION_JSON_TYPE);
     }
 
     public WebApplicationException createWebApplicationException(Response.Status status, IErrorType type, String reason) throws WebApplicationException {
