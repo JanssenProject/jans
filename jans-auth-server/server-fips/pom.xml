@@ -19,6 +19,10 @@
 	<build>
 		<finalName>${project.artifactId}</finalName>
 
+		<filters>
+			<filter>${basedir}/profiles/${cfg}/config-oxauth-test-data.properties</filter>
+		</filters>
+
 		<resources>
 			<resource>
 				<directory>${project.basedir}/../server/src/main/resources</directory>
@@ -209,6 +213,10 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-static</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-model</artifactId>
 		</dependency>
 
 		<!-- jans -->

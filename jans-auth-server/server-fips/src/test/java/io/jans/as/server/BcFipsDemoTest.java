@@ -5,9 +5,16 @@ package io.jans.as.server;
 
 import static org.testng.Assert.assertNotNull;
 
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+
 import org.testng.annotations.Test;
+import org.testng.annotations.Parameters;
 
 import io.jans.util.security.SecurityProviderUtility;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 
 /**
  * @author smans
@@ -16,8 +23,8 @@ import io.jans.util.security.SecurityProviderUtility;
 public class BcFipsDemoTest extends BaseTest {
 	
     @Test(enabled = true)
-    public void bcFipsDemoTest() {
-        showTitle("BcFipsDemoTest.bcFipsDemoTest");
+    public void bcFipsDemoTest1() {
+        showTitle("BcFipsDemoTest.bcFipsDemoTest1");
 
         SecurityProviderUtility.installBCProvider(true);
 
@@ -73,5 +80,22 @@ public class BcFipsDemoTest extends BaseTest {
 
         //import org.bouncycastle.jcajce.interfaces.EdDSAKey;
         //import org.bouncycastle.jcajce.spec.EdDSAParameterSpec;        
+    }
+
+  	@Parameters ({"serverKeyStoreFile", "serverKeyStoreSecret", "dnName"})
+    @Test(enabled = true)
+    public void bcFipsDemoTest2(final String serverKeyStoreFile, final String serverKeyStoreSecret, final String dnName) {
+        showTitle("BcFipsDemoTest.bcFipsDemoTest2");
+
+		output("serverKeyStoreFile = " + serverKeyStoreFile);
+		output("serverKeyStoreSecret = " + serverKeyStoreSecret);
+		output("dnName = " + dnName);
+		
+		try {
+			AuthCryptoProvider authCryptoProvider = new AuthCryptoProvider(serverKeyStoreFile, serverKeyStoreSecret, dnName);
+			authCryptoProvider.load();
+		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException ex) {
+			fails(ex);			
+		}  
     }
 }
