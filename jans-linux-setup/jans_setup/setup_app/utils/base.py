@@ -421,7 +421,8 @@ def extract_subdir(zip_fn, sub_dir, target_dir, par_dir=None):
         shutil.unpack_archive(zip_fn, unpack_dir, format='zip')
         shutil.copytree(os.path.join(unpack_dir, par_dir, sub_dir), target_dir)
 
-current_app.app_info = readJsonFile(os.path.join(par_dir, 'app_info.json'))
+app_info_fn = os.environ.get('JANS_APP_INFO') or os.path.join(par_dir, 'app_info.json')
+current_app.app_info = readJsonFile(app_info_fn)
 current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')
 
 def as_bool(val):
