@@ -601,11 +601,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/config-guide/config-tools/jans-cli/install/</loc>
-         <lastmod>2023-08-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/config-guide/config-tools/jans-tui/</loc>
          <lastmod>2023-08-11</lastmod>
          <changefreq>daily</changefreq>
