@@ -336,3 +336,20 @@ To run operations on Janssen Server, CLI client will need to be authenticated an
 4. After successful user authentication, the next screen allows the user to enter the user code. Use the user code presented on command-line instruction in step 1 above.
 5. After successful code validation, the user is presented with OAuth permissions screen. This screen would list all the permissions requested by Jans CLI. The user can choose to `Allow` or `Not Allow` granting of these permissions.
 6. After allowing the grant of requested permissions, the user should come back to the command-line interface and hit <<Enter>> as instructed. This will enable CLI to run operations on the corresponding Janssen server.
+
+## Stand-alone Installation
+
+- Follow [these instructions](../jans-tui/README.md#1-build-pyz-self-executable-file) and create a self-executable file
+- Run the file as shown in the example below to enter CLI mode. Here, supplying the argument `--no-tui` is necessary, 
+otherwise it will switch to TUI mode.
+```
+$ ./jans-cli-tui.pyz --no-tui --host test.jans.io --client-id 2000.562981df-1623-4136-b1d0-aaa277edc48c --client-secret KU6ydImJZK6S --operation-id get-acrs
+Please wait while retrieving data ...
+Access token was not found.
+Please visit verification url https://test.jans.io/device-code?user_code=LKHC-PBTR and authorize this device within 1800 secods
+Please press «Enter» when ready
+{
+  "defaultAcr": "simple_password_auth"
+}
+```
+
