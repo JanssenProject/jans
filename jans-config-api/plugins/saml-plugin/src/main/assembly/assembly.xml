@@ -21,6 +21,8 @@
 				<include>org.opensaml:opensaml-saml-api</include>
 				<include>org.opensaml:xmltooling</include>
 				<include>org.opensaml:opensaml-xmlsec-api</include>
+				<include>org.opensaml:opensaml-core</include>
+				<include>net.shibboleth.utilities:java-support</include>
 			</includes>
 			<scope>runtime</scope>
 		</dependencySet>

@@ -7450,34 +7450,20 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-<<<<<<< HEAD
-=======
-          type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         adminCanAccess:
->>>>>>> dec9dc768906ffecfc9848f4cec123a3c9ea9a17
+          type: boolean
+        adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
-<<<<<<< HEAD
         userCanAccess:
           type: boolean
         adminCanEdit:
-=======
-        adminCanView:
->>>>>>> dec9dc768906ffecfc9848f4cec123a3c9ea9a17
           type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
-        userCanView:
-          type: boolean
-<<<<<<< HEAD
-        adminCanAccess:
-          type: boolean
-=======
->>>>>>> dec9dc768906ffecfc9848f4cec123a3c9ea9a17
         baseDn:
           type: string
     PatchRequest:
@@ -7497,6 +7483,8 @@ components:
         baseEndpoint:
           type: string
         authorizationEndpoint:
+          type: string
+        authorizationChallengeEndpoint:
           type: string
         tokenEndpoint:
           type: string
@@ -7529,6 +7517,8 @@ components:
         deviceAuthzEndpoint:
           type: string
         mtlsAuthorizationEndpoint:
+          type: string
+        mtlsAuthorizationChallengeEndpoint:
           type: string
         mtlsTokenEndpoint:
           type: string
@@ -8212,6 +8202,10 @@ components:
           $ref: '#/components/schemas/SsaConfiguration'
         blockWebviewAuthorizationEnabled:
           type: boolean
+        authorizationChallengeDefaultAcr:
+          type: string
+        authorizationChallengeShouldGenerateSession:
+          type: boolean
         dateFormatterPatterns:
           type: object
           additionalProperties:
@@ -8219,6 +8213,8 @@ components:
         httpLoggingResponseBodyContent:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
+          type: boolean
+        fapi:
           type: boolean
         allResponseTypesSupported:
           uniqueItems: true
@@ -8229,8 +8225,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8845,8 +8839,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
         authenticationMethod:
           type: string
           enum:
@@ -8858,6 +8850,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        displayName:
+          type: string
         baseDn:
           type: string
         inum:
@@ -8970,10 +8964,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -9158,6 +9152,7 @@ components:
           type: string
           enum:
           - person_authentication
+          - authorization_challenge
           - introspection
           - resource_owner_password_credentials
           - application_session

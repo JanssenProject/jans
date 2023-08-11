@@ -92,10 +92,6 @@
      	    <groupId>jakarta.ws.rs</groupId>
      		<artifactId>jakarta.ws.rs-api</artifactId>
    		</dependency>		
-<!--		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-multipart-provider</artifactId>
-		</dependency>-->
 		
 		<!-- apache -->
 		 <dependency>
@@ -119,6 +115,11 @@
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-xmlsec-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-core</artifactId>
+            <version>4.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
@@ -150,6 +151,11 @@
 				</exclusion>
 			</exclusions>
 		 </dependency>
+		 <dependency>
+            <groupId>net.shibboleth.utilities</groupId>
+            <artifactId>java-support</artifactId>
+            <version>7.5.2</version>
+        </dependency>
 
 		<!-- Testing -->
 		<dependency>
