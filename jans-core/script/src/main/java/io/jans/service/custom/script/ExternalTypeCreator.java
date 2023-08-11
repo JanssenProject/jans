@@ -69,7 +69,8 @@ public class ExternalTypeCreator {
                                                Map<String, SimpleCustomProperty> configurationAttributes) {
         String customScriptInum = customScript.getInum();
 
-        BaseExternalType externalType;
+        BaseExternalType externalType = null;
+        Throwable loadException = null; 
         try {
             if (customScript.getProgrammingLanguage() == ProgrammingLanguage.JAVA) {
                 externalType = createExternalTypeWithJava(customScript);
@@ -77,17 +78,20 @@ public class ExternalTypeCreator {
                 externalType = createExternalTypeFromStringWithPythonException(customScript);
             }
         } catch (Throwable ex) {
+        	loadException = ex;
             log.error("Failed to prepare external type '{}', exception: '{}'", customScriptInum, ExceptionUtils.getStackTrace(ex));
             log.error("Script '{}'", customScript.getScript());
-            saveScriptError(customScript, ex, true);
-            return null;
         }
 
         externalType = initExternalType(externalType, customScript, configurationAttributes);
 
         if (externalType == null) {
+        	if (loadException == null) {
+        		loadException = new Exception("Using default external type class");
+        	}
+        	
             log.debug("Using default external type class");
-            saveScriptError(customScript, new Exception("Using default external type class"), true);
+            saveScriptError(customScript, loadException, true);
             externalType = customScript.getScriptType().getDefaultImplementation();
         } else {
             clearScriptError(customScript);
