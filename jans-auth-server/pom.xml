@@ -472,13 +472,11 @@
 						<encoding>UTF-8</encoding>
 					</configuration>
 				</plugin>
-<!--
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>4.0.0-M7</version>
 				</plugin>
--->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
@@ -520,7 +518,6 @@
 					<artifactId>jetty-maven-plugin</artifactId>
 					<version>${jetty.version}</version>
 				</plugin>
-<!--
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
@@ -528,7 +525,6 @@
 						<failOnError>false</failOnError>
 					</configuration>
 				</plugin>
--->
 				<plugin>
 					<groupId>org.owasp</groupId>
 					<artifactId>dependency-check-maven</artifactId>
