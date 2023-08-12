@@ -470,11 +470,13 @@
 						<encoding>UTF-8</encoding>
 					</configuration>
 				</plugin>
+<!--
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>4.0.0-M7</version>
 				</plugin>
+-->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
@@ -538,7 +540,6 @@
 					<artifactId>spotbugs-maven-plugin</artifactId>
 					<version>4.7.3.4</version>
 				</plugin>
-<!--
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>buildnumber-maven-plugin</artifactId>
@@ -549,7 +550,6 @@
 					<artifactId>git-commit-id-plugin</artifactId>
 					<version>4.9.10</version>
 				</plugin>
--->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>

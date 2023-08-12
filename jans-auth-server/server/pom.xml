@@ -209,7 +209,6 @@
 					<doUpdate>false</doUpdate>
 				</configuration>
 			</plugin>
-<!--
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
@@ -226,7 +225,6 @@
 					<failOnNoGitDirectory>false</failOnNoGitDirectory>
 				</configuration>
 			</plugin>
--->
 			<!-- Jetty plugin -->
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
