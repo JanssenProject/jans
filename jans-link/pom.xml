@@ -8,9 +8,7 @@
 		<module>model</module>
 		<module>service</module>
 		<module>server</module>
-<!--
 		<module>server-fips</module>
--->
 	</modules>
 	<packaging>pom</packaging>
 	<name>jans link server parent</name>
