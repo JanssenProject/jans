@@ -16,6 +16,7 @@ import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.Util;
 import io.jans.util.security.SecurityProviderUtility;
 
+import java.nio.charset.StandardCharsets;
 import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -101,7 +102,7 @@ public class ECDSASigner extends AbstractJwsSigner {
 
             Signature signer = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), SecurityProviderUtility.getBCProvider());
             signer.initSign(privateKey);
-            signer.update(signingInput.getBytes(Util.UTF8_STRING_ENCODING));
+            signer.update(signingInput.getBytes(StandardCharsets.UTF_8));
 
             byte[] signature = signer.sign();
             if (AlgorithmFamily.EC.equals(getSignatureAlgorithm().getFamily())) {
@@ -150,7 +151,7 @@ public class ECDSASigner extends AbstractJwsSigner {
             if (AlgorithmFamily.EC.equals(getSignatureAlgorithm().getFamily())) {
                 sigBytes = ECDSA.transcodeSignatureToDER(sigBytes);
             }
-            byte[] sigInBytes = signingInput.getBytes(Util.UTF8_STRING_ENCODING);
+            byte[] sigInBytes = signingInput.getBytes(StandardCharsets.UTF_8);
 
             AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC", SecurityProviderUtility.getBCProvider());
             parameters.init(new ECGenParameterSpec(getSignatureAlgorithm().getCurve().getName()));

@@ -28,6 +28,8 @@ import io.jans.util.security.SecurityProviderUtility;
  *
  * @author Javier Rojas Blum
  * @version June 15, 2016
+ *
+ * @deprecated
  */
 @SuppressWarnings("java:S1133") 
 @Deprecated
@@ -38,6 +40,16 @@ public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
     private RSAPrivateKey rsaPrivateKey;
     private RSAPublicKey rsaPublicKey;
 
+    /**
+     * @param signatureAlgorithm
+     * @param dnName
+     * @throws NoSuchAlgorithmException
+     * @throws OperatorCreationException
+     * @throws CertificateException
+     * @throws CertIOException
+     *
+     * @deprecated
+     */
     @Deprecated
     public RSAKeyFactory(SignatureAlgorithm signatureAlgorithm, String dnName) throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, CertIOException {
         if (signatureAlgorithm == null) {
@@ -68,24 +80,30 @@ public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
         }
     }
 
+    /**
+     *
+     * @param pKey
+     *
+     * @deprecated
+     */
     @Deprecated
-    public RSAKeyFactory(JSONWebKey p_key) {
-        if (p_key == null) {
+    public RSAKeyFactory(JSONWebKey pKey) {
+        if (pKey == null) {
             throw new IllegalArgumentException("Key value must not be null.");
         }
 
         rsaPrivateKey = new RSAPrivateKey(
                 null,
-                p_key.getN(),
-                p_key.getE());
+                pKey.getN(),
+                pKey.getE());
         rsaPublicKey = new RSAPublicKey(
-                p_key.getN(),
-                p_key.getE());
+                pKey.getN(),
+                pKey.getE());
         certificate = null;
     }
 
-    public static RSAKeyFactory valueOf(JSONWebKey p_key) {
-        return new RSAKeyFactory(p_key);
+    public static RSAKeyFactory valueOf(JSONWebKey pKey) {
+        return new RSAKeyFactory(pKey);
     }
 
     @Override
