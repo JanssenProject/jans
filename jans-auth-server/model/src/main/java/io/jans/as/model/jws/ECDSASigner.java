@@ -13,7 +13,6 @@ import io.jans.as.model.crypto.signature.ECDSAPrivateKey;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
 import io.jans.util.security.SecurityProviderUtility;
 
 import java.nio.charset.StandardCharsets;
