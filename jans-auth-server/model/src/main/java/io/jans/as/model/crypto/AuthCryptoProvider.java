@@ -57,7 +57,6 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -191,7 +190,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             } else if (algUse == Use.ENCRYPTION) {
                 jsonObject = generateKeyEncryption(algorithm, expirationTime, keyLength, keyOpsType);
             }
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | OperatorCreationException
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | OperatorCreationException
                 | CertificateException | KeyStoreException | IOException e) {
             throw new CryptoProviderException(e);
         }
@@ -451,7 +450,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType)
-            throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException,
+            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, OperatorCreationException,
             CertificateException, KeyStoreException, IOException {
 
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
@@ -478,7 +477,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return getJson(algorithm, keyGen, signatureAlgorithm.getAlgorithm(), expirationTime, keyOpsType);
     }
 
-    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws NoSuchAlgorithmException, NoSuchProviderException,
+    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws NoSuchAlgorithmException,
             InvalidAlgorithmParameterException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
 
         KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
@@ -592,7 +591,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         }
     }
 
-    private boolean verifySignatureEcEdRSA(String signingInput, String encodedSignature, SignatureAlgorithm signatureAlgorithm, PublicKey publicKey) throws JOSEException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
+    private boolean verifySignatureEcEdRSA(String signingInput, String encodedSignature, SignatureAlgorithm signatureAlgorithm, PublicKey publicKey) throws JOSEException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         byte[] signature = Base64Util.base64urldecode(encodedSignature);
         byte[] signatureDer = signature;
         if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
@@ -627,16 +626,12 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             }
         }
         if (!ksTypeFound) {
-            switch (securityMode) {
-            case BCFIPS_SECURITY_MODE: {
+        	if (securityMode == SecurityProviderUtility.SecurityModeType.BCFIPS_SECURITY_MODE) {
                 keyStorageType =  SecurityProviderUtility.KeyStorageType.BCFKS_KS;
-                break;
-            }
-            case BCPROV_SECURITY_MODE: {
+        	}
+        	else if (securityMode == SecurityProviderUtility.SecurityModeType.BCPROV_SECURITY_MODE) {
                 keyStorageType = SecurityProviderUtility.KeyStorageType.PKCS12_KS;
-                break;
-            }
-            }
+        	}
         }
         return keyStorageType;
     }

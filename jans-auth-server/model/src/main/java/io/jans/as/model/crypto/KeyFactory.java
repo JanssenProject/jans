@@ -11,6 +11,7 @@ package io.jans.as.model.crypto;
  *
  * @author Javier Rojas Blum Date: 10.22.2012
  */
+@SuppressWarnings("java:S1610") //disabling offer to convert this class to interface 
 public abstract class KeyFactory<E extends PrivateKey, F extends PublicKey> {
 
     public abstract E getPrivateKey();

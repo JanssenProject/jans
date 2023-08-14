@@ -16,12 +16,8 @@ import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.Util;
 import io.jans.util.security.SecurityProviderUtility;
 
-import java.io.UnsupportedEncodingException;
-
 import java.security.AlgorithmParameters;
-import java.security.InvalidKeyException;
 import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -31,7 +27,6 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
 /**
