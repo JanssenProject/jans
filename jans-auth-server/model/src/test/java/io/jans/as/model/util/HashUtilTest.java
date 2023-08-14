@@ -12,8 +12,6 @@ import io.jans.util.security.SecurityProviderUtility;
 
 import org.testng.annotations.Test;
 
-import java.security.Security;
-
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -24,7 +22,7 @@ public class HashUtilTest extends BaseTest {
     private static final String INPUT = "a308bb8f-25b0-4b1f-85a6-778698a35a43";
 
     static {
-        Security.addProvider(SecurityProviderUtility.getBCProvider());
+        SecurityProviderUtility.installBCProvider(true);
     }
 
     @Test
