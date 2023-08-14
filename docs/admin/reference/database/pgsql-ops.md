@@ -1,8 +1,11 @@
 ---
 tags:
   - administration
-  - upgrade
+  - reference
+  - database
 ---
+
+Connect to PostgreSql workspace: `sudo -u postgres psql` 
 
 ## This content is in progress
 

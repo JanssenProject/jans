@@ -1,8 +1,7 @@
 ---
 tags:
   - administration
-  - upgrade
-  - vm
+  - link
 ---
 
 ## This content is in progress
