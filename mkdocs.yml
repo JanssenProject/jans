@@ -122,7 +122,7 @@ nav:
         - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
       - Command Line Interface (CLI):
         - admin/config-guide/config-tools/jans-cli/README.md
-      - CLI For Agama Developer Studio: admin/config-guide/config-tools/jans-cli/cli-agama.md
+      - CLI For Agama Developer Studio: admin/config-guide/agama-configuration.md
       - SCIM CLI: admin/config-guide/config-tools/scim-cli.md
     - Attribute: admin/config-guide/attribute-configuration.md
     - Default Authentication: admin/config-guide/default-authentication-method-config.md
@@ -182,11 +182,7 @@ nav:
       - OpenID id_token: admin/auth-server/tokens/openid-id-token.md
       - OpenID Userinfo Token: admin/auth-server/tokens/openid-userinfo-token.md
       - UMA RPT Token: admin/auth-server/tokens/uma-rpt-token.md
-    - Scopes:
-      - admin/auth-server/scopes/README.md
-      - OAuth Scopes: admin/auth-server/scopes/oauth.md
-      - OpenID Scopes: admin/auth-server/scopes/openid.md
-      - UMA Scopes: admin/auth-server/scopes/uma.md
+    - Scopes: admin/auth-server/scopes/README.md
     - Endpoints:
       - admin/auth-server/endpoints/README.md
       - OpenID Configuration: admin/auth-server/endpoints/configuration.md
