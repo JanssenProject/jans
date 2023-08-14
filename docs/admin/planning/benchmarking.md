@@ -67,5 +67,4 @@ See [Authorization code flow recipe](../recipes/benchmark.md#authorization-code-
 
 For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx) is used.  
 
-See [ROPC flow recipe](../recipes/benchmark.md
-resource-owner-password-credentials-ropc-flow) for details.
+See [ROPC flow recipe](../recipes/benchmark.md#resource-owner-password-credentials-ropc-flow) for details.

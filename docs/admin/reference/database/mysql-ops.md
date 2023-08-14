@@ -41,7 +41,7 @@ Say we want to increase the size of `mail` field to 144. Do the following:<br>
 There are two steps here: 
 
 * Create attribute in MySQL database: `ALTER TABLE `jansdb`.`jansPerson` ADD COLUMN `cmdAttr` VARCHAR(64) NULL;` 
-* Create attribute from TUI: ![tui_custom_attribute](../../assets/TUI_CustomAttribute.png)
+* Create attribute from TUI: ![tui_custom_attribute](../../../assets/TUI_CustomAttribute.png)
 
 ### LDAP to MySQL Migration Script
 

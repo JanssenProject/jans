@@ -55,10 +55,10 @@ Here we will use manual client registration.
 
 To register a new OpenID connect client on the Janssen server, we will use `jans-cli` tool provided by the Janssen server. `jans-cli` has a menu-driven interface that makes it easy to configure the Janssen server. Here we will use the menu-driven approach to register a new client. To further understand how to use menu-driven approach and get complete list of supported command-line operations, refer to [jans-cli documentation](../../config-guide/config-tools/jans-cli/README.md).
 
-  - Run the command below on Janssen server to enter interactive mode.
+  - Run the command below on Janssen server to enter interactive mode. 
 
 
-     > Note: </br> `jans-cli` has to be authenticated and authorized with the respective Janssen server. If `jans-cli` is being executed for the first time or if there is no valid access token available, then running the command below will initiate device authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../../config-guide/jans-cli/cli-index.md#cli-authorization) to continue running the command.
+     > Note: </br> `jans-cli` has to be authenticated and authorized with the respective Janssen server. If `jans-cli` is being executed for the first time or if there is no valid access token available, then running the command below will initiate device authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../../config-guide/config-tools/jans-cli/README.md#cli-authorization) to continue running the command.
   
     ```
     /opt/jans/jans-cli/config-cli.py
@@ -66,7 +66,7 @@ To register a new OpenID connect client on the Janssen server, we will use `jans
 
     Running above command will bring up main menu as shown in sample below:
     
-    ![CLI-main-menu](../../assets/image-howto-mod-auth-cli-main-menu-04292022.png)
+    ![CLI-main-menu](../../../assets/image-howto-mod-auth-cli-main-menu-04292022.png)
     
     To register a new OpenID Connect client, select `OAuth OpenID Connect - Clients` option (`16` in above sample). Selecting an appropriate option will bring up related sub-menu. 
    

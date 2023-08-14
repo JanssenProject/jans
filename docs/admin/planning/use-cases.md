@@ -47,7 +47,7 @@ square peg situation. But with that said, Auth Server supports it.
 
 Janssen Auth Server is frequently used to issue access tokens to authenticate
 software clients that needs to call an API. The [OAuth WG](https://datatracker.ietf.org/group/oauth/documents/) has published many useful
-specifications about how to do this securely, and Janssen implements [many](.) of
+specifications about how to do this securely, and Janssen implements [many](../auth-server/README.md#supported-standards) of
 these RFCs and drafts. In OAuth parlance, Jans Auth Server is the Authorization
 Server; and Jans Client API is a service that helps clients with advanced
 features like MTLS and private key authentication. As OAuth scopes are frequently
