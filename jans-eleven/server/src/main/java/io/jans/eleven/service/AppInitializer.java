@@ -6,17 +6,15 @@
 
 package io.jans.eleven.service;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 
+import io.jans.util.security.SecurityProviderUtility;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Initialized;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import java.security.Provider;
-import java.security.Security;
 
 /**
  * Initialize application level beans
@@ -32,31 +30,12 @@ public class AppInitializer {
 
 	@PostConstruct
     public void createApplicationComponents() {
-    	installBCProvider();
+		SecurityProviderUtility.installBCProvider();
     }
 
 	// Don't remove this. It force CDI to create bean at startup
 	public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
 		log.info("Application initialized");
     }
-
-	private void installBCProvider(boolean silent) {
-		Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
-		if (provider == null) {
-			if (!silent) {
-				log.info("Adding Bouncy Castle Provider");
-			}
-
-			Security.addProvider(new BouncyCastleProvider());
-		} else {
-			if (!silent) {
-				log.info("Bouncy Castle Provider was added already");
-			}
-		}
-	}
-
-	private void installBCProvider() {
-		installBCProvider(false);
-	}
 
 }
