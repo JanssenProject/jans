@@ -8,6 +8,8 @@ tags:
   - LDAP to MySQL Migration Script
 ---
 
+Below operations require to log into mysql workspace first with command: `mysql`
+
 ### **Change password for user `jans`** :
 
 *  `ALTER USER 'jans'@'localhost' IDENTIFIED BY 'TopSecret';`
@@ -30,6 +32,16 @@ Say we want to increase the size of `mail` field to 144. Do the following:<br>
  ```
 * c. Ensure you restart services after DB schema modification
 
+### **Search user** : 
+
+* `use jansdb; select * from jansPerson where uid='admin'\G;`
+
+### Add custom attribute
+
+There are two steps here: 
+
+* Create attribute in MySQL database: `ALTER TABLE `jansdb`.`jansPerson` ADD COLUMN `cmdAttr` VARCHAR(64) NULL;` 
+* Create attribute from TUI: ![tui_custom_attribute](../../assets/TUI_CustomAttribute.png)
 
 ### LDAP to MySQL Migration Script
 
