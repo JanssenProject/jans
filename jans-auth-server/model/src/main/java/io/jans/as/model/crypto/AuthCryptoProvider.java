@@ -86,6 +86,8 @@ import java.util.stream.Collectors;
 public class AuthCryptoProvider extends AbstractCryptoProvider {
 
     protected static final Logger LOG = Logger.getLogger(AuthCryptoProvider.class);
+    
+    public static final boolean ENABLE_ECDSA = false; 
 
     private KeyStore keyStore;
     private String keyStoreFile;
@@ -470,6 +472,14 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                 keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), SecurityProviderUtility.getBCProvider());
                 keyGen.initialize(ecSpec, new SecureRandom());
                 break;
+            case ED:
+            	if (!ENABLE_ECDSA) {
+                    throw new IllegalStateException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
+            	}
+            	org.bouncycastle.jcajce.spec.EdDSAParameterSpec edSpec = new org.bouncycastle.jcajce.spec.EdDSAParameterSpec(signatureAlgorithm.getCurve().getAlias());
+                keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), SecurityProviderUtility.getBCProvider());
+                keyGen.initialize(edSpec, new SecureRandom());
+                break;
             default:
                 throw new IllegalStateException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
 
@@ -565,6 +575,13 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             }
             jsonObject.put(JWKParameter.X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
             jsonObject.put(JWKParameter.Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
+        } else if (ENABLE_ECDSA && use == Use.SIGNATURE && publicKey instanceof org.bouncycastle.jcajce.interfaces.EdDSAPublicKey) {
+        	org.bouncycastle.jcajce.interfaces.EdDSAPublicKey edDSAPublicKey = (org.bouncycastle.jcajce.interfaces.EdDSAPublicKey) publicKey;
+            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
+            jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
+            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(edDSAPublicKey.getEncoded()));
+            // EdDSA keys (EdDSAPublicKey, EDDSAPrivateKey) don't use BigInteger, but only byte[], 
+            // so Base64Util.base64urlencode, but not Base64Util.base64urlencodeUnsignedBigInt is used.
         }
         JSONArray x5c = new JSONArray();
         x5c.put(Base64.encodeBase64String(cert.getEncoded()));

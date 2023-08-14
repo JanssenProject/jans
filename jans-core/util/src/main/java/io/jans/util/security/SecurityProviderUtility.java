@@ -297,7 +297,7 @@ public class SecurityProviderUtility {
     * 
     * @return boolean value
     */
-    private static boolean checkFipsMode() {
+    public static boolean checkFipsMode() {
         try {
             // First check if there are FIPS provider libs
             Class.forName(BC_FIPS_PROVIDER_CLASS_NAME);
