@@ -23,6 +23,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javax.net.ssl.X509TrustManager;
@@ -30,7 +32,6 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import io.jans.fido2.ctap.AttestationFormat;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.google.safetynet.AttestationStatement;
 import io.jans.fido2.google.safetynet.OfflineVerify;
 import io.jans.fido2.model.auth.AuthData;
@@ -63,6 +64,12 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
     @Inject
     private Base64Service base64Service;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
+    @Inject
+    private OfflineVerify offlineVerify;
+
     @Override
     public AttestationFormat getAttestationFormat() {
         return AttestationFormat.android_safetynet;
@@ -80,13 +87,14 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
         X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, null);
         AttestationStatement stmt;
         try {
-            stmt = OfflineVerify.parseAndVerify(new String(base64Service.decode(response)), tm);
+            stmt = offlineVerify.parseAndVerify(new String(base64Service.decode(response)), tm);
         } catch (Exception e) {
-            throw new Fido2RuntimeException("Invalid safety net attestation " + e.getMessage());
+            log.error("Error on parse and verify: {}", e.getMessage(), e);
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation " + e.getMessage());
         }
 
         if (stmt == null) {
-            throw new Fido2RuntimeException("Invalid safety net attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation, stmt is null");
         }
 
         byte[] b1 = authData.getAuthDataDecoded();
@@ -95,21 +103,21 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
         byte[] hashedBuffer = DigestUtils.getSha256Digest().digest(buffer);
         byte[] nonce = stmt.getNonce();
         if (!Arrays.equals(hashedBuffer, nonce)) {
-            throw new Fido2RuntimeException("Invalid safety net attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation, hashed and nonce are not equals");
         }
 
         if (!stmt.isCtsProfileMatch()) {
-            throw new Fido2RuntimeException("Invalid safety net attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation, cts profile match is false");
         }
 
         Instant timestamp = Instant.ofEpochMilli(stmt.getTimestampMs());
 
         if (timestamp.isAfter(Instant.now())) {
-            throw new Fido2RuntimeException("Invalid safety net attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation, timestamp is after now");
         }
 
         if (timestamp.isBefore(Instant.now().minus(1, ChronoUnit.MINUTES))) {
-            throw new Fido2RuntimeException("Invalid safety net attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation, timestamp is before now minus 1 minutes");
         }
 
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
