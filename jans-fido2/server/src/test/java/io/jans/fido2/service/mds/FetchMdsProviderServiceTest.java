@@ -6,7 +6,10 @@ import io.jans.fido2.exception.mds.MdsClientException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.mds.MdsGetEndpointResponse;
 import io.jans.fido2.service.DataMapperService;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +20,7 @@ import org.slf4j.Logger;
 
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -85,7 +89,14 @@ class FetchMdsProviderServiceTest {
 
     @Test
     void fetchMetadataBlob_withValidMdsUrl_valid() throws ParseException {
-        String mdsUrl = "https://mds3.fido.tools/execute/90c8ec276023503f7cd6ba188410dd38161d5ee14f4eb97b98a7f4b0c76482dd";
+        MdsGetEndpointResponse responseGetEndpoint = ResteasyClientBuilder.newBuilder().build()
+                .target("https://mds3.fido.tools/getEndpoints").request()
+                .post(Entity.entity(Collections.singletonMap("endpoint", "https://jans.fido.org"), MediaType.APPLICATION_JSON_TYPE))
+                .readEntity(MdsGetEndpointResponse.class);
+        assertNotNull(responseGetEndpoint);
+        assertFalse(responseGetEndpoint.getResult().isEmpty());
+
+        String mdsUrl = responseGetEndpoint.getResult().get(0);
 
         String response = fetchMdsProviderService.fetchMetadataBlob(mdsUrl);
         assertNotNull(response);
