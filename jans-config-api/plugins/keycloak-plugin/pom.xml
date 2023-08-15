@@ -42,7 +42,7 @@
 			<version>${jans.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.jans</groupId>
+			<groupId>io.jans.jans-config-api.plugins</groupId>
 			<artifactId>saml-plugin</artifactId>
 			<version>${jans.version}</version>
 		</dependency>

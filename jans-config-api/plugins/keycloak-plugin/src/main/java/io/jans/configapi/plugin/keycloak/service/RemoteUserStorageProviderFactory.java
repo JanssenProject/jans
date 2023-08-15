@@ -20,7 +20,7 @@ import org.keycloak.models.credential.PasswordCredentialModel;
 import org.keycloak.storage.StorageId;
 import org.keycloak.storage.UserStorageProvider;
 import org.keycloak.storage.adapter.AbstractUserAdapter;
-import org.keycloak.storage.user.UserStorageProviderFactory;
+import org.keycloak.storage.UserStorageProviderFactory;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

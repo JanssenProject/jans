@@ -50,7 +50,7 @@ public class UserResource extends BaseResource {
 
     @GET
     public Response getUser() {
-        logger.info("SAML details samlConfiguration():{}", samlConfiguration);
+        logger.info("UserResource::getUser()");
         return Response.ok("OK").build();
     }
 

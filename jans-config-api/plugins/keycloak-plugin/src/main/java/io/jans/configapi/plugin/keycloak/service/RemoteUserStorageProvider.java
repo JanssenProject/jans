@@ -26,13 +26,12 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
-public class RemoteUserStorageProvider implements UserLookupProvider, CredentialInputValidator, UserStorageProvider {
+public class RemoteUserStorageProvider implements UserLookupProvider, UserStorageProvider {
 
     @Inject
     Logger logger;
 
     @Inject
-    @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     PersistenceEntryManager persistenceManager;
 
     private KeycloakSession session;
@@ -48,5 +47,9 @@ public class RemoteUserStorageProvider implements UserLookupProvider, Credential
         this.model = model;
         this.usersService = usersService;
     }
-   
+    
+    public UserModel getUserById(RealmModel paramRealmModel, String paramString) {return null;}
+    public UserModel getUserByUsername(RealmModel paramRealmModel, String paramString) {return null;}
+    public UserModel getUserByEmail(RealmModel paramRealmModel, String paramString) {return null;}
+    public void close(){}
 }
