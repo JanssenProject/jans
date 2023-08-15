@@ -9,6 +9,7 @@ package io.jans.as.model.crypto;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.SecureRandom;
+import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -55,7 +56,7 @@ public abstract class KeyFactory<E extends PrivateKey, F extends PublicKey> {
         return key;
     }
 
-    public Certificate generateV3Certificate(Date startDate, Date expirationDate, String dnName) throws OperatorCreationException, CertificateException, CertIOException {
+    public Certificate generateV3Certificate(Date startDate, Date expirationDate, String dnName) throws OperatorCreationException, CertificateException, CertIOException, SignatureException {
         BigInteger serialNumber = new BigInteger(1024, new SecureRandom()); // serial number for certificate
         X500Name name = new X500Name(dnName);
 

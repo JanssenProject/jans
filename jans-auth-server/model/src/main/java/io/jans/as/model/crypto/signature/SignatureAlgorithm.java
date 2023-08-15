@@ -22,7 +22,9 @@ import java.util.List;
  * (RFC 7518, A.1.  Digital Signature/MAC Algorithm Identifier
  * Cross-Reference).
  *
- * CFRG Elliptic Curve Diffie-Hellman (ECDH). 
+ * CFRG Elliptic Curve Diffie-Hellman (ECDH) and Signatures
+ * in JSON Object Signing and Encryption (JOSE) signature
+ * algorithm "Ed25519". 
  *
  * @author Javier Rojas Blum
  * @author Sergey Manoylo
@@ -47,7 +49,9 @@ public enum SignatureAlgorithm {
 
     PS256(SignatureAlgorithm.DEF_PS256, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA256WITHRSAANDMGF1, JWSAlgorithm.PS256),
     PS384(SignatureAlgorithm.DEF_PS384, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA384WITHRSAANDMGF1, JWSAlgorithm.PS384),
-    PS512(SignatureAlgorithm.DEF_PS512, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA512WITHRSAANDMGF1, JWSAlgorithm.PS512);
+    PS512(SignatureAlgorithm.DEF_PS512, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA512WITHRSAANDMGF1, JWSAlgorithm.PS512),
+
+    EDDSA(SignatureAlgorithm.DEF_EDDDSA, AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED25519, EllipticEdvardsCurve.ED_25519, JWSAlgorithm.EdDSA);
 
     public static final String DEF_HS256 = "HS256";
     public static final String DEF_HS384 = "HS384";
@@ -65,6 +69,9 @@ public enum SignatureAlgorithm {
     public static final String DEF_PS256 = "PS256";
     public static final String DEF_PS384 = "PS384";
     public static final String DEF_PS512 = "PS512";
+
+    public static final String DEF_ED25519 = "Ed25519";
+    public static final String DEF_EDDDSA = "EdDSA";
 
     public static final String DEF_HMACSHA256 = "HMACSHA256";
     public static final String DEF_HMACSHA384 = "HMACSHA384";

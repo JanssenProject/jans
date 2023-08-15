@@ -28,13 +28,13 @@ import org.slf4j.LoggerFactory;
  */
 public class SecurityProviderUtility {
 
-    // security mode
-    public static final String DEF_MODE_BCPROV      = "BCPROV";
     public static final String DEF_MODE_BCFIPS      = "BCFIPS";
 
     // keystorage type
     public static final String DEF_KS_JKS           = "JKS";
     public static final String DEF_KS_PKCS12        = "PKCS12";
+    // security mode
+    public static final String DEF_MODE_BCPROV      = "BCPROV";
     public static final String DEF_KS_BCFKS         = "BCFKS";
 
     // JKS additional extensions

@@ -27,7 +27,7 @@ public enum KeyType {
      * The RSA algorithm is defined by RFC 3447.
      */
     RSA("RSA"),
-    
+
     /**
      * Octet Key Pair.
      * <p>
@@ -38,7 +38,7 @@ public enum KeyType {
      * <p>
      * The Edwards Curve Digital Signature Algorithm (EDDSA) is defined by RFC 8032.
      */
-    OKP("OKP"),    
+    OKP("OKP"),
 
     /**
      * Octet sequence (used to represent symmetric keys), according to RFC 7518

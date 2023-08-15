@@ -14,6 +14,7 @@ import java.security.InvalidParameterException;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -47,11 +48,12 @@ public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
      * @throws OperatorCreationException
      * @throws CertificateException
      * @throws CertIOException
+     * @throws SignatureException 
      *
      * @deprecated
      */
     @Deprecated
-    public RSAKeyFactory(SignatureAlgorithm signatureAlgorithm, String dnName) throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, CertIOException {
+    public RSAKeyFactory(SignatureAlgorithm signatureAlgorithm, String dnName) throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, CertIOException, SignatureException {
         if (signatureAlgorithm == null) {
             throw new InvalidParameterException("The signature algorithm cannot be null");
         }
