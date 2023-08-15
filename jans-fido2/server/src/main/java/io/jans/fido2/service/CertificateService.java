@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -51,6 +53,9 @@ public class CertificateService {
     @Inject
     private Base64Service base64Service;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     public X509Certificate getCertificate(String x509certificate) {
         return getCertificate(new ByteArrayInputStream(base64Service.decode(x509certificate)));
 
@@ -63,7 +68,7 @@ public class CertificateService {
         	
         	return certificate;
         } catch (CertificateException e) {
-            throw new Fido2RuntimeException(e.getMessage(), e);
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, e.getMessage(), e);
         }
     }
 

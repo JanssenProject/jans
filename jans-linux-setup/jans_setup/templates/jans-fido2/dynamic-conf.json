@@ -17,6 +17,7 @@
    ],
    "superGluuEnabled": false,
    "oldU2fMigrationEnabled": true,
+   "errorReasonEnabled": false,
    "fido2Configuration":{
       "authenticatorCertsFolder":"%(fido2ConfigFolder)s/authenticator_cert",
       "mdsCertsFolder":"%(fido2ConfigFolder)s/mds/cert",

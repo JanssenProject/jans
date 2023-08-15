@@ -40,6 +40,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.mds.AuthenticatorCertificationStatus;
 import io.jans.fido2.service.CertificateService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -62,13 +64,16 @@ public class CertificateVerifier {
     @Inject
     private CertificateService certificateService;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     public void checkForTrustedCertsInAttestation(List<X509Certificate> attestationCerts, List<X509Certificate> trustChainCertificates) {
         final List<String> trustedSignatures = trustChainCertificates.stream().map(cert -> base64Service.encodeToString(cert.getSignature()))
                 .collect(Collectors.toList());
         List<String> duplicateSignatures = attestationCerts.stream().map(cert -> base64Service.encodeToString(cert.getSignature()))
                 .filter(trustedSignatures::contains).collect(Collectors.toList());
         if (!duplicateSignatures.isEmpty()) {
-            throw new Fido2RuntimeException("Root certificate in the attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Root certificate in the attestation");
         }
     }
 
@@ -78,7 +83,7 @@ public class CertificateVerifier {
             Set<TrustAnchor> trustAnchors = trustChainCertificates.parallelStream().map(f -> new TrustAnchor(f, null)).collect(Collectors.toSet());
 
             if (trustAnchors.isEmpty()) {
-                throw new Fido2MissingAttestationCertException("Trust anchors certs list is empty!");
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Trust anchors certs list is empty!");
             }
 
             PKIXParameters params = new PKIXParameters(trustAnchors);
@@ -106,7 +111,7 @@ public class CertificateVerifier {
             }
         } catch (InvalidAlgorithmParameterException | CertificateException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
-            throw new Fido2RuntimeException("Problem with certificate");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Problem with certificate: " + e.getMessage());
         }
     }
 
@@ -124,11 +129,11 @@ public class CertificateVerifier {
                 return null;
             } else {
                 log.error("Cert not validated against the root {}", ex.getMessage());
-                throw new Fido2RuntimeException("Problem with certificate " + ex.getMessage());
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Problem with certificate " + ex.getMessage());
             }
         } catch (InvalidAlgorithmParameterException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
-            throw new Fido2RuntimeException("Problem with certificate");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Problem with certificate");
         }
     }
 

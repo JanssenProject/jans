@@ -7,10 +7,10 @@ import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
-import io.jans.fido2.exception.Fido2RpRuntimeException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.processor.attestation.AppleAttestationProcessor;
@@ -19,6 +19,8 @@ import io.jans.fido2.service.processors.AttestationFormatProcessor;
 import io.jans.orm.model.fido2.UserVerification;
 import io.jans.service.net.NetworkService;
 import jakarta.enterprise.inject.Instance;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,6 +62,9 @@ class CommonVerifiersTest {
 
     @Mock
     private Instance<AttestationFormatProcessor> supportedAttestationFormats;
+
+    @Mock
+    private ErrorResponseFactory errorResponseFactory;
 
     @Test
     void verifyRpIdHash_retrieveRpIdHashAndCalculatedRpIdHashNotEqual_fido2RuntimeException() {
@@ -168,10 +173,13 @@ class CommonVerifiersTest {
     @Test
     void verifyAssertionOptions_paramsEmpty_fido2RuntimeException() {
         ObjectNode params = mapper.createObjectNode();
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyAssertionOptions(params));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyAssertionOptions(params));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid parameters");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -185,10 +193,13 @@ class CommonVerifiersTest {
     @Test
     void verifyBasicPayload_paramsEmpty_fido2RuntimeException() {
         ObjectNode params = mapper.createObjectNode();
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyBasicPayload(params));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyBasicPayload(params));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid parameters");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -274,10 +285,13 @@ class CommonVerifiersTest {
         String fieldName = "TEST-fieldName";
         String fieldValue = "";
         node.put(fieldName, fieldValue);
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyThatNonEmptyString(node, fieldName));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyThatNonEmptyString(node, fieldName));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid field " + node);
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -295,10 +309,13 @@ class CommonVerifiersTest {
     @Test
     void verifyThatBinary_ifNodeIsNotBinary_fido2RuntimeException() {
         ObjectNode node = mapper.createObjectNode();
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyThatBinary(node));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyThatBinary(node));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid field " + node);
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -314,10 +331,13 @@ class CommonVerifiersTest {
     @Test
     void verifyAuthData_ifDataIsEmpty_fido2RuntimeException() {
         JsonNode node = new BinaryNode(new byte[]{});
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyAuthData(node));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyAuthData(node));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid field " + node);
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -342,10 +362,13 @@ class CommonVerifiersTest {
     void verifyAlgorithm_ifAlgorithmTypeNotEqualsRegisteredAlgorithmType_fido2RuntimeException() {
         JsonNode alg = new IntNode(1);
         int registeredAlgorithmType = -257;
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyAlgorithm(alg, registeredAlgorithmType));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyAlgorithm(alg, registeredAlgorithmType));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Wrong algorithm");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -363,10 +386,13 @@ class CommonVerifiersTest {
         JsonNode fmtNode = mapper.createObjectNode().put("fmt", fmt);
         String fieldName = "fmt";
         when(supportedAttestationFormats.stream()).thenReturn(Stream.of(new AppleAttestationProcessor()));
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyFmt(fmtNode, fieldName));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyFmt(fmtNode, fieldName));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Unsupported attestation format " + fmt);
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -385,10 +411,13 @@ class CommonVerifiersTest {
     void verifyAAGUIDZeroed_ifAaguidNotContainsZero_fido2RuntimeException() {
         AuthData authData = new AuthData();
         authData.setAaguid("TEST-aaguid".getBytes());
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyAAGUIDZeroed(authData));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyAAGUIDZeroed(authData));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid AAGUID");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -418,10 +447,13 @@ class CommonVerifiersTest {
     void verifyClientJSONTypeIsGet1_ifTypeNotEqualOtherType_fido2RuntimeException() {
         JsonNode clientJsonNode = mapper.createObjectNode().put("type", "TEST-type");
         String type = "TEST-type1";
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyClientJSONType(clientJsonNode, type));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSONType(clientJsonNode, type));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid client json parameters");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -455,10 +487,13 @@ class CommonVerifiersTest {
     @Test
     void verifyClientJSON_ifClientDataJsonIsMissing_fido2RuntimeException() {
         ObjectNode responseNode = mapper.createObjectNode();
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Client data JSON is missing");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -467,10 +502,13 @@ class CommonVerifiersTest {
         responseNode.put("clientDataJSON", "TEST-clientDataJSON");
         when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
         when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(null);
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Client data JSON is empty");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -479,10 +517,13 @@ class CommonVerifiersTest {
         responseNode.put("clientDataJSON", "TEST-clientDataJSON");
         when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
         when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenThrow(new IOException());
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Can't parse message");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -494,10 +535,13 @@ class CommonVerifiersTest {
         clientJsonNode.put("origin", "TEST-origin");
         clientJsonNode.put("type", "TEST-type");
         when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid client json parameters");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -509,10 +553,13 @@ class CommonVerifiersTest {
         clientJsonNode.put("challenge", "TEST-challenge");
         clientJsonNode.put("type", "TEST-type");
         when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid client json parameters");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -524,10 +571,13 @@ class CommonVerifiersTest {
         clientJsonNode.put("challenge", "TEST-challenge");
         clientJsonNode.put("origin", "TEST-origin");
         when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid client json parameters");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -541,10 +591,13 @@ class CommonVerifiersTest {
         clientJsonNode.put("type", "TEST-type");
         clientJsonNode.put("tokenBinding", mapper.createObjectNode());
         when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid tokenBinding entry. it should contains status");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -606,10 +659,13 @@ class CommonVerifiersTest {
         clientJsonNode.put("origin", "");
         clientJsonNode.put("type", "TEST-type");
         when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(responseNode));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Client data origin parameter should be string");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -696,10 +752,13 @@ class CommonVerifiersTest {
     @Test
     void verifyTokenBindingSupport_ifTokenBindingSupportEnumIsNull_fido2RuntimeException() {
         String status = "WRONG-STATUS";
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyTokenBindingSupport(status));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyTokenBindingSupport(status));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Wrong token binding status parameter " + status);
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -902,10 +961,14 @@ class CommonVerifiersTest {
     void verifyNotUseGluuParameters_ifParamsHasNonNullSuperGluuRequestIsTrue_fido2RpRuntimeException() {
         JsonNode params = mock(JsonNode.class);
         when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RpRuntimeException ex = assertThrows(Fido2RpRuntimeException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Input request conflicts with Super Gluu parameters");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
+
         verify(params).hasNonNull(SUPER_GLUU_REQUEST);
         verify(params, never()).hasNonNull(SUPER_GLUU_MODE);
         verify(params, never()).hasNonNull(SUPER_GLUU_APP_ID);
@@ -918,10 +981,14 @@ class CommonVerifiersTest {
         JsonNode params = mock(JsonNode.class);
         when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(false);
         when(params.hasNonNull(SUPER_GLUU_MODE)).thenReturn(true);
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RpRuntimeException ex = assertThrows(Fido2RpRuntimeException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Input request conflicts with Super Gluu parameters");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
+
         verify(params).hasNonNull(SUPER_GLUU_REQUEST);
         verify(params).hasNonNull(SUPER_GLUU_MODE);
         verify(params, never()).hasNonNull(SUPER_GLUU_APP_ID);
@@ -935,10 +1002,14 @@ class CommonVerifiersTest {
         when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(false);
         when(params.hasNonNull(SUPER_GLUU_MODE)).thenReturn(false);
         when(params.hasNonNull(SUPER_GLUU_APP_ID)).thenReturn(true);
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RpRuntimeException ex = assertThrows(Fido2RpRuntimeException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Input request conflicts with Super Gluu parameters");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
+
         verify(params).hasNonNull(SUPER_GLUU_REQUEST);
         verify(params).hasNonNull(SUPER_GLUU_MODE);
         verify(params).hasNonNull(SUPER_GLUU_APP_ID);
@@ -953,10 +1024,14 @@ class CommonVerifiersTest {
         when(params.hasNonNull(SUPER_GLUU_MODE)).thenReturn(false);
         when(params.hasNonNull(SUPER_GLUU_APP_ID)).thenReturn(false);
         when(params.hasNonNull(SUPER_GLUU_KEY_HANDLE)).thenReturn(true);
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RpRuntimeException ex = assertThrows(Fido2RpRuntimeException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Input request conflicts with Super Gluu parameters");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
+
         verify(params).hasNonNull(SUPER_GLUU_REQUEST);
         verify(params).hasNonNull(SUPER_GLUU_MODE);
         verify(params).hasNonNull(SUPER_GLUU_APP_ID);
@@ -972,10 +1047,14 @@ class CommonVerifiersTest {
         when(params.hasNonNull(SUPER_GLUU_APP_ID)).thenReturn(false);
         when(params.hasNonNull(SUPER_GLUU_KEY_HANDLE)).thenReturn(false);
         when(params.hasNonNull(SUPER_GLUU_REQUEST_CANCEL)).thenReturn(true);
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RpRuntimeException ex = assertThrows(Fido2RpRuntimeException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Input request conflicts with Super Gluu parameters");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
+
         verify(params).hasNonNull(SUPER_GLUU_REQUEST);
         verify(params).hasNonNull(SUPER_GLUU_MODE);
         verify(params).hasNonNull(SUPER_GLUU_APP_ID);

@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import java.util.Arrays;
 import java.util.Optional;
 
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.jboss.weld.junit5.ExplicitParamInjection;
 import org.jboss.weld.junit5.auto.AddBeanClasses;
 import org.jboss.weld.junit5.auto.EnableAutoWeld;
@@ -134,6 +135,11 @@ public class FullFlowAppleTest {
 	@Produces
 	@ExcludeBean
 	DeviceRegistrationService deviceRegistrationService = Mockito.mock(DeviceRegistrationService.class);
+
+	@Mock
+	@Produces
+	@ExcludeBean
+	ErrorResponseFactory errorResponseFactory = Mockito.mock(ErrorResponseFactory.class);
 
 	@Mock
 	ChallengeGenerator challengeGenerator = Mockito.mock(ChallengeGenerator.class);

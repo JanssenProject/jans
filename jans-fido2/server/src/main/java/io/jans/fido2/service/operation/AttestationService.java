@@ -14,10 +14,12 @@ import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseRSAAlgorithm;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.auth.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.RequestedParty;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
@@ -84,6 +86,9 @@ public class AttestationService {
 
     @Inject
     private ExternalFido2Service externalFido2InterceptionService;
+
+	@Inject
+    private ErrorResponseFactory errorResponseFactory;
 
 	@Context
 	private HttpServletRequest httpRequest;
@@ -239,8 +244,8 @@ public class AttestationService {
 
 		// Find registration entry
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge, oneStep)
-				.parallelStream().findAny().orElseThrow(() -> new Fido2RuntimeException(
-						String.format("Can't find associated attestatioan request by challenge '%s'", challenge)));
+				.parallelStream().findAny().orElseThrow(() ->
+					errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE, String.format("Can't find associated attestation request by challenge '%s'", challenge)));
 		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
 
 		// Verify domain
@@ -282,7 +287,7 @@ public class AttestationService {
 						Fido2DeviceData.class);
                 registrationEntry.setDeviceData(deviceData);
             } catch (Exception ex) {
-                throw new Fido2RuntimeException(String.format("Device data is invalid: %s", responseDeviceData), ex);
+                throw errorResponseFactory.invalidRequest(String.format("Device data is invalid: %s", responseDeviceData), ex);
             }
         }
 

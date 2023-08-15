@@ -6,8 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
 import io.jans.as.model.fido.u2f.protocol.RegisterResponse;
-import io.jans.fido2.exception.Fido2RpRuntimeException;
-import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.DataMapperService;
@@ -16,6 +15,7 @@ import io.jans.fido2.service.operation.AttestationService;
 import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.sg.RawRegistrationService;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -62,6 +62,9 @@ class AttestationSuperGluuControllerTest {
     @Mock
     private UserSessionIdService userSessionIdService;
 
+    @Mock
+    private ErrorResponseFactory errorResponseFactory;
+
     @Test
     void startRegistration_validValues_valid() {
         String username = "test-username";
@@ -94,20 +97,13 @@ class AttestationSuperGluuControllerTest {
         String appId = "test-appId";
         String sessionId = "test-sessionId";
         when(userSessionIdService.isValidSessionId(sessionId, username)).thenReturn(false);
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> attestationSuperGluuController.buildFido2AttestationStartResponse(username, appId, sessionId));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 400);
-        assertNotNull(ex.getResponse().getEntity());
-        JsonNode entityNode = mapper.readTree(ex.getResponse().getEntity().toString());
-        assertNotNull(entityNode);
-        assertTrue(entityNode.has("reason"));
-        assertTrue(entityNode.has("error_description"));
-        assertTrue(entityNode.has("error"));
-        assertEquals(entityNode.get("reason").asText(), "session_id 'test-sessionId' is invalid");
-        assertEquals(entityNode.get("error_description").asText(), "The session_id is null, blank or invalid, this param is required.");
-        assertEquals(entityNode.get("error").asText(), "invalid_id_session");
+        assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verifyNoInteractions(dataMapperService, attestationService, log);
     }
@@ -217,10 +213,13 @@ class AttestationSuperGluuControllerTest {
     void parseRegisterResponse_ifReadValueThrowException_fido2RpRuntimeException() throws IOException {
         String registerResponseString = "wrong_response_string";
         when(dataMapperService.readValue(registerResponseString, RegisterResponse.class)).thenThrow(new IOException("test_io_exception"));
+        when(errorResponseFactory.invalidRequest(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RpRuntimeException ex = assertThrows(Fido2RpRuntimeException.class, () -> attestationSuperGluuController.parseRegisterResponse(registerResponseString));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> attestationSuperGluuController.parseRegisterResponse(registerResponseString));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Failed to parse options attestation request");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test
@@ -239,10 +238,13 @@ class AttestationSuperGluuControllerTest {
         String clientData = "eyJ0eXAiOiJ3cm9uZ190eXBlIiwiY2hhbGxlbmdlIjoidGVzdF9jaGFsbGVuZ2UiLCJvcmlnaW4iOiJ0ZXN0X29yaWdpbiJ9";
         String deviceData = "test_device_data";
         RegisterResponse registerResponse = new RegisterResponse(registrationData, clientData, deviceData);
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> attestationSuperGluuController.buildFido2AttestationVerifyResponse(username, registerResponse));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> attestationSuperGluuController.buildFido2AttestationVerifyResponse(username, registerResponse));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid options attestation request type");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verifyNoInteractions(dataMapperService, base64Service, rawRegistrationService, log);
     }
@@ -270,10 +272,13 @@ class AttestationSuperGluuControllerTest {
         );
         when(rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData())).thenReturn(rawRegisterResponse);
         when(x509Certificate.getEncoded()).thenThrow(new CertificateEncodingException("test_certificate_exception"));
+        when(errorResponseFactory.invalidRequest(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> attestationSuperGluuController.buildFido2AttestationVerifyResponse(username, registerResponse));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> attestationSuperGluuController.buildFido2AttestationVerifyResponse(username, registerResponse));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Failed during encoding attestationCertificate");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verify(base64Service, times(2)).urlEncodeToString(any());
         verify(dataMapperService, never()).cborWriteAsBytes(any());
@@ -304,10 +309,13 @@ class AttestationSuperGluuControllerTest {
                 "test_signature".getBytes()
         );
         when(rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData())).thenReturn(rawRegisterResponse);
+        when(errorResponseFactory.invalidRequest(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> attestationSuperGluuController.buildFido2AttestationVerifyResponse(username, registerResponse));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> attestationSuperGluuController.buildFido2AttestationVerifyResponse(username, registerResponse));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Failed to prepare attestationObject");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verify(base64Service, times(2)).urlEncodeToString(any());
         verify(dataMapperService).cborWriteAsBytes(any());

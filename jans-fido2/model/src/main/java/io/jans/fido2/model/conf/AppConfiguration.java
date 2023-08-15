@@ -53,6 +53,8 @@ public class AppConfiguration implements Configuration {
     private boolean superGluuEnabled;
 	@DocProperty(description = "Boolean value to enable disable old oxAuth U2F enrollments migration")
     private boolean oldU2fMigrationEnabled;
+	@DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from Fido2. Default value is false", defaultValue = "false")
+	private Boolean errorReasonEnabled = false;
 
     private Fido2Configuration fido2Configuration;
 
@@ -184,4 +186,11 @@ public class AppConfiguration implements Configuration {
 		this.oldU2fMigrationEnabled = oldU2fMigrationEnabled;
 	}
 
+	public Boolean getErrorReasonEnabled() {
+		return errorReasonEnabled;
+	}
+
+	public void setErrorReasonEnabled(Boolean errorReasonEnabled) {
+		this.errorReasonEnabled = errorReasonEnabled;
+	}
 }

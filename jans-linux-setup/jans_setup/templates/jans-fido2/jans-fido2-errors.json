@@ -1,0 +1,108 @@
+{
+  "common": [
+    {
+      "id": "invalid_request",
+      "description": "The request is missing a required parameter, includes an unsupported parameter or parameter value, or is otherwise malformed",
+      "uri": null
+    },
+    {
+      "id": "invalid_domain",
+      "description": "The request contains invalid domain or doesn't match",
+      "uri": null
+    },
+    {
+      "id": "unknown_error",
+      "description": "Unknown or not found error",
+      "uri": null
+    }
+  ],
+  "assertion": [
+    {
+      "id": "invalid_session_id",
+      "description": "The request contains invalid session_id",
+      "uri": null
+    },
+    {
+      "id": "invalid_username_or_key_handle",
+      "description": "The request contains invalid username or key handle",
+      "uri": null
+    },
+    {
+      "id": "unsupported_authentication_type",
+      "description": "The request contains an unsupported authentication type",
+      "uri": null
+    },
+    {
+      "id": "conflict_with_super_gluu",
+      "description": "The request contains conflicts with Super Gluu parameters",
+      "uri": null
+    },
+    {
+      "id": "keys_not_found",
+      "description": "Can't find associated key(s)",
+      "uri": null
+    }
+  ],
+  "attestation": [
+    {
+      "id": "invalid_session_id",
+      "description": "The request contains invalid session_id",
+      "uri": null
+    },
+    {
+      "id": "invalid_challenge",
+      "description": "The request contains a challenge with error",
+      "uri": null
+    },
+    {
+      "id": "unsupported_attestation_format",
+      "description": "The request contains unsupported attestation format (fmt)",
+      "uri": null
+    },
+    {
+      "id": "unsupported_register_type",
+      "description": "The request contains an unsupported register type",
+      "uri": null
+    },
+    {
+      "id": "user_auto_enrollment_is_disabled",
+      "description": "User auto enrollment is disabled",
+      "uri": null
+    },
+    {
+      "id": "invalid_certificate",
+      "description": "Certificate validation error",
+      "uri": null
+    },
+    {
+      "id": "packed_error",
+      "description": "Packed validation error",
+      "uri": null
+    },
+    {
+      "id": "tpm_error",
+      "description": "Tpm validation error",
+      "uri": null
+    },
+    {
+      "id": "android_key_error",
+      "description": "Android key validation error",
+      "uri": null
+    },
+    {
+      "id": "android_safetynet_error",
+      "description": "Android safetynet validation error",
+      "uri": null
+    },
+    {
+      "id": "apple_error",
+      "description": "Apple validation error",
+      "uri": null
+    },
+    {
+      "id": "fido_u2f_error",
+      "description": "Fido U2F validation error",
+      "uri": null
+    }
+  ]
+}

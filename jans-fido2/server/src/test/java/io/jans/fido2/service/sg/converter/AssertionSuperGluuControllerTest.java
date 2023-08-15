@@ -1,14 +1,12 @@
 package io.jans.fido2.service.sg.converter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateResponse;
-import io.jans.fido2.exception.Fido2RpRuntimeException;
-import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.DigestService;
@@ -16,6 +14,7 @@ import io.jans.fido2.service.operation.AssertionService;
 import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.sg.RawAuthenticationService;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,6 +55,9 @@ class AssertionSuperGluuControllerTest {
 
     @Mock
     private UserSessionIdService userSessionIdService;
+
+    @Mock
+    private ErrorResponseFactory errorResponseFactory;
 
     @Test
     void startAuthentication_ifAllowCredentialsIsNull_valid() {
@@ -120,51 +122,39 @@ class AssertionSuperGluuControllerTest {
     }
 
     @Test
-    void buildFido2AssertionStartResponse_ifValidIsFalse_webApplicationException() throws JsonProcessingException {
+    void buildFido2AssertionStartResponse_ifValidIsFalse_webApplicationException() {
         String username = "test_username";
         String keyHandle = "test_key_handle";
         String appId = "test_app_id";
         String sessionId = "test_session_id";
         when(userSessionIdService.isValidSessionId(sessionId, username)).thenReturn(false);
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionSuperGluuController.buildFido2AssertionStartResponse(username, keyHandle, appId, sessionId));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 400);
-        assertNotNull(ex.getResponse().getEntity());
-        JsonNode entityNode = mapper.readTree(ex.getResponse().getEntity().toString());
-        assertNotNull(entityNode);
-        assertTrue(entityNode.has("reason"));
-        assertTrue(entityNode.has("error_description"));
-        assertTrue(entityNode.has("error"));
-        assertEquals(entityNode.get("reason").asText(), "session_id 'test_session_id' is invalid");
-        assertEquals(entityNode.get("error_description").asText(), "The session_id is null, blank or invalid, this param is required.");
-        assertEquals(entityNode.get("error").asText(), "invalid_id_session");
+        assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verify(userSessionIdService).isValidSessionId(sessionId, username);
         verifyNoInteractions(dataMapperService, log);
     }
 
     @Test
-    void buildFido2AssertionStartResponse_ifUsernameAndKeyHandleIsEmpty_webApplicationException() throws JsonProcessingException {
+    void buildFido2AssertionStartResponse_ifUsernameAndKeyHandleIsEmpty_webApplicationException() {
         String username = "";
         String keyHandle = "";
         String appId = "test_app_id";
         String sessionId = "test_session_id";
         when(userSessionIdService.isValidSessionId(sessionId, username)).thenReturn(true);
+        WebApplicationException exception = new WebApplicationException(Response.status(400).entity("test exception").build());
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(exception);
 
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionSuperGluuController.buildFido2AssertionStartResponse(username, keyHandle, appId, sessionId));
         assertNotNull(ex);
+        assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 400);
-        assertNotNull(ex.getResponse().getEntity());
-        JsonNode entityNode = mapper.readTree(ex.getResponse().getEntity().toString());
-        assertNotNull(entityNode);
-        assertTrue(entityNode.has("reason"));
-        assertTrue(entityNode.has("error_description"));
-        assertTrue(entityNode.has("error"));
-        assertEquals(entityNode.get("reason").asText(), "invalid: username or keyHandle");
-        assertEquals(entityNode.get("error_description").asText(), "The request should contains either username or keyHandle");
-        assertEquals(entityNode.get("error").asText(), "invalid_username_or_keyhandle");
+        assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verify(userSessionIdService).isValidSessionId(sessionId, username);
         verifyNoInteractions(dataMapperService, log);
@@ -274,10 +264,13 @@ class AssertionSuperGluuControllerTest {
         String keyHandle = "test_key_handle";
         String deviceData = "test_device_data";
         AuthenticateResponse authenticateResponse = new AuthenticateResponse(clientData, signatureData, keyHandle, deviceData);
+        when(errorResponseFactory.badRequestException(any(), contains("Invalid options attestation request type"))).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(username, authenticateResponseString, authenticateResponse));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(username, authenticateResponseString, authenticateResponse));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid options attestation request type");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verifyNoInteractions(dataMapperService, base64Service, rawAuthenticationService, log);
     }
@@ -301,10 +294,13 @@ class AssertionSuperGluuControllerTest {
         when(rawAuthenticationService.parseRawAuthenticateResponse(authenticateResponse.getSignatureData())).thenReturn(rawAuthenticateResponse);
         when(base64Service.urlEncodeToString(any())).thenReturn("test_client_data_json", "test_signature", "test_authenticator_data", "test_attestation_object");
         when(digestService.hashSha256(anyString())).thenReturn("rp_id_hash".getBytes());
+        when(errorResponseFactory.invalidRequest(contains("Failed to prepare attestationObject"), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(username, authenticateResponseString, authenticateResponse));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(username, authenticateResponseString, authenticateResponse));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Failed to prepare attestationObject");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verify(dataMapperService, times(4)).createObjectNode();
         verify(base64Service, times(3)).urlEncodeToString(any());
@@ -369,10 +365,13 @@ class AssertionSuperGluuControllerTest {
     void parseAuthenticateResponse_ifThrowIOException_fido2RpRuntimeException() throws IOException {
         String authenticateResponseString = "wrong_authenticate_response_string";
         when(dataMapperService.readValue(authenticateResponseString, AuthenticateResponse.class)).thenThrow(new IOException("test_io_exception"));
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RpRuntimeException ex = assertThrows(Fido2RpRuntimeException.class, () -> assertionSuperGluuController.parseAuthenticateResponse(authenticateResponseString));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionSuperGluuController.parseAuthenticateResponse(authenticateResponseString));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Failed to parse options assertion request");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
     }
 
     @Test

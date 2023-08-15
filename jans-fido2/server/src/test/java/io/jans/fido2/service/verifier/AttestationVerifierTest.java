@@ -2,15 +2,17 @@ package io.jans.fido2.service.verifier;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.AuthenticatorDataParser;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.processor.attestation.AttestationProcessorFactory;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,14 +51,21 @@ class AttestationVerifierTest {
     @Mock
     private AttestationProcessorFactory attestationProcessorFactory;
 
+    @Mock
+    private ErrorResponseFactory errorResponseFactory;
+
     @Test
     void verifyAuthenticatorAttestationResponse_attestationObjectFieldIsNull_fido2RuntimeException() {
         ObjectNode authenticatorResponse = mapper.createObjectNode();
         authenticatorResponse.put("clientDataJSON", "TEST-clientDataJSON");
         Fido2RegistrationData credential = new Fido2RegistrationData();
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential));
-        assertEquals(ex.getMessage(), "Authenticator data is invalid");
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential));
+        assertNotNull(ex);
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
         verifyNoInteractions(log, base64Service, dataMapperService, commonVerifiers, authenticatorDataParser, attestationProcessorFactory);
     }
 
@@ -65,9 +74,13 @@ class AttestationVerifierTest {
         ObjectNode authenticatorResponse = mapper.createObjectNode();
         authenticatorResponse.put("attestationObject", "TEST-attestationObject");
         Fido2RegistrationData credential = new Fido2RegistrationData();
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential));
-        assertEquals(ex.getMessage(), "Authenticator data is invalid");
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential));
+        assertNotNull(ex);
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
         verifyNoInteractions(log, base64Service, dataMapperService, commonVerifiers, authenticatorDataParser, attestationProcessorFactory);
     }
 
@@ -77,9 +90,13 @@ class AttestationVerifierTest {
         authenticatorResponse.put("attestationObject", "TEST-attestationObject");
         authenticatorResponse.put("clientDataJSON", "TEST-clientDataJSON");
         Fido2RegistrationData credential = new Fido2RegistrationData();
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential));
-        assertEquals(ex.getMessage(), "Attestation object is empty");
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential));
+        assertNotNull(ex);
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
         verifyNoInteractions(log, dataMapperService, commonVerifiers, authenticatorDataParser, attestationProcessorFactory);
     }
 
@@ -91,9 +108,13 @@ class AttestationVerifierTest {
         authenticatorResponse.put("clientDataJSON", "TEST-clientDataJSON");
         Fido2RegistrationData credential = new Fido2RegistrationData();
         when(base64Service.urlDecode(attestationObjectString)).thenReturn(attestationObjectString.getBytes());
+        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential));
-        assertEquals(ex.getMessage(), "Attestation JSON is empty");
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential));
+        assertNotNull(ex);
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
         verifyNoInteractions(log, commonVerifiers, authenticatorDataParser, attestationProcessorFactory);
     }
 
@@ -107,9 +128,13 @@ class AttestationVerifierTest {
         Fido2RegistrationData credential = new Fido2RegistrationData();
         when(base64Service.urlDecode(attestationObjectString)).thenReturn(attestationObjectBytes);
         when(dataMapperService.cborReadTree(attestationObjectBytes)).thenThrow(mock(IOException.class));
+        when(errorResponseFactory.invalidRequest(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential));
-        assertEquals(ex.getMessage(), "Failed to parse and verify authenticator attestation response data");
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential));
+        assertNotNull(ex);
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
         verifyNoInteractions(log, commonVerifiers, authenticatorDataParser, attestationProcessorFactory);
     }
 
