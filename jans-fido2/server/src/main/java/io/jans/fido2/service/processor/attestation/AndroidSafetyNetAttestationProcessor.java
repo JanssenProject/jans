@@ -67,6 +67,9 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    @Inject
+    private OfflineVerify offlineVerify;
+
     @Override
     public AttestationFormat getAttestationFormat() {
         return AttestationFormat.android_safetynet;
@@ -84,13 +87,14 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
         X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, null);
         AttestationStatement stmt;
         try {
-            stmt = OfflineVerify.parseAndVerify(new String(base64Service.decode(response)), tm);
+            stmt = offlineVerify.parseAndVerify(new String(base64Service.decode(response)), tm);
         } catch (Exception e) {
+            log.error("Error on parse and verify: {}", e.getMessage(), e);
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation " + e.getMessage());
         }
 
         if (stmt == null) {
-            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation, stmt is null");
         }
 
         byte[] b1 = authData.getAuthDataDecoded();
@@ -99,21 +103,21 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
         byte[] hashedBuffer = DigestUtils.getSha256Digest().digest(buffer);
         byte[] nonce = stmt.getNonce();
         if (!Arrays.equals(hashedBuffer, nonce)) {
-            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation, hashed and nonce are not equals");
         }
 
         if (!stmt.isCtsProfileMatch()) {
-            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation, cts profile match is false");
         }
 
         Instant timestamp = Instant.ofEpochMilli(stmt.getTimestampMs());
 
         if (timestamp.isAfter(Instant.now())) {
-            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation, timestamp is after now");
         }
 
         if (timestamp.isBefore(Instant.now().minus(1, ChronoUnit.MINUTES))) {
-            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_SAFETYNET_ERROR, "Invalid safety net attestation, timestamp is before now minus 1 minutes");
         }
 
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());

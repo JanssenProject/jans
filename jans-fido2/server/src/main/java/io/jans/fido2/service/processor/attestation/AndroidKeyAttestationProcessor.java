@@ -91,7 +91,7 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
 
         Iterator<JsonNode> i = attStmt.get("x5c").elements();
 
-        ArrayList<String> certificatePath = new ArrayList();
+        ArrayList<String> certificatePath = new ArrayList<>();
         while (i.hasNext()) {
             certificatePath.add(i.next().asText());
         }
