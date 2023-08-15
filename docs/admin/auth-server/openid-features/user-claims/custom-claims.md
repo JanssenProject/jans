@@ -21,7 +21,7 @@ Custom claims provide the flexibility to include application-specific or user-sp
 
 Create a new custom attribute using [Test User Interface](../../../admin/config-guide/config-tools/jans-tui) or [CURL commands](../../../admin/config-guide/jans-cli/cli-attribute/#creating-an-attribute), superb tools provided in Janssen. The attribute name should be the claim name.
 
-![](../../../assets/image-tui-add-attribute.png)
+![](../../../../assets/image-tui-add-attribute.png)
 
 ### Step 2: Make entry of the claim in OpenDJ Schema 
 
@@ -78,7 +78,7 @@ The complete 77-customAttributes.ldif will look like this:
 
 ### Step 3: Restart `opendj` service.
 
-[Restart](../../../admin/vm-ops/restarting-services/#reload) the `opendj` service.
+[Restart](../../../../admin/vm-ops/restarting-services/#reload) the `opendj` service.
 
 That will create the custom user claim in the local LDAP server.
 
@@ -88,7 +88,7 @@ That will create the custom user claim in the local LDAP server.
 
 Create a new custom attribute using [Test User Interface](../../../admin/config-guide/config-tools/jans-tui) or [CURL commands](../../../admin/config-guide/jans-cli/cli-attribute/#creating-an-attribute), superb tools provided in Janssen. The attribute-name should be the claim-name.
 
-![](../../../assets/image-tui-add-attribute.png)
+![](../../../../assets/image-tui-add-attribute.png)
 
 ### Step 2: Make entry of the claim in MySQL Schema
 
@@ -107,7 +107,7 @@ Create a new custom attribute using [Test User Interface](../../../admin/config-
 |Numeric|INT|
 |Multivalued|JSON|
 
-![](../../../assets/image-tui-attribute-datatype.png)
+![](../../../../assets/image-tui-attribute-datatype.png)
 
 !!!warning 
     If the attribute is Multivalued, dataType should be JSON regardless of what you will choose for Type in Janssen TUI.
@@ -117,4 +117,4 @@ The above steps will create the custom user claim in the MySQL persistence.
 
 Once the user claim is added, it can be used in user management.
 
-![](../../../assets/image-tui-user-claim.png)
+![](../../../../assets/image-tui-user-claim.png)
