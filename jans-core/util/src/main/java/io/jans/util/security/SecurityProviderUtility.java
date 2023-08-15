@@ -376,4 +376,26 @@ public class SecurityProviderUtility {
         }
         return keyStorageType;
     }
+
+    /**
+     * 
+     * @return
+     */
+    static public boolean isBcProvMode() {
+        if (securityMode == null) {
+            throw new IllegalStateException("SecurityProviderUtility: securityMode is not initialized");
+        }
+        return SecurityProviderUtility.SecurityModeType.BCPROV_SECURITY_MODE == securityMode;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    static public boolean isBcFipsMode() {
+        if (securityMode == null) {
+            throw new IllegalStateException("SecurityProviderUtility: securityMode is not initialized");
+        }
+        return SecurityProviderUtility.SecurityModeType.BCFIPS_SECURITY_MODE == securityMode;
+    }
 }
