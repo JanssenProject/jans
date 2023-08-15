@@ -345,7 +345,7 @@ public class SecurityProviderUtility {
      * @param keyStoreFile
      * @return
      */
-    static public SecurityProviderUtility.KeyStorageType solveKeyStorageType(final String keyStoreFile) {
+    public static SecurityProviderUtility.KeyStorageType solveKeyStorageType(final String keyStoreFile) {
         if (keyStoreFile == null) {
             throw new InvalidParameterException("KeyStore File isn't defined. Check configuration.");
         }
@@ -381,7 +381,7 @@ public class SecurityProviderUtility {
      * 
      * @return
      */
-    static public boolean isBcProvMode() {
+    public static boolean isBcProvMode() {
         if (securityMode == null) {
             throw new IllegalStateException("SecurityProviderUtility: securityMode is not initialized");
         }
@@ -392,7 +392,7 @@ public class SecurityProviderUtility {
      * 
      * @return
      */
-    static public boolean isBcFipsMode() {
+    public static boolean isBcFipsMode() {
         if (securityMode == null) {
             throw new IllegalStateException("SecurityProviderUtility: securityMode is not initialized");
         }
