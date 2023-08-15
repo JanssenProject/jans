@@ -52,9 +52,11 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
     ```
     You can adjust `node-type` and `nodes` number as per your desired cluster size
 
-6.  Install [Helm3](https://helm.sh/docs/intro/install/)
+6. To be able to attach volumes to your pod, you need to install the Amazon [EBS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html)
 
-7.  Create `jans` namespace where our resources will reside
+7.  Install [Helm3](https://helm.sh/docs/intro/install/)
+
+8.  Create `jans` namespace where our resources will reside
     ```
     kubectl create namespace jans
     ```
