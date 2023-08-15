@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,6 +41,9 @@ class CertificateVerifierTest {
     @Mock
     private CertificateService certificateService;
 
+    @Mock
+    private ErrorResponseFactory errorResponseFactory;
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
@@ -53,10 +58,13 @@ class CertificateVerifierTest {
         when(cert2.getSignature()).thenReturn(cert2Bytes);
         when(base64Service.encodeToString(cert1Bytes)).thenReturn("TEST-cert1-encoded");
         when(base64Service.encodeToString(cert2Bytes)).thenReturn("TEST-cert2-encoded");
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.checkForTrustedCertsInAttestation(attestationCerts, trustChainCertificates));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.checkForTrustedCertsInAttestation(attestationCerts, trustChainCertificates));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Root certificate in the attestation");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
         verify(base64Service, times(3)).encodeToString(any());
     }
 
@@ -89,10 +97,13 @@ class CertificateVerifierTest {
         byte[] cert1Bytes = "TEST-cert1".getBytes();
         when(cert1.getSignature()).thenReturn(cert1Bytes);
         when(base64Service.encodeToString(cert1Bytes)).thenReturn("TEST-cert1-encoded");
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2MissingAttestationCertException ex = assertThrows(Fido2MissingAttestationCertException.class, () -> certificateVerifier.verifyAttestationCertificates(certs, trustChainCertificates));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.verifyAttestationCertificates(certs, trustChainCertificates));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Trust anchors certs list is empty!");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
         verifyNoInteractions(log);
     }
 
@@ -168,10 +179,13 @@ class CertificateVerifierTest {
         CertificateFactory certPath = mock(CertificateFactory.class);
         when(certificateService.instanceCertificateFactoryX509()).thenReturn(certPath);
         when(certPath.generateCertPath(certs)).thenThrow(new CertificateException("Test CertificateException"));
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyAttestationCertificates(certs, trustChainCertificates));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.verifyAttestationCertificates(certs, trustChainCertificates));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Problem with certificate");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
         verify(log).warn(contains("Cert verification problem"), any(), any());
         verifyNoMoreInteractions(certificateService);
     }

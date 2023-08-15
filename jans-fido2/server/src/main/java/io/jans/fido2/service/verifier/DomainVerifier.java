@@ -21,6 +21,8 @@ package io.jans.fido2.service.verifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import io.jans.fido2.model.error.CommonErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -37,6 +39,9 @@ public class DomainVerifier {
     
     @Inject
     private CommonVerifiers commonVerifiers;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
 
     public boolean verifyDomain(String domain, JsonNode clientDataNode) {
     	String clientDataOrigin = commonVerifiers.verifyThatFieldString(clientDataNode, "origin");
@@ -69,7 +74,7 @@ public class DomainVerifier {
         if (!domain.equals(effectiveDomain)) {
             //Check registrable domain suffix rule
             if (!effectiveDomain.endsWith("." + domain)) {
-                throw new Fido2RpRuntimeException("Domains don't match");
+                throw errorResponseFactory.badRequestException(CommonErrorResponseType.INVALID_DOMAIN, "Domains don't match");
             }
         }
 
