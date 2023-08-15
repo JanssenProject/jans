@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import io.jans.fido2.model.assertion.AssertionErrorResponseType;
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -57,6 +60,9 @@ public class AuthenticationPersistenceService {
     @Inject
     private PersistenceEntryManager persistenceEntryManager;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     public void save(Fido2AuthenticationData authenticationData) {
         Fido2AuthenticationEntry authenticationEntity = buildFido2AuthenticationEntry(authenticationData, false);
 
@@ -79,7 +85,7 @@ public class AuthenticationPersistenceService {
 	            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
 	                user = userService.addDefaultUser(userName);
 	            } else {
-	                throw new Fido2RuntimeException("Auto user enrollment was disabled. User not exists!");
+	                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");
 	            }
 	        }
 	        userInum = userService.getUserInum(user);
