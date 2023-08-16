@@ -312,6 +312,7 @@ nav:
       - SCIM: admin/developer/scripts/scim.md
       - Persistence: admin/developer/scripts/persistence.md
       - Config API: admin/developer/scripts/config-api.md
+      - Authorization Challenge: admin/developer/scripts/authorization-challenge.md
   - Reference Guide:
     - admin/reference/README.md
     - Javadocs / OpenAPI:
