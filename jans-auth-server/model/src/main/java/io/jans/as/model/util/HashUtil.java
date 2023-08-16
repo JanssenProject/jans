@@ -58,8 +58,7 @@ public class HashUtil {
                     case HS512:
                     case RS512:
                     case PS512:
-                    case ES512: 
-                    case EDDSA: {
+                    case ES512: {
                         digest = JwtUtil.getMessageDigestSHA512(input);
                         break;
                     }
