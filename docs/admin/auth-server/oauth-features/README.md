@@ -27,6 +27,7 @@ The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/
 - Assertion Framework for OAuth 2.0 Client Authentication and Authorization Grants [(spec)](https://www.rfc-editor.org/rfc/rfc7521.html)
 - JWT Secured Authorization Response Mode for OAuth 2.0 (JARM) [(spec)](https://openid.net/specs/oauth-v2-jarm.html)
 - OAuth 2.0 for First-Party Native Applications [(spec)](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-00.html)
+- The Use of Attestation in OAuth 2.0 Dynamic Client Registration [(spec)](https://www.ietf.org/id/draft-tschofenig-oauth-attested-dclient-reg-00.html)
 
 
 ## Protocol Overview

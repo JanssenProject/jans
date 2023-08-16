@@ -56,6 +56,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             context.setRegisterRequest(registerRequest);
             context.setErrorResponseFactory(errorResponseFactory);
             context.setSoftwareStatement(Jwt.parseSilently(registerRequest.getSoftwareStatement()));
+            context.setEvidence(Jwt.parseSilently(registerRequest.getEvidence()));
 
             final String clientCertAsPem = httpRequest.getHeader("X-ClientCert");
             if (StringUtils.isNotBlank(clientCertAsPem)) {
@@ -99,6 +100,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, null, script, client);
             context.setRegisterRequest(registerRequest);
             context.setSoftwareStatement(Jwt.parseSilently(registerRequest.getSoftwareStatement()));
+            context.setEvidence(Jwt.parseSilently(registerRequest.getEvidence()));
             context.setErrorResponseFactory(errorResponseFactory);
 
             final boolean result = externalClientRegistrationType.updateClient(context);

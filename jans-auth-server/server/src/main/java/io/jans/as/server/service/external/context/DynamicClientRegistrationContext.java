@@ -19,6 +19,8 @@ import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.service.cdi.util.CdiUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -27,10 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -44,6 +43,7 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
     private RegisterRequest registerRequest;
     private Jwt softwareStatement;
     private Jwt dcr;
+    private Jwt evidence;
     private Client client;
     private ErrorResponseFactory errorResponseFactory;
     private X509Certificate certificate;
@@ -57,6 +57,31 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
         this.script = script;
         this.registerRequestJson = registerRequest;
         this.client = client;
+    }
+
+    public Jwt getEvidence() {
+        return evidence;
+    }
+
+    public void setEvidence(Jwt evidence) {
+        this.evidence = evidence;
+    }
+
+    public WebApplicationException createStaleEvidenceWebApplicationException() {
+        return createStaleEvidenceWebApplicationException(UUID.randomUUID().toString());
+    }
+
+    public WebApplicationException createStaleEvidenceWebApplicationException(String nonce) {
+        final String entity = errorResponseFactory.errorAsJson(RegisterErrorResponseType.STALE_EVIDENCE, "");
+
+        JSONObject json = new JSONObject(entity);
+        json.put("nonce", nonce);
+
+        return new WebApplicationException(Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(json.toString())
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
     }
 
     public Jwt getDcr() {

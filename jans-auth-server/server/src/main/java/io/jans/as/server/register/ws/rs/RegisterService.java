@@ -419,6 +419,9 @@ public class RegisterService {
         if (StringUtils.isNotBlank(requestObject.getSoftwareStatement())) {
             client.setSoftwareStatement(requestObject.getSoftwareStatement());
         }
+        if (StringUtils.isNotBlank(requestObject.getEvidence())) {
+            client.getAttributes().setEvidence(requestObject.getEvidence());
+        }
 
         if (StringUtils.isNotBlank(requestObject.getSubjectIdentifierAttribute())) {
             client.getAttributes().setPublicSubjectIdentifierAttribute(requestObject.getSubjectIdentifierAttribute());

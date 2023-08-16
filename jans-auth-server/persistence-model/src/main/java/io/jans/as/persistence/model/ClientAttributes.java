@@ -125,6 +125,17 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("requestedLifetime")
     private Integer requestedLifetime; // in seconds
 
+    @JsonProperty("evidence")
+    private String evidence;
+
+    public String getEvidence() {
+        return evidence;
+    }
+
+    public void setEvidence(String evidence) {
+        this.evidence = evidence;
+    }
+
     public Boolean getDpopBoundAccessToken() {
         if (dpopBoundAccessToken == null) dpopBoundAccessToken = false;
         return dpopBoundAccessToken;
@@ -455,6 +466,7 @@ public class ClientAttributes implements Serializable {
                 ", defaultPromptLogin=" + defaultPromptLogin +
                 ", requestedLifetime=" + requestedLifetime +
                 ", requirePar=" + requirePar +
+                ", evidence=" + evidence +
                 ", dpopBoundAccessToken=" + dpopBoundAccessToken +
                 '}';
     }

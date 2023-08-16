@@ -6,10 +6,8 @@
 
 package io.jans.model.custom.script.type.client;
 
-import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.type.BaseExternalType;
 
-import java.util.Map;
 
 /**
  * Base interface for external custom client registration python script

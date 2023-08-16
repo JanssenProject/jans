@@ -1,5 +1,6 @@
 package io.jans.as.server.register.ws.rs;
 
+import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.TrustedIssuerConfig;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -67,6 +68,30 @@ public class RegisterValidatorTest {
 
     @Mock
     private UriService uriService;
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateEvidence_whenAbsentButRequired_shouldReturnError() {
+        when(appConfiguration.getDcrAttestationEvidenceRequired()).thenReturn(true);
+        when(errorResponseFactory.errorAsJson(any(), any())).thenReturn("{}");
+
+        registerValidator.validateEvidence(new RegisterRequest());
+    }
+
+    @Test
+    public void validateEvidence_whenAbsentAndNotRequired_shouldNotRaiseError() {
+        when(appConfiguration.getDcrAttestationEvidenceRequired()).thenReturn(false);
+
+        registerValidator.validateEvidence(new RegisterRequest());
+    }
+
+    @Test
+    public void validateEvidence_whenPresentAndRequired_shouldNotRaiseError() {
+        when(appConfiguration.getDcrAttestationEvidenceRequired()).thenReturn(true);
+
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setEvidence("custom_evidence");
+        registerValidator.validateEvidence(registerRequest);
+    }
 
     @Test
     public void validateIssuer_whenTrustedIssuersAreNotConfigured_shouldPass() {

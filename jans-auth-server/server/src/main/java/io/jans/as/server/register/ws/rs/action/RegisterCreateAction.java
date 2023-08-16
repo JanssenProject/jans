@@ -108,9 +108,10 @@ public class RegisterCreateAction {
 
             final RegisterRequest r = RegisterRequest.fromJson(requestObject);
 
-            log.info("Attempting to register client: applicationType = {}, clientName = {}, redirectUris = {}, isSecure = {}, sectorIdentifierUri = {}, defaultAcrValues = {}",
-                    r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), r.getDefaultAcrValues());
+            log.info("Attempting to register client: applicationType = {}, clientName = {}, redirectUris = {}, isSecure = {}, sectorIdentifierUri = {}, defaultAcrValues = {}, evidence = {}",
+                    r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), r.getDefaultAcrValues(), r.getEvidence());
 
+            registerValidator.validateEvidence(r);
             registerValidator.validatePasswordGrantType(r);
             registerValidator.validateDcrAuthorizationWithClientCredentials(r);
 

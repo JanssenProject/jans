@@ -180,6 +180,11 @@
             "id":"access_denied",
             "description":"The authorization server denied the request.",
             "uri":null
+        },
+        {
+            "id": "stale_evidence",
+            "description":"The provided evidence is not current. Resend fresh evidence.",
+            "uri":null
         }
     ],
     "token":[

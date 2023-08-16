@@ -667,6 +667,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value indicating if DCR authorization allowed with MTLS", defaultValue = "false")
     private Boolean dcrAuthorizationWithMTLS = false;
 
+    @DocProperty(description = "Boolean value indicating if DCR attestation evidence is required", defaultValue = "false")
+    private Boolean dcrAttestationEvidenceRequired = false;
+
     @DocProperty(description = "List of trusted SSA issuers with configuration (e.g. automatically granted scopes).")
     private Map<String, TrustedIssuerConfig> trustedSsaIssuers = new HashMap<>();
 
@@ -1325,6 +1328,15 @@ public class AppConfiguration implements Configuration {
 
     public void setDcrSignatureValidationJwksUri(String dcrSignatureValidationJwksUri) {
         this.dcrSignatureValidationJwksUri = dcrSignatureValidationJwksUri;
+    }
+
+    public Boolean getDcrAttestationEvidenceRequired() {
+        if (dcrAttestationEvidenceRequired == null) dcrAttestationEvidenceRequired = false;
+        return dcrAttestationEvidenceRequired;
+    }
+
+    public void setDcrAttestationEvidenceRequired(Boolean dcrAttestationEvidenceRequired) {
+        this.dcrAttestationEvidenceRequired = dcrAttestationEvidenceRequired;
     }
 
     public Boolean getDcrAuthorizationWithMTLS() {
