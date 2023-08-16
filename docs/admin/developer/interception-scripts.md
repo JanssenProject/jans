@@ -42,6 +42,7 @@ calling external APIs
 1. UMA 2 RPT Authorization Policies
 1. UMA 2 Claims-Gathering
 1. [Fido2 Extension](./scripts/fido2-extension.md) : Extension of attestation and assertion endpoints.
+1. [Discovery](./scripts/discovery.md): OpenID discovery response modification
 
 ## Implementation languages - Jython or pure Java
 
