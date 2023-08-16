@@ -188,6 +188,7 @@ nav:
       - OpenID Configuration: admin/auth-server/endpoints/configuration.md
       - Client Registration: admin/auth-server/endpoints/client-registration.md
       - Authorization: admin/auth-server/endpoints/authorization.md
+      - Authorization Challenge: admin/auth-server/endpoints/authorization-challenge.md
       - Token: admin/auth-server/endpoints/token.md
       - SSA: admin/auth-server/endpoints/ssa.md
       - Userinfo: admin/auth-server/endpoints/userinfo.md
