@@ -28,13 +28,13 @@ import org.slf4j.LoggerFactory;
  */
 public class SecurityProviderUtility {
 
-    // security mode
-    public static final String DEF_MODE_BCPROV      = "BCPROV";
     public static final String DEF_MODE_BCFIPS      = "BCFIPS";
 
     // keystorage type
     public static final String DEF_KS_JKS           = "JKS";
     public static final String DEF_KS_PKCS12        = "PKCS12";
+    // security mode
+    public static final String DEF_MODE_BCPROV      = "BCPROV";
     public static final String DEF_KS_BCFKS         = "BCFKS";
 
     // JKS additional extensions
@@ -297,7 +297,7 @@ public class SecurityProviderUtility {
     * 
     * @return boolean value
     */
-    private static boolean checkFipsMode() {
+    public static boolean checkFipsMode() {
         try {
             // First check if there are FIPS provider libs
             Class.forName(BC_FIPS_PROVIDER_CLASS_NAME);
@@ -345,7 +345,7 @@ public class SecurityProviderUtility {
      * @param keyStoreFile
      * @return
      */
-    static public SecurityProviderUtility.KeyStorageType solveKeyStorageType(final String keyStoreFile) {
+    public static SecurityProviderUtility.KeyStorageType solveKeyStorageType(final String keyStoreFile) {
         if (keyStoreFile == null) {
             throw new InvalidParameterException("KeyStore File isn't defined. Check configuration.");
         }
@@ -375,5 +375,27 @@ public class SecurityProviderUtility {
             }
         }
         return keyStorageType;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public static boolean isBcProvMode() {
+        if (securityMode == null) {
+            throw new IllegalStateException("SecurityProviderUtility: securityMode is not initialized");
+        }
+        return SecurityProviderUtility.SecurityModeType.BCPROV_SECURITY_MODE == securityMode;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public static boolean isBcFipsMode() {
+        if (securityMode == null) {
+            throw new IllegalStateException("SecurityProviderUtility: securityMode is not initialized");
+        }
+        return SecurityProviderUtility.SecurityModeType.BCFIPS_SECURITY_MODE == securityMode;
     }
 }
