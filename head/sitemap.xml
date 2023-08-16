@@ -741,6 +741,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/developer/scripts/discovery/</loc>
+         <lastmod>2023-08-16</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/dynamic-scope/</loc>
          <lastmod>2023-08-16</lastmod>
          <changefreq>daily</changefreq>
@@ -767,11 +772,6 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/introspection/</loc>
-         <lastmod>2023-08-16</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/developer/scripts/openid-config/</loc>
          <lastmod>2023-08-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
