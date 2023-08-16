@@ -11,15 +11,15 @@ import io.jans.as.model.crypto.signature.EDDSAPublicKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.StringUtils;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.StringWriter;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
 
 /**
@@ -51,26 +51,24 @@ public class Certificate {
      * @return Public Key from X509 Certificate.
      */
     public PublicKey getPublicKey() {
-        if(x509Certificate == null) {
-            return null; 
-        }
         PublicKey publicKey = null;
-        if (x509Certificate.getPublicKey() instanceof BCRSAPublicKey) {
-            BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) x509Certificate.getPublicKey();
+
+        if (x509Certificate != null && x509Certificate.getPublicKey() instanceof java.security.interfaces.RSAPublicKey) {
+            java.security.interfaces.RSAPublicKey jcersaPublicKey = (java.security.interfaces.RSAPublicKey) x509Certificate.getPublicKey();
 
             publicKey = new RSAPublicKey(jcersaPublicKey.getModulus(), jcersaPublicKey.getPublicExponent());
-        } else if (x509Certificate.getPublicKey() instanceof BCECPublicKey) {
-            BCECPublicKey jceecPublicKey = (BCECPublicKey) x509Certificate.getPublicKey();
+        } else if (x509Certificate != null && x509Certificate.getPublicKey() instanceof ECPublicKey) {
+            ECPublicKey jceecPublicKey = (ECPublicKey) x509Certificate.getPublicKey();
 
-            publicKey = new ECDSAPublicKey(signatureAlgorithm, jceecPublicKey.getQ().getXCoord().toBigInteger(),
-                    jceecPublicKey.getQ().getYCoord().toBigInteger());
-        } else if (x509Certificate.getPublicKey() instanceof BCEdDSAPublicKey) {
-            BCEdDSAPublicKey jceedPublicKey = (BCEdDSAPublicKey) x509Certificate.getPublicKey();
+            publicKey = new ECDSAPublicKey(signatureAlgorithm, jceecPublicKey.getW().getAffineX(), jceecPublicKey.getW().getAffineY());
+        } else if (SecurityProviderUtility.isBcProvMode() && x509Certificate.getPublicKey() instanceof org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey) {
+            org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey jceedPublicKey = (org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey) x509Certificate.getPublicKey();
 
             publicKey = new EDDSAPublicKey(signatureAlgorithm, jceedPublicKey.getEncoded());
         }
+
         return publicKey;
-    }
+    }    
 
     /**
      * Returns RSA Public Key from X509 Certificate.
@@ -78,18 +76,13 @@ public class Certificate {
      * @return RSA Public Key from X509 Certificate.
      */
     public RSAPublicKey getRsaPublicKey() {
-        if(x509Certificate == null) {
-            return null;
-        }
         RSAPublicKey rsaPublicKey = null;
-        if (x509Certificate.getPublicKey() instanceof BCRSAPublicKey) {
-            BCRSAPublicKey publicKey = (BCRSAPublicKey) x509Certificate.getPublicKey();
-            rsaPublicKey = new RSAPublicKey(publicKey.getModulus(), publicKey.getPublicExponent());
-        } else if (x509Certificate.getPublicKey() instanceof java.security.interfaces.RSAPublicKey) {
-            java.security.interfaces.RSAPublicKey publicKey = (java.security.interfaces.RSAPublicKey) x509Certificate
-                    .getPublicKey();
+
+        if (x509Certificate != null && x509Certificate.getPublicKey() instanceof java.security.interfaces.RSAPublicKey) {
+            java.security.interfaces.RSAPublicKey publicKey = (java.security.interfaces.RSAPublicKey) x509Certificate.getPublicKey();
             rsaPublicKey = new RSAPublicKey(publicKey.getModulus(), publicKey.getPublicExponent());
         }
+
         return rsaPublicKey;
     }
 
@@ -99,20 +92,13 @@ public class Certificate {
      * @return ECDSA Public Key from X509 Certificate.
      */
     public ECDSAPublicKey getEcdsaPublicKey() {
-        if(x509Certificate == null) {
-            return null;
-        }
         ECDSAPublicKey ecdsaPublicKey = null;
-        if (x509Certificate.getPublicKey() instanceof BCECPublicKey) {
-            BCECPublicKey publicKey = (BCECPublicKey) x509Certificate.getPublicKey();
-            ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, publicKey.getQ().getXCoord().toBigInteger(),
-                    publicKey.getQ().getYCoord().toBigInteger());
-        } else if (x509Certificate.getPublicKey() instanceof java.security.interfaces.ECPublicKey) {
-            java.security.interfaces.ECPublicKey publicKey = (java.security.interfaces.ECPublicKey) x509Certificate
-                    .getPublicKey();
-            ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, publicKey.getW().getAffineX(),
-                    publicKey.getW().getAffineY());
+
+        if (x509Certificate != null && x509Certificate.getPublicKey() instanceof ECPublicKey) {
+            ECPublicKey publicKey = (ECPublicKey) x509Certificate.getPublicKey();
+            ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, publicKey.getW().getAffineX(), publicKey.getW().getAffineY());
         }
+
         return ecdsaPublicKey;
     }
 
@@ -123,8 +109,10 @@ public class Certificate {
      */
     public EDDSAPublicKey getEddsaPublicKey() {
         EDDSAPublicKey eddsaPublicKey = null;
-        if (x509Certificate != null && x509Certificate.getPublicKey() instanceof BCEdDSAPublicKey) {
-            BCEdDSAPublicKey publicKey = (BCEdDSAPublicKey) x509Certificate.getPublicKey();
+        if (SecurityProviderUtility.isBcProvMode() && x509Certificate != null
+                && x509Certificate.getPublicKey() instanceof org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey) {
+            org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey publicKey = 
+                    (org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey) x509Certificate.getPublicKey();
             eddsaPublicKey = new EDDSAPublicKey(signatureAlgorithm, publicKey.getEncoded());
         }
         return eddsaPublicKey;

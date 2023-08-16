@@ -44,6 +44,7 @@ import static io.jans.as.model.jwk.JWKParameter.*;
  * KeyGenerator -sig_keys RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA -enc_keys RSA1_5 RSA-OAEP RSA-OAEP-256 ECDH-ES ECDH-ES+A128KW ECDH-ES+A192KW ECDH-ES+A256KW -keystore /Users/JAVIER/tmp/mykeystore.jks -keypasswd secret -dnname "CN=Jans Auth CA Certificates" -expiration 365
  * <p/>
  * KeyGenerator -sig_keys RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA -ox11 https://ce.gluu.info:8443/oxeleven/rest/generateKey -expiration 365 -at xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+ * Note that EdDSA is not allowed in FIPS mode
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
@@ -89,6 +90,10 @@ public class KeyGenerator {
 
             Option signingKeysOption = new Option(SIGNING_KEYS, true,
                     "Signature keys to generate (RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA).");
+            if (SecurityProviderUtility.checkFipsMode()) {
+            	signingKeysOption = new Option(SIGNING_KEYS, true,
+                        "Signature keys to generate (RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512).");
+            }
             signingKeysOption.setArgs(Option.UNLIMITED_VALUES);
 
             Option encryptionKeysOption = new Option(ENCRYPTION_KEYS, true,
