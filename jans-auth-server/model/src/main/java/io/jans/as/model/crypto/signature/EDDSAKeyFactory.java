@@ -7,18 +7,17 @@ package io.jans.as.model.crypto.signature;
 
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.KeyFactory;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.apache.commons.lang.StringUtils;
+
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v1CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
-import org.bouncycastle.crypto.util.PrivateKeyInfoFactory;
-import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPrivateKey;
-import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey;
+
 import org.bouncycastle.jcajce.spec.EdDSAParameterSpec;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -79,17 +78,20 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
         if (!AlgorithmFamily.ED.equals(signatureAlgorithm.getFamily())) {
             throw new InvalidParameterException("Wrong value of the family of the SignatureAlgorithm");
         }
+        if (!SecurityProviderUtility.isBcProvMode()) {
+            throw new InvalidParameterException("Wrong CryptoProvider Mode. EdDSA can be used, when BCPROV mode is initialized");
+        }
         this.signatureAlgorithm = signatureAlgorithm;
 
         EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getCurve().getName());
 
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), DEF_BC);
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), SecurityProviderUtility.getBCProvider());
         keyGen.initialize(edSpec, new SecureRandom());
 
         this.keyPair = keyGen.generateKeyPair();
 
-        BCEdDSAPrivateKey privateKey = (BCEdDSAPrivateKey) keyPair.getPrivate();
-        BCEdDSAPublicKey publicKey = (BCEdDSAPublicKey) keyPair.getPublic();
+        org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPrivateKey privateKey = (org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPrivateKey) keyPair.getPrivate();
+        org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey publicKey = (org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey) keyPair.getPublic();
 
         byte[] privateKeyData = privateKey.getEncoded();
         byte[] publicKeyData = publicKey.getEncoded();
@@ -107,9 +109,9 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
             JcaX509v1CertificateBuilder certGen = new JcaX509v1CertificateBuilder(name, serialNumber,
                     startDate.getTime(), expiryDate.getTime(), name, publicKey);
             X509CertificateHolder certHolder = certGen
-                    .build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(DEF_BC)
+                    .build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(SecurityProviderUtility.getBCProvider())
                             .build(keyPair.getPrivate()));
-            X509Certificate cert = new JcaX509CertificateConverter().setProvider(DEF_BC).getCertificate(certHolder);
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(SecurityProviderUtility.getBCProvider()).getCertificate(certHolder);
             this.certificate = new Certificate(signatureAlgorithm, cert);
         }
     }
@@ -129,18 +131,21 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
      * @throws SignatureException
      */
     public Certificate generateV3Certificate(final Date startDate, final Date expirationDate, final String dnName) throws SignatureException {
+        if (!SecurityProviderUtility.isBcProvMode()) {
+            throw new InvalidParameterException("Wrong CryptoProvider Mode. EdDSA can be used, when BCPROV mode is initialized");
+        }
         // Creating the certificate
         Certificate resCertificate = null;
         try {
-            BCEdDSAPublicKey publicKey = (BCEdDSAPublicKey) keyPair.getPublic();
+            org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey publicKey = (org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey) keyPair.getPublic();
             BigInteger serialNumber = new BigInteger(1024, new SecureRandom()); // serial number for certificate
             X500Name name = new X500Name(dnName);
             JcaX509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(name, serialNumber, startDate,
                     expirationDate, name, publicKey);
             X509CertificateHolder certHolder = certGen
-                    .build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(DEF_BC)
+                    .build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(SecurityProviderUtility.getBCProvider())
                             .build(keyPair.getPrivate()));
-            X509Certificate cert = new JcaX509CertificateConverter().setProvider(DEF_BC).getCertificate(certHolder);
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(SecurityProviderUtility.getBCProvider()).getCertificate(certHolder);
             resCertificate = new Certificate(signatureAlgorithm, cert);
         } catch (Exception e) {
             throw new SignatureException(e);
@@ -181,6 +186,9 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
      * @throws SignatureException
      */
     public static EDDSAPublicKey createEDDSAPublicKeyFromDecodedKey(final SignatureAlgorithm signatureAlgorithm, final byte[] decodedPublicKey) throws SignatureException {
+        if (!SecurityProviderUtility.isBcProvMode()) {
+            throw new InvalidParameterException("Wrong CryptoProvider Mode. EdDSA can be used, when BCPROV mode is initialized");
+        }
         byte[] encodedPubKey = getEncodedPubKey(signatureAlgorithm, decodedPublicKey);
         return new EDDSAPublicKey(signatureAlgorithm, encodedPubKey);
     }
@@ -196,9 +204,12 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
      * @throws IOException
      */
     public static EDDSAPrivateKey createEDDSAPrivateKeyFromDecodedKey(final SignatureAlgorithm signatureAlgorithm, final byte[] decodedPrivateKey, final byte[] decodedPublicKey) throws SignatureException, IOException {
+        if (!SecurityProviderUtility.isBcProvMode()) {
+            throw new InvalidParameterException("Wrong CryptoProvider Mode. EdDSA can be used, when BCPROV mode is initialized");
+        }
         byte[] encodedPubKey = getEncodedPubKey(signatureAlgorithm, decodedPublicKey);
-        Ed25519PrivateKeyParameters privKeysParams = new Ed25519PrivateKeyParameters(decodedPrivateKey);
-        PrivateKeyInfo privKeyInfo = PrivateKeyInfoFactory.createPrivateKeyInfo(privKeysParams, null);
+        org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters privKeysParams = new org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters(decodedPrivateKey);
+        PrivateKeyInfo privKeyInfo = org.bouncycastle.crypto.util.PrivateKeyInfoFactory.createPrivateKeyInfo(privKeysParams, null);
         return new EDDSAPrivateKey(signatureAlgorithm, privKeyInfo.getEncoded(), encodedPubKey);
     }
 
@@ -211,9 +222,12 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
      * @throws SignatureException
      */
     private static byte[] getEncodedPubKey(final SignatureAlgorithm signatureAlgorithm, final byte[] decodedPublicKey) throws SignatureException {
+        if (!SecurityProviderUtility.isBcProvMode()) {
+            throw new InvalidParameterException("Wrong CryptoProvider Mode. EdDSA can be used, when BCPROV mode is initialized");
+        }
         byte[] encodedPubKey = null;
         if (signatureAlgorithm == SignatureAlgorithm.EDDSA) {
-            encodedPubKey = new byte[Ed25519Prefix.length + Ed25519PublicKeyParameters.KEY_SIZE];
+            encodedPubKey = new byte[Ed25519Prefix.length + org.bouncycastle.crypto.params.Ed25519PublicKeyParameters.KEY_SIZE];
             System.arraycopy(Ed25519Prefix, 0, encodedPubKey, 0, Ed25519Prefix.length);
             System.arraycopy(decodedPublicKey, 0, encodedPubKey, Ed25519Prefix.length, decodedPublicKey.length);
         }

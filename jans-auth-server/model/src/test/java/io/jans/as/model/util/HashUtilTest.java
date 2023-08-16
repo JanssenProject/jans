@@ -52,6 +52,5 @@ public class HashUtilTest extends BaseTest {
         assertEquals(HashUtil.getHash(INPUT, SignatureAlgorithm.HS512), "CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4");
         assertEquals(HashUtil.getHash(INPUT, SignatureAlgorithm.PS512), "CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4");
         assertEquals(HashUtil.getHash(INPUT, SignatureAlgorithm.RS512), "CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4");
-        assertEquals(HashUtil.getHash(INPUT, SignatureAlgorithm.EDDSA), "CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4");
     }
 }
