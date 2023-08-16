@@ -562,9 +562,9 @@ Further reading [here](../../developer/scripts/client-registration.md)
 
 ### The Use of Attestation in Dynamic Client Registration
 
-AS supports "The Use of Attestation in OAuth 2.0 Dynamic Client Registration" [specification](https://www.ietf.org/id/draft-tschofenig-oauth-attested-dclient-reg-00.html).
+AS supports "The Use of Attestation in OAuth 2.0 Dynamic Client Registration" [specification draft](https://www.ietf.org/id/draft-tschofenig-oauth-attested-dclient-reg-00.html).
 
-Specification does not define exact attestation request/response formats. 
+Specification draft does not define exact attestation request/response formats. 
 Thus AS supports Attestation calls to Verifier via `ClientRegistrationType` custom script type.
 
 Use `createClient` method of `ClientRegistrationType` to prevent client creation if attestation result does not satisfy expectation.
