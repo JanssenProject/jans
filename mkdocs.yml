@@ -296,7 +296,7 @@ nav:
       - Select Account: admin/developer/scripts/select-account.md
       - Resource Owner Password Credentials: admin/developer/scripts/ropc.md
       - CIBA End User Notification: admin/developer/scripts/ciba.md
-      - OpenID Configuration: admin/developer/scripts/openid-config.md
+      - OpenID Configuration: admin/developer/scripts/discovery.md
       - Dynamic Scope: admin/developer/scripts/dynamic-scope.md
       - Spontaneous Scope: admin/developer/scripts/spontaneous-scope.md
       - Application Session: admin/developer/scripts/application-session.md
