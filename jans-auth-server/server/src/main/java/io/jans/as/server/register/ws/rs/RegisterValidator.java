@@ -44,10 +44,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_STATEMENT;
 import static io.jans.as.model.util.StringUtils.implode;
@@ -96,6 +93,32 @@ public class RegisterValidator {
             log.trace("Failed to perform client action, reason: {}", errorReason);
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "");
         }
+    }
+
+    public void validateEvidence(RegisterRequest registerRequest) {
+        if (isFalse(appConfiguration.getDcrAttestationEvidenceRequired())) {
+            return;
+        }
+
+        if (StringUtils.isNotBlank(registerRequest.getEvidence())) {
+            return;
+        }
+
+        throw createStaleEvidenceWebApplicationException();
+    }
+
+    public WebApplicationException createStaleEvidenceWebApplicationException() {
+        final String entity = errorResponseFactory.errorAsJson(RegisterErrorResponseType.STALE_EVIDENCE, "");
+        final String nonce = UUID.randomUUID().toString();
+
+        JSONObject json = new JSONObject(entity);
+        json.put("nonce", nonce);
+
+        return new WebApplicationException(Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(json.toString())
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
     }
 
     public void validateRequestObject(String requestParams, JSONObject softwareStatement, HttpServletRequest httpRequest) {
