@@ -288,7 +288,7 @@ nav:
       - Custom client logs: admin/developer/customization/custom-client-logs.md
     - Interception Scripts:
       - admin/developer/scripts/README.md
-      - Script Debugging: admin/developer/interception-scripts-debug.md
+      - Script Debugging: admin/developer/scripts/interception-scripts-debug.md
       - Person Authentication: admin/developer/scripts/person-authentication.md
       - Consent Gathering: admin/developer/scripts/consent-gathering.md
       - Post Authentication: admin/developer/scripts/post-authentication.md
