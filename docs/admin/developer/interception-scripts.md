@@ -202,7 +202,7 @@ where <library_name> is the name of the library to install.
 
 1. This [article](../developer/interception-scripts-debug-ce.md) covers the details for debugging a script in a developer environment (CE).
 
-2. This [article](../developer/interception-scripts-debug.md) covers the details for debugging a script in a CN environment.
+2. This [article](./scripts/interception-scripts-debug.md) covers the details for debugging a script in a CN environment.
 
 ***
 
