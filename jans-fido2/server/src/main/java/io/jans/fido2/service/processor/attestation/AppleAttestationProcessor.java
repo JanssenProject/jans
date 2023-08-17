@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -23,7 +25,6 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.fido2.ctap.AttestationFormat;
-import io.jans.fido2.exception.AttestationException;
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
@@ -60,6 +61,9 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 
 	@Inject
 	private CertificateService certificateService;
+
+	@Inject
+	private ErrorResponseFactory errorResponseFactory;
 
     private static final String KEY_DESCRIPTION_OID = "1.2.840.113635.100.8.2";
 
@@ -119,7 +123,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 				baos.write(authDataInBytes);
 				baos.write(clientDataHash);
 			} catch (IOException e) {
-				throw new AttestationException(
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
 						"Concatenate |authenticatorData| and |clientDataHash| to form |nonceToHash|." + e.getMessage());
 			}
 
@@ -136,7 +140,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			byte[] attestationChallenge = getExtension(credCert);
 
 			if (!Arrays.equals(nonce, attestationChallenge)) {
-				throw new AttestationException("Certificate 1.2.840.113635.100.8.2 extension does not match nonce");
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR, "Certificate 1.2.840.113635.100.8.2 extension does not match nonce");
 			} else
 				log.info("Step 4 completed");
 
@@ -148,7 +152,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			PublicKey publicKeyCredCert = credCert.getPublicKey();
 
 			if (!publicKeyAuthData.equals(publicKeyCredCert)) {
-				throw new AttestationException(
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
 						"The public key in the first certificate in x5c doesn't matches the credentialPublicKey in the attestedCredentialData in authenticatorData.");
 			} else {
 				log.info("Step 5 completed");
@@ -212,7 +216,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			extracted = octetString.getValue();
 			return extracted;
 		} catch (IOException | RuntimeException e) {
-			throw new AttestationException("Failed to extract nonce from Apple anonymous attestation statement.");
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR, "Failed to extract nonce from Apple anonymous attestation statement.");
 		}
 	}
 }

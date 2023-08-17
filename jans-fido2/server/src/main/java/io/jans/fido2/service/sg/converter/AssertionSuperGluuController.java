@@ -10,11 +10,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import io.jans.as.model.config.Constants;
-import io.jans.fido2.model.u2f.error.Fido2ErrorResponseFactory;
-import io.jans.fido2.model.u2f.error.Fido2ErrorResponseType;
+import io.jans.fido2.model.assertion.AssertionErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,8 +22,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateResponse;
 import io.jans.as.model.fido.u2f.protocol.ClientData;
-import io.jans.fido2.exception.Fido2RpRuntimeException;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.service.AuthenticatorDataParser;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
@@ -68,6 +64,9 @@ public class AssertionSuperGluuController {
 
     @Inject
     private UserSessionIdService userSessionIdService;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
 
     /* Example for one_step:
      *  - request:
@@ -126,14 +125,12 @@ public class AssertionSuperGluuController {
         boolean valid = userSessionIdService.isValidSessionId(sessionId, userName);
         if (!valid) {
             String reasonError = String.format("session_id '%s' is invalid", sessionId);
-            String descriptionError = "The session_id is null, blank or invalid, this param is required.";
-            throw Fido2ErrorResponseFactory.createBadRequestException(Fido2ErrorResponseType.INVALID_ID_SESSION, reasonError, descriptionError, ThreadContext.get(Constants.CORRELATION_ID_HEADER));
+            throw errorResponseFactory.badRequestException(AssertionErrorResponseType.INVALID_SESSION_ID, reasonError);
         }
 
         if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
-            String reasonError = "invalid: username or keyHandle";
-            String descriptionError = "The request should contains either username or keyHandle";
-            throw Fido2ErrorResponseFactory.createBadRequestException(Fido2ErrorResponseType.INVALID_USERNAME_OR_KEYHANDLE, reasonError, descriptionError, ThreadContext.get(Constants.CORRELATION_ID_HEADER));
+            String reasonError = "invalid username or keyHandle";
+            throw errorResponseFactory.badRequestException(AssertionErrorResponseType.INVALID_USERNAME_OR_KEY_HANDLE, reasonError);
         }
 
         ObjectNode params = dataMapperService.createObjectNode();
@@ -189,7 +186,7 @@ public class AssertionSuperGluuController {
 
     public ObjectNode buildFido2AuthenticationVerifyResponse(String userName, String authenticateResponseString, AuthenticateResponse authenticateResponse) {
         if (!ArrayUtils.contains(RawAuthenticationService.SUPPORTED_AUTHENTICATE_TYPES, authenticateResponse.getClientData().getTyp())) {
-            throw new Fido2RuntimeException("Invalid options attestation request type");
+            throw errorResponseFactory.badRequestException(AssertionErrorResponseType.UNSUPPORTED_AUTHENTICATION_TYPE, "Invalid options attestation request type");
         }
 
         boolean oneStep = StringHelper.isEmpty(userName);
@@ -234,7 +231,7 @@ public class AssertionSuperGluuController {
             response.put("authenticatorData", base64Service.urlEncodeToString(authData));
             response.put("attestationObject", base64Service.urlEncodeToString(dataMapperService.cborWriteAsBytes(attestationObject)));
         } catch (IOException e) {
-            throw new Fido2RuntimeException("Failed to prepare attestationObject");
+            throw errorResponseFactory.invalidRequest("Failed to prepare attestationObject: " + e.getMessage(), e);
         }
 
         log.debug("Prepared U2F_V2 assertion verify request: {}", params);
@@ -245,8 +242,8 @@ public class AssertionSuperGluuController {
         AuthenticateResponse authenticateResponse;
         try {
             authenticateResponse = dataMapperService.readValue(authenticateResponseString, AuthenticateResponse.class);
-        } catch (IOException ex) {
-            throw new Fido2RpRuntimeException("Failed to parse options assertion request", ex);
+        } catch (Exception ex) {
+            throw errorResponseFactory.invalidRequest(ex.getMessage());
         }
         return authenticateResponse;
     }
@@ -262,6 +259,4 @@ public class AssertionSuperGluuController {
 
         return authData;
     }
-
-
 }

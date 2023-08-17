@@ -8,7 +8,6 @@ import Select from 'react-select';
 import { IOption } from './IOption';
 import { ILooseObject } from './ILooseObject';
 import moment from 'moment';
-
 const components = {
     DropdownIndicator: null,
 };
@@ -22,6 +21,7 @@ const OIDCClientDetails = (data) => {
     const [additionalParam, setAdditionalParam] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [displayToken, setDisplayToken] = useState(false);
     const [acrValueOption, setAcrValueOption] = useState<IOption | null>();
     const [acrValueOptions, setAcrValueOptions] = useState<readonly IOption[]>([]);
 
@@ -48,7 +48,7 @@ const OIDCClientDetails = (data) => {
             if (lifetime <= 0) {
                 setError('This client is expired. Please reset and register a new client.')
             } else {
-                setError('The client will expire in ' + secondsToDhms(lifetime) )
+                setError('The client will expire in ' + secondsToDhms(lifetime))
             }
 
         })();
@@ -155,7 +155,7 @@ const OIDCClientDetails = (data) => {
                             resolve(JSON.stringify(result));
                         });
                     });
-                    
+
                     const tokenReqData = qs.stringify({
                         redirect_uri: redirectUrl,
                         grant_type: 'authorization_code',
@@ -197,6 +197,7 @@ const OIDCClientDetails = (data) => {
                                 'access_token': tokenResponse.data.access_token,
                                 'userDetails': userInfoResponse.data,
                                 'id_token': tokenResponse.data.id_token,
+                                'displayToken': displayToken,
                             }
                         }).then(async () => {
                             console.log("userDetails: " + JSON.stringify(userInfoResponse.data));
@@ -346,6 +347,8 @@ const OIDCClientDetails = (data) => {
                     onChange={(newValue) => setAcrValueOption(newValue)}
                     options={acrValueOptions}
                 />
+
+                <label><input type="checkbox" onChange={() => setDisplayToken(!displayToken)} /><b>Display Access Token and ID Token after authentication</b></label>
 
                 <button id="trigCodeFlowButton" onClick={triggerCodeFlowButton}>Trigger Auth Code Flow</button>
                 <button id="resetButton" onClick={resetClient}>Reset</button>
