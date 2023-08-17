@@ -279,7 +279,6 @@ nav:
       - Engine and bridge configurations: admin/developer/agama/engine-bridge-config.md
       - FAQ: admin/developer/agama/faq.md      
       - Quick Start Using Agama Lab: admin/developer/agama/quick-start-using-agama-lab.md
-    - Script Debugging: admin/developer/interception-scripts-debug.md
     - External Libraries: admin/developer/external-libraries.md
     - CORS: admin/developer/cors.md
     - Managed Beans: admin/developer/managed-beans.md
@@ -289,6 +288,7 @@ nav:
       - Custom client logs: admin/developer/customization/custom-client-logs.md
     - Interception Scripts:
       - admin/developer/scripts/README.md
+      - Script Debugging: admin/developer/interception-scripts-debug.md
       - Person Authentication: admin/developer/scripts/person-authentication.md
       - Consent Gathering: admin/developer/scripts/consent-gathering.md
       - Post Authentication: admin/developer/scripts/post-authentication.md
