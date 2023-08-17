@@ -636,11 +636,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/developer/interception-scripts-debug/</loc>
-         <lastmod>2023-08-17</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/developer/interception-scripts/</loc>
          <lastmod>2023-08-17</lastmod>
          <changefreq>daily</changefreq>
@@ -767,6 +762,11 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/id-token/</loc>
+         <lastmod>2023-08-17</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/developer/scripts/interception-scripts-debug/</loc>
          <lastmod>2023-08-17</lastmod>
          <changefreq>daily</changefreq>
     </url>
