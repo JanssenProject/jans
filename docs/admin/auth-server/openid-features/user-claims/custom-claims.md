@@ -92,11 +92,11 @@ Create a new custom attribute using [Test User Interface](../../../admin/config-
 
 ### Step 2: Make entry of the claim in MySQL Schema
 
-- Add a column to table `jansCustomPerson` in MySQL. Command will be `ALTER TABLE jansCustomPerson ADD COLUMN <claimName> <dataType>`;
+- Add a column to table `jansPerson` in MySQL. Command will be `ALTER TABLE jansPerson ADD COLUMN <claimName> <dataType>`;
 
 **Example**
 ```
-mysql> ALTER TABLE gluuPerson ADD COLUMN customAttribute VARCHAR(100);
+mysql> ALTER TABLE jansPerson ADD COLUMN newClaim VARCHAR(100);
 ```
 
 **Choose dataType according to the following table**
