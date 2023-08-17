@@ -1,13 +1,11 @@
 package io.jans.configapi.plugin.keycloak.service;
 
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.util.exception.InvalidConfigurationException;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
+import io.jans.as.common.model.common.User;
+
+import java.io.IOException;
 import java.util.List;
 
-
+import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
 import org.keycloak.credential.CredentialInputValidator;
@@ -24,15 +22,12 @@ import org.keycloak.storage.user.UserLookupProvider;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@ApplicationScoped
 public class RemoteUserStorageProvider implements UserLookupProvider, UserStorageProvider {
 
-    @Inject
-    Logger logger;
-
-    @Inject
-    PersistenceEntryManager persistenceManager;
+    private static Logger LOG = LoggerFactory.getLogger(RemoteUserStorageProvider.class);
+    private static String AUTH_USER_ENDPOINT = "http://localhost:8080/jans-config-api/mgt/configuser/";
 
     private KeycloakSession session;
     private ComponentModel model;
@@ -41,15 +36,44 @@ public class RemoteUserStorageProvider implements UserLookupProvider, UserStorag
 
     public RemoteUserStorageProvider(KeycloakSession session, ComponentModel model,
             UsersApiLegacyService usersService) {
-        logger.error(" session:{}, model:{}, usersService:{}",session, model, usersService);
+        LOG.error(" session:{}, model:{}, usersService:{}",session, model, usersService);
     
         this.session = session;
         this.model = model;
         this.usersService = usersService;
     }
     
-    public UserModel getUserById(RealmModel paramRealmModel, String paramString) {return null;}
-    public UserModel getUserByUsername(RealmModel paramRealmModel, String paramString) {return null;}
+    /**
+     * Get user based on id
+     */
+    public UserModel getUserById(RealmModel paramRealmModel, String id) {
+        LOG.error("getUserById() paramRealmModel:{}, id:{}",paramRealmModel, id);
+        UserModel userModel = null;
+        try {
+            User user = usersService.getUserById(id);
+            LOG.error("User fetched with id:{} from external service is:{}",id , user);
+
+        }catch(Exception ex) {
+            LOG.error("Error fetching user id:{} from external service is:{} - {} ",id,ex.getMessage(), ex);
+        }
+        return userModel;
+    }
+    
+    /**
+     * Get user based on name
+     */
+    public UserModel getUserByUsername(RealmModel paramRealmModel, String name) {
+        LOG.error("getUserByUsername() paramRealmModel:{}, name:{}",paramRealmModel, name);
+        UserModel userModel = null;
+        try {
+            User user = usersService.getUserByName(name);
+            LOG.error("User fetched with name:{} from external service is:{}",name , user);
+        }catch(Exception ex) {
+            LOG.error("Error fetching user name:{}, from external service is:{} -{} ",name, ex.getMessage(), ex);
+        }
+        return userModel;
+    }
+    
     public UserModel getUserByEmail(RealmModel paramRealmModel, String paramString) {return null;}
     public void close(){}
 }

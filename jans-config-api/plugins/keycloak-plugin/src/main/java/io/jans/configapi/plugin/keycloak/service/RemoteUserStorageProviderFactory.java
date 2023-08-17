@@ -1,12 +1,6 @@
 package io.jans.configapi.plugin.keycloak.service;
 
-import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.exception.InvalidConfigurationException;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import java.util.List;
-
 
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
@@ -24,29 +18,25 @@ import org.keycloak.storage.UserStorageProviderFactory;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@ApplicationScoped
 public class RemoteUserStorageProviderFactory implements UserStorageProviderFactory<RemoteUserStorageProvider> {
-
-    @Inject
-    Logger logger;
-
-    @Inject
-    PersistenceEntryManager persistenceManager;
-    
+   
+    private static Logger LOG = LoggerFactory.getLogger(RemoteUserStorageProviderFactory.class);
+   
 
     public static final String PROVIDER_NAME = "jans-remote-user-storage-provider";
        
     @Override
     public RemoteUserStorageProvider create(KeycloakSession session, ComponentModel model) {
-        logger.error("session:{}, model:{}",session, model);
+        LOG.error("session:{}, model:{}",session, model);
         return new RemoteUserStorageProvider(session, model, new UsersApiLegacyService(session));
     }
     
     @Override
     public String getId() {
         String id = PROVIDER_NAME;
-        logger.error("id:{}",id);
+        LOG.error("id:{}",id);
         return id;
     }
 

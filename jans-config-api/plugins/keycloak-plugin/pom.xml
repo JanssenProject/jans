@@ -15,7 +15,7 @@
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 		<jans.version>${project.version}</jans.version>
-		
+		<keycloak.version>21.1.1</keycloak.version>
 	</properties>
 	
 	<dependencies>
@@ -43,7 +43,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jans.jans-config-api.plugins</groupId>
-			<artifactId>saml-plugin</artifactId>
+			<artifactId>user-mgt-plugin</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
 
@@ -198,26 +198,26 @@
 			<artifactId>swagger-core-jakarta</artifactId>
 		</dependency>
 
-<!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-core -->
-<dependency>
-    <groupId>org.keycloak</groupId>
-    <artifactId>keycloak-core</artifactId>
-    <version>21.1.1</version>
-</dependency>
-<!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-services -->
-<dependency>
-    <groupId>org.keycloak</groupId>
-    <artifactId>keycloak-services</artifactId>
-    <version>21.1.1</version>
-    <scope>provided</scope>
-</dependency>
- <!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-model-legacy -->
-<dependency>
-    <groupId>org.keycloak</groupId>
-    <artifactId>keycloak-model-legacy</artifactId>
-    <version>21.1.1</version>
-</dependency>
-
+		<!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-core -->
+		<dependency>
+		    <groupId>org.keycloak</groupId>
+		    <artifactId>keycloak-core</artifactId>
+		    <version>${keycloak.version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-services -->
+		<dependency>
+		    <groupId>org.keycloak</groupId>
+		    <artifactId>keycloak-services</artifactId>
+		    <version>${keycloak.version}</version>
+		    <scope>provided</scope>
+		</dependency>
+		 <!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-model-legacy -->
+		<dependency>
+		    <groupId>org.keycloak</groupId>
+		    <artifactId>keycloak-model-legacy</artifactId>
+		    <version>${keycloak.version}</version>
+		</dependency>
+		
 
 	</dependencies>
 
@@ -225,24 +225,6 @@
 	<build>
 		<finalName>jans-remote-user-storage-provider</finalName>
 		
-		<filters>
-			<filter>../../profiles/${cfg}/config-build.properties</filter>
-			<filter>../../profiles/${cfg}/config-api-test.properties</filter>
-		</filters>
-
-		<testResources>
-			<testResource>
-				<directory>src/test/resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>karate.properties</include>
-					<include>karate_jenkins.properties</include>
-					<include>test.properties</include>
-					<include>*.*</include>
-				</includes>
-			</testResource>
-		</testResources>
-
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -256,26 +238,43 @@
 			</resource>
 		</resources>
 
-
 		<plugins>
-			<!--<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<descriptors>
-								<descriptor>src/main/assembly/assembly.xml</descriptor>
-							</descriptors>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
--->
+			
+		    <plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-dependency-plugin</artifactId>
+	            <executions>
+		            <execution>
+			            <id>copy-dependencies</id>
+			            <phase>prepare-package</phase>
+			            <goals>
+			            	<goal>copy-dependencies</goal>
+			            </goals>
+			            <configuration>
+			            	<outputDirectory>
+			            		${project.build.directory}/libs
+			            	</outputDirectory>
+			            </configuration>
+			            </execution>
+	            </executions>
+            </plugin>	
+			
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+	                <archive>
+		                <manifest>
+		                <addClasspath>true</addClasspath>
+		                <classpathPrefix>libs/</classpathPrefix>
+			              <!--  <mainClass>
+			                	io.jans.keycloak
+			                </mainClass> -->
+		                </manifest>
+	                </archive>
+                </configuration>
+            </plugin>
+
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
