@@ -10,7 +10,7 @@ tags:
 
 # Built-in Claims
 
-The Janssen Server persistence includes all standard claims (or built-in claims). Built-in claims defines a standard set of pre-defined claims available to use after installation for sharing of user attributes between identity providers and relying parties. 
+The Janssen Server persistence includes all standard claims defined in [OpenID Connect specifications](https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims). Built-in claims defines a standard set of pre-defined claims available to use after installation for sharing of user attributes between identity providers and relying parties. 
 
 The built-in user claims in Janssen in below table
 
@@ -18,9 +18,9 @@ The built-in user claims in Janssen in below table
 |---|---|---|
 |Username|user_name|...| 
 |Password|user_password|...|
-|First Name|given_name|...|
-|Middle Name|middle_name|...|
-|Last Name|family_name|...|
+|First Name|given_name|First name of user|
+|Middle Name|middle_name|Middle name of user|
+|Last Name|family_name|Last name of user|
 |Display Name|name|...|
 |Email|email|...|
 |Nickname|nickname|...|

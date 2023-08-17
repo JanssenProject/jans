@@ -14,7 +14,7 @@ Custom claims provide the flexibility to include application-specific or user-sp
 
 ## Adding a new custom user claim
 
-<div class="result" markdown>
+<div markdown>
 === "In LDAP persistence"
 
 ### Step 1: Create a custom attribute
