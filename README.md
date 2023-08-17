@@ -13,7 +13,7 @@ infrastructure like KeyCloak and Microsoft Active Directory, as well as cloud
 identity solutions like Okta. By design, Janssen also enables domains to select
 *a la carte* which identity services to run.
 
-We're proud to say that we've been recognized as a
+We're proud to say that we've been recognized as a test-fail
 [Digital Public Good](https://app.digitalpublicgoods.net/a/10470).
 
 [![The Linux Foundation](https://img.shields.io/badge/Member-The%20Linux%20Foundation-blue?style=flat-square)](https://www.linuxfoundation.org/press/press-release/the-janssen-project-takes-on-worlds-most-demanding-digital-trust-challenges-at-linux-foundation)
