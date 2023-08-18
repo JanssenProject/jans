@@ -82,7 +82,15 @@ class Gluu2FlexMigrator:
 
         self.schema_mappging_path = setup_path.joinpath('schema', 'jans_schema_mappings.json')
         self.schema_mappging_dict = json.loads(self.schema_mappging_path.read_text())
-        self.org_units = {'people':'gluuPerson', 'groups':'gluuGroup', 'scopes':'oxAuthCustomScope', 'clients':'oxAuthClient', 'attributes':'gluuAttribute', 'scripts': 'oxCustomScript'}
+        self.org_units = {
+            'people':'gluuPerson',
+            'groups':'gluuGroup',
+            'scopes':'oxAuthCustomScope',
+            'clients':'oxAuthClient',
+            'attributes':'gluuAttribute',
+            'scripts': 'oxCustomScript',
+            'configuration': '*',
+            }
         self.source_ldif_paths = {}
         self.target_ldif_paths = {}
 
@@ -347,15 +355,16 @@ class Gluu2FlexMigrator:
         jans_scripts_fd.close()
 
 
-    def import_ldif_files(self):
+    def prepare_jans_setup(self):
+
         profile = 'jans'
         os.environ['JANS_PROFILE'] = profile
         from setup_app import paths
 
         paths.LOG_DIR = os.path.join(setup_path.as_posix(), 'logs')
-        paths.LOG_FILE = os.path.join(paths.LOG_DIR, 'setup.log')
-        paths.LOG_ERROR_FILE = os.path.join(paths.LOG_DIR, 'setup_error.log')
-        paths.LOG_OS_CHANGES_FILE = os.path.join(paths.LOG_DIR, 'os-changes.log')
+        paths.LOG_FILE = os.path.join(paths.LOG_DIR, 'gluu2flex_migration.log')
+        paths.LOG_ERROR_FILE = os.path.join(paths.LOG_DIR, 'gluu2flex_migration_error.log')
+        paths.LOG_OS_CHANGES_FILE = os.path.join(paths.LOG_DIR, 'gluu2flex_migration_os-changes.log')
 
         from setup_app.utils import base
         base.current_app.profile = profile
@@ -381,10 +390,40 @@ class Gluu2FlexMigrator:
 
         from setup_app.utils.db_utils import dbUtils
 
+        self.base = base
+        self.Config = Config
+        self.dbUtils = dbUtils
+
+    def parse_gluu_configuration_ldif(self):
+        print("Parsing Gluu configuration")
+        self.gluu_configuration_parser = myLdifParser(self.source_ldif_paths['configuration'])
+        self.gluu_configuration_parser.parse()
+
+
+    def update_casa_config(self):
+        casa_jans_dn = 'ou=casa,ou=configuration,o=jans'
+        jans_casa_config_entry = self.dbUtils.dn_exists(casa_jans_dn)
+        if jans_casa_config_entry:
+            jans_casa_config = json.loads(jans_casa_config_entry['jansConfApp'])
+            for dn, entry in self.gluu_configuration_parser.entries:
+                if dn == 'ou=casa,ou=configuration,o=gluu':
+                    gluu_casa_config = json.loads(entry['oxConfApplication'][0])
+                    gluu_casa_config.pop('oxd_config', None)
+                    gluu_casa_config.get('acr_plugin_mapping', {}).pop('u2f', None)
+                    jans_casa_config.update(gluu_casa_config)
+                    print("Updating Gluu/Flex Casa configuration")
+                    jans_casa_config_str = json.dumps(jans_casa_config, indent=2)
+                    self.dbUtils.set_configuration('jansConfApp', jans_casa_config_str, casa_jans_dn)
+
+    def import_ldif_files(self):
+
         for org_unit in self.org_units:
+            if org_unit in ('configuration',):
+                continue
             org_unit_ldif_fn = self.target_ldif_paths[org_unit].as_posix()
             print(f"Impoting {org_unit_ldif_fn}")
-            dbUtils.import_ldif([org_unit_ldif_fn])
+            self.dbUtils.import_ldif([org_unit_ldif_fn])
+
 
 migrator = Gluu2FlexMigrator()
 
@@ -399,6 +438,7 @@ if host_vendor == 'jans':
     migrator.migrate_clients()
     migrator.migrate_attributes()
     migrator.migrate_scripts()
-
+    migrator.prepare_jans_setup()
     migrator.import_ldif_files()
-
+    migrator.parse_gluu_configuration_ldif()
+    migrator.update_casa_config()
