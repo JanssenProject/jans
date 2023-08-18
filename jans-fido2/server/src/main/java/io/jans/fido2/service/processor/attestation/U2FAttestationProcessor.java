@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -84,6 +86,9 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
     @Inject
     private CertificateService certificateService;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     @Override
     public AttestationFormat getAttestationFormat() {
         return AttestationFormat.fido_u2f;
@@ -119,12 +124,12 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 				String issuerDN = certificate.getIssuerDN().getName();
 				log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
 				if (appConfiguration.getFido2Configuration().isCheckU2fAttestations()) {
-					throw ex;
+                    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR, ex.getMessage());
 				}
 			}
         } else if (attStmt.hasNonNull("ecdaaKeyId")) {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
-            throw new UnsupportedOperationException("ecdaaKeyId is not supported");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR, "ecdaaKeyId is not supported");
         } else {
             PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
             authenticatorDataVerifier.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);

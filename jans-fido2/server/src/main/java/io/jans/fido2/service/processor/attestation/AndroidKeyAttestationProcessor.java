@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -32,7 +34,6 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import io.jans.fido2.androind.AndroidKeyUtils;
 import io.jans.fido2.ctap.AttestationFormat;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
@@ -74,6 +75,9 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
     @Inject
     private AttestationCertificateService attestationCertificateService;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     @Override
     public AttestationFormat getAttestationFormat() {
         return AttestationFormat.android_key;
@@ -87,7 +91,7 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
 
         Iterator<JsonNode> i = attStmt.get("x5c").elements();
 
-        ArrayList<String> certificatePath = new ArrayList();
+        ArrayList<String> certificatePath = new ArrayList<>();
         while (i.hasNext()) {
             certificatePath.add(i.next().asText());
         }
@@ -106,15 +110,15 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
             byte[] attestationChallenge = ((ASN1OctetString) extensionData.getObjectAt(AndroidKeyUtils.ATTESTATION_CHALLENGE_INDEX)).getOctets();
 
             if (!Arrays.equals(clientDataHash, attestationChallenge)) {
-                throw new Fido2RuntimeException("Invalid android key attestation");
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_KEY_ERROR, "Invalid android key attestation");
             }
 
             ASN1Encodable[] softwareEnforced = ((ASN1Sequence) extensionData.getObjectAt(AndroidKeyUtils.SW_ENFORCED_INDEX)).toArray();
             ASN1Encodable[] teeEnforced = ((ASN1Sequence) extensionData.getObjectAt(AndroidKeyUtils.TEE_ENFORCED_INDEX)).toArray();
 
         } catch (Exception e) {
-            log.warn("Problem with android key", e);
-            throw new Fido2RuntimeException("Problem with android key");
+            log.warn("Problem with android key: {}", e.getMessage());
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.ANDROID_KEY_ERROR, "Problem with android key");
         }
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
         authenticatorDataVerifier.verifyAttestationSignature(authData, clientDataHash, signature, verifiedCert, authData.getKeyType());

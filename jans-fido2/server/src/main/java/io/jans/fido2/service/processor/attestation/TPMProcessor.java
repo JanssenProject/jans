@@ -32,12 +32,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import io.jans.fido2.ctap.AttestationFormat;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
@@ -89,6 +90,9 @@ public class TPMProcessor implements AttestationFormatProcessor {
     @Inject
     private Base64Service base64Service;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     @Override
     public AttestationFormat getAttestationFormat() {
         return AttestationFormat.tpm;
@@ -101,7 +105,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
         try {
             cborPublicKey = dataMapperService.cborReadTree(authData.getCosePublicKey());
         } catch (IOException e) {
-            throw new Fido2RuntimeException("Problem with TPM attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "Problem with TPM attestation: " + e.getMessage());
         }
 
         verifyVersion2(attStmt);
@@ -152,7 +156,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
             credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
             credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
         } else {
-            throw new Fido2RuntimeException("Problem with TPM attestation. Unsupported");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "Problem with TPM attestation. Unsupported");
         }
 
     }
@@ -162,13 +166,13 @@ public class TPMProcessor implements AttestationFormatProcessor {
         byte[] keyBufferFromTPM = Arrays.copyOfRange(tmp, 2, tmp.length);
 
         if (!Arrays.equals(keyBufferFromTPM, keyBufferFromAuthData)) {
-            throw new Fido2RuntimeException("Problem with TPM attestation.");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "Problem with TPM attestation.");
         }
     }
 
     private void verifyTPMSExtraData(byte[] hashedBuffer, byte[] extraData) {
         if (!Arrays.equals(hashedBuffer, extraData)) {
-            throw new Fido2RuntimeException("Problem with TPM attestation.");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "Problem with TPM attestation.");
         }
     }
 
@@ -182,7 +186,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
         }
             break;
         default:
-            throw new Fido2RuntimeException("Problem with TPM attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "Problem with TPM attestation");
         }
         // this is not really certificate info but nameAlgID + hex.encode(pubAreaDigest)
         // reverse engineered from FIDO Certification tool
@@ -190,13 +194,13 @@ public class TPMProcessor implements AttestationFormatProcessor {
         TPMS_CERTIFY_INFO certifyInfo = (TPMS_CERTIFY_INFO) tpmsAttest.attested;
         byte[] certificateName = Arrays.copyOfRange(certifyInfo.name, 2, certifyInfo.name.length);
         if (!Arrays.equals(certificateName, pubAreaDigest)) {
-            throw new Fido2RuntimeException("Problem with TPM attestation.");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "Problem with TPM attestation.");
         }
     }
 
     private void verifyMagicInTpms(TPMS_ATTEST tpmsAttest) {
         if (tpmsAttest.magic.toInt() != TPM_GENERATED.VALUE.toInt()) {
-            throw new Fido2RuntimeException("Problem with TPM attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "Problem with TPM attestation");
         }
     }
 
@@ -212,7 +216,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
         if (ext != null && ext.length > 0) {
             String fidoAAGUID = new String(ext, Charset.forName("UTF-8"));
             if (!authData.getAaguid().equals(fidoAAGUID)) {
-                throw new Fido2RuntimeException("Problem with TPM attestation");
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "Problem with TPM attestation");
             }
         }
     }
@@ -222,26 +226,26 @@ public class TPMProcessor implements AttestationFormatProcessor {
             aikCertificate.verify(rootCertificate.getPublicKey());
         } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {
             log.warn("Problem with AIK certificate {}", e.getMessage());
-            throw new Fido2RuntimeException("Problem with TPM attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "Problem with TPM attestation");
         }
     }
 
     private void verifyVersion2(JsonNode attStmt) {
         if (!attStmt.has("ver")) {
             log.error("TPM does not contain the ver");
-            throw new Fido2RuntimeException("TPM does not contain the 'ver'");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "TPM does not contain the 'ver'");
         }
         String version = attStmt.get("ver").asText();
         if (!version.equals("2.0")) {
             log.error("TPM invalid version, ver 2.0 is required");
-            throw new Fido2RuntimeException("TPM invalid version, ver 2.0 is required");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "TPM invalid version, ver 2.0 is required");
         }
     }
 
     private int verifyAlg(JsonNode attStmt) {
         if (!attStmt.has("alg")) {
             log.error("TPM does not contain the alg");
-            throw new Fido2RuntimeException("TPM does not contain the 'alg'");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "TPM does not contain the 'alg'");
         }
         int alg = attStmt.get("alg").asInt();
         log.trace("TPM attStmt 'alg': {}", alg);

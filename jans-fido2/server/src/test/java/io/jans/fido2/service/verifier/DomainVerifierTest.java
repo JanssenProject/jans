@@ -2,7 +2,9 @@ package io.jans.fido2.service.verifier;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.jans.fido2.exception.Fido2RpRuntimeException;
+import io.jans.fido2.model.error.ErrorResponseFactory;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +28,9 @@ class DomainVerifierTest {
 
     @Mock
     private CommonVerifiers commonVerifiers;
+
+    @Mock
+    private ErrorResponseFactory errorResponseFactory;
 
     @Test
     void verifyDomain_valid_true() {
@@ -80,10 +85,14 @@ class DomainVerifierTest {
         ObjectNode clientDataNode = mapper.createObjectNode();
         clientDataNode.put(originKey, domain);
         when(commonVerifiers.verifyThatFieldString(clientDataNode, originKey)).thenReturn(originValue);
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        Fido2RpRuntimeException ex = assertThrows(Fido2RpRuntimeException.class, () -> domainVerifier.verifyDomain(domain, clientDataNode));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> domainVerifier.verifyDomain(domain, clientDataNode));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Domains don't match");
+        assertNotNull(ex.getResponse());
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertEquals(ex.getResponse().getEntity(), "test exception");
+
         verify(log).debug("Domains comparison {} {}", domain, originValue);
         verifyNoMoreInteractions(log);
     }

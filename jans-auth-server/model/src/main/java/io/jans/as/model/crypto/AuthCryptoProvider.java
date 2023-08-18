@@ -57,6 +57,7 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -190,7 +191,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             } else if (algUse == Use.ENCRYPTION) {
                 jsonObject = generateKeyEncryption(algorithm, expirationTime, keyLength, keyOpsType);
             }
-        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | OperatorCreationException
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | OperatorCreationException
                 | CertificateException | KeyStoreException | IOException e) {
             throw new CryptoProviderException(e);
         }
@@ -450,7 +451,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType)
-            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, OperatorCreationException,
+            throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException,
             CertificateException, KeyStoreException, IOException {
 
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
@@ -470,6 +471,14 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                 keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), SecurityProviderUtility.getBCProvider());
                 keyGen.initialize(ecSpec, new SecureRandom());
                 break;
+            case ED:
+                if (!SecurityProviderUtility.isBcProvMode()) {
+                    throw new InvalidParameterException("Wrong CryptoProvider Mode. EdDSA can be used, when BCPROV mode is initialized");                    
+                }
+                org.bouncycastle.jcajce.spec.EdDSAParameterSpec edSpec = new org.bouncycastle.jcajce.spec.EdDSAParameterSpec(signatureAlgorithm.getCurve().getAlias());
+                keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), SecurityProviderUtility.getBCProvider());
+                keyGen.initialize(edSpec, new SecureRandom());
+                break;
             default:
                 throw new IllegalStateException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
 
@@ -477,7 +486,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return getJson(algorithm, keyGen, signatureAlgorithm.getAlgorithm(), expirationTime, keyOpsType);
     }
 
-    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws NoSuchAlgorithmException,
+    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws NoSuchAlgorithmException, NoSuchProviderException,
             InvalidAlgorithmParameterException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
 
         KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
@@ -566,6 +575,15 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             jsonObject.put(JWKParameter.X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
             jsonObject.put(JWKParameter.Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
         }
+        if (SecurityProviderUtility.isBcProvMode() && use == Use.SIGNATURE
+                && publicKey instanceof org.bouncycastle.jcajce.interfaces.EdDSAPublicKey) {
+            org.bouncycastle.jcajce.interfaces.EdDSAPublicKey edDSAPublicKey = (org.bouncycastle.jcajce.interfaces.EdDSAPublicKey) publicKey;
+            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
+            jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
+            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(edDSAPublicKey.getEncoded()));
+            // EdDSA keys (EdDSAPublicKey, EDDSAPrivateKey) don't use BigInteger, but only byte[], 
+            // so Base64Util.base64urlencode, but not Base64Util.base64urlencodeUnsignedBigInt is used.
+        }
         JSONArray x5c = new JSONArray();
         x5c.put(Base64.encodeBase64String(cert.getEncoded()));
         jsonObject.put(JWKParameter.CERTIFICATE_CHAIN, x5c);
@@ -591,7 +609,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         }
     }
 
-    private boolean verifySignatureEcEdRSA(String signingInput, String encodedSignature, SignatureAlgorithm signatureAlgorithm, PublicKey publicKey) throws JOSEException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    private boolean verifySignatureEcEdRSA(String signingInput, String encodedSignature, SignatureAlgorithm signatureAlgorithm, PublicKey publicKey) throws JOSEException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         byte[] signature = Base64Util.base64urldecode(encodedSignature);
         byte[] signatureDer = signature;
         if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
@@ -626,14 +644,17 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             }
         }
         if (!ksTypeFound) {
-        	if (securityMode == SecurityProviderUtility.SecurityModeType.BCFIPS_SECURITY_MODE) {
+            switch (securityMode) {
+            case BCFIPS_SECURITY_MODE: {
                 keyStorageType =  SecurityProviderUtility.KeyStorageType.BCFKS_KS;
-        	}
-        	else if (securityMode == SecurityProviderUtility.SecurityModeType.BCPROV_SECURITY_MODE) {
+                break;
+            }
+            case BCPROV_SECURITY_MODE: {
                 keyStorageType = SecurityProviderUtility.KeyStorageType.PKCS12_KS;
-        	}
+                break;
+            }
+            }
         }
         return keyStorageType;
     }
 }
-

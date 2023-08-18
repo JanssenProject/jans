@@ -38,7 +38,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 1.  Enable [GKE API](https://console.cloud.google.com/kubernetes) if not enabled yet.
 
-2.  If you are using `Cloud Shell`, you can skip to step 4.
+2.  If you are using `Cloud Shell`, you can skip to step 6.
 
 3.  Install [gcloud](https://cloud.google.com/sdk/docs/quickstarts).
     
@@ -151,7 +151,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
     - Couchbase for pesistence storage
       
-        `Add the following yaml snippet to your `override.yaml` file:
+        Add the following yaml snippet to your `override.yaml` file:
 
         ```yaml
         global:
@@ -175,7 +175,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
             cnCouchbaseUrl: cbjanssen.default.svc.cluster.local
             # -- Couchbase restricted user
             cnCouchbaseUser: janssen
-        ````
+        ```
 
 
 

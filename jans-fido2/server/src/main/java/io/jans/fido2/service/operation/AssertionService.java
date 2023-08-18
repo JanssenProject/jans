@@ -14,8 +14,10 @@ import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.assertion.AssertionErrorResponseType;
 import io.jans.fido2.model.auth.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
@@ -99,6 +101,9 @@ public class AssertionService {
     @Inject
     private Base64Service base64Service;
 
+	@Inject
+    private ErrorResponseFactory errorResponseFactory;
+
 	@Context
 	private HttpServletRequest httpRequest;
 	@Context
@@ -158,7 +163,7 @@ public class AssertionService {
 		Pair<ArrayNode, String> allowedCredentialsPair = prepareAllowedCredentials(applicationId, username, requestedKeyHandle, superGluu);
 		ArrayNode allowedCredentials = allowedCredentialsPair.getLeft();
 		if (allowedCredentials.isEmpty()) {
-			throw new Fido2RuntimeException("Can't find associated key(s). Username: " + username);
+			throw errorResponseFactory.badRequestException(AssertionErrorResponseType.KEYS_NOT_FOUND, "Can't find associated key(s). Username: " + username);
 		}
 
 		optionsResponseNode.set("allowCredentials", allowedCredentials);
