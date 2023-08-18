@@ -240,8 +240,7 @@ class Gluu2FlexMigrator:
         jans_scopes_fd.close()
 
     def migrate_clients(self):
-        #TODO: oxAuthRequireAuthTime ???
-        
+
         print("Migrating Clients")
         clients_parser = myLdifParser(self.source_ldif_paths['clients'])
         clients_parser.parse()
@@ -385,8 +384,8 @@ class Gluu2FlexMigrator:
 
         Config.init(paths.INSTALL_DIR)
         Config.installed_instance = True
-        collectProperties = CollectProperties()
-        collectProperties.collect()
+        collect_properties = CollectProperties()
+        collect_properties.collect()
 
         from setup_app.utils.db_utils import dbUtils
 
