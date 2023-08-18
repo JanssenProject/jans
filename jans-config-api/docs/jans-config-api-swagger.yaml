@@ -7450,19 +7450,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         adminCanAccess:
           type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
         userCanEdit:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
+          type: boolean
+        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -8048,6 +8048,8 @@ components:
           type: boolean
         dcrAuthorizationWithMTLS:
           type: boolean
+        dcrAttestationEvidenceRequired:
+          type: boolean
         trustedSsaIssuers:
           type: object
           additionalProperties:
@@ -8214,6 +8216,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8223,8 +8227,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8953,6 +8955,8 @@ components:
         requestedLifetime:
           type: integer
           format: int32
+        evidence:
+          type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -9205,14 +9209,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:

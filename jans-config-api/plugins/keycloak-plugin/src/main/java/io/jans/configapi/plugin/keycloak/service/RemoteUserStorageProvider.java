@@ -51,6 +51,17 @@ public class RemoteUserStorageProvider implements UserLookupProvider, UserStorag
         UserModel userModel = null;
         try {
             User user = usersService.getUserById(id);
+            if (user != null  {
+                String userId = user.getUserId();
+                if (userId != null) {
+                    userModel = createUserModel(paramRealmModel, userId);
+                    System.out.println("New UserModel:");
+                    System.out.println(userModel.toString());
+                    LOG.error("userModel:{}",userModel);
+                    
+                }
+            }
+            return userModel;
             LOG.error("User fetched with id:{} from external service is:{}",id , user);
 
         }catch(Exception ex) {
@@ -69,12 +80,20 @@ public class RemoteUserStorageProvider implements UserLookupProvider, UserStorag
             User user = usersService.getUserByName(name);
             LOG.error("User fetched with name:{} from external service is:{}",name , user);
         }catch(Exception ex) {
-            LOG.error("Error fetching user name:{}, from external service is:{} -{} ",name, ex.getMessage(), ex
-                    );
+            LOG.error("Error fetching user name:{}, from external service is:{} -{} ",name, ex.getMessage(), ex);
         }
         return userModel;
     }
     
     public UserModel getUserByEmail(RealmModel paramRealmModel, String paramString) {return null;}
     public void close(){}
+    
+    protected UserModel createUserModel(RealmModel realm, String username) {
+        return new AbstractUserAdapter(session, realm, model) {
+            @Override
+            public String getUsername() {
+                return username;
+            }
+        };
+     }
 }

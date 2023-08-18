@@ -15,7 +15,7 @@
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 		<jans.version>${project.version}</jans.version>
-		<keycloak.version>21.1.1</keycloak.version>
+		<keycloak.version>21.1.2</keycloak.version>
 	</properties>
 	
 	<dependencies>
@@ -267,9 +267,9 @@
 		                <manifest>
 		                <addClasspath>true</addClasspath>
 		                <classpathPrefix>libs/</classpathPrefix>
-			              <!--  <mainClass>
+			                <mainClass>
 			                	io.jans.keycloak
-			                </mainClass> -->
+			                </mainClass> 
 		                </manifest>
 	                </archive>
                 </configuration>
