@@ -69,7 +69,8 @@ public class RemoteUserStorageProvider implements UserLookupProvider, UserStorag
             User user = usersService.getUserByName(name);
             LOG.error("User fetched with name:{} from external service is:{}",name , user);
         }catch(Exception ex) {
-            LOG.error("Error fetching user name:{}, from external service is:{} -{} ",name, ex.getMessage(), ex);
+            LOG.error("Error fetching user name:{}, from external service is:{} -{} ",name, ex.getMessage(), ex
+                    );
         }
         return userModel;
     }
