@@ -55,6 +55,7 @@
     "gluuConfiguration": "jansAppConf",
     "gluuContainerFederation": "jansContainerFed",
     "gluuCustomMessage": "jansCustomMessage",
+    "gluuCustomPerson": "jansCustomPerson",
     "gluuDSstatus": "jansDSstatus",
     "gluuEntityId": "jansEntityId",
     "gluuEntityType": "jansEntityTyp",
