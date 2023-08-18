@@ -100,9 +100,14 @@ public class AUIConfigurationService extends BaseService {
         auiConfig.setAuthServerClientId(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getClientId());
         auiConfig.setAuthServerClientSecret(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getClientSecret());
         auiConfig.setAuthServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getScopes(), "+"));
-        auiConfig.setAuthServerRedirectUrl(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getRedirectUri());
+     /*   auiConfig.setAuthServerRedirectUrl(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getRedirectUri());
         auiConfig.setAuthServerFrontChannelLogoutUrl(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getFrontchannelLogoutUri());
         auiConfig.setAuthServerPostLogoutRedirectUri(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getPostLogoutUri());
+*/
+        auiConfig.setAuthServerRedirectUrl("http://localhost:4100");
+        auiConfig.setAuthServerFrontChannelLogoutUrl("http://localhost:4100/logout");
+        auiConfig.setAuthServerPostLogoutRedirectUri("http://localhost:4100");
+
         auiConfig.setAuthServerAuthzBaseUrl(appConfiguration.getAuthorizationEndpoint());
         auiConfig.setAuthServerTokenEndpoint(appConfiguration.getTokenEndpoint());
         auiConfig.setAuthServerIntrospectionEndpoint(appConfiguration.getIntrospectionEndpoint());
