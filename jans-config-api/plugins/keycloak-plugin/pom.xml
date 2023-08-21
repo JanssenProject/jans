@@ -300,8 +300,38 @@
 					</execution>
 				</executions>
 			</plugin>
-
+			
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.2</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+						<!--<relocations>
+								<relocation>
+									<pattern>org.sample.plexus.util</pattern>
+									<shadedPattern>org.shaded.sample.plexus.util</shadedPattern>
+									<excludes>
+										<exclude>org.sample.plexus.util.xml.pull.*</exclude>
+									</excludes>
+								</relocation>
+			
+								</relocations>	-->
+								<includes>
+									<include>
+										io.jan.*						
+										</include>
+								</includes>							
+						</configuration>
+					</execution>
+				</executions>
+				</plugin>
+	<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
@@ -324,7 +354,32 @@
 					</execution>
 				</executions>
 			</plugin>
-
+			-->
+			<!--<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-antrun-plugin</artifactId>
+			    <executions>
+			    <execution>
+			        <id>antrun-archive</id>
+			        <phase>package</phase>
+			        <goals>
+			            <goal>run</goal>
+			        </goals>
+			        <configuration>
+			          <target>
+			              <property name="final.name" value="${project.build.directory}/${project.build.finalName}"/>
+			              <property name="archive.includes" value="${project.build.finalName}.${project.packaging} ${project.build.finalName}.lib/*"/>
+			              <property name="tar.destfile" value="${final.name}.tar"/>
+			              <zip basedir="${project.build.directory}" destfile="${final.name}.zip" includes="${archive.includes}" />
+			              <tar basedir="${project.build.directory}" destfile="${tar.destfile}" includes="${archive.includes}" />
+			              <gzip src="${tar.destfile}" destfile="${tar.destfile}.gz" />
+			              <bzip2 src="${tar.destfile}" destfile="${tar.destfile}.bz2" />
+			              </target>
+			            </configuration>
+			        </execution>
+			    </executions>
+			</plugin>
+-->
 			<!-- swagger -->
 			<plugin>
 				<groupId>io.swagger.core.v3</groupId>
