@@ -23,32 +23,32 @@ public class UsersApiLegacyService {
     
     
     public UsersApiLegacyService(KeycloakSession session) {
-        LOG.error(" session:{}", session);
+        LOG.debug(" session:{}", session);
         this.session = session;
     }
     
     public CustomUser getUserById(String inum) {
-        LOG.error(" inum:{}", inum);
+        LOG.debug(" inum:{}", inum);
         try {
             return SimpleHttp.doGet(AUTH_USER_ENDPOINT + inum, this.session).asJson(CustomUser.class);
         } catch (Exception ex) {
-            LOG.error("Error fetching user based on inum:{} from external service is:{} - {} ", inum, ex.getMessage(), ex);
+            LOG.debug("Error fetching user based on inum:{} from external service is:{} - {} ", inum, ex.getMessage(), ex);
         }
         return null;
     }
         
     public CustomUser getUserByName(String username) {
-        LOG.error(" username:{}", username);
+        LOG.debug(" username:{}", username);
         try {
             return SimpleHttp.doGet(AUTH_USER_ENDPOINT + username, this.session).asJson(CustomUser.class);
         } catch (Exception ex) {
-            LOG.error("Error fetching user based on username:{} from external service is:{} - {} ", username, ex.getMessage(), ex);
+            LOG.debug("Error fetching user based on username:{} from external service is:{} - {} ", username, ex.getMessage(), ex);
         }
         return null;
     }
     
     public CustomUser getUserByEmail(String email) {
-        LOG.error(" email:{}", email);
+        LOG.debug(" email:{}", email);
         try {
             return SimpleHttp.doGet(AUTH_USER_ENDPOINT + email, this.session).asJson(CustomUser.class);
         } catch (Exception ex) {

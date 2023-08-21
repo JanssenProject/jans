@@ -240,7 +240,26 @@
 
 		<plugins>
 			
-		    <plugin>
+			<!--<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/assembly/assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>-->
+
+			
+		  <!--  <plugin>
 	            <groupId>org.apache.maven.plugins</groupId>
 	            <artifactId>maven-dependency-plugin</artifactId>
 	            <executions>
@@ -257,7 +276,7 @@
 			            </configuration>
 			            </execution>
 	            </executions>
-            </plugin>	
+            </plugin>	-->
 			
 			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -301,7 +320,7 @@
 				</executions>
 			</plugin>
 			
-			<plugin>
+			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>3.2.2</version>
@@ -312,7 +331,7 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
-						<!--<relocations>
+						<relocations>
 								<relocation>
 									<pattern>org.sample.plexus.util</pattern>
 									<shadedPattern>org.shaded.sample.plexus.util</shadedPattern>
@@ -321,7 +340,7 @@
 									</excludes>
 								</relocation>
 			
-								</relocations>	-->
+								</relocations>
 								<includes>
 									<include>
 										io.jan.*						
@@ -330,7 +349,7 @@
 						</configuration>
 					</execution>
 				</executions>
-				</plugin>
+				</plugin>-->
 	<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>

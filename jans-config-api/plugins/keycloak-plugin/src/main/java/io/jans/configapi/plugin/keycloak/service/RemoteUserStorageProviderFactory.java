@@ -29,14 +29,14 @@ public class RemoteUserStorageProviderFactory implements UserStorageProviderFact
        
     @Override
     public RemoteUserStorageProvider create(KeycloakSession session, ComponentModel model) {
-        LOG.error("session:{}, model:{}",session, model);
+        LOG.debug("session:{}, model:{}",session, model);
         return new RemoteUserStorageProvider(session, model, new UsersApiLegacyService(session));
     }
     
     @Override
     public String getId() {
         String id = PROVIDER_NAME;
-        LOG.error("id:{}",id);
+        LOG.debug("id:{}",id);
         return id;
     }
 

@@ -35,7 +35,7 @@ public class RemoteUserStorageProvider implements UserLookupProvider, UserStorag
 
     public RemoteUserStorageProvider(KeycloakSession session, ComponentModel model,
             UsersApiLegacyService usersService) {
-        LOG.error(" session:{}, model:{}, usersService:{}", session, model, usersService);
+        LOG.debug(" session:{}, model:{}, usersService:{}", session, model, usersService);
 
         this.session = session;
         this.model = model;
@@ -46,7 +46,7 @@ public class RemoteUserStorageProvider implements UserLookupProvider, UserStorag
      * Get user based on id
      */
     public UserModel getUserById(RealmModel paramRealmModel, String id) {
-        LOG.error("getUserById() paramRealmModel:{}, id:{}", paramRealmModel, id);
+        LOG.debug("getUserById() paramRealmModel:{}, id:{}", paramRealmModel, id);
         UserModel userModel = null;
         try {
             CustomUser user = usersService.getUserById(id);
@@ -54,10 +54,10 @@ public class RemoteUserStorageProvider implements UserLookupProvider, UserStorag
                 userModel = createUserModel(paramRealmModel, user);
                 System.out.println("New UserModel:");
                 System.out.println(userModel.toString());
-                LOG.error("userModel:{}", userModel);
+                LOG.debug("userModel:{}", userModel);
             }
          
-            LOG.error("User fetched with id:{} from external service is:{}", id, user);
+            LOG.debug("User fetched with id:{} from external service is:{}", id, user);
 
         } catch (Exception ex) {
             LOG.error("Error fetching user id:{} from external service is:{} - {} ", id, ex.getMessage(), ex);
@@ -69,11 +69,11 @@ public class RemoteUserStorageProvider implements UserLookupProvider, UserStorag
      * Get user based on name
      */
     public UserModel getUserByUsername(RealmModel paramRealmModel, String name) {
-        LOG.error("getUserByUsername() paramRealmModel:{}, name:{}", paramRealmModel, name);
+        LOG.debug("getUserByUsername() paramRealmModel:{}, name:{}", paramRealmModel, name);
         UserModel userModel = null;
         try {
             CustomUser user = usersService.getUserByName(name);
-            LOG.error("User fetched with name:{} from external service is:{}", name, user);
+            LOG.debug("User fetched with name:{} from external service is:{}", name, user);
         } catch (Exception ex) {
             LOG.error("Error fetching user name:{}, from external service is:{} -{} ", name, ex.getMessage(), ex);
         }

@@ -7458,11 +7458,11 @@ components:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanEdit:
-          type: boolean
         userCanView:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
