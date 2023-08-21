@@ -1,6 +1,6 @@
 package io.jans.configapi.plugin.keycloak.service;
 
-import io.jans.as.common.model.common.User;
+import io.jans.configapi.plugin.mgt.model.user.CustomUser;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,67 +33,61 @@ public class RemoteUserStorageProvider implements UserLookupProvider, UserStorag
     private ComponentModel model;
     private UsersApiLegacyService usersService;
 
-
     public RemoteUserStorageProvider(KeycloakSession session, ComponentModel model,
             UsersApiLegacyService usersService) {
-        LOG.error(" session:{}, model:{}, usersService:{}",session, model, usersService);
-    
+        LOG.error(" session:{}, model:{}, usersService:{}", session, model, usersService);
+
         this.session = session;
         this.model = model;
         this.usersService = usersService;
     }
-    
+
     /**
      * Get user based on id
      */
     public UserModel getUserById(RealmModel paramRealmModel, String id) {
-        LOG.error("getUserById() paramRealmModel:{}, id:{}",paramRealmModel, id);
+        LOG.error("getUserById() paramRealmModel:{}, id:{}", paramRealmModel, id);
         UserModel userModel = null;
         try {
-            User user = usersService.getUserById(id);
-            if (user != null  {
-                String userId = user.getUserId();
-                if (userId != null) {
-                    userModel = createUserModel(paramRealmModel, userId);
-                    System.out.println("New UserModel:");
-                    System.out.println(userModel.toString());
-                    LOG.error("userModel:{}",userModel);
-                    
-                }
+            CustomUser user = usersService.getUserById(id);
+            if (user != null) {
+                userModel = createUserModel(paramRealmModel, user);
+                System.out.println("New UserModel:");
+                System.out.println(userModel.toString());
+                LOG.error("userModel:{}", userModel);
             }
-            return userModel;
-            LOG.error("User fetched with id:{} from external service is:{}",id , user);
+         
+            LOG.error("User fetched with id:{} from external service is:{}", id, user);
 
-        }catch(Exception ex) {
-            LOG.error("Error fetching user id:{} from external service is:{} - {} ",id,ex.getMessage(), ex);
+        } catch (Exception ex) {
+            LOG.error("Error fetching user id:{} from external service is:{} - {} ", id, ex.getMessage(), ex);
         }
         return userModel;
     }
-    
+
     /**
      * Get user based on name
      */
     public UserModel getUserByUsername(RealmModel paramRealmModel, String name) {
-        LOG.error("getUserByUsername() paramRealmModel:{}, name:{}",paramRealmModel, name);
+        LOG.error("getUserByUsername() paramRealmModel:{}, name:{}", paramRealmModel, name);
         UserModel userModel = null;
         try {
-            User user = usersService.getUserByName(name);
-            LOG.error("User fetched with name:{} from external service is:{}",name , user);
-        }catch(Exception ex) {
-            LOG.error("Error fetching user name:{}, from external service is:{} -{} ",name, ex.getMessage(), ex);
+            CustomUser user = usersService.getUserByName(name);
+            LOG.error("User fetched with name:{} from external service is:{}", name, user);
+        } catch (Exception ex) {
+            LOG.error("Error fetching user name:{}, from external service is:{} -{} ", name, ex.getMessage(), ex);
         }
         return userModel;
     }
-    
-    public UserModel getUserByEmail(RealmModel paramRealmModel, String paramString) {return null;}
-    public void close(){}
-    
-    protected UserModel createUserModel(RealmModel realm, String username) {
-        return new AbstractUserAdapter(session, realm, model) {
-            @Override
-            public String getUsername() {
-                return username;
-            }
-        };
-     }
+
+    public UserModel getUserByEmail(RealmModel paramRealmModel, String paramString) {
+        return null;
+    }
+
+    public void close() {
+    }
+
+    private UserModel createUserModel(RealmModel realm, CustomUser user) {
+        return new UserAdapter(session, realm, model, user);
+    }
 }

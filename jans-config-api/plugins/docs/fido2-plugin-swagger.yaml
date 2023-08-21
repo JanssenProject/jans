@@ -134,6 +134,8 @@ components:
           type: boolean
         oldU2fMigrationEnabled:
           type: boolean
+        errorReasonEnabled:
+          type: boolean
         fido2Configuration:
           $ref: '#/components/schemas/Fido2Configuration'
     Fido2Configuration:

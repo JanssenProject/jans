@@ -1,6 +1,6 @@
 package io.jans.configapi.plugin.keycloak.service;
 
-import import io.jans.as.common.model.common.User;
+import io.jans.configapi.plugin.mgt.model.user.CustomUser;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.LegacyUserCredentialManager;
@@ -17,12 +17,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.lang.StringUtils;
 
 public class UserAdapter extends AbstractUserAdapter {
 
-    private final User user;
+    private final CustomUser user;
 
-    public UserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, User user) {
+    public UserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, CustomUser user) {
         super(session, realm, model);
         this.storageId = new StorageId(storageProviderModel.getId(), user.getUserId());
         this.user = user;
@@ -30,22 +31,22 @@ public class UserAdapter extends AbstractUserAdapter {
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return user.getGivenName();
     }
 
     @Override
     public String getFirstName() {
-        return user.getFirstName();
+        return user.getAttribute("firstName");
     }
 
     @Override
     public String getLastName() {
-        return user.getLastName();
+        return user.getAttribute("lastName");
     }
 
     @Override
     public String getEmail() {
-        return user.getEmail();
+        return user.getAttribute("email");
     }
 
     @Override
@@ -55,12 +56,20 @@ public class UserAdapter extends AbstractUserAdapter {
 
     @Override
     public boolean isEnabled() {
-        return user.isEnabled();
+        boolean enabled = false;
+        if(StringUtils.isNotBlank(user.getJansStatus())){
+            enabled =  user.getJansStatus().equalsIgnoreCase("active")?true:false;
+        }
+        return enabled;
     }
 
     @Override
     public Long getCreatedTimestamp() {
-        return user.getCreated();
+        Long created = null;
+        if(user.getCreatedAt()!=null) {
+            created = user.getCreatedAt().getTime();
+        }
+        return created;
     }
 
     @Override
@@ -83,9 +92,8 @@ public class UserAdapter extends AbstractUserAdapter {
 
     @Override
     protected Set<RoleModel> getRoleMappingsInternal() {
-        if (user.getRoles() != null) {
-            return user.getRoles().stream().map(roleName -> new UserRoleModel(roleName, realm)).collect(Collectors.toSet());
-        }
+       
         return Set.of();
     }
+ 
 }
