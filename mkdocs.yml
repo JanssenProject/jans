@@ -224,7 +224,6 @@ nav:
         - admin/auth-server/openid-features/user-claims/README.md
         - Built-in Claims: admin/auth-server/openid-features/user-claims/built-in-claims.md
         - Adding Custom Claims: admin/auth-server/openid-features/user-claims/custom-claims.md
-        - Claim Uniqueness/Validation: admin/auth-server/openid-features/user-claims/claim-uniqueness-validation.md
       - Logout:
         - admin/auth-server/openid-features/logout/README.md
         - Front Channel: admin/auth-server/openid-features/logout/front-channel.md
