@@ -14,7 +14,6 @@ Custom claims provide the flexibility to include application-specific or user-sp
 
 ## Adding a new custom user claim
 
-<div markdown>
 === "LDAP persistence"
 
 ### Step 1: Create a custom attribute
@@ -82,6 +81,10 @@ The complete 77-customAttributes.ldif will look like this:
 
 That will create the custom user claim in the local LDAP server.
 
+Once the user claim is added, it can be used in user management.
+
+![](../../../../assets/image-tui-user-claim.png)
+
 === "MySQL persistence"
 
 ### Step 1: Create a custom attribute
@@ -118,7 +121,7 @@ mysql> ALTER TABLE jansPerson ADD COLUMN newClaim VARCHAR(100);
     If the attribute is Multivalued, dataType should be JSON regardless of what you will choose for Type in Janssen TUI.
 
 The above steps will create the custom user claim in the MySQL persistence.
-</div>
+
 
 Once the user claim is added, it can be used in user management.
 
