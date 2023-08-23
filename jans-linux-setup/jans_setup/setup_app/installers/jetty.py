@@ -140,9 +140,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         if base.snap:
             Config.templateRenderingDict['jetty_dist'] = self.jetty_base
-        else:
-            # we need this, because this method may be called externally
-            jetty_archive, jetty_dist = self.get_jetty_info()
 
         self.logIt("Preparing %s service base folders" % service_name)
         self.run([paths.cmd_mkdir, '-p', jetty_service_base])
