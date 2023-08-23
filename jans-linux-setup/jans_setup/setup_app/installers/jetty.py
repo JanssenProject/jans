@@ -66,17 +66,14 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.addUserToGroup('jans', Config.jetty_user)
         self.run([paths.cmd_mkdir, '-p', self.jetty_user_home_lib])
 
-        jettyArchive, jetty_dist = self.get_jetty_info()
+        jetty_archive, jetty_dist = self.get_jetty_info()
 
         jettyTemp = os.path.join(jetty_dist, 'temp')
         self.run([paths.cmd_mkdir, '-p', jettyTemp])
         self.chown(jettyTemp, Config.jetty_user, Config.jetty_group, recursive=True)
 
-        try:
-            self.logIt("Extracting %s into /opt/jetty" % jettyArchive)
-            self.run(['tar', '-xzf', jettyArchive, '-C', jetty_dist, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
-        except:
-            self.logIt("Error encountered while extracting archive %s" % jettyArchive)
+        self.logIt(f"Extracting {jetty_archive} into {jetty_dist}")
+        shutil.unpack_archive(jetty_archive, format='gztar', extract_dir=jetty_dist)
 
         jettyDestinationPath = max(glob.glob(os.path.join(jetty_dist, '{}-*'.format(self.jetty_dist_string))))
 
@@ -109,10 +106,10 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         if not jetty_archive_list:
             self.logIt("Jetty archive not found in {}. Exiting...".format(Config.dist_app_dir), True, True)
 
-        jettyArchive = max(jetty_archive_list)
+        jetty_archive = max(jetty_archive_list)
 
-        jettyArchive_fn = os.path.basename(jettyArchive)
-        jetty_regex = re.search('{}-(\d*\.\d*)'.format(self.jetty_dist_string), jettyArchive_fn)
+        jetty_archive_fn = os.path.basename(jetty_archive)
+        jetty_regex = re.search('{}-(\d*\.\d*)'.format(self.jetty_dist_string), jetty_archive_fn)
         if not jetty_regex:
             self.logIt("Can't determine Jetty version", True, True)
 
@@ -120,7 +117,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         Config.templateRenderingDict['jetty_dist'] = jetty_dist
         self.jetty_version_string = jetty_regex.groups()[0]
 
-        return jettyArchive, jetty_dist
+        return jetty_archive, jetty_dist
 
     @property
     def web_app_xml_fn(self):
@@ -145,7 +142,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             Config.templateRenderingDict['jetty_dist'] = self.jetty_base
         else:
             # we need this, because this method may be called externally
-            jettyArchive, jetty_dist = self.get_jetty_info()
+            jetty_archive, jetty_dist = self.get_jetty_info()
 
         self.logIt("Preparing %s service base folders" % service_name)
         self.run([paths.cmd_mkdir, '-p', jetty_service_base])
