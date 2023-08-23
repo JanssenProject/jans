@@ -19,6 +19,7 @@ def merge_auth_keystore_ctx_hook(manager, ctx: dict[str, _t.Any]) -> dict[str, _
 
 def transform_auth_dynamic_config_hook(conf, manager):
     should_update = False
+    hostname = manager.config.get("hostname")
 
     if "redirectUrisRegexEnabled" not in conf:
         conf["redirectUrisRegexEnabled"] = True
@@ -88,7 +89,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
         should_update = True
 
     if "ssaConfiguration" not in conf:
-        hostname = manager.config.get("hostname")
         conf["ssaConfiguration"] = {
             "ssaEndpoint": f"https://{hostname}/jans-auth/restv1/ssa",
             "ssaSigningAlg": "RS256",
@@ -202,6 +202,11 @@ def transform_auth_dynamic_config_hook(conf, manager):
     # avoid setting agama configuration root dir based on java system variable
     if "rootDir" not in conf["agamaConfiguration"]:
         conf["agamaConfiguration"]["rootDir"] = "/opt/jans/jetty/jans-auth/agama"
+        should_update = True
+
+    # add authorizationChallengeEndpoint if missing
+    if "authorizationChallengeEndpoint" not in conf:
+        conf["authorizationChallengeEndpoint"] = f"https://{hostname}/jans-auth/restv1/authorization_challenge"
         should_update = True
 
     # return the conf and flag to determine whether it needs update or not
