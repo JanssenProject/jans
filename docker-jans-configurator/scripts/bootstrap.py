@@ -35,9 +35,9 @@ DB_DIR = os.environ.get("CN_CONFIGURATOR_DB_DIR", f"{CONFIGURATOR_DIR}/db")
 CERTS_DIR = os.environ.get("CN_CONFIGURATOR_CERTS_DIR", f"{CONFIGURATOR_DIR}/certs")
 JAVALIBS_DIR = f"{CONFIGURATOR_DIR}/javalibs"
 
-DEFAULT_CONFIG_FILE = f"{DB_DIR}/config.json"
-DEFAULT_SECRET_FILE = f"{DB_DIR}/secret.json"
-DEFAULT_GENERATE_FILE = f"{DB_DIR}/generate.json"
+DEFAULT_CONFIG_FILE = os.environ.get("CN_CONFIGURATOR_CONFIG_FILE", f"{DB_DIR}/config.json")
+DEFAULT_SECRET_FILE = os.environ.get("CN_CONFIGURATOR_SECRET_FILE", f"{DB_DIR}/secret.json")
+DEFAULT_GENERATE_FILE = os.environ.get("CN_CONFIGURATOR_GENERATE_FILE", f"{DB_DIR}/generate.json")
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("configurator")
