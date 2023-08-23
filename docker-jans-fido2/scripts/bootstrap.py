@@ -201,6 +201,10 @@ class PersistenceSetup:
         # pre-populate fido2_static_conf_base64
         with open("/app/templates/jans-fido2/static-conf.json") as f:
             ctx["fido2_static_conf_base64"] = generate_base64_contents(f.read())
+
+        # pre-populate fido2_error_base64
+        with open("/app/templates/jans-fido2/jans-fido2-errors.json") as f:
+            ctx["fido2_error_base64"] = generate_base64_contents(f.read())
         return ctx
 
     @cached_property
