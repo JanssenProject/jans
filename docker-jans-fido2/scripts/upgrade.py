@@ -30,6 +30,7 @@ def _transform_fido2_dynamic_config(conf):
         ("superGluuEnabled", False),
         ("oldU2fMigrationEnabled", True),
         ("metadataUrlsProvider", ""),
+        ("errorReasonEnabled", False),
     ]:
         # dont update if key exists
         if k in conf:
@@ -56,6 +57,18 @@ def _transform_fido2_static_config(conf):
             continue
 
         conf["baseDn"][k] = v
+        should_update = True
+
+    # return modified config (if any) and update flag
+    return conf, should_update
+
+
+def _transform_fido2_error_config(conf):
+    should_update = False
+
+    if not conf:
+        with open("/app/templates/jans-fido2/jans-fido2-errors.json") as f:
+            conf = json.loads(f.read())
         should_update = True
 
     # return modified config (if any) and update flag
@@ -211,6 +224,7 @@ class Upgrade:
         logger.info("Running upgrade process (if required)")
         self.update_fido2_dynamic_config()
         self.update_fido2_static_config()
+        self.update_fido2_error_config()
 
     def update_fido2_dynamic_config(self):
         kwargs = {}
@@ -266,6 +280,38 @@ class Upgrade:
         if should_update:
             if self.backend.type != "couchbase":
                 entry.attrs["jansConfStatic"] = json.dumps(conf)
+
+            entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_fido2_error_config(self):
+        kwargs = {}
+        id_ = "ou=jans-fido2,ou=configuration,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansAppConf"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        # config maybe null
+        if self.backend.type != "couchbase":
+            with contextlib.suppress(json.decoder.JSONDecodeError):
+                entry.attrs["jansConfErrors"] = json.loads(entry.attrs.get("jansConfErrors") or "{}")
+        else:
+            entry.attrs["jansConfErrors"] = entry.attrs.get("jansConfErrors") or {}
+
+        conf, should_update = _transform_fido2_error_config(entry.attrs["jansConfErrors"])
+
+        if should_update:
+            if self.backend.type != "couchbase":
+                entry.attrs["jansConfErrors"] = json.dumps(conf)
 
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
