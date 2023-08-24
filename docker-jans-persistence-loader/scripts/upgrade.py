@@ -864,6 +864,16 @@ def _transform_auth_errors_config(conf):
         conf["token"].append(err)
         should_update = True
 
+    # add stale_evidence on register
+    reg_errors = [err["id"] for err in conf["register"]]
+    if "stale_evidence" not in reg_errors:
+        conf["register"].append({
+            "id": "stale_evidence",
+            "description": "The provided evidence is not current. Resend fresh evidence.",
+            "uri": None,
+        })
+        should_update = True
+
     return conf, should_update
 
 
