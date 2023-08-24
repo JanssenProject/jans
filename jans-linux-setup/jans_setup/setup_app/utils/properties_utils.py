@@ -615,7 +615,7 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_casa:
             return
 
-        prompt = self.getPrompt("Install Gluu/Flex Casa?",
+        prompt = self.getPrompt("Install Gluu Casa?",
                                 self.getDefaultOption(Config.install_casa)
                             )[0].lower()
 
