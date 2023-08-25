@@ -107,7 +107,7 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>oauth2-oidc-sdk</artifactId>
-            <version>9.41</version>
+            <version>10.13.2</version>
         </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
