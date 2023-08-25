@@ -27,24 +27,36 @@ overridden to implement your business case.
 1. [Consent Gathering](./consent-gathering.md): Allows exact
    customization of the authorization (or consent) process. By default, the OP will
    request authorization for each scope, and display the respective scope description.
-1. Update User
+1. [Update User](./notsure)
 1. [Client Registration](./client-registration.md): Allows implementing custom business logic during dynamic client registration, including validating SSA's and granting scopes.
 1. [Dynamic Scopes](./dynamic-scope.md) : Enables admin to generate scopes on the fly, for example by
    calling external APIs
-1. ID Generator
+1. [ID Generator](./id-generator.md)
 1. [Update Token](./update-token.md) : Enables transformation of claims and values in id_token, Access token and Refresh tokens; allows the setting of token lifetime; allows the addition or removal of scopes to / from tokens; allows the addition of audit logs each time a token is created.
-1. Session Management
-1. SCIM
+1. [Session Management](./notsure)
+1. [SCIM](./scim.md)
 1. [Introspection](./introspection.md) : Introspection scripts allows to modify response of Introspection Endpoint spec and present additional meta information surrounding the token.
 1. [Post Authentication](./post-authentication.md)
 1. [Authorization Challenge](./authorization-challenge.md)
 1. [Select Account](./select-account.md)
-1. Resource Owner Password Credentials
-1. UMA 2 RPT Authorization Policies
-1. UMA 2 Claims-Gathering
+1. [Resource Owner Password Credentials](./ropc.md)
+1. [UMA 2 RPT Authorization Policies](./uma-rpt.md)
+1. [UMA 2 Claims-Gathering](./notsure)
+1. [UMA RPT Claims](./notsure)
 1. [Fido2 Extension](./fido2-extension.md) : Extension of attestation and assertion endpoints.
 1. [Discovery](./discovery.md): OpenID discovery response modification
 1. [CIBA - End User notification](./ciba.md)
+1. [Configuration API](./config-api.md)
+1. [IDP](./notsure)
+1. [End Session](./end-session.md)
+1. [Persistence Type](./persistence.md)
+1. [Revoke Token](./revoke-token.md) 
+1. [Application Session](./application-session.md)
+1. [Spontaneous Scope](./spontaneous-scope.md)
+1. [SSA Response Modification](./notsure)
+
+
+
 
 ## Implementation languages - Jython or pure Java
 
