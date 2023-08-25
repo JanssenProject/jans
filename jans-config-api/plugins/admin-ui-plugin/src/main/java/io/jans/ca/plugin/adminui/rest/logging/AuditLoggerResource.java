@@ -1,9 +1,8 @@
 package io.jans.ca.plugin.adminui.rest.logging;
 
+import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.swagger.v3.oas.annotations.Hidden;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -12,6 +11,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+
 import java.util.Map;
 
 @Hidden
@@ -32,7 +33,10 @@ public class AuditLoggerResource {
             return Response.ok("{'status': 'success'}").build();
         } catch (Exception e) {
             log.error(ErrorResponse.AUDIT_LOGGING_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.AUDIT_LOGGING_ERROR.getDescription()))
+                    .build();
         }
     }
 }

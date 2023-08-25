@@ -2,8 +2,8 @@ package io.jans.ca.plugin.adminui.model.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class LicenseApiResponse {
-    private boolean apiResult;
+public class GenericResponse {
+    private boolean success;
     private String responseMessage;
     private int responseCode;
 
@@ -33,19 +33,18 @@ public class LicenseApiResponse {
         this.responseCode = responseCode;
     }
 
-    public boolean isApiResult() {
-        return apiResult;
+    public boolean isSuccess() {
+        return success;
     }
 
-    public void setApiResult(boolean apiResult) {
-        this.apiResult = apiResult;
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
-
 
     @Override
     public String toString() {
-        return "LicenseApiResponse{" +
-                "apiResult=" + apiResult +
+        return "GenericResponse{" +
+                "success=" + success +
                 ", responseMessage='" + responseMessage + '\'' +
                 ", responseCode=" + responseCode +
                 ", responseObject=" + responseObject +

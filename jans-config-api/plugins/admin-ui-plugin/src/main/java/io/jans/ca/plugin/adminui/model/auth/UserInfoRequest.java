@@ -19,19 +19,19 @@ public class UserInfoRequest {
         this.code = code;
     }
 
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
     public String getCodeVerifier() {
         return codeVerifier;
     }
 
     public void setCodeVerifier(String codeVerifier) {
         this.codeVerifier = codeVerifier;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 }

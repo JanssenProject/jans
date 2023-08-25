@@ -1,15 +1,16 @@
 package io.jans.ca.plugin.adminui.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
+import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 
-import javax.crypto.Cipher;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
-import java.security.PrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.ZoneId;
@@ -51,15 +52,21 @@ public class CommonUtils {
         return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
     }
 
-    public static String decode(String toDecode, String privateKeyPEM) throws Exception {
+    public static String decode(String toDecode) throws UnsupportedEncodingException {
 
-        PrivateKey privateKey = loadPrivateKey(privateKeyPEM);
+        return java.net.URLDecoder.decode(toDecode, StandardCharsets.UTF_8.name());
+    }
 
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+    public static GenericResponse createGenericResponse(boolean result, int responseCode, String responseMessage) {
+        return createGenericResponse(result, responseCode, responseMessage, null);
+    }
 
-        byte[] bytes = cipher.doFinal(Base64.decodeBase64(toDecode));
-        return new String(bytes);
-
+    public static GenericResponse createGenericResponse(boolean result, int responseCode, String responseMessage, JsonNode node) {
+        GenericResponse genericResponse = new GenericResponse();
+        genericResponse.setResponseCode(responseCode);
+        genericResponse.setResponseMessage(responseMessage);
+        genericResponse.setSuccess(result);
+        genericResponse.setResponseObject(node);
+        return genericResponse;
     }
 }
