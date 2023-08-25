@@ -8,19 +8,17 @@ import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.service.auth.OAuth2Service;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
+import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.rest.ProtectedApi;
-
 import io.swagger.v3.oas.annotations.Hidden;
-
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
 
 @Hidden
 @Path("/app")
@@ -65,10 +63,16 @@ public class OAuth2Resource {
             return Response.ok(oauth2Config).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ERROR_IN_READING_CONFIGURATION.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_READING_CONFIGURATION.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_READING_CONFIGURATION.getDescription()))
+                    .build();
         }
     }
 
@@ -76,7 +80,6 @@ public class OAuth2Resource {
     @Path(OAUTH2_ACCESS_TOKEN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAccessToken(@QueryParam("code") String code, @PathParam("codeVerifier") String codeVerifier, @PathParam("appType") String appType) {
-
         try {
             log.info("Access token request to Auth Server.");
             TokenResponse tokenResponse = oAuth2Service.getAccessToken(code, codeVerifier, appType);
@@ -84,10 +87,16 @@ public class OAuth2Resource {
             return Response.ok(tokenResponse).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription()))
+                    .build();
         }
     }
 
@@ -102,10 +111,16 @@ public class OAuth2Resource {
             return Response.ok(tokenResponse).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription()))
+                    .build();
         }
     }
 
@@ -120,10 +135,16 @@ public class OAuth2Resource {
             return Response.ok(userInfoResponse).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_USER_INFO_ERROR.getDescription()))
+                    .build();
         }
     }
 

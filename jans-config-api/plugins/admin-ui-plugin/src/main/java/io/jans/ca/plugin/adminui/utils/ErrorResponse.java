@@ -35,10 +35,14 @@ public enum ErrorResponse {
     UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE("Permission is mapped to role so cannot be deleted. Please remove the permission mapped to the role before deleting it."),
     ERROR_IN_READING_CONFIGURATION("Error in reading Admin UI configuration."),
     TOKEN_GENERATION_ERROR("Error in generating SCAN API access token."),
+    RETRIEVE_LICENSE_ERROR("Error in retrieving license. Check logs for further details."),
     BLANK_JWT("JWT is blank or empty"),
     ISS_CLAIM_NOT_FOUND("ISS claim not fount in jwt"),
     ERROR_IN_DCR("Error in DCR using SSA."),
     LICENSE_NOT_PRESENT("Active license not present."),
+    LICENSE_ALREADY_ACTIVE("The license has been already activated."),
+    LICENSE_CONFIG_ABSENT("License configuration is not present."),
+    SCAN_HOSTNAME_MISSING("SCAN api hostname is missing in configuration.")
     ;
 
     private final String description;
