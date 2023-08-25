@@ -15,7 +15,7 @@ Deployment occurs through a REST API. Here is a typical workflow once a `.gama` 
 
 1. Send (POST) the archive contents to the deployment endpoint. Normally a 202 response should be obtained meaning a task has been queued for processing
 1. Poll (via GET) the status of the deployment. When the archive has been effectively deployed a status of 200 should be obtained. It may take up to 30 seconds for the process to complete once the archive is sent. This time may extend if there is another deployment in course
-1. Optionally supply configuration parameters for flows if needed. This is done via PUT to the `/configs` endpoint. The response of the previous step may contain descriptive/sample configurations that can be used as a guide
+1. Optionally supply configuration properties for flows if needed. This is done via PUT to the `/configs` endpoint. The response of the previous step may contain descriptive/sample configurations that can be used as a guide
 1. Test the deployed flows and adjust the archive for any changes required
 1. Go to point 1 if needed
 1. If desired, a request can be sent to undeploy the flows (via DELETE)
