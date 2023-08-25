@@ -8,10 +8,9 @@ package io.jans.as.model.util;
 
 import io.jans.as.model.BaseTest;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.testng.annotations.Test;
+import io.jans.util.security.SecurityProviderUtility;
 
-import java.security.Security;
+import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
@@ -23,7 +22,7 @@ public class HashUtilTest extends BaseTest {
     private static final String INPUT = "a308bb8f-25b0-4b1f-85a6-778698a35a43";
 
     static {
-        Security.addProvider(new BouncyCastleProvider());
+        SecurityProviderUtility.installBCProvider(true);
     }
 
     @Test

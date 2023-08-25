@@ -7,14 +7,14 @@ package io.jans.as.model.jwk;
 
 import com.nimbusds.jose.jwk.JWKException;
 import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.Security;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -26,7 +26,7 @@ import static org.testng.Assert.assertNotNull;
 public class JSONWebKeyTest {
 
     static {
-        Security.addProvider(new BouncyCastleProvider());
+        SecurityProviderUtility.installBCProvider(true);
     }
 
     @Test
