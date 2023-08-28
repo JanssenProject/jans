@@ -39,13 +39,11 @@ class JreInstaller(BaseInstaller, SetupUtils):
         else:
             jre_archive = self.source_files[0][0]
 
-        self.logIt("Installing server JRE {} ...".format(os.path.basename(jre_archive)))
+        jre_basename = os.path.basename(jre_archive)
+        self.logIt(f"Installing server JRE {jre_basename} ...")
 
-        try:
-            self.logIt("Extracting %s into /opt/" % os.path.basename(jre_archive))
-            self.run([paths.cmd_tar, '-xzf', jre_archive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
-        except Exception as e:
-            self.logIt("Error encountered while extracting archive {}".format(e))
+        self.logIt(f"Extracting {jre_basename} into {Config.opt_dir}")
+        shutil.unpack_archive(jre_archive, format='gztar', extract_dir=Config.opt_dir)
 
         if Config.java_type == 'jdk':
             jreDestinationPath = max(glob.glob('/opt/jdk-11*'))
