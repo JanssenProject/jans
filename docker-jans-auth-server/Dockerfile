@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:11.0.16
+FROM bellsoft/liberica-openjdk-alpine:11.0.16
 
 # ===============
 # Alpine packages
@@ -9,7 +9,7 @@ RUN apk update \
     && apk add --no-cache openssl python3 tini curl bash py3-cryptography py3-psycopg2 py3-grpcio \
     && apk add --no-cache --virtual .build-deps wget git zip \
     && mkdir -p /usr/java/latest \
-    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
+    && ln -sf /usr/lib/jvm/jdk /usr/java/latest/jre
 
 # =====
 # Jetty
