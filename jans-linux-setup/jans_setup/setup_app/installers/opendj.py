@@ -1,4 +1,5 @@
 import os
+import stat
 import glob
 import shutil
 import ssl
@@ -95,12 +96,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         opendj_archive = max(glob.glob(os.path.join(Config.dist_app_dir, 'opendj-server-*4*.zip')))
 
-        try:
-            self.logIt("Unzipping %s in /opt/" % opendj_archive)
-            self.run([paths.cmd_unzip, '-n', '-q', '%s' % (opendj_archive), '-d', '/opt/' ])
-        except:
-            self.logIt("Error encountered while doing unzip %s -d /opt/" % (opendj_archive))
-
+        self.logIt(f"Extracting {opendj_archive} into {Config.opt_dir}")
+        base.unpack_zip(opendj_archive, Config.opt_dir)
         real_ldap_base_dir = os.path.realpath(Config.ldap_base_dir)
         self.chown(real_ldap_base_dir, Config.ldap_user, Config.ldap_group, recursive=True)
 

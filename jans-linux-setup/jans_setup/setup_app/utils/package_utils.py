@@ -123,11 +123,6 @@ class PackageUtils(SetupUtils):
             if os.path.exists(default_site):
                 os.remove(default_site)
 
-        #re-new paths
-        paths.cmd_wget = shutil.which('wget')
-        paths.cmd_tar = shutil.which('tar')
-        paths.cmd_unzip = shutil.which('unzip')
-
 
     def installPackage(self, packageName, remote=False):
         base.logIt("Installing " + packageName)

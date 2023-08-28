@@ -421,6 +421,14 @@ def extract_subdir(zip_fn, sub_dir, target_dir, par_dir=None):
         shutil.unpack_archive(zip_fn, unpack_dir, format='zip')
         shutil.copytree(os.path.join(unpack_dir, par_dir, sub_dir), target_dir)
 
+def unpack_zip(zip_fn, extract_dir):
+    with zipfile.ZipFile(zip_fn, 'r') as zf:
+        for info in zf.infolist():
+            zf.extract(info.filename, path=extract_dir)
+            out_path = os.path.join(extract_dir, info.filename)
+            perm = info.external_attr >> 16
+            os.chmod(out_path, perm)
+
 app_info_fn = os.environ.get('JANS_APP_INFO') or os.path.join(par_dir, 'app_info.json')
 current_app.app_info = readJsonFile(app_info_fn)
 current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')

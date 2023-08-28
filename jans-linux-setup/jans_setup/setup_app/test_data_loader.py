@@ -7,6 +7,7 @@ import socket
 import ldap3
 import urllib.request
 import base64
+import shutil
 
 from setup_app import paths
 from setup_app import static
@@ -251,7 +252,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         # Client keys deployment
         target_jwks_fn = os.path.join(base.current_app.HttpdInstaller.server_root, 'jans_test_client_keys.zip')
         base.download('https://github.com/JanssenProject/jans/raw/main/jans-auth-server/client/src/test/resources/jans_test_client_keys.zip', target_jwks_fn)
-        self.run([paths.cmd_unzip, '-o', target_jwks_fn, '-d', base.current_app.HttpdInstaller.server_root])
+        shutil.unpack_archive(target_jwks_fn, base.current_app.HttpdInstaller.server_root)
+
         self.removeFile(target_jwks_fn)
 
         self.chown(os.path.join(base.current_app.HttpdInstaller.server_root, 'jans-auth-client'), base.current_app.HttpdInstaller.apache_user, base.current_app.HttpdInstaller.apache_group, recursive=True)
@@ -442,9 +444,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         if Config.installEleven:
             eleven_tokens_package = os.path.join(Config.staticFolder, 'eleven/jans-eleven-tokens.tar.gz')
             target_dir = '/var/lib/softhsm/tokens/'
-            if not os.path.exists(target_dir):
-                os.makedirs(target_dir)
-            self.run([paths.cmd_tar, '-zxf', eleven_tokens_package, '-C', target_dir])
+            self.logIt(f"Extracting {eleven_tokens_package} into {target_dir}")
+            shutil.unpack_archive(eleven_tokens_package, format='gztar', extract_dir=target_dir)
 
         if Config.install_scim_server:
             self.restart('jans-scim')
