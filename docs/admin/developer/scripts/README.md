@@ -21,29 +21,37 @@ represents a feature of the Jans server that can be extended as per the business
 need. Each script type is described by a java interface whose methods should be
 overridden to implement your business case.
 
-1. [Person Authentication](./person-authentication.md): Allows the
-   definition of multi-step authentication workflows, including adaptive
-   authentication - where the number of steps varies depending on the context.
-1. [Consent Gathering](./consent-gathering.md): Allows exact
-   customization of the authorization (or consent) process. By default, the OP will
-   request authorization for each scope, and display the respective scope description.
-1. Update User
-1. [Client Registration](./client-registration.md): Allows implementing custom business logic during dynamic client registration, including validating SSA's and granting scopes.
-1. [Dynamic Scopes](./dynamic-scope.md) : Enables admin to generate scopes on the fly, for example by
-   calling external APIs
-1. ID Generator
-1. [Update Token](./update-token.md) : Enables transformation of claims and values in id_token, Access token and Refresh tokens; allows the setting of token lifetime; allows the addition or removal of scopes to / from tokens; allows the addition of audit logs each time a token is created.
-1. Session Management
-1. SCIM
-1. [Introspection](./introspection.md) : Introspection scripts allows to modify response of Introspection Endpoint spec and present additional meta information surrounding the token.
-1. [Post Authentication](./post-authentication.md)
-1. [Authorization Challenge](./authorization-challenge.md)
-1. [Select Account](./select-account.md)
-1. Resource Owner Password Credentials
-1. UMA 2 RPT Authorization Policies
-1. UMA 2 Claims-Gathering
-1. [Fido2 Extension](./fido2-extension.md) : Extension of attestation and assertion endpoints.
-1. [Discovery](./discovery.md): OpenID discovery response modification
+| Script Name                                             | Purpose                                                                                                                                                                                                                                                    |
+|---------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [Person Authentication](./person-authentication.md)     | Allows the definition of multi-step authentication workflows, including adaptive authentication - where the number of steps varies depending on the context.                                                                                               |
+| [Consent Gathering](./consent-gathering.md)             | Allows exact customization of the authorization (or consent) process. By default, the OP will request authorization for each scope, and display the respective scope description.                                                                          |
+| Link Interception Script                                |                                                                                                                                                                                                                                                            |
+| [Client Registration](./client-registration.md)         | Allows implementing custom business logic during dynamic client registration, including validating SSA's and granting scopes.                                                                                                                              |
+| [Dynamic Scopes](./dynamic-scope.md)                    | Enables admin to generate scopes on the fly, for example by calling external APIs                                                                                                                                                                          |
+| [ID Generator](./id-generator.md)                       |                                                                                                                                                                                                                                                            |
+| [Update Token](./update-token.md)                       | Enables transformation of claims and values in id_token, Access token and Refresh tokens; allows the setting of token lifetime; allows the addition or removal of scopes to / from tokens; allows the addition of audit logs each time a token is created. |
+| Session Management                                      |                                                                                                                                                                                                                                                            |
+| [SCIM](./scim.md)                                       |                                                                                                                                                                                                                                                            |
+| [Introspection](./introspection.md)                     | Introspection scripts allows to modify response of Introspection Endpoint spec and present additional meta information surrounding the token.                                                                                                              |
+| [Post Authentication](./post-authentication.md)         |                                                                                                                                                                                                                                                            |
+| [Authorization Challenge](./authorization-challenge.md) |                                                                                                                                                                                                                                                            |
+| [Select Account](./select-account.md)                   |                                                                                                                                                                                                                                                            |
+| [Resource Owner Password Credentials](./ropc.md)        |                                                                                                                                                                                                                                                            |
+| [UMA 2 RPT Authorization Policies](./uma-rpt.md)        |                                                                                                                                                                                                                                                            |
+| UMA 2 Claims-Gathering                                  |                                                                                                                                                                                                                                                            |
+| UMA RPT Claims                                          |                                                                                                                                                                                                                                                            |
+| [Fido2 Extension](./fido2-extension.md)                 | Extension of attestation and assertion endpoints                                                                                                                                                                                                           |
+| [Discovery](./discovery.md)                             | OpenID discovery response modification                                                                                                                                                                                                                     |
+| [CIBA - End User notification](./ciba.md)               |                                                                                                                                                                                                                                                            |
+| [Configuration API](./config-api.md)                    |                                                                                                                                                                                                                                                            |
+| IDP                                                     |                                                                                                                                                                                                                                                            |
+| [End Session](./end-session.md)                         |                                                                                                                                                                                                                                                            |
+| [Persistence Type](./persistence.md)                    |                                                                                                                                                                                                                                                            |
+| [Revoke Token](./revoke-token.md)                       |                                                                                                                                                                                                                                                            |
+| [Application Session](./application-session.md)         |                                                                                                                                                                                                                                                            |
+| [Spontaneous Scope](./spontaneous-scope.md)             |                                                                                                                                                                                                                                                            |
+| SSA Response Modification                               |                                                                                                                                                                                                                                                            |
+
 
 ## Implementation languages - Jython or pure Java
 
