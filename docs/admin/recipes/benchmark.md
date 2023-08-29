@@ -30,7 +30,7 @@ As mentioned in the overview we recommend using the same Kubernetes cluster as p
 
 We recommend your persistence in production to be HA, backup supported and point in time recovery supported. Below is a table of the persistence used and resources set for this test.
 
-| Persistence      | # of nodes | RAM(GiB) | CPU | Total RAM (GiB) | Total CPU |
+| Persistence      | # of nodes | RAM(GiB) | vCPU | Total RAM (GiB) | Total vCPU |
 |------------------|------------|----------|-----|-----------------|-----------|
 | MySQL            | 1          | 52       | 8   | 52              | 8         |
 
@@ -43,7 +43,7 @@ We recommend your persistence in production to be HA, backup supported and point
 
 Resourcing is  critical as timeouts in connections can occur, resulting in failed authentications or cutoffs.
 
-| Regions     | # of nodes | RAM(GiB) | CPU | Total RAM (GiB) | Total CPU |
+| Regions     | # of nodes | RAM(GiB) | vCPU | Total RAM (GiB) | Total vCPU |
 |-------------|------------|----------|-----|-----------------|-----------|
 | US-West     | 1          | 96       | 48  | 96              | 48        |
 | US-East     | 1          | 96       | 48  | 96              | 48        |
@@ -194,7 +194,7 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     | `LOAD_USERS_TO_LDAP`             | Enable loading users to LDAP persistence. `true` or `false` == ``                                             | `false`                |
     | `LOAD_USERS_TO_SPANNER`          | Enable loading users to Spanner persistence. `true` or `false` == ``                                          | `false`                |
     | `LOAD_USERS_TO_RDBMS`            | Enable loading users to RDBMS persistence. `true` or `false` == ``                                            | `false`                |
-    | `USER_SPLIT_PARALLEL_THREADS`    | The number of parallel threads to break the total number users across. This number heavily effects CPU usage. | `20`                   |
+    | `USER_SPLIT_PARALLEL_THREADS`    | The number of parallel threads to break the total number users across. This number heavily effects vCPU usage. | `20`                   |
     | `GOOGLE_APPLICATION_CREDENTIALS` | Google Credentials JSON SA file. **Used with Spanner**                                                        | ``                     |
     | `GOOGLE_PROJECT_ID`              | Google Project ID. **Used with Spanner**                                                                      | ``                     |
     | `GOOGLE_SPANNER_INSTANCE_ID`     | Google Spanner Instance ID. **Used with Spanner**                                                             | ``                     |
@@ -208,7 +208,7 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     | `RDBMS_PASSWORD`                 | RDBMS user password if `mysql` or `pgsql` is the persistence to load users in. .                              | ``                     |
     | `RDBMS_HOST`                     | RDBMS host if `mysql` or `pgsql` is the persistence to load users in.                                         | `localhost`            |
 
-    __Tips:__ To speed the loading process, increase the CPU requests and limits of the pod.
+    __Tips:__ To speed the loading process, increase the vCPU requests and limits of the pod.
 
 4. Create a namespace for load-testing.
 
@@ -233,7 +233,7 @@ Wait until all the users are up before moving forward. Tail the logs by running 
 
  The below resources were [calculated](#kubernetes-cluster-load-test-resources) when creating the nodes above.
 
-| NAME                                | # of pods | RAM(GiB) | CPU | Total RAM(GiB) | Total CPU |
+| NAME                                | # of pods | RAM(GiB) | vCPU | Total RAM(GiB) | Total vCPU |
 |-------------------------------------|-----------|----------|-----|----------------|-----------|
 | Authorization code flow jmeter test | 20        | 8        | 1.3 | 190            | 24        |
 | Grand Total                         |           |          |     | 190 GiB        | 24        |
@@ -319,7 +319,7 @@ Create the client needed to run the test by executing the following. Make sure t
 
  The below resources were [calculated](#kubernetes-cluster-load-test-resources) when creating the nodes above.
 
-| NAME                  | # of pods | RAM(GiB) | CPU | Total RAM(GiB) | Total CPU |
+| NAME                  | # of pods | RAM(GiB) | vCPU | Total RAM(GiB) | Total vCPU |
 |-----------------------|-----------|----------|-----|----------------|-----------|
 | ROPC flow jmeter test | 20        | 8        | 1.3 | 190            | 24        |
 | Grand Total           |           |          |     | 190 GiB        | 24        |
@@ -407,7 +407,7 @@ Create the client needed to run the test by executing the following. Make sure t
 
  The below resources were [calculated](#kubernetes-cluster-load-test-resources) when creating the nodes above.
 
-| NAME        | # of pods | RAM(GiB) | CPU | Total RAM(GiB) | Total CPU |
+| NAME        | # of pods | RAM(GiB) | vCPU | Total RAM(GiB) | Total vCPU |
 |-------------|-----------|----------|-----|----------------|-----------|
 | DCR test    | 20        | 8        | 1.3 | 190            | 24        |
 | Grand Total |           |          |     | 190 GiB        | 24        |
