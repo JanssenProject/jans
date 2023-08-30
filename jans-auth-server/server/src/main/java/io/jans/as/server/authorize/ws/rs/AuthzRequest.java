@@ -1,26 +1,33 @@
 package io.jans.as.server.authorize.ws.rs;
 
+import com.google.common.collect.Sets;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.DeviceSession;
 import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.util.Util;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.service.RedirectUriResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.SecurityContext;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.jans.as.model.util.StringUtils.implode;
+
 /**
  * @author Yuriy Zabrovarnyy
  */
 public class AuthzRequest {
+
+    private final static Logger log = LoggerFactory.getLogger(AuthzRequest.class);
 
     private String scope;
     private String responseType;
@@ -219,12 +226,31 @@ public class AuthzRequest {
         return Prompt.fromString(prompt, " ");
     }
 
+    public void setPromptList(List<Prompt> prompts) {
+        setPrompt(implode(Sets.newHashSet(prompts), " "));
+    }
+
+    public void addPrompt(Prompt prompt) {
+        final List<Prompt> prompts = getPromptList();
+        prompts.add(prompt);
+        log.trace("Added prompt '{}'", prompt);
+        setPromptList(prompts);
+    }
+
+    public void removePrompt(Prompt prompt) {
+        final List<Prompt> prompts = getPromptList();
+        prompts.remove(prompt);
+        log.trace("Removed prompt '{}'", prompt);
+        setPromptList(prompts);
+    }
+
     public String getPrompt() {
         return prompt;
     }
 
     public void setPrompt(String prompt) {
         this.prompt = prompt;
+        log.trace("Set prompt to '{}'", prompt);
     }
 
     public Integer getMaxAge() {

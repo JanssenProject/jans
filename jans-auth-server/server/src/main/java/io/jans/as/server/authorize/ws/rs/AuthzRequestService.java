@@ -12,7 +12,6 @@ import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.WebKeysConfiguration;
@@ -206,7 +205,7 @@ public class AuthzRequestService {
     }
 
     @SuppressWarnings("java:S3776")
-    public void processRequestObject(AuthzRequest authzRequest, Client client, Set<String> scopes, User user, List<Prompt> prompts) {
+    public void processRequestObject(AuthzRequest authzRequest, Client client, Set<String> scopes, User user) {
         final RedirectUriResponse redirectUriResponse = authzRequest.getRedirectUriResponse();
 
         JwtAuthorizationRequest jwtRequest = null;
@@ -273,9 +272,7 @@ public class AuthzRequestService {
                     authzRequest.setDisplay(jwtRequest.getDisplay().getParamName());
                 }
                 if (!jwtRequest.getPrompts().isEmpty()) {
-                    prompts.clear();
-                    prompts.addAll(Lists.newArrayList(jwtRequest.getPrompts()));
-                    authzRequest.setPrompt(implode(prompts, " "));
+                    authzRequest.setPromptList(jwtRequest.getPrompts());
                     authzRequest.setPromptFromJwt(true);
                 }
                 if (jwtRequest.getResponseMode() != null) {
