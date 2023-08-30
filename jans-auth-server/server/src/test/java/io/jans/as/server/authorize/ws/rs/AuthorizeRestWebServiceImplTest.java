@@ -27,8 +27,6 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Mockito.when;
@@ -119,13 +117,11 @@ public class AuthorizeRestWebServiceImplTest {
     public void checkPromptLogin_whenDisablePromptLoginIsTrue_shouldNotClearSession() {
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setSessionId("some_id");
-
-        List<Prompt> promptList = new ArrayList<>();
-        promptList.add(Prompt.LOGIN);
+        authzRequest.addPrompt(Prompt.LOGIN);
 
         when(appConfiguration.getDisablePromptLogin()).thenReturn(true);
 
-        authorizeRestWebService.checkPromptLogin(authzRequest, promptList);
+        authorizeRestWebService.checkPromptLogin(authzRequest);
         assertEquals(authzRequest.getSessionId(), "some_id");
     }
 
@@ -133,14 +129,12 @@ public class AuthorizeRestWebServiceImplTest {
     public void checkPromptLogin_whenDisablePromptLoginIsFalse_shouldClearSession() {
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setSessionId("some_id");
-
-        List<Prompt> promptList = new ArrayList<>();
-        promptList.add(Prompt.LOGIN);
+        authzRequest.addPrompt(Prompt.LOGIN);
 
         when(identity.getSessionId()).thenReturn(new SessionId());
         when(appConfiguration.getDisablePromptLogin()).thenReturn(false);
 
-        authorizeRestWebService.checkPromptLogin(authzRequest, promptList);
+        authorizeRestWebService.checkPromptLogin(authzRequest);
         assertNull(authzRequest.getSessionId());
     }
 
