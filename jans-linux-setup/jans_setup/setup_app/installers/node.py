@@ -1,5 +1,6 @@
 import os
 import glob
+import shutil
 
 from setup_app import paths
 from setup_app.utils import base
