@@ -19,7 +19,6 @@
 package io.jans.fido2.service.processor.attestation;
 
 import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -107,7 +106,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 
         if (attStmt.hasNonNull("x5c")) {
             Iterator<JsonNode> i = attStmt.get("x5c").elements();
-            ArrayList<String> certificatePath = new ArrayList<String>();
+            ArrayList<String> certificatePath = new ArrayList<>();
             while (i.hasNext()) {
                 certificatePath.add(i.next().asText());
             }
@@ -115,20 +114,26 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 
             credIdAndCounters.setSignatureAlgorithm(alg);
             List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates((JsonNode) null, certificates);
-//            certificateValidator.saveCertificate(certificates.get(0));
-			try {
-				Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
-	            authenticatorDataVerifier.verifyU2FAttestationSignature(authData, clientDataHash, signature, verifiedCert, alg);
-			} catch (Fido2MissingAttestationCertException ex) {
-				X509Certificate certificate = certificates.get(0);
-				String issuerDN = certificate.getIssuerDN().getName();
-				log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
-				if (appConfiguration.getFido2Configuration().isCheckU2fAttestations()) {
-                    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR, ex.getMessage());
-				}
-			}
+
+            if (appConfiguration.getFido2Configuration().isSkipValidateMdsInAttestationEnabled()) {
+                log.warn("SkipValidateMdsInAttestation is enabled");
+            } else {
+                try {
+                    X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
+                    authenticatorDataVerifier.verifyU2FAttestationSignature(authData, clientDataHash, signature, verifiedCert, alg);
+                } catch (Fido2MissingAttestationCertException ex) {
+                    if (!certificates.isEmpty()) {
+                        X509Certificate certificate = certificates.get(0);
+                        String issuerDN = certificate.getIssuerDN().getName();
+                        log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
+                    }
+                    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR, "Error on verify attestation mds: " + ex.getMessage());
+                }
+            }
+
         } else if (attStmt.hasNonNull("ecdaaKeyId")) {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
+            log.warn("Fido-U2F unsupported EcdaaKeyId: {}", ecdaaKeyId);
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR, "ecdaaKeyId is not supported");
         } else {
             PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
@@ -139,5 +144,4 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
     }
-
 }
