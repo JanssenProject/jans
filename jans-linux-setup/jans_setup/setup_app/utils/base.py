@@ -186,8 +186,8 @@ def check_resources():
 
 
 def determineApacheVersion(full=False):
-    httpd_cmd = shutil.which(httpd_name)
-    cmd = httpd_name + " -v | egrep '^Server version'"
+    httpd_cmd = shutil.which(httpd_name) or shutil.which('apache2ctl')
+    cmd = httpd_cmd + " -v | egrep '^Server version'"
     output = run(cmd, shell=True)
     apache_version_re = re.search('Apache/(\d).(\d).(\d)', output.strip())
     if apache_version_re:
