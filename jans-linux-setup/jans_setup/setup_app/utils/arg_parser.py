@@ -97,8 +97,12 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
     parser.add_argument('--install-eleven', help="Install Eleven Server", action='store_true')
     parser.add_argument('--install-jans-link', help="Install Link Server", action='store_true')
+<<<<<<< HEAD
     parser.add_argument('--with-casa', help="Install Gluu/Flex Casa Server", action='store_true')
     parser.add_argument('--install-jans-saml', help="Install Jans SAML", action='store_true')
+=======
+    parser.add_argument('--with-casa', help="Install Gluu Casa Server", action='store_true')
+>>>>>>> f06b6ca458305a47e5aa8f8821fad1d8335f5a20
 
     #parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
     parser.add_argument('--load-config-api-test', help="Load Config Api Test Data", action='store_true')

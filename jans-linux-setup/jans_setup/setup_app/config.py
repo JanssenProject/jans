@@ -16,6 +16,7 @@ OPENBANKING_PROFILE = 'openbanking'
 class Config:
 
     # we define statics here so that is is acessible without construction
+    opt_dir = '/opt'
     jansOptFolder = '/opt/jans'
     distFolder = '/opt/dist'
     jre_home = '/opt/jre'
