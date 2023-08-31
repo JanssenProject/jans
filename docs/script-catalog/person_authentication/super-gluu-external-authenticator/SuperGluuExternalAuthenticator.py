@@ -149,7 +149,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 self.AS_CLIENT_ID = clientRegistrationResponse['client_id']
                 self.AS_CLIENT_SECRET = clientRegistrationResponse['client_secret']
 
-        if StringHelper.isNotEmptyString(self.AS_CLIENT_ID) and StringHelper.isNotEmptyString(self.self.AS_CLIENT_SECRET):
+        if StringHelper.isNotEmptyString(self.AS_CLIENT_ID) and StringHelper.isNotEmptyString(self.AS_CLIENT_SECRET):
             self.enabledPushNotifications = self.initPushNotificationService(configurationAttributes)
         else:
             self.enabledPushNotifications = False
