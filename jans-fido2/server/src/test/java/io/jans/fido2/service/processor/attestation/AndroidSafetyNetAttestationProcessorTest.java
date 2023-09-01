@@ -6,6 +6,8 @@ import io.jans.fido2.google.safetynet.AttestationStatement;
 import io.jans.fido2.google.safetynet.OfflineVerify;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.mds.AttestationCertificateService;
@@ -51,32 +53,44 @@ class AndroidSafetyNetAttestationProcessorTest {
     @Mock
     private OfflineVerify offlineVerify;
 
+    @Mock
+    private AppConfiguration appConfiguration;
+
     @Test
-    void process_ifParseAndVerifyThrownError_badRequestException() {
+    void getAttestationFormat_valid_androidSafetynet() {
+        String fmt = androidSafetyNetAttestationProcessor.getAttestationFormat().getFmt();
+        assertNotNull(fmt);
+        assertEquals(fmt, "android-safetynet");
+    }
+
+    @Test
+    void process_ifSkipValidateMdsInAttestationEnabledIsTrue_success() {
         JsonNode attStmt = mock(JsonNode.class);
         AuthData authData = mock(AuthData.class);
         Fido2RegistrationData credential = mock(Fido2RegistrationData.class);
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.get("response")).thenReturn(new TextNode("response"));
-        when(authData.getAaguid()).thenReturn("aaguid".getBytes());
-        when(base64Service.decode("response")).thenReturn("test_decode".getBytes());
-        when(offlineVerify.parseAndVerify(anyString(), any())).thenThrow(new RuntimeException("test exception"));
-        WebApplicationException e = new WebApplicationException(Response.status(400).entity("test exception").build());
-        when(errorResponseFactory.badRequestException(any(), any())).thenThrow(e);
+        when(attStmt.get("response")).thenReturn(new TextNode("test response"));
+        when(authData.getAaguid()).thenReturn("test_aaguid".getBytes());
+        when(base64Service.decode(anyString())).thenReturn("test response decoded".getBytes());
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setSkipValidateMdsInAttestationEnabled(true);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        when(authData.getCredId()).thenReturn("test_cred_id".getBytes());
+        when(authData.getCosePublicKey()).thenReturn("test_cose_public_key".getBytes());
+        when(base64Service.urlEncodeToString(any(byte[].class))).thenReturn("test_cred_id", "test_uncompressed_ec_point");
 
-        WebApplicationException res = assertThrows(WebApplicationException.class, () -> androidSafetyNetAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
-        assertNotNull(res);
-        assertNotNull(res.getResponse());
-        assertEquals(res.getResponse().getStatus(), 400);
-        assertEquals(res.getResponse().getEntity(), "test exception");
+        androidSafetyNetAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
 
         verify(commonVerifiers).verifyThatNonEmptyString(any(), eq("ver"));
         verify(log).debug(contains("Android safetynet payload"), any(), any());
-        verify(log).error(contains("Error on parse and verify"), any(), any());
-        verify(errorResponseFactory).badRequestException(any(), contains("Invalid safety net attestation "));
-        verifyNoMoreInteractions(errorResponseFactory, base64Service);
+        verify(base64Service).decode(anyString());
+        verify(appConfiguration).getFido2Configuration();
+        verify(log).warn(eq("SkipValidateMdsInAttestation is enabled"));
+        verify(base64Service, times(2)).urlEncodeToString(any(byte[].class));
+        verifyNoInteractions(attestationCertificateService, offlineVerify, errorResponseFactory);
+        verifyNoMoreInteractions(base64Service);
     }
 
     @Test
@@ -87,9 +101,12 @@ class AndroidSafetyNetAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.get("response")).thenReturn(new TextNode("response"));
-        when(authData.getAaguid()).thenReturn("aaguid".getBytes());
-        when(base64Service.decode("response")).thenReturn("test_decode".getBytes());
+        when(attStmt.get("response")).thenReturn(new TextNode("test response"));
+        when(authData.getAaguid()).thenReturn("test_aaguid".getBytes());
+        when(base64Service.decode(anyString())).thenReturn("test response decoded".getBytes());
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         X509TrustManager tm = mock(X509TrustManager.class);
         when(attestationCertificateService.populateTrustManager(authData, null)).thenReturn(tm);
         when(offlineVerify.parseAndVerify(anyString(), any())).thenReturn(null);
@@ -102,7 +119,10 @@ class AndroidSafetyNetAttestationProcessorTest {
         assertEquals(res.getResponse().getEntity(), "test exception");
 
         verify(commonVerifiers).verifyThatNonEmptyString(any(), eq("ver"));
+        verify(base64Service, times(2)).decode(anyString());
         verify(log).debug(contains("Android safetynet payload"), any(), any());
+        verify(attestationCertificateService).populateTrustManager(authData, null);
+        verify(offlineVerify).parseAndVerify(any(), any());
         verify(errorResponseFactory).badRequestException(any(), eq("Invalid safety net attestation, stmt is null"));
         verifyNoMoreInteractions(log, errorResponseFactory, base64Service);
     }
@@ -115,14 +135,17 @@ class AndroidSafetyNetAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.get("response")).thenReturn(new TextNode("response"));
-        when(authData.getAaguid()).thenReturn("aaguid".getBytes());
-        when(authData.getAuthDataDecoded()).thenReturn("authDataDecoded".getBytes());
-        when(base64Service.decode("response")).thenReturn("test_decode".getBytes());
+        when(attStmt.get("response")).thenReturn(new TextNode("test response"));
+        when(authData.getAaguid()).thenReturn("test_aaguid".getBytes());
+        when(base64Service.decode(anyString())).thenReturn("test response decoded".getBytes());
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         X509TrustManager tm = mock(X509TrustManager.class);
         when(attestationCertificateService.populateTrustManager(authData, null)).thenReturn(tm);
         AttestationStatement stmt = mock(AttestationStatement.class);
         when(offlineVerify.parseAndVerify(anyString(), any())).thenReturn(stmt);
+        when(authData.getAuthDataDecoded()).thenReturn("authDataDecoded".getBytes());
         when(errorResponseFactory.badRequestException(any(), anyString())).thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> androidSafetyNetAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters));
@@ -132,7 +155,10 @@ class AndroidSafetyNetAttestationProcessorTest {
         assertEquals(res.getResponse().getEntity(), "test exception");
 
         verify(commonVerifiers).verifyThatNonEmptyString(any(), eq("ver"));
+        verify(base64Service, times(2)).decode(anyString());
         verify(log).debug(contains("Android safetynet payload"), any(), any());
+        verify(attestationCertificateService).populateTrustManager(authData, null);
+        verify(offlineVerify).parseAndVerify(any(), any());
         verify(errorResponseFactory).badRequestException(any(), eq("Invalid safety net attestation, hashed and nonce are not equals"));
         verifyNoMoreInteractions(log, errorResponseFactory, base64Service);
     }
@@ -145,14 +171,17 @@ class AndroidSafetyNetAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.get("response")).thenReturn(new TextNode("response"));
-        when(authData.getAaguid()).thenReturn("aaguid".getBytes());
-        when(authData.getAuthDataDecoded()).thenReturn("authDataDecoded".getBytes());
-        when(base64Service.decode("response")).thenReturn("test_decode".getBytes());
+        when(attStmt.get("response")).thenReturn(new TextNode("test response"));
+        when(authData.getAaguid()).thenReturn("test_aaguid".getBytes());
+        when(base64Service.decode(anyString())).thenReturn("test response decoded".getBytes());
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         X509TrustManager tm = mock(X509TrustManager.class);
         when(attestationCertificateService.populateTrustManager(authData, null)).thenReturn(tm);
         AttestationStatement stmt = mock(AttestationStatement.class);
         when(offlineVerify.parseAndVerify(anyString(), any())).thenReturn(stmt);
+        when(authData.getAuthDataDecoded()).thenReturn("authDataDecoded".getBytes());
         when(stmt.getNonce()).thenReturn(DigestUtils.getSha256Digest().digest("authDataDecodedtest_clientDataHash".getBytes()));
         when(stmt.isCtsProfileMatch()).thenReturn(false);
         when(errorResponseFactory.badRequestException(any(), anyString())).thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
@@ -164,7 +193,10 @@ class AndroidSafetyNetAttestationProcessorTest {
         assertEquals(res.getResponse().getEntity(), "test exception");
 
         verify(commonVerifiers).verifyThatNonEmptyString(any(), eq("ver"));
+        verify(base64Service, times(2)).decode(anyString());
         verify(log).debug(contains("Android safetynet payload"), any(), any());
+        verify(attestationCertificateService).populateTrustManager(authData, null);
+        verify(offlineVerify).parseAndVerify(any(), any());
         verify(errorResponseFactory).badRequestException(any(), eq("Invalid safety net attestation, cts profile match is false"));
         verifyNoMoreInteractions(log, errorResponseFactory, base64Service);
     }
@@ -177,14 +209,17 @@ class AndroidSafetyNetAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.get("response")).thenReturn(new TextNode("response"));
-        when(authData.getAaguid()).thenReturn("aaguid".getBytes());
-        when(authData.getAuthDataDecoded()).thenReturn("authDataDecoded".getBytes());
-        when(base64Service.decode("response")).thenReturn("test_decode".getBytes());
+        when(attStmt.get("response")).thenReturn(new TextNode("test response"));
+        when(authData.getAaguid()).thenReturn("test_aaguid".getBytes());
+        when(base64Service.decode(anyString())).thenReturn("test response decoded".getBytes());
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         X509TrustManager tm = mock(X509TrustManager.class);
         when(attestationCertificateService.populateTrustManager(authData, null)).thenReturn(tm);
         AttestationStatement stmt = mock(AttestationStatement.class);
         when(offlineVerify.parseAndVerify(anyString(), any())).thenReturn(stmt);
+        when(authData.getAuthDataDecoded()).thenReturn("authDataDecoded".getBytes());
         when(stmt.getNonce()).thenReturn(DigestUtils.getSha256Digest().digest("authDataDecodedtest_clientDataHash".getBytes()));
         when(stmt.isCtsProfileMatch()).thenReturn(true);
         when(stmt.getTimestampMs()).thenReturn(ZonedDateTime.now().plusHours(1).toInstant().toEpochMilli());
@@ -196,7 +231,11 @@ class AndroidSafetyNetAttestationProcessorTest {
         assertEquals(res.getResponse().getStatus(), 400);
         assertEquals(res.getResponse().getEntity(), "test exception");
 
+        verify(commonVerifiers).verifyThatNonEmptyString(any(), eq("ver"));
+        verify(base64Service, times(2)).decode(anyString());
         verify(log).debug(contains("Android safetynet payload"), any(), any());
+        verify(attestationCertificateService).populateTrustManager(authData, null);
+        verify(offlineVerify).parseAndVerify(any(), any());
         verify(errorResponseFactory).badRequestException(any(), eq("Invalid safety net attestation, timestamp is after now"));
         verifyNoMoreInteractions(log, errorResponseFactory, base64Service);
     }
@@ -209,14 +248,17 @@ class AndroidSafetyNetAttestationProcessorTest {
         byte[] clientDataHash = "test_clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 
-        when(attStmt.get("response")).thenReturn(new TextNode("response"));
-        when(authData.getAaguid()).thenReturn("aaguid".getBytes());
-        when(authData.getAuthDataDecoded()).thenReturn("authDataDecoded".getBytes());
-        when(base64Service.decode("response")).thenReturn("test_decode".getBytes());
+        when(attStmt.get("response")).thenReturn(new TextNode("test response"));
+        when(authData.getAaguid()).thenReturn("test_aaguid".getBytes());
+        when(base64Service.decode(anyString())).thenReturn("test response decoded".getBytes());
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         X509TrustManager tm = mock(X509TrustManager.class);
         when(attestationCertificateService.populateTrustManager(authData, null)).thenReturn(tm);
         AttestationStatement stmt = mock(AttestationStatement.class);
         when(offlineVerify.parseAndVerify(anyString(), any())).thenReturn(stmt);
+        when(authData.getAuthDataDecoded()).thenReturn("authDataDecoded".getBytes());
         when(stmt.getNonce()).thenReturn(DigestUtils.getSha256Digest().digest("authDataDecodedtest_clientDataHash".getBytes()));
         when(stmt.isCtsProfileMatch()).thenReturn(true);
         when(stmt.getTimestampMs()).thenReturn(ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli());
@@ -228,8 +270,50 @@ class AndroidSafetyNetAttestationProcessorTest {
         assertEquals(res.getResponse().getStatus(), 400);
         assertEquals(res.getResponse().getEntity(), "test exception");
 
+        verify(commonVerifiers).verifyThatNonEmptyString(any(), eq("ver"));
+        verify(base64Service, times(2)).decode(anyString());
         verify(log).debug(contains("Android safetynet payload"), any(), any());
+        verify(attestationCertificateService).populateTrustManager(authData, null);
+        verify(offlineVerify).parseAndVerify(any(), any());
         verify(errorResponseFactory).badRequestException(any(), eq("Invalid safety net attestation, timestamp is before now minus 1 minutes"));
         verifyNoMoreInteractions(log, errorResponseFactory, base64Service);
+    }
+
+    @Test
+    void process_validData_success() {
+        JsonNode attStmt = mock(JsonNode.class);
+        AuthData authData = mock(AuthData.class);
+        Fido2RegistrationData credential = mock(Fido2RegistrationData.class);
+        byte[] clientDataHash = "test_clientDataHash".getBytes();
+        CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
+
+        when(attStmt.get("response")).thenReturn(new TextNode("test response"));
+        when(authData.getAaguid()).thenReturn("test_aaguid".getBytes());
+        when(base64Service.decode(anyString())).thenReturn("test response decoded".getBytes());
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        X509TrustManager tm = mock(X509TrustManager.class);
+        when(attestationCertificateService.populateTrustManager(authData, null)).thenReturn(tm);
+        AttestationStatement stmt = mock(AttestationStatement.class);
+        when(offlineVerify.parseAndVerify(anyString(), any())).thenReturn(stmt);
+        when(authData.getAuthDataDecoded()).thenReturn("authDataDecoded".getBytes());
+        when(stmt.getNonce()).thenReturn(DigestUtils.getSha256Digest().digest("authDataDecodedtest_clientDataHash".getBytes()));
+        when(stmt.isCtsProfileMatch()).thenReturn(true);
+        when(stmt.getTimestampMs()).thenReturn(ZonedDateTime.now().toInstant().toEpochMilli());
+        when(authData.getCredId()).thenReturn("test_cred_id".getBytes());
+        when(authData.getCosePublicKey()).thenReturn("test_cose_public_key".getBytes());
+        when(base64Service.urlEncodeToString(any(byte[].class))).thenReturn("test_cred_id", "test_uncompressed_ec_point");
+
+        androidSafetyNetAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
+
+        verify(commonVerifiers).verifyThatNonEmptyString(any(), eq("ver"));
+        verify(base64Service, times(2)).decode(anyString());
+        verify(log).debug(contains("Android safetynet payload"), any(), any());
+        verify(attestationCertificateService).populateTrustManager(authData, null);
+        verify(offlineVerify).parseAndVerify(any(), any());
+        verify(base64Service, times(2)).urlEncodeToString(any(byte[].class));
+        verifyNoMoreInteractions(log);
+        verifyNoInteractions(errorResponseFactory);
     }
 }

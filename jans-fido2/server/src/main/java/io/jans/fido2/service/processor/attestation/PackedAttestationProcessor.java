@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -80,6 +81,9 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
     private CertificateService certificateService;
 
     @Inject
+    private AppConfiguration appConfiguration;
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     @Override
@@ -93,25 +97,23 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         int alg = commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
 
-
         if (attStmt.hasNonNull("x5c")) {
-            List<X509Certificate> attestationCertificates = getAttestationCertificates(attStmt);
-
-            X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates);
-            if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
-                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
-                        "Packed full attestation but no certificates in metadata for authenticator " + Hex.encodeHexString(authData.getAaguid()));
+            if (appConfiguration.getFido2Configuration().isSkipValidateMdsInAttestationEnabled()) {
+                log.warn("SkipValidateMdsInAttestation is enabled");
+            } else {
+                List<X509Certificate> attestationCertificates = getAttestationCertificates(attStmt);
+                X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates);
+                if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
+                    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Packed full attestation but no certificates in metadata for authenticator " + Hex.encodeHexString(authData.getAaguid()));
+                }
+                X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(attestationCertificates, Arrays.asList(tm.getAcceptedIssuers()));
+                authenticatorDataVerifier.verifyPackedAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, verifiedCert, alg);
+                if (certificateVerifier.isSelfSigned(verifiedCert)) {
+                    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Self signed certificate");
+                }
             }
-
             credIdAndCounters.setSignatureAlgorithm(alg);
 
-            X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(attestationCertificates, Arrays.asList(tm.getAcceptedIssuers()));
-
-            authenticatorDataVerifier.verifyPackedAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, verifiedCert, alg);
-
-            if (certificateVerifier.isSelfSigned(verifiedCert)) {
-                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Self signed certificate");
-            }
         } else if (attStmt.hasNonNull("ecdaaKeyId")) {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, ecdaaKeyId + " is not supported");
@@ -126,13 +128,10 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
 
 	private List<X509Certificate> getAttestationCertificates(JsonNode attStmt) {
 		Iterator<JsonNode> i = attStmt.get("x5c").elements();
-		ArrayList<String> certificatePath = new ArrayList<String>();
+		ArrayList<String> certificatePath = new ArrayList<>();
 		while (i.hasNext()) {
 		    certificatePath.add(i.next().asText());
 		}
-		List<X509Certificate> certificates = certificateService.getCertificates(certificatePath);
-
-		return certificates;
+		return certificateService.getCertificates(certificatePath);
 	}
-
 }
