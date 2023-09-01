@@ -270,7 +270,7 @@
   },
   "jansDeviceData": {
     "mysql": {
-      "type": "TINYTEXT"
+      "type": "TEXT"
     },
     "pgsql": {
       "type": "TEXT"
