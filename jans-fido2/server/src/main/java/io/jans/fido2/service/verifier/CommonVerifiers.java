@@ -39,6 +39,8 @@ import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import tss.tpm.TPMS_ATTEST;
+import tss.tpm.TPMT_PUBLIC;
 
 /**
  * @author Yuriy Movchan
@@ -497,5 +499,13 @@ public class CommonVerifiers {
         if ((node == null) || node.isNull()) {
             throw errorResponseFactory.invalidRequest("Invalid data, value is null");
         }
+    }
+
+    public TPMT_PUBLIC tpmParseToPublic(byte[] value) {
+        return TPMT_PUBLIC.fromTpm(value);
+    }
+
+    public TPMS_ATTEST tpmParseToAttest(byte[] value) {
+        return TPMS_ATTEST.fromTpm(value);
     }
 }

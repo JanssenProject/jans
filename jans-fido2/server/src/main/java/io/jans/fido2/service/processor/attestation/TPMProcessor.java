@@ -33,12 +33,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import io.jans.fido2.ctap.AttestationFormat;
+import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
@@ -91,6 +93,9 @@ public class TPMProcessor implements AttestationFormatProcessor {
     private Base64Service base64Service;
 
     @Inject
+    private AppConfiguration appConfiguration;
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     @Override
@@ -131,11 +136,22 @@ public class TPMProcessor implements AttestationFormatProcessor {
             List<X509Certificate> certificates = certificateService.getCertificates(certificatePath);
             List<X509Certificate> aikCertificates = certificateService.getCertificates(aikCertificatePath);
             List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates(authData, aikCertificates);
-            X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
             X509Certificate aikCertificate = aikCertificates.get(0);
 
+            if (appConfiguration.getFido2Configuration().isSkipValidateMdsInAttestationEnabled()) {
+                log.warn("SkipValidateMdsInAttestation is enabled");
+            } else {
+//                try {
+//
+//                } catch (Fido2RuntimeException e) {
+//                    log.error("Error on verify attestation certificates: {}", e.getMessage(), e);
+//                    throw e;
+//                }
+                X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
+                verifyAIKCertificate(aikCertificate, verifiedCert);
+            }
+
             verifyTPMCertificateExtenstion(aikCertificate, authData);
-            verifyAIKCertificate(aikCertificate, verifiedCert);
 
             String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
             byte[] certInfoBuffer = base64Service.decode(certInfo);
@@ -144,8 +160,8 @@ public class TPMProcessor implements AttestationFormatProcessor {
             signatureVerifier.verifySignature(signatureBytes, certInfoBuffer, aikCertificate, alg);
 
             byte[] pubAreaBuffer = base64Service.decode(pubArea);
-            TPMT_PUBLIC tpmtPublic = TPMT_PUBLIC.fromTpm(pubAreaBuffer);
-            TPMS_ATTEST tpmsAttest = TPMS_ATTEST.fromTpm(certInfoBuffer);
+            TPMT_PUBLIC tpmtPublic = commonVerifiers.tpmParseToPublic(pubAreaBuffer);
+            TPMS_ATTEST tpmsAttest = commonVerifiers.tpmParseToAttest(certInfoBuffer);
 
             verifyMagicInTpms(tpmsAttest);
             verifyTPMSCertificateName(tpmtPublic, tpmsAttest, pubAreaBuffer);
@@ -158,7 +174,6 @@ public class TPMProcessor implements AttestationFormatProcessor {
         } else {
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "Problem with TPM attestation. Unsupported");
         }
-
     }
 
     private void verifyThatKeysAreSame(TPMT_PUBLIC tpmtPublic, byte[] keyBufferFromAuthData) {
@@ -181,7 +196,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
         byte[] pubAreaDigest;
         switch (tpmtPublic.nameAlg.asEnum()) {
         case SHA1:
-        case SHA256: {
+        case     SHA256: {
             pubAreaDigest = DigestUtils.getSha256Digest().digest(pubAreaBuffer);
         }
             break;

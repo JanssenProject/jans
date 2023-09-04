@@ -256,6 +256,9 @@
     "mysql": {
       "type": "TEXT"
     },
+    "pgsql": {
+      "type": "TEXT"
+    },
     "spanner": {
       "type": "STRING(MAX)"
     }
@@ -264,13 +267,27 @@
     "mysql": {
       "type": "TEXT"
     },
+    "pgsql": {
+      "type": "TEXT"
+    },
     "spanner": {
       "type": "STRING(MAX)"
     }
   },
   "jansDeviceData": {
     "mysql": {
-      "type": "TINYTEXT"
+      "type": "TEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "jansDeviceNotificationConf": {
+    "mysql": {
+      "type": "TEXT"
     },
     "pgsql": {
       "type": "TEXT"
