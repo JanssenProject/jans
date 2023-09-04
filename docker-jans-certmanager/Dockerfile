@@ -7,9 +7,7 @@ FROM bellsoft/liberica-openjre-alpine:11.0.16
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache openssl python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps wget git \
-    && mkdir -p /usr/java/latest \
-    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
+    && apk add --no-cache --virtual .build-deps wget git
 
 # ===========
 # Auth client
@@ -146,6 +144,8 @@ RUN mkdir -p /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
+
+RUN ln -sf /usr/lib/jvm/jre /opt/java
 
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
