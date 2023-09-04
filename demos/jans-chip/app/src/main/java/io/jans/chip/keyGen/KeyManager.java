@@ -45,6 +45,11 @@ public class KeyManager {
         return single_instance;
     }
 
+    /**
+     * The function retrieves the public key from the Android Keystore, generating a new key pair if necessary.
+     *
+     * @return The method is returning a PublicKey object.
+     */
     public PublicKey getPublicKey() {
         try {
             if (!checkKeyExists()) {
@@ -52,11 +57,8 @@ public class KeyManager {
             }
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEYSTORE);
             keyStore.load(null);
-            //We get the private and public key from the keystore if they exists
             PrivateKey privateKey = (PrivateKey) keyStore.getKey(KEY_ALIAS, null);
-            //PublicKey publicKey = this.kp.getPublic();
             PublicKey publicKey = keyStore.getCertificate(KEY_ALIAS).getPublicKey();
-
             return publicKey;
         } catch (
                 NoSuchAlgorithmException |
@@ -68,6 +70,11 @@ public class KeyManager {
         }
     }
 
+    /**
+     * The function retrieves the private key from the Android Keystore, generating a new key pair if it doesn't exist.
+     *
+     * @return The method is returning a PrivateKey object.
+     */
     public PrivateKey getPrivateKey() {
         try {
             if (!checkKeyExists()) {
@@ -86,6 +93,11 @@ public class KeyManager {
         }
     }
 
+    /**
+     * The function generates a key pair using RSA algorithm with specified parameters and returns the public key.
+     *
+     * @return The method is returning a PublicKey object.
+     */
     private PublicKey generateKeyPair() {
 
         try {
@@ -115,7 +127,6 @@ public class KeyManager {
             kp = kpg.generateKeyPair();
             Log.d("Key pair successfully generated:: Public Key", kp.getPublic().toString());
             Log.d("Key pair successfully generated:: Public Key", Base64.encodeToString(kp.getPublic().getEncoded(), Base64.NO_WRAP));
-            //Log.d("Key pair successfully generated:: Private Key", Base64.encodeToString(kp.getPrivate().getEncoded(), Base64.NO_WRAP));
 
             return kp.getPublic();
         } catch (Exception e) {
@@ -124,6 +135,12 @@ public class KeyManager {
         return null;
     }
 
+    /**
+     * The function checks if a private and public key pair exists in the Android Keystore.
+     *
+     * @return The method is returning a boolean value. It returns true if both the private key and public key exist in the
+     * keystore, and false otherwise.
+     */
     private boolean checkKeyExists() {
         //We get the Keystore instance
         KeyStore keyStore = null;
@@ -141,6 +158,12 @@ public class KeyManager {
         }
     }
 
+    /**
+     * The function generates a signature for the given data using a private key stored in the Android Keystore.
+     *
+     * @param data The "data" parameter is a byte array that represents the data that you want to sign.
+     * @return The method is returning a String representation of the signature generated from the provided data.
+     */
     public String signData(byte[] data) {
         KeyStore keyStore = null;
         try {
@@ -163,44 +186,16 @@ public class KeyManager {
         }
     }
 
+    /**
+     * The function takes a public key and returns a JWK (JSON Web Key) representation of the key.
+     *
+     * @param publicKey The publicKey parameter is of type PublicKey and represents the public key that you want to convert
+     * to a JWK (JSON Web Key) format.
+     * @return The method is returning a JWK (JSON Web Key) object.
+     */
     public static JWK getPublicKeyJWK(PublicKey publicKey) {
         JWK jwk = new RSAKey.Builder((RSAPublicKey) publicKey)
                 .build();
         return jwk;
     }
-    /*private boolean verifyData(byte[] data) {
-        //We get the Keystore instance
-        KeyStore keyStore = null;
-        try {
-            keyStore = KeyStore.getInstance(ANDROID_KEYSTORE);
-            keyStore.load(null);
-
-            //We get the certificate from the keystore
-            KeyStore.Entry entry = keyStore.getEntry(KEY_ALIAS, null);
-            if (!(entry instanceof KeyStore.PrivateKeyEntry)) {
-                Log.w("Warning", "Not an instance of a PrivateKeyEntry");
-                return false;
-            }
-            Signature signature = Signature.getInstance("SHA256withRSA");
-            signature.initVerify(((KeyStore.PrivateKeyEntry)entry).getCertificate());
-            signature.update(data);
-            boolean valid = s.verify(signature);
-            return vaild;
-            } catch (UnrecoverableEntryException e) {
-            throw new RuntimeException(e);
-        } catch (CertificateException e) {
-            throw new RuntimeException(e);
-        } catch (KeyStoreException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (SignatureException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
-        }
-
-    }*/
 }

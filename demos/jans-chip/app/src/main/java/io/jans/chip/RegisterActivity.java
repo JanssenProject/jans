@@ -122,7 +122,7 @@ public class RegisterActivity extends AppCompatActivity {
         claims.put("aapName", "DPoPApp");
         claims.put("seq", UUID.randomUUID());
         try {
-            String evidenceJwt = DPoPProofFactory.issueJWTToken(claims);
+            String evidenceJwt = DPoPProofFactory.getInstance().issueJWTToken(claims);
             dcrRequest.setEvidence(evidenceJwt);
             Log.d("Inside doDCR :: evidence :: ", evidenceJwt);
         } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException |

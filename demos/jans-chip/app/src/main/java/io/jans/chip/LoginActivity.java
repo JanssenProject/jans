@@ -125,7 +125,7 @@ public class LoginActivity extends AppCompatActivity {
         OIDCClient oidcClient = dbH.getOIDCClient(1);
 
         try {
-            Log.d("dpop token", DPoPProofFactory.issueDPoPJWTToken("POST", opConfiguration.getIssuer()));
+            Log.d("dpop token", DPoPProofFactory.getInstance().issueDPoPJWTToken("POST", opConfiguration.getIssuer()));
             // Create a call to request a token
             Call<TokenResponse> call = RetrofitClient.getInstance(opConfiguration.getIssuer()).getAPIInterface()
                     .getToken(oidcClient.getClientId(),
@@ -134,7 +134,7 @@ public class LoginActivity extends AppCompatActivity {
                             opConfiguration.getIssuer(),
                             "openid",
                             "Basic " + Base64.encodeToString((oidcClient.getClientId() + ":" + oidcClient.getClientSecret()).getBytes(), Base64.NO_WRAP),
-                            DPoPProofFactory.issueDPoPJWTToken("POST", opConfiguration.getIssuer()),
+                            DPoPProofFactory.getInstance().issueDPoPJWTToken("POST", opConfiguration.getIssuer()),
                             opConfiguration.getTokenEndpoint());
             call.enqueue(new Callback<TokenResponse>() {
                 @Override

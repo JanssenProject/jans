@@ -21,9 +21,6 @@ public interface APIInterface {
     @POST
     Call<DCResponse> doDCR(@Body DCRequest dcrRequest, @Url String url);
 
-    @POST
-    Call<DCResponse> getToken(@Body DCRequest dcrRequest, @Url String url);
-
     @FormUrlEncoded
     @POST
     Call<LoginResponse> getAuthorizationChallenge (@Field("client_id") String clientId,
