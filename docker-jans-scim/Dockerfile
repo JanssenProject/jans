@@ -7,9 +7,7 @@ FROM bellsoft/liberica-openjre-alpine:11.0.16
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache openssl python3 tini curl bash py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps wget git zip \
-    && mkdir -p /usr/java/latest \
-    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
+    && apk add --no-cache --virtual .build-deps wget git zip
 
 # =====
 # Jetty
@@ -230,6 +228,8 @@ RUN chmod +x /app/scripts/entrypoint.sh
 
 RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
 
+RUN ln -sf /usr/lib/jvm/jre /opt/java
+
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
@@ -240,7 +240,7 @@ RUN chmod 664 ${JETTY_BASE}/jans-scim/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-scim/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
-    && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
+    && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
     && chmod -R g=u /app/templates/jans-scim \
