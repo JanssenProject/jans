@@ -109,7 +109,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         DCRequest dcrRequest = new DCRequest();
         dcrRequest.setIssuer(issuer);
-        dcrRequest.setClientName("DPoPAppClient-" + UUID.randomUUID());
+        dcrRequest.setClientName("jans-chip-" + UUID.randomUUID());
         dcrRequest.setApplicationType("web");
         dcrRequest.setGrantTypes(Lists.newArrayList("authorization_code", "client_credentials"));
         dcrRequest.setScope(scopeText);
@@ -119,7 +119,7 @@ public class RegisterActivity extends AppCompatActivity {
         dcrRequest.setPostLogoutRedirectUris(Lists.newArrayList(issuer));
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("aapName", "DPoPApp");
+        claims.put("aapName", "jans-chip");
         claims.put("seq", UUID.randomUUID());
         try {
             String evidenceJwt = DPoPProofFactory.getInstance().issueJWTToken(claims);

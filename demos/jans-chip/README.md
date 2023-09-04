@@ -2,6 +2,8 @@
 
 ## A  first party android mobile application that leverages dynamic client registration (DCR), DPoP access tokens.
 
+[Demo Video](https://youtu.be/rqPewmESJb0)
+
 ### Steps followed in App for authentication
 
 1. DCR with attestation

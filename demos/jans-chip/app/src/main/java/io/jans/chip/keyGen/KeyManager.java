@@ -30,7 +30,7 @@ import java.security.interfaces.RSAPublicKey;
 import javax.security.auth.x500.X500Principal;
 
 public class KeyManager {
-    private static final String KEY_ALIAS = "DPoPAppKeystore";
+    private static final String KEY_ALIAS = "JansChipKeystore";
     private static final String ANDROID_KEYSTORE = "AndroidKeyStore";
     private KeyPair kp;
     private static KeyManager single_instance = null;
