@@ -34,7 +34,6 @@
         android:ems="10"
         android:hint="Configuration Endpoint"
         android:inputType="text"
-        android:text="https://admin-ui-test.gluu.org/.well-known/openid-configuration"
         app:layout_constraintBottom_toTopOf="@+id/registerButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.472"
