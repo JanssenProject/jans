@@ -428,6 +428,10 @@ class SpannerBackend:
             ("jansFido2AuthnEntry", "jansApp"),
             ("jansFido2RegistrationEntry", "jansApp"),
             ("adsPrjDeployment", "adsPrjDeplDetails"),
+            ("jansFido2RegistrationEntry", "jansDeviceData"),
+            ("jansDeviceRegistration", "jansDeviceData"),
+            ("jansFido2RegistrationEntry", "jansDeviceNotificationConf"),
+            ("jansDeviceRegistration", "jansDeviceNotificationConf"),
         ]:
             change_column_type(mod[0], mod[1])
 
