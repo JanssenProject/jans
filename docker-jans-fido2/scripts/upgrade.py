@@ -31,6 +31,8 @@ def _transform_fido2_dynamic_config(conf):
         ("oldU2fMigrationEnabled", True),
         ("metadataUrlsProvider", ""),
         ("errorReasonEnabled", False),
+        ("skipDownloadMdsEnabled", False),
+        ("skipValidateMdsInAttestationEnabled", False),
     ]:
         # dont update if key exists
         if k in conf:
