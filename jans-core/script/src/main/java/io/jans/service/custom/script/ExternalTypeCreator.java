@@ -8,14 +8,12 @@ import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.model.ScriptError;
 import io.jans.model.custom.script.type.BaseExternalType;
 import io.jans.service.PythonService;
+import io.jans.service.custom.script.jit.SimpleJavaCompiler;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.openhft.compiler.CompilerUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.io.IoBuilder;
 import org.python.core.PyLong;
 import org.python.core.PyObject;
 import org.slf4j.Logger;
@@ -23,22 +21,16 @@ import org.slf4j.Logger;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
 public class ExternalTypeCreator {
-
-    private static final AtomicBoolean classPathInitialized = new AtomicBoolean(false);
 
     @Inject
     protected Logger log;
@@ -48,22 +40,6 @@ public class ExternalTypeCreator {
 
     @Inject
     protected AbstractCustomScriptService customScriptService;
-
-    private void initJavaCompilerClasspathIfNeeded() {
-        if (classPathInitialized.get()) {
-            return;
-        }
-        try {
-            classPathInitialized.set(true);
-
-            URL[] urls = ((URLClassLoader) this.getClass().getClassLoader()).getURLs();
-            for (URL url : urls) {
-                CompilerUtils.addClassPath(url.getFile());
-            }
-        } catch (Throwable e) {
-            log.error("FAILED to output class loader urls", e);
-        }
-    }
 
     public BaseExternalType createExternalType(CustomScript customScript,
                                                Map<String, SimpleCustomProperty> configurationAttributes) {
@@ -81,6 +57,7 @@ public class ExternalTypeCreator {
         	loadException = ex;
             log.error("Failed to prepare external type '{}', exception: '{}'", customScriptInum, ExceptionUtils.getStackTrace(ex));
             log.error("Script '{}'", customScript.getScript());
+            log.error("Classpath '{}'", SimpleJavaCompiler.getClasspath());
         }
 
         externalType = initExternalType(externalType, customScript, configurationAttributes);
@@ -132,12 +109,8 @@ public class ExternalTypeCreator {
         return null;
     }
 
-    private BaseExternalType createExternalTypeWithJava(CustomScript customScript) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        initJavaCompilerClasspathIfNeeded();
-        CustomScriptType customScriptType = customScript.getScriptType();
-
-        PrintWriter printWriter = IoBuilder.forLogger(getClass()).setLevel(Level.DEBUG).buildPrintWriter();
-        Class<?> aClass = CompilerUtils.CACHED_COMPILER.loadFromJava(getClass().getClassLoader(), customScriptType.getClassName(), customScript.getScript(), printWriter);
+    private BaseExternalType createExternalTypeWithJava(CustomScript customScript) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?> aClass = SimpleJavaCompiler.compile(BaseExternalType.class, customScript.getScript());
         return (BaseExternalType) aClass.getDeclaredConstructor().newInstance();
     }
 
