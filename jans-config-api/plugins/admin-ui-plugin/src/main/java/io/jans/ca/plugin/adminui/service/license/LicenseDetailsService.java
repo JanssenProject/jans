@@ -57,6 +57,7 @@ public class LicenseDetailsService extends BaseService {
     public static final String LICENSE_ISACTIVE_ERROR_RESPONSE = "License isActive error response";
     public static final String LICENSE_RETRIEVE_ERROR_RESPONSE = "License retrieve error response";
     public static final String LICENSE_ACTIVATE_ERROR_RESPONSE = "License activate error response";
+    public static final String LICENSE_APIS_404 = "Unable to connect to license apis. Response Code: 404";
     public static final String TRIAL_GENERATE_ERROR_RESPONSE = "Generate Trial license error response";
 
     /**
@@ -133,8 +134,13 @@ public class LicenseDetailsService extends BaseService {
                 }
             }
             //getting error
+            if (response.getStatus() == 404) {
+                log.error("{}", LICENSE_APIS_404);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
+            }
             String jsonData = response.readEntity(String.class);
             JsonNode jsonNode = mapper.readValue(jsonData, JsonNode.class);
+
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
                 log.error("{}: {}", LICENSE_ISACTIVE_ERROR_RESPONSE, jsonData);
                 return CommonUtils.createGenericResponse(false, jsonNode.get(CODE).intValue(), jsonNode.get(MESSAGE).textValue());
@@ -195,6 +201,10 @@ public class LicenseDetailsService extends BaseService {
                 return CommonUtils.createGenericResponse(true, 200, "Valid license present.", jsonNode);
             }
             //getting error
+            if (response.getStatus() == 404) {
+                log.error("{}", LICENSE_APIS_404);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
+            }
             String jsonData = response.readEntity(String.class);
             JsonNode jsonNode = mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
 
@@ -271,6 +281,10 @@ public class LicenseDetailsService extends BaseService {
                 }
             }
             //getting error
+            if (response.getStatus() == 404) {
+                log.error("{}", LICENSE_APIS_404);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
+            }
             String jsonData = response.readEntity(String.class);
             JsonNode jsonNode = mapper.readValue(jsonData, JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
@@ -435,6 +449,7 @@ public class LicenseDetailsService extends BaseService {
             LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
             licenseConfig.setSsa(ssaRequest.getSsa());
             licenseConfig.setScanLicenseApiHostname(dcrResponse.getScanHostname());
+            licenseConfig.setLicenseHardwareKey(dcrResponse.getHardwareId());
             OIDCClientSettings oidcClient = new OIDCClientSettings(dcrResponse.getOpHost(), dcrResponse.getClientId(), dcrResponse.getClientSecret());
             licenseConfig.setOidcClient(oidcClient);
             appConf.getMainSettings().setLicenseConfig(licenseConfig);
