@@ -6,17 +6,14 @@
 
 package io.jans.keycloak.link.service.config;
 
+import org.slf4j.Logger;
+
 import io.jans.keycloak.link.model.config.AppConfiguration;
-import io.jans.model.SmtpConfiguration;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
-import io.jans.service.cache.CacheConfiguration;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
 
 /**
  * Holds factory methods to create services

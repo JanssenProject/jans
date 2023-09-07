@@ -24,17 +24,23 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-//import javax.inject.Inject;
-//import javax.inject.Named;
-
-import io.jans.link.CacheRefreshEvent;
 import io.jans.link.constants.JansConstants;
+import io.jans.link.event.CacheRefreshEvent;
 import io.jans.link.external.ExternalCacheRefreshService;
 import io.jans.link.model.*;
 import io.jans.link.model.config.AppConfiguration;
 import io.jans.link.model.config.CacheRefreshConfiguration;
+import io.jans.link.server.service.*;
 import io.jans.link.model.config.CacheRefreshAttributeMapping;
-import io.jans.link.service.*;
+import io.jans.link.service.CacheRefreshService;
+import io.jans.link.service.CacheRefreshSnapshotFileService;
+import io.jans.link.service.CacheRefreshUpdateMethod;
+import io.jans.link.service.EncryptionService;
+import io.jans.link.service.Fido2DeviceService;
+import io.jans.link.service.FidoDeviceService;
+import io.jans.link.service.InumService;
+import io.jans.link.service.PairwiseIdService;
+import io.jans.link.service.PersonService;
 import io.jans.link.service.config.ApplicationFactory;
 import io.jans.link.service.config.ConfigurationFactory;
 import io.jans.link.util.PropertyUtil;

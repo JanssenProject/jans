@@ -6,27 +6,58 @@
 
 package io.jans.keycloak.link.timer;
 
-import io.jans.keycloak.link.CacheRefreshEvent;
+import java.lang.reflect.Field;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.commons.beanutils.BeanUtilsBean2;
+import org.apache.commons.io.FilenameUtils;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+
 import io.jans.keycloak.link.model.CacheCompoundKey;
 import io.jans.keycloak.link.model.JansInumMap;
-import io.jans.link.constants.JansConstants;
-import io.jans.link.external.ExternalCacheRefreshService;
-import io.jans.keycloak.link.model.*;
 import io.jans.keycloak.link.model.config.AppConfiguration;
 import io.jans.keycloak.link.model.config.CacheRefreshAttributeMapping;
 import io.jans.keycloak.link.model.config.CacheRefreshConfiguration;
-import io.jans.keycloak.link.service.*;
+import io.jans.keycloak.link.server.service.CacheRefrshConfigurationService;
+import io.jans.keycloak.link.server.service.KeycloakService;
 import io.jans.keycloak.link.service.CacheRefreshService;
-import io.jans.link.service.CacheRefreshSnapshotFileService;
+import io.jans.keycloak.link.service.CacheRefreshSnapshotFileServiceTemp;
 import io.jans.keycloak.link.service.CacheRefreshUpdateMethod;
-import io.jans.keycloak.link.service.CacheRefrshConfigurationService;
 import io.jans.keycloak.link.service.PersonService;
 import io.jans.keycloak.link.service.config.ApplicationFactory;
 import io.jans.keycloak.link.service.config.ConfigurationFactory;
-import io.jans.link.util.PropertyUtil;
 import io.jans.link.constants.JansConstants;
-import io.jans.link.model.*;
-import io.jans.link.service.*;
+import io.jans.link.event.CacheRefreshEvent;
+import io.jans.link.external.ExternalCacheRefreshService;
+import io.jans.link.model.GluuCustomFidoDevice;
+import io.jans.link.model.GluuCustomPerson;
+import io.jans.link.model.GluuFido2Device;
+import io.jans.link.model.GluuSimplePerson;
+import io.jans.link.model.GluuUserPairwiseIdentifier;
+import io.jans.link.service.EncryptionService;
+import io.jans.link.service.Fido2DeviceService;
+import io.jans.link.service.FidoDeviceService;
+import io.jans.link.service.InumService;
+import io.jans.link.service.PairwiseIdService;
+import io.jans.link.util.PropertyUtil;
 import io.jans.model.GluuStatus;
 import io.jans.model.JansCustomAttribute;
 import io.jans.model.SchemaEntry;
@@ -59,19 +90,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import org.apache.commons.beanutils.BeanUtilsBean2;
-import org.apache.commons.io.FilenameUtils;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.representations.idm.UserRepresentation;
-import org.slf4j.Logger;
-
-import java.lang.reflect.Field;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Check periodically if source servers contains updates and trigger target

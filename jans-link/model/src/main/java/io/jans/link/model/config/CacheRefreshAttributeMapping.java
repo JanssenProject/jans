@@ -8,6 +8,8 @@ package io.jans.link.model.config;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import jakarta.enterprise.inject.Vetoed;
+
 import java.io.Serializable;
 
 
@@ -16,6 +18,7 @@ import java.io.Serializable;
  *
  * @author Yuriy Movchan Date: 10/23/2015
  */
+@Vetoed
 @JsonPropertyOrder({ "source", "destination" })
 public class CacheRefreshAttributeMapping implements Serializable {
 

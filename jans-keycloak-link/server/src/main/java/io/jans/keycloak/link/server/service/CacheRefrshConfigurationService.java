@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package io.jans.keycloak.link.service;
+package io.jans.keycloak.link.server.service;
 
 import io.jans.keycloak.link.model.config.AppConfiguration;
 import io.jans.keycloak.link.model.config.Conf;

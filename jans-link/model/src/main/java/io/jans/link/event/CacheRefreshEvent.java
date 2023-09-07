@@ -1,4 +1,4 @@
-package io.jans.keycloak.link;
+package io.jans.link.event;
 
 public class CacheRefreshEvent {
 }

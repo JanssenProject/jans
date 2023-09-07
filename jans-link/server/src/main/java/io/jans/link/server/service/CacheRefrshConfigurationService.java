@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package io.jans.link.service;
+package io.jans.link.server.service;
 
 import java.io.Serializable;
 

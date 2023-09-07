@@ -134,6 +134,8 @@ components:
           type: boolean
         oldU2fMigrationEnabled:
           type: boolean
+        errorReasonEnabled:
+          type: boolean
         fido2Configuration:
           $ref: '#/components/schemas/Fido2Configuration'
     Fido2Configuration:
@@ -169,6 +171,10 @@ components:
             $ref: '#/components/schemas/RequestedParty'
         metadataUrlsProvider:
           type: string
+        skipDownloadMdsEnabled:
+          type: boolean
+        skipValidateMdsInAttestationEnabled:
+          type: boolean
     RequestedParty:
       type: object
       properties:

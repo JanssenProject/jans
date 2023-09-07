@@ -4,14 +4,21 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.keycloak.link.service;
+package io.jans.link.server.service;
+
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Properties;
+
+import org.slf4j.Logger;
 
 import com.google.common.collect.Lists;
-import io.jans.exception.ConfigurationException;
-import io.jans.keycloak.link.service.config.ApplicationFactory;
-import io.jans.keycloak.link.service.config.ConfigurationFactory;
-import io.jans.keycloak.link.timer.CacheRefreshTimer;
+
 import io.jans.link.service.EncryptionService;
+import io.jans.link.service.config.ApplicationFactory;
+import io.jans.link.service.config.ConfigurationFactory;
+import io.jans.link.timer.CacheRefreshTimer;
+import io.jans.exception.ConfigurationException;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PersistenceConfiguration;
@@ -22,6 +29,7 @@ import io.jans.service.cdi.event.ApplicationInitializedEvent;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.script.CustomScriptManager;
+import io.jans.service.logger.LoggerService;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
@@ -38,11 +46,6 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.slf4j.Logger;
-
-import java.lang.annotation.Annotation;
-import java.util.List;
-import java.util.Properties;
 
 /**
  * 
@@ -85,7 +88,7 @@ public class AppInitializer {
 	private QuartzSchedulerManager quartzSchedulerManager;
 
 	@Inject
-	private io.jans.link.service.LoggerService loggerService;
+	private LoggerService loggerService;
 
 	@Inject
 	private CacheRefreshTimer cacheRefreshTimer;
@@ -100,7 +103,7 @@ public class AppInitializer {
 	}
 
 	public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
- 		log.debug("Initializing application services");
+		log.debug("Initializing application services");
 
 		configurationFactory.create();
 
@@ -124,7 +127,6 @@ public class AppInitializer {
 		configurationFactory.initTimer();
 		loggerService.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
-		//customScriptManager.reloadTimerEvent(new UpdateScriptEvent());
 		cacheRefreshTimer.initTimer();
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)

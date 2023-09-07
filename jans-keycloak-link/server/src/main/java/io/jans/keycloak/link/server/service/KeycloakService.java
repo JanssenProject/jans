@@ -1,4 +1,4 @@
-package io.jans.keycloak.link.service;
+package io.jans.keycloak.link.server.service;
 
 import io.jans.keycloak.link.model.config.CacheRefreshConfiguration;
 import io.jans.keycloak.link.model.config.KeycloakConfiguration;

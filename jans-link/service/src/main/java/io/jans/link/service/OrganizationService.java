@@ -6,36 +6,22 @@
 
 package io.jans.link.service;
 
-import io.jans.link.model.config.AppConfiguration;
 import io.jans.model.ApplicationType;
-import jakarta.annotation.Priority;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 /**
  * Provides operations with organization
  * 
  * @author Yuriy Movchan Date: 11.02.2010
  */
-@ApplicationScoped
-@Priority(value = 5)
-public class OrganizationService extends io.jans.service.OrganizationService {
+public abstract class OrganizationService extends io.jans.service.OrganizationService {
 
 	private static final long serialVersionUID = -1959146007518514678L;
 
-	@Inject
-	private AppConfiguration appConfiguration;
-
 	public String getDnForOrganization() {
-		return getDnForOrganization(appConfiguration.getBaseDN());
+		return getDnForOrganization(getAppConfigurationBaseDn());
 	}
 
-	public String getDnForOrganization(String baseDn) {
-		if (baseDn == null) {
-			baseDn = "o=jans";
-		}
-		return baseDn;
-	}
+	public abstract String getAppConfigurationBaseDn();
 
 	/**
 	 * Build DN string for organization
@@ -43,7 +29,7 @@ public class OrganizationService extends io.jans.service.OrganizationService {
 	 * @return DN string for organization
 	 */
 	public String getBaseDn() {
-		return appConfiguration.getBaseDN();
+		return getAppConfigurationBaseDn();
 	}
 
 	@Override
