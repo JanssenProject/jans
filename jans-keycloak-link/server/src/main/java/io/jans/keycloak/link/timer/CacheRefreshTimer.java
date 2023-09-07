@@ -34,11 +34,11 @@ import org.slf4j.Logger;
 import io.jans.keycloak.link.model.CacheCompoundKey;
 import io.jans.keycloak.link.model.JansInumMap;
 import io.jans.keycloak.link.model.config.AppConfiguration;
-import io.jans.keycloak.link.model.config.CacheRefreshAttributeMapping;
-import io.jans.keycloak.link.model.config.CacheRefreshConfiguration;
-import io.jans.keycloak.link.server.service.CacheRefrshConfigurationService;
+import io.jans.keycloak.link.server.service.CacheRefreshConfigurationService;
 import io.jans.keycloak.link.server.service.KeycloakService;
 import io.jans.keycloak.link.service.CacheRefreshService;
+import io.jans.keycloak.link.model.config.CacheRefreshConfiguration;
+import io.jans.link.model.config.shared.CacheRefreshAttributeMapping;
 import io.jans.keycloak.link.service.CacheRefreshSnapshotFileServiceTemp;
 import io.jans.keycloak.link.service.CacheRefreshUpdateMethod;
 import io.jans.keycloak.link.service.PersonService;
@@ -145,7 +145,7 @@ public class CacheRefreshTimer {
 	private AppConfiguration appConfiguration;
 
 	@Inject
-	private CacheRefrshConfigurationService CacheRefrshConfigurationService;
+	private CacheRefreshConfigurationService CacheRefrshConfigurationService;
 
 	@Inject
 	private EncryptionService encryptionService;

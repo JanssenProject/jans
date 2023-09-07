@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.keycloak.link.model.config;
+package io.jans.link.model.config.shared;
 
 /**
  * base interface for all Jans Auth configurations
@@ -12,5 +12,5 @@ package io.jans.keycloak.link.model.config;
  * @author Yuriy Movchan
  * @version 04/12/2017
  */
-public interface Configuration extends io.jans.link.model.config.shared.Configuration {
+public interface Configuration {
 }

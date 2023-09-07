@@ -22,7 +22,7 @@ import java.io.Serializable;
  * @author Reda Zerrad Date: 08.10.2012
  */
 @ApplicationScoped
-public class CacheRefrshConfigurationService implements Serializable {
+public class CacheRefreshConfigurationService implements Serializable {
 
     private Logger log;
 

@@ -31,7 +31,7 @@ import io.jans.link.model.*;
 import io.jans.link.model.config.AppConfiguration;
 import io.jans.link.model.config.CacheRefreshConfiguration;
 import io.jans.link.server.service.*;
-import io.jans.link.model.config.CacheRefreshAttributeMapping;
+import io.jans.link.model.config.shared.CacheRefreshAttributeMapping;
 import io.jans.link.service.CacheRefreshService;
 import io.jans.link.service.CacheRefreshSnapshotFileService;
 import io.jans.link.service.CacheRefreshUpdateMethod;
