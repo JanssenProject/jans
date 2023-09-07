@@ -94,6 +94,7 @@ public class ClientService {
     }
 
     public void merge(Client client) {
+        ignoreCustomObjectClassesForNonLDAP(client);
         ldapEntryManager.merge(client);
         removeFromCache(client);
     }
