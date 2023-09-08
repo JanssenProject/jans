@@ -176,7 +176,7 @@ class CasaInstaller(JettyInstaller):
         web_resources = self.readFile(web_resources_fn).splitlines()
 
         for i, l in enumerate(web_resources):
-            mathced = re.match('<Set name="(.*)">(.*)</Set>', l.strip())
+            mathced = re.match(r'<Set name="(.*)">(.*)</Set>', l.strip())
             if mathced:
                 glist = mathced.groups()
                 if glist[0] == 'resourceBase':
