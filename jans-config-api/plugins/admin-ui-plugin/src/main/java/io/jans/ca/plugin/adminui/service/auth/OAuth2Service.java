@@ -134,7 +134,7 @@ public class OAuth2Service extends BaseService {
 
             return tokenResp;
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription());
+            log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
