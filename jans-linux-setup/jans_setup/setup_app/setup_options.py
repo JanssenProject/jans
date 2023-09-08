@@ -193,5 +193,6 @@ def get_setup_options():
     if base.argsp.no_httpd:
         setupOptions['installHTTPD'] = False
 
+    setupOptions['mono_jetty'] = base.argsp.mono_jetty
 
     return setupOptions

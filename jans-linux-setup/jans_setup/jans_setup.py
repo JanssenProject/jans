@@ -323,6 +323,8 @@ Config.install_jans_cli = Config.install_config_api or Config.install_scim_serve
 
 app_vars = locals().copy()
 
+jansInstaller.pre_setup()
+
 if argsp.shell:
     code.interact(local=locals())
     sys.exit()
@@ -467,11 +469,17 @@ def main():
 
             for service in jansProgress.services:
                 if service['app_type'] == static.AppType.SERVICE:
+                    if Config.mono_jetty and getattr(service['object'], 'jans_jetty_service', False):
+                        continue
                     jansProgress.progress(PostSetup.service_name,
                                           "Starting {}".format(service['name'].replace('-', ' ').replace('_', ' ').title()))
                     time.sleep(2)
                     service['object'].stop()
                     service['object'].start()
+
+            if Config.mono_jetty:
+                jansProgress.progress(PostSetup.service_name, f"Starting {Config.mono_jetty_dir}")
+                jansInstaller.start(Config.mono_jetty_dir)
 
             if argsp.t:
                 base.logIt("Loading test data")

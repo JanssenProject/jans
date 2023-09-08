@@ -11,14 +11,14 @@ from setup_app.installers.jetty import JettyInstaller
 
 
 class ElevenInstaller(JettyInstaller):
-
+    web_port = '8075'
+    service_name = 'jans-eleven'
     source_files = [
             (os.path.join(Config.dist_jans_dir, 'jans-eleven.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-eleven-server/{0}/jans-eleven-server-{0}.war').format(base.current_app.app_info['ox_version']))
             ]
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
-        self.service_name = 'jans-eleven'
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL

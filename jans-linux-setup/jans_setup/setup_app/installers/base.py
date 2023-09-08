@@ -34,12 +34,7 @@ class BaseInstaller:
             self.create_user()
 
         self.create_folders()
-
-        # render unit file
-        unit_files_dir = os.path.join(Config.staticFolder, 'system/systemd')
-        unit_file = os.path.join(unit_files_dir, self.service_name + '.service')
-        if os.path.exists(unit_file):
-            self.renderTemplateInOut(unit_file, unit_files_dir, Config.unit_files_path)
+        self.render_copy_unit_file()
 
         self.install()
         self.copy_static()
@@ -51,6 +46,17 @@ class BaseInstaller:
         self.render_import_templates()
         self.update_backend()
         self.service_post_setup()
+
+    def render_copy_unit_file(self):
+        # render unit file
+        if Config.mono_jetty and self.service_name != 'jans-auth':
+            return
+        unit_files_dir = os.path.join(Config.staticFolder, 'system/systemd')
+        unit_fn_base = Config.mono_jetty_dir if Config.mono_jetty else self.service_name
+        unit_file = os.path.join(unit_files_dir, unit_fn_base + '.service')
+        if os.path.exists(unit_file):
+            self.renderTemplateInOut(unit_file, unit_files_dir, Config.unit_files_path)
+            self.reload_daemon()
 
     def update_rendering_dict(self):
         mydict = {}
@@ -119,8 +125,18 @@ class BaseInstaller:
 
 
     def run_service_command(self, operation, service):
+
+        jans_jetty_service = getattr(self, 'jans_jetty_service', False)
+
+        # we only enable jans-services for mono jetty installations
+        if Config.mono_jetty and  jans_jetty_service and self.service_name != 'jans-auth':
+            return
+
         if not service:
-            service = self.service_name
+            if jans_jetty_service:
+                service = self.mono_jetty_dir if Config.mono_jetty else self.service_name
+            else:
+                service = self.service_name 
 
         if base.snap:
             service = os.environ['SNAP_NAME'] + '.' + service

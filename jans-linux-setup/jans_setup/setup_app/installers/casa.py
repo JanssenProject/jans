@@ -16,12 +16,12 @@ from setup_app.utils.properties_utils import propertiesUtils
 from setup_app.utils.ldif_utils import myLdifParser
 from setup_app.installers.jetty import JettyInstaller
 
-Config.casa_web_port = '8080'
+
 CASA_GIT = 'https://raw.githubusercontent.com/GluuFederation/flex/main/casa'
 
-
 class CasaInstaller(JettyInstaller):
-
+    web_port = '8080'
+    service_name = 'casa'
     client_id_prefix = '3000.'
     casa_dist_dir = os.path.join(Config.dist_jans_dir, 'casa')
     source_files = [
@@ -44,15 +44,12 @@ class CasaInstaller(JettyInstaller):
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
-        self.service_name = 'casa'
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'install_casa'
         self.register_progess()
 
         self.source_files += self.casa_script_files
-        self.jetty_service_dir = os.path.join(self.jetty_base, self.service_name)
-        self.jetty_service_webapps = os.path.join(self.jetty_service_dir, 'webapps')
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
         self.templates_dir = os.path.join(Config.templateFolder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
@@ -72,6 +69,9 @@ class CasaInstaller(JettyInstaller):
 
         self.casa_scopes = self.create_scopes()
         self.add_plugins()
+        if Config.mono_jetty:
+            self.set_resource_base()
+
         self.enable()
 
     def add_plugins(self):
@@ -132,7 +132,7 @@ class CasaInstaller(JettyInstaller):
     def create_folders(self):
         self.createDirs(self.pylib_dir)
         for cdir in ('plugins', 'static'):
-            self.createDirs(os.path.join(self.jetty_service_dir, cdir))
+            self.createDirs(os.path.join(self.jetty_service_base, cdir))
 
     def create_scopes(self):
         self.logIt("Creating Casa client scopes")
@@ -166,6 +166,20 @@ class CasaInstaller(JettyInstaller):
         return scopes_list
 
     def service_post_setup(self):
-        self.writeFile(os.path.join(self.jetty_service_dir, '.administrable'), '', backup=False)
+        self.writeFile(os.path.join(self.jetty_service_base, '.administrable'), '', backup=False)
         self.chown(self.pylib_dir, Config.jetty_user, Config.jetty_group, recursive=True)
-        self.chown(self.jetty_service_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+        self.chown(self.jetty_service_base, Config.jetty_user, Config.jetty_group, recursive=True)
+
+
+    def set_resource_base(self):
+        web_resources_fn = os.path.join(self.jetty_service_webapps, os.path.basename(self.source_files[4][0]))
+        web_resources = self.readFile(web_resources_fn).splitlines()
+
+        for i, l in enumerate(web_resources):
+            mathced = re.match('<Set name="(.*)">(.*)</Set>', l.strip())
+            if mathced:
+                glist = mathced.groups()
+                if glist[0] == 'resourceBase':
+                    web_resources[i] = l.replace(glist[1], os.path.join(self.jetty_service_base, 'static'))
+
+        self.writeFile(web_resources_fn, '\n'.join(web_resources), backup=False)

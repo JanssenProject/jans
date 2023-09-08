@@ -10,7 +10,8 @@ from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 
 class FidoInstaller(JettyInstaller):
-
+    web_port = '8073'
+    service_name = 'jans-fido2'
     source_files = [
                 (os.path.join(Config.dist_jans_dir, 'jans-fido2.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(base.current_app.app_info['ox_version'])),
                 (os.path.join(Config.dist_app_dir, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN']),
@@ -20,7 +21,6 @@ class FidoInstaller(JettyInstaller):
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
-        self.service_name = 'jans-fido2'
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
@@ -41,7 +41,7 @@ class FidoInstaller(JettyInstaller):
 
         self.logIt("Copying fido.war into jetty webapps folder...")
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
+        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
 
         if Config.installed_instance and Config.install_config_api:
             base.current_app.ConfigApiInstaller.install_plugin('fido2-plugin')

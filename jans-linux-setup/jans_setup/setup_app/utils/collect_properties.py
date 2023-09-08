@@ -36,6 +36,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
             salt_prop = base.read_properties_file(salt_fn)
             Config.encode_salt = salt_prop['encodeSalt']
 
+        if os.path.exists(os.path.join(Config.jetty_base, Config.mono_jetty_dir)):
+            Config.mono_jetty = True
+
         jans_prop = base.read_properties_file(Config.jans_properties_fn)
         Config.persistence_type = jans_prop['persistence.type']
         oxauth_ConfigurationEntryDN = jans_prop['jansAuth_ConfigurationEntryDN']

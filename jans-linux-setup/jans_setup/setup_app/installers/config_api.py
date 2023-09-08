@@ -17,7 +17,8 @@ from setup_app.installers.jetty import JettyInstaller
 from setup_app.pylib.ldif4.ldif import LDIFWriter
 
 class ConfigApiInstaller(JettyInstaller):
-
+    web_port = '8074'
+    service_name = 'jans-config-api'
     source_files = [
                 (os.path.join(Config.dist_jans_dir, 'jans-config-api.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war').format(base.current_app.app_info['ox_version'])),
                 (os.path.join(Config.dist_jans_dir, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
@@ -29,7 +30,6 @@ class ConfigApiInstaller(JettyInstaller):
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
-        self.service_name = 'jans-config-api'
         self.needdb = True # we don't need backend connection in this class
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
@@ -45,8 +45,8 @@ class ConfigApiInstaller(JettyInstaller):
         self.dynamic_conf_json = os.path.join(self.output_folder, 'dynamic-conf.json')
         self.config_ldif_fn = os.path.join(self.output_folder, 'config.ldif')
         self.load_ldif_files = [self.config_ldif_fn, self.scope_ldif_fn]
-        self.libDir = os.path.join(self.jetty_base, self.service_name, 'custom/libs/')
-        self.custom_config_dir = os.path.join(self.jetty_base, self.service_name, 'custom/config')
+        self.lib_dir = os.path.join(self.jetty_service_base, 'custom/libs/')
+        self.custom_config_dir = os.path.join(self.jetty_service_base, 'custom/config')
 
         if not base.argsp.shell:
             self.extract_files()
@@ -56,8 +56,8 @@ class ConfigApiInstaller(JettyInstaller):
         self.run([paths.cmd_chmod, '+x', '/usr/sbin/facter'])
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         self.logIt("Copying fido.war into jetty webapps folder...")
-        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
+        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/log4j2.xml', self.custom_config_dir)
 
         self.install_plugin('user-mgt-plugin')
 
@@ -77,13 +77,12 @@ class ConfigApiInstaller(JettyInstaller):
         for source_file in self.source_files:
             if plugin in source_file[0]:
                 self.logIt("Installing Jans Config Api Plugin {}".format(plugin))
-                self.copyFile(source_file[0], self.libDir)
-                plugin_path = os.path.join(self.libDir, os.path.basename(source_file[0]))
+                self.copyFile(source_file[0], self.lib_dir)
+                plugin_path = os.path.join(self.lib_dir, os.path.basename(source_file[0]))
                 self.add_extra_class(plugin_path)
                 break
 
     def extract_files(self):
-        base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/log4j2.xml', self.custom_config_dir)
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', Config.data_dir)
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/config-api-rs-protect.json', Config.data_dir)
 
@@ -176,8 +175,7 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['configOauthEnabled'] = 'false' if base.argsp.disable_config_api_security else 'true'
         Config.templateRenderingDict['apiApprovedIssuer'] = base.argsp.approved_issuer or 'https://{}'.format(Config.hostname)
 
-        oxauth_config_str = base64.decodebytes(Config.templateRenderingDict['oxauth_config_base64'].encode())
-        oxauth_config = json.loads(oxauth_config_str.decode())
+        _, oxauth_config = self.dbUtils.get_oxAuthConfDynamic()
         for param in ('issuer', 'openIdConfigurationEndpoint', 'introspectionEndpoint', 'tokenEndpoint', 'tokenRevocationEndpoint'):
             Config.templateRenderingDict[param] = oxauth_config[param]
 
