@@ -57,7 +57,8 @@ public class LicenseDetailsService extends BaseService {
     public static final String LICENSE_ISACTIVE_ERROR_RESPONSE = "License isActive error response";
     public static final String LICENSE_RETRIEVE_ERROR_RESPONSE = "License retrieve error response";
     public static final String LICENSE_ACTIVATE_ERROR_RESPONSE = "License activate error response";
-    public static final String LICENSE_APIS_404 = "Unable to connect to license apis. Response Code: 404";
+    public static final String LICENSE_APIS_404 = "The requested license apis not found. Response Code: 404";
+    public static final String LICENSE_APIS_503 = "The requested license apis not available. Response Code: 503";
     public static final String TRIAL_GENERATE_ERROR_RESPONSE = "Generate Trial license error response";
 
     /**
@@ -88,6 +89,7 @@ public class LicenseDetailsService extends BaseService {
     }
 
     public GenericResponse checkLicense() {
+        Response response = null;
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
@@ -122,7 +124,7 @@ public class LicenseDetailsService extends BaseService {
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(checkLicenseUrl);
             request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
             request.header(CONTENT_TYPE, APPLICATION_JSON);
-            Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
+            response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("license request status code: {}", response.getStatus());
             ObjectMapper mapper = new ObjectMapper();
@@ -134,10 +136,7 @@ public class LicenseDetailsService extends BaseService {
                 }
             }
             //getting error
-            if (response.getStatus() == 404) {
-                log.error("{}", LICENSE_APIS_404);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
-            }
+
             String jsonData = response.readEntity(String.class);
             JsonNode jsonNode = mapper.readValue(jsonData, JsonNode.class);
 
@@ -149,6 +148,14 @@ public class LicenseDetailsService extends BaseService {
             return CommonUtils.createGenericResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
 
         } catch (Exception e) {
+            if (response.getStatus() == 404) {
+                log.error("{}", LICENSE_APIS_404);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
+            }
+            if (response.getStatus() == 503) {
+                log.error("{}", LICENSE_APIS_503);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503);
+            }
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.CHECK_LICENSE_ERROR.getDescription());
         }
@@ -161,6 +168,7 @@ public class LicenseDetailsService extends BaseService {
      * @return The method `retrieveLicense()` returns a `GenericResponse` object.
      */
     public GenericResponse retrieveLicense() {
+        Response response = null;
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
@@ -187,7 +195,7 @@ public class LicenseDetailsService extends BaseService {
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(retriveLicenseUrl);
             request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
             request.header(CONTENT_TYPE, APPLICATION_JSON);
-            Response response = request.get();
+            response = request.get();
 
             log.info("license request status code: {}", response.getStatus());
 
@@ -201,17 +209,14 @@ public class LicenseDetailsService extends BaseService {
                 return CommonUtils.createGenericResponse(true, 200, "Valid license present.", jsonNode);
             }
             //getting error
-            if (response.getStatus() == 404) {
-                log.error("{}", LICENSE_APIS_404);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
-            }
+
             String jsonData = response.readEntity(String.class);
             JsonNode jsonNode = mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
 
-             if(response.getStatus() == 402) {
-                 log.error("Payment Required: 402");
-                 return CommonUtils.createGenericResponse(false, 402, "Payment Required.");
-             }
+            if (response.getStatus() == 402) {
+                log.error("Payment Required: 402");
+                return CommonUtils.createGenericResponse(false, 402, "Payment Required.");
+            }
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
                 log.error("{}: {}", LICENSE_RETRIEVE_ERROR_RESPONSE, jsonData);
                 return CommonUtils.createGenericResponse(false, jsonNode.get(CODE).intValue(), jsonNode.get(MESSAGE).textValue());
@@ -220,6 +225,14 @@ public class LicenseDetailsService extends BaseService {
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
 
         } catch (Exception e) {
+            if (response.getStatus() == 404) {
+                log.error("{}", LICENSE_APIS_404);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
+            }
+            if (response.getStatus() == 503) {
+                log.error("{}", LICENSE_APIS_503);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503);
+            }
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
         }
@@ -238,6 +251,7 @@ public class LicenseDetailsService extends BaseService {
         if (licenseApiResponse.isSuccess()) {
             return CommonUtils.createGenericResponse(true, 200, ErrorResponse.LICENSE_ALREADY_ACTIVE.getDescription());
         }
+        Response response = null;
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
@@ -260,7 +274,7 @@ public class LicenseDetailsService extends BaseService {
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(activateLicenseUrl);
             request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
             request.header(CONTENT_TYPE, APPLICATION_JSON);
-            Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
+            response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("license Activation request status code: {}", response.getStatus());
             ObjectMapper mapper = new ObjectMapper();
@@ -281,10 +295,6 @@ public class LicenseDetailsService extends BaseService {
                 }
             }
             //getting error
-            if (response.getStatus() == 404) {
-                log.error("{}", LICENSE_APIS_404);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
-            }
             String jsonData = response.readEntity(String.class);
             JsonNode jsonNode = mapper.readValue(jsonData, JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
@@ -296,6 +306,14 @@ public class LicenseDetailsService extends BaseService {
             log.error("{}: {}", LICENSE_ACTIVATE_ERROR_RESPONSE, jsonData);
             return CommonUtils.createGenericResponse(false, response.getStatus(), "License is not activated.");
         } catch (Exception e) {
+            if (response.getStatus() == 404) {
+                log.error("{}", LICENSE_APIS_404);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
+            }
+            if (response.getStatus() == 503) {
+                log.error("{}", LICENSE_APIS_503);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503);
+            }
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription());
         }
@@ -308,7 +326,7 @@ public class LicenseDetailsService extends BaseService {
      * @return The method is returning a LicenseApiResponse object.
      */
     public GenericResponse generateTrialLicense() {
-
+        Response response = null;
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
@@ -330,7 +348,7 @@ public class LicenseDetailsService extends BaseService {
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(trialLicenseUrl);
             request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
             request.header(CONTENT_TYPE, APPLICATION_JSON);
-            Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
+            response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("Generate trial license request status code: {}", response.getStatus());
 
@@ -354,6 +372,7 @@ public class LicenseDetailsService extends BaseService {
                 }
             }
             //getting error
+
             String jsonData = response.readEntity(String.class);
             JsonNode jsonNode = objectMapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
@@ -363,6 +382,14 @@ public class LicenseDetailsService extends BaseService {
             log.error("{}: {}", TRIAL_GENERATE_ERROR_RESPONSE, jsonData);
             return CommonUtils.createGenericResponse(false, response.getStatus(), "Error in generating trial license.");
         } catch (Exception e) {
+            if (response.getStatus() == 404) {
+                log.error("{}", LICENSE_APIS_404);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
+            }
+            if (response.getStatus() == 503) {
+                log.error("{}", LICENSE_APIS_503);
+                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503);
+            }
             log.error(ErrorResponse.ERROR_IN_TRIAL_LICENSE.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_TRIAL_LICENSE.getDescription());
         }
