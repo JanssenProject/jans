@@ -2,7 +2,7 @@ package io.jans.ca.plugin.adminui.utils;
 
 public enum ErrorResponse {
     GET_ACCESS_TOKEN_ERROR("Error in getting access token."),
-    GET_API_PROTECTION_TOKEN_ERROR("Error in getting api protection token."),
+    GET_API_PROTECTION_TOKEN_ERROR("Error in generating token to access Jans Config Api endpoints."),
     GET_USER_INFO_ERROR("Error in getting User-Info."),
     AUTHORIZATION_CODE_BLANK("Bad Request: Authourization `code` blank or empty."),
     USER_INFO_JWT_BLANK("User-Info jwt is blank or empty. Generating token with default scopes."),
