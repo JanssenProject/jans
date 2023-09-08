@@ -55,7 +55,7 @@
 		<!-- ############### Gluu ################# -->
 		<Logger name="io.jans" level="INFO" />
 
-        <Logger name="io.jans.fido2" level="$fido2_log_level">
+        <Logger name="io.jans.fido2" level="$fido2_log_level" additivity="false">
             <AppenderRef ref="$fido2_log_target" />
         </Logger>
 
