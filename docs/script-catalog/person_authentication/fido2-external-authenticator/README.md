@@ -81,7 +81,7 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 ## FIDO2 login page
 Below is an illustration of the Janssen Server's default FIDO2 login page:
 
-![fido2](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/image_fido2.png)
+![fido2](../../../assets/image_fido2.png)
 
 The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://jans.io/docs/admin/developer/customization/customize-web-pages/).
 
@@ -96,7 +96,7 @@ All subsequent FIDO2 authentications for that user account will require the enro
 ### FIDO2 credential management
 A user's FIDO2 devices can be removed by a Janssen administrator in LDAP under the user entry as shown in the below screenshot.
 
-![fido2](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/image-fido2-ldap-structure.png)
+![fido2](../../../assets/image-fido2-ldap-structure.png)
 Diagram source in mermaid.live
 ```
 graph TD
