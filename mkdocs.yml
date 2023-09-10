@@ -95,6 +95,7 @@ nav:
     - Logs: admin/kubernetes-ops/logs.md
     - External Secrets and Configmaps: admin/kubernetes-ops/external-secrets-configmaps.md
     - Health Check: admin/kubernetes-ops/health-check.md
+    - TUI K8s: admin/kubernetes-ops/tui-k8s.md
   - VM Operation Guide:
     - admin/vm-ops/README.md
     - Upgrade: admin/vm-ops/upgrade.md
