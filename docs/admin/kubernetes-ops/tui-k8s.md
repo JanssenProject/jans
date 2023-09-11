@@ -13,7 +13,7 @@ tags:
 
 1.  Download jans-cli-tui from the [release](https://github.com/JanssenProject/jans/releases) assets depending on your OS. For example: 
     
-    `wget https://github.com/JanssenProject/jans/releases/download/v1.0.17.nightly/jans-cli-tui-linux-ubuntu-X86-64.pyz`
+    `wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz`
     
     Now we have `jans-cli-tui-linux-ubuntu-X86-64.pyz` downloaded.
 
