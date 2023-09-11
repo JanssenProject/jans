@@ -555,19 +555,16 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             return;
         }
         if (authzRequest.getPromptList().contains(Prompt.LOGIN)) {
-            boolean sessionUnauthenticated = false;
 
             //  workaround for #1030 - remove only authenticated session, for set up acr we set it unauthenticated and then drop in AuthorizeAction
             if (identity.getSessionId().getState() == SessionIdState.AUTHENTICATED) {
-                sessionUnauthenticated = unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest(), authzRequest.isPromptFromJwt());
+                unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest(), authzRequest.isPromptFromJwt());
             }
             authzRequest.setSessionId(null);
             authzRequest.removePrompt(Prompt.LOGIN);
 
-            if (sessionUnauthenticated) {
-                log.debug("Redirect to authorization page, request {}", authzRequest);
-                throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
-            }
+            log.debug("Redirect to authorization page, request {}", authzRequest);
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
 
