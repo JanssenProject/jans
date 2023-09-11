@@ -40,9 +40,11 @@ tags:
 4. Next, pick which services should be installed for this deployment:
 
   ```bash
-  Install Jans Config API? [Yes]:
-  Install SCIM Server? [Yes]:
-  Install Fido2 Server? [Yes]:
+Install Jans Config API? [Yes] : 
+Install Scim Server? [Yes] : 
+Install Fido2 Server? [Yes] : 
+Install Jans Link Server? [Yes] : 
+Install Gluu Casa? [No] :
   ```
    
 5. Finally, review the summary screen that gives an overview of the selections made during the setup process.
