@@ -38,7 +38,7 @@ jobs:
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@v5
+      uses: crazy-max/ghaction-import-gpg@v6
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -76,7 +76,7 @@ jobs:
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@v5
+      uses: crazy-max/ghaction-import-gpg@v6
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -114,7 +114,7 @@ jobs:
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@v5
+      uses: crazy-max/ghaction-import-gpg@v6
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -152,7 +152,7 @@ jobs:
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@v5
+      uses: crazy-max/ghaction-import-gpg@v6
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -185,7 +185,7 @@ jobs:
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@v5
+      uses: crazy-max/ghaction-import-gpg@v6
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
