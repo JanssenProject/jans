@@ -60,7 +60,7 @@
 		<junit.jupiter.version>5.9.2</junit.jupiter.version>
 		<mockito.version>5.1.1</mockito.version>
 
-		<jetty.version>11.0.15</jetty.version>
+		<jetty.version>11.0.16</jetty.version>
 	</properties>
 
 	<repositories>
