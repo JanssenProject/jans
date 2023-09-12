@@ -614,5 +614,18 @@ jansRevision: 0
 jansScr::%(introspection_introspection_github_claims_introspection_github_claims)s
 jansScrTyp: introspection
 
-
+dn: inum=ABBA-ABBA,ou=scripts,o=jans
+inum: ABBA-ABBA
+objectClass: jansCustomScr
+objectClass: top
+description: Agama Forwarder Script
+displayName: agama forwarder
+jansEnabled: false
+jansLevel: 11
+jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description": ""}
+jansProgLng: python
+jansRevision: 1
+jansScr::%(person_authentication_agama_bridge_agamaforwarder)s
+jansScrTyp: person_authentication
 
