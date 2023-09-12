@@ -8,7 +8,14 @@ tags:
 
 ## Overview 
 
-[![Using the TUI with a Janssen Kubernetes Setup](https://www.loom.com/share/36688669f0aa4c22be2eaf3f711fe488?sid=ec28d4fd-3c73-45a6-ac8d-d550fbaf863f)](https://www.loom.com/share/36688669f0aa4c22be2eaf3f711fe488?sid=ec28d4fd-3c73-45a6-ac8d-d550fbaf863f "Using the TUI with a Janssen Kubernetes Setup")
+  <div>
+    <a href="https://www.loom.com/share/36688669f0aa4c22be2eaf3f711fe488">
+      <p>Using the TUI with a Janssen Kubernetes Setup - Watch Video</p>
+    </a>
+    <a href="https://www.loom.com/share/36688669f0aa4c22be2eaf3f711fe488">
+      <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/36688669f0aa4c22be2eaf3f711fe488-with-play.gif">
+    </a>
+  </div>
    
    Installing TUI and connecting to a Kubernetes installation.
    
