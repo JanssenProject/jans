@@ -130,8 +130,10 @@ public class UserSessionIdService {
     public void updateSessionId(SessionId entity) {
         if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
         	// Reuse existing expiration
-        	int expirationInSeconds = (int) ((System.currentTimeMillis() - entity.getExpirationDate().getTime()) / 1000);
-        	if ((expirationInSeconds <= 0) || (expirationInSeconds > CacheService.DEFAULT_EXPIRATION)) {
+        	int expirationInSeconds = (int) ((entity.getExpirationDate().getTime() - new Date().getTime()) / 1000);
+        	
+        	// Make sure that expiration is bigger than zero
+        	if (expirationInSeconds <= 0) {
         		expirationInSeconds = CacheService.DEFAULT_EXPIRATION;
         	}
             cacheService.put(expirationInSeconds, entity.getDn(), entity);
