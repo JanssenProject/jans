@@ -51,6 +51,8 @@ public class AppConfiguration implements Configuration {
     private List<String> personCustomObjectClassList;
 	@DocProperty(description = "Boolean value to enable disable Super Gluu extension")
     private boolean superGluuEnabled;
+    @DocProperty(description = "Boolean value specifying whether to persist session_id in cache", defaultValue = "false")
+    private Boolean sessionIdPersistInCache = false;
 	@DocProperty(description = "Boolean value to enable disable old oxAuth U2F enrollments migration")
     private boolean oldU2fMigrationEnabled;
 	@DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from Fido2. Default value is false", defaultValue = "false")
@@ -177,6 +179,15 @@ public class AppConfiguration implements Configuration {
 	public void setSuperGluuEnabled(boolean superGluuEnabled) {
 		this.superGluuEnabled = superGluuEnabled;
 	}
+
+    public Boolean getSessionIdPersistInCache() {
+        if (sessionIdPersistInCache == null) sessionIdPersistInCache = false;
+        return sessionIdPersistInCache;
+    }
+
+    public void setSessionIdPersistInCache(Boolean sessionIdPersistInCache) {
+        this.sessionIdPersistInCache = sessionIdPersistInCache;
+    }
 
 	public boolean isOldU2fMigrationEnabled() {
 		return oldU2fMigrationEnabled;
