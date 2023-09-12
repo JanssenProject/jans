@@ -33,6 +33,7 @@ tags:
 | requestedCredentialTypes | List of Requested Credential Types | [Details](#requestedcredentialtypes) |
 | requestedParties | Authenticators metadata in json format | [Details](#requestedparties) |
 | serverMetadataFolder | Authenticators metadata in json format | [Details](#servermetadatafolder) |
+| sessionIdPersistInCache | Boolean value specifying whether to persist session_id in cache | [Details](#sessionidpersistincache) |
 | superGluuEnabled | Boolean value to enable disable Super Gluu extension | [Details](#supergluuenabled) |
 | unfinishedRequestExpiration | Expiration time in seconds for pending enrollment/authentication requests | [Details](#unfinishedrequestexpiration) |
 | useLocalCache | Boolean value to indicate if Local Cache is to be used | [Details](#uselocalcache) |
@@ -253,6 +254,14 @@ tags:
 - Required: No
 
 - Default value: None
+
+### sessionIdPersistInCache
+
+- Description: Boolean value specifying whether to persist session_id in cache
+
+- Required: No
+
+- Default value: false
 
 
 ### unfinishedRequestExpiration
