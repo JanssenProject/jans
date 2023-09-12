@@ -26,4 +26,5 @@ This Operation guide helps you learn about the common operations for Janssen on 
 - [Logs](logs.md)
 - [External Secrets and Configmaps](external-secrets-configmaps.md)
 - [Health Check](health-check.md)
+- [TUI K8s](tui-k8s.md)
 - [FAQ](faq.md)
