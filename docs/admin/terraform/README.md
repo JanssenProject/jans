@@ -52,7 +52,7 @@ Let's have an example on `importing` the current `logging level` of a deployment
      required_providers {
         jans = {
         source = "JanssenProject/jans"
-        version = "0.7.0"
+        version = "0.7.3"
         }
      }
     }
