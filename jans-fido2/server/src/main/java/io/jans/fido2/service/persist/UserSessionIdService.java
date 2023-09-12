@@ -6,6 +6,8 @@
 
 package io.jans.fido2.service.persist;
 
+import static org.apache.commons.lang.BooleanUtils.isTrue;
+
 import java.util.Date;
 import java.util.Map;
 
@@ -14,11 +16,13 @@ import org.slf4j.Logger;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
 import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
+import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -38,7 +42,13 @@ public class UserSessionIdService {
     private Logger log;
 
     @Inject
+    private AppConfiguration appConfiguration;
+
+    @Inject
     private StaticConfiguration staticConfiguration;
+
+    @Inject
+    private CacheService cacheService;
 
     @Inject
     private PersistenceEntryManager persistenceEntryManager;
@@ -118,8 +128,17 @@ public class UserSessionIdService {
     }
 
     public void updateSessionId(SessionId entity) {
-		entity.setLastUsedAt(new Date());
-        persistenceEntryManager.merge(entity);
+        if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
+        	// Reuse existing expiration
+        	int expirationInSeconds = (int) ((System.currentTimeMillis() - entity.getExpirationDate().getTime()) / 1000);
+        	if ((expirationInSeconds <= 0) || (expirationInSeconds > CacheService.DEFAULT_EXPIRATION)) {
+        		expirationInSeconds = CacheService.DEFAULT_EXPIRATION;
+        	}
+            cacheService.put(expirationInSeconds, entity.getDn(), entity);
+        } else {
+        	entity.setLastUsedAt(new Date());
+	        persistenceEntryManager.merge(entity);
+        }
 	}
 
     private SessionId getSessionId(String sessionId) {
@@ -130,9 +149,13 @@ public class UserSessionIdService {
         final SessionId entity;
         try {
         	String sessionDn = buildDn(sessionId);
-            entity = persistenceEntryManager.find(SessionId.class, sessionDn);
-            if (entity == null) {
-                log.warn("Failed to load session id '{}'", sessionId);
+            if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
+            	entity = (SessionId) cacheService.get(sessionDn);
+            } else {
+	            entity = persistenceEntryManager.find(SessionId.class, sessionDn);
+	            if (entity == null) {
+	                log.warn("Failed to load session id '{}'", sessionId);
+	            }
             }
         } catch (Exception ex) {
             log.trace(ex.getMessage(), ex);
@@ -155,5 +178,5 @@ public class UserSessionIdService {
     private String buildDn(String sessionId) {
         return String.format("jansId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
     }
-    
+
 }

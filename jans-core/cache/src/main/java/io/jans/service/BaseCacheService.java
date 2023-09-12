@@ -23,7 +23,7 @@ import java.util.function.Supplier;
  */
 public abstract class BaseCacheService implements CacheInterface {
 	
-	private static int DEFAULT_EXPIRATION = 60;
+	public static int DEFAULT_EXPIRATION = 60;
 
 	@Inject
     private Logger log;

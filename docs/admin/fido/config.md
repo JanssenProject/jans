@@ -67,6 +67,7 @@ Response:
     "jansPerson"
   ],
   "superGluuEnabled": true,
+  "sessionIdPersistInCache": false,
   "oldU2fMigrationEnabled": true,
   "fido2Configuration": {
     "authenticatorCertsFolder": "/etc/jans/conf/fido2/authenticator_cert",

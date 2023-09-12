@@ -16,6 +16,7 @@
       "jansPerson"
    ],
    "superGluuEnabled": false,
+   "sessionIdPersistInCache": false,
    "oldU2fMigrationEnabled": true,
    "errorReasonEnabled": false,
    "fido2Configuration":{
