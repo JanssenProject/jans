@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.15
+ARG JETTY_VERSION=11.0.16
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -44,7 +44,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 ENV CN_VERSION=1.0.17-SNAPSHOT
-ENV CN_BUILD_DATE='2023-08-23 08:32'
+ENV CN_BUILD_DATE='2023-09-11 16:58'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-link-server/${CN_VERSION}/jans-link-server-${CN_VERSION}.war
 
 RUN mkdir -p ${JETTY_BASE}/jans-link/webapps \

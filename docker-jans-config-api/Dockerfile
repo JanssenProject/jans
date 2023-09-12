@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.15
+ARG JETTY_VERSION=11.0.16
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.0.17-SNAPSHOT
-ENV CN_BUILD_DATE='2023-08-23 11:06'
+ENV CN_BUILD_DATE='2023-09-11 16:58'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -72,23 +72,23 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 
 RUN mkdir -p /usr/share/java
 
-ENV SCIM_PLUGIN_BUILD_DATE='2023-08-02 10:33'
+ENV SCIM_PLUGIN_BUILD_DATE='2023-09-11 16:58'
 ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O /usr/share/java/scim-plugin.jar
 
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2023-08-02 10:32'
+ENV ADMIN_UI_PLUGIN_BUILD_DATE='2023-09-11 16:58'
 ENV ADMIN_UI_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${ADMIN_UI_PLUGIN_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
 
-ENV FIDO2_PLUGIN_BUILD_DATE='2023-08-02 10:34'
+ENV FIDO2_PLUGIN_BUILD_DATE='2023-09-11 16:58'
 ENV FIDO2_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/fido2-plugin/${CN_VERSION}/fido2-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${FIDO2_PLUGIN_SOURCE_URL} -O /usr/share/java/fido2-plugin.jar
 
-ENV USER_MGT_PLUGIN_BUILD_DATE='2023-08-02 10:33'
+ENV USER_MGT_PLUGIN_BUILD_DATE='2023-09-11 16:58'
 ENV USER_MGT_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/${CN_VERSION}/user-mgt-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${USER_MGT_PLUGIN_SOURCE_URL} -O /usr/share/java/user-mgt-plugin.jar
 
-ENV JANS_LINK_PLUGIN_BUILD_DATE='2023-07-12 15:50'
+ENV JANS_LINK_PLUGIN_BUILD_DATE='2023-09-11 16:58'
 ENV JANS_LINK_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/jans-link-plugin/${CN_VERSION}/jans-link-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${JANS_LINK_PLUGIN_SOURCE_URL} -O /usr/share/java/jans-link-plugin.jar
 
