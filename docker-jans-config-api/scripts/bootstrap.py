@@ -446,9 +446,9 @@ class PersistenceSetup:
 
     def import_ldif_files(self) -> None:
         # create missing scopes, saved as scopes.ldif (if enabled)
-        if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
-            logger.info("Missing scopes creation is enabled!")
-            self.generate_scopes_ldif()
+        # if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
+        logger.info("Missing scopes creation is enabled!")
+        self.generate_scopes_ldif()
 
         files = ["config.ldif", "scopes.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
