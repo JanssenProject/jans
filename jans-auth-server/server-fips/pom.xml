@@ -53,7 +53,7 @@
 				<executions>
 					<execution>
 						<id>build-oxauth-fips-war</id>
-						<phase>process-sources</phase>
+						<phase>compile</phase>
 						<configuration>
 							<target>
 								<property name="server.webapp.dir" value="${project.basedir}/../server/target/jans-auth-server" />
