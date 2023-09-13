@@ -116,7 +116,7 @@
         <module>agama/engine</module>
         <module>agama/inboundID</module>
         <module>server</module>
-        <!--<module>server-fips</module>-->
+        <module>server-fips</module>
     </modules>
 
 	<dependencyManagement>
