@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import io.jans.orm.ldap.impl.LdapEntryManager;
 import io.jans.orm.ldap.model.MailUniquenessConfiguration;
+import io.jans.orm.ldap.persistence.LdapEntryManagerSample;
 
 /**
  * @author Yuriy Movchan Date: 11/03/2016
