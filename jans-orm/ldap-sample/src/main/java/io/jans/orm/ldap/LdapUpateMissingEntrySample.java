@@ -16,6 +16,7 @@ import org.apache.logging.log4j.status.StatusLogger;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.ldap.impl.LdapEntryManager;
 import io.jans.orm.ldap.model.SimpleSessionState;
+import io.jans.orm.ldap.persistence.LdapEntryManagerSample;
 
 /**
  * @author Yuriy Movchan Date: 03/09/2020

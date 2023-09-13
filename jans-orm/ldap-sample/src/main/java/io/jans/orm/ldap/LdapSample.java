@@ -6,34 +6,30 @@
 
 package io.jans.orm.ldap;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.jans.orm.ldap.impl.LdapEntryManager;
 import io.jans.orm.ldap.model.SimpleAttribute;
 import io.jans.orm.ldap.model.SimpleGrant;
 import io.jans.orm.ldap.model.SimpleSession;
 import io.jans.orm.ldap.model.SimpleUser;
+import io.jans.orm.ldap.persistence.LdapEntryManagerSample;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.search.filter.Filter;
-import org.apache.log4j.Logger;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.status.StatusLogger;
-
-import java.util.List;
 
 /**
  * @author Yuriy Movchan Date: 11/03/2016
  */
 public final class LdapSample {
 
-    private static final Logger LOG;
-
-    static {
-        StatusLogger.getLogger().setLevel(Level.OFF);
-        LoggingHelper.configureConsoleAppender();
-        LOG = Logger.getLogger(LdapSample.class);
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(LdapSample.class);
 
     private LdapSample() {
     }
@@ -44,6 +40,17 @@ public final class LdapSample {
 
         // Create LDAP entry manager
         LdapEntryManager ldapEntryManager = ldapEntryManagerSample.createLdapEntryManager();
+
+        SimpleUser newUser = new SimpleUser();
+        newUser.setDn(String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis()));
+        newUser.setUserId("sample_user_" + System.currentTimeMillis());
+        newUser.setUserPassword("pwd");
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList("London", "Texas", "Kiev")));
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("transientId", "transientId"));
+        ldapEntryManager.persist(newUser);
+
+        SimpleUser dummyUser = ldapEntryManager.find(SimpleUser.class, newUser.getDn());
+        LOG.info("Dummy User '{}'", dummyUser);
 
         // Find all users which have specified object classes defined in SimpleUser
         List<SimpleUser> users = ldapEntryManager.findEntries("o=jans", SimpleUser.class, null);
