@@ -155,11 +155,6 @@
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcmail-fips</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-auth-server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 	</dependencies>
 
 </project>
