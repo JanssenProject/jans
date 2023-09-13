@@ -60,8 +60,7 @@
 		<junit.jupiter.version>5.9.2</junit.jupiter.version>
 		<mockito.version>5.1.1</mockito.version>
 
-		<jetty.version>11.0.15</jetty.version>
-        <apache.james.version>0.8.3</apache.james.version>
+		<jetty.version>11.0.16</jetty.version>
 	</properties>
 
 	<repositories>
@@ -288,7 +287,7 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bc-fips</artifactId>
-				<version>1.0.2.3</version>
+				<version>(,1.0.2.4]</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -664,12 +663,7 @@
 				<artifactId>resteasy-core-spi</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-multipart-provider</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-           
+
 			<!-- <dependency>
 			    <groupId>javax.ws.rs</groupId>
 			    <artifactId>javax.ws.rs-api</artifactId>
@@ -736,32 +730,6 @@
 				<artifactId>opensaml</artifactId>
 				<version>2.6.4</version>
 			</dependency>
-		    <dependency>
-				<groupId>org.opensaml</groupId>
-				<artifactId>opensaml-saml-api</artifactId>
-				<version>3.4.6</version>
-			</dependency>
-		    <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>xmltooling</artifactId>
-                <version>1.4.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-xmlsec-api</artifactId>
-                <version>3.4.6</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-security-api</artifactId>
-                <version>3.4.6</version>
-            </dependency>
-  <!--          <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-core</artifactId>
-                <version>3.4.6</version>
-            </dependency>-->
-            
 			<dependency>
 			    <groupId>org.apache.santuario</groupId>
 			    <artifactId>xmlsec</artifactId>
@@ -979,24 +947,6 @@
 				<artifactId>sac</artifactId>
 				<version>1.3</version>
 			</dependency>
-
-            <!-- apache james -->
-            <dependency>
-            	<groupId>org.apache.james</groupId>
-            	<artifactId>apache-mime4j-dom</artifactId>
-            	<version>${apache.james.version}</version>
-            </dependency>
-            <dependency>
-            	<groupId>org.apache.james</groupId>
-            	<artifactId>apache-mime4j-storage</artifactId>
-            	<version>${apache.james.version}</version>
-            </dependency>
-            <dependency>
-            	<groupId>org.apache.james</groupId>
-            	<artifactId>apache-mime4j-core</artifactId>
-            	<version>${apache.james.version}</version>
-            </dependency>         
-		
 		</dependencies>
 	</dependencyManagement>
 
