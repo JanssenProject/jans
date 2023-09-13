@@ -418,7 +418,6 @@ class Agama(DialogUtils):
                         app=self.app,
                         data=list(flow_errors.items()),
                         headers=["Flow", "Error"],
-                        preferred_size=[int((self.app.dialog_width-5)*.35), int((self.app.dialog_width-5)*.65)]
                         )
                     body_widgets.append(jans_table)
 
