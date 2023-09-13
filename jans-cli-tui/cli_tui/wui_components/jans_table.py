@@ -70,7 +70,7 @@ class JansTableWidget():
 
             total_col_size = sum(max_col_sizes)
 
-            max_width = self.app.dialog_width - 1 - len(max_col_sizes) * self.padding
+            max_width = self.app.dialog_width - 5 - len(max_col_sizes) * self.padding
             if total_col_size > max_width:
                 max_col_ratio = [c/total_col_size for c in max_col_sizes]
                 self.preferred_size = [int(r*max_width) for r in max_col_ratio]
@@ -94,6 +94,9 @@ class JansTableWidget():
             for i, c in enumerate(row):
                 if not c:
                     c = '-'
+                if len(c) > self.preferred_size[i]:
+                    c = textwrap.fill(c, self.preferred_size[i]-1)
+
                 m = c.splitlines()
                 row_widgets.append(TextArea(c, width=self.preferred_size[i], read_only=True, height=len(m), style=self.data_style))
                 table_height += len(m) +1
