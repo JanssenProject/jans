@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.ScopeConstants;
@@ -20,6 +21,8 @@ import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -29,6 +32,7 @@ import org.testng.annotations.Test;
 
 import java.util.Set;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
@@ -113,6 +117,9 @@ public class AuthorizeRestWebServiceImplTest {
     @Mock
     private AuthzRequestService authzRequestService;
 
+    @Mock
+    private HttpServletRequest servletRequest;
+
     @Test
     public void checkPromptLogin_whenDisablePromptLoginIsTrue_shouldNotClearSession() {
         AuthzRequest authzRequest = new AuthzRequest();
@@ -125,14 +132,21 @@ public class AuthorizeRestWebServiceImplTest {
         assertEquals(authzRequest.getSessionId(), "some_id");
     }
 
-    @Test
+    @Test(expectedExceptions = NoLogWebApplicationException.class)
     public void checkPromptLogin_whenDisablePromptLoginIsFalse_shouldClearSession() {
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setSessionId("some_id");
         authzRequest.addPrompt(Prompt.LOGIN);
 
+        final RedirectUri redirectUri = mock(RedirectUri.class);
+        when(redirectUri.toString()).thenReturn("http://rp.com");
+
+        authzRequest.setRedirectUriResponse(new RedirectUriResponse(redirectUri, "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
+
         when(identity.getSessionId()).thenReturn(new SessionId());
         when(appConfiguration.getDisablePromptLogin()).thenReturn(false);
+        when(appConfiguration.getIssuer()).thenReturn("http://as.com");
+        when(servletRequest.getContextPath()).thenReturn("/path");
 
         authorizeRestWebService.checkPromptLogin(authzRequest);
         assertNull(authzRequest.getSessionId());
