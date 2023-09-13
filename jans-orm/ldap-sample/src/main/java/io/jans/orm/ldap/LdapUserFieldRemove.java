@@ -2,6 +2,7 @@ package io.jans.orm.ldap;
 
 import io.jans.orm.ldap.impl.LdapEntryManager;
 import io.jans.orm.ldap.model.SimpleUser;
+import io.jans.orm.ldap.persistence.LdapEntryManagerSample;
 import io.jans.orm.search.filter.Filter;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
