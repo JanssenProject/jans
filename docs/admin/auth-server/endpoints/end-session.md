@@ -31,6 +31,10 @@ https://janssen.server.host/jans-auth/restv1/end_session
 Refer to [this](https://gluu.org/docs/gluu-server/4.4/operation/logout/#openid-connect-single-log-out-slo) article from 
 Gluu Server documentation to understand how end session endpoint works in Janssen Server.  
 
+More information about request and response of the end session endpoint can be found in the OpenAPI specification 
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
+
+
 ## Disabling The Endpoint Using Feature Flag
 
 `/end_session` endpoint can be enabled or disable using [END_SESSION feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#endsession).
