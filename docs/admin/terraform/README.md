@@ -76,11 +76,9 @@ Let's have an example on `importing` the current `logging level` of a deployment
     - **VM:** grab `client_id` and `client_pw` from `/opt/jans/jans-setup/setup.properties.last` file.
 
     - **K8s:** 
-        1. client_id: `kubectl get cm cn -n <namespace> -o yaml | grep test_client_id` 
+        1. client_id: `kubectl get cm cn -n <namespace>  --template={{.data.jca_client_id}}` 
 
-        2. Get client_secret: `kubectl get secret cn -n <namespace> -o yaml | grep test_client_pw`. This client secret has to be decoded before use.
-
-        3. Decode the client_secret: `echo "client_secret" | base64 -d`
+        2. client_secret: `kubectl get secret cn -n <namespace> --template={{.data.jca_client_pw}} | base64 -d`
 
 5.  In your `variables.tf` file, add your `client_id`, `client_secret` and `FQDN`
     ```
@@ -114,7 +112,7 @@ Let's have an example on `importing` the current `logging level` of a deployment
     }
     ```
 
-7.  Before importing, we have to define an empty `resource` in `configurations.tf`:
+7.  Before importing, we have to define a `resource` configuration in `configurations.tf`:
 
     ```
     resource "jans_logging_configuration" "global" {
@@ -125,7 +123,7 @@ Let's have an example on `importing` the current `logging level` of a deployment
 8. Import:
    `terraform import jans_logging_configuration.global global`
 
-    Now after importing, the logging configuration is in Terraform state file, i.e. terraform.tfstate, and it's under Terraform management.
+    Now after importing, the logging configuration is in the Terraform state file, i.e. terraform.tfstate, and it's under Terraform management.
 
     `terraform state list` will output:
     ```
