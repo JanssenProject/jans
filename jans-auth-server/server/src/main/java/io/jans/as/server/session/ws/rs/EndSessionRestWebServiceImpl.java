@@ -119,11 +119,11 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private EndSessionService endSessionService;
 
     @Override
-    public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sid,
+    public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sid, String clientId,
                                       HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
         try {
-            log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sid: {}, Is Secure = {}",
-                    idTokenHint, postLogoutRedirectUri, sid, sec.isSecure());
+            log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sid: {}, Is Secure = {}, clientId = {}",
+                    idTokenHint, postLogoutRedirectUri, sid, sec.isSecure(), clientId);
 
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.END_SESSION);
 
@@ -136,7 +136,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason, state));
             }
 
-            postLogoutRedirectUri = validatePostLogoutRedirectUri(postLogoutRedirectUri, pair, state);
+            postLogoutRedirectUri = validatePostLogoutRedirectUri(postLogoutRedirectUri, pair, state, clientId);
             validateSid(postLogoutRedirectUri, validatedIdToken, pair.getFirst(), state);
 
             endSession(pair, httpRequest, httpResponse);
@@ -407,8 +407,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return null;
     }
 
-
-    private String validatePostLogoutRedirectUri(String postLogoutRedirectUri, Pair<SessionId, AuthorizationGrant> pair, String state) {
+    protected String validatePostLogoutRedirectUri(String postLogoutRedirectUri, Pair<SessionId, AuthorizationGrant> pair, String state, String clientId) {
         try {
             if (StringUtils.isBlank(postLogoutRedirectUri)) {
                 return "";
@@ -418,11 +417,18 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 return postLogoutRedirectUri;
             }
 
-            final String result;
+            String result;
             if (pair.getSecond() == null) {
                 result = redirectionUriService.validatePostLogoutRedirectUri(pair.getFirst(), postLogoutRedirectUri);
+                log.trace("Validated post_logout_redirect_uri: {} against session: {}, result: {}" , postLogoutRedirectUri, pair.getFirst(), result);
             } else {
                 result = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
+                log.trace("Validated post_logout_redirect_uri: {} against (pair) client: {}, result: {}" , postLogoutRedirectUri, pair.getSecond().getClient().getClientId(), result);
+            }
+
+            if (StringUtils.isBlank(result) && StringUtils.isNotBlank(clientId)) {
+                result = redirectionUriService.validatePostLogoutRedirectUri(clientId, postLogoutRedirectUri);
+                log.trace("Validated post_logout_redirect_uri: {} against client_id: {}, result: {}" , postLogoutRedirectUri, clientId, result);
             }
 
             if (StringUtils.isBlank(result)) {
