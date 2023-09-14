@@ -32,6 +32,7 @@ public interface EndSessionRestWebService {
                                @QueryParam(EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI) String postLogoutRedirectUri,
                                @QueryParam(EndSessionRequestParam.STATE) String state,
                                @QueryParam("sid") String sid,
+                               @QueryParam("client_id") String clientId,
                                @Context HttpServletRequest httpRequest,
                                @Context HttpServletResponse httpResponse,
                                @Context SecurityContext securityContext);
