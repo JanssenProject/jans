@@ -17,6 +17,7 @@ import io.jans.orm.ldap.impl.LdapEntryManager;
 import io.jans.orm.ldap.model.SimpleClient;
 import io.jans.orm.ldap.model.SimpleSession;
 import io.jans.orm.ldap.model.SimpleTokenLdap;
+import io.jans.orm.ldap.persistence.LdapEntryManagerSample;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.DefaultBatchOperation;
 import io.jans.orm.model.ProcessBatchOperation;

@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.orm.ldap;
+package io.jans.orm.ldap.persistence;
 
 import java.util.Properties;
 
