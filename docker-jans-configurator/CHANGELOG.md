@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.17-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.16-1...docker-jans-configurator-v1.0.17-1) (2023-09-17)
+
+
+### Features
+
+* **docker-jans-configurator:** custom location for generate.json via ENV ([#5905](https://github.com/JanssenProject/jans/issues/5905)) ([b9ec4d3](https://github.com/JanssenProject/jans/commit/b9ec4d3dc8a0721e75cca8ba8b6759f286238cb1))
+
+
+### Bug Fixes
+
+* **docker-jans-configurator:** use longer expiration time for initial jwks ([#5992](https://github.com/JanssenProject/jans/issues/5992)) ([3a532a2](https://github.com/JanssenProject/jans/commit/3a532a2aa3b26528cb1da93ca368f498796e4cc9))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
 ## [1.0.16-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.15-1...docker-jans-configurator-v1.0.16-1) (2023-08-02)
 
 
