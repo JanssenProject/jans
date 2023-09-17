@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-eleven-v1.0.16...jans-eleven-v1.0.17) (2023-09-17)
+
+
+### Features
+
+* BCFIPS support (sub-part 01) ([#5767](https://github.com/JanssenProject/jans/issues/5767)) ([d8cea00](https://github.com/JanssenProject/jans/commit/d8cea008a73ccecb1b734a010b9e9bdd363c8432))
+
+
+### Bug Fixes
+
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+* version reference ([432a904](https://github.com/JanssenProject/jans/commit/432a9048fd104e6d8ddeb50684bf5df23f0722cf))
+
 ## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-eleven-v1.0.15...jans-eleven-v1.0.16) (2023-08-02)
 
 
