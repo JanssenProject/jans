@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.17-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.16-1...docker-jans-monolith-v1.0.17-1) (2023-09-17)
+
+
+### Bug Fixes
+
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
 ## [1.0.16-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.15-1...docker-jans-monolith-v1.0.16-1) (2023-08-02)
 
 
