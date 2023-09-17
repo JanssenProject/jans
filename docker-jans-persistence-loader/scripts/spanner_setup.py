@@ -347,6 +347,7 @@ class SpannerBackend:
             ("jansClnt", "jansReqURI"),
             ("jansClnt", "jansClaimRedirectURI"),
             ("jansClnt", "jansAuthorizedOrigins"),
+            ("jansSessId", "deviceSecret"),
         ]:
             column_to_array(mod[0], mod[1])
 
