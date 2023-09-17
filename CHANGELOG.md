@@ -5,6 +5,13 @@
 
 ### Bug Fixes
 
+* jar dep ([66c4c15](https://github.com/JanssenProject/jans/commit/66c4c1534a153f3bed4b0bab568e7f43591ccbdd))
+
+## [1.0.17](https://github.com/JanssenProject/jans/compare/v1.0.17...v1.0.17) (2023-09-17)
+
+
+### Bug Fixes
+
 * **docker-jans-fido2:** search cache for session instead of persistence ([#6040](https://github.com/JanssenProject/jans/issues/6040)) ([d8d4073](https://github.com/JanssenProject/jans/commit/d8d40731d935782dc3a8639d055a2440dbdcb3ec))
 * **docker-jans-persistence-loader:** search session by deviceSecret ([#6038](https://github.com/JanssenProject/jans/issues/6038)) ([d299d7f](https://github.com/JanssenProject/jans/commit/d299d7f926e07c7e0af04d5069d51ba9b000393f))
 * **docs:** autogenerate docs ([#6065](https://github.com/JanssenProject/jans/issues/6065)) ([0f3cf5d](https://github.com/JanssenProject/jans/commit/0f3cf5d6c679f02b5a385b72003de2669f2bfb66))
