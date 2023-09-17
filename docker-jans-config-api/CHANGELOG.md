@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.17-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.16-1...docker-jans-config-api-v1.0.17-1) (2023-09-17)
+
+
+### Features
+
+* **docker-jans:** sync assets of images ([#5907](https://github.com/JanssenProject/jans/issues/5907)) ([acbc763](https://github.com/JanssenProject/jans/commit/acbc763f31422c3d9f80f44ade82cc8519dc4fa4))
+
+
+### Bug Fixes
+
+* **docker-jans-config-api:** missing config-api scopes for test client ([#6016](https://github.com/JanssenProject/jans/issues/6016)) ([58c105c](https://github.com/JanssenProject/jans/commit/58c105c8faa46bb76c4ae4b674e51eb26268473e))
+* **docker-jans:** update jetty to v11.0.16 ([#6010](https://github.com/JanssenProject/jans/issues/6010)) ([d8104cd](https://github.com/JanssenProject/jans/commit/d8104cd985d1ca869135b97f1f2e1c02f3bfd5ff))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
 ## [1.0.16-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.15-1...docker-jans-config-api-v1.0.16-1) (2023-08-02)
 
 
