@@ -13,6 +13,7 @@ on:
       - "jans-linux-setup/**"
 permissions:
   checks: write
+  pull-requests: write
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -49,7 +50,7 @@ jobs:
         git config --global user.name "mo-auto"
         git config --global user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token 
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
 
     - name: Test Jans monolith demo
       run: |
@@ -57,7 +58,8 @@ jobs:
         sudo chmod u+x automation/startjanssenmonolithdemo.sh
         sudo bash ./automation/startjanssenmonolithdemo.sh "demoexample.jans.io" "${{ matrix.persistence-backends }}" "${ip}" "${{ github.sha }}"
         persistence=$(echo "${{ matrix.persistence-backends }}" | tr '[:upper:]' '[:lower:]')
-        
+        mv /tmp/reports /${{ matrix.persistence-backends }}-reports
+
         echo "generating rdbms docs for ${{ matrix.persistence-backends }}..."
         git clone  https://mo-auto:${{ secrets.MOAUTO_WORKFLOW_TOKEN }}@github.com/JanssenProject/jans.git
         cd jans
@@ -71,8 +73,8 @@ jobs:
         MESSAGE="fix(docs): autogenerate ${{ matrix.persistence-backends }} RDBMS docs"
         gh pr create --body "Auto generated RDBMS docs" --title "${MESSAGE}" || echo "PR exists"
         cd ..
-        echo "generating rdbms docs for ${{ matrix.persistence-backends }} done"
-
+        echo "generating rdbms docs for ${{ matrix.persistence-backends }} done"   
+        
         export JANS_URL=https://demoexample.jans.io
         export JANS_CLIENT_ID=9876baac-de39-4c23-8a78-674b59df8c09
         export JANS_CLIENT_SECRET=1t5Fin3#security
@@ -81,20 +83,29 @@ jobs:
         cd terraform-provider-jans
         go install github.com/jstemmer/go-junit-report/v2@latest
         go test -v 2>&1 ./... | go-junit-report > ${{ matrix.persistence-backends }}report.xml
+        cd ..
 
-    - id: java
+    - name: Publish Test Results
       continue-on-error: true
+      uses: EnricoMi/publish-unit-test-result-action@v2
       if: >-
-        github.event.pull_request.head.repo.full_name == github.repository ||
-        github.event_name == 'workflow_dispatch' ||
-        github.event_name == 'push'
-      name: Publish Java ${{ matrix.persistence-backends }} Test Report
-      uses: mikepenz/action-junit-report@v3
+          github.event.pull_request.head.repo.full_name == github.repository ||
+          github.event_name == 'workflow_dispatch' ||
+          github.event_name == 'push'
       with:
-        report_paths: '/tmp/reports/*.xml'
-        test_files_prefix: true
-        detailed_summary: true
+        large_files: true
         check_name: Java ${{ matrix.persistence-backends }} Tests
+        report_individual_runs: "true"
+        files: |
+          /${{ matrix.persistence-backends }}-reports/*.xml
+
+    - name: Upload Test Results
+      continue-on-error: true
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: java-${{ matrix.persistence-backends }}-test-results
+        path: "/${{ matrix.persistence-backends }}-reports/*.xml"
 
     - uses: dorny/test-reporter@v1
       continue-on-error: true
@@ -107,3 +118,14 @@ jobs:
         name: Go ${{ matrix.persistence-backends }} Tests
         path: './terraform-provider-jans/${{ matrix.persistence-backends }}report.xml'
         reporter: java-junit
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: java-${{ matrix.persistence-backends }}-test-results
+        path: java-${{ matrix.persistence-backends }}-test-results
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action/composite@v2
+      with:
+        files: "java-${{ matrix.persistence-backends }}-test-results/**/*.xml"
