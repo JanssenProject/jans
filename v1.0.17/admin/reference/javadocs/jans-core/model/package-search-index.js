@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.model"},{"l":"io.jans.model.attribute"},{"l":"io.jans.model.metric"},{"l":"io.jans.model.metric.counter"},{"l":"io.jans.model.metric.ldap"},{"l":"io.jans.model.metric.timer"},{"l":"io.jans.model.types"},{"l":"io.jans.model.uma"},{"l":"io.jans.model.user"}]

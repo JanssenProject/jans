@@ -1,0 +1,12 @@
+io.jans.scim.model
+io.jans.scim.model.fido
+io.jans.scim.model.fido2
+io.jans.scim.auth
+io.jans.scim.auth.oauth
+io.jans.scim.auth.none
+io.jans.scim.util
+io.jans.scim.exception
+io.jans.scim.service
+io.jans.scim.service.filter
+io.jans.scim.service.cdi.event
+io.jans.scim.service.logger

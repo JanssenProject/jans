@@ -1,0 +1,66 @@
+Flow io.jans.inbound.ExternalSiteLogin
+    Basepath "inboundID"
+    Configs providers
+    Inputs providerId
+
+When providerId is null
+    obj = { providers: providers }
+    obj = RRF "login-chooser.ftlh" obj
+    providerId = obj.providerId
+    
+    When providerId is null
+        //Launch basic authn 
+        obj = Trigger io.jans.flow.sample.basic
+        Log "Basic authentication finished with success:" obj.success
+        Finish obj
+        
+provider = providers.$providerId
+//See class io.jans.inbound.Provider for reference
+
+When provider is null or provider.enabled is false
+    msg = Call java.lang.String#format "Provider '%s' not recognized. Is it enabled?" providerId
+    obj = { success: false, error: msg }
+    Finish obj
+
+//Launch matching flow and retrieve profile
+Log "Initiating external authentication for identity provider '%'" providerId
+obj = Trigger $provider.flowQname
+
+When obj.success is false
+    Finish obj
+
+idProc = Call io.jans.inbound.IdentityProcessor#new provider
+temp = Call io.jans.agama.engine.service.ActionService#class
+temp = Call io.jans.service.cdi.util.CdiUtil#bean temp
+temp = Call temp getClassLoader
+
+profile = Call idProc applyMapping obj.data temp
+//In profile, every key is associated to a list
+Log "@d Mapped profile is\n" profile
+temp = null
+
+When profile.uid is null or profile.uid.empty is true
+    obj = { success: false, error: "Mapped profile misses attribute value for 'uid'" }
+    Finish obj
+
+When profile.mail is null or profile.mail.empty is true
+    Log "Incoming user has no e-mail value"
+
+    //Prompt for e-mail if necessary
+    When provider.requestForEmail is true
+        obj = RRF "email-prompt.ftlh"
+        mail = obj.email
+        
+        When mail is null
+            obj = { success: false, error: "Unable to complete profile data: e-mail not provided" }
+            Finish obj
+
+        profile.mail = [ mail ]
+
+uid | E = Call idProc process profile
+When E is null
+    Finish uid
+
+Log "@e Unable to process the incoming user" E
+obj = { success: false, error: E.message }
+Finish obj
