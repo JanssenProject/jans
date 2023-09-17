@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-scim-v1.0.16...jans-scim-v1.0.17) (2023-09-17)
+
+
+### Features
+
+* BCFIPS support (sub-part 01) ([#5767](https://github.com/JanssenProject/jans/issues/5767)) ([d8cea00](https://github.com/JanssenProject/jans/commit/d8cea008a73ccecb1b734a010b9e9bdd363c8432))
+
+
+### Bug Fixes
+
+* add exception handling in test case [#6035](https://github.com/JanssenProject/jans/issues/6035) ([#6036](https://github.com/JanssenProject/jans/issues/6036)) ([32bf00f](https://github.com/JanssenProject/jans/commit/32bf00fb97146f03c4c43af9ef2ff1cb5868e76f))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
 ## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-scim-v1.0.15...jans-scim-v1.0.16) (2023-08-02)
 
 
