@@ -29,7 +29,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.17
-    created: "2023-09-17T18:09:19.441210218Z"
+    created: "2023-09-17T19:21:07.197294689Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -72,7 +72,7 @@ entries:
       repository: ""
       version: 1.0.17
     description: Janssen Access and Identity Management
-    digest: 66af9548efb20d4f4a8f226133eeaaec7bd56972f2d7e653b5cc6e001dcfb6e3
+    digest: 5b4a97a5f055fa994876680de6cfb5c9402889fab84ca538679cfd831b4cb487
     home: https://jans.io
     icon: https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
     kubeVersion: '>=v1.22.0-0'
@@ -114,7 +114,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.17-dev
-    created: "2023-09-17T18:09:19.431139723Z"
+    created: "2023-09-17T19:21:07.187787927Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -199,7 +199,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.16
-    created: "2023-09-17T18:09:19.420914927Z"
+    created: "2023-09-17T19:21:07.177951157Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -284,7 +284,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.16-dev
-    created: "2023-09-17T18:09:19.41058393Z"
+    created: "2023-09-17T19:21:07.168681301Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -369,7 +369,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.15
-    created: "2023-09-17T18:09:19.401503145Z"
+    created: "2023-09-17T19:21:07.158014908Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -450,7 +450,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.15-dev
-    created: "2023-09-17T18:09:19.391966955Z"
+    created: "2023-09-17T19:21:07.148569748Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -531,7 +531,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.14
-    created: "2023-09-17T18:09:19.382682268Z"
+    created: "2023-09-17T19:21:07.139504598Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -612,7 +612,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.14-dev
-    created: "2023-09-17T18:09:19.373794384Z"
+    created: "2023-09-17T19:21:07.131130568Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -693,7 +693,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.13
-    created: "2023-09-17T18:09:19.364443496Z"
+    created: "2023-09-17T19:21:07.121205395Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -774,7 +774,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.13-dev
-    created: "2023-09-17T18:09:19.356181118Z"
+    created: "2023-09-17T19:21:07.111487827Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -855,7 +855,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.12
-    created: "2023-09-17T18:09:19.345817321Z"
+    created: "2023-09-17T19:21:07.101558654Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -936,7 +936,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.12-dev
-    created: "2023-09-17T18:09:19.33720124Z"
+    created: "2023-09-17T19:21:07.092966118Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -989,4 +989,4 @@ entries:
     urls:
     - janssen-1.0.12-dev.tgz
     version: 1.0.12-dev
-generated: "2023-09-17T18:09:19.309135776Z"
+generated: "2023-09-17T19:21:07.075891948Z"
