@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.16...jans-cli-tui-v1.0.17) (2023-09-17)
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** check if host in config ([#5836](https://github.com/JanssenProject/jans/issues/5836)) ([04265de](https://github.com/JanssenProject/jans/commit/04265de820bccfc89ce2c9108f41669a605cf03c))
+* **jans-cli-tui:** move agama archiever to jans-cli directory ([#5721](https://github.com/JanssenProject/jans/issues/5721)) ([61053f0](https://github.com/JanssenProject/jans/commit/61053f0a9cee48415b57289b8236733dcd725199))
+* **jans-cli-tui:** table rows fith dialog ([#6028](https://github.com/JanssenProject/jans/issues/6028)) ([dbbced4](https://github.com/JanssenProject/jans/commit/dbbced44f95050684f18990f28cedf9c7d71923a))
+* **jans-cli-tui:** table widget size for agama details dialog ([#6021](https://github.com/JanssenProject/jans/issues/6021)) ([d2a0b56](https://github.com/JanssenProject/jans/commit/d2a0b567f08fb5f33b3363583c28e2901be96674))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
 ## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.15...jans-cli-tui-v1.0.16) (2023-08-02)
 
 
