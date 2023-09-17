@@ -218,3 +218,4 @@ spec:
 Copy over the files to host
 
 `kubectl cp config-init-load-job:/app/db .`
+
