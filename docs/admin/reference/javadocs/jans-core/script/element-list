@@ -7,6 +7,7 @@ io.jans.model.custom.script.model.bind
 io.jans.model.custom.script.type
 io.jans.model.custom.script.type.auth
 io.jans.model.custom.script.type.authz
+io.jans.model.custom.script.type.authzchallenge
 io.jans.model.custom.script.type.ciba
 io.jans.model.custom.script.type.client
 io.jans.model.custom.script.type.configapi
@@ -33,3 +34,4 @@ io.jans.service
 io.jans.service.cdi.event
 io.jans.service.custom.inject
 io.jans.service.custom.script
+io.jans.service.custom.script.jit
