@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.17-1](https://github.com/JanssenProject/jans/compare/docker-jans-fido2-v1.0.16-1...docker-jans-fido2-v1.0.17-1) (2023-09-17)
+
+
+### Features
+
+* **docker-jans-fido2:** add optional mds config ([#5953](https://github.com/JanssenProject/jans/issues/5953)) ([1197089](https://github.com/JanssenProject/jans/commit/119708999ecf02dd7ea3f3d675adf4eb469bf9a6))
+* **docker-jans:** sync assets of images ([#5907](https://github.com/JanssenProject/jans/issues/5907)) ([acbc763](https://github.com/JanssenProject/jans/commit/acbc763f31422c3d9f80f44ade82cc8519dc4fa4))
+
+
+### Bug Fixes
+
+* **docker-jans-fido2:** duplicate logs for fido2 prefix ([#5974](https://github.com/JanssenProject/jans/issues/5974)) ([4ec99b9](https://github.com/JanssenProject/jans/commit/4ec99b9e8af29365f20eac6c85bfb971f0874ddd))
+* **docker-jans-fido2:** search cache for session instead of persistence ([#6040](https://github.com/JanssenProject/jans/issues/6040)) ([d8d4073](https://github.com/JanssenProject/jans/commit/d8d40731d935782dc3a8639d055a2440dbdcb3ec))
+* **docker-jans:** update jetty to v11.0.16 ([#6010](https://github.com/JanssenProject/jans/issues/6010)) ([d8104cd](https://github.com/JanssenProject/jans/commit/d8104cd985d1ca869135b97f1f2e1c02f3bfd5ff))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
 ## [1.0.16-1](https://github.com/JanssenProject/jans/compare/docker-jans-fido2-v1.0.15-1...docker-jans-fido2-v1.0.16-1) (2023-08-02)
 
 
