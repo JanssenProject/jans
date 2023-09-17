@@ -22,6 +22,7 @@ io.jans.fido2.service.processors
 io.jans.fido2.service.sg
 io.jans.fido2.service.sg.converter
 io.jans.fido2.service.shared
+io.jans.fido2.service.util
 io.jans.fido2.service.verifier
 io.jans.fido2.ws.rs.controller
 io.jans.u2f.service.persist
