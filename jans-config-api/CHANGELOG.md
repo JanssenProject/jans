@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.16...jans-config-api-v1.0.17) (2023-09-17)
+
+
+### Features
+
+* BCFIPS support (sub-part 01) ([#5767](https://github.com/JanssenProject/jans/issues/5767)) ([d8cea00](https://github.com/JanssenProject/jans/commit/d8cea008a73ccecb1b734a010b9e9bdd363c8432))
+* commit the admin-ui openapi specs changes [#5913](https://github.com/JanssenProject/jans/issues/5913) ([#5914](https://github.com/JanssenProject/jans/issues/5914)) ([a755d23](https://github.com/JanssenProject/jans/commit/a755d234e7628ac5d5b99a6b265751262969337b))
+* **jans-auth-server:** OAuth 2.0 for First-Party Native Applications ([#5654](https://github.com/JanssenProject/jans/issues/5654)) ([9d90e28](https://github.com/JanssenProject/jans/commit/9d90e28791c49bc86771623601c654f2c662b7a1))
+* refactoring for change in license flow [#5402](https://github.com/JanssenProject/jans/issues/5402) ([#5889](https://github.com/JanssenProject/jans/issues/5889)) ([adf4578](https://github.com/JanssenProject/jans/commit/adf45788f07e678a523c585d1fa4efaa25d836b4))
+* send proper error response with http error code from Admin UI backend apis [#5986](https://github.com/JanssenProject/jans/issues/5986) ([#5989](https://github.com/JanssenProject/jans/issues/5989)) ([fd22ec1](https://github.com/JanssenProject/jans/commit/fd22ec1e90fd1ec4d8ad96dff2d3a4dca9cc7f26))
+
+
+### Bug Fixes
+
+* **config-api:** source LDAP server test ([#5840](https://github.com/JanssenProject/jans/issues/5840)) ([5379b36](https://github.com/JanssenProject/jans/commit/5379b36c138b879173bfb704404c95c81f625626))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+* update org_id in persistence when ssa is uploaded from UI [#5966](https://github.com/JanssenProject/jans/issues/5966) ([#5967](https://github.com/JanssenProject/jans/issues/5967)) ([85a2d68](https://github.com/JanssenProject/jans/commit/85a2d680dac7695eec09772286cd8722ddbc192f))
+* version reference ([432a904](https://github.com/JanssenProject/jans/commit/432a9048fd104e6d8ddeb50684bf5df23f0722cf))
+
 ## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.15...jans-config-api-v1.0.16) (2023-08-02)
 
 
