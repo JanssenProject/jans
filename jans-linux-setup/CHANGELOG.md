@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.16...jans-linux-setup-v1.0.17) (2023-09-17)
+
+
+### Features
+
+* fido2 needs to search cache for session instead of persistent ([#6011](https://github.com/JanssenProject/jans/issues/6011)) ([0cc0c19](https://github.com/JanssenProject/jans/commit/0cc0c192735c0537c28bb7cc96a9db509d9628e0))
+* **jans-auth-server:** added "The Use of Attestation in OAuth 2.0 Dynamic Client Registration" spec support [#5562](https://github.com/JanssenProject/jans/issues/5562) ([#5868](https://github.com/JanssenProject/jans/issues/5868)) ([38653c9](https://github.com/JanssenProject/jans/commit/38653c9cb9eb992213c5f230a5f36ce1187d0197))
+* **jans-auth-server:** OAuth 2.0 for First-Party Native Applications ([#5654](https://github.com/JanssenProject/jans/issues/5654)) ([9d90e28](https://github.com/JanssenProject/jans/commit/9d90e28791c49bc86771623601c654f2c662b7a1))
+* **jans-fido2:** mds optional ([#5409](https://github.com/JanssenProject/jans/issues/5409)) ([fad9961](https://github.com/JanssenProject/jans/commit/fad9961fbeeffb315d6ca495c43f8a4f000eac86))
+* **jans-linux-setup:** add selinux policies to post setup messages ([#5797](https://github.com/JanssenProject/jans/issues/5797)) ([33db186](https://github.com/JanssenProject/jans/commit/33db186fa2fe69adeb79f8e9e58e525fabfa311e))
+* **jans-linux-setup:** make Casa .administrable by default ([#5829](https://github.com/JanssenProject/jans/issues/5829)) ([cd9dbfb](https://github.com/JanssenProject/jans/commit/cd9dbfbdd331ca2a59b8605db9359d614f2a560b))
+* **jans-linux-setup:** option for java version ([#5830](https://github.com/JanssenProject/jans/issues/5830)) ([5d9290c](https://github.com/JanssenProject/jans/commit/5d9290c750ae9108ec4fa5415208d41f9c1c3372))
+* **jans-linux-setup:** salt with argument ([#5786](https://github.com/JanssenProject/jans/issues/5786)) ([d433827](https://github.com/JanssenProject/jans/commit/d4338271d910ec66e2788e77049c111046193a95))
+* **jans-linux-setup:** support for CentOS Stream 9 ([#5803](https://github.com/JanssenProject/jans/issues/5803)) ([1fce49a](https://github.com/JanssenProject/jans/commit/1fce49a9f5301a1ff505e2b911c44b9800c1741f))
+* **jans-linux-setup:** use builtin libs for tar, zip, wget ([#5899](https://github.com/JanssenProject/jans/issues/5899)) ([280c26d](https://github.com/JanssenProject/jans/commit/280c26d6a29b5800172cbde813f9854fdc5bf9fc))
+
+
+### Bug Fixes
+
+* add missing CB index for native SSO ([#6033](https://github.com/JanssenProject/jans/issues/6033)) ([ea8963c](https://github.com/JanssenProject/jans/commit/ea8963c0a91a5d467a22de0b05c51bcb10fc8041))
+* data type too small for jansDeviceData [#5940](https://github.com/JanssenProject/jans/issues/5940) ([#5943](https://github.com/JanssenProject/jans/issues/5943)) ([f342154](https://github.com/JanssenProject/jans/commit/f3421547911c9a34ddb6ca7613f06f17f75b31cf))
+* data type too small for jansDeviceNotificationConf [#5940](https://github.com/JanssenProject/jans/issues/5940) ([#5946](https://github.com/JanssenProject/jans/issues/5946)) ([39ffb3a](https://github.com/JanssenProject/jans/commit/39ffb3a35b397d8cac1a7472908a6aa6d17e1a33))
+* failed to search session by deviceSecret if DB is PostgreSQL [#6012](https://github.com/JanssenProject/jans/issues/6012) ([#6013](https://github.com/JanssenProject/jans/issues/6013)) ([00b4c8d](https://github.com/JanssenProject/jans/commit/00b4c8da3c1b66e1d85d3dc13ba3ed4fff517431))
+* **fido2:** Exception handling for assertion ([#5689](https://github.com/JanssenProject/jans/issues/5689)) ([2c82c5d](https://github.com/JanssenProject/jans/commit/2c82c5d73594464ed8ecec199f57774737cfd4e3))
+* fix schema and update ldap samples ([#6024](https://github.com/JanssenProject/jans/issues/6024)) ([beabaef](https://github.com/JanssenProject/jans/commit/beabaef7835fa4331f2b889b69d8bb6fab436fcc))
+* **jans-cli-tui:** move agama archiever to jans-cli directory ([#5721](https://github.com/JanssenProject/jans/issues/5721)) ([61053f0](https://github.com/JanssenProject/jans/commit/61053f0a9cee48415b57289b8236733dcd725199))
+* **jans-linux-setup:** cb installation with args ([#5860](https://github.com/JanssenProject/jans/issues/5860)) ([2582fd5](https://github.com/JanssenProject/jans/commit/2582fd5018c3a5a40817267b0eaa9c5dc9bc2f50))
+* **jans-linux-setup:** Gluu/Flex Casa ([#5916](https://github.com/JanssenProject/jans/issues/5916)) ([276c082](https://github.com/JanssenProject/jans/commit/276c0828837f0283adda9874ffe6d7fd3f02674f))
+* **jans-linux-setup:** missing attribute mappings ([#5886](https://github.com/JanssenProject/jans/issues/5886)) ([d4bd70b](https://github.com/JanssenProject/jans/commit/d4bd70bfa070dada8165d3f4158038c63d9ea8c0))
+* **jans-linux-setup:** node installer ([#5933](https://github.com/JanssenProject/jans/issues/5933)) ([ddbb2cf](https://github.com/JanssenProject/jans/commit/ddbb2cf1bed6aec78f17e57c1acce237533a1412))
+* **jans-linux-setup:** prompt for Gluu Casa ([#5898](https://github.com/JanssenProject/jans/issues/5898)) ([e388a26](https://github.com/JanssenProject/jans/commit/e388a26d0ada0ca0197b6992f3828f357ae90c5d))
+* **jans-linux-setup:** suse apache version ([#5938](https://github.com/JanssenProject/jans/issues/5938)) ([66c4ef7](https://github.com/JanssenProject/jans/commit/66c4ef766a62788437cce88974357a9a2b20de21))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
 ## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.15...jans-linux-setup-v1.0.16) (2023-08-02)
 
 
