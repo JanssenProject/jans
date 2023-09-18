@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.0.17</version>
+		<version>1.0.18-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
