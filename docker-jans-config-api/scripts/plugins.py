@@ -7,7 +7,7 @@ from jans.pycloudlib.utils import cert_to_truststore
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("plugins")
+logger = logging.getLogger("config-api")
 
 SUPPORTED_PLUGINS = (
     "admin-ui",
@@ -35,7 +35,7 @@ def discover_plugins() -> list[str]:
         if plugin not in SUPPORTED_PLUGINS:
             continue
 
-        src = f"/usr/share/java/{plugin}-plugin.jar"
+        src = f"/opt/jans/jetty/jans-config-api/_plugins/{plugin}-plugin.jar"
         dst = f"/opt/jans/jetty/jans-config-api/custom/libs/{plugin}-plugin.jar"
 
         if not os.path.isfile(src):

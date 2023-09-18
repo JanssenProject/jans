@@ -18,7 +18,7 @@ from settings import LOGGING_CONFIG
 from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("config-api")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
@@ -297,7 +297,6 @@ class Upgrade:
         self.update_api_dynamic_config()
 
         # add missing scopes into internal config-api client (if enabled)
-        # if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
         self.update_client_scopes()
         self.update_test_client_scopes()
 

@@ -39,15 +39,15 @@ from plugins import discover_plugins
 from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("config-api")
 
 
 def main():
     manager = get_manager()
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
 
-    render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
-    render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
+    render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
+    render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
 
     mapper = PersistenceMapper()
     persistence_groups = mapper.groups().keys()
@@ -60,7 +60,7 @@ def main():
     if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
-            "/app/templates/jans-ldap.properties.tmpl",
+            "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
         sync_ldap_truststore(manager)
@@ -68,7 +68,7 @@ def main():
     if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
-            "/app/templates/jans-couchbase.properties.tmpl",
+            "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
         # need to resolve whether we're using default or user-defined couchbase cert
@@ -79,14 +79,14 @@ def main():
 
         render_sql_properties(
             manager,
-            f"/app/templates/jans-{db_dialect}.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties",
             "/etc/jans/conf/jans-sql.properties",
         )
 
     if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
-            "/app/templates/jans-spanner.properties.tmpl",
+            "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
 
@@ -205,7 +205,7 @@ def configure_logging():
     ]):
         config["log_prefix"] = "${sys:config_api.log.console.prefix}%X{config_api.log.console.group} - "
 
-    with open("/app/templates/log4j2.xml") as f:
+    with open("/app/templates/jans-config-api/log4j2.xml") as f:
         txt = f.read()
 
     logfile = "/opt/jans/jetty/jans-config-api/resources/log4j2.xml"
@@ -278,7 +278,7 @@ def configure_admin_ui_logging():
     ]):
         config["log_prefix"] = "${sys:admin_ui.log.console.prefix}%X{admin_ui.log.console.group} - "
 
-    with open("/app/plugins/admin-ui/log4j2-adminui.xml") as f:
+    with open("/app/templates/jans-config-api/log4j2-adminui.xml") as f:
         txt = f.read()
 
     tmpl = Template(txt)
@@ -446,7 +446,6 @@ class PersistenceSetup:
 
     def import_ldif_files(self) -> None:
         # create missing scopes, saved as scopes.ldif (if enabled)
-        # if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
         logger.info("Missing scopes creation is enabled!")
         self.generate_scopes_ldif()
 
