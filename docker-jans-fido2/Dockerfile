@@ -25,9 +25,6 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
     && rm -rf /tmp/jetty.tar.gz
 
-# Ports required by jetty
-EXPOSE 8080
-
 # ======
 # Jython
 # ======
@@ -48,8 +45,7 @@ ENV CN_BUILD_DATE='2023-09-17 16:09'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
-
-COPY jetty/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
+COPY static/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
 RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
     && wget -q ${CN_SOURCE_URL} -O /tmp/jans-fido2.war \
     && cd /tmp \
@@ -97,9 +93,6 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/jans-fido2/static-conf.json /app/templates/jans-fido2/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-fido2/jans-fido2-errors.json /app/templates/jans-fido2/
 
-# cleanup
-RUN rm -rf /tmp/jans
-
 # download external files
 ARG MDS_DOWNLOAD_DATE='2022-10-03'
 RUN wget -q https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem -P /etc/jans/conf/fido2/authenticator_cert/ \
@@ -120,14 +113,14 @@ RUN python3 -m ensurepip \
 # Prometheus
 # ==========
 
-COPY conf/prometheus-config.yaml /opt/prometheus/
+COPY static/prometheus-config.yaml /opt/prometheus/
 
 # =======
 # Cleanup
 # =======
 
 RUN apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* /tmp/jans
 
 # =======
 # License
@@ -208,11 +201,15 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
-    CN_AWS_SECRETS_REPLICA_FILE=""
+    CN_AWS_SECRETS_REPLICA_FILE="" \
+    CN_FIDO2_JETTY_PORT=8080 \
+    CN_FIDO2_JETTY_HOST=0.0.0.0
 
 # ==========
 # misc stuff
 # ==========
+
+EXPOSE $CN_FIDO2_JETTY_PORT
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
@@ -226,11 +223,11 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-fido2/custom/libs \
     ${JETTY_BASE}/common/libs/spanner \
     ${JETTY_BASE}/common/libs/couchbase \
+    ${JETTY_HOME}/temp \
     /usr/share/java
 
-COPY jetty/log4j2.xml /app/templates/
-COPY conf/*.tmpl /app/templates/
-
+COPY templates /app/templates/
+RUN cp /app/templates/jans-fido2/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
@@ -241,8 +238,6 @@ RUN ln -sf /usr/lib/jvm/jre /opt/java
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
-COPY --chown=1000:0 jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
-
 # adjust ownership and permission
 RUN chmod 664 ${JETTY_BASE}/jans-fido2/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-fido2/logs \
@@ -252,7 +247,9 @@ RUN chmod 664 ${JETTY_BASE}/jans-fido2/resources/log4j2.xml \
     && chown -R 1000:0 /etc/jans/conf/fido2/mds/toc \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
-    && chown -R 1000:0 /opt/prometheus
+    && chown -R 1000:0 /opt/prometheus \
+    && chown 1000:0 ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.xml \
+    && chown -R 1000:0 ${JETTY_HOME}/temp
 
 USER 1000
 
