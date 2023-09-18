@@ -1,13 +1,15 @@
+import os
 from hashlib import sha256
 from pathlib import Path
 
 from jans.pycloudlib import get_manager
+from jans.pycloudlib.utils import as_boolean
 
 import logging.config
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("auth")
 
 
 manager = get_manager()
@@ -37,4 +39,6 @@ def digest_equals(val1: str, val2: str) -> bool:
 
 
 if __name__ == "__main__":
-    push_auth_conf()
+    # @TODO: run the function if enabled
+    if as_boolean(os.environ.get("CN_SHARE_AUTH_CONF", "false")):
+        push_auth_conf()
