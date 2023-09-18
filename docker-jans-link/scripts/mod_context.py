@@ -14,12 +14,12 @@ from jans.pycloudlib.utils import exec_cmd
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("link")
 
 
 Library = namedtuple("Library", ["path", "basename", "meta"])
 
-LIB_METADATA_RE = re.compile(r"(?P<name>.*)-(?P<version>\d+(?:.\d+).*)(?P<ext>\..*)")
+LIB_METADATA_RE = re.compile(r"(?P<name>.*)-(?P<version>\d+.*)(?P<ext>\.jar)")
 
 
 def extract_common_libs(persistence_type):

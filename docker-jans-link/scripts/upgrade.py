@@ -16,7 +16,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("link")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 

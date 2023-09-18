@@ -38,7 +38,7 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("link")
 
 manager = get_manager()
 
@@ -46,8 +46,8 @@ manager = get_manager()
 def main():
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
 
-    render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
-    render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
+    render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
+    render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
 
     mapper = PersistenceMapper()
     persistence_groups = mapper.groups()
@@ -60,7 +60,7 @@ def main():
     if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
-            "/app/templates/jans-ldap.properties.tmpl",
+            "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
         sync_ldap_truststore(manager)
@@ -68,7 +68,7 @@ def main():
     if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
-            "/app/templates/jans-couchbase.properties.tmpl",
+            "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
         sync_couchbase_truststore(manager)
@@ -78,14 +78,14 @@ def main():
 
         render_sql_properties(
             manager,
-            f"/app/templates/jans-{db_dialect}.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties",
             "/etc/jans/conf/jans-sql.properties",
         )
 
     if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
-            "/app/templates/jans-spanner.properties.tmpl",
+            "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
 
@@ -172,7 +172,7 @@ def configure_logging():
     ]):
         config["log_prefix"] = "${sys:link.log.console.prefix}%X{link.log.console.group} - "
 
-    with open("/app/templates/log4j2.xml") as f:
+    with open("/app/templates/jans-link/log4j2.xml") as f:
         txt = f.read()
 
     logfile = "/opt/jans/jetty/jans-link/resources/log4j2.xml"
