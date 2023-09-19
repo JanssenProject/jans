@@ -5,7 +5,7 @@ Summary:        Janssen
 License:        Apache-2.0
 URL:            https://jans.io/
 Source0:        jans-%VER%.tar.gz
-Requires:       apache2, apache2-mod_auth_openidc, curl, wget, tar, xz, unzip, rsyslog, bzip2, python3-ldap3, python3-requests, python3-ruamel.yaml, python3-certifi, python3-PyMySQL, python3-cryptography, python3-psycopg2
+Requires:       openssl, apache2, apache2-mod_auth_openidc, curl, wget, tar, xz, unzip, rsyslog, bzip2, python3-ldap3, python3-requests, python3-ruamel.yaml, python3-certifi, python3-PyMySQL, python3-cryptography, python3-psycopg2
 AutoReqProv:    no
 %description
 Janssen enables organizations to build a scalable centralized authentication and authorization service using free open source software.
