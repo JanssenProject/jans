@@ -2525,7 +2525,7 @@ paths:
             type: string
         - name: client_id
           in: query
-          description: Client Id. It can be useful to specify client id explicitly in case id_token and session are expired so AS can still validate "post_logout_redirect_uri"
+          description: Client Id. It can be useful to specify client id explicitly in case id_token and session are expired so AS can still validate post_logout_redirect_uri
           schema:
             type: string
       responses:
