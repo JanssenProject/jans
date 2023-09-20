@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging.config
 import os
-import re
 import typing as _t
 from functools import cached_property
 from string import Template
@@ -243,11 +242,10 @@ class PersistenceSetup:
 
     @cached_property
     def ldif_files(self) -> list[str]:
-        files = [
+        return [
             f"/app/templates/jans-scim/{file_}"
             for file_ in ["configuration.ldif", "scopes.ldif", "clients.ldif"]
         ]
-        return files
 
     def import_ldif_files(self) -> None:
         # temporarily disable dynamic scopes creation

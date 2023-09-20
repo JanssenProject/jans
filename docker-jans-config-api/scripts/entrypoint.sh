@@ -36,8 +36,8 @@ get_prometheus_lib() {
 }
 
 get_java_options() {
-    if [ -n "${CN_SCIM_JAVA_OPTIONS}" ]; then
-        echo " ${CN_SCIM_JAVA_OPTIONS} "
+    if [ -n "${CN_CONFIG_API_JAVA_OPTIONS}" ]; then
+        echo " ${CN_CONFIG_API_JAVA_OPTIONS} "
     else
         # backward-compat
         echo " ${CN_JAVA_OPTIONS} "

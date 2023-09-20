@@ -1,7 +1,6 @@
 import json
 import logging.config
 import os
-import re
 import typing as _t
 from functools import cached_property
 from string import Template

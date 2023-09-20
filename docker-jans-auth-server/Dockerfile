@@ -228,14 +228,13 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_JACKRABBIT_URL=http://localhost:8080 \
     CN_JACKRABBIT_ADMIN_ID=admin \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
-    CN_JAVA_OPTIONS="" \
+    CN_AUTH_JAVA_OPTIONS="" \
     CN_SYNC_JKS_ENABLED=false \
     CN_SYNC_JKS_INTERVAL=30 \
     GOOGLE_PROJECT_ID="" \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
-    ADMIN_UI_JWKS=http://0.0.0.0:8080/jans-auth/restv1/jwks \
     CN_JETTY_REQUEST_HEADER_SIZE=8192 \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
@@ -245,13 +244,14 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AUTH_JETTY_HOST=0.0.0.0 \
     CN_SHARE_AUTH_CONF=true
 
+# @TODO: revisit the usage (if any)
+ENV ADMIN_UI_JWKS=http://${CN_AUTH_JETTY_HOST}:${CN_AUTH_JETTY_PORT}/jans-auth/restv1/jwks
+
 # ==========
 # misc stuff
 # ==========
 
 EXPOSE $CN_AUTH_JETTY_PORT
-
-
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \

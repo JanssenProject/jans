@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging.config
 import os
-import re
 import typing as _t
 from functools import cached_property
 from string import Template
@@ -24,9 +23,7 @@ from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
-from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import generate_base64_contents
-from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
@@ -222,11 +219,10 @@ class PersistenceSetup:
 
     @cached_property
     def ldif_files(self) -> list[str]:
-        files = [
+        return [
             f"/app/templates/jans-link/{file_}"
             for file_ in ["configuration.ldif"]
         ]
-        return files
 
     def import_ldif_files(self) -> None:
         for file_ in self.ldif_files:

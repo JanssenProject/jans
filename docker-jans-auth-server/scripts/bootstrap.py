@@ -1,6 +1,6 @@
 import json
+import logging.config
 import os
-import re
 from string import Template
 
 from jans.pycloudlib import get_manager
@@ -17,7 +17,6 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
 
-import logging.config
 from settings import LOGGING_CONFIG
 from hooks import get_auth_keys_hook
 

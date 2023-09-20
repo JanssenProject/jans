@@ -1,7 +1,6 @@
 import json
 import logging.config
 import os
-import re
 import typing as _t
 from functools import cached_property
 from string import Template
@@ -314,19 +313,18 @@ class PersistenceSetup:
             return json.loads(entry["jansConfDyn"])
 
         # couchbase
-        elif self.persistence_type == "couchbase":
+        if self.persistence_type == "couchbase":
             key = id_from_dn(dn)
             bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
             req = self.client.exec_query(
-                f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+                f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec:  608
             )
             attrs = req.json()["results"][0]
             return attrs["jansConfDyn"]
 
         # ldap
-        else:
-            entry = self.client.get(dn, attributes=["jansConfDyn"])
-            return json.loads(entry.entry_attributes_as_dict["jansConfDyn"][0])
+        entry = self.client.get(dn, attributes=["jansConfDyn"])
+        return json.loads(entry.entry_attributes_as_dict["jansConfDyn"][0])
 
     def transform_url(self, url):
         auth_server_url = os.environ.get("CN_AUTH_SERVER_URL", "")
@@ -339,8 +337,7 @@ class PersistenceSetup:
             path = f"/jans-auth{parse_result.path}"
         else:
             path = parse_result.path
-        url = f"http://{auth_server_url}{path}"
-        return url
+        return f"http://{auth_server_url}{path}"
 
     def get_injected_urls(self):
         auth_config = self.get_auth_config()
