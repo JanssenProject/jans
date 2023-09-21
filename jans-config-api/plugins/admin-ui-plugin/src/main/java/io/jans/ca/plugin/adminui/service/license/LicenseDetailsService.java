@@ -148,13 +148,9 @@ public class LicenseDetailsService extends BaseService {
             return CommonUtils.createGenericResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
 
         } catch (Exception e) {
-            if (response.getStatus() == 404) {
-                log.error("{}", LICENSE_APIS_404);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
-            }
-            if (response.getStatus() == 503) {
-                log.error("{}", LICENSE_APIS_503);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503);
+            GenericResponse genericResponse = handleLicenseApiNotAccessible(response);
+            if (genericResponse == null) {
+                return genericResponse;
             }
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.CHECK_LICENSE_ERROR.getDescription());
@@ -194,7 +190,6 @@ public class LicenseDetailsService extends BaseService {
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(retriveLicenseUrl);
             request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
-            request.header(CONTENT_TYPE, APPLICATION_JSON);
             response = request.get();
 
             log.info("license request status code: {}", response.getStatus());
@@ -215,7 +210,7 @@ public class LicenseDetailsService extends BaseService {
 
             if (response.getStatus() == 402) {
                 log.error("Payment Required: 402");
-                return CommonUtils.createGenericResponse(false, 402, "Payment Required.");
+                return CommonUtils.createGenericResponse(false, 402, "Payment Required. Subscribe Admin UI license on Agama Lab.");
             }
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
                 log.error("{}: {}", LICENSE_RETRIEVE_ERROR_RESPONSE, jsonData);
@@ -225,13 +220,9 @@ public class LicenseDetailsService extends BaseService {
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
 
         } catch (Exception e) {
-            if (response.getStatus() == 404) {
-                log.error("{}", LICENSE_APIS_404);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
-            }
-            if (response.getStatus() == 503) {
-                log.error("{}", LICENSE_APIS_503);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503);
+            GenericResponse genericResponse = handleLicenseApiNotAccessible(response);
+            if (genericResponse == null) {
+                return genericResponse;
             }
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
@@ -306,13 +297,9 @@ public class LicenseDetailsService extends BaseService {
             log.error("{}: {}", LICENSE_ACTIVATE_ERROR_RESPONSE, jsonData);
             return CommonUtils.createGenericResponse(false, response.getStatus(), "License is not activated.");
         } catch (Exception e) {
-            if (response.getStatus() == 404) {
-                log.error("{}", LICENSE_APIS_404);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
-            }
-            if (response.getStatus() == 503) {
-                log.error("{}", LICENSE_APIS_503);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503);
+            GenericResponse genericResponse = handleLicenseApiNotAccessible(response);
+            if (genericResponse == null) {
+                return genericResponse;
             }
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription());
@@ -382,13 +369,9 @@ public class LicenseDetailsService extends BaseService {
             log.error("{}: {}", TRIAL_GENERATE_ERROR_RESPONSE, jsonData);
             return CommonUtils.createGenericResponse(false, response.getStatus(), "Error in generating trial license.");
         } catch (Exception e) {
-            if (response.getStatus() == 404) {
-                log.error("{}", LICENSE_APIS_404);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
-            }
-            if (response.getStatus() == 503) {
-                log.error("{}", LICENSE_APIS_503);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503);
+            GenericResponse genericResponse = handleLicenseApiNotAccessible(response);
+            if (genericResponse == null) {
+                return genericResponse;
             }
             log.error(ErrorResponse.ERROR_IN_TRIAL_LICENSE.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_TRIAL_LICENSE.getDescription());
@@ -507,5 +490,17 @@ public class LicenseDetailsService extends BaseService {
             log.error(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
             return null;
         }
+    }
+
+    private GenericResponse handleLicenseApiNotAccessible(Response response) {
+        if (response.getStatus() == 404) {
+            log.error("{}", LICENSE_APIS_404);
+            return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
+        }
+        if (response.getStatus() == 503) {
+            log.error("{}", LICENSE_APIS_503);
+            return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503);
+        }
+        return null;
     }
 }
