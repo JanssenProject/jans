@@ -1552,6 +1552,9 @@ paths:
                   description: ROPC script dn
                   items:
                     type: string
+                org_id:
+                  type: string
+                  description: Organization Id
 
       responses:
         200:
@@ -1583,6 +1586,9 @@ paths:
                   client_secret_expires_at:
                     type: integer
                     description: Time at which the client_secret will expire or 0 if it will not expire.
+                  org_id:
+                    type: string
+                    description: Organization Id. Present only when organization id is set.
         400:
           description: Invalid parameters provided to endpoint.
           content:
