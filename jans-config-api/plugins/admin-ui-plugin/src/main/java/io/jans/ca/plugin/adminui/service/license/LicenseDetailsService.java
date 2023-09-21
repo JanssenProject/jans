@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Singleton
 public class LicenseDetailsService extends BaseService {
@@ -148,9 +149,9 @@ public class LicenseDetailsService extends BaseService {
             return CommonUtils.createGenericResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
 
         } catch (Exception e) {
-            GenericResponse genericResponse = handleLicenseApiNotAccessible(response);
-            if (genericResponse == null) {
-                return genericResponse;
+            Optional<GenericResponse> genericResOptional = handleLicenseApiNotAccessible(response);
+            if (genericResOptional.isPresent()) {
+                return genericResOptional.get();
             }
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.CHECK_LICENSE_ERROR.getDescription());
@@ -220,9 +221,9 @@ public class LicenseDetailsService extends BaseService {
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
 
         } catch (Exception e) {
-            GenericResponse genericResponse = handleLicenseApiNotAccessible(response);
-            if (genericResponse == null) {
-                return genericResponse;
+            Optional<GenericResponse> genericResOptional = handleLicenseApiNotAccessible(response);
+            if (genericResOptional.isPresent()) {
+                return genericResOptional.get();
             }
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
@@ -297,9 +298,9 @@ public class LicenseDetailsService extends BaseService {
             log.error("{}: {}", LICENSE_ACTIVATE_ERROR_RESPONSE, jsonData);
             return CommonUtils.createGenericResponse(false, response.getStatus(), "License is not activated.");
         } catch (Exception e) {
-            GenericResponse genericResponse = handleLicenseApiNotAccessible(response);
-            if (genericResponse == null) {
-                return genericResponse;
+            Optional<GenericResponse> genericResOptional = handleLicenseApiNotAccessible(response);
+            if (genericResOptional.isPresent()) {
+                return genericResOptional.get();
             }
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription());
@@ -369,9 +370,9 @@ public class LicenseDetailsService extends BaseService {
             log.error("{}: {}", TRIAL_GENERATE_ERROR_RESPONSE, jsonData);
             return CommonUtils.createGenericResponse(false, response.getStatus(), "Error in generating trial license.");
         } catch (Exception e) {
-            GenericResponse genericResponse = handleLicenseApiNotAccessible(response);
-            if (genericResponse == null) {
-                return genericResponse;
+            Optional<GenericResponse> genericResOptional = handleLicenseApiNotAccessible(response);
+            if (genericResOptional.isPresent()) {
+                return genericResOptional.get();
             }
             log.error(ErrorResponse.ERROR_IN_TRIAL_LICENSE.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_TRIAL_LICENSE.getDescription());
@@ -464,6 +465,27 @@ public class LicenseDetailsService extends BaseService {
             licenseConfig.setOidcClient(oidcClient);
             appConf.getMainSettings().setLicenseConfig(licenseConfig);
             entryManager.merge(appConf);
+
+            // The above code is setting various properties of the `LicenseConfiguration` object obtained from the
+            // `AUIConfiguration` object. These properties include the scan authentication server hostname, scan API client
+            // ID, scan API client secret, hardware ID, and scan API hostname. After setting these properties, the
+            // `LicenseConfiguration` object is set back to the `AUIConfiguration` object, and the updated
+            // `AUIConfiguration` object is set back to the `auiConfigurationService`.
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
+
+            if(licenseConfiguration == null){
+                licenseConfiguration = new LicenseConfiguration();
+            }
+
+            licenseConfiguration.setScanAuthServerHostname(dcrResponse.getOpHost());
+            licenseConfiguration.setScanApiClientId(dcrResponse.getClientId());
+            licenseConfiguration.setScanApiClientSecret(dcrResponse.getClientSecret());
+            licenseConfiguration.setHardwareId(dcrResponse.getHardwareId());
+            licenseConfiguration.setScanApiHostname(dcrResponse.getScanHostname());
+            auiConfiguration.setLicenseConfiguration(licenseConfiguration);
+            auiConfigurationService.setAuiConfiguration(auiConfiguration);
+
             return CommonUtils.createGenericResponse(true, 201, "SSA saved successfully.");
 
         } catch (Exception e) {
@@ -492,15 +514,15 @@ public class LicenseDetailsService extends BaseService {
         }
     }
 
-    private GenericResponse handleLicenseApiNotAccessible(Response response) {
+    private Optional<GenericResponse> handleLicenseApiNotAccessible(Response response) {
         if (response.getStatus() == 404) {
             log.error("{}", LICENSE_APIS_404);
-            return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404);
+            return Optional.of(CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_404));
         }
         if (response.getStatus() == 503) {
             log.error("{}", LICENSE_APIS_503);
-            return CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503);
+            return Optional.of(CommonUtils.createGenericResponse(false, response.getStatus(), LICENSE_APIS_503));
         }
-        return null;
+        return Optional.empty();
     }
 }
