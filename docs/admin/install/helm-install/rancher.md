@@ -31,8 +31,8 @@ For this quick start we will use a [single node Kubernetes install in docker wit
 6. Next, you'll see the Rancher home page with a list of existing clusters. By default, the name of the newly created cluster would be `local`. Click on the cluster name to go to the dashboard.
 
 7. Add Janssen repository: From the top-left menu expand `Apps` > `Repositories` > `Create` > Add a repo name and the Index URL `https://docs.jans.io/charts` > `Create`
-7. From the top-left menu expand `Apps` and click `Charts`.
-8. Search for `Janssen` and begin your installation.
-9. During Step 1 of installation, be sure to select the `Customize Helm options before install` option.
-10. In Step 2, customize the settings for the Janssen installation.
-11. In Step 3, unselect the `Wait` option and start the installation.
+8. From the top-left menu expand `Apps` and click `Charts`.
+9. Search for `Janssen` and begin your installation.
+10. During Step 1 of installation, be sure to select the `Customize Helm options before install` option.
+11. In Step 2, customize the settings for the Janssen installation.
+12. In Step 3, unselect the `Wait` option and start the installation.
