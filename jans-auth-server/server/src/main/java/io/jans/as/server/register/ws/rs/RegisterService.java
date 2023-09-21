@@ -20,6 +20,7 @@ import io.jans.as.model.json.JsonApplier;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.ciba.CIBARegisterClientMetadataService;
 import io.jans.as.server.service.ScopeService;
@@ -388,7 +389,7 @@ public class RegisterService {
         }
 
         if (requestObject.getJsonObject() != null) {
-            final String orgId = requestObject.getJsonObject().optString("org_id");
+            final String orgId = requestObject.getJsonObject().optString(RegisterRequestParam.ORG_ID.getName());
             if (StringUtils.isNotBlank(orgId)) {
                 client.setOrganization(orgId);
             }

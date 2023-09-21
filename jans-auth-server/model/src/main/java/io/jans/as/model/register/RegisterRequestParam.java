@@ -93,6 +93,11 @@ public enum RegisterRequestParam {
     TOS_URI("tos_uri"),
 
     /**
+     * Organization id
+     */
+    ORG_ID("org_id"),
+
+    /**
      * URL for the Client's JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to
      * the OP. The JWK Set may also contain the Client's encryption keys(s) that are used by the OP to encrypt the
      * responses to the Client.
