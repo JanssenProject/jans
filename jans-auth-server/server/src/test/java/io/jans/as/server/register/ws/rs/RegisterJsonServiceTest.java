@@ -41,6 +41,7 @@ public class RegisterJsonServiceTest {
 
     @Mock
     private AttributeService attributeService;
+
     @Mock
     private CIBARegisterClientResponseService cibaRegisterClientResponseService;
 
