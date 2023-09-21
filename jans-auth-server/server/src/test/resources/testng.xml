@@ -38,6 +38,7 @@
             <class name="io.jans.as.server.register.ws.rs.action.RegisterCreateActionTest" />
             <class name="io.jans.as.server.register.ws.rs.RegisterServiceTest" />
             <class name="io.jans.as.server.register.ws.rs.RegisterValidatorTest" />
+            <class name="io.jans.as.server.register.ws.rs.RegisterJsonServiceTest" />
 
             <!-- SESSION -->
             <class name="io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImplTest" />
