@@ -17,35 +17,10 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "entrypoint": {
+        "auth": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
         },
-        "jks_sync": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "wait": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "casawatcher": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "webdav": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-
     },
-    # "root": {
-    #     "level": "INFO",
-    #     "handlers": ["console"],
-    # },
 }

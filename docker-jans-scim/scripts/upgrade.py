@@ -16,7 +16,7 @@ from settings import LOGGING_CONFIG
 from utils import parse_swagger_file
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("scim")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
@@ -105,10 +105,10 @@ class CouchbaseBackend:
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
         bucket = kwargs.get("bucket")
         req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec: B608
         )
         if not req.ok:
-            return
+            return None
 
         try:
             _attrs = req.json()["results"][0]
@@ -148,7 +148,7 @@ class CouchbaseBackend:
     def search_entries(self, key, filter_="", attrs=None, **kwargs):
         bucket = kwargs.get("bucket")
         req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} {filter_}"
+            f"SELECT META().id, {bucket}.* FROM {bucket} {filter_}"  # nosec: B608
         )
         if not req.ok:
             return []

@@ -11,12 +11,11 @@ from jans.pycloudlib.persistence import SqlClient
 from jans.pycloudlib.persistence import PersistenceMapper
 from jans.pycloudlib.persistence import doc_id_from_dn
 from jans.pycloudlib.persistence import id_from_dn
-from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("link")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
@@ -88,7 +87,7 @@ class CouchbaseBackend:
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
         bucket = kwargs.get("bucket")
         req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec: B608
         )
         if not req.ok:
             return None

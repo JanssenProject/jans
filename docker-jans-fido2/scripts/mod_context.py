@@ -14,12 +14,12 @@ from jans.pycloudlib.utils import exec_cmd
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("fido2")
 
 
 Library = namedtuple("Library", ["path", "basename", "meta"])
 
-LIB_METADATA_RE = re.compile(r"(?P<name>.*)-(?P<version>\d+(?:.\d+).*)(?P<ext>\..*)")
+LIB_METADATA_RE = re.compile(r"(?P<name>.*)-(?P<version>\d+.*)(?P<ext>\.jar)")
 
 
 def extract_common_libs(persistence_type):
@@ -75,11 +75,10 @@ def get_registered_common_libs(app_name, persistence_type):
     archived_libs = get_archived_libs(app_name)
     archived_lib_names = [al.meta["name"] for al in archived_libs]
 
-    reg_libs = [
+    return [
         lib.path for lib in libs
         if lib.meta["name"] not in archived_lib_names
     ]
-    return reg_libs
 
 
 def modify_app_xml(app_name):

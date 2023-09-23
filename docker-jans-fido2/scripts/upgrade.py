@@ -17,7 +17,7 @@ from jans.pycloudlib.persistence import id_from_dn
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("fido2")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
@@ -145,10 +145,10 @@ class CouchbaseBackend:
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
         bucket = kwargs.get("bucket")
         req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec: B608
         )
         if not req.ok:
-            return
+            return None
 
         try:
             _attrs = req.json()["results"][0]

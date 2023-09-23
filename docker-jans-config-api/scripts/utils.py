@@ -1,7 +1,7 @@
 import json
 
 
-def get_config_api_scope_mapping(path="/app/static/config-api-rs-protect.json"):
+def get_config_api_scope_mapping(path="/app/templates/jans-config-api/config-api-rs-protect.json"):
     scope_mapping = {}
     scope_levels = ["scopes", "groupScopes", "superScopes"]
 

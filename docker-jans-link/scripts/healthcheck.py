@@ -1,10 +1,13 @@
+import os
 import sys
 
 import requests
 
 
 def main():
-    req = requests.get("http://0.0.0.0:9091/jans-link/sys/health-check")
+    host = os.environ.get("CN_LINK_JETTY_HOST", "0.0.0.0")  # nosec: B104
+    port = os.environ.get("CN_LINK_JETTY_PORT", "9091")
+    req = requests.get(f"http://{host}:{port}/jans-link/sys/health-check", timeout=5)
     if not req.ok:
         sys.exit(1)
 
