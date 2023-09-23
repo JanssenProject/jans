@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.18-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.17-1...docker-jans-certmanager-v1.0.18-1) (2023-09-23)
+
+
+### Bug Fixes
+
+* jar dep ([66c4c15](https://github.com/JanssenProject/jans/commit/66c4c1534a153f3bed4b0bab568e7f43591ccbdd))
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
 ## [1.0.17-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.16-1...docker-jans-certmanager-v1.0.17-1) (2023-09-17)
 
 
