@@ -1,7 +1,7 @@
 import ruamel.yaml
 
 
-def parse_swagger_file(path="/app/static/jans-scim-openapi.yaml"):
+def parse_swagger_file(path="/app/templates/jans-scim/jans-scim-openapi.yaml"):
     with open(path) as f:
         txt = f.read()
     txt = txt.replace("\t", " ")
