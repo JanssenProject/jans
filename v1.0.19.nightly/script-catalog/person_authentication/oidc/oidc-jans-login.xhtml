@@ -1,0 +1,185 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-template.xhtml">
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" />
+	</f:metadata>
+	<ui:define name="head">
+		<meta name="description" content="Gluu, Inc." />
+	</ui:define>
+	<ui:define name="pageTitle">
+		<h:outputText value="#{msgs['login.pageTitle']}" />
+	</ui:define>
+	<ui:define name="body">
+		<div class="container">
+			<h:panelGroup rendered="true">
+				<div class="login_bx_1"
+					style="border-radius: 10px; margin-top: 0px; background: white; border: 1px solid #008b8b;">
+					<div class="row">
+						<h:messages class="text-center"
+							style="color:#8b0000;margin:5px;margin-left:20px; font-size:2vw;"
+							infoClass="text-center" errorClass="text-center" />
+					</div>
+					<h:form id="loginForm" style="padding:30px;">
+						<div class="row">
+							<div class="col-sm-3 col-md-3">
+								<h:outputText value="#{msgs['login.username']}" />
+							</div>
+							<div class="col-sm-9 col-md-9">
+								<h:inputText placeholder="#{msgs['login.username']}"
+									id="username" name="username" required="true" colMd="10"
+									labelColMd="2" autocomplete="off"
+									value="#{credentials.username}" styleClass="form-control"
+									style="width:100%">
+								</h:inputText>
+							</div>
+						</div>
+						<div class="form-group row"></div>
+						<div class="row">
+							<div class="col-sm-3 col-md-3">
+								<h:outputText value="#{msgs['login.password']}" />
+							</div>
+							<div class="col-sm-9 col-md-9">
+								<h:inputSecret placeholder="#{msgs['login.password']}"
+									colMd="10" id="password" name="password" labelColMd="2"
+									value="#{credentials.password}" autocomplete="off"
+									styleClass="form-control" tyle="width:100%">
+								</h:inputSecret>
+							</div>
+						</div>
+						<div class="form-group row"></div>
+						<div class="row">
+							<div class="col-sm-5 col-md-5">
+								<h:outputLabel styleClass="col-form-label" for="rememberme"
+									value="#{msgs['login.rememberMe']}" />
+							</div>
+							<div class="col-sm-2 col-md-2" style="padding-top: 15px">
+								<input type="checkbox" value="rememberme" id="rememberme"
+									name="rememberme" />
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-sm-offset-2 offset-md-2 col-sm-8 col-md-8">
+								<h:commandButton id="loginButton"
+									style="background-color: #00BE79; color:white;"
+									styleClass="btn col-sm-12" value="    #{msgs['login.login']}"
+									onclick="checkRemembeMe()" iconAwesome="fa-sign-in"
+									action="#{authenticator.authenticate}" />
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-sm-offset-3 offset-md-3 col-sm-7 col-md-7">
+								<div class="forgot_link">
+									<a href="/identity/person/passwordReminder.htm"
+										style="color: blue;"> <h:outputText
+											value="#{msgs['login.forgotYourPassword']}" />
+									</a>
+								</div>
+							</div>
+						</div>
+						<h:panelGroup layout="block" rendered="#{not empty facesContext.messageList and cookie['X-Correlation-Id'] != null}">
+							<br/>
+							<p style="font-size: 0.7em">
+								<strong>Correlation Id: </strong> <h:outputText value="#{cookie['X-Correlation-Id'].value}" />
+							</p>
+						</h:panelGroup>
+						<h:inputHidden id="platform" />
+					</h:form>
+          <button type="submit" class="btn col-sm-12 btn-primary" onclick="redirectToExternalOP()">#{identity.getWorkingParameter('oidc_title')}</button>
+					<div class="row">
+						<div align="center" class="col-sm-offset-4 col-sm-9">
+							<ui:repeat
+								value="#{identity.getWorkingParameter('download_url').entrySet().toArray()}"
+								var="_entry">
+								<ui:param name="app_name" value="#{_entry.key}" />
+								<ui:param name="app_link" value="#{_entry.value}" />
+								<h:outputLink style="margin-right:5px;" value="#{app_link}"
+									title="#{app_name}">
+									<h:graphicImage value="img/#{app_name}.png" />
+								</h:outputLink>
+							</ui:repeat>
+						</div>
+						<h:panelGroup layout="block"
+							rendered="#{external_registration_uri != Null}">
+							<div class="reg_link">
+								<a href="#{external_registration_uri}"> <h:outputText
+										value="Register Now " />
+								</a>
+							</div>
+						</h:panelGroup>
+					</div>
+				</div>
+			</h:panelGroup>
+		</div>
+		<script type="text/javascript">
+      function redirectToExternalOP() {
+        window.location.href = "#{identity.getWorkingParameter('oidc_redirect_uri')}"
+      }
+
+    		$(document).ready(function () {
+    			$('.other').click(function(){
+    				$('#social_new').toggle();
+    			});
+                if (localStorage.chkbx &amp;&amp; localStorage.chkbx != '') {
+                    $('#rememberme').attr('checked', 'checked')
+                    document.getElementById("loginForm:username").value = localStorage.usrname;
+                } else {
+                    $('#rememberme').removeAttr('checked');
+                    document.getElementById("loginForm:username").value = "";
+                }
+
+                $('#rememberme').click(function() {
+                    checkRemembeMe();
+                });
+
+                fillPlatformField();
+
+				var userNameField = document.getElementById("loginForm:username");
+				var passwordField = document.getElementById("loginForm:password");
+
+				passwordField.value = "";
+				var userName = '#{!empty authorizeAction.loginHint ? authorizeAction.loginHint : ""}';
+				if (userName) {
+					userNameField.value = userName;
+					passwordField.focus();
+				} else {
+					userNameField.focus();
+				}
+
+				var displayRegister = #{display_register_action or identity.sessionId.sessionAttributes['display_register_action']};
+				if (displayRegister) {
+					var registerButton = document.getElementById("loginForm:registerId");
+					if (registerButton != null) {
+						registerButton.style.display = 'inline';
+					}
+				}
+    		});
+
+    		function checkRemembeMe() {
+                if ($('#rememberme').is(':checked')) {
+                    localStorage.usrname = document.getElementById("loginForm:username").value;
+                    localStorage.chkbx = $('#rememberme').val();
+                } else {
+                    localStorage.usrname = '';
+                    localStorage.chkbx = '';
+                }
+			}
+
+            function fillPlatformField() {
+                try {
+                    re = /^([^\.]+\.[^\.]+)\..+/;
+                    result = re.exec(platform.version);
+                    if (result != null) {
+                        platform.version=result[1];
+                    }
+    			    document.getElementById("loginForm:platform").value = JSON.stringify(platform);
+                } catch (e) {
+                }
+            }
+        </script>
+	</ui:define>
+</ui:composition>

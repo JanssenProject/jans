@@ -1,0 +1,6 @@
+io.jans.configapi.plugin.scim.configuration
+io.jans.configapi.plugin.scim.extensions
+io.jans.configapi.plugin.scim.model.config
+io.jans.configapi.plugin.scim.rest
+io.jans.configapi.plugin.scim.service
+io.jans.configapi.plugin.scim.util
