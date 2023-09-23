@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.orm.sql.dsl.template"},{"l":"io.jans.orm.sql.dsl.types"},{"l":"io.jans.orm.sql.impl"},{"l":"io.jans.orm.sql.model"},{"l":"io.jans.orm.sql.operation"},{"l":"io.jans.orm.sql.operation.impl"},{"l":"io.jans.orm.sql.operation.watch"}]
