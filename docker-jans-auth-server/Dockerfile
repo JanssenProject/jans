@@ -51,7 +51,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=1.0.18
-ENV CN_BUILD_DATE='2023-09-17 16:04'
+ENV CN_BUILD_DATE='2023-09-23 10:17'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -113,7 +113,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=0f3cf5d6c679f02b5a385b72003de2669f2bfb66
+ENV JANS_SOURCE_VERSION=14a4ee5d21b788db7bb3e9bb94a1d1caf228f95a
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
