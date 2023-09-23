@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.17...jans-auth-server-v1.0.18) (2023-09-23)
+
+
+### Features
+
+* **jans-auth-server:** included org_id in the response of DCR [#5787](https://github.com/JanssenProject/jans/issues/5787) ([#6095](https://github.com/JanssenProject/jans/issues/6095)) ([34a5f8f](https://github.com/JanssenProject/jans/commit/34a5f8f43aefaa7403cd52d84e0b732f9e1d396e))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** corrected client's jar-with-dependencies built ([#6080](https://github.com/JanssenProject/jans/issues/6080)) ([099d552](https://github.com/JanssenProject/jans/commit/099d5524ac516c16e0740cfad8e380ba9be01ceb))
+* **jans-auth-server:** redirect when session does not exist but client_id parameter is present ([#6104](https://github.com/JanssenProject/jans/issues/6104)) ([f8f9591](https://github.com/JanssenProject/jans/commit/f8f959144b527148f3b586088ae9dd6fcf1158cf))
+* **jans-auth-server:** swagger is malformed due to typo [#6085](https://github.com/JanssenProject/jans/issues/6085) ([#6086](https://github.com/JanssenProject/jans/issues/6086)) ([e1ae899](https://github.com/JanssenProject/jans/commit/e1ae899ac4b1d82cd428276e5f00065b0b5a633e))
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
 ## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.16...jans-auth-server-v1.0.17) (2023-09-17)
 
 
