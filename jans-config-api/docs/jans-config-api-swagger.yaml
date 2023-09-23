@@ -8968,10 +8968,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
