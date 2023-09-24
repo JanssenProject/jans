@@ -37,6 +37,8 @@ class Config:
     jetty_base = os.path.join(jansOptFolder, 'jetty')
     dist_app_dir = os.path.join(distFolder, 'app')
     dist_jans_dir = os.path.join(distFolder, 'jans')
+    mono_jetty_dir = 'jans-services'
+    mono_jetty_web_port = '8081'
 
     installed_instance = False
 
@@ -68,11 +70,13 @@ class Config:
     @classmethod
     def calculate_mem(self):
         if Config.opendj_install:
-            self.opendj_max_ram = int(int(Config.jans_max_mem) * .2) # 20% of mem_use
-            self.application_max_ram = int(int(Config.jans_max_mem) * .8) # 80% of mem_use
+            self.opendj_max_ram = int(int(self.jans_max_mem) * .2) # 20% of mem_use
+            self.application_max_ram = int(int(self.jans_max_mem) * .8) # 80% of mem_use
         else:
             self.opendj_max_ram = 0
-            self.application_max_ram = int(Config.jans_max_mem)
+            self.application_max_ram = int(self.jans_max_mem)
+
+        self.jans_min_mem = int(int(self.jans_max_mem) * .4)
 
     @classmethod
     def init(self, install_dir=INSTALL_DIR):
@@ -87,6 +91,8 @@ class Config:
         self.ldap_user = self.ldap_group = 'ldap'
         self.backend_service = 'network.target'
         self.dump_config_on_error = False
+        self.mono_jetty = False
+
 
         if not self.output_dir:
             self.output_dir = os.path.join(install_dir, 'output')

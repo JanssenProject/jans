@@ -134,6 +134,13 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         self.extract_scripts()
 
+    def pre_setup(self):
+        for app_var in dir(base.current_app):
+            app_obj = getattr(base.current_app, app_var)
+            if hasattr(app_obj, 'service_name') and hasattr(app_obj, 'web_port'):
+                if Config.mono_jetty:
+                    app_obj.web_port = base.current_app.JansAuthInstaller.web_port
+                Config.templateRenderingDict[app_obj.service_name + '-web_port'] = app_obj.web_port
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')

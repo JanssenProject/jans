@@ -66,6 +66,7 @@ parser.add_argument('-enable-script', action='append', help="inum of script to e
 parser.add_argument('-disable-script', action='append', help="inum of script to disable", required=False)
 
 parser.add_argument('-java-version', help="Version of Amazon Corretto", choices=['11', '17'], required=False)
+parser.add_argument('--mono-jetty', help="Run all services in one Jetty container", action='store_true')
 
 
 if PROFILE != OPENBANKING_PROFILE:

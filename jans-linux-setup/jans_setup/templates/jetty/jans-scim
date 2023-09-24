@@ -5,7 +5,7 @@ JAVA_OPTIONS="-server -Xms%(jans-scim_min_heap_mem)sm -Xmx%(jans-scim_max_heap_m
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/jans-scim
 JETTY_USER=%(jetty_user)s
-JETTY_ARGS="jetty.http.host=localhost jetty.http.port=8087"
+JETTY_ARGS="jetty.http.host=localhost jetty.http.port=%(jans-scim-web_port)s"
 TMPDIR=%(jetty_dist)s/temp
 
 export PYTHON_HOME=%(jython_home)s

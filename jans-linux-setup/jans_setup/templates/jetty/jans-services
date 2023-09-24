@@ -1,0 +1,12 @@
+JAVA_HOME=%(jre_home)s
+JAVA=$JAVA_HOME/bin/java
+JAVA_OPTIONS="-server -Xms%(jans_min_mem)sm -Xmx%(jans_max_mem)sm -XX:+DisableExplicitGC -Djans.base=%(jansBaseFolder)s -Dserver.base=%(jetty_base)s/%(mono_jetty_dir)s -Dlog.base=%(jetty_base)s/%(mono_jetty_dir)s -Dpython.home=%(jython_home)s  -Dadmin.lock=%(jetty_base)s/%(mono_jetty_dir)s/.administrable"
+
+JETTY_START_TIMEOUT=180
+JETTY_HOME=%(jetty_home)s
+JETTY_BASE=%(jetty_base)s/%(mono_jetty_dir)s
+JETTY_USER=%(jetty_user)s
+JETTY_ARGS="jetty.http.host=localhost jetty.http.port=%(mono_jetty_web_port)s"
+TMPDIR=%(jetty_dist)s/temp
+
+export PYTHON_HOME=%(jython_home)s

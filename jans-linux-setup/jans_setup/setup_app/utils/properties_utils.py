@@ -887,6 +887,17 @@ class PropertiesUtils(SetupUtils):
             Config.ob_alias = self.getPrompt('  Openbanking Key Alias', Config.ob_alias)
 
 
+    def prompt_for_mono_jetty_container(self):
+        if Config.installed_instance:
+            return
+
+        prompt_for_mono_jetty = self.getPrompt("Run all services in one Jetty container?", 
+                            self.getDefaultOption(Config.mono_jetty)
+                            )[0].lower()
+
+        Config.mono_jetty = prompt_for_mono_jetty == 'y'
+
+
     def promptForProperties(self):
 
         if Config.noPrompt or '-x' in sys.argv:
@@ -972,6 +983,7 @@ class PropertiesUtils(SetupUtils):
             self.promptForFido2Server()
             self.prompt_for_jans_link()
             self.prompt_for_casa()
+            self.prompt_for_mono_jetty_container()
 
             #self.promptForEleven()
             #if (not Config.installOxd) and Config.oxd_package:

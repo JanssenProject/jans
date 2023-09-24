@@ -16,7 +16,8 @@ from setup_app.installers.jetty import JettyInstaller
 from setup_app.static import AppType, InstallOption, SetupProfiles
 
 class JansAuthInstaller(JettyInstaller):
-
+    web_port = Config.mono_jetty_web_port
+    service_name = 'jans-auth'
     source_files = [
                     (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['ox_version']))),
                     (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version']))),
@@ -26,13 +27,11 @@ class JansAuthInstaller(JettyInstaller):
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
-        self.service_name = 'jans-auth'
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'installOxAuth'
         self.register_progess()
 
-        self.jetty_service_webapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
 
@@ -45,8 +44,8 @@ class JansAuthInstaller(JettyInstaller):
         self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.' + Config.default_store_type.lower())
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
-        self.agama_root = os.path.join(self.jetty_base, self.service_name, 'agama')
-        self.custom_lib_dir = os.path.join(self.jetty_base, self.service_name, 'custom/libs/')
+        self.agama_root = os.path.join(self.jetty_service_base, 'agama')
+        self.custom_lib_dir = os.path.join(self.jetty_service_base, 'custom/libs/')
 
         if Config.profile == SetupProfiles.OPENBANKING:
             Config.enable_ob_auth_script = '0' if base.argsp.disable_ob_auth_script else '1'
@@ -56,6 +55,9 @@ class JansAuthInstaller(JettyInstaller):
         self.logIt("Copying auth.war into jetty webapps folder...")
         self.make_pairwise_calculation_salt()
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        if Config.mono_jetty:
+            self.copyFile(self.jetty_bin_sh_fn, os.path.join(Config.distFolder, 'scripts', Config.mono_jetty_dir), backup=False)
+
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.external_libs()
         self.setup_agama()
