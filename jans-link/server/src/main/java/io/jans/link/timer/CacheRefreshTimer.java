@@ -176,8 +176,9 @@ public class CacheRefreshTimer {
 		this.lastFinishedTime = System.currentTimeMillis();
 	}
 
-	@Asynchronous
-	public void process(@Observes @Scheduled CacheRefreshEvent cacheRefreshEvent) {
+	//@Asynchronous
+	//public void process(@Observes @Scheduled CacheRefreshEvent cacheRefreshEvent) {
+	public void process() {
 		if (this.isActive.get()) {
 			log.info("Another process is active");
 			return;

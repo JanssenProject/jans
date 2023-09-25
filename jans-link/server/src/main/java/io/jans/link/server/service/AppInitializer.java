@@ -10,6 +10,7 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Properties;
 
+import io.jans.link.timer.JansLinkTimer;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Lists;
@@ -90,8 +91,11 @@ public class AppInitializer {
 	@Inject
 	private LoggerService loggerService;
 
+	//@Inject
+	//private CacheRefreshTimer cacheRefreshTimer;
+
 	@Inject
-	private CacheRefreshTimer cacheRefreshTimer;
+	private JansLinkTimer jansLinkTimer;
 
 	@PostConstruct
 	public void createApplicationComponents() {
@@ -127,7 +131,8 @@ public class AppInitializer {
 		configurationFactory.initTimer();
 		loggerService.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
-		cacheRefreshTimer.initTimer();
+		//cacheRefreshTimer.initTimer();
+		jansLinkTimer.initTimer();
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
 				.fire(new ApplicationInitializedEvent());

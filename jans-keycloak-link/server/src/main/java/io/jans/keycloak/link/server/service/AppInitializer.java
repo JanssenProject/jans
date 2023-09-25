@@ -10,6 +10,7 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Properties;
 
+import io.jans.keycloak.link.timer.JansKeycloakLinkTimer;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Lists;
@@ -92,6 +93,9 @@ public class AppInitializer {
 	@Inject
 	private CacheRefreshTimer cacheRefreshTimer;
 
+	@Inject
+	private JansKeycloakLinkTimer jansKeycloakLinkTimer;
+
 	@PostConstruct
 	public void createApplicationComponents() {
 		try {
@@ -127,7 +131,8 @@ public class AppInitializer {
 		loggerService.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
 		//customScriptManager.reloadTimerEvent(new UpdateScriptEvent());
-		cacheRefreshTimer.initTimer();
+		//cacheRefreshTimer.initTimer();
+		jansKeycloakLinkTimer.initTimer();
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
 				.fire(new ApplicationInitializedEvent());
