@@ -14,7 +14,7 @@ from prompt_toolkit.eventloop import get_event_loop
 
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_user_dialog import EditUserDialog
-from utils.utils import DialogUtils, common_data
+from utils.utils import DialogUtils, common_data, check_email
 from utils.static import DialogResult
 from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
@@ -240,6 +240,11 @@ class Plugin(DialogUtils):
 
         if not (raw_data['userId'].strip() and raw_data['mail'].strip()):
             self.app.show_message(fix_title, _("Username and/or Email is empty"))
+            return
+
+        if not check_email(raw_data['mail']):
+            self.app.show_message(fix_title, _("Please enter a valid email"))
+            return
 
         if 'baseDn' not in dialog.data and not raw_data['userPassword'].strip():
             self.app.show_message(fix_title, _("Please enter Password"))
