@@ -91,9 +91,6 @@ public class AppInitializer {
 	private LoggerService loggerService;
 
 	@Inject
-	private CacheRefreshTimer cacheRefreshTimer;
-
-	@Inject
 	private JansKeycloakLinkTimer jansKeycloakLinkTimer;
 
 	@PostConstruct
@@ -130,8 +127,6 @@ public class AppInitializer {
 		configurationFactory.initTimer();
 		loggerService.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
-		//customScriptManager.reloadTimerEvent(new UpdateScriptEvent());
-		//cacheRefreshTimer.initTimer();
 		jansKeycloakLinkTimer.initTimer();
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
