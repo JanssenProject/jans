@@ -1,5 +1,7 @@
 package io.jans.chip.keyGen;
 
+import android.content.Context;
+
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -72,9 +74,8 @@ public class DPoPProofFactory {
     public String issueJWTToken(Map<String, Object> claims) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
 
         Map<String, Object> headers = new HashMap<>();
-        headers.put("typ", "dpop+jwt");
+        headers.put("typ", "jwt");
         headers.put("alg", "RS256");
-        headers.put("jwk", KeyManager.getPublicKeyJWK(KeyManager.getInstance().getPublicKey()).getRequiredParams());
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             LocalDateTime now = LocalDateTime.now();
