@@ -54,7 +54,7 @@
 	</prerequisites>
 
 	<modules>
-		<module>user-storage-spi</module>
+		<module>storage-api</module>
 	</modules>
 
 	<repositories>

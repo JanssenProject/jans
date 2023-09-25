@@ -5,8 +5,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>jans-keycloak-user-storage-spi</artifactId>
-	<name>jans-keycloak-user-storage-spi</name>
+	<artifactId>jans-keycloak-storage-api</artifactId>
+	<name>jans-keycloak-storage-api</name>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -14,7 +14,6 @@
 		<artifactId>jans-keycloak-parent</artifactId>
 		<version>1.0.17-SNAPSHOT</version>
 	</parent>
-
 
 	<prerequisites>
 		<maven>${maven.min-version}</maven>
@@ -80,7 +79,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>jans-keycloak-user-storage-spi</finalName>
+		<finalName>jans-keycloak-storage-api</finalName>
 
 		<resources>
 			<resource>
@@ -95,9 +94,7 @@
 			</resource>
 		</resources>
 
-
 		<plugins>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -140,8 +137,6 @@
 					</archive>
 				</configuration>
 			</plugin>
-
-
 		</plugins>
 	</build>
 
