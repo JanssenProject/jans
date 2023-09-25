@@ -20,6 +20,14 @@ public class Constants {
     public static final String CLIENT_CREDENTIALS = "client_credentials";
     public static final String RESOURCE_OWNER_PASSWORD_CREDENTIALS = "password";
 
+    //properties
+    public static final String KEYCLOAK_SERVER_URL = "keycloak.server.url";
+    public static final String AUTH_TOKEN_ENDPOINT = "auth.token.endpoint";
+    public static final String SCIM_USER_ENDPOINT = "scim.user.endpoint";
+    public static final String SCIM_USER_SEARCH_ENDPOINT = "scim.user.search.endpoint";
+    public static final String SCIM_OAUTH_SCOPE = "scim.oauth.scope";
+    public static final String KEYCLOAK_SCIM_CLIENT_ID = "keycloak.scim.client.id";
+    public static final String KEYCLOAK_SCIM_CLIENT_PASSWORD = "keycloak.scim.client.password";
     
 
 }

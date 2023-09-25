@@ -36,40 +36,40 @@ public class JansUtil {
     }
 
     public String getTokenEndpoint() {
-        logger.debug("\n JansUtil::getTokenEndpoint() - configProperties.get(\"token.endpoint\")():{}",
-                configProperties.get("token.endpoint"));
-        return configProperties.get("token.endpoint");
+        logger.debug("\n JansUtil::getTokenEndpoint() - configProperties.get(Constants.AUTH_TOKEN_ENDPOINT)():{}",
+                configProperties.get(Constants.AUTH_TOKEN_ENDPOINT));
+        return configProperties.get(Constants.AUTH_TOKEN_ENDPOINT);
     }
 
     public String getScimUserEndpoint() {
-        logger.debug(" \n JansUtil::getScimUserEndpoint() - configProperties.get(\"scim.user.endpoint\")():{}",
-                configProperties.get("scim.user.endpoint"));
-        return configProperties.get("scim.user.endpoint");
+        logger.debug(" \n JansUtil::getScimUserEndpoint() - configProperties.get(Constants.SCIM_USER_ENDPOINT)():{}",
+                configProperties.get(Constants.SCIM_USER_ENDPOINT));
+        return configProperties.get(Constants.SCIM_USER_ENDPOINT);
     }
 
     public String getScimUserSearchEndpoint() {
         logger.debug(
-                "\n JansUtil::getScimUserSearchEndpoint() - configProperties.get(\"scim.user.search.endpoint\")():{}",
-                configProperties.get("scim.user.search.endpoint"));
-        return configProperties.get("scim.user.search.endpoint");
+                "\n JansUtil::getScimUserSearchEndpoint() - configProperties.get(Constants.SCIM_USER_SEARCH_ENDPOINT)():{}",
+                configProperties.get(Constants.SCIM_USER_SEARCH_ENDPOINT));
+        return configProperties.get(Constants.SCIM_USER_SEARCH_ENDPOINT);
     }
 
     public String getClientId() {
-        logger.debug(" \n JansUtil::getClientId() - configProperties.get(\"client.id\")():{}",
-                configProperties.get("client.id"));
-        return configProperties.get("client.id");
+        logger.debug(" \n JansUtil::getClientId() - configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_ID)():{}",
+                configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_ID));
+        return configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_ID);
     }
 
     public String getClientPassword() {
-        logger.debug(" \n JansUtil::getClientPassword() - configProperties.get(\"client.password\")():{}",
-                configProperties.get("client.password"));
-        return configProperties.get("client.password");
+        logger.debug(" \n JansUtil::getClientPassword() - configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_PASSWORD)():{}",
+                configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_PASSWORD));
+        return configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_PASSWORD);
     }
 
     public String getScimOauthScope() {
-        logger.debug(" \n  JansUtil::getScimOauthScope() - configProperties.get(\"scim.oauth.scope\")():{}",
-                configProperties.get("scim.oauth.scope"));
-        return configProperties.get("scim.oauth.scope");
+        logger.debug(" \n  JansUtil::getScimOauthScope() - configProperties.get(Constants.SCIM_OAUTH_SCOPE)():{}",
+                configProperties.get(Constants.SCIM_OAUTH_SCOPE));
+        return configProperties.get(Constants.SCIM_OAUTH_SCOPE);
     }
 
     public String requestScimAccessToken() throws IOException {
