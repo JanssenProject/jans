@@ -1,3 +1,5 @@
+import re
+import sys
 import datetime
 
 from types import SimpleNamespace
@@ -9,7 +11,6 @@ from cli_style import style
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_spinner import Spinner
 from wui_components.jans_vetrical_nav import JansVerticalNav
-import sys
 
 from wui_components.jans_date_picker import DateSelectWidget
 
@@ -101,3 +102,6 @@ def fromisoformat(dt_str):
         us = int(us.rstrip("Z"), 10)
         dt = dt + datetime.timedelta(microseconds=us)
     return dt
+
+def check_email(email):
+    return re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$', email, re.IGNORECASE)

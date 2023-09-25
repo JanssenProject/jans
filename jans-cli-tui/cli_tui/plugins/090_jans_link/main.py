@@ -247,6 +247,17 @@ class Plugin(DialogUtils):
                                 self.app.getTitledText(_("Snapshot Count"), name='snapshotMaxCount', value=self.data.get('snapshotMaxCount', '10'), jans_help=self.app.get_help_from_schema(self.schema, 'snapshotMaxCount'), style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget, text_type='integer'),
                                 self.app.getTitledCheckBox(_("Keep External Persons"), name='keepExternalPerson', checked=self.data.get('keepExternalPerson'), jans_help=self.app.get_help_from_schema(self.schema, 'keepExternalPerson'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
                                 self.app.getTitledCheckBox(_("Load Source Data withLimited Search"), name='useSearchLimit', checked=self.data.get('useSearchLimit'), jans_help=self.app.get_help_from_schema(self.schema, 'useSearchLimit'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
+                                self.app.getTitledWidget(
+                                    _("Logging Level"),
+                                    name='loggingLevel',
+                                    widget=DropDownWidget(
+                                        values=[('TRACE', 'TRACE'), ('DEBUG', 'DEBUG'), ('INFO', 'INFO'), ('WARN', 'WARN'),('ERROR', 'ERROR'),('FATAL', 'FATAL'),('OFF', 'OFF')],
+                                        value=self.data.get('loggingLevel', 'INFO'),
+                                        select_one_option=False
+                                        ),
+                                    jans_help=self.app.get_help_from_schema(self.schema, 'updateMethod'),
+                                    style=cli_style.edit_text
+                                    ),
 
                                 Window(height=1),
                                 save_config_buttonc,
