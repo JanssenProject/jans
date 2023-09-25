@@ -2,6 +2,9 @@
 
 set -e
 
+# get script directory
+basedir=$(dirname "$(readlink -f -- "$0")")
+
 get_prometheus_opt() {
     prom_opt=""
 
@@ -23,27 +26,44 @@ get_prometheus_lib() {
     fi
 }
 
+get_java_options() {
+    if [ -n "${CN_LINK_JAVA_OPTIONS}" ]; then
+        echo " ${CN_LINK_JAVA_OPTIONS} "
+    else
+        # backward-compat
+        echo " ${CN_JAVA_OPTIONS} "
+    fi
+}
+
+get_max_ram_percentage() {
+    if [ -n "${CN_MAX_RAM_PERCENTAGE}" ]; then
+        echo " -XX:MaxRAMPercentage=$CN_MAX_RAM_PERCENTAGE "
+    fi
+}
+
 get_prometheus_lib
-python3 /app/scripts/wait.py
-python3 /app/scripts/bootstrap.py
-python3 /app/scripts/mod_context.py jans-link
-python3 /app/scripts/upgrade.py
+python3 "$basedir/wait.py"
+python3 "$basedir/bootstrap.py"
+python3 "$basedir/mod_context.py" jans-link
+python3 "$basedir/upgrade.py"
 
 cd /opt/jans/jetty/jans-link
+# shellcheck disable=SC2046
 exec java \
     -server \
     -XX:+DisableExplicitGC \
     -XX:+UseContainerSupport \
-    -XX:MaxRAMPercentage=$CN_MAX_RAM_PERCENTAGE \
     -Djans.base=/etc/jans \
     -Dserver.base=/opt/jans/jetty/jans-link \
     -Dlog.base=/opt/jans/jetty/jans-link \
-    -Djava.io.tmpdir=/tmp \
+    -Djava.io.tmpdir=/opt/jetty/temp \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
     -Dpython.home=/opt/jython \
+    $(get_max_ram_percentage) \
     $(get_prometheus_opt) \
-    ${CN_JAVA_OPTIONS} \
+    $(get_java_options) \
     -jar /opt/jetty/start.jar \
-        jetty.http.port=9091 \
+        jetty.http.host="${CN_LINK_JETTY_HOST}" \
+        jetty.http.port="${CN_LINK_JETTY_PORT}" \
         jetty.deploy.scanInterval=0 \
         jetty.httpConfig.sendServerVersion=false

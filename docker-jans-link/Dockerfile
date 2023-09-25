@@ -25,9 +25,6 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
     && rm -rf /tmp/jetty.tar.gz
 
-# Ports required by jetty
-EXPOSE 9091
-
 # ======
 # Jython
 # ======
@@ -43,14 +40,17 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Link
 # ====
 
-ENV CN_VERSION=1.0.18-SNAPSHOT
-ENV CN_BUILD_DATE='2023-09-17 16:08'
+ENV CN_VERSION=1.0.19-SNAPSHOT
+ENV CN_BUILD_DATE='2023-09-23 10:19'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-link-server/${CN_VERSION}/jans-link-server-${CN_VERSION}.war
 
+# Install Link
+COPY static/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
 RUN mkdir -p ${JETTY_BASE}/jans-link/webapps \
     && wget -q ${CN_SOURCE_URL} -O /tmp/jans-link.war \
     && cd /tmp \
     && zip -d jans-link.war WEB-INF/jetty-web.xml \
+    && zip -r jans-link.war WEB-INF/jetty-env.xml \
     && cp jans-link.war ${JETTY_BASE}/jans-link/webapps/jans-link.war \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-link --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-link.war /tmp/WEB-INF
@@ -59,7 +59,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-link/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=0f3cf5d6c679f02b5a385b72003de2669f2bfb66
+ENV JANS_SOURCE_VERSION=14a4ee5d21b788db7bb3e9bb94a1d1caf228f95a
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -68,13 +68,12 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout add ${JANS_SETUP_DIR}/schema \
-    && git sparse-checkout add ${JANS_SETUP_DIR}/static/rdbm \
-    && git sparse-checkout add ${JANS_SETUP_DIR}/templates/jans-link
+    && git sparse-checkout add ${JANS_SETUP_DIR}
 
-RUN mkdir -p /app/static/rdbm \
+RUN mkdir -p /etc/jans/conf \
+    /app/static/rdbm \
     /app/schema \
-    /app/templates
+    /app/templates/jans-link
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
@@ -85,10 +84,9 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-link /app/templates/jans-link
-
-# cleanup
-RUN rm -rf /tmp/jans
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-link/configuration.ldif /app/templates/jans-link/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-link/jans-link-config.json /app/templates/jans-link/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-link/jans-link-static-config.json /app/templates/jans-link/
 
 # ======
 # Python
@@ -104,14 +102,14 @@ RUN python3 -m ensurepip \
 # Prometheus
 # ==========
 
-COPY conf/prometheus-config.yaml /opt/prometheus/
+COPY static/prometheus-config.yaml /opt/prometheus/
 
 # =======
 # Cleanup
 # =======
 
 RUN apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* /tmp/jans
 
 # =======
 # License
@@ -184,7 +182,7 @@ ENV CN_PERSISTENCE_TYPE=ldap \
 ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
-    CN_JAVA_OPTIONS="" \
+    CN_LINK_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
@@ -192,31 +190,34 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
-    CN_AWS_SECRETS_REPLICA_FILE=""
+    CN_AWS_SECRETS_REPLICA_FILE="" \
+    CN_LINK_JETTY_PORT=9091 \
+    CN_LINK_JETTY_HOST=0.0.0.0
 
 # ==========
 # misc stuff
 # ==========
 
+EXPOSE $CN_LINK_JETTY_PORT
+
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/link" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.18" \
+    org.opencontainers.image.version="1.0.19" \
     org.opencontainers.image.title="Janssen Link" \
     org.opencontainers.image.description=""
 
 RUN mkdir -p /etc/certs \
-    /etc/jans/conf \
     ${JETTY_BASE}/jans-link/logs \
     ${JETTY_BASE}/jans-link/custom/libs \
     ${JETTY_BASE}/common/libs/spanner \
     ${JETTY_BASE}/common/libs/couchbase \
+    ${JETTY_HOME}/temp \
     /usr/share/java \
     /var/jans/cr-snapshots
 
-COPY jetty/log4j2.xml /app/templates/
-COPY conf/*.tmpl /app/templates/
-
+COPY templates /app/templates/
+RUN cp /app/templates/jans-link/jans-link.xml ${JETTY_BASE}/jans-link/webapps/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
@@ -227,8 +228,6 @@ RUN ln -sf /usr/lib/jvm/jre /opt/java
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
-COPY --chown=1000:0 jetty/jans-link.xml ${JETTY_BASE}/jans-link/webapps/
-
 # adjust ownership and permission
 RUN chmod 664 ${JETTY_BASE}/jans-link/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-link/logs \
@@ -238,7 +237,9 @@ RUN chmod 664 ${JETTY_BASE}/jans-link/resources/log4j2.xml \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
-    && chown -R 1000:0 /var/jans/cr-snapshots
+    && chown 1000:0 ${JETTY_BASE}/jans-link/webapps/jans-link.xml \
+    && chown -R 1000:0 /var/jans/cr-snapshots \
+    && chown -R 1000:0 ${JETTY_HOME}/temp
 
 USER 1000
 

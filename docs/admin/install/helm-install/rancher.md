@@ -8,13 +8,17 @@ tags:
 
 # Install Janssen Server Using Rancher Marketplace
 
-For this quick start we will use a [single node Kubernetes install in docker with a self-signed certificate](https://rancher.com/docs/rancher/v2.6/en/installation/other-installation-methods/single-node-docker/).
+For this quick start we will use a [single node Kubernetes install in docker with a self-signed certificate](https://ranchermanager.docs.rancher.com/pages-for-subheaders/rancher-on-a-single-node-with-docker).
 
 !!! note
-    For a more generic setup, use Rancher UI to deploy the setup. For more options please follow this [link](https://rancher.com/docs/rancher/v2.6/en/installation/).
+    For a more generic setup, use Rancher UI to deploy the setup. For more options please follow this [link](https://ranchermanager.docs.rancher.com/pages-for-subheaders/installation-and-upgrade).
 
 
 ## Installation Steps
+
+!!! note
+    If you are deploying an Ingress controller on a single node deployment, in which Ingress utilizes ports 80 and 443, then you have to adjust the host ports mapped for the rancher/rancher container.
+    Here's an [example](https://ranchermanager.docs.rancher.com/reference-guides/single-node-rancher-in-docker/advanced-options#running-rancherrancher-and-rancherrancher-agent-on-the-same-node) on how to do that. 
 
 1. Provision a Linux 4 CPU, 16 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Save the VM IP address. For development environments, the VM can be set up using VMWare Workstation Player or VirtualBox with an Ubuntu 20.04 operating system running on a VM.
 2. Install [Docker](https://docs.docker.com/engine/install/).
@@ -23,7 +27,7 @@ For this quick start we will use a [single node Kubernetes install in docker wit
     docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher:latest
     ```
    The final line of the returned text is the `container-id`, which you'll need for the next step.
-4. Execute the following command to get the [bootstrap password](https://rancher.com/docs/rancher/v2.6/en/installation/resources/bootstrap-password/#specifying-the-bootstrap-password-in-docker-installs) for login.
+4. Execute the following command to get the [bootstrap password](https://ranchermanager.docs.rancher.com/getting-started/installation-and-upgrade/resources/bootstrap-password#specifying-the-bootstrap-password-in-docker-installs) for login.
     ```bash
     docker logs  <container-id>  2>&1 | grep "Bootstrap Password:"
     ```

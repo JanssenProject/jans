@@ -25,9 +25,6 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
     && rm -rf /tmp/jetty.tar.gz
 
-# Ports required by jetty
-EXPOSE 8080
-
 # ======
 # Jython
 # ======
@@ -43,12 +40,12 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # SCIM
 # ====
 
-ENV CN_VERSION=1.0.18-SNAPSHOT
-ENV CN_BUILD_DATE='2023-09-17 16:12'
+ENV CN_VERSION=1.0.19-SNAPSHOT
+ENV CN_BUILD_DATE='2023-09-23 10:24'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
-COPY jetty/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
+COPY static/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
 RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
     && wget -q ${CN_SOURCE_URL} -O /tmp/jans-scim.war \
     && cd /tmp \
@@ -58,27 +55,11 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-scim --add-module=server,deploy,resources,http,http-forwarded,jsp,websocket,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-scim.war /tmp/WEB-INF
 
-# ======
-# Python
-# ======
-
-COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
-    && pip3 uninstall -y pip wheel
-
-# ==========
-# Prometheus
-# ==========
-
-COPY conf/prometheus-config.yaml /opt/prometheus/
-
 # =====================
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=0f3cf5d6c679f02b5a385b72003de2669f2bfb66
+ENV JANS_SOURCE_VERSION=14a4ee5d21b788db7bb3e9bb94a1d1caf228f95a
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
@@ -91,7 +72,8 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git sparse-checkout add ${JANS_SETUP_DIR} \
     && git sparse-checkout add ${JANS_SCIM_RESOURCE_DIR}
 
-RUN mkdir -p /app/static/rdbm \
+RUN mkdir -p /etc/jans/conf \
+    /app/static/rdbm \
     /app/schema \
     /app/templates/jans-scim
 
@@ -107,17 +89,30 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/jans-scim/configuration.ldif /app/templates/jans-scim/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-scim/dynamic-conf.json /app/templates/jans-scim/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-scim/static-conf.json /app/templates/jans-scim/ \
-    && cp ${JANS_SCIM_RESOURCE_DIR}/jans-scim-openapi.yaml /app/static/
+    && cp ${JANS_SCIM_RESOURCE_DIR}/jans-scim-openapi.yaml /app/templates/jans-scim/
 
-# cleanup
-RUN rm -rf /tmp/jans
+# ======
+# Python
+# ======
+
+COPY requirements.txt /app/requirements.txt
+RUN python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel setuptools \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
+
+# ==========
+# Prometheus
+# ==========
+
+COPY static/prometheus-config.yaml /opt/prometheus/
 
 # =======
 # Cleanup
 # =======
 
 RUN apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* /tmp/jans
 
 # =======
 # License
@@ -190,7 +185,7 @@ ENV CN_PERSISTENCE_TYPE=ldap \
 ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
-    CN_JAVA_OPTIONS="" \
+    CN_SCIM_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
@@ -198,31 +193,33 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
-    CN_AWS_SECRETS_REPLICA_FILE=""
+    CN_AWS_SECRETS_REPLICA_FILE="" \
+    CN_SCIM_JETTY_PORT=8080 \
+    CN_SCIM_JETTY_HOST=0.0.0.0
 
 # ==========
 # misc stuff
 # ==========
 
+EXPOSE $CN_SCIM_JETTY_PORT
+
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/scim" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.18" \
+    org.opencontainers.image.version="1.0.19" \
     org.opencontainers.image.title="Janssen SCIM" \
     org.opencontainers.image.description="SCIM server"
 
 RUN mkdir -p /etc/certs \
-    /etc/jans/conf \
     ${JETTY_BASE}/jans-scim/logs \
     ${JETTY_BASE}/jans-scim/custom/libs \
     ${JETTY_BASE}/common/libs/spanner \
     ${JETTY_BASE}/common/libs/couchbase \
+    ${JETTY_HOME}/temp \
     /usr/share/java
 
-COPY jetty/log4j2.xml /app/templates/
-COPY conf/*.tmpl /app/templates/
-COPY templates /app/templates
-
+COPY templates /app/templates/
+RUN cp /app/templates/jans-scim/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
@@ -233,8 +230,6 @@ RUN ln -sf /usr/lib/jvm/jre /opt/java
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
-COPY --chown=1000:0 jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
-
 # adjust ownership
 RUN chmod 664 ${JETTY_BASE}/jans-scim/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-scim/logs \
@@ -243,8 +238,9 @@ RUN chmod 664 ${JETTY_BASE}/jans-scim/resources/log4j2.xml \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
-    && chmod -R g=u /app/templates/jans-scim \
-    && chown -R 1000:0 /opt/prometheus
+    && chown -R 1000:0 /opt/prometheus \
+    && chown 1000:0 ${JETTY_BASE}/jans-scim/webapps/jans-scim.xml \
+    && chown -R 1000:0 ${JETTY_HOME}/temp
 
 USER 1000
 
