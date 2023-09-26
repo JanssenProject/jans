@@ -13,11 +13,11 @@ tags:
 
 Increasing number of mobile phone users are using multiple mobile applications
 from the same software vendor. For instance, it is fairly common to see people
-use multiple mobile apps from software vendors like Google and Microsoft etc.
+using multiple mobile apps from software vendors like Google and Microsoft etc.
 
 Software vendors need a way to allow users to sign-in in one of the apps 
 provided by software vendor and user should be able to use all other apps from 
-same vendor without having to sign-in again. In short, single sign-on for 
+same vendor without having to sign-in again. In short, **single sign-on** for 
 applications belonging to same vendor.
 
 Janssen Server supports [OpenID Connect native SSO mechanism](https://openid.net/specs/openid-connect-native-sso-1_0.html) 
@@ -35,29 +35,24 @@ return `device_secret` in token response from token endpoint.
 
 ## Device Secret
 
-`device_secret`
+`device_secret` is an opaque value returned to the application from token 
+endpoint as a response to token exchange request. Janssen Server will return
+`device_secret` only if the code provided by the application in token exchange
+request is having `device_sso` scope.
 
-- device secret is opaque to the client. How to exactly construct this device token is not specified in the 
-spec and it is decided by AS.
-- device secret identifies a unique device and it is same for all apps on that device from a particular software vendor
-- what data does device secret contain? and construction of device secret? is device secret encrypted?
-- does AS maintain state on backend and if not then how does AS protect device secret
+Janssen Server also checks if the client has the token exchange grant type 
+enabled. To enable the grant type, use [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md)
+and enable token exchange grant 
+(`urn:ietf:params:oauth:grant-type:token-exchange`). 
 
-`Session ID`
-- how is it created? and used?
+`device_token` claim in returned token response contains the device secret.
+Janssen Server stores the device secretes issued to a client in corresponding
+session-id.
 
-## Changes to Token Endpoint
+## Processing Token Exchange Request
 
-- changes to id_token
-  - how does AS manage binding between device_secret and ds_hash
-  - how does AS protect the relationship between the id_token and device_secret?
-  - The device_secret is returned in the device_token claim of the returned JSON data.
-
-## Token Exchange SPEC profile
-
-urn:ietf:params:oauth:grant-type:token-exchange
-
-urn:x-oath:params:oauth:token-type:device-secret
+Janssen Server carries out processing of token request as per rules and 
+checks defined [in the specification](https://openid.net/specs/openid-connect-native-sso-1_0.html#name-native-sso-processing-rules).
 
 
 
