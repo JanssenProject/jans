@@ -31,9 +31,12 @@
 
 		<jans.version>${project.version}</jans.version>
 		<keycloak.version>21.1.1</keycloak.version>
+		<jakarta.servlet.api.version>6.0.0</jakarta.servlet.api.version>
 		<jakarta.ws.rs.api.version>3.0.0</jakarta.ws.rs.api.version>
 		<log4j.version>2.19.0</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
+		<commons.lang.version>2.6</commons.lang.version>
+		
 		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 		<smallrye.config.version>3.0.0-RC1</smallrye.config.version>
 		<junit.jupiter.version>5.9.2</junit.jupiter.version>
@@ -94,22 +97,16 @@
 				<version>${jans.version}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-api</artifactId>
-				<version>${log4j.version}</version>
-			</dependency>
-
 			<!-- jakarta -->
+			<dependency>
+				<groupId>jakarta.servlet</groupId>
+				<artifactId>jakarta.servlet-api</artifactId>
+				<version>${jakarta.servlet.api.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>jakarta.ws.rs</groupId>
 				<artifactId>jakarta.ws.rs-api</artifactId>
 				<version>${jakarta.ws.rs.api.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>jakarta.servlet</groupId>
-				<artifactId>jakarta.servlet-api</artifactId>
-				<scope>provided</scope>
 			</dependency>
 
 			<!-- keycloak -->
@@ -129,18 +126,42 @@
 				<version>${keycloak.version}</version>
 			</dependency>
 
-
+			<!-- smallrye -->
 			<dependency>
 				<groupId>io.smallrye.config</groupId>
 				<artifactId>smallrye-config</artifactId>
 				<version>${smallrye.config.version}</version>
 			</dependency>
 
+			<!-- log -->
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-api</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-core</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-log4j12</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
+			
+			<!-- commons -->
+			<dependency>
+				<groupId>commons-lang</groupId>
+				<artifactId>commons-lang</artifactId>
+				<version>${commons.lang.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-collections4</artifactId>
+				<version>4.1</version>
+			</dependency>
+			
 
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
