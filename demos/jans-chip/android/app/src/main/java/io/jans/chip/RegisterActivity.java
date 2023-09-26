@@ -121,6 +121,8 @@ public class RegisterActivity extends AppCompatActivity {
         Map<String, Object> claims = new HashMap<>();
         claims.put("aapName", "jans-chip");
         claims.put("seq", UUID.randomUUID());
+        claims.put("app_id", getApplicationContext().getPackageName());
+
         try {
             String evidenceJwt = DPoPProofFactory.getInstance().issueJWTToken(claims);
             dcrRequest.setEvidence(evidenceJwt);
@@ -177,6 +179,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
     }
+
     private void createErrorDialog(String message) {
         errorDialog.setMessage(message)
                 .setTitle(R.string.error_title)
