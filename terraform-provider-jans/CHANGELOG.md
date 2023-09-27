@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.0](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.7.3...v0.8.0) (2023-09-27)
+
+
+### Features
+
+* fixed app configuration, OIDC client, and attribute type to match latest API 
+
+
+### Bug Fixes
+
+* added new attributes to app config, client, custom scripts to match latest API version 
+
+## [0.7.4](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.7.4...v0.7.4) (2023-09-28)
+
+
+### Bug Fixes
+
+* fixed app configuration, OIDC client, and attribute type to match latest API 
+
+
 ## [0.7.3](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.7.2...v0.7.3) (2023-07-28)
 
 

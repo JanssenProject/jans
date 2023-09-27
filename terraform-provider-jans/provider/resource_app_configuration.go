@@ -171,6 +171,12 @@ func resourceAppConfiguration() *schema.Resource {
 				Description:      "The authorization endpoint URL. Example: https://server.example.com/restv1/authorize",
 				ValidateDiagFunc: validateURL,
 			},
+			"authorization_challenge_endpoint": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "The authorization challenge endpoint URL.",
+				ValidateDiagFunc: validateURL,
+			},
 			"token_endpoint": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -265,6 +271,12 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional: true,
 				Description: `URL for Mutual TLS Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint.
 							Example: 'https://server.example.com/jans-auth/restv1/mtls'`,
+				ValidateDiagFunc: validateURL,
+			},
+			"mtls_authorization_challenge_endpoint": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      `URL for Mutual TLS Client Authentication and Certificate-Bound Access Tokens (MTLS) Challenge Endpoint.`,
 				ValidateDiagFunc: validateURL,
 			},
 			"mtls_token_endpoint": {
@@ -1587,6 +1599,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Boolean value indicating if DCR authorization allowed with MTLS.",
 			},
+			"dcr_attestation_evidence_required": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value indicating if DCR attestation evidence is required.",
+			},
 			"trusted_ssa_issuers": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -2052,6 +2069,16 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Boolean value specifying whether to block webview authorization.",
 			},
+			"authorization_challenge_default_acr": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Default ACR for authorization challenge.",
+			},
+			"authorization_challenge_should_generate_session": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to generate session for authorization challenge.",
+			},
 			"date_formatter_patterns": {
 				Type:        schema.TypeMap,
 				Optional:    true,
@@ -2070,6 +2097,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Boolean value specifying whether to skip authentication filter for options method calls.",
 			},
+			"fapi": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to enable FAPI.",
+			},
 			"all_response_types_supported": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -2083,11 +2115,6 @@ func resourceAppConfiguration() *schema.Resource {
 						return validateEnum(v, enums)
 					},
 				},
-			},
-			"fapi": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Boolean value specifying whether to enable FAPI.",
 			},
 		},
 		Importer: &schema.ResourceImporter{

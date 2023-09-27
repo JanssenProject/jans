@@ -106,6 +106,7 @@ type AppConfiguration struct {
 	Issuer                                                    string                                `schema:"issuer" json:"issuer"`
 	BaseEndpoint                                              string                                `schema:"base_endpoint" json:"baseEndpoint"`
 	AuthorizationEndpoint                                     string                                `schema:"authorization_endpoint" json:"authorizationEndpoint"`
+	AuthorizationChallengeEndpoint                            string                                `schema:"authorization_challenge_endpoint" json:"authorizationChallengeEndpoint"`
 	TokenEndpoint                                             string                                `schema:"token_endpoint" json:"tokenEndpoint"`
 	TokenRevocationEndpoint                                   string                                `schema:"token_revocation_endpoint" json:"tokenRevocationEndpoint"`
 	UserInfoEndpoint                                          string                                `schema:"userinfo_endpoint" json:"userInfoEndpoint"`
@@ -122,6 +123,7 @@ type AppConfiguration struct {
 	RequirePar                                                bool                                  `schema:"require_par" json:"requirePar"`
 	DeviceAuthzEndpoint                                       string                                `schema:"device_authz_endpoint" json:"deviceAuthzEndpoint"`
 	MtlsAuthorizationEndpoint                                 string                                `schema:"mtls_authorization_endpoint" json:"mtlsAuthorizationEndpoint"`
+	MtlsAuthorizationChallengeEndpoint                        string                                `schema:"mtls_authorization_challenge_endpoint" json:"mtlsAuthorizationChallengeEndpoint"`
 	MtlsTokenEndpoint                                         string                                `schema:"mtls_token_endpoint" json:"mtlsTokenEndpoint"`
 	MtlsTokenRevocationEndpoint                               string                                `schema:"mtls_token_revocation_endpoint" json:"mtlsTokenRevocationEndpoint"`
 	MtlsUserInfoEndpoint                                      string                                `schema:"mtls_user_info_endpoint" json:"mtlsUserInfoEndpoint"`
@@ -309,6 +311,7 @@ type AppConfiguration struct {
 	DcrSignatureValidationJwksUri                             string                                `schema:"dcr_signature_validation_jwks_uri" json:"dcrSignatureValidationJwksUri"`
 	DcrAuthorizationWithClientCredentials                     bool                                  `schema:"dcr_authorization_with_client_credentials" json:"dcrAuthorizationWithClientCredentials"`
 	DcrAuthorizationWithMTLS                                  bool                                  `schema:"dcr_authorization_with_mtls" json:"dcrAuthorizationWithMTLS"`
+	DcrAttestationEvidenceRequired                            bool                                  `schema:"dcr_attestation_evidence_required" json:"dcrAttestationEvidenceRequired"`
 	TrustedSSAIssuers                                         []TrustedIssuerConfig                 `schema:"trusted_ssa_issuers" json:"trustedSsaIssuers"`
 	UseLocalCache                                             bool                                  `schema:"use_local_cache" json:"useLocalCache"`
 	FapiCompatibility                                         bool                                  `schema:"fapi_compatibility" json:"fapiCompatibility"`
@@ -368,11 +371,13 @@ type AppConfiguration struct {
 	DcrSsaValidationConfigs                                   []SsaValidationConfig                 `schema:"dcr_ssa_validation_configs" json:"dcrSsaValidationConfigs"`
 	SsaConfiguration                                          SsaConfiguration                      `schema:"ssa_configuration" json:"ssaConfiguration"`
 	BlockWebviewAuthorizationEnabled                          bool                                  `schema:"block_webview_authorization_enabled" json:"blockWebviewAuthorizationEnabled"`
+	AuthorizationChallengeDefaultAcr                          string                                `schema:"authorization_challenge_default_acr" json:"authorizationChallengeDefaultAcr"`
+	AuthorizationChallengeShouldGenerateSession               bool                                  `schema:"authorization_challenge_should_generate_session" json:"authorizationChallengeShouldGenerateSession"`
 	DateFormatterPatterns                                     map[string]string                     `schema:"date_formatter_patterns" json:"dateFormatterPatterns"`
 	AllResponseTypesSupported                                 []string                              `schema:"all_response_types_supported" json:"allResponseTypesSupported"`
 	HttpLoggingResponseBodyContent                            bool                                  `schema:"http_logging_response_body_content" json:"httpLoggingResponseBodyContent"`
-	SkipAuthenticationFilterOptionsMethod                     bool                                  `schema:"skip_authentication_filter_options_method" json:"skipAuthenticationFilterOptionsMethod"`
 	Fapi                                                      bool                                  `schema:"fapi" json:"fapi"`
+	SkipAuthenticationFilterOptionsMethod                     bool                                  `schema:"skip_authentication_filter_options_method" json:"skipAuthenticationFilterOptionsMethod"`
 }
 
 // GetAppConfiguration returns all Janssen authorization server configuration
