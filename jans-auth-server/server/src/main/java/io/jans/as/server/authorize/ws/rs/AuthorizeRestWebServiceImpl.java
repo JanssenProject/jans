@@ -40,9 +40,11 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
+import io.jans.as.server.service.external.ExternalResourceOwnerPasswordCredentialsService;
 import io.jans.as.server.service.external.ExternalSelectAccountService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
+import io.jans.as.server.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.as.server.service.external.session.SessionEventType;
@@ -65,6 +67,7 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.spi.NoLogWebApplicationException;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -161,6 +164,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private ExternalSelectAccountService externalSelectAccountService;
+
+    @Inject
+    private ExternalResourceOwnerPasswordCredentialsService externalResourceOwnerPasswordCredentialsService;
 
     @Context
     private HttpServletRequest servletRequest;
@@ -260,7 +266,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         ResponseBuilder builder;
 
-        authzRequest.setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(authzRequest.getHttpRequest().getQueryString())));
+        authzRequestService.setCustomParameters(authzRequest);
+
 
         try {
             builder = authorize(authzRequest);
@@ -334,6 +341,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         checkOfflineAccessScopes(responseTypes, authzRequest.getPromptList(), client, scopes);
         checkResponseType(authzRequest, responseTypes, client);
+
+        User ropcUser = executeRopcIfRequired(user, new ExecutionContext(authzRequest.getHttpRequest(), authzRequest.getHttpResponse()));
+        if (ropcUser != null) {
+            user = ropcUser;
+            sessionUser = generatedAuthenticatedSessionForRopc(authzRequest, sessionUser, user);
+        }
 
         AuthorizationGrant authorizationGrant = null;
 
@@ -477,6 +490,23 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         processDeviceAuthorization(deviceAuthzUserCode, user);
 
         return builder;
+    }
+
+    @NotNull
+    private SessionId generatedAuthenticatedSessionForRopc(AuthzRequest authzRequest, SessionId sessionUser, User user) {
+        if (sessionUser == null) {
+            log.trace("Generating authenticated session.");
+            Map<String, String> genericRequestMap = getGenericRequestMap(authzRequest.getHttpRequest());
+
+            Map<String, String> parameterMap = Maps.newHashMap(genericRequestMap);
+            Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+            sessionUser = sessionIdService.generateAuthenticatedSessionId(authzRequest.getHttpRequest(), user.getDn(), authzRequest.getPrompt());
+            sessionUser.setSessionAttributes(requestParameterMap);
+
+            cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
+            sessionIdService.updateSessionId(sessionUser);
+        }
+        return sessionUser;
     }
 
     private void addCustomHeaders(ResponseBuilder builder, AuthzRequest authzRequest) {
@@ -999,5 +1029,35 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         DeviceCodeGrant deviceCodeGrant = authorizationGrantList.createDeviceGrant(cacheData, user);
 
         log.info("Granted device authorization request, user_code: {}, device_code: {}, grant_id: {}", userCode, cacheData.getDeviceCode(), deviceCodeGrant.getGrantId());
+    }
+
+    private User executeRopcIfRequired(User user, ExecutionContext executionContext) {
+        if (!appConfiguration.getForceRopcInAuthorizationEndpoint()) {
+            return null;
+        }
+
+        log.trace("Triggering ROPC at Authorization Endpoint (forced by 'forceRopcInAuthorizationEndpoint' configuration property)");
+
+        if (!externalResourceOwnerPasswordCredentialsService.isEnabled()) {
+            log.trace("Skip ROPC because no ROPC script found.");
+            return null;
+        }
+
+        final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(executionContext);
+        context.setUser(user);
+
+        if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
+            user = context.getUser();
+            if (user != null) {
+                log.trace("ROPC - User {} is authenticated successfully by external script.", user.getUserId());
+                return user;
+            } else {
+                log.trace("ROPC returned True but user is not set (set valid user in context.setUser(<user>))");
+            }
+        } else {
+            log.trace("ROPC script returned False.");
+        }
+
+        return null;
     }
 }
