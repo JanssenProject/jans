@@ -24,8 +24,8 @@ import io.jans.kc.spi.auth.oidc.impl.NimbusOIDCService;
 public class JansAuthenticatorFactory implements AuthenticatorFactory {
     
     private static final String PROVIDER_ID = "janssen-auth";
-    private static final String DISPLAY_TYPE = "Janssen Authentication";
-    private static final String REFERENCE_CATEGORY = "Janssen Authentication";
+    private static final String DISPLAY_TYPE = "Janssen Authenticator";
+    private static final String REFERENCE_CATEGORY = "Janssen Authenticator";
     private static final String HELP_TEXT= "Janssen authenticator for Keycloak";
 
     private static final Logger log = Logger.getLogger(JansAuthenticatorFactory.class);
