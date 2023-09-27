@@ -14,7 +14,7 @@ type AttributeValidation struct {
 	MaxLength int    `schema:"max_length" json:"maxLength,omitempty"`
 }
 
-// Attribute represents a single Gluu attribute.
+// Attribute represents a single Jans attribute.
 type Attribute struct {
 	Dn                     string               `schema:"dn" json:"dn,omitempty"`
 	Selected               bool                 `schema:"selected" json:"selected,omitempty"`
@@ -52,7 +52,7 @@ type Attribute struct {
 	BaseDn                 string               `schema:"base_dn" json:"baseDn,omitempty"`
 }
 
-// GetAttributes returns a list of all Gluu attributes currently configured
+// GetAttributes returns a list of all Jans attributes currently configured
 // in the server.
 func (c *Client) GetAttributes(ctx context.Context) ([]Attribute, error) {
 
@@ -76,7 +76,7 @@ func (c *Client) GetAttributes(ctx context.Context) ([]Attribute, error) {
 	return resp.Data, nil
 }
 
-// GetAttribute returns a single attribute, identified by its inum.
+// GetAttribute returns a single Jans attribute, identified by its inum.
 func (c *Client) GetAttribute(ctx context.Context, inum string) (*Attribute, error) {
 
 	if inum == "" {
@@ -98,7 +98,7 @@ func (c *Client) GetAttribute(ctx context.Context, inum string) (*Attribute, err
 	return ret, nil
 }
 
-// CreateAttribute creates a new attribute.
+// CreateAttribute creates a new Jans attribute.
 func (c *Client) CreateAttribute(ctx context.Context, attr *Attribute) (*Attribute, error) {
 
 	if attr == nil {
@@ -119,7 +119,7 @@ func (c *Client) CreateAttribute(ctx context.Context, attr *Attribute) (*Attribu
 	return ret, nil
 }
 
-// UpdateAttribute updates an existing attribute.
+// UpdateAttribute updates an existing Jans attribute.
 func (c *Client) UpdateAttribute(ctx context.Context, attr *Attribute) (*Attribute, error) {
 
 	if attr == nil {
@@ -142,7 +142,7 @@ func (c *Client) UpdateAttribute(ctx context.Context, attr *Attribute) (*Attribu
 	return ret, nil
 }
 
-// DeleteAttribute deletes the attribute with the given inum.
+// DeleteAttribute deletes the Jans attribute with the given inum.
 func (c *Client) DeleteAttribute(ctx context.Context, inum string) error {
 
 	if inum == "" {
