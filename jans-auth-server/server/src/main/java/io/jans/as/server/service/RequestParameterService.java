@@ -7,6 +7,7 @@
 package io.jans.as.server.service;
 
 import com.google.common.collect.Lists;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.AuthorizationRequestCustomParameter;
@@ -15,18 +16,21 @@ import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.model.security.Identity;
 import io.jans.util.Pair;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-
-import javax.annotation.Nonnull;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -64,6 +68,9 @@ public class RequestParameterService {
             AuthorizeRequestParam.AUTH_REQ_ID,
             AuthorizeRequestParam.SID,
             DeviceAuthorizationService.SESSION_USER_CODE));
+
+    @Inject
+    private Logger log;
 
     @Inject
     private Identity identity;
@@ -233,6 +240,60 @@ public class RequestParameterService {
             if (jsonPayload.has(customParam.getParamName())) {
                 customParameters.put(customParam.getParamName(), jsonPayload.getString(customParam.getParamName()));
             }
+        }
+    }
+
+    public Map<String, String> getCustomParameters(HttpServletRequest request) {
+        Map<String, String> customParameters = new HashMap<>();
+        addCustomParameters(request, customParameters);
+        return customParameters;
+    }
+
+    public void addCustomParameters(HttpServletRequest request, Map<String, String> customParameters) {
+        Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters = appConfiguration
+                .getAuthorizationRequestCustomAllowedParameters();
+
+        if (authorizationRequestCustomAllowedParameters == null) {
+            log.trace("Skipped custom parameters because 'authorizationRequestCustomAllowedParameters' AS configuration is not set.");
+            return;
+        }
+
+        final Enumeration<String> parameterNames = request.getParameterNames();
+        while (parameterNames.hasMoreElements()) {
+            final String parameterName = parameterNames.nextElement();
+            if (!authorizationRequestCustomAllowedParameters.stream().map(AuthorizationRequestCustomParameter::getParamName).collect(toList()).contains(parameterName)) {
+                log.trace("Skipped '{}' as custom parameter (not defined in 'authorizationRequestCustomAllowedParameters')", parameterName);
+                continue;
+            }
+
+            final String parameterValue = request.getParameter(parameterName);
+            if (StringUtils.isNotBlank(parameterValue)) {
+                customParameters.put(parameterName, parameterValue);
+            }
+        }
+
+        log.trace("Custom parameters: {}", customParameters);
+    }
+
+    public void putCustomParametersIntoSession(SessionId sessionId, HttpServletRequest httpRequest) {
+        putCustomParametersIntoSession(sessionId, getCustomParameters(httpRequest));
+    }
+
+    public void putCustomParametersIntoSession(SessionId sessionId, Map<String, String> customParameters) {
+        if (sessionId == null || customParameters == null) {
+            return;
+        }
+
+        putCustomParametersIntoSession(sessionId.getSessionAttributes(), customParameters);
+    }
+
+    public void putCustomParametersIntoSession(Map<String, String> sessionAttributes, Map<String, String> customParameters) {
+        if (sessionAttributes == null || customParameters == null) {
+            return;
+        }
+
+        for (Map.Entry<String, String> entry : customParameters.entrySet()) {
+            sessionAttributes.put("custom_" + entry.getKey(), entry.getValue());
         }
     }
 }
