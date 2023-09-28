@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import io.jans.exception.ConfigurationException;
 import io.jans.keycloak.link.service.config.ApplicationFactory;
 import io.jans.keycloak.link.service.config.ConfigurationFactory;
-import io.jans.keycloak.link.timer.CacheRefreshTimer;
 import io.jans.link.service.EncryptionService;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
