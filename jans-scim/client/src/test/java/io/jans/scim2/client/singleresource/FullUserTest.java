@@ -42,8 +42,13 @@ public class FullUserTest extends UserBaseTest {
         confirmExtendedAttrs(user);
 
         //Confirm extended attrs info is there upon retrieval 
-        Response response = client.searchUsers("id eq \"" + user.getId() +  "\"", null, 1, null, null, null, null);
-        confirmExtendedAttrs(response.readEntity(usrClass));
+        Response response = client.searchUsers("id eq \"" + user.getId() +  "\"", null, 1, 
+                null, null, null, null);
+        assertEquals(response.getStatus(), OK.getStatusCode());
+
+        UserResource other = response.readEntity(ListResponse.class).getResources()
+                .stream().map(usrClass::cast).findFirst().get();        
+        confirmExtendedAttrs(other);
 
     }
 
