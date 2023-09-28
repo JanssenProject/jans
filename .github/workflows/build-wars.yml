@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - 'keycloak-integration/**'
       - 'agama/**'
       - 'jans-auth-server/**'
       - 'jans-bom/**'
@@ -14,11 +15,13 @@ on:
       - 'jans-fido2/**'
       - 'jans-orm/**'
       - 'jans-scim/**'
+      - 'jans-link/**'
 
   push:
    branches:
       - main
    paths:
+      - 'keycloak-integration/**'
       - 'agama/**'
       - 'jans-auth-server/**'
       - 'jans-bom/**'
@@ -28,6 +31,7 @@ on:
       - 'jans-fido2/**'
       - 'jans-orm/**'
       - 'jans-scim/**'
+      - 'jans-link/**'
 jobs:
   build:
     name: Build wars
@@ -36,7 +40,7 @@ jobs:
     strategy:
       max-parallel: 11
       matrix:
-        fldrpath: ['jans-bom','agama','jans-fido2','jans-core','jans-eleven','jans-auth-server','jans-orm','jans-config-api','jans-scim']
+        fldrpath: ['jans-bom','agama','jans-fido2','jans-core','jans-eleven','jans-auth-server','jans-orm','jans-config-api','jans-scim', 'keycloak-integration', 'jans-link']
     steps:
     - name : Variables
       run: |
