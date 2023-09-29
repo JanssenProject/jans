@@ -17,6 +17,7 @@ from jans.pycloudlib.secret import GoogleSecret
 from jans.pycloudlib.secret import AwsSecret
 from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
+from jans.pycloudlib.lock import LockStorage
 
 ConfigAdapter = _t.Union[ConsulConfig, KubernetesConfig, GoogleConfig, AwsConfig]
 """Configs adapter type.
@@ -334,6 +335,9 @@ class Manager:
     #: An instance of :class:`~jans.pycloudlib.manager.SecretManager`
     secret: SecretManager
 
+    #: An instance of :class:`~jans.pycloudlib.lock.LockStorage`
+    lock: LockStorage
+
 
 def get_manager() -> Manager:  # noqa: D412
     """Create an instance of [Manager][jans.pycloudlib.manager.Manager] class.
@@ -354,4 +358,5 @@ def get_manager() -> Manager:  # noqa: D412
     """
     config_mgr = ConfigManager()
     secret_mgr = SecretManager()
-    return Manager(config_mgr, secret_mgr)
+    lock_storage = LockStorage()
+    return Manager(config_mgr, secret_mgr, lock_storage)
