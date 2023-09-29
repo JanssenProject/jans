@@ -10,23 +10,23 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.session.EndSessionErrorResponseType;
 import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
-import io.jans.as.common.model.session.SessionId;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
-import org.slf4j.Logger;
-
+import io.jans.as.server.session.ws.rs.EndSessionService;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
@@ -55,6 +55,9 @@ public class RedirectionUriService {
 
     @Inject
     private LocalResponseCache localResponseCache;
+
+    @Inject
+    private EndSessionService endSessionService;
 
     public String validateRedirectionUri(String clientIdentifier, String redirectionUri) {
         Client client = clientService.getClient(clientIdentifier);
@@ -221,7 +224,7 @@ public class RedirectionUriService {
     }
 
     public String validatePostLogoutRedirectUri(String postLogoutRedirectUri, String[] allowedPostLogoutRedirectUris) {
-        if (BooleanUtils.isTrue(appConfiguration.getAllowPostLogoutRedirectWithoutValidation())) {
+        if (BooleanUtils.isTrue(appConfiguration.getAllowPostLogoutRedirectWithoutValidation()) && endSessionService.isUrlWhiteListed(postLogoutRedirectUri)) {
             return postLogoutRedirectUri;
         }
 
