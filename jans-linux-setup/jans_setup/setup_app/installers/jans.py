@@ -76,12 +76,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Jans Link Server'.ljust(30) + repr(Config.install_jans_link).rjust(35) + (' *' if 'install_jans_link' in Config.addPostSetupService else '') + "\n"
-<<<<<<< HEAD
-                txt += 'Install Gluu/Flex Casa Server'.ljust(30) + repr(Config.install_casa).rjust(35) + (' *' if 'install_casa' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Jans SAML'.ljust(30) + repr(Config.install_jans_saml).rjust(35) + (' *' if 'install_jans_saml' in Config.addPostSetupService else '') + "\n"
-=======
                 txt += 'Install Gluu Casa Server'.ljust(30) + repr(Config.install_casa).rjust(35) + (' *' if 'install_casa' in Config.addPostSetupService else '') + "\n"
->>>>>>> f06b6ca458305a47e5aa8f8821fad1d8335f5a20
+                txt += 'Install Jans SAML'.ljust(30) + repr(Config.install_jans_saml).rjust(35) + (' *' if 'install_jans_saml' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
 
             if Config.profile == 'jans' and Config.installEleven:
