@@ -5,26 +5,42 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.play.core.integrity.IntegrityManager;
+import com.google.android.play.core.integrity.IntegrityManagerFactory;
+import com.google.android.play.core.integrity.IntegrityTokenRequest;
+import com.google.android.play.core.integrity.IntegrityTokenResponse;
+import com.google.android.play.core.integrity.model.IntegrityErrorCode;
 import com.google.common.collect.Lists;
 
-import java.nio.charset.StandardCharsets;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-import io.jans.chip.keyGen.DPoPProofFactory;
-import io.jans.chip.keyGen.KeyManager;
+import io.jans.chip.modal.AppIntegrity;
+import io.jans.chip.utils.AppConfig;
+import io.jans.chip.utils.ChecksumUtil;
+import io.jans.chip.factories.DPoPProofFactory;
+import io.jans.chip.factories.KeyManager;
 import io.jans.chip.modal.DCRequest;
 import io.jans.chip.modal.DCResponse;
 import io.jans.chip.modal.JSONWebKeySet;
@@ -32,6 +48,9 @@ import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.retrofit.RetrofitClient;
 import io.jans.chip.services.DBHandler;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -43,6 +62,8 @@ public class RegisterActivity extends AppCompatActivity {
     Button registerButton;
     ProgressBar registerProgressBar;
     AlertDialog.Builder errorDialog;
+    TextView appIntegrityText;
+    TextView deviceIntegrityText;
     public static final String APP_LINK = "https://dpop.app";
 
     @Override
@@ -51,28 +72,77 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
         errorDialog = new AlertDialog.Builder(this);
 
+        DBHandler dbH = new DBHandler(RegisterActivity.this, AppConfig.SQLITE_DB_NAME, null, 1);
+
         registerProgressBar = findViewById(R.id.registerProgressBar);
         registerButton = findViewById(R.id.registerButton);
+
+        //Display app integrity
+        displayAppIntegrity(dbH);
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                registerProgressBar.setVisibility(View.VISIBLE);
-                registerButton.setEnabled(false);
 
                 issuer = findViewById(R.id.issuer);
                 scopes = findViewById(R.id.scopes);
                 String issuerText = issuer.getText().toString();
                 String scopeText = scopes.getText().toString();
-                DBHandler dbH = new DBHandler(RegisterActivity.this, "chipDB", null, 1);
-                fetchOPConfiguration(issuerText, scopeText, dbH);
+
+                if(validateInputs()) {
+                    registerProgressBar.setVisibility(View.VISIBLE);
+                    registerButton.setEnabled(false);
+                    fetchOPConfiguration(issuerText, scopeText, dbH);
+                }
             }
         });
+    }
+
+    private boolean validateInputs() {
+        if (issuer == null || issuer.length() == 0) {
+            createErrorDialog("Configuration endpoint cannot be left empty.");
+            errorDialog.show();
+            return false;
+        }
+        return true;
+    }
+
+    private void displayAppIntegrity(DBHandler dbH) {
+        AppIntegrity appIntegrity = dbH.getAppIntegrity();
+        appIntegrityText = findViewById(R.id.appIntegrityText);
+        deviceIntegrityText = findViewById(R.id.deviceIntegrityText);
+
+        if (appIntegrity == null) {
+            appIntegrityText.setText("Unable to fetch App Integrity data frpm App server.");
+            registerButton.setEnabled(false);
+        } else if (appIntegrity.getError() != null) {
+            appIntegrityText.setText(appIntegrity.getError());
+            registerButton.setEnabled(false);
+        } else if (appIntegrity.getResponse() != null) {
+            try {
+                JSONObject jo = new JSONObject(appIntegrity.getResponse().toString());
+                if (jo.has("appIntegrity")) {
+                    if(jo.getJSONObject("appIntegrity").has("appRecognitionVerdict")) {
+                        appIntegrityText.setText(jo.getJSONObject("appIntegrity").getString("appRecognitionVerdict"));
+                    }
+                }
+                if (jo.has("deviceIntegrity")) {
+                    if(jo.getJSONObject("deviceIntegrity").has("deviceRecognitionVerdict")) {
+                        deviceIntegrityText.setText(jo.getJSONObject("deviceIntegrity").getString("deviceRecognitionVerdict"));
+                    }
+                }
+            } catch (JSONException e) {
+                createErrorDialog("Error in  displaying App Integrity " + e.getMessage());
+                errorDialog.show();
+                registerButton.setEnabled(false);
+            }
+        }
     }
 
     private void fetchOPConfiguration(String configurationUrl, String scopeText, DBHandler dbH) {
 
         String issuer = configurationUrl.replace("/.well-known/openid-configuration", "");
         Log.d("Inside fetchOPConfiguration :: configurationUrl ::", configurationUrl);
+
         Call<OPConfiguration> call = RetrofitClient.getInstance(issuer).getAPIInterface().getOPConfiguration(configurationUrl);
 
         call.enqueue(new Callback<OPConfiguration>() {
@@ -119,10 +189,19 @@ public class RegisterActivity extends AppCompatActivity {
         dcrRequest.setPostLogoutRedirectUris(Lists.newArrayList(issuer));
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("aapName", "jans-chip");
+        claims.put("appName", "jans-chip");
         claims.put("seq", UUID.randomUUID());
         claims.put("app_id", getApplicationContext().getPackageName());
-
+        String checksum = null;
+        try {
+            checksum = ChecksumUtil.getChecksum(this);
+            claims.put("app_checksum", checksum);
+        } catch (IOException | NoSuchAlgorithmException | PackageManager.NameNotFoundException e) {
+            createErrorDialog("Error in  generating checksum.\n" + e.getMessage());
+            errorDialog.show();
+        }
+        AppIntegrity appIntegrity = dbH.getAppIntegrity();
+        claims.put("app_integrity_result", appIntegrity.getResponse().toString());
         try {
             String evidenceJwt = DPoPProofFactory.getInstance().issueJWTToken(claims);
             dcrRequest.setEvidence(evidenceJwt);

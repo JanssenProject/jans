@@ -1,4 +1,4 @@
-package io.jans.chip.keyGen;
+package io.jans.chip.factories;
 
 import android.icu.util.Calendar;
 import android.icu.util.GregorianCalendar;

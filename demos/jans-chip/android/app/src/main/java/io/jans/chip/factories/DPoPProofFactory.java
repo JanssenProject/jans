@@ -1,6 +1,4 @@
-package io.jans.chip.keyGen;
-
-import android.content.Context;
+package io.jans.chip.factories;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
