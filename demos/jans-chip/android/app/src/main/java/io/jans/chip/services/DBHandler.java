@@ -9,6 +9,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import io.jans.chip.modal.AppIntegrity;
 import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.modal.OPConfiguration;
 
@@ -20,7 +21,8 @@ public class DBHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS OIDC_CLIENT (SNO INTEGER PRIMARY KEY, CLIENT_NAME TEXT, CLIENT_ID TEXT, CLIENT_SECRET TEXT, PUBLIC_KEY TEXT, RECENT_GENERATED_ID_TOKEN TEXT, RECENT_GENERATED_ACCESS_TOKEN TEXT)");
-        sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS OP_CONFIGURATION (REGISTRATION_ENDPOINT TEXT, TOKEN_ENDPOINT TEXT, USERINFO_ENDPOINT TEXT, AUTHORIZATION_CHALLENGE_ENDPOINT, ISSUER, REVOCATION_ENDPOINT)");
+        sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS OP_CONFIGURATION (REGISTRATION_ENDPOINT TEXT, TOKEN_ENDPOINT TEXT, USERINFO_ENDPOINT TEXT, AUTHORIZATION_CHALLENGE_ENDPOINT TEXT, ISSUER, REVOCATION_ENDPOINT TEXT)");
+        sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS APP_INTEGRITY (RESPONSE TEXT, ERROR TEXT)");
     }
 
     @Override
@@ -29,7 +31,34 @@ public class DBHandler extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(drop);
         onCreate(sqLiteDatabase);
     }
+    public void addAppIntegrity(AppIntegrity appIntegrity) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        if(appIntegrity.getResponse() != null) {
+            values.put("RESPONSE", appIntegrity.getResponse().toString());
+        }
+        values.put("ERROR", appIntegrity.getError());
+        long id = db.insert("APP_INTEGRITY", null, values);
+        Log.d("DBHandler :: addAppIntegrity ::", Long.toString(id));
+        db.close();
+    }
+    public AppIntegrity getAppIntegrity() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor result = db.query("APP_INTEGRITY", new String[]{"RESPONSE", "ERROR"},
+                null, null, null, null, null);
+        if (result != null && result.moveToFirst()) {
 
+            AppIntegrity appIntegrity = new AppIntegrity();
+            appIntegrity.setResponseString(result.getString(0));
+            appIntegrity.setError(result.getString(1));
+
+            return appIntegrity;
+
+        } else {
+            Log.e("DBHandler :: getAppIntegrity :: ", "Some error occured!");
+            return null;
+        }
+    }
     public void addOIDCClient(OIDCClient client) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
