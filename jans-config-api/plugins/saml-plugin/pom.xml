@@ -13,7 +13,7 @@
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 		<jans.version>${project.version}</jans.version>
-		
+	    <saml.version>3.4.6</saml.version>
 	</properties>
 
 	<dependencies>
@@ -111,10 +111,12 @@
 	    <dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-saml-api</artifactId>
+			<version>${saml.version}</version>
 		</dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-xmlsec-api</artifactId>
+			<version>${saml.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
@@ -124,10 +126,12 @@
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-security-api</artifactId>
+            <version>${saml.version}</version>
         </dependency>
-	    <dependency>
+	    <!--<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>xmltooling</artifactId>
+			<version>2.6.4</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>bcprov-jdk15</artifactId>
@@ -150,7 +154,7 @@
 					<artifactId>not-yet-commons-ssl</artifactId>
 				</exclusion>
 			</exclusions>
-		 </dependency>
+		 </dependency>-->
 		 <dependency>
             <groupId>net.shibboleth.utilities</groupId>
             <artifactId>java-support</artifactId>

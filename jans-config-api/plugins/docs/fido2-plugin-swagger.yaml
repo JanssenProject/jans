@@ -132,6 +132,8 @@ components:
             type: string
         superGluuEnabled:
           type: boolean
+        sessionIdPersistInCache:
+          type: boolean
         oldU2fMigrationEnabled:
           type: boolean
         errorReasonEnabled:
@@ -171,6 +173,10 @@ components:
             $ref: '#/components/schemas/RequestedParty'
         metadataUrlsProvider:
           type: string
+        skipDownloadMdsEnabled:
+          type: boolean
+        skipValidateMdsInAttestationEnabled:
+          type: boolean
     RequestedParty:
       type: object
       properties:
