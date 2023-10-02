@@ -1,11 +1,11 @@
 [Unit]
-Description=Gluu Casa service
+Description=Janssen Casa service
 After=%(order_casa_service)s
 
 [Service]
 Type=forking
-ExecStart=/opt/dist/scripts/casa start
-ExecStop=/opt/dist/scripts/casa stop
+ExecStart=/opt/dist/scripts/jans-casa start
+ExecStop=/opt/dist/scripts/jans-casa stop
 User=jetty
 Group=jetty
 

@@ -23,13 +23,13 @@ CASA_GIT = 'https://raw.githubusercontent.com/GluuFederation/flex/main/casa'
 class CasaInstaller(JettyInstaller):
 
     client_id_prefix = '3000.'
-    casa_dist_dir = os.path.join(Config.dist_jans_dir, 'casa')
+    casa_dist_dir = os.path.join(Config.dist_jans_dir, 'jans_casa')
+    # we need to change source files after jans-casa build
     source_files = [
-            (os.path.join(casa_dist_dir, 'casa.war'), os.path.join(base.current_app.app_info['GLUU_MAVEN'], 'maven/org/gluu/casa/{0}/casa-{0}.war').format(base.current_app.app_info['CASA_VERSION'])),
-            (os.path.join(casa_dist_dir, 'casa-config.jar'), os.path.join(base.current_app.app_info['GLUU_MAVEN'], 'maven/org/gluu/casa-config/{0}/casa-config-{0}.jar').format(base.current_app.app_info['CASA_VERSION'])),
+            (os.path.join(casa_dist_dir, 'jans-casa.war'), os.path.join(base.current_app.app_info['GLUU_MAVEN'], 'maven/org/gluu/casa/{0}/casa-{0}.war').format(base.current_app.app_info['CASA_VERSION'])),
+            (os.path.join(casa_dist_dir, 'jans-casa-config.jar'), os.path.join(base.current_app.app_info['GLUU_MAVEN'], 'maven/org/gluu/casa-config/{0}/casa-config-{0}.jar').format(base.current_app.app_info['CASA_VERSION'])),
             (os.path.join(casa_dist_dir, 'twillo.jar'), os.path.join(base.current_app.app_info['TWILIO_MAVEN'], '{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION']))),
             (os.path.join(casa_dist_dir, 'jans-fido2-client.jar'), (os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}{1}/jans-fido2-client-{0}{1}.jar'.format(base.current_app.app_info['JANS_APP_VERSION'], base.current_app.app_info['JANS_BUILD'])))),
-            (os.path.join(casa_dist_dir, 'casa_web_resources.xml'), os.path.join(CASA_GIT, 'extras/casa_web_resources.xml')),
             ]
 
     casa_python_libs = ['Casa.py', 'casa-external_fido2.py', 'casa-external_otp.py', 'casa-external_super_gluu.py', 'casa-external_twilio_sms.py']
@@ -44,15 +44,13 @@ class CasaInstaller(JettyInstaller):
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
-        self.service_name = 'casa'
+        self.service_name = 'jans-casa'
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'install_casa'
         self.register_progess()
 
         self.source_files += self.casa_script_files
-        self.jetty_service_dir = os.path.join(self.jetty_base, self.service_name)
-        self.jetty_service_webapps = os.path.join(self.jetty_service_dir, 'webapps')
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
         self.templates_dir = os.path.join(Config.templateFolder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
@@ -102,9 +100,9 @@ class CasaInstaller(JettyInstaller):
 
     def render_import_templates(self):
 
-        Config.templateRenderingDict['casa_redirect_uri'] = 'https://{}/casa'.format(Config.hostname)
-        Config.templateRenderingDict['casa_redirect_logout_uri'] = 'https://{}/casa/bye.zul'.format(Config.hostname)
-        Config.templateRenderingDict['casa_frontchannel_logout_uri'] = 'https://{}/casa/autologout'.format(Config.hostname)
+        Config.templateRenderingDict['casa_redirect_uri'] = f'https://{Config.hostname}/{self.service_name}'
+        Config.templateRenderingDict['casa_redirect_logout_uri'] = f'https://{Config.hostname}/{self.service_name}/bye.zul'
+        Config.templateRenderingDict['casa_frontchannel_logout_uri'] = f'https://{Config.hostname}/{self.service_name}/autologout'
 
         # prepare casa scipt ldif
         base64_script_file = self.generate_base64_file(self.casa_script_files[0][0], 1)
