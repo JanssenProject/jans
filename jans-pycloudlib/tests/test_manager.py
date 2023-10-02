@@ -4,6 +4,7 @@ import pytest
 def test_base_configuration():
     from functools import cached_property
     from jans.pycloudlib.manager import BaseConfiguration
+    from jans.pycloudlib.lock import LockStorage
 
     class Configuration(BaseConfiguration):
         @cached_property
@@ -26,7 +27,7 @@ def test_base_configuration():
         def set_all(self, data):
             return True
 
-    config = Configuration()
+    config = Configuration(LockStorage())
 
     assert config.get("foo") == "random"
     assert config.set("foo", "bar") is True
@@ -42,18 +43,20 @@ def test_base_configuration():
 ])
 def test_config_manager(monkeypatch, adapter, adapter_cls):
     from jans.pycloudlib.manager import ConfigManager
+    from jans.pycloudlib.lock import LockStorage
 
     monkeypatch.setenv("CN_CONFIG_ADAPTER", adapter)
-    manager = ConfigManager()
+    manager = ConfigManager(LockStorage())
     assert manager.adapter.__class__.__name__ == adapter_cls
 
 
 def test_config_manager_invalid_adapter(monkeypatch):
     from jans.pycloudlib.manager import ConfigManager
+    from jans.pycloudlib.lock import LockStorage
 
     monkeypatch.setenv("CN_CONFIG_ADAPTER", "random")
     with pytest.raises(ValueError) as exc:
-        _ = ConfigManager().get("config1")
+        _ = ConfigManager(LockStorage()).get("config1")
     assert "Unsupported config adapter" in str(exc.value)
 
 
@@ -64,18 +67,20 @@ def test_config_manager_invalid_adapter(monkeypatch):
 ])
 def test_secret_manager(monkeypatch, adapter, adapter_cls):
     from jans.pycloudlib.manager import SecretManager
+    from jans.pycloudlib.lock import LockStorage
 
     monkeypatch.setenv("CN_SECRET_ADAPTER", adapter)
-    manager = SecretManager()
+    manager = SecretManager(LockStorage())
     assert manager.adapter.__class__.__name__ == adapter_cls
 
 
 def test_secret_manager_invalid_adapter(monkeypatch):
     from jans.pycloudlib.manager import SecretManager
+    from jans.pycloudlib.lock import LockStorage
 
     monkeypatch.setenv("CN_SECRET_ADAPTER", "random")
     with pytest.raises(ValueError) as exc:
-        _ = SecretManager().get("secret1")
+        _ = SecretManager(LockStorage()).get("secret1")
     assert "Unsupported secret adapter" in str(exc.value)
 
 

@@ -1,5 +1,6 @@
 """This module contains config and secret helpers."""
 
+import logging
 import os
 import typing as _t
 from abc import ABC
@@ -18,6 +19,8 @@ from jans.pycloudlib.secret import AwsSecret
 from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.lock import LockStorage
+
+logger = logging.getLogger(__name__)
 
 ConfigAdapter = _t.Union[ConsulConfig, KubernetesConfig, GoogleConfig, AwsConfig]
 """Configs adapter type.
@@ -63,6 +66,9 @@ class AdapterProtocol(_t.Protocol):  # pragma: no cover
 
 class BaseConfiguration(ABC):
     """Base class to provide contracts for managing configuration (configs or secrets)."""
+
+    def __init__(self, lock_storage):
+        self.lock_storage = lock_storage
 
     @abstractproperty
     def adapter(self) -> AdapterProtocol:  # pragma: no cover
@@ -173,8 +179,43 @@ class ConfigManager(BaseConfiguration):
 
         if adapter == "aws":
             return AwsConfig()
-
         raise ValueError(f"Unsupported config adapter {adapter!r}")
+
+    def get_or_set(self, key: str, value: _t.Any, ttl: int = 10, retry_delay: float = 5.0, max_start_delay: float = 2.0):
+        """Get or set a config based on given key.
+
+        If key is found, returns the value immediately. Otherwise create a new one and returns the value.
+        Note that the whole process is guarded by locking mechanism.
+
+        Args:
+            key: Name of the key.
+            value: Value that will be created if key doesn't exist.
+            ttl: Duration of how long lock should be expired.
+            retry_delay: Delay before retrying to acquire the lock.
+            max_start_delay: Delay before starting to acquire a lock.
+
+        Returns:
+            The value of given key (if any).
+        """
+        name = f"config.{key}"
+
+        with self.lock_storage.create_lock(name, ttl=ttl, retry_delay=retry_delay, max_start_delay=max_start_delay):
+            # double check if key already set
+            _value = self.get(key)
+            if _value:
+                logger.info(f"The {key=} is found")
+                return _value
+
+            # key is not found, lets create it
+            logger.info(f"Unable to get the {key=}; trying to create a new one")
+
+            # maybe a callable
+            if callable(value):
+                value = value()
+
+            self.set(key, value)
+            logger.info(f"The {key=} has been created")
+            return value
 
 
 class SecretManager(BaseConfiguration):
@@ -219,7 +260,6 @@ class SecretManager(BaseConfiguration):
 
         if adapter == "aws":
             return AwsSecret()
-
         raise ValueError(f"Unsupported secret adapter {adapter!r}")
 
     def to_file(
@@ -317,6 +357,42 @@ class SecretManager(BaseConfiguration):
             value = encode_text(value, salt).decode()
         self.adapter.set(key, value)
 
+    def get_or_set(self, key: str, value: _t.Any, ttl: int = 10, retry_delay: float = 5.0, max_start_delay: float = 2.0):
+        """Get or set a secret based on given key.
+
+        If key is found, returns the value immediately. Otherwise create a new one and returns the value.
+        Note that the whole process is guarded by locking mechanism.
+
+        Args:
+            key: Name of the key.
+            value: Value that will be created if key doesn't exist.
+            ttl: Duration of how long lock should be expired.
+            retry_delay: Delay before retrying to acquire the lock.
+            max_start_delay: Delay before starting to acquire a lock.
+
+        Returns:
+            The value of given key (if any).
+        """
+        name = f"secret.{key}"
+
+        with self.lock_storage.create_lock(name, ttl=ttl, retry_delay=retry_delay, max_start_delay=max_start_delay):
+            # double check if key already set
+            _value = self.get(key)
+            if _value:
+                logger.info(f"The {key=} is found")
+                return _value
+
+            # key is not found, lets create it
+            logger.info(f"Unable to get the {key=}; trying to create a new one")
+
+            # maybe a callable
+            if callable(value):
+                value = value()
+
+            self.set(key, value)
+            logger.info(f"The {key=} has been created")
+            return value
+
 
 @dataclass
 class Manager:
@@ -327,6 +403,7 @@ class Manager:
     Args:
         config: An instance of config manager class.
         secret: An instance of secret manager class.
+        lock: An instance of lock storage class.
     """
 
     #: An instance of :class:`~jans.pycloudlib.manager.ConfigManager`
@@ -356,7 +433,7 @@ def get_manager() -> Manager:  # noqa: D412
     manager.secret.get("ssl-cert")
     ```
     """
-    config_mgr = ConfigManager()
-    secret_mgr = SecretManager()
-    lock_storage = LockStorage()
-    return Manager(config_mgr, secret_mgr, lock_storage)
+    lock = LockStorage()
+    config = ConfigManager(lock)
+    secret = SecretManager(lock)
+    return Manager(config, secret, lock)
