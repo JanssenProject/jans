@@ -140,7 +140,6 @@ public class RegisterActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<OPConfiguration> call, Throwable t) {
                     Log.e("Inside fetchOPConfiguration :: onFailure :: ", t.getMessage());
-                    //Toast.makeText(MainActivity.this, "Error in fetching configuration : " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     createErrorDialog("Error in  fetching OP Configuration.\n" + t.getMessage());
                     errorDialog.show();
                     registerProgressBar.setVisibility(View.INVISIBLE);
