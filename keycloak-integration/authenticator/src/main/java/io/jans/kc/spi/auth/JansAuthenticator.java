@@ -27,6 +27,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
+import io.jans.kc.spi.ProviderIDs;
 import io.jans.kc.spi.auth.oidc.OIDCAuthRequest;
 import io.jans.kc.spi.auth.oidc.OIDCMetaError;
 import io.jans.kc.spi.auth.oidc.OIDCService;
@@ -37,6 +38,7 @@ import io.jans.kc.spi.auth.oidc.OIDCTokenResponse;
 import io.jans.kc.spi.auth.oidc.OIDCUserInfoError;
 import io.jans.kc.spi.auth.oidc.OIDCUserInfoRequestError;
 import io.jans.kc.spi.auth.oidc.OIDCUserInfoResponse;
+import io.jans.kc.spi.rest.JansAuthResponseResourceProvider;
 
 public class JansAuthenticator implements Authenticator {
     
@@ -52,7 +54,7 @@ public class JansAuthenticator implements Authenticator {
     private static final String JANS_LOGIN_URL_ATTRIBUTE = "jansLoginUrl";
     private static final String OPENID_AUTH_PARAMS_ATTRIBUTE = "openIdAuthParams";
 
-    private static final String URI_PATH_TO_REST_SERVICE = "/realms/{0}/jans-auth-bridge/auth-complete";
+    private static final String URI_PATH_TO_REST_SERVICE = "/realms/{0}/{1}/auth-complete";
     
     
     private OIDCService oidcService;
@@ -187,6 +189,12 @@ public class JansAuthenticator implements Authenticator {
     private Configuration extractAndValidateConfiguration(AuthenticationFlowContext  context) {
         
         Configuration config = pluginConfigurationFromContext(context);
+
+        if(config == null) {
+            log.debugv("Plugin probably not configured. Check the Janssen Auth plugin in the authentication flow");
+            return null;
+        }
+
         ValidationResult validationresult = config.validate();
         if(validationresult.hasErrors()) {
             for(String err : validationresult.getErrors()) {
@@ -201,7 +209,7 @@ public class JansAuthenticator implements Authenticator {
 
         URI serverUri = context.getSession().getContext().getUri().getBaseUri();
         String realmname = context.getRealm().getName();
-        String rest_svc_uri = MessageFormat.format(URI_PATH_TO_REST_SERVICE,realmname);
+        String rest_svc_uri = MessageFormat.format(URI_PATH_TO_REST_SERVICE,realmname,ProviderIDs.JANS_AUTH_RESPONSE_REST_PROVIDER);
         return serverUri.resolve(rest_svc_uri);
     }
 
