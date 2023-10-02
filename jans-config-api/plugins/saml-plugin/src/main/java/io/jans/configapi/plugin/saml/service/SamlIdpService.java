@@ -58,7 +58,7 @@ public class SamlIdpService {
         SAMLSchemaBuilder samlSchemaBuilder = new SAMLSchemaBuilder(SAML1Version.SAML_11);
         try {
             this.samlSchema = samlSchemaBuilder.getSAMLSchema();
-            logger.error("samlSchema", samlSchema);
+            logger.debug("samlSchema", samlSchema);
         } catch (Exception ex) {
             logger.error("Failed to load SAMLSchema - ", ex);
         }
@@ -172,7 +172,7 @@ public class SamlIdpService {
     }
 
     public boolean renameMetadata(String metadataPath, String destinationMetadataPath) {
-        logger.error("Rename metadata file documentStoreService:{},metadataPath:{}, destinationMetadataPath:{}", documentStoreService, metadataPath, destinationMetadataPath);
+        logger.debug("Rename metadata file documentStoreService:{},metadataPath:{}, destinationMetadataPath:{}", documentStoreService, metadataPath, destinationMetadataPath);
         try {
             return documentStoreService.renameDocument(metadataPath, destinationMetadataPath);
         } catch (Exception ex) {

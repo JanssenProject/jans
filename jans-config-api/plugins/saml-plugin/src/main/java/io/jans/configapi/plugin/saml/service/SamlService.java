@@ -309,17 +309,17 @@ public class SamlService {
             return true;
         }
         if (emptySpMetadataFileName) {
-            log.error("emptySpMetadataFileName:{}", emptySpMetadataFileName);
+            log.debug("emptySpMetadataFileName:{}", emptySpMetadataFileName);
             spMetadataFileName = samlIdpService.getSpNewMetadataFileName(trustRelationship);
-            log.error("spMetadataFileName:{}", spMetadataFileName);
+            log.debug("spMetadataFileName:{}", spMetadataFileName);
             trustRelationship.setSpMetaDataFN(spMetadataFileName);
 
         }
         InputStream targetStream = file;
-        log.error("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
+        log.debug("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
 
         String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
-        log.error("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
+        log.debug("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
         if (StringHelper.isNotEmpty(result)) {
             metadataValidationTimer.queue(result);
             //process files in temp that were not processed earlier
@@ -333,19 +333,19 @@ public class SamlService {
     }
 
     public void processUnprocessedMetadataFiles() {
-        log.error("processing unprocessed metadata files ");
+        log.debug("processing unprocessed metadata files ");
         String directory = samlIdpService.getIdpMetadataTempDir();
-        log.error("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
+        log.debug("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
 
         if (Files.exists(Paths.get(directory))) {
-            log.error("directory:{} does exists)", directory);
+            log.debug("directory:{} does exists)", directory);
             File folder = new File(directory);
             File[] files = folder.listFiles();
-            log.error("files:{}", files);
+            log.debug("files:{}", files);
             if (files != null && files.length > 0) {
 
                 for (File file : files) {
-                    log.error("file:{}, file.getName():{}", file, file.getName());
+                    log.debug("file:{}, file.getName():{}", file, file.getName());
                     metadataValidationTimer.queue(file.getName());
                 }
             }

@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.saml.rest;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
 import io.jans.configapi.plugin.saml.form.TrustRelationshipForm;
 import io.jans.configapi.core.rest.BaseResource;
@@ -74,7 +75,7 @@ public class TrustRelationshipResource extends BaseResource {
     @Path(Constants.ID_PATH + Constants.ID_PATH_PARAM)
     public Response getTrustRelationshipById(
             @Parameter(description = "Unique identifier - Id") @PathParam(Constants.ID) @NotNull String id) {
-        logger.info("Searching TrustRelationship by id: {}", id);
+        logger.info("Searching TrustRelationship by id: {}", escapeLog(id));
 
         TrustRelationship trustRelationship = samlService.getTrustRelationshipByInum(id);
 
@@ -157,7 +158,7 @@ public class TrustRelationshipResource extends BaseResource {
     public Response deleteTrustRelationship(
             @Parameter(description = "Unique Id of Trust Relationship") @PathParam(Constants.ID) @NotNull String id) {
 
-        logger.info("Delete client identified by id:{}", id);
+        logger.info("Delete client identified by id:{}", escapeLog(id));
 
         TrustRelationship trustRelationship = samlService.getTrustRelationshipByInum(id);
         if (trustRelationship == null) {
@@ -174,9 +175,9 @@ public class TrustRelationshipResource extends BaseResource {
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @Path(Constants.ID_PATH_PARAM)
+    @Path(PROCESS_META_FILE)
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    @DELETE
+    @POST
     public Response processMetadataFiles() {
 
         logger.info("process metadata files");

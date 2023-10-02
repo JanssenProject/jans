@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
 		<artifactId>plugins</artifactId>
 		<groupId>io.jans.jans-config-api.plugins</groupId>
 		<version>1.0.19-SNAPSHOT</version>
 	</parent>
-	
+
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>saml-plugin</artifactId>
-	
+
 	<properties>
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 		<jans.version>${project.version}</jans.version>
-	    <saml.version>3.4.6</saml.version>
+		<saml.version>3.4.6</saml.version>
 	</properties>
 
 	<dependencies>
@@ -44,7 +46,7 @@
 			<artifactId>jans-core-saml</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
@@ -74,92 +76,65 @@
 			<artifactId>httpcore-nio</artifactId>
 			<version>${httpcore.version}</version>
 		</dependency>
-		
+
 		<!-- CDI -->
 		<dependency>
-		    <groupId>jakarta.enterprise</groupId>
-		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.inject</groupId>
 			<artifactId>jakarta.inject-api</artifactId>
 		</dependency>
 		<dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
-        </dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+		</dependency>
 		<dependency>
-     	    <groupId>jakarta.ws.rs</groupId>
-     		<artifactId>jakarta.ws.rs-api</artifactId>
-   		</dependency>		
-		
+			<groupId>jakarta.ws.rs</groupId>
+			<artifactId>jakarta.ws.rs-api</artifactId>
+		</dependency>
+
 		<!-- apache -->
-		 <dependency>
-            <groupId>org.apache.james</groupId>
-            <artifactId>apache-mime4j-dom</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.james</groupId>
-            <artifactId>apache-mime4j-storage</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.james</groupId>
-            <artifactId>apache-mime4j-core</artifactId>
-        </dependency>
-        
-	    <!-- opensaml -->
-	    <dependency>
+		<dependency>
+			<groupId>org.apache.james</groupId>
+			<artifactId>apache-mime4j-dom</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.james</groupId>
+			<artifactId>apache-mime4j-storage</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.james</groupId>
+			<artifactId>apache-mime4j-core</artifactId>
+		</dependency>
+
+		<!-- opensaml -->
+		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-saml-api</artifactId>
 			<version>${saml.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml-xmlsec-api</artifactId>
-			<version>${saml.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml-core</artifactId>
-            <version>4.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml-security-api</artifactId>
-            <version>${saml.version}</version>
-        </dependency>
-	    <!--<dependency>
+		<dependency>
 			<groupId>org.opensaml</groupId>
-			<artifactId>xmltooling</artifactId>
-			<version>2.6.4</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>bcprov-jdk15</artifactId>
-					<groupId>org.bouncycastle</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-httpclient</artifactId>
-					<groupId>commons-httpclient</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>log4j-over-slf4j</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>ca.juliusdavies</groupId>
-					<artifactId>not-yet-commons-ssl</artifactId>
-				</exclusion>
-			</exclusions>
-		 </dependency>-->
-		 <dependency>
-            <groupId>net.shibboleth.utilities</groupId>
-            <artifactId>java-support</artifactId>
-            <version>7.5.2</version>
-        </dependency>
+			<artifactId>opensaml-xmlsec-api</artifactId>
+			<version>${saml.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.opensaml</groupId>
+			<artifactId>opensaml-core</artifactId>
+			<version>4.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.opensaml</groupId>
+			<artifactId>opensaml-security-api</artifactId>
+			<version>${saml.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.shibboleth.utilities</groupId>
+			<artifactId>java-support</artifactId>
+			<version>7.5.2</version>
+		</dependency>
 
 		<!-- Testing -->
 		<dependency>
@@ -192,14 +167,12 @@
 			<artifactId>cucumber-reporting</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- Swagger -->
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core-jakarta</artifactId>
 		</dependency>
-
-
 
 
 	</dependencies>
@@ -333,8 +306,8 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-					
-			
+
+
 		</plugins>
 	</build>
 </project>

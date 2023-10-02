@@ -33,7 +33,7 @@ public class TrustRelationshipForm implements Serializable {
     @NotNull
 	@FormParam("metaDataFile")
 	@PartType(MediaType.APPLICATION_OCTET_STREAM)
-    private InputStream  metaDataFile;
+    private transient InputStream  metaDataFile;
 
     public TrustRelationship getTrustRelationship() {
         return trustRelationship;

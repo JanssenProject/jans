@@ -20,6 +20,7 @@ public class Constants {
     public static final String ID = "id";
     public static final String CLIENTID_PATH = "/{clientId}";
     public static final String CLIENTID = "clientId";
+    public static final String PROCESS_META_FILE = "/PROCESS_META_FILE";
     
     
     //Scopes
