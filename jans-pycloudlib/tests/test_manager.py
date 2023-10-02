@@ -3,10 +3,10 @@ import pytest
 
 def test_base_configuration():
     from functools import cached_property
-    from jans.pycloudlib.manager import BaseConfiguration
+    from jans.pycloudlib.base import BaseStorage
     from jans.pycloudlib.lock import LockStorage
 
-    class Configuration(BaseConfiguration):
+    class Configuration(BaseStorage):
         @cached_property
         def adapter(self):
             return Adapter()
@@ -27,7 +27,7 @@ def test_base_configuration():
         def set_all(self, data):
             return True
 
-    config = Configuration(LockStorage())
+    config = Configuration()
 
     assert config.get("foo") == "random"
     assert config.set("foo", "bar") is True
@@ -42,21 +42,21 @@ def test_base_configuration():
     ("google", "GoogleConfig"),
 ])
 def test_config_manager(monkeypatch, adapter, adapter_cls):
-    from jans.pycloudlib.manager import ConfigManager
+    from jans.pycloudlib.config import ConfigStorage
     from jans.pycloudlib.lock import LockStorage
 
     monkeypatch.setenv("CN_CONFIG_ADAPTER", adapter)
-    manager = ConfigManager(LockStorage())
+    manager = ConfigStorage(LockStorage())
     assert manager.adapter.__class__.__name__ == adapter_cls
 
 
 def test_config_manager_invalid_adapter(monkeypatch):
-    from jans.pycloudlib.manager import ConfigManager
+    from jans.pycloudlib.config import ConfigStorage
     from jans.pycloudlib.lock import LockStorage
 
     monkeypatch.setenv("CN_CONFIG_ADAPTER", "random")
     with pytest.raises(ValueError) as exc:
-        _ = ConfigManager(LockStorage()).get("config1")
+        _ = ConfigStorage(LockStorage()).get("config1")
     assert "Unsupported config adapter" in str(exc.value)
 
 
@@ -66,21 +66,21 @@ def test_config_manager_invalid_adapter(monkeypatch):
     ("google", "GoogleSecret")
 ])
 def test_secret_manager(monkeypatch, adapter, adapter_cls):
-    from jans.pycloudlib.manager import SecretManager
+    from jans.pycloudlib.secret import SecretStorage
     from jans.pycloudlib.lock import LockStorage
 
     monkeypatch.setenv("CN_SECRET_ADAPTER", adapter)
-    manager = SecretManager(LockStorage())
+    manager = SecretStorage(LockStorage())
     assert manager.adapter.__class__.__name__ == adapter_cls
 
 
 def test_secret_manager_invalid_adapter(monkeypatch):
-    from jans.pycloudlib.manager import SecretManager
+    from jans.pycloudlib.secret import SecretStorage
     from jans.pycloudlib.lock import LockStorage
 
     monkeypatch.setenv("CN_SECRET_ADAPTER", "random")
     with pytest.raises(ValueError) as exc:
-        _ = SecretManager(LockStorage()).get("secret1")
+        _ = SecretStorage(LockStorage()).get("secret1")
     assert "Unsupported secret adapter" in str(exc.value)
 
 

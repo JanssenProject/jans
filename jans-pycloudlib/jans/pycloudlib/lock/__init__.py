@@ -12,6 +12,7 @@ from datetime import datetime
 from datetime import timedelta
 from functools import cached_property
 
+from jans.pycloudlib.base import BaseStorage
 from jans.pycloudlib.lock.consul_lock import ConsulLock  # noqa: F401
 from jans.pycloudlib.lock.kubernetes_lock import KubernetesLock  # noqa: F401
 from jans.pycloudlib.lock.google_lock import GoogleLock  # noqa: F401
@@ -33,7 +34,7 @@ Currently supports the following classes:
 """
 
 
-class LockStorage:
+class LockStorage(BaseStorage):
     @cached_property
     def adapter(self) -> LockAdapter:  # noqa: D412
         """Get an instance of lock adapter class.
@@ -75,62 +76,8 @@ class LockStorage:
             return AwsLock()
         raise ValueError(f"Unsupported lock adapter {adapter!r}")
 
-    def get(self, key: str, default: _t.Any = "") -> _t.Any:
-        """Get value based on given key.
-
-        Args:
-            key: Key name.
-            default: Default value if key is not exist.
-
-        Returns:
-            Value based on given key or default one.
-        """
-        return self.adapter.get(key, default)
-
-    def set(self, key: str, value: _t.Any) -> bool:
-        """Set key with given value.
-
-        Args:
-            key: Key name.
-            value: Value of the key.
-
-        Returns:
-            A boolean to mark whether configuration is set or not.
-        """
-        return self.adapter.set(key, value)
-
-    def all(self) -> dict[str, _t.Any]:  # noqa: A003
-        """Get all key-value pairs (deprecated in favor of [get_all][jans.pycloudlib.manager.BaseConfiguration.get_all]).
-
-        Returns:
-            A mapping of configuration.
-        """
-        return self.get_all()
-
-    def get_all(self) -> dict[str, _t.Any]:
-        """Get all configuration.
-
-        Returns:
-            A mapping of configuration (if any).
-        """
-        return self.adapter.get_all()
-
-    def set_all(self, data: dict[str, _t.Any]) -> bool:
-        """Set all key-value pairs.
-
-        Args:
-            data: Key-value pairs.
-
-        Returns:
-            A boolean to mark whether configuration is set or not.
-        """
-        return self.adapter.set_all(data)
-
     def delete(self, key: str) -> bool:
         """Delete specific lock.
-
-        !!! important
-            Subclass **MUST** implement this method.
 
         Args:
             key: Key name.
@@ -390,9 +337,9 @@ class Lock:
 
 # avoid implicit reexport disabled error
 __all__ = [
-    "LockStorage",
     "ConsulLock",
     "KubernetesLock",
     "GoogleLock",
     "AwsLock",
+    "LockStorage",
 ]

@@ -42,7 +42,7 @@ def test_encoding_decode_file_salt(monkeypatch):
     from jans.pycloudlib.cli.encoding import decode_file
 
     monkeypatch.setattr(
-        "jans.pycloudlib.manager.SecretManager.get",
+        "jans.pycloudlib.secret.SecretStorage.get",
         lambda key, default: "2CG9qwCzH5haWXXuUIUe4wFT",
     )
 
@@ -73,7 +73,7 @@ def test_encoding_decode_file_value_error(monkeypatch):
     from jans.pycloudlib.cli.encoding import decode_file
 
     monkeypatch.setattr(
-        "jans.pycloudlib.manager.SecretManager.get",
+        "jans.pycloudlib.secret.SecretStorage.get",
         lambda key, default: "2CG9qwCzH5haWXXuUIUe4wFT",
     )
 
@@ -121,7 +121,7 @@ def test_encoding_decode_string_salt(monkeypatch):
     from jans.pycloudlib.cli.encoding import decode_string
 
     monkeypatch.setattr(
-        "jans.pycloudlib.manager.SecretManager.get",
+        "jans.pycloudlib.secret.SecretStorage.get",
         lambda key, default: "2CG9qwCzH5haWXXuUIUe4wFT",
     )
 
@@ -144,7 +144,7 @@ def test_encoding_decode_string_value_error(monkeypatch):
     from jans.pycloudlib.cli.encoding import decode_string
 
     monkeypatch.setattr(
-        "jans.pycloudlib.manager.SecretManager.get",
+        "jans.pycloudlib.secret.SecretStorage.get",
         lambda key, default: "2CG9qwCzH5haWXXuUIUe4wFT",
     )
 
