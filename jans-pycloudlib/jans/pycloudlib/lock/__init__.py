@@ -5,6 +5,7 @@ import logging
 import os
 import random
 import socket
+import threading
 import time
 import typing as _t
 from datetime import datetime
@@ -144,8 +145,7 @@ class LockStorage:
         name: str,
         owner: str = "",
         ttl: int = 10,
-        lock_storage: "LockStorage" | None = None,
-        retry_delay: float = 2.0,
+        retry_delay: float = 5.0,
         max_start_delay: float = 0.0,
     ):
         """Create lock object.
@@ -164,14 +164,14 @@ class LockStorage:
             name: Name of the lock.
             owner: Owner of the lock.
             ttl: Duration of lock (in seconds).
-            lock_storage: An instance of `jans.pycloudlib.lock.LockStorage` or `None` type.
+            retry_delay: Delay before retrying to acquire lock (in seconds).
+            max_start_delay: Max. delay before starting to acquire lock.
 
         Returns:
             Instance of `jans.pycloudlib.lock.Lock`.
         """
         owner = owner or socket.gethostname()
-        lock_storage = lock_storage or self
-        return Lock(name, owner, ttl, lock_storage, retry_delay, max_start_delay)
+        return Lock(name, owner, ttl, retry_delay, max_start_delay, lock_storage=self)
 
 
 class LockNotAcquired(RuntimeError):
@@ -215,12 +215,12 @@ class Lock:
         name: str,
         owner: str,
         ttl: int,
-        lock_storage: LockStorage,
-        retry_delay: float = 2.0,
-        max_start_delay: float = 0.0
+        retry_delay: float = 5.0,
+        max_start_delay: float = 0.0,
+        lock_storage: "LockStorage" | None = None,
     ):
         # storage to set/get/delete lock
-        self.lock_storage = lock_storage
+        self.lock_storage = lock_storage or LockStorage()
 
         # name of the lock
         self.name = name
@@ -233,6 +233,12 @@ class Lock:
 
         # maximum delay before acquiring lock (in seconds)
         self.max_start_delay = max_start_delay
+
+        # thread object to renew lock
+        self._renew_thread = None
+
+        # event object to stop renew lock
+        self._renew_stop_event = None
 
     def __enter__(self):
         if not self.acquire():
@@ -292,12 +298,35 @@ class Lock:
         """
         return self.lock_storage.delete(self.name)
 
-    def _get_jitter(self):
+    def _get_start_delay(self):
         # random jitter
         return random.uniform(0, self.max_start_delay)  # nosec: B311
 
     def _owned_by_candidate(self, record: dict[str, _t.Any]) -> bool:
         return self.candidate["owner"] == record["owner"]
+
+    def _renew_loop(self):
+        logger.info(f"Starting lock {self.name} update")
+        time.sleep(self._get_start_delay())
+
+        while True:
+            if self._renew_stop_event.isSet():
+                logger.info(f"Stopping lock {self.name} update")
+                break
+
+            if self._set_record():
+                logger.info(f"Lock {self.name} owned by candidate {self.candidate['owner']} has been updated")
+            time.sleep(self.retry_delay)
+
+    def _start_renew_loop(self):
+        self._renew_stop_event = threading.Event()
+        self._renew_thread = threading.Thread(target=self._renew_loop, daemon=False)
+        self._renew_thread.start()
+
+    def _stop_renew_loop(self):
+        self._renew_stop_event.set()
+        self._renew_thread.join()
+        self._renew_thread = None
 
     def acquire(self) -> bool:
         """Acquire a lock.
@@ -305,56 +334,58 @@ class Lock:
         Returns:
             Boolean to indicate if lock is acquired.
         """
-        # add random delay before starting acquiring lock
-        # this allow simulating non-blocking access to lock
-        # TODO: use thread?
-        jitter = self._get_jitter()
-        logger.info(f"Trying to acquire lock {self.name}; {jitter=}")
-        time.sleep(jitter)  # nosec: B311
+        # add random delay (if any) before starting to acquire a lock
+        logger.info(f"Trying to acquire lock {self.name}")
+        time.sleep(self._get_start_delay())
 
         while True:
             # check if lock exists
             record = self._get_record()
 
-            # lock not found, create new one
-            if not record and self._set_record():
-                logger.info(f"Lock {self.name} is created and owned by {self.candidate['owner']}")
+            # the most simple scenario (when lock is not found) is to create new lock
+            if not record:
+                if self._set_record():
+                    # lock created; mark it as acquired to allow candidate to proceed
+                    logger.info(f"Lock {self.name} is created by candidate {self.candidate['owner']}")
+                    self._start_renew_loop()
+                    return True
+
+                # lock not created; mark it as not acquired to allow other candidates to create lock
+                return False
+
+            # at this point, we found an existing lock; note that a lock maybe expired
+            # (owner doesn't update or delete it properly), hence we will try to take over
+            if self._record_expired(record) and self._set_record():
+                logger.info(f"Lock {self.name} is expired hence taken over by candidate {self.candidate['owner']}")
+                self._start_renew_loop()
                 return True
 
-            # logger.info(f"{record=}")
+            # known states of why lock couldn't be acquired
+            #
+            # 1. lock is not expired yet
+            # 2. lock is still used by the owner
+            # 3. candidate is the owner of lock and it has been acquired
+            logger.warning(f"Unable to acquire lock {self.name}; retrying in {self.retry_delay} seconds")
 
-            # lock exists, check if candidate holds the lock
-            # if self.candidate["owner"] == record["owner"]:
-            if self._owned_by_candidate(record):
-                # logger.warning(f"Lock {self.name} exists and owned by the same owner {self.candidate['owner']}")
-                # likely the process needs more time
-                self._set_record()
-                # logger.info(f"updated_record={self._get_record()}")
-                time.sleep(self.retry_delay)
-                continue
-
-            if self._record_expired(record):
-                # logger.info(f"Lock {self.name} is expired hence taken over by {self.candidate['owner']}")
-                return True
-
-            # logger.warning(f"Lock {self.name} is still owned by {record['owner']} and not expired yet")
+            # delay before retrying to acquire
             time.sleep(self.retry_delay)
 
-        # mark as acquired
-        return True
+        # mark as not acquired
+        return False
 
     def release(self) -> None:
         """Release a lock.
 
         Lock is released only if the record exists and owned by candidate.
         """
+        self._stop_renew_loop()
+
         record = self._get_record()
 
         # only allow deletion if lock is owned by the candidate
-        # if record and self.candidate["owner"] == record["owner"]:
         if record and self._owned_by_candidate(record):
             self._delete_record()
-            logger.info(f"Lock {self.name} is released by {self.candidate['owner']}")
+            logger.info(f"Lock {self.name} is released by candidate {self.candidate['owner']}")
 
 
 # avoid implicit reexport disabled error
