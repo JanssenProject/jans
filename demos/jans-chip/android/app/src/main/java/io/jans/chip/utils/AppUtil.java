@@ -4,13 +4,16 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class ChecksumUtil {
+public class AppUtil {
     public static String getChecksum(Context context) throws IOException, NoSuchAlgorithmException, PackageManager.NameNotFoundException {
         // Get the Android package file path.
         String apkPath = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).applicationInfo.sourceDir;

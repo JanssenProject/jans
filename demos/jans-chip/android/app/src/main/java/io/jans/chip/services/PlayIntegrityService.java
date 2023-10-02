@@ -1,32 +1,19 @@
 package io.jans.chip.services;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
-
 import com.google.android.gms.tasks.Task;
 import com.google.android.play.core.integrity.IntegrityManager;
 import com.google.android.play.core.integrity.IntegrityManagerFactory;
 import com.google.android.play.core.integrity.IntegrityTokenRequest;
 import com.google.android.play.core.integrity.IntegrityTokenResponse;
 import com.google.android.play.core.integrity.model.IntegrityErrorCode;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.UUID;
-
-import io.jans.chip.SplashScreenActivity;
-import io.jans.chip.modal.AppIntegrity;
-import io.jans.chip.services.DBHandler;
+import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
+import io.jans.chip.retrofit.RetrofitClient;
 import io.jans.chip.utils.AppConfig;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class PlayIntegrityService {
     Context context;
@@ -46,106 +33,54 @@ public class PlayIntegrityService {
         integrityTokenResponse.addOnSuccessListener(integrityTokenResponse1 -> {
             String integrityToken = integrityTokenResponse1.token();
             Log.d("Integrity token Obtained result", "success");
-            new getTokenResponse(dbH).execute(integrityToken);
+            getTokenResponse(dbH, integrityToken);
         });
 
         integrityTokenResponse.addOnFailureListener(e -> {
             Log.e("Integrity token Obtained result", "failure");
-            //Toast.makeText(context, "Integrity token Obtained result :: failure", Toast.LENGTH_SHORT).show();
-            dbH.addAppIntegrity(setErrorInAppIntegrityObj("Error in obtaining integrity token :: " + e.getMessage()));
+            dbH.addAppIntegrity(setErrorInAppIntegrityObj("Error in obtaining integrity token :: " + getErrorText(e)));
             throw new RuntimeException(e);
         });
     }
 
-    private class getTokenResponse extends AsyncTask<String, Integer, String[]> {
+    private void getTokenResponse(DBHandler dbH, String integrityToken) {
+        Log.d("INTEGRITY_APP_SERVER_URL", AppConfig.INTEGRITY_APP_SERVER_URL + "/api/check?token=" + integrityToken);
+        Call<AppIntegrityResponse> call = RetrofitClient.getInstance(AppConfig.INTEGRITY_APP_SERVER_URL).getAPIInterface().verifyIntegrityTokenOnAppServer(AppConfig.INTEGRITY_APP_SERVER_URL + "/api/check?token=" + integrityToken);
 
-        private boolean hasError = false;
-        private DBHandler dbH;
+        call.enqueue(new Callback<AppIntegrityResponse>() {
+            @Override
+            public void onResponse(Call<AppIntegrityResponse> call, retrofit2.Response<AppIntegrityResponse> response) {
+                if (response.code() == 200) {
+                    AppIntegrityResponse appIntegrityResponse = response.body();
 
-        public getTokenResponse(DBHandler dbH) {
-            this.dbH = dbH;
-        }
+                    if (appIntegrityResponse == null) {
+                        Log.e("Response from App server :: ", "Response body is empty");
+                        dbH.addAppIntegrity(setErrorInAppIntegrityObj("Empty response obtained from App Server."));
+                    }
+                    if (appIntegrityResponse.getError() != null) {
+                        Log.e("Response from App server :: ", "Response body has error");
+                        dbH.addAppIntegrity(setErrorInAppIntegrityObj("Response from App server has error :: " + appIntegrityResponse.getError()));
+                    }
+                    if (appIntegrityResponse.getAppIntegrity() == null || appIntegrityResponse.getAppIntegrity().getAppRecognitionVerdict() == null) {
+                        Log.e("Response from App server :: ", "Response body do not have appIntegrity");
+                        dbH.addAppIntegrity(setErrorInAppIntegrityObj("Response body do not have appIntegrity."));
+                    }
 
-        @Override
-        protected String[] doInBackground(String... token) {
-
-            OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder()
-                    .get()
-                    .url(AppConfig.INTEGRITY_APP_SERVER_URL + "/api/check?token=" + token[0])
-                    .build();
-
-            Response response = null;
-            try {
-                response = client.newCall(request).execute();
-
-
-                if (!response.isSuccessful()) {
-                    hasError = true;
+                    Log.d("Inside getTokenResponse :: appIntegrityResponse ::", appIntegrityResponse.getAppIntegrity().getAppRecognitionVerdict());
+                    dbH.addAppIntegrity(appIntegrityResponse);
+                } else {
                     Log.e("Response from App server :: Unsuccessful, Response code :: ", String.valueOf(response.code()));
-                    //Toast.makeText(context, "Response from App server :: Unsuccessful, Response code :: " + response.code(), Toast.LENGTH_SHORT).show();
                     dbH.addAppIntegrity(setErrorInAppIntegrityObj("Error in obtaining response from aap server :: Response code :: " + response.code()));
-                    return new String[]{"Api request error", "Response code: " + response.code()};
                 }
-                ResponseBody responseBody = response.body();
-
-                if (responseBody == null) {
-                    hasError = true;
-                    Log.e("Response from App server :: ", "Response body is empty");
-                    //Toast.makeText(context, "Api request error :: Empty response", Toast.LENGTH_SHORT).show();
-                    dbH.addAppIntegrity(setErrorInAppIntegrityObj("Empty response obtained from App Server."));
-                    return new String[]{"Api request error", "Empty response"};
-                }
-
-                JSONObject json = null;
-                json = new JSONObject(responseBody.string());
-
-
-                if (json.has("error")) {
-                    hasError = true;
-                    Log.e("Response from App server :: ", "Response body has error");
-                    //Toast.makeText(context, "Api request error :: " + json.getString("error"), Toast.LENGTH_SHORT).show();
-                    dbH.addAppIntegrity(setErrorInAppIntegrityObj("Response from App server has error :: " + json.getString("error")));
-                    return new String[]{"Api request error", json.getString("error")};
-                }
-
-                if (!json.has("appIntegrity")) {
-                    hasError = true;
-                    Log.e("Response from App server :: ", "Response body do not have appIntegrity");
-                    //Toast.makeText(context, "Api request error :: Response does not contain appIntegrity", Toast.LENGTH_SHORT).show();
-                    dbH.addAppIntegrity(setErrorInAppIntegrityObj("Response body do not have appIntegrity."));
-                    return new String[]{"Api request error", "Response does not contain appIntegrity"};
-                }
-                return new String[]{json.toString()};
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
-        }
 
+            @Override
+            public void onFailure(Call<AppIntegrityResponse> call, Throwable t) {
+                Log.e("Error in fetching AppIntegrity :: ", t.getMessage());
+                dbH.addAppIntegrity(setErrorInAppIntegrityObj("Error in fetching AppIntegrity :: " + t.getMessage()));
 
-        protected void onBackgroundError(Exception e) {
-            hasError = true;
-            onPostExecute(new String[]{"Api request error", e.getMessage()});
-        }
-
-        @Override
-        protected void onPostExecute(String[] result) {
-            if (hasError) {
-                Log.d("Response from App server has error :: ", result[0]);
-                //Toast.makeText(context, "Api request error :: " + result[0], Toast.LENGTH_SHORT).show();
-                dbH.addAppIntegrity(setErrorInAppIntegrityObj("Response from App server has error :: " + result[0]));
-                //showErrorDialog(result[0], result[1]);
-            } else {
-                String json = result[0];
-                Log.d("Response from App server is successful :: ", json);
-                AppIntegrity appIntegrity = new AppIntegrity();
-                appIntegrity.setResponseString(json);
-                dbH.addAppIntegrity(appIntegrity);
-                Toast.makeText(context, "Api request Success :: " + json, Toast.LENGTH_SHORT).show();
             }
-        }
+        });
     }
 
     private String getErrorText(Exception e) {
@@ -154,7 +89,6 @@ public class PlayIntegrityService {
             return "Unknown Error";
         }
 
-        //Pretty junk way of getting the error code but it works
         int errorCode = Integer.parseInt(msg.replaceAll("\n", "").replaceAll(":(.*)", ""));
         switch (errorCode) {
             case IntegrityErrorCode.API_NOT_AVAILABLE:
@@ -205,8 +139,8 @@ public class PlayIntegrityService {
         }
     }
 
-    private AppIntegrity setErrorInAppIntegrityObj(String error) {
-        AppIntegrity appIntegrity = new AppIntegrity();
+    private AppIntegrityResponse setErrorInAppIntegrityObj(String error) {
+        AppIntegrityResponse appIntegrity = new AppIntegrityResponse();
         appIntegrity.setError(error);
         return appIntegrity;
 

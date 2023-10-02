@@ -39,8 +39,9 @@ public class KeyManager {
     }
 
     public static synchronized KeyManager getInstance() {
-        if (single_instance == null)
+        if (single_instance == null) {
             single_instance = new KeyManager();
+        }
 
         return single_instance;
     }

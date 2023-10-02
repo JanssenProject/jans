@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,14 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.play.core.integrity.IntegrityManager;
-import com.google.android.play.core.integrity.IntegrityManagerFactory;
-import com.google.android.play.core.integrity.IntegrityTokenRequest;
-import com.google.android.play.core.integrity.IntegrityTokenResponse;
-import com.google.android.play.core.integrity.model.IntegrityErrorCode;
 import com.google.common.collect.Lists;
 
 import org.json.JSONException;
@@ -32,13 +24,12 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-import io.jans.chip.modal.AppIntegrity;
+import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
 import io.jans.chip.utils.AppConfig;
-import io.jans.chip.utils.ChecksumUtil;
+import io.jans.chip.utils.AppUtil;
 import io.jans.chip.factories.DPoPProofFactory;
 import io.jans.chip.factories.KeyManager;
 import io.jans.chip.modal.DCRequest;
@@ -48,9 +39,6 @@ import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.retrofit.RetrofitClient;
 import io.jans.chip.services.DBHandler;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -88,7 +76,7 @@ public class RegisterActivity extends AppCompatActivity {
                 String issuerText = issuer.getText().toString();
                 String scopeText = scopes.getText().toString();
 
-                if(validateInputs()) {
+                if (validateInputs()) {
                     registerProgressBar.setVisibility(View.VISIBLE);
                     registerButton.setEnabled(false);
                     fetchOPConfiguration(issuerText, scopeText, dbH);
@@ -107,68 +95,64 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void displayAppIntegrity(DBHandler dbH) {
-        AppIntegrity appIntegrity = dbH.getAppIntegrity();
+        AppIntegrityResponse appIntegrity = dbH.getAppIntegrity();
         appIntegrityText = findViewById(R.id.appIntegrityText);
         deviceIntegrityText = findViewById(R.id.deviceIntegrityText);
 
         if (appIntegrity == null) {
             appIntegrityText.setText("Unable to fetch App Integrity data frpm App server.");
             registerButton.setEnabled(false);
-        } else if (appIntegrity.getError() != null) {
+        }
+        if (appIntegrity.getError() != null) {
             appIntegrityText.setText(appIntegrity.getError());
             registerButton.setEnabled(false);
-        } else if (appIntegrity.getResponse() != null) {
-            try {
-                JSONObject jo = new JSONObject(appIntegrity.getResponse().toString());
-                if (jo.has("appIntegrity")) {
-                    if(jo.getJSONObject("appIntegrity").has("appRecognitionVerdict")) {
-                        appIntegrityText.setText(jo.getJSONObject("appIntegrity").getString("appRecognitionVerdict"));
-                    }
-                }
-                if (jo.has("deviceIntegrity")) {
-                    if(jo.getJSONObject("deviceIntegrity").has("deviceRecognitionVerdict")) {
-                        deviceIntegrityText.setText(jo.getJSONObject("deviceIntegrity").getString("deviceRecognitionVerdict"));
-                    }
-                }
-            } catch (JSONException e) {
-                createErrorDialog("Error in  displaying App Integrity " + e.getMessage());
-                errorDialog.show();
-                registerButton.setEnabled(false);
-            }
         }
+        if (appIntegrity.getAppIntegrity() != null && appIntegrity.getAppIntegrity().getAppRecognitionVerdict() != null) {
+            appIntegrityText.setText(appIntegrity.getAppIntegrity().getAppRecognitionVerdict());
+        }
+        if (appIntegrity.getDeviceIntegrity() != null && appIntegrity.getDeviceIntegrity().getAppRecognitionVerdict() != null) {
+            appIntegrityText.setText(appIntegrity.getDeviceIntegrity().commasSeparatedString());
+        }
+
     }
 
     private void fetchOPConfiguration(String configurationUrl, String scopeText, DBHandler dbH) {
 
         String issuer = configurationUrl.replace("/.well-known/openid-configuration", "");
         Log.d("Inside fetchOPConfiguration :: configurationUrl ::", configurationUrl);
+        try {
+            Call<OPConfiguration> call = RetrofitClient.getInstance(issuer).getAPIInterface().getOPConfiguration(configurationUrl);
 
-        Call<OPConfiguration> call = RetrofitClient.getInstance(issuer).getAPIInterface().getOPConfiguration(configurationUrl);
-
-        call.enqueue(new Callback<OPConfiguration>() {
-            @Override
-            public void onResponse(Call<OPConfiguration> call, Response<OPConfiguration> response) {
-                if (response.code() == 200) {
-                    OPConfiguration opConfiguration = response.body();
-                    Log.d("Inside fetchOPConfiguration :: opConfiguration ::", opConfiguration.toString());
-                    dbH.addOPConfiguration(opConfiguration);
-                    doDCR(scopeText, dbH);
-                } else {
-                    createErrorDialog("Error in  fetching OP Configuration.\n Error code: " + response.code() + "\n Error message: " + response.message());
-                    errorDialog.show();
+            call.enqueue(new Callback<OPConfiguration>() {
+                @Override
+                public void onResponse(Call<OPConfiguration> call, Response<OPConfiguration> response) {
+                    if (response.code() == 200) {
+                        OPConfiguration opConfiguration = response.body();
+                        Log.d("Inside fetchOPConfiguration :: opConfiguration ::", opConfiguration.toString());
+                        dbH.addOPConfiguration(opConfiguration);
+                        doDCR(scopeText, dbH);
+                    } else {
+                        createErrorDialog("Error in  fetching OP Configuration.\n Error code: " + response.code() + "\n Error message: " + response.message());
+                        errorDialog.show();
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<OPConfiguration> call, Throwable t) {
-                Log.e("Inside fetchOPConfiguration :: onFailure :: ", t.getMessage());
-                //Toast.makeText(MainActivity.this, "Error in fetching configuration : " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                createErrorDialog("Error in  fetching OP Configuration.\n" + t.getMessage());
-                errorDialog.show();
-                registerProgressBar.setVisibility(View.INVISIBLE);
-                registerButton.setEnabled(true);
-            }
-        });
+                @Override
+                public void onFailure(Call<OPConfiguration> call, Throwable t) {
+                    Log.e("Inside fetchOPConfiguration :: onFailure :: ", t.getMessage());
+                    //Toast.makeText(MainActivity.this, "Error in fetching configuration : " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    createErrorDialog("Error in  fetching OP Configuration.\n" + t.getMessage());
+                    errorDialog.show();
+                    registerProgressBar.setVisibility(View.INVISIBLE);
+                    registerButton.setEnabled(true);
+                }
+            });
+        } catch (Exception e) {
+            createErrorDialog("Error in  fetching OP Configuration.\n" + e.getMessage());
+            errorDialog.show();
+            registerProgressBar.setVisibility(View.INVISIBLE);
+            registerButton.setEnabled(true);
+        }
     }
 
     private void doDCR(String scopeText, DBHandler dbH) {
@@ -194,14 +178,14 @@ public class RegisterActivity extends AppCompatActivity {
         claims.put("app_id", getApplicationContext().getPackageName());
         String checksum = null;
         try {
-            checksum = ChecksumUtil.getChecksum(this);
+            checksum = AppUtil.getChecksum(this);
             claims.put("app_checksum", checksum);
         } catch (IOException | NoSuchAlgorithmException | PackageManager.NameNotFoundException e) {
             createErrorDialog("Error in  generating checksum.\n" + e.getMessage());
             errorDialog.show();
         }
-        AppIntegrity appIntegrity = dbH.getAppIntegrity();
-        claims.put("app_integrity_result", appIntegrity.getResponse().toString());
+        AppIntegrityResponse appIntegrity = dbH.getAppIntegrity();
+        claims.put("app_integrity_result", appIntegrity);
         try {
             String evidenceJwt = DPoPProofFactory.getInstance().issueJWTToken(claims);
             dcrRequest.setEvidence(evidenceJwt);

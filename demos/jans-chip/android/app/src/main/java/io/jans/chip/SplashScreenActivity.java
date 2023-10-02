@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
-import io.jans.chip.modal.AppIntegrity;
+import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
 import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.services.DBHandler;
 import io.jans.chip.services.PlayIntegrityService;
@@ -52,10 +52,11 @@ public class SplashScreenActivity extends Activity {
     }
 
     private void checkAppIntegrity(DBHandler dbH) {
-        AppIntegrity appIntegrity = dbH.getAppIntegrity();
-        if(appIntegrity == null) {
-            PlayIntegrityService PlayIntegrityService = new PlayIntegrityService(getApplicationContext());
-            PlayIntegrityService.checkAppIntegrity();
+        AppIntegrityResponse appIntegrity = dbH.getAppIntegrity();
+        if(appIntegrity == null || appIntegrity.getError() != null) {
+            dbH.deleteAppIntegrity();
+            PlayIntegrityService playIntegrityService = new PlayIntegrityService(getApplicationContext());
+            playIntegrityService.checkAppIntegrity();
             handlerDelay = 20000;
         }
     }
