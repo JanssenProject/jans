@@ -175,7 +175,7 @@ public class TrustRelationshipResource extends BaseResource {
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @Path(PROCESS_META_FILE)
+    @Path(Constants.PROCESS_META_FILE)
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
     @POST
     public Response processMetadataFiles() {
