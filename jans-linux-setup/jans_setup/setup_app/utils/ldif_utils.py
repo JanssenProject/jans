@@ -157,6 +157,11 @@ def schema2json(schema_file, out_dir=None):
         w.write(schema_str)
 
 def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, display_name, trusted_client='false', grant_types=None, authorization_methods=None):
+    # create directory if not exists
+    dirname = os.path.dirname(ldif_fn)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
     clients_ldif_fd = open(ldif_fn, 'wb')
     ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
     client_dn = 'inum={},ou=clients,o=jans'.format(client_id)
