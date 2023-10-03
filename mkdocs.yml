@@ -8788,12 +8788,30 @@ nav:
   - Language reference: agama/language-reference.md
   - Execution rules: agama/execution-rules.md
   - gama format: agama/gama-format.md
+- 'Casa':
+    - 'casa/index.md'
+    - Quick Start: 'casa/quick-start.md'
+    - 'Installation': 'casa/administration/installation.md'
+    - Administration Guide:
+        - 'About 2FA': 'casa/administration/2fa-basics.md'
+        - 'Admin console': 'casa/administration/admin-console.md'
+        - 'Credentials storage': 'casa/administration/credentials-stored.md'
+        - 'Custom branding': 'casa/administration/custom-branding.md'
+        - 'URL path customization': 'casa/administration/change-context-path.md'
+        - 'Localization': 'casa/administration/localization.md'
+        - 'Plugins':
+            - '2FA Settings': 'casa/plugins/2fa-settings.md'
+            #            - 'BioID': 'casa/plugins/bioid.md'
+            - 'Consent Management': 'casa/plugins/consent-management.md'
+            - 'Custom Branding': 'casa/plugins/custom-branding.md'
+        - 'FAQ': 'casa/administration/faq.md'
+    - User Guide: 'casa/user-guide.md'
 plugins:
 - tags
 - search
-- git-revision-date-localized:
-    enable_creation_date: true
-    type: timeago
+#- git-revision-date-localized:
+#    enable_creation_date: true
+#    type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
