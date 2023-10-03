@@ -40,6 +40,7 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt:0.9.1")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
     implementation("com.nimbusds:nimbus-jose-jwt:9.31")
+    implementation("com.google.android.play:integrity:1.2.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

@@ -1,4 +1,4 @@
-package io.jans.chip.keyGen;
+package io.jans.chip.factories;
 
 import android.icu.util.Calendar;
 import android.icu.util.GregorianCalendar;
@@ -39,8 +39,9 @@ public class KeyManager {
     }
 
     public static synchronized KeyManager getInstance() {
-        if (single_instance == null)
+        if (single_instance == null) {
             single_instance = new KeyManager();
+        }
 
         return single_instance;
     }

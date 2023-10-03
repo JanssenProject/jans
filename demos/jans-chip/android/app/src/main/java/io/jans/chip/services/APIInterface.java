@@ -1,5 +1,6 @@
 package io.jans.chip.services;
 
+import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
 import io.jans.chip.modal.DCRequest;
 import io.jans.chip.modal.DCResponse;
 import io.jans.chip.modal.LoginResponse;
@@ -46,4 +47,8 @@ public interface APIInterface {
     @FormUrlEncoded
     @POST
     Call<Void> logout (@Field("token") String token, @Field("token_type_hint") String tokenTypeHint, @Header("Authorization") String authHeader, @Url String url);
+
+    // This API for verifying integrity token
+    @GET
+    Call<AppIntegrityResponse> verifyIntegrityTokenOnAppServer(@Url String url);
 }

@@ -12,20 +12,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.UUID;
 
-import io.jans.chip.keyGen.DPoPProofFactory;
+import io.jans.chip.factories.DPoPProofFactory;
 import io.jans.chip.modal.LoginResponse;
 import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.TokenResponse;
 import io.jans.chip.retrofit.RetrofitClient;
 import io.jans.chip.services.DBHandler;
+import io.jans.chip.utils.AppConfig;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         loginProgressBar = findViewById(R.id.loginProgressBar);
         loginButton = findViewById(R.id.loginButton);
         // Initialize the database handler
-        DBHandler dbH = new DBHandler(LoginActivity.this, "chipDB", null, 1);
+        DBHandler dbH = new DBHandler(LoginActivity.this, AppConfig.SQLITE_DB_NAME, null, 1);
         // Check if OIDCClient is available, if not, navigate to MainActivity
         OIDCClient oidcClient = dbH.getOIDCClient(1);
         if (oidcClient == null || oidcClient.getClientId() == null) {
@@ -66,17 +66,33 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loginProgressBar.setVisibility(View.VISIBLE);
-                loginButton.setEnabled(false);
 
                 username = findViewById(R.id.username);
                 password = findViewById(R.id.password);
                 String usernameText = username.getText().toString();
                 String passwordText = password.getText().toString();
 
-                processlogin(usernameText, passwordText, dbH);
+                if(validateInputs()) {
+                    loginProgressBar.setVisibility(View.VISIBLE);
+                    loginButton.setEnabled(false);
+
+                    processlogin(usernameText, passwordText, dbH);
+                }
             }
         });
+    }
+    private boolean validateInputs() {
+        if (username == null || username.length() == 0) {
+            createErrorDialog("Username cannot be left empty.");
+            errorDialog.show();
+            return false;
+        }
+        if (password == null || password.length() == 0) {
+            createErrorDialog("Password cannot be left empty.");
+            errorDialog.show();
+            return false;
+        }
+        return true;
     }
 
     // Function to handle the login process
