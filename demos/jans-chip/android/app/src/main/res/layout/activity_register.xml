@@ -74,10 +74,45 @@
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/registerButton"
+        app:layout_constraintVertical_bias="0.229" />
+
+    <TextView
+        android:id="@+id/appIntegrityText"
+        android:layout_width="324dp"
+        android:layout_height="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.444"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/registerProgressBar"
+        app:layout_constraintVertical_bias="0.485" />
+
+    <TextView
+        android:id="@+id/heading2"
+        android:layout_width="163dp"
+        android:layout_height="30dp"
+        android:text="App Integrity Status"
+        android:textSize="18sp"
+        android:textFontWeight="700"
+        app:layout_constraintBottom_toTopOf="@+id/appIntegrityText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/registerProgressBar"
+        app:layout_constraintVertical_bias="0.771" />
+
+    <TextView
+        android:id="@+id/deviceIntegrityText"
+        android:layout_width="326dp"
+        android:layout_height="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:visibility="invisible"
-        app:layout_constraintTop_toBottomOf="@+id/registerButton" />
+        app:layout_constraintTop_toBottomOf="@+id/appIntegrityText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

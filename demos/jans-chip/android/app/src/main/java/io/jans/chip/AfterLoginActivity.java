@@ -19,6 +19,7 @@ import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.retrofit.RetrofitClient;
 import io.jans.chip.services.DBHandler;
+import io.jans.chip.utils.AppConfig;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -43,7 +44,7 @@ public class AfterLoginActivity extends AppCompatActivity {
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DBHandler dbH = new DBHandler(AfterLoginActivity.this, "chipDB", null, 1);
+                DBHandler dbH = new DBHandler(AfterLoginActivity.this, AppConfig.SQLITE_DB_NAME, null, 1);
                 logout(dbH);
             }
         });
