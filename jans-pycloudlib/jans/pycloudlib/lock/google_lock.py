@@ -191,6 +191,14 @@ class GoogleLock(BaseLock):
         Returns:
             A boolean to mark whether lock is removed or not.
         """
-        result = self.get_all()
-        result.pop(key, None)
-        return self.set_all(result)
+        data = self.get_all()
+        data.pop(key, None)
+
+        payload = {}
+        for k, v in data.items():
+            payload[k] = safe_value(v)
+
+        self.create_secret()
+
+        logger.info(f'Size of secret payload : {sys.getsizeof(safe_value(payload))} bytes')
+        return self.add_secret_version(safe_value(payload))

@@ -274,6 +274,16 @@ class AwsLock(BaseLock):
         Returns:
             A boolean to mark whether lock is removed or not.
         """
-        result = self.get_all()
-        result.pop(key, None)
-        return self.set_all(result)
+        data = self.get_all()
+        data.pop(key, None)
+
+        payload = {}
+        for k, v in data.items():
+            # ensure value that has bytes is converted to text
+            payload[k] = safe_value(v)
+
+        resp = self.client.update_secret(
+            SecretId=self.basepath,
+            SecretString=_dump_value(payload),
+        )
+        return bool(resp)
