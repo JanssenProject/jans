@@ -27,7 +27,7 @@ class JansSamlInstaller(JettyInstaller):
         self.saml_enabled = True
         self.config_generation = True
         self.ignore_validation = True
-        self.idp_root_dir = '/opt/idp/configs/'
+        self.idp_root_dir = os.path.join(Config.opt_dir, 'idp/configs/')
 
         # sample config
         self.idp_config_id = 'keycloak'
