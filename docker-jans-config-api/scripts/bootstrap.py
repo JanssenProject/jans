@@ -373,41 +373,43 @@ class PersistenceSetup:
         }
         ctx.update(self.get_injected_urls())
 
-        # Client
-        ctx["jca_client_id"] = self.manager.config.get("jca_client_id")
-        if not ctx["jca_client_id"]:
-            ctx["jca_client_id"] = f"1800.{uuid4()}"
-            self.manager.config.set("jca_client_id", ctx["jca_client_id"])
+        with self.manager.lock.create_lock("config-api.jca_client"):
+            # Client
+            ctx["jca_client_id"] = self.manager.config.get("jca_client_id")
+            if not ctx["jca_client_id"]:
+                ctx["jca_client_id"] = f"1800.{uuid4()}"
+                self.manager.config.set("jca_client_id", ctx["jca_client_id"])
 
-        ctx["jca_client_pw"] = self.manager.secret.get("jca_client_pw")
-        if not ctx["jca_client_pw"]:
-            ctx["jca_client_pw"] = get_random_chars()
-            self.manager.secret.set("jca_client_pw", ctx["jca_client_pw"])
+            ctx["jca_client_pw"] = self.manager.secret.get("jca_client_pw")
+            if not ctx["jca_client_pw"]:
+                ctx["jca_client_pw"] = get_random_chars()
+                self.manager.secret.set("jca_client_pw", ctx["jca_client_pw"])
 
-        ctx["jca_client_encoded_pw"] = self.manager.secret.get("jca_client_encoded_pw")
-        if not ctx["jca_client_encoded_pw"]:
-            ctx["jca_client_encoded_pw"] = encode_text(
-                ctx["jca_client_pw"], self.manager.secret.get("encoded_salt"),
-            ).decode()
-            self.manager.secret.set("jca_client_encoded_pw", ctx["jca_client_encoded_pw"])
+            ctx["jca_client_encoded_pw"] = self.manager.secret.get("jca_client_encoded_pw")
+            if not ctx["jca_client_encoded_pw"]:
+                ctx["jca_client_encoded_pw"] = encode_text(
+                    ctx["jca_client_pw"], self.manager.secret.get("encoded_salt"),
+                ).decode()
+                self.manager.secret.set("jca_client_encoded_pw", ctx["jca_client_encoded_pw"])
 
-        # test client
-        ctx["test_client_id"] = self.manager.config.get("test_client_id")
-        if not ctx["test_client_id"]:
-            ctx["test_client_id"] = f"{uuid4()}"
-            self.manager.config.set("test_client_id", ctx["test_client_id"])
+        with self.manager.lock.create_lock("config-api.test_client"):
+            # test client
+            ctx["test_client_id"] = self.manager.config.get("test_client_id")
+            if not ctx["test_client_id"]:
+                ctx["test_client_id"] = f"{uuid4()}"
+                self.manager.config.set("test_client_id", ctx["test_client_id"])
 
-        ctx["test_client_pw"] = self.manager.secret.get("test_client_pw")
-        if not ctx["test_client_pw"]:
-            ctx["test_client_pw"] = get_random_chars()
-            self.manager.secret.set("test_client_pw", ctx["test_client_pw"])
+            ctx["test_client_pw"] = self.manager.secret.get("test_client_pw")
+            if not ctx["test_client_pw"]:
+                ctx["test_client_pw"] = get_random_chars()
+                self.manager.secret.set("test_client_pw", ctx["test_client_pw"])
 
-        ctx["test_client_encoded_pw"] = self.manager.secret.get("test_client_encoded_pw")
-        if not ctx["test_client_encoded_pw"]:
-            ctx["test_client_encoded_pw"] = encode_text(
-                ctx["test_client_pw"], self.manager.secret.get("encoded_salt"),
-            ).decode()
-            self.manager.secret.set("test_client_encoded_pw", ctx["test_client_encoded_pw"])
+            ctx["test_client_encoded_pw"] = self.manager.secret.get("test_client_encoded_pw")
+            if not ctx["test_client_encoded_pw"]:
+                ctx["test_client_encoded_pw"] = encode_text(
+                    ctx["test_client_pw"], self.manager.secret.get("encoded_salt"),
+                ).decode()
+                self.manager.secret.set("test_client_encoded_pw", ctx["test_client_encoded_pw"])
 
         # pre-populate config_api_dynamic_conf_base64
         with open("/app/templates/jans-config-api/dynamic-conf.json") as f:

@@ -209,35 +209,35 @@ class PersistenceSetup:
             "hostname": self.manager.config.get("hostname"),
         }
 
-        # SCIM client
-        ctx["scim_client_id"] = self.manager.config.get("scim_client_id")
+        with self.manager.lock.create_lock("scim.scim_client"):
+            # SCIM client
+            ctx["scim_client_id"] = self.manager.config.get("scim_client_id")
 
-        if not ctx["scim_client_id"]:
-            ctx["scim_client_id"] = f"1201.{uuid4()}"
-            self.manager.config.set("scim_client_id", ctx["scim_client_id"])
+            if not ctx["scim_client_id"]:
+                ctx["scim_client_id"] = f"1201.{uuid4()}"
+                self.manager.config.set("scim_client_id", ctx["scim_client_id"])
 
-        ctx["scim_client_pw"] = self.manager.secret.get("scim_client_pw")
+            ctx["scim_client_pw"] = self.manager.secret.get("scim_client_pw")
 
-        if not ctx["scim_client_pw"]:
-            ctx["scim_client_pw"] = get_random_chars()
-            self.manager.secret.set("scim_client_pw", ctx["scim_client_pw"])
+            if not ctx["scim_client_pw"]:
+                ctx["scim_client_pw"] = get_random_chars()
+                self.manager.secret.set("scim_client_pw", ctx["scim_client_pw"])
 
-        ctx["scim_client_encoded_pw"] = self.manager.secret.get("scim_client_encoded_pw")
+            ctx["scim_client_encoded_pw"] = self.manager.secret.get("scim_client_encoded_pw")
 
-        if not ctx["scim_client_encoded_pw"]:
-            ctx["scim_client_encoded_pw"] = encode_text(
-                ctx["scim_client_pw"], self.manager.secret.get("encoded_salt"),
-            ).decode()
-            self.manager.secret.set("scim_client_encoded_pw", ctx["scim_client_encoded_pw"])
+            if not ctx["scim_client_encoded_pw"]:
+                ctx["scim_client_encoded_pw"] = encode_text(
+                    ctx["scim_client_pw"], self.manager.secret.get("encoded_salt"),
+                ).decode()
+                self.manager.secret.set("scim_client_encoded_pw", ctx["scim_client_encoded_pw"])
 
-        # pre-populate scim_dynamic_conf_base64
-        with open("/app/templates/jans-scim/dynamic-conf.json") as f:
-            ctx["scim_dynamic_conf_base64"] = generate_base64_contents(f.read() % ctx)
+            # pre-populate scim_dynamic_conf_base64
+            with open("/app/templates/jans-scim/dynamic-conf.json") as f:
+                ctx["scim_dynamic_conf_base64"] = generate_base64_contents(f.read() % ctx)
 
-        # pre-populate scim_static_conf_base64
-        with open("/app/templates/jans-scim/static-conf.json") as f:
-            ctx["scim_static_conf_base64"] = generate_base64_contents(f.read())
-
+            # pre-populate scim_static_conf_base64
+            with open("/app/templates/jans-scim/static-conf.json") as f:
+                ctx["scim_static_conf_base64"] = generate_base64_contents(f.read())
         return ctx
 
     @cached_property

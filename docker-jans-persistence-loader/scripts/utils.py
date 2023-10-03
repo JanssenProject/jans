@@ -176,27 +176,28 @@ def merge_auth_ctx(ctx):
 
 
 def merge_jans_cli_ctx(manager, ctx):
-    # jans-cli-tui client
-    ctx["tui_client_id"] = manager.config.get("tui_client_id")
-    if not ctx["tui_client_id"]:
-        # migrate from old configs/secrets (if any)
-        ctx["tui_client_id"] = manager.config.get("role_based_client_id", f"2000.{uuid4()}")
-        manager.config.set("tui_client_id", ctx["tui_client_id"])
+    with manager.lock.create_lock("persistence-loader.tui_client"):
+        # jans-cli-tui client
+        ctx["tui_client_id"] = manager.config.get("tui_client_id")
+        if not ctx["tui_client_id"]:
+            # migrate from old configs/secrets (if any)
+            ctx["tui_client_id"] = manager.config.get("role_based_client_id", f"2000.{uuid4()}")
+            manager.config.set("tui_client_id", ctx["tui_client_id"])
 
-    ctx["tui_client_pw"] = manager.secret.get("tui_client_pw")
-    if not ctx["tui_client_pw"]:
-        # migrate from old configs/secrets (if any)
-        ctx["tui_client_pw"] = manager.secret.get("role_based_client_pw", get_random_chars())
-        manager.secret.set("tui_client_pw", ctx["tui_client_pw"])
+        ctx["tui_client_pw"] = manager.secret.get("tui_client_pw")
+        if not ctx["tui_client_pw"]:
+            # migrate from old configs/secrets (if any)
+            ctx["tui_client_pw"] = manager.secret.get("role_based_client_pw", get_random_chars())
+            manager.secret.set("tui_client_pw", ctx["tui_client_pw"])
 
-    ctx["tui_client_encoded_pw"] = manager.secret.get("tui_client_encoded_pw")
-    if not ctx["tui_client_encoded_pw"]:
-        # migrate from old configs/secrets (if any)
-        ctx["tui_client_encoded_pw"] = manager.secret.get(
-            "role_based_client_encoded_pw",
-            encode_text(ctx["tui_client_pw"], manager.secret.get("encoded_salt")).decode(),
-        )
-        manager.secret.set("tui_client_encoded_pw", ctx["tui_client_encoded_pw"])
+        ctx["tui_client_encoded_pw"] = manager.secret.get("tui_client_encoded_pw")
+        if not ctx["tui_client_encoded_pw"]:
+            # migrate from old configs/secrets (if any)
+            ctx["tui_client_encoded_pw"] = manager.secret.get(
+                "role_based_client_encoded_pw",
+                encode_text(ctx["tui_client_pw"], manager.secret.get("encoded_salt")).decode(),
+            )
+            manager.secret.set("tui_client_encoded_pw", ctx["tui_client_encoded_pw"])
     return ctx
 
 
@@ -245,56 +246,57 @@ def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.j
 
 
 def merge_smtp_ctx(manager, ctx):
-    encoded_salt = manager.secret.get("encoded_salt")
-    jks_fn = "/etc/certs/smtp-keys.pkcs12"
+    with manager.lock.create_lock("persistence-loader.smtp"):
+        encoded_salt = manager.secret.get("encoded_salt")
+        jks_fn = "/etc/certs/smtp-keys.pkcs12"
 
-    smtp_jks_pass = manager.secret.get("smtp_jks_pass")
-    if not smtp_jks_pass:
-        smtp_jks_pass = get_random_chars()
-        manager.secret.set("smtp_jks_pass", smtp_jks_pass)
+        smtp_jks_pass = manager.secret.get("smtp_jks_pass")
+        if not smtp_jks_pass:
+            smtp_jks_pass = get_random_chars()
+            manager.secret.set("smtp_jks_pass", smtp_jks_pass)
 
-    smtp_jks_pass_enc = manager.secret.get("smtp_jks_pass_enc")
-    if not smtp_jks_pass_enc:
-        smtp_jks_pass_enc = encode_text(smtp_jks_pass, encoded_salt).decode()
-        manager.secret.set("smtp_jks_pass_enc", smtp_jks_pass_enc)
+        smtp_jks_pass_enc = manager.secret.get("smtp_jks_pass_enc")
+        if not smtp_jks_pass_enc:
+            smtp_jks_pass_enc = encode_text(smtp_jks_pass, encoded_salt).decode()
+            manager.secret.set("smtp_jks_pass_enc", smtp_jks_pass_enc)
 
-    smtp_signing_alg = manager.config.get("smtp_signing_alg")
-    if not smtp_signing_alg:
-        smtp_signing_alg = "SHA256withECDSA"
-        manager.config.set("smtp_signing_alg", smtp_signing_alg)
+        smtp_signing_alg = manager.config.get("smtp_signing_alg")
+        if not smtp_signing_alg:
+            smtp_signing_alg = "SHA256withECDSA"
+            manager.config.set("smtp_signing_alg", smtp_signing_alg)
 
-    smtp_alias = manager.config.get("smtp_alias")
-    if not smtp_alias:
-        smtp_alias = "smtp_sig_ec256"
-        manager.config.set("smtp_alias", smtp_alias)
+        smtp_alias = manager.config.get("smtp_alias")
+        if not smtp_alias:
+            smtp_alias = "smtp_sig_ec256"
+            manager.config.set("smtp_alias", smtp_alias)
 
-    smtp_jks_base64 = manager.secret.get("smtp_jks_base64")
-    if not smtp_jks_base64:
-        cmds = " ".join([
-            "keytool",
-            "-genkeypair",
-            "-alias", smtp_alias,
-            "-keyalg", "ec",
-            "-groupname", "secp256r1",
-            "-sigalg", smtp_signing_alg,
-            "-storetype", "pkcs12",
-            "-keystore", jks_fn,
-            "-storepass", smtp_jks_pass,
-            "-dname", "'CN=SMTP CA Certificate'",
-            "-validity", "365",
-        ])
-        _, err, retcode = exec_cmd(cmds)
-        assert retcode == 0, "Failed to generate JKS keystore; reason={}".format(err.decode())
+        smtp_jks_base64 = manager.secret.get("smtp_jks_base64")
+        if not smtp_jks_base64:
+            cmds = " ".join([
+                "keytool",
+                "-genkeypair",
+                "-alias", smtp_alias,
+                "-keyalg", "ec",
+                "-groupname", "secp256r1",
+                "-sigalg", smtp_signing_alg,
+                "-storetype", "pkcs12",
+                "-keystore", jks_fn,
+                "-storepass", smtp_jks_pass,
+                "-dname", "'CN=SMTP CA Certificate'",
+                "-validity", "365",
+            ])
+            _, err, retcode = exec_cmd(cmds)
+            assert retcode == 0, "Failed to generate JKS keystore; reason={}".format(err.decode())
 
-        with open(jks_fn, "rb") as fr:
-            manager.secret.set("smtp_jks_base64", encode_text(fr.read(), encoded_salt))
+            with open(jks_fn, "rb") as fr:
+                manager.secret.set("smtp_jks_base64", encode_text(fr.read(), encoded_salt))
 
-    smtp_ctx = {
-        "smtp_jks_fn": jks_fn,
-        "smtp_jks_pass": smtp_jks_pass,
-        "smtp_alias": smtp_alias,
-        "smtp_signing_alg": smtp_signing_alg,
-        "smtp_jks_pass_enc": smtp_jks_pass_enc,
-    }
-    ctx.update(smtp_ctx)
+        smtp_ctx = {
+            "smtp_jks_fn": jks_fn,
+            "smtp_jks_pass": smtp_jks_pass,
+            "smtp_alias": smtp_alias,
+            "smtp_signing_alg": smtp_signing_alg,
+            "smtp_jks_pass_enc": smtp_jks_pass_enc,
+        }
+        ctx.update(smtp_ctx)
     return ctx
