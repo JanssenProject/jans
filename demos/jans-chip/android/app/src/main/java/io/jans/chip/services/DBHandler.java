@@ -9,8 +9,15 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import java.util.Arrays;
+
+import io.jans.chip.modal.appIntegrity.AccountDetails;
+import io.jans.chip.modal.appIntegrity.AppIntegrity;
+import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
 import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.modal.OPConfiguration;
+import io.jans.chip.modal.appIntegrity.DeviceIntegrity;
+import io.jans.chip.modal.appIntegrity.RequestDetails;
 
 public class DBHandler extends SQLiteOpenHelper {
     public DBHandler(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
@@ -20,7 +27,8 @@ public class DBHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS OIDC_CLIENT (SNO INTEGER PRIMARY KEY, CLIENT_NAME TEXT, CLIENT_ID TEXT, CLIENT_SECRET TEXT, PUBLIC_KEY TEXT, RECENT_GENERATED_ID_TOKEN TEXT, RECENT_GENERATED_ACCESS_TOKEN TEXT)");
-        sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS OP_CONFIGURATION (REGISTRATION_ENDPOINT TEXT, TOKEN_ENDPOINT TEXT, USERINFO_ENDPOINT TEXT, AUTHORIZATION_CHALLENGE_ENDPOINT, ISSUER, REVOCATION_ENDPOINT)");
+        sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS OP_CONFIGURATION (REGISTRATION_ENDPOINT TEXT, TOKEN_ENDPOINT TEXT, USERINFO_ENDPOINT TEXT, AUTHORIZATION_CHALLENGE_ENDPOINT TEXT, ISSUER, REVOCATION_ENDPOINT TEXT)");
+        sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS APP_INTEGRITY (APP_INTEGRITY TEXT, DEVICE_INTEGRITY TEXT, APP_LICENSING_VERDICT TEXT, REQUEST_PACKAGE_NAME TEXT, NONCE TEXT, ERROR TEXT)");
     }
 
     @Override
@@ -28,6 +36,65 @@ public class DBHandler extends SQLiteOpenHelper {
         String drop = "DROP TABLE IF EXISTS";
         sqLiteDatabase.execSQL(drop);
         onCreate(sqLiteDatabase);
+    }
+
+    public void deleteAppIntegrity() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        long count = db.delete("APP_INTEGRITY", null, null);
+        Log.d("DBHandler :: deleteAppIntegrity :: Number of rows deleted", Long.toString(count));
+        db.close();
+    }
+
+    public void addAppIntegrity(AppIntegrityResponse appIntegrity) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put("APP_INTEGRITY", appIntegrity.getAppIntegrity().getAppRecognitionVerdict());
+        values.put("DEVICE_INTEGRITY", appIntegrity.getDeviceIntegrity().commasSeparatedString());
+        values.put("APP_LICENSING_VERDICT", appIntegrity.getAccountDetails().getAppLicensingVerdict());
+        values.put("REQUEST_PACKAGE_NAME", appIntegrity.getRequestDetails().getRequestPackageName());
+        values.put("NONCE", appIntegrity.getRequestDetails().getNonce());
+        values.put("ERROR", appIntegrity.getError());
+
+        long id = db.insert("APP_INTEGRITY", null, values);
+        Log.d("DBHandler :: addAppIntegrity ::", Long.toString(id));
+        db.close();
+    }
+
+    public AppIntegrityResponse getAppIntegrity() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor result = db.query("APP_INTEGRITY", new String[]{"APP_INTEGRITY", "DEVICE_INTEGRITY", "APP_LICENSING_VERDICT", "REQUEST_PACKAGE_NAME", "NONCE", "ERROR"},
+                null, null, null, null, null);
+        if (result != null && result.moveToFirst()) {
+
+            AppIntegrityResponse appIntegrityResponse = new AppIntegrityResponse();
+            AppIntegrity appIntegrity = new AppIntegrity();
+            appIntegrity.setAppRecognitionVerdict(result.getString(0));
+            appIntegrityResponse.setAppIntegrity(appIntegrity);
+
+            if (result.getString(1) != null) {
+                DeviceIntegrity deviceIntegrity = new DeviceIntegrity();
+                deviceIntegrity.setAppRecognitionVerdict(Arrays.asList(result.getString(1).split(",", -1)));
+                appIntegrityResponse.setDeviceIntegrity(deviceIntegrity);
+            }
+
+            AccountDetails accountDetails = new AccountDetails();
+            accountDetails.setAppLicensingVerdict(result.getString(2));
+            appIntegrityResponse.setAccountDetails(accountDetails);
+
+            RequestDetails requestDetails = new RequestDetails();
+            requestDetails.setRequestPackageName(result.getString(3));
+            requestDetails.setNonce(result.getString(4));
+            appIntegrityResponse.setRequestDetails(requestDetails);
+
+            appIntegrityResponse.setError(result.getString(5));
+
+            return appIntegrityResponse;
+
+        } else {
+            Log.e("DBHandler :: getAppIntegrity :: ", "Some error occured!");
+            return null;
+        }
     }
 
     public void addOIDCClient(OIDCClient client) {
