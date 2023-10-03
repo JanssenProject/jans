@@ -93,7 +93,7 @@ class LockStorage(BaseStorage):
         owner: str = "",
         ttl: int = 10,
         retry_delay: float = 5.0,
-        max_start_delay: float = 0.0,
+        max_start_delay: float = 2.0,
     ):
         """Create lock object.
 
@@ -163,7 +163,7 @@ class Lock:
         owner: str,
         ttl: int,
         retry_delay: float = 5.0,
-        max_start_delay: float = 0.0,
+        max_start_delay: float = 2.0,
         lock_storage: "LockStorage" | None = None,
     ):
         # storage to set/get/delete lock
