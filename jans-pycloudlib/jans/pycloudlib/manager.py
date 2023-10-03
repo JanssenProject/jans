@@ -47,8 +47,8 @@ def get_manager() -> Manager:  # noqa: D412
     ```
     """
     lock = LockStorage()
-    config = ConfigStorage(lock)
-    secret = SecretStorage(lock)
+    config = ConfigStorage()
+    secret = SecretStorage()
     return Manager(config, secret, lock)
 
 
