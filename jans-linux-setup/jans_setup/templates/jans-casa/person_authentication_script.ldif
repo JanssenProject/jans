@@ -6,7 +6,7 @@ jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
 jansScr::%(casa_person_authentication_script)s
-jansConfProperty: {"value1":"supergluu_app_id","value2":"https://%(hostname)s/casa","description":""}
+jansConfProperty: {"value1":"supergluu_app_id","value2":"https://%(hostname)s/jans-casa","description":""}
 jansConfProperty: {"value1":"u2f_app_id","value2":"https://%(hostname)s","description":""}
 jansScrTyp: person_authentication
 objectClass: top
