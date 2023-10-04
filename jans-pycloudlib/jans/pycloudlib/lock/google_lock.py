@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import json
 import logging
-import sys
 import os
 import typing as _t
+from contextlib import suppress
 from functools import cached_property
 
 from google.cloud import secretmanager
-from google.api_core.exceptions import AlreadyExists, NotFound
+from google.api_core.exceptions import AlreadyExists
+from google.api_core.exceptions import NotFound
 
 from jans.pycloudlib.lock.base_lock import BaseLock
 from jans.pycloudlib.utils import safe_value
@@ -52,36 +53,14 @@ class GoogleLock(BaseLock):
         Returns:
             A mapping of locks (if any)
         """
-        # Try to get the latest resource name. Used in initialization. If the latest version doesn't exist
-        # its a state where the secret and initial version must be created
-        name = f"projects/{self.project_id}/secrets/{self.google_secret_name}/versions/latest"
-
-        try:
-            self.client.access_secret_version(request={"name": name})
-        except NotFound:
-            logger.warning("Secret may not exist or have any versions created yet")
-            self.create_secret()
-            self.add_secret_version(safe_value({}))
-
         # Build the resource name of the secret version.
         name = f"projects/{self.project_id}/secrets/{self.google_secret_name}/versions/{self.version_id}"
         data = {}
 
-        try:
-            # Access the secret version.
+        with suppress(NotFound):
             response = self.client.access_secret_version(request={"name": name})
-            # logger.info(f"Secret {self.google_secret_name} has been found. Accessing version {self.version_id}.")
-            payload = response.payload.data.decode("UTF-8")
-            data = json.loads(payload)
-        except NotFound:
-            logger.warning(
-                "Secret may not exist or have any versions created. Make sure "
-                "CN_GOOGLE_SECRET_VERSION_ID and CN_GOOGLE_SECRET_NAME_PREFIX "
-                "environment variables are set correctly. In Google secrets manager, "
-                "a secret with the name jans-secret would have "
-                "CN_GOOGLE_SECRET_NAME_PREFIX set to jans."
-            )
-        return data
+            data = json.loads(response.payload.data.decode("UTF-8"))
+        return data  # noqa: R504
 
     def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
@@ -108,12 +87,7 @@ class GoogleLock(BaseLock):
         """
         all_ = self.get_all()
         all_[key] = safe_value(value)
-
-        self.create_secret()
-
-        logger.info(f'Adding key {key} to google secret manager')
-        logger.info(f'Size of secret payload : {sys.getsizeof(safe_value(all_))} bytes')
-        return self.add_secret_version(safe_value(all_))
+        return self._add_secret_version(safe_value(all_))
 
     def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Push a full dictionary to secrets.
@@ -130,13 +104,9 @@ class GoogleLock(BaseLock):
 
         for k, v in data.items():
             all_[k] = safe_value(v)
+        return self._add_secret_version(safe_value(all_))
 
-        self.create_secret()
-
-        logger.info(f'Size of secret payload : {sys.getsizeof(safe_value(all_))} bytes')
-        return self.add_secret_version(safe_value(all_))
-
-    def create_secret(self) -> None:
+    def _prepare_secret(self) -> None:
         """Create a new secret with the given name.
 
         A secret is a logical wrapper around a collection of secret versions.
@@ -145,7 +115,7 @@ class GoogleLock(BaseLock):
         # Build the resource name of the parent project.
         parent = f"projects/{self.project_id}"
 
-        try:
+        with suppress(AlreadyExists):
             # Create the secret.
             response = self.client.create_secret(
                 request={
@@ -155,15 +125,15 @@ class GoogleLock(BaseLock):
                 }
             )
             logger.info(f"Created secret: {response.name}")
-        except AlreadyExists:
-            logger.warning(f'Secret {self.google_secret_name} already exists. A new version will be created.')
 
-    def add_secret_version(self, payload: _t.AnyStr) -> bool:
+    def _add_secret_version(self, payload: _t.AnyStr) -> bool:
         """Add a new secret version to the given secret with the provided payload.
 
         Args:
             payload: Payload string or bytes.
         """
+        self._prepare_secret()
+
         # Build the resource name of the parent secret.
         parent = self.client.secret_path(self.project_id, self.google_secret_name)
 
@@ -197,8 +167,4 @@ class GoogleLock(BaseLock):
         payload = {}
         for k, v in data.items():
             payload[k] = safe_value(v)
-
-        self.create_secret()
-
-        logger.info(f'Size of secret payload : {sys.getsizeof(safe_value(payload))} bytes')
-        return self.add_secret_version(safe_value(payload))
+        return self._add_secret_version(safe_value(payload))
