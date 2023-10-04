@@ -284,8 +284,10 @@ jobs:
         npm install
         npm run build
         npm run pack
-        mv ./release/jans-tarp-*.zip ../demo-jans-tarp-$VER.zip
-        sha256sum ../demo-jans-tarp-$VER.zip > ../demo-jans-tarp-$VER.zip.sha256sum
+        mv ./release/jans-tarp-chrome-*.zip ../demo-jans-tarp-chrome-$VER.zip
+        mv ./release/jans-tarp-firefox-*.zip ../demo-jans-tarp-firefox-$VER.zip
+        sha256sum ../demo-jans-tarp-chrome-$VER.zip > ../demo-jans-tarp-chrome-$VER.zip.sha256sum
+        sha256sum ../demo-jans-tarp-firefox-$VER.zip > ../demo-jans-tarp-firefox-$VER.zip.sha256sum
         cd ..
         
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
