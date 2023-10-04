@@ -1,0 +1,368 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		304311F22ACC05E4006B8D40 /* Jans_ChipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */; };
+		304311F62ACC05E5006B8D40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 304311F52ACC05E5006B8D40 /* Assets.xcassets */; };
+		304311F92ACC05E5006B8D40 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 304311F82ACC05E5006B8D40 /* Preview Assets.xcassets */; };
+		3063E5682ACC0890002B4879 /* MainViewInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5672ACC0890002B4879 /* MainViewInteractor.swift */; };
+		3063E56A2ACC0973002B4879 /* MainViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5692ACC0973002B4879 /* MainViewState.swift */; };
+		3063E56C2ACC0BAF002B4879 /* MainViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E56B2ACC0BAF002B4879 /* MainViewPresenter.swift */; };
+		3063E56E2ACC0BFE002B4879 /* MainViewAssembler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E56D2ACC0BFE002B4879 /* MainViewAssembler.swift */; };
+		3063E5702ACC0CE9002B4879 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E56F2ACC0CE9002B4879 /* MainView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		304311EE2ACC05E4006B8D40 /* Jans-Chip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Jans-Chip.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Jans_ChipApp.swift; sourceTree = "<group>"; };
+		304311F52ACC05E5006B8D40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		304311F82ACC05E5006B8D40 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		3063E5672ACC0890002B4879 /* MainViewInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewInteractor.swift; sourceTree = "<group>"; };
+		3063E5692ACC0973002B4879 /* MainViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewState.swift; sourceTree = "<group>"; };
+		3063E56B2ACC0BAF002B4879 /* MainViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewPresenter.swift; sourceTree = "<group>"; };
+		3063E56D2ACC0BFE002B4879 /* MainViewAssembler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewAssembler.swift; sourceTree = "<group>"; };
+		3063E56F2ACC0CE9002B4879 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		304311EB2ACC05E4006B8D40 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		304311E52ACC05E4006B8D40 = {
+			isa = PBXGroup;
+			children = (
+				304311F02ACC05E4006B8D40 /* Jans-Chip */,
+				304311EF2ACC05E4006B8D40 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		304311EF2ACC05E4006B8D40 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				304311EE2ACC05E4006B8D40 /* Jans-Chip.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		304311F02ACC05E4006B8D40 /* Jans-Chip */ = {
+			isa = PBXGroup;
+			children = (
+				3063E5662ACC0852002B4879 /* MainView */,
+				304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */,
+				304311F52ACC05E5006B8D40 /* Assets.xcassets */,
+				304311F72ACC05E5006B8D40 /* Preview Content */,
+			);
+			path = "Jans-Chip";
+			sourceTree = "<group>";
+		};
+		304311F72ACC05E5006B8D40 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				304311F82ACC05E5006B8D40 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		3063E5662ACC0852002B4879 /* MainView */ = {
+			isa = PBXGroup;
+			children = (
+				3063E5672ACC0890002B4879 /* MainViewInteractor.swift */,
+				3063E5692ACC0973002B4879 /* MainViewState.swift */,
+				3063E56B2ACC0BAF002B4879 /* MainViewPresenter.swift */,
+				3063E56D2ACC0BFE002B4879 /* MainViewAssembler.swift */,
+				3063E56F2ACC0CE9002B4879 /* MainView.swift */,
+			);
+			path = MainView;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		304311ED2ACC05E4006B8D40 /* Jans-Chip */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 304311FC2ACC05E5006B8D40 /* Build configuration list for PBXNativeTarget "Jans-Chip" */;
+			buildPhases = (
+				304311EA2ACC05E4006B8D40 /* Sources */,
+				304311EB2ACC05E4006B8D40 /* Frameworks */,
+				304311EC2ACC05E4006B8D40 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Jans-Chip";
+			productName = "Jans-Chip";
+			productReference = 304311EE2ACC05E4006B8D40 /* Jans-Chip.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		304311E62ACC05E4006B8D40 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1430;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					304311ED2ACC05E4006B8D40 = {
+						CreatedOnToolsVersion = 14.3.1;
+					};
+				};
+			};
+			buildConfigurationList = 304311E92ACC05E4006B8D40 /* Build configuration list for PBXProject "Jans-Chip" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 304311E52ACC05E4006B8D40;
+			productRefGroup = 304311EF2ACC05E4006B8D40 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				304311ED2ACC05E4006B8D40 /* Jans-Chip */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		304311EC2ACC05E4006B8D40 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				304311F92ACC05E5006B8D40 /* Preview Assets.xcassets in Resources */,
+				304311F62ACC05E5006B8D40 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		304311EA2ACC05E4006B8D40 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3063E5702ACC0CE9002B4879 /* MainView.swift in Sources */,
+				3063E5682ACC0890002B4879 /* MainViewInteractor.swift in Sources */,
+				3063E56E2ACC0BFE002B4879 /* MainViewAssembler.swift in Sources */,
+				3063E56C2ACC0BAF002B4879 /* MainViewPresenter.swift in Sources */,
+				304311F22ACC05E4006B8D40 /* Jans_ChipApp.swift in Sources */,
+				3063E56A2ACC0973002B4879 /* MainViewState.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		304311FA2ACC05E5006B8D40 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		304311FB2ACC05E5006B8D40 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		304311FD2ACC05E5006B8D40 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Jans-Chip/Preview Content\"";
+				DEVELOPMENT_TEAM = FLRS8NH8Y9;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "gluu.jans.chip.Jans-Chip";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		304311FE2ACC05E5006B8D40 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Jans-Chip/Preview Content\"";
+				DEVELOPMENT_TEAM = FLRS8NH8Y9;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "gluu.jans.chip.Jans-Chip";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		304311E92ACC05E4006B8D40 /* Build configuration list for PBXProject "Jans-Chip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				304311FA2ACC05E5006B8D40 /* Debug */,
+				304311FB2ACC05E5006B8D40 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		304311FC2ACC05E5006B8D40 /* Build configuration list for PBXNativeTarget "Jans-Chip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				304311FD2ACC05E5006B8D40 /* Debug */,
+				304311FE2ACC05E5006B8D40 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 304311E62ACC05E4006B8D40 /* Project object */;
+}
