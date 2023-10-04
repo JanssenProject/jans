@@ -17,17 +17,15 @@ from setup_app.utils.ldif_utils import myLdifParser
 from setup_app.installers.jetty import JettyInstaller
 
 Config.casa_web_port = '8080'
-CASA_GIT = 'https://raw.githubusercontent.com/GluuFederation/flex/main/casa'
-
+CASA_GIT = 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-casa'
 
 class CasaInstaller(JettyInstaller):
 
     client_id_prefix = '3000.'
     casa_dist_dir = os.path.join(Config.dist_jans_dir, 'jans_casa')
-    # we need to change source files after jans-casa build
     source_files = [
-            (os.path.join(casa_dist_dir, 'jans-casa.war'), os.path.join(base.current_app.app_info['GLUU_MAVEN'], 'maven/org/gluu/casa/{0}/casa-{0}.war').format(base.current_app.app_info['CASA_VERSION'])),
-            (os.path.join(casa_dist_dir, 'jans-casa-config.jar'), os.path.join(base.current_app.app_info['GLUU_MAVEN'], 'maven/org/gluu/casa-config/{0}/casa-config-{0}.jar').format(base.current_app.app_info['CASA_VERSION'])),
+            (os.path.join(casa_dist_dir, 'jans-casa.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/casa/{0}/casa-{0}.war').format(base.current_app.app_info['CASA_VERSION'])),
+            (os.path.join(casa_dist_dir, 'jans-casa-config.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/casa-config/{0}/casa-config-{0}.jar').format(base.current_app.app_info['CASA_VERSION'])),
             (os.path.join(casa_dist_dir, 'twillo.jar'), os.path.join(base.current_app.app_info['TWILIO_MAVEN'], '{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION']))),
             (os.path.join(casa_dist_dir, 'jans-fido2-client.jar'), (os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}{1}/jans-fido2-client-{0}{1}.jar'.format(base.current_app.app_info['JANS_APP_VERSION'], base.current_app.app_info['JANS_BUILD'])))),
             ]
