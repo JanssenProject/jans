@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 cur_path = Path(cur_dir)
-setup_path = cur_path.parent.joinpath('jans_setup')
+setup_path = cur_path.parent.parent.joinpath('jans_setup')
 sys.path.append(setup_path.as_posix())
 
 
