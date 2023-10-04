@@ -254,7 +254,10 @@ class Lock:
 
     def _renew_loop(self):
         logger.info(f"Starting lock {self.name} update")
-        time.sleep(self._get_start_delay())
+        # start_delay = self._get_start_delay()
+        # time.sleep(start_delay)
+
+        renew_delay = int(self.candidate["ttl"] * 2 / 3)
 
         while True:
             if self._renew_stop_event.isSet():
@@ -263,7 +266,9 @@ class Lock:
 
             if self._set_record():
                 logger.info(f"Lock {self.name} owned by candidate {self.candidate['owner']} has been updated")
-            time.sleep(self.retry_delay)
+
+            # delay before doing next update
+            time.sleep(renew_delay)
 
     def _start_renew_loop(self):
         self._renew_stop_event = threading.Event()
@@ -291,6 +296,8 @@ class Lock:
 
             # the most simple scenario (when lock is not found) is to create new lock
             if not record:
+                logger.warning(f"Lock {self.name} is not found")
+
                 if self._set_record():
                     # lock created; mark it as acquired to allow candidate to proceed
                     logger.info(f"Lock {self.name} is created by candidate {self.candidate['owner']}")
@@ -299,6 +306,8 @@ class Lock:
 
                 # lock not created; mark it as not acquired to allow other candidates to create lock
                 return False
+
+            logger.info(f"Found existing lock {self.name} owned by {record['owner']}")
 
             # at this point, we found an existing lock; note that a lock maybe expired
             # (owner doesn't update or delete it properly), hence we will try to take over
