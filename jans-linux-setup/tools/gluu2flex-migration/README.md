@@ -1,6 +1,6 @@
 # Gluu to Flex Migration
 
-## 1. Install Gluu 4.x, inside container:
+## 1. Inside Gluu 4.x container:
 
    1.1 Download Janssen archieve: `wget https://github.com/JanssenProject/jans/archive/refs/heads/jans-linux-setup-gluu2flex-migration.zip`
 
