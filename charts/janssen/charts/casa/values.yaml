@@ -59,7 +59,7 @@ service:
 livenessProbe:
   httpGet:
     # -- http liveness probe endpoint
-    path: /casa/health-check
+    path: /jans-casa/health-check
     port: http-casa
   initialDelaySeconds: 25
   periodSeconds: 25
@@ -68,7 +68,7 @@ livenessProbe:
 readinessProbe:
   httpGet:
     # -- http readiness probe endpoint
-    path: /casa/health-check
+    path: /jans-casa/health-check
     port: http-casa
   initialDelaySeconds: 30
   periodSeconds: 30
