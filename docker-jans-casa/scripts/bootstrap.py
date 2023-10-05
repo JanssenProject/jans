@@ -196,9 +196,9 @@ class PersistenceSetup:
 
         ctx = {
             "hostname": hostname,
-            "casa_redirect_uri": f"https://{hostname}/casa",
-            "casa_redirect_logout_uri": f"https://{hostname}/casa/bye.zul",
-            "casa_frontchannel_logout_uri": f"https://{hostname}/casa/autologout",
+            "casa_redirect_uri": f"https://{hostname}/jans-casa",
+            "casa_redirect_logout_uri": f"https://{hostname}/jans-casa/bye.zul",
+            "casa_frontchannel_logout_uri": f"https://{hostname}/jans-casa/autologout",
         }
 
         with open("/app/static/extension/person_authentication/Casa.py") as f:

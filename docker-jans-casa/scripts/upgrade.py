@@ -171,6 +171,8 @@ class Upgrade:
     def invoke(self):
         logger.info("Running upgrade process (if required)")
         self.update_client_scopes()
+        self.update_client_uris()
+        self.update_conf_app()
 
     def update_client_scopes(self):
         kwargs = {}
@@ -212,6 +214,93 @@ class Upgrade:
                 entry.attrs["jansScope"]["v"] = client_scopes + diff
             else:
                 entry.attrs["jansScope"] = client_scopes + diff
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_conf_app(self):
+        kwargs = {}
+        id_ = "ou=casa,ou=configuration,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansAppConf"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        should_update = False
+
+        if self.backend.type != "couchbase":
+            with suppress(json.decoder.JSONDecodeError):
+                entry.attrs["jansConfApp"] = json.loads(entry.attrs["jansConfApp"])
+
+        for key in ["authz_redirect_uri", "post_logout_uri", "frontchannel_logout_uri"]:
+            parsed_url = urlparse(entry.attrs["jansConfApp"]["oidc_config"][key])
+
+            url_paths = [
+                pth for pth in parsed_url.path.rsplit("/")
+                if pth
+            ]
+
+            if url_paths[0] != "jans-casa":
+                url_paths[0] = "jans-casa"
+                parsed_url = parsed_url._replace(path="/".join(url_paths))
+                entry.attrs["jansConfApp"]["oidc_config"][key] = urlunparse(parsed_url)
+                should_update = True
+
+        if should_update:
+            if self.backend.type != "couchbase":
+                entry.attrs["jansConfApp"] = json.dumps(entry.attrs["jansConfApp"])
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_client_uris(self):
+        kwargs = {}
+        client_id = self.manager.config.get("casa_client_id")
+        id_ = f"inum={client_id},ou=clients,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansClnt"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        should_update = False
+        hostname = self.manager.config.get("hostname")
+        uri_mapping = {
+            "jansLogoutURI": f"https://{hostname}/jans-casa/autologout",
+            "jansPostLogoutRedirectURI": f"https://{hostname}/jans-casa/bye.zul",
+            "jansRedirectURI": f"https://{hostname}/jans-casa",
+        }
+
+        for key, uri in uri_mapping.items():
+            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                client_uris = entry.attrs[key]["v"]
+            else:
+                client_uris = entry.attrs[key]
+
+            if not isinstance(client_uris, list):
+                client_uris = [client_uris]
+
+            if uri not in client_uris:
+                client_uris.append(uri)
+
+                if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                    entry.attrs[key]["v"] = client_uris
+                else:
+                    entry.attrs[key] = client_uris
+                should_update = True
+
+        if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
 

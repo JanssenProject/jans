@@ -4,8 +4,7 @@ Docker assets for Casa
 
 ## Versions
 
-See [Releases](https://github.com/GluuFederation/docker-casa/releases) for stable versions.
-For bleeding-edge/unstable version, use `gluufederation/casa:5.0.0_dev`.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fcasa) for available versions.
 
 ## Environment Variables
 
