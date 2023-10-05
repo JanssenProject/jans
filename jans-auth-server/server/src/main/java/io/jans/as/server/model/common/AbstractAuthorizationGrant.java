@@ -69,6 +69,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private String codeChallenge;
     private String codeChallengeMethod;
     private String claims;
+    private String dpopJkt;
 
     private String acrValues;
     private String sessionDn;
@@ -92,6 +93,14 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         this.client = client;
         this.scopes = new CopyOnWriteArraySet<>();
         this.grantId = UUID.randomUUID().toString();
+    }
+
+    public String getDpopJkt() {
+        return dpopJkt;
+    }
+
+    public void setDpopJkt(String dpopJkt) {
+        this.dpopJkt = dpopJkt;
     }
 
     @Override

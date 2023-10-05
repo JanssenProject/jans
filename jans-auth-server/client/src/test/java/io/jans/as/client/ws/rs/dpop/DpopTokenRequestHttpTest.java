@@ -668,4 +668,70 @@ public class DpopTokenRequestHttpTest extends BaseTest {
 
         return registerResponse.getClientId();
     }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
+            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+//    @Test
+    public void testDPoP_withDpopJkt_RS256(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret) throws Exception {
+        showTitle("testDPoP_withDpopJkt_RS256");
+
+        // 1. Generate jwk thumbprint
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
+
+        JSONWebKey jsonWebKey = new JSONWebKey();
+        jsonWebKey.setKty(KeyType.RSA);
+        jsonWebKey.setN(Base64Util.base64urlencodeUnsignedBigInt(publicKey.getModulus()));
+        jsonWebKey.setE(Base64Util.base64urlencodeUnsignedBigInt(publicKey.getPublicExponent()));
+        String jwkThumbprint = jsonWebKey.getJwkThumbprint();
+
+        List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
+
+        // 2. Dynamic Registration
+        String clientId = dynamicRegistration(redirectUris, sectorIdentifierUri, clientJwksUri, responseTypes);
+
+        // 3. Request authorization
+        List<String> scope = Collections.singletonList("openid");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+                responseTypes, clientId, scope, redirectUri, nonce);
+        authorizationRequest.setState(state);
+        authorizationRequest.setDpopJkt(jwkThumbprint);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        String jti1 = DPoP.generateJti();
+        DPoP dpop1 = new DPoP(AsymmetricSignatureAlgorithm.RS256, jsonWebKey, jti1, HttpMethod.POST,
+                tokenEndpoint, keyId, cryptoProvider);
+
+        // 3. Request access token using the authorization code.
+        TokenResponse tokenResponse = requestAccessToken(redirectUri, authorizationCode, dpop1);
+
+        String accessToken = tokenResponse.getAccessToken();
+        String refreshToken = tokenResponse.getRefreshToken();
+
+        // 4. JWK Thumbprint Confirmation Method
+        thumbprintConfirmationMethod(jwkThumbprint, accessToken);
+
+        // 5. JWK Thumbprint Confirmation Method in Token Introspection
+        tokenIntrospection(jwkThumbprint, accessToken);
+
+        // 5. Request new access token using the refresh token.
+        String accessTokenHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(accessToken));
+        String jti2 = DPoP.generateJti();
+        DPoP dpop2 = new DPoP(AsymmetricSignatureAlgorithm.RS256, jsonWebKey, jti2, HttpMethod.POST,
+                tokenEndpoint, keyId, cryptoProvider);
+        dpop2.setAth(accessTokenHash);
+
+        requestAccessTokenWithRefreshToken(refreshToken, dpop2);
+    }
 }

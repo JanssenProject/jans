@@ -27,6 +27,7 @@ import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.token.TokenRequestParam;
 import io.jans.as.server.audit.ApplicationAuditLogger;
+import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.*;
@@ -146,6 +147,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private StatService statService;
 
+    @Inject
+    private DpopService dPoPService;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
@@ -182,7 +186,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             Client client = tokenRestWebServiceValidator.validateClient(getClient(), auditLog);
             tokenRestWebServiceValidator.validateGrantType(gt, client, auditLog);
-            String dpopStr = runDPoP(request, client, auditLog);
+            String dpopStr = getDPoPJwkThumprint(request, client, auditLog);
 
             final Function<JsonWebResponse, Void> idTokenTokingBindingPreprocessing = TokenBindingMessage.createIdTokenTokingBindingPreprocessing(
                     tokenBindingHeader, client.getIdTokenTokenBindingCnf()); // for all except authorization code grant
@@ -397,6 +401,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
         tokenRestWebServiceValidator.validateGrant(authorizationCodeGrant, client, code, executionContext.getAuditLog(), grant -> grantService.removeAllByAuthorizationCode(code));
         validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog());
+        dPoPService.validateDpopThumprint(authorizationCodeGrant.getDpopJkt(), executionContext.getDpop());
 
         authorizationCodeGrant.setIsCachedWithNoPersistence(false);
         authorizationCodeGrant.save();
@@ -595,7 +600,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 
-    private String runDPoP(HttpServletRequest httpRequest, Client client, OAuth2AuditLog oAuth2AuditLog) {
+    private String getDPoPJwkThumprint(HttpServletRequest httpRequest, Client client, OAuth2AuditLog oAuth2AuditLog) {
         try {
             String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
             final boolean isDpopBlank = StringUtils.isBlank(dpopStr);
