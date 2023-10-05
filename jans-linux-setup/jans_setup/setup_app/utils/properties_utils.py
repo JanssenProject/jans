@@ -615,14 +615,14 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_casa:
             return
 
-        prompt = self.getPrompt("Install Gluu Casa?",
+        prompt = self.getPrompt("Install Jans Casa?",
                                 self.getDefaultOption(Config.install_casa)
                             )[0].lower()
 
         Config.install_casa = prompt == 'y'
 
         if Config.installed_instance and Config.install_casa:
-            Config.addPostSetupService.append(Config.install_casa)
+            Config.addPostSetupService.append('install_casa')
 
 
     def promptForConfigApi(self):
