@@ -32,7 +32,6 @@ class JansAuthInstaller(JettyInstaller):
         self.install_var = 'installOxAuth'
         self.register_progess()
 
-        self.jetty_service_webapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
 

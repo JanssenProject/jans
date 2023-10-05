@@ -1,0 +1,81 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.adm.title}</h:title>
+
+    <z:div if="${empty pageScope.error and sessionContext.user.admin}" viewModel="@('io.jans.casa.plugins.strongauthn.vm.StrongAuthViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.adm.strongauth_title}</h2>
+                </div>
+                <div class="${css.panel}">
+                    <p class="mb0">${labels.adm.strongauth_min2fa_text}</p>
+                    <z:radiogroup id="mincreds" />
+                    <z:div sclass="flex flex-wrap justify-center" children="@load(vm.minCredsList)">
+                        <zk:template name="children">
+                            <z:radio sclass="ph3" label="@load(each)" selected="@load(each eq vm.minCreds2FA)" radiogroup="mincreds"/>
+                        </zk:template>
+                    </z:div>
+                    <div class="f7 dark-blue2 pb3 flex justify-center">
+                    	<div>
+							<z:checkbox label="${labels.adm.strongauth_autoEnable}" checked="@load(vm.autoEnable)" sclass="db"
+										onCheck="@('checkAutoEnable', self.checked) "/>
+							<z:checkbox label="${labels.adm.strongauth_hideswitch}" checked="@bind(vm.hideSwitch)"  sclass="db"
+										disabled="@load(not vm.autoEnable)" />                        
+							<z:label visible="@load(vm.hideSwitch)" value="${labels.adm.strongauth_hideswitch2}" sclass="ml3" />
+                        </div>
+                    </div>
+                    
+                    <p class="mb0">${labels.adm.strongauth.policy.text}</p>
+                    <div class="f7 pl4-ns dark-blue2">
+                        <z:checkbox id="EVERY_LOGIN" label="${labels.adm.strongauth.policy.EVERY_LOGIN}" sclass="db"
+                                    disabled="@load(vm.enforcementPolicies.contains('CUSTOM'))"
+                                    checked="@load(vm.enforcementPolicies.contains(self.id))" onCheck="@('checkPolicy', self.checked, self.id)" />
+
+                        <z:checkbox id="LOCATION_UNKNOWN" label="${labels.adm.strongauth.policy.LOCATION_UNKNOWN}" sclass="db"
+                                    disabled="@load(vm.enforcementPolicies.contains('EVERY_LOGIN') or vm.enforcementPolicies.contains('CUSTOM'))"
+                                    checked="@load(vm.enforcementPolicies.contains(self.id))" onCheck="@('checkPolicy', self.checked, self.id)" />
+
+                        <z:checkbox id="DEVICE_UNKNOWN" label="${labels.adm.strongauth.policy.DEVICE_UNKNOWN}" sclass="db"
+                                    disabled="@load(vm.enforcementPolicies.contains('EVERY_LOGIN') or vm.enforcementPolicies.contains('CUSTOM'))"
+                                    checked="@load(vm.enforcementPolicies.contains(self.id))" onCheck="@('checkPolicy', self.checked, self.id)" />
+
+                        <z:checkbox id="CUSTOM" label="${labels.adm.strongauth.policy.CUSTOM}" sclass="db"
+                                    disabled="@load(vm.enforcementPolicies.contains('EVERY_LOGIN'))"
+                                    checked="@load(vm.enforcementPolicies.contains(self.id))" onCheck="@('checkPolicy', self.checked, self.id)" />
+
+                        <z:div sclass="pt1 pb2 flex flex-wrap" visible="@load(vm.enforcementPolicies.contains('LOCATION_UNKNOWN') or vm.enforcementPolicies.contains('CUSTOM'))">
+                            <label class="mr2">${labels.adm.strongauth_location_exp}</label>
+                            <z:intbox sclass="${css.textInput} w3" value="@bind(vm.locationExpiration)" maxlength="3" />
+                        </z:div>
+                        <z:div sclass="pb2 flex flex-wrap" visible="@load(vm.enforcementPolicies.contains('DEVICE_UNKNOWN') or vm.enforcementPolicies.contains('CUSTOM'))">
+                            <label class="mr2">${labels.adm.strongauth_device_exp}</label>
+                            <z:intbox sclass="${css.textInput} w3" value="@bind(vm.deviceExpiration)" maxlength="3" />
+                        </z:div>
+                    </div>
+                    
+					<z:checkbox label="${labels.adm.strongauth_selPreferred}" checked="@bind(vm.selectPreferred)" />
+					
+                    <div class="tc pt3">
+                        <z:button label="${labels.general.save}" sclass="${css.primaryButton} ph4" disabled="@load(empty vm.enforcementPolicies)"
+                                  w:onClick="alertRef = $('#feedback-strongauth')" onClick="@('change2FASettings', mincreds.selectedIndex)" />
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="ph4 mb2">
+            <div class="alert alert-success dn" id="feedback-strongauth" role="alert" />
+        </div>
+
+    </z:div>
+
+</zk:zk>

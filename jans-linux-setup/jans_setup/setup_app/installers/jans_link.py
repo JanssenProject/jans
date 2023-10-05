@@ -25,7 +25,6 @@ class JansLinkInstaller(JettyInstaller):
         self.install_var = 'install_jans_link'
         self.register_progess()
 
-        self.jetty_service_webapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')

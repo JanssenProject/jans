@@ -1,0 +1,124 @@
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+        <z:include src="/back-home.zul" />
+
+        <div class="ph4 mb2">
+            <div class="alert alert-success dn" id="feedback-phone-edit" role="alert" />
+        </div>
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.usr.mobile_title}</h2>
+                    <p>${labels.usr.mobile_text}</p>
+                </div>
+
+                <!-- phones list -->
+                <z:div children="@load(vm.phones)">
+                    <zk:template name="children">
+                        <div class="${css.panel} flex justify-between">
+                            <div class="flex items-start">
+                                <i class="fas fa-phone f5" />
+
+                                <p class="ml3 mb0">
+                                    <z:label sclass="f5 dark-blue2" value="@load(c:cat3(each.number, ' - ', each.nickName))" />
+                                    <br />
+                                    <h:span if="${each.addedOn > 0}">${labels.general.added_on}</h:span>
+                                    <z:label value="@load(each.addedOn) @converter('io.jans.casa.ui.CustomDateConverter',
+                                        format='MMM d, yyyy - hh:mm a', offset = sessionContext.zoneOffset)"/>
+                                </p>
+                            </div>
+                            <div class="pl2 pt2">
+                                <h:button class="${css.editButton} mb2 mr2" w:onClick="prepareAlert()" onClick="@('prepareForUpdate', each)"
+                                          data-original-title="${labels.general.edit}" data-toggle="tooltip" data-placement="top">
+                                    <i class="fas fa-pencil-alt" />
+                                </h:button>
+                                <h:button class="${css.deleteButton} mb2" w:onClick="prepareAlert()" onClick="@('delete', each)"
+                                          data-original-title="${labels.general.delete}" data-toggle="tooltip" data-placement="top">
+                                    <i class="fas fa-trash-alt" />
+                                </h:button>
+                            </div>
+                        </div>
+                    </zk:template>
+                </z:div>
+
+                <div class="${css.panel} bg-near-white">
+                    <h2 class="f5 dark-blue2 pt1">${labels.usr.mobile_add}</h2>
+
+                    <div class="alert alert-success dn" id="feedback-phone" role="alert" />
+
+                    <!-- see sms-util.js#updatePhoneValue -->
+                    <z:textbox id="phWidget" value="@save(vm.newPhone.number)" visible="false" />
+
+                    <z:div sclass="pl3-ns pt2 pb3 flex flex-wrap" visible="@load(not vm.uiSmsDelivered and not vm.uiCodesMatch)">
+                        <div class="mr3" style="width:11rem">
+                            <input class="focused-text" placeholder="${labels.general.phonenumber}" id="phone"
+                                   onChange="javascript:updatePhoneValue()" ca:type="tel" />
+                        </div>
+                        <div class="pt1">
+                            <z:button label="${labels.usr.mobile_send}" sclass="${css.primaryButton}" onClick="@('sendCode', sentCode)"
+                                      id="sendButton" w:onClick="tempDisable('sendButton', 7000, 'sentCode');  alertRef = $('#feedback-phone')" />
+                        </div>
+                    </z:div>
+                    <z:div sclass="pt2 pb3" visible="@load(vm.uiSmsDelivered and not vm.uiCodesMatch)">
+                        <div class="pb3">
+                            <z:label value="@load(empty vm.newPhone.number ? '' :
+                            c:l2('usr.mobile_sms_sent', c:split(vm.newPhone.number, ',')))" />
+                        </div>
+
+                        <div class="pb3 flex flex-wrap">
+                            <div class="relative w4 mt3 pr3">
+                                <z:textbox id="sentCode" sclass="focused-text w-100 pb1" value="@bind(vm.code)" ca:required="required"
+                                         onOK="@('checkCode', ninick)"/>
+                                <label class="focused-label">${labels.usr.mobile_code}</label>
+                            </div>
+                            <div class="pt2">
+                                <z:button sclass="${css.primaryButton} mr2" label="${labels.general.validate}" onClick="@('checkCode', ninick)" />
+                                <z:button sclass="${css.tertiaryButton}" label="${labels.general.cancel}"
+                                          w:onClick="resetPhoneValue()" onClick="@('cancel')" />
+                            </div>
+                        </div>
+
+                        <div>
+                            ${labels.usr.mobile_sms_not_received}
+                            <z:a w:onClick="resetPhoneValue()" onClick="@('cancel')" label="${labels.usr.mobile_sms_retry}" />
+                        </div>
+
+                    </z:div>
+
+
+                    <z:div sclass="flex flex-wrap pt2" visible="@load(vm.uiCodesMatch)">
+                        <div class="relative w5 mt3 pr3">
+                            <z:textbox id="ninick" sclass="focused-text w-100 pb1" ca:required="required"
+                                       value="@bind(vm.newPhone.nickName)" onOK="@('add')" />
+                            <label class="focused-label">${labels.usr.enter_nick}</label>
+                        </div>
+                        <div class="pt2">
+                            <z:button sclass="${css.primaryButton} mr3" label="${labels.general.add}" onClick="@('add')" />
+                            <z:button sclass="${css.tertiaryButton}" label="${labels.general.cancel}"
+                                      w:onClick="resetPhoneValue()" onClick="@('cancel')" />
+                        </div>
+                    </z:div>
+                </div>
+            </section>
+        </div>
+
+        <z:window title="${labels.usr.mobile_edit}" border="normal" mode="modal" visible="@load(not empty vm.editingNumber)"
+                  closable="true" onClose="@('cancelUpdate', event)" sclass="${css.modalWindow}">
+
+            <div sclass="pt1 mb3">
+                <span class="db f7-cust gray">${labels.general.new_nick}</span>
+                <div class="pa1">
+                    <z:textbox sclass="${css.textInput} w-100" value="@bind(vm.newPhone.nickName)" onOK="@('update')"/>
+                </div>
+            </div>
+            <div class="w-100 flex justify-center">
+                <z:button sclass="${css.primaryButton} mr3" label="${labels.general.update}"
+                          w:onClick="prepareAlert()" onClick="@('update')" />
+                <z:button sclass="${css.tertiaryButton}" label="${labels.general.cancel}" onClick="@('cancelUpdate', event)" />
+            </div>
+
+        </z:window>
+
+</zk:zk>

@@ -1,0 +1,39 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.adm.title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.admin.LogLevelViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.adm.logging_title}</h2>
+                    <p class="mb0">${labels.adm.logging_text}</p>
+                </div>
+                <div class="${css.panel}">
+
+                    <z:radiogroup id="methods"/>
+                    <z:div children="@load(vm.logLevels)" sclass="flex justify-around flex-wrap">
+                        <zk:template name="children">
+                            <z:radio label="${each}" selected="${each eq vm.selectedLogLevel}" radiogroup="methods" sclass="ph3"
+                                     w:onCheck="alertRef = $('#feedback-log-level')" onCheck="@('change', each)"/>
+                        </zk:template>
+                    </z:div>
+
+                </div>
+            </section>
+        </div>
+
+        <div class="ph4 mt2">
+            <div class="alert alert-success dn" id="feedback-log-level" role="alert" />
+        </div>
+
+    </z:div>
+
+</zk:zk>

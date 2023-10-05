@@ -141,7 +141,7 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.fido import FidoInstaller
     from setup_app.installers.eleven import ElevenInstaller
     from setup_app.installers.jans_link import JansLinkInstaller
-    from setup_app.installers.casa import CasaInstaller
+    from setup_app.installers.jans_casa import CasaInstaller
 
 
 from setup_app.installers.config_api import ConfigApiInstaller

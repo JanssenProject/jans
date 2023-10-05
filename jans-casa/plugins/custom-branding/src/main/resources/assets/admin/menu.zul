@@ -1,0 +1,14 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native">
+
+    <li class="collapsible-menu-item di">
+        <a class="db pv2 pl2 hover-bg-washed-blue ${css.menuItem}" href="${zkService.contextPath}${base}/admin/" data-priority="${priority}">
+            ${labels.branding.title}
+            <sup class="green"> <i>PRO!</i></sup>
+        </a>
+    </li>
+    <script>
+        /* obliterate basic custom branding menu item */
+        $("#basic_branding_menuitem").remove();
+    </script>
+
+</z:zk>
