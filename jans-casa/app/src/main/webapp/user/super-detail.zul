@@ -1,0 +1,140 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<?link rel="stylesheet" type="text/css" href="/styles/jquery-ui-1.12.1.min.css"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.usr.supergluu_title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.user.SuperGluuViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+        <div class="ph4 mb2">
+            <div class="alert alert-success dn" id="feedback-device-edit" role="alert" />
+        </div>
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.usr.supergluu_title}</h2>
+                    <p>${labels.usr.supergluu_text}</p>
+                    <!--z:label visible="@load(not empty vm.phones)" sclass="dark-blue2" value="${labels.usr.you_added}" /-->
+                </div>
+
+                <!-- tokens list -->
+                <z:div children="@load(vm.devices)">
+                    <zk:template name="children">
+                        <div class="${css.panel} flex justify-between">
+                            <div class="flex items-start">
+                                <img src="${zkService.contextPath}${assetsService.prefix}/images/supergluu.png" />
+                                <p class="ml3 mb0">
+                                    <z:label sclass="f5 dark-blue2" value="@load(empty each.nickName ? c:l('general.no_named') : each.nickName)" />
+                                    <br />
+                                    <label class="w4 ma0 truncate nb1">${labels.general.platform}</label>
+                                    <z:label value="@load(c:cat3(each.deviceData.platform, ' ', each.deviceData.osVersion))" />
+                                    <br />
+                                    <label class="w4 ma0 truncate nb1">${labels.general.name}</label>
+                                    <z:label value="@load(each.deviceData.name)" />
+
+                                    <br />
+                                    <label class="w4 ma0 truncate nb1">${labels.general.last_used}</label>
+                                    <zk:zk if="${each.lastAccessTime ne null}">
+                                        <z:label value="@load(each.lastAccessTime) @converter('io.jans.casa.ui.CustomDateConverter',
+                                            format='MMM d, yyyy - hh:mm a', offset = sessionContext.zoneOffset))" />
+                                    </zk:zk>
+                                    <zk:zk unless="${each.lastAccessTime ne null}">
+                                        <z:label value="@load(each.creationDate) @converter('io.jans.casa.ui.CustomDateConverter',
+                                            format='MMM d, yyyy - hh:mm a', offset = sessionContext.zoneOffset))"/>
+                                    </zk:zk>
+
+                                    <br />
+                                    <label class="w4 ma0 truncate nb1">${labels.general.added_on}</label>
+                                    <z:label value="@load(each.creationDate) @converter('io.jans.casa.ui.CustomDateConverter',
+                                        format='MMM d, yyyy - hh:mm a', offset = sessionContext.zoneOffset)"/>
+                                </p>
+                            </div>
+                            <div class="pt2">
+                                <h:button class="${css.editButton} mb2 mr2" w:onClick="prepareAlert()" onClick="@('prepareForUpdate', each)"
+                                          data-original-title="${labels.general.edit}" data-toggle="tooltip" data-placement="top">
+                                    <i class="fas fa-pencil-alt" />
+                                </h:button>
+                                <h:button class="${css.deleteButton} mb2" w:onClick="prepareAlert()" onClick="@('delete', each)"
+                                          data-original-title="${labels.general.delete}" data-toggle="tooltip" data-placement="top">
+                                    <i class="fas fa-trash-alt" />
+                                </h:button>
+                            </div>
+
+                        </div>
+                    </zk:template>
+                </z:div>
+
+                <div class="${css.panel} bg-near-white">
+                    <h2 class="f5 dark-blue2 pt1">${labels.usr.supergluu_add}</h2>
+
+                    <p>${labels.usr.supergluu_install_ready}</p>
+                    <div class="mb2">
+                        <!-- do not change id of this button, see otp-util.js -->
+                        <z:button id="readyButton" label="${labels.general.ready}" sclass="${css.primaryButton} mr2" disabled="@load(vm.uiQRShown or vm.uiEnrolled)"
+                                  w:onClick="alertRef = $('#feedback-device'); initialize('throbber')" onClick="@('showQR')" />
+                        <z:image id="throbber" src="${assetsService.prefix}/images/throbber.gif" visible="false" />
+                    </div>
+                    <p class="dark-blue2">${labels.usr.supergluu_download}</p>
+
+                    <div class="alert alert-success dn" id="feedback-device" role="alert" />
+
+                    <z:div sclass="pt2 flex flex-wrap" visible="@load(vm.uiEnrolled)">
+                        <div class="relative w5 mt3 pr3">
+                            <z:textbox sclass="focused-text w-100 pb1" onOK="@('add')" value="@bind(vm.newDevice.nickName)" ca:required="required" />
+                            <label class="focused-label">${labels.usr.enter_nick}</label>
+                        </div>
+
+                        <div class="pt2">
+                            <z:button label="${labels.general.add}" sclass="${css.primaryButton} mr2" onClick="@('add')"/>
+                            <z:button label="${labels.general.cancel}" sclass="${css.tertiaryButton}" onClick="@('cancel')"/>
+                        </div>
+                    </z:div>
+                </div>
+
+            </section>
+        </div>
+
+        <z:window title="${labels.usr.supergluu_scan}" border="normal" mode="modal" visible="@load(vm.uiQRShown)" sclass="${css.modalWindow}">
+            <div sclass="pt1 mb3">
+                <span class="f7 gray mr2">${labels.usr.supergluu_close_automatic}</span>
+                <z:button label="${labels.general.cancel}" sclass="${css.secondaryButton} lh-tight" disabled="@load(vm.uiEnrolled)"
+                          onClick="@('cancel')" />
+            </div>
+            <div align="center" class="mb2"> <!-- these 2 must be grouped inside a div -->
+                <div id="container"></div>
+                <div id="progressbar" class="${css.progressBar}"></div>
+            </div>
+        </z:window>
+
+        <z:window title="${labels.usr.supergluu_edit}" border="normal" mode="modal" visible="@load(not empty vm.editingId)"
+                  closable="true" onClose="@('cancelUpdate', event)" sclass="${css.modalWindow}">
+
+            <div sclass="pt1 mb3">
+                <span class="db f7-cust gray">${labels.general.new_nick}</span>
+                <div class="pa1">
+                    <z:textbox sclass="${css.textInput} w-100" value="@bind(vm.newDevice.nickName)" onOK="@('update')"/>
+                </div>
+            </div>
+            <div class="w-100 flex justify-center">
+                <z:button sclass="${css.primaryButton} mr3" label="${labels.general.update}"
+                          w:onClick="prepareAlert()" onClick="@('update')" />
+                <z:button sclass="${css.tertiaryButton}" label="${labels.general.cancel}" onClick="@('cancelUpdate', event)" />
+            </div>
+
+        </z:window>
+
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <z:script src="/scripts/jquery-qrcode-0.17.0.min.js" />
+        <z:script src="/scripts/jquery-ui-1.12.1.min.js" />
+        <z:script src="/scripts/gluu/gluu-auth.js" />
+        <z:script src="/scripts/gluu/otp-util.js" />
+    </z:div>
+
+</zk:zk>

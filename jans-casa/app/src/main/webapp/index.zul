@@ -1,0 +1,24 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/basic.zul"?>
+<?init class="io.jans.casa.core.navigation.HomeInitiator"?>
+<?script src="/scripts/platform.js"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName}</h:title>
+
+    <z:div sclass="f7-cust flex justify-center mv4" self="@define(content)">
+        <div class="w-90 w-75-ns ba bw1 br2 b--light-gray flex flex-column items-center bg-blank">
+            <z:div sclass="pa4 f6" if="${empty pageScope.error}" id="message"
+                   viewModel="@('io.jans.casa.ui.vm.HomeViewModel')">
+                ${labels.general.wait}
+            </z:div>
+            <div class="pa4" unless="${empty pageScope.error}">
+                <h4>${pageScope.error}</h4>
+            </div>
+            <div class="pa2 mb2" unless="${empty pageScope.error}">
+                <p>${pageScope.description}</p>
+            </div>
+        </div>
+    </z:div>
+
+</zk:zk>

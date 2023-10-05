@@ -22,6 +22,7 @@ on:
       - 'jans-linux-setup/**'
       - 'jans-cli-tui/**'
       - 'jans-pycloudlib/**'
+      - 'jans-casa/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
 
@@ -47,6 +48,7 @@ on:
       - 'jans-linux-setup/**'
       - 'jans-cli-tui/**'
       - 'jans-pycloudlib/**'
+      - 'jans-casa/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
 
@@ -59,7 +61,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, jans-link]
+        module: [keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, jans-link, jans-casa]
     env:
       JVM_PROJECTS: |
         keycloak-integration
@@ -71,6 +73,7 @@ jobs:
         jans-core
         jans-fido2
         jans-eleven
+        jans-casa
         agama
       NON_JVM_PROJECTS: |
         jans-linux-setup

@@ -5,23 +5,23 @@ on:
       simple_release_as:
         description: 'Release version for docs'
         required: true
-        default: '1.0.11'
+        default: '1.0.19'
       java_release_as:
         description: 'Release version for the java projects jans-*'
         required: true
-        default: '1.0.11'
+        default: '1.0.19'
       docker_release_as:
         description: 'Release version for the docker images docker-*'
         required: true
-        default: '1.0.11-1'
+        default: '1.0.19-1'
       python_release_as:
         description: 'Release version for the python projects'
         required: true
-        default: '1.0.11'
+        default: '1.0.19'
       mega_release_as:
         description: 'Mega release version'
         required: true
-        default: '1.0.11'
+        default: '1.0.19'
 jobs:
   release-simple-pr:
     runs-on: ubuntu-latest
@@ -67,7 +67,7 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        maven: [ "jans-scim", "jans-orm", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama", "jans-link", "keycloak-integration" ]
+        maven: [ "jans-scim", "jans-orm", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama", "jans-link", "keycloak-integration", 'jans-casa' ]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -105,7 +105,7 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim", "docker-jans-monolith", "docker-jans-link" ]
+        simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim", "docker-jans-monolith", "docker-jans-link", "docker-jans-casa" ]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
