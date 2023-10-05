@@ -67,8 +67,8 @@ public class DpopTokenRequestHttpTest extends BaseTest {
     @Test
     public void testDPoP_whenClientRequiredDpop_shouldGetErrorIfMakeRequestWithoutDpop(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret) {
         showTitle("testDPoP_whenClientRequiredDpop_shouldGetErrorIfMakeRequestWithoutDpop");
 
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
