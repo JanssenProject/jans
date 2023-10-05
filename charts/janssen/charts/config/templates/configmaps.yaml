@@ -183,6 +183,17 @@ data:
   | squote
   }}
   {{- end }}
+  {{- if .Values.global.casa.enabled }}  # CASA
+  GLUU_CASA_APP_LOGGERS: {{ .Values.global.casa.appLoggers
+  | toJson
+  | replace "casaLogTarget" "casa_log_target"
+  | replace "casaLogLevel" "casa_log_level"
+  | replace "timerLogTarget" "timer_log_target"
+  | replace "timerLogLevel" "timer_log_level"
+  | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
+  | squote
+  }}
+  {{- end }}
 ---
 
 apiVersion: v1
