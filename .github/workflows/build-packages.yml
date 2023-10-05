@@ -44,7 +44,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: temp-jans
 
@@ -130,7 +130,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - uses: addnab/docker-run-action@v3
       name: Build with Suse
       continue-on-error: true
@@ -199,7 +199,7 @@ jobs:
         name: [ubuntu, suse]
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - uses: actions/cache@v3
       id: cache-installers
       with:
@@ -270,7 +270,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Build with Ubuntu
       continue-on-error: true
       run: |
