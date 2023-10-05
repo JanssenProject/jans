@@ -1,0 +1,61 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.usr.passreset_title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.user.PassResetViewModel')" self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+
+        <h:div class="${css['sectionsWrapper']}" if="${vm.pst.passResetAvailable}">
+            <section class="${css.section}">
+
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.usr.passreset_title}</h2>
+
+                    <div class="relative w5 mt4 pr3">
+                        <h:input id="c_pass" class="focused-text w-100 pb1" type="password" ca:required="required"
+                                 value="@bind(vm.currentPassword)" />
+                        <label class="focused-label" for="c_pass">${labels.usr.passreset_current}</label>
+                        <i class="fas fa-eye absolute right-1 top-0 mt1" onClick="javascript:togglePass(this, 'c_pass')" />
+                    </div>
+                    <div class="relative w5 mt4 pr3">
+                        <h:input id="new_pass" class="focused-text w-100 pb1" type="password" ca:required="required"
+                                 onBlur="updateStrength('new_pass')" value="@bind(vm.newPassword)"
+                                 data-original-title="${labels.usr.passreset_hint}" data-toggle="tooltip" data-placement="bottom" />
+                        <label class="focused-label" for="new_pass">${labels.usr.passreset_newpass}</label>
+                        <i class="icon fas fa-eye absolute right-1 top-0 mt1" onClick="javascript:togglePass(this, 'new_pass')" />
+                    </div>
+                    <div class="w5 pt1 tc f7">
+                        <z:label sclass="i" visible="@load(not empty vm.strengthText)" value="${labels.usr.pass.strength.title}" />
+                        <z:label sclass="i b" value="@load(vm.strengthText)"/>
+                    </div>
+                    <div class="relative w5 mt4 pr3">
+                        <h:input id="cn_pass" class="focused-text w-100 pb1" type="password" ca:required="required"
+                                 value="@bind(vm.newPasswordConfirm)" />
+                        <label class="focused-label" for="cn_pass">${labels.usr.passreset_confirm}</label>
+                        <i class="icon fas fa-eye absolute right-1 top-0 mt1" onClick="javascript:togglePass(this, 'cn_pass')" />
+                    </div>
+                    <div class="mt4">
+                        <z:button sclass="${css.primaryButton} mr3" label="${labels.usr.passreset_change}" disabled="@load(empty vm.currentPassword or empty vm.newPassword)"
+                                  w:onClick="alertRef = $('#feedback-pass-reset')" onClick="@('resetPass')" />
+                        <z:button sclass="${css.tertiaryButton}" label="${labels.general.cancel}"
+                                  w:onClick="alertRef = $('#feedback-pass-reset')" onClick="@('cancel')" />
+                    </div>
+
+                    <div class="mt4">
+                        <div class="alert alert-success dn" id="feedback-pass-reset" role="alert" />
+                    </div>
+                </div>
+            </section>
+        </h:div>
+
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <z:script src="/scripts/zxcvbn-4.4.2.js" />
+        <z:script src="/scripts/hideShowPassword-2.1.1.min.js" />
+    </z:div>
+
+</zk:zk>

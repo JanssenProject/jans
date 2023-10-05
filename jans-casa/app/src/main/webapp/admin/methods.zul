@@ -1,0 +1,72 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<?link rel="stylesheet" type="text/css" href="/styles/intlTelInput.min.css"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.adm.title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.admin.AuthnMethodsViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.adm.methods_title}</h2>
+                    <p>${labels.adm.methods_text}</p>
+                    <zk:zk unless="${empty vm.methods}">
+                        <p>${labels.adm.methods_text_requisite}</p>
+                    </zk:zk>
+
+                    <zk:zk if="${empty vm.methods}">
+                        <span class="dark-blue2">${labels.adm.methods_hint_noscripts}</span>
+                    </zk:zk>
+                </div>
+
+                <z:div sclass="${css.panel}" unless="${empty vm.methods}">
+                    <div class="pt3 pb2">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th scope="col" />
+                                    <th scope="col">${labels.adm.methods_acr}</th>
+                                    <th scope="col">${labels.adm.methods_methodname}</th>
+                                    <th scope="col">${labels.adm.methods_plugin}</th>
+                                </tr>
+                            </thead>
+                            <h:tbody children="@load(vm.methods)" sclass="f7">
+                                <zk:template name="children">
+                                    <tr>
+                                        <td>
+                                            <z:checkbox checked="@bind(each.enabled)" />
+                                        </td>
+                                        <td><z:label value="${each.acr}" /></td>
+                                        <td><z:label value="${each.name}" /></td>
+                                        <td>
+                                            <z:listbox mold="select" onSelect="@('selectionChanged', each.acr, self.selectedIndex)"
+                                                       sclass="gray" style="min-width:6rem">
+                                                <z:listitem forEach="${each.plugins}" label="${each.y}" selected="${forEachStatus.previous.each.selectedPlugin eq each.x}" />
+                                            </z:listbox>
+                                        </td>
+                                    </tr>
+                                </zk:template>
+                            </h:tbody>
+                        </table>
+                    </div>
+
+                    <div class="mb2">
+                        <div class="alert alert-success dn" id="feedback-methods" role="alert" />
+                    </div>
+                    <div class="tc">
+                        <z:button disabled="@load(empty vm.methods)" label="${labels.general.save}" sclass="${css.primaryButton}"
+                                  w:onClick="alertRef = $('#feedback-methods')" onClick="@('save')" />
+                    </div>
+                </z:div>
+            </section>
+        </div>
+    </z:div>
+
+</zk:zk>
