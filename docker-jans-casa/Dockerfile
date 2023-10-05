@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-alpine:11.0.16
+FROM bellsoft/liberica-openjre-alpine:11.0.16
 
 # ===============
 # Alpine packages
@@ -6,8 +6,8 @@ FROM bellsoft/liberica-openjdk-alpine:11.0.16
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache openssl python3 tini curl bash py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps wget git zip
+    && apk add --no-cache python3 openssl tini py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache --virtual .build-deps git wget zip
 
 # =====
 # Jetty
@@ -25,88 +25,65 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
     && rm -rf /tmp/jetty.tar.gz
 
-# ======
-# Jython
-# ======
-
-ARG JYTHON_VERSION=2.7.3
-ARG JYTHON_BUILD_DATE='2022-08-01 17:37'
-RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
-    && mkdir -p /opt/jython \
-    && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
-    && rm -f /tmp/jython-installer.jar /tmp/*.properties
-
-# install pydev debugger into Jython
-RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_debugger_2_3_0.tar.gz -P /tmp \
-    && tar xvf /tmp/pydev_debugger_2_3_0.tar.gz -C /tmp \
-    && cd /tmp/PyDev.Debugger-pydev_debugger_2_3_0 \
-    && /opt/jython/bin/pip install . \
-    && rm -rf /tmp/pydev_debugger* /tmp/PyDev.Debugger-*
-
-# uninstall modules included in Jython ensurepip to reduce vulnerabilities
-RUN /opt/jython/bin/pip uninstall -y pip setuptools
-
-# ===========
-# Auth server
-# ===========
+# ====
+# Casa
+# ====
 
 ENV CN_VERSION=1.0.19-SNAPSHOT
-ENV CN_BUILD_DATE='2023-10-05 08:23'
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
+ENV CN_BUILD_DATE='2023-10-05 08:38'
+ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
-# Install Jans Auth
+# Install Casa
 COPY static/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
-RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
-    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-auth.war \
+RUN mkdir -p ${JETTY_BASE}/jans-casa/webapps \
+    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-casa.war \
     && cd /tmp \
-    && zip -d jans-auth.war WEB-INF/jetty-web.xml \
-    && zip -r jans-auth.war WEB-INF/jetty-env.xml \
-    && cp jans-auth.war ${JETTY_BASE}/jans-auth/webapps/jans-auth.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
-    && rm -rf /tmp/jans-auth.war /tmp/WEB-INF
+    && zip -d jans-casa.war WEB-INF/jetty-web.xml \
+    && zip -r jans-casa.war WEB-INF/jetty-env.xml \
+    && cp jans-casa.war ${JETTY_BASE}/jans-casa/webapps/jans-casa.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-casa --add-module=server,deploy,resources,http,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
+    && rm -rf /tmp/jans-casa.war /tmp/WEB-INF
 
-# ===========
-# Custom libs
-# ===========
-
-RUN mkdir -p /usr/share/java \
-    ${JETTY_BASE}/jans-auth/_libs
-
-ARG TWILIO_VERSION=7.17.0
-ARG JSMPP_VERSION=2.3.7
-ARG CASA_CONFIG_VERSION=1.0.19-SNAPSHOT
-ARG CASA_CONFIG_BUILD_DATE="2023-02-13 11:44"
-ARG FIDO2_CLIENT_VERSION=1.0.19-SNAPSHOT
-ARG FIDO2_CLIENT_BUILD_DATE="2023-01-31 15:04"
-
-RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
-    && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
-    && wget -q https://jenkins.jans.io/maven/io/jans/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
-    && wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
+# casa plugins
+RUN mkdir -p ${JETTY_BASE}/jans-casa/plugins \
+    && for casa_plugin in strong-authn-settings authorized-clients custom-branding; \
+    do \
+        wget -nv "https://jenkins.jans.io/maven/io/jans/casa/plugins/${casa_plugin}/${CN_VERSION}/${casa_plugin}-${CN_VERSION}-jar-with-dependencies.jar" -O "${JETTY_BASE}/jans-casa/plugins/${casa_plugin}-${CN_VERSION}.jar"; \
+    done
 
 # =====================
 # jans-linux-setup sync
 # =====================
 
-RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
-    ${JETTY_BASE}/jans-auth/agama/ftl \
-    ${JETTY_BASE}/jans-auth/agama/scripts
-
 ENV JANS_SOURCE_VERSION=eb4e84a3b7fbf9a3ad778b3cc77b40dec3210e5d
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+ARG JANS_CASA_EXTRAS_DIR=jans-casa/extras
 
 # note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the agama code
+# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
 RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout add agama/misc \
-    && git sparse-checkout add jans-linux-setup/jans_setup/static/auth/conf \
-    && git sparse-checkout add jans-casa/extras \
-    && cp -R agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
-    && cp -R jans-linux-setup/jans_setup/static/auth/conf /etc/certs \
-    && mkdir -p /opt/jans/python/libs \
-    && cp jans-casa/extras/casa-external_* /opt/jans/python/libs
+    && git sparse-checkout add ${JANS_SETUP_DIR} \
+    && git sparse-checkout add ${JANS_CASA_EXTRAS_DIR}
+
+RUN mkdir -p /app/static/rdbm \
+    /app/schema \
+    /app/templates/jans-casa \
+    /app/static/extension/person_authentication
+
+# sync static files from linux-setup
+RUN cd /tmp/jans \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sub_tables.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-casa/* /app/templates/jans-casa/ \
+    && cp ${JANS_CASA_EXTRAS_DIR}/Casa.py /app/static/extension/person_authentication/
 
 # ======
 # Python
@@ -209,80 +186,74 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_JACKRABBIT_URL=http://localhost:8080 \
     CN_JACKRABBIT_ADMIN_ID=admin \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
-    CN_AUTH_JAVA_OPTIONS="" \
-    CN_SYNC_JKS_ENABLED=false \
-    CN_SYNC_JKS_INTERVAL=30 \
+    CN_CASA_JAVA_OPTIONS="" \
+    CN_SSL_CERT_FROM_SECRETS=false \
     GOOGLE_PROJECT_ID="" \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
-    CN_JETTY_REQUEST_HEADER_SIZE=8192 \
+    CN_CASA_ADMIN_LOCK_FILE=/opt/jans/jetty/jans-casa/resources/.administrable \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
-    CN_AUTH_JETTY_PORT=8080 \
-    CN_AUTH_JETTY_HOST=0.0.0.0 \
+    CN_CASA_JWKS_SIZE_LIMIT=100000 \
+    CN_CASA_JETTY_PORT=8080 \
+    CN_CASA_JETTY_HOST=0.0.0.0 \
     CN_SHARE_AUTH_CONF=true
-
-# @TODO: revisit the usage (if any)
-ENV ADMIN_UI_JWKS=http://${CN_AUTH_JETTY_HOST}:${CN_AUTH_JETTY_PORT}/jans-auth/restv1/jwks
 
 # ==========
 # misc stuff
 # ==========
 
-EXPOSE $CN_AUTH_JETTY_PORT
+EXPOSE $CN_CASA_JETTY_PORT
 
-LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
-    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
-    org.opencontainers.image.vendor="Janssen Project" \
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/casa" \
+    org.opencontainers.image.authors="Gluu Inc. <support@gluu.org>" \
+    org.opencontainers.image.vendor="Gluu Federation" \
     org.opencontainers.image.version="1.0.19" \
-    org.opencontainers.image.title="Janssen Authorization Server" \
-    org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
+    org.opencontainers.image.title="Janssen Casa" \
+    org.opencontainers.image.description="Self-service portal for people to manage their account security preferences in the Janssen, like 2FA"
 
-RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
-    ${JETTY_BASE}/jans-auth/custom/static \
-    ${JETTY_BASE}/jans-auth/custom/libs \
-    ${JETTY_BASE}/jans-auth/custom/i18n \
-    ${JETTY_BASE}/jans-auth/logs \
+RUN mkdir -p /opt/jans/python/libs \
+    ${JETTY_BASE}/jans-casa/static \
+    ${JETTY_BASE}/jans-casa/plugins \
+    ${JETTY_BASE}/jans-casa/logs \
     ${JETTY_BASE}/common/libs/spanner \
     ${JETTY_BASE}/common/libs/couchbase \
     ${JETTY_HOME}/temp \
-    /etc/jans/conf \
-    /app/templates \
-    /etc/certs
+    /etc/jans/conf/casa \
+    /etc/certs \
+    /usr/share/java
 
 COPY templates /app/templates/
-RUN cp /app/templates/jans-auth/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/ \
-    && cp /app/templates/jans-auth/jans-auth_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/ \
-    && cp /app/templates/jans-auth/agama_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
+RUN cp /app/templates/jans-casa/jans-casa.xml ${JETTY_BASE}/jans-casa/webapps/ \
+    && cp /app/templates/jans-casa/jans-casa_web_resources.xml ${JETTY_BASE}/jans-casa/webapps/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
 RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
 
-RUN ln -sf /usr/lib/jvm/jdk /opt/java
+RUN ln -sf /usr/lib/jvm/jre /opt/java
 
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
 # adjust ownership and permission
-RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
-    && chmod 664 ${JETTY_BASE}/jans-auth/resources/log4j2.xml \
-    && chmod -R g=u ${JETTY_BASE}/jans-auth/logs \
+RUN chmod -R g=u ${JETTY_BASE}/jans-casa/static \
+    && chmod -R g=u ${JETTY_BASE}/jans-casa/plugins \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-casa/resources \
+    && chmod 664 ${JETTY_BASE}/jans-casa/resources/log4j2.xml \
+    && chmod -R g=u ${JETTY_BASE}/jans-casa/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
     && chmod 664 /opt/java/lib/security/cacerts \
-    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/agama \
-    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/custom \
-    && chown -R 1000:0 /opt/jans/python/libs \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
-    && chown 1000:0 ${JETTY_BASE}/jans-auth/webapps/jans-auth.xml \
+    && chown 1000:0 ${JETTY_BASE}/jans-casa/webapps/jans-casa.xml \
     && chown -R 1000:0 ${JETTY_HOME}/temp \
-    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/_libs
+    && chown -R 1000:0 /app/templates/jans-casa
 
 USER 1000
 
