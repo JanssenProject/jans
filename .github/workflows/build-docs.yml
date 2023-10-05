@@ -205,13 +205,8 @@ jobs:
           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/${LATEST:1}/g"
           git add . && git update-index --refresh
           cd ..
-          rm -rf head/admin/reference/javadocs || echo "Nothing to remove"
-          rm -rf main/admin/reference/javadocs || echo "Nothing to remove"
-          cd head
-          git add . && git update-index --refresh
-          cd ../main
-          git add . && git update-index --refresh
-          cd ..
+          git rm -r head/admin/reference/javadocs || echo "Nothing to remove"
+          git rm -r main/admin/reference/javadocs || echo "Nothing to remove"
           echo "${STABLE}" > stable.txt
           git add stable.txt && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"
