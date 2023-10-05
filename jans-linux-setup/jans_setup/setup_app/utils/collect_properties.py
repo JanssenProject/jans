@@ -20,7 +20,7 @@ from setup_app.utils.properties_utils import propertiesUtils
 from setup_app.pylib.jproperties import Properties
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.base import BaseInstaller
-from setup_app.installers.casa import CasaInstaller
+from setup_app.installers.jans_casa import CasaInstaller
 
 class CollectProperties(SetupUtils, BaseInstaller):
 

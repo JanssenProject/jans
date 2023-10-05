@@ -2,6 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema#",
   "type": "object",
   "properties": {
+    "casa":{
+         "description":"Janssen Casa (\"Casa\") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Gluu Server.",
+         "type":"object",
+         "properties":{
+
+         }
+      },
     "auth-server": {
       "description": "OAuth Authorization Server, the OpenID Connect Provider, the UMA Authorization Server--this is the main Internet facing component of Janssen. It's the service that returns tokens, JWT's and identity assertions. This service must be Internet facing.",
       "type": "object",
@@ -462,6 +469,30 @@
           "type": "string",
           "pattern": ".*google-credentials.json\\b.*"
         },
+        "casa":{
+               "type":"object",
+               "properties":{
+                  "casaServiceName":{
+                     "description":"Name of the casa service. Please keep it as default.",
+                     "type":"string",
+                     "pattern":"^[a-z0-9-]+$"
+                  },
+                  "enabled":{
+                     "description":"Boolean flag to enable/disable the casa chart.",
+                     "type":"boolean"
+                  },
+                  "ingress":{
+                     "description":"Endpoint control",
+                     "type":"object",
+                     "properties": {
+                           "casaEnabled":{
+                              "description":" Enable casa endpoints /casa",
+                              "type":"boolean"
+                           }
+                     }
+                           }
+               }
+            },
         "config-api": {
           "type": "object",
           "properties": {
@@ -808,6 +839,9 @@
     },
     {
       "$ref": "#/definitions/config-api-enabled"
+    },
+    {
+       "$ref":"#/definitions/casa-enabled"
     },
     {
       "$ref": "#/definitions/fido2-enabled"
@@ -1165,6 +1199,145 @@
       },
       "else": true
     },
+    "casa-enabled":{
+         "if":{
+            "properties":{
+               "global":{
+                  "properties":{
+                     "casa":{
+                        "properties":{
+                           "enabled":{
+                              "const":"true"
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         },
+         "then":{
+            "properties":{
+               "casa":{
+                  "required":[
+                     "image",
+                     "replicas",
+                     "resources"
+                  ],
+                  "properties":{
+                     "hpa":{
+                        "description":"Configure the HorizontalPodAutoscaler",
+                        "type":"object",
+                        "properties":{
+                           "enabled":{
+                              "type":"boolean"
+                           },
+                           "minReplicas":{
+                              "type":"integer"
+                           },
+                           "maxReplicas":{
+                              "type":"integer"
+                           },
+                           "targetCPUUtilizationPercentage":{
+                              "type":"integer"
+                           },
+                           "metrics":{
+                              "description":"metrics if targetCPUUtilizationPercentage is not set",
+                              "type":"array"
+                           },
+                           "behavior":{
+                              "description":"Scaling Policies",
+                              "type":"object"
+                           }
+                        }
+                     },
+                     "usrEnvs":{
+                        "description":"Add custom normal and secret envs to the service",
+                        "type":"object",
+                        "properties":{
+                           "normal":{
+                              "description":"Add custom normal envs to the service",
+                              "type":"object"
+                           },
+                           "secret":{
+                              "description":"Add custom secret envs to the service",
+                              "type":"object"
+                           }
+                        }
+                     },
+                     "dnsPolicy":{
+                        "description":"Add custom dns policy",
+                        "type":"string",
+                        "pattern":"^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+                     },
+                     "dnsConfig":{
+                        "description":"Add custom dns config",
+                        "type":"object"
+                     },
+                     "image":{
+                        "type":"object",
+                        "properties":{
+                           "pullPolicy":{
+                              "description":"Image pullPolicy to use for deploying.",
+                              "type":"string",
+                              "pattern":"^(Always|Never|IfNotPresent)$"
+                           },
+                           "repository":{
+                              "description":"Image  to use for deploying",
+                              "type":"string"
+                           },
+                           "tag":{
+                              "description":"Image  tag to use for deploying.",
+                              "type":"string",
+                              "pattern":"^[a-z0-9-_.]+$"
+                           }
+                        }
+                     },
+                     "replicas":{
+                        "description":"Service replica number.",
+                        "type":"integer"
+                     },
+                     "resources":{
+                        "description":"Resource specs.",
+                        "type":"object",
+                        "properties":{
+                           "limits":{
+                              "type":"object",
+                              "properties":{
+                                 "cpu":{
+                                    "description":"CPU limit.",
+                                    "type":"string",
+                                    "pattern":"^[0-9m]+$"
+                                 },
+                                 "memory":{
+                                    "description":"Memory limit.",
+                                    "type":"string",
+                                    "pattern":"^[0-9Mi]+$"
+                                 }
+                              }
+                           },
+                           "requests":{
+                              "type":"object",
+                              "properties":{
+                                 "cpu":{
+                                    "description":"CPU request.",
+                                    "type":"string",
+                                    "pattern":"^[0-9m]+$"
+                                 },
+                                 "memory":{
+                                    "description":"Memory request.",
+                                    "type":"string",
+                                    "pattern":"^[0-9Mi]+$"
+                                 }
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         },
+         "else":true
+      },
     "config-api-enabled": {
       "if": {
         "properties": {

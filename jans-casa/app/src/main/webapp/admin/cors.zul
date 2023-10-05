@@ -1,0 +1,53 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.adm.cors_title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.admin.CORSViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.adm.cors_title}</h2>
+                    <p class="mb0">${labels.adm.cors_text}</p>
+                </div>
+                <div class="${css.panel}">
+                    <z:label value="${labels.adm.cors_no_allowed_origins}" sclass="dark-blue2" visible="@load(empty vm.origins)" />
+
+                    <z:div children="@load(vm.origins)">
+                        <zk:template name="children">
+                            <div>
+                                <z:label value="@load(each)" sclass="dark-gray dib mr1-ns w5" />
+
+                                <h:button class="${css.deleteButton} mb2" w:onClick="alertRef = $('#feedback-cors')"
+                                          onClick="@('dropOrigin', each)"
+                                          data-original-title="${labels.general.delete}" data-toggle="tooltip" data-placement="top">
+                                    <i class="fas fa-trash-alt" />
+                                </h:button>
+                            </div>
+                        </zk:template>
+                    </z:div>
+
+                    <div class="pt2">
+                        <span class="f7 mr1">${labels.adm.cors_enter}</span>
+                        <z:textbox sclass="${css.textInput} w5 mr2" placeholder="${labels.adm.cors_origin_placeholder}"
+                                   value="@bind(vm.origin)" onOK="@('addOrigin')" focus="true" />
+                        <z:button label="${c:toLowerCase(labels.general.add)}" sclass="${css.primaryButton} lh-tight"
+                                  w:onClick="alertRef = $('#feedback-cors')" onClick="@('addOrigin')" />
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="ph4 mt2">
+            <div class="alert alert-success dn" id="feedback-cors" role="alert" />
+        </div>
+
+    </z:div>
+
+</zk:zk>
