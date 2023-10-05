@@ -11,13 +11,14 @@ tags:
 
 ### System Requirements
 
-Gluu Casa gets installed as a component of Gluu Flex Server. Please refer to system requirements for 
-[Gluu Flex Server](../administration/installation.md#system-requirements). 
+Jans Casa gets installed as a component of Janssen Server. Please refer to system requirements for 
+[Janssen Server](../administration/installation.md#system-requirements). 
 
 ### Installation via Linux Packages 
 
-Casa is offered as one of the several components of the Gluu Flex Server. To include Casa in your instance, just ensure 
-to check it when prompted at [installation](https://gluu.org/docs/gluu-server/4.4/installation-guide/) time.
+Jans Casa is offered as one of the several components of the Janssen Server. 
+To include Casa in your instance, just ensure 
+to check it when prompted at installation time.
 
 To add Casa post-install do the following:
 

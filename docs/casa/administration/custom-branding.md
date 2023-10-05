@@ -30,7 +30,7 @@ Once you supply your files, color values, and footer text, click on `Save` and s
 
 With "Primary buttons" we refer to the vast majority of buttons that trigger some action such as saving, updating or accepting - whether in the user pages or the admin UI itself. "Cancel" covers undo, close or cancel, while "Misc" is for anything not fitting any of the previous usages.
 
-You can choose "Use defaults" if you feel comfortable with the [Bootstrap-like](https://getbootstrap.com/docs/4.4/components/buttons/) colors offered in Gluu Casa.
+You can choose "Use defaults" if you feel comfortable with the [Bootstrap-like](https://getbootstrap.com/docs/4.4/components/buttons/) colors offered in Jans Casa.
 
 ## Using the external assets directory
 

@@ -47,7 +47,7 @@ If you've followed the steps as described above, next time he attempts to log in
 
 ### How to adjust the issuer for OTP tokens
 
-When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in the Gluu Flex Server OTP script. For example, you might want to set the `issuer` property to `ACME Dev` on your dev server, and `ACME, Inc.` on your production server. 
+When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in the Janssen Server OTP script. For example, you might want to set the `issuer` property to `ACME Dev` on your dev server, and `ACME, Inc.` on your production server. 
 
 
 ## Errors shown in the UI
