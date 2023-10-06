@@ -30,16 +30,6 @@ class CasaInstaller(JettyInstaller):
             (os.path.join(casa_dist_dir, 'jans-fido2-client.jar'), (os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['jans_version'])))),
             ]
 
-    casa_python_libs = ['Casa.py', 'casa-external_fido2.py', 'casa-external_otp.py', 'casa-external_super_gluu.py', 'casa-external_twilio_sms.py']
-
-    casa_script_files = []
-
-    for plib in casa_python_libs:
-        casa_script_files.append((
-            os.path.join(casa_dist_dir, 'pylib', plib),
-            os.path.join(CASA_GIT, 'extras', plib)
-            ))
-
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-casa'
@@ -48,7 +38,6 @@ class CasaInstaller(JettyInstaller):
         self.install_var = 'install_casa'
         self.register_progess()
 
-        self.source_files += self.casa_script_files
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
         self.templates_dir = os.path.join(Config.templateFolder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
