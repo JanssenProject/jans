@@ -8792,8 +8792,8 @@ nav:
 - 'Jans Casa':
     - 'casa/index.md'
     - Quick Start: 'casa/quick-start.md'
-    - 'Installation': 'casa/administration/installation.md'
     - Administration Guide:
+        - 'casa/administration/README.md'
         - 'About 2FA': 'casa/administration/2fa-basics.md'
         - 'Admin console': 'casa/administration/admin-console.md'
         - 'Credentials storage': 'casa/administration/credentials-stored.md'

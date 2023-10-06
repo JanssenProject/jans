@@ -13,7 +13,7 @@ Use this guide to install and configure a deployment of Casa.
 
 ## Installation
 
-Follow the Gluu Casa [installation guide](./administration/installation.md) to install Gluu Casa.
+Follow the Gluu Casa [installation guide](./administration/README.md) to install Gluu Casa.
 
 ## Configuration
 
