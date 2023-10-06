@@ -716,7 +716,7 @@ spec:
     - host: {{ $host | quote }}
       http:
         paths:
-          - path: /casa
+          - path: /jans-casa
             pathType: Prefix
             backend:
               service:
