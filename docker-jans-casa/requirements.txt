@@ -1,5 +1,5 @@
 webdavclient3>=3.14.5
 libcst<0.4
 # pinned to py3-grpcio version to avoid failure on native extension build
-grpcio==1.41.0
+grpcio==1.53.0
 git+https://github.com/JanssenProject/jans@36cd1798afaa3c1c05246a4a338804d20713cf9f#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
