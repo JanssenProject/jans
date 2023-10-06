@@ -8714,6 +8714,7 @@ nav:
       - Config and Secret Keys: admin/reference/kubernetes/config-secret-keys.md
       - Image Config Properties:
         - Auth Server: admin/reference/kubernetes/docker-jans-auth-server.md
+        - Casa: admin/reference/kubernetes/docker-jans-casa.md
         - Cert Manager: admin/reference/kubernetes/docker-jans-certmanager.md
         - Config API: admin/reference/kubernetes/docker-jans-config-api.md
         - Configurator: admin/reference/kubernetes/docker-jans-configurator.md
