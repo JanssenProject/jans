@@ -268,7 +268,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return page
 
-        return "/jans-casa/login.xhtml"
+        return "/casa/login.xhtml"
 
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
