@@ -123,6 +123,9 @@ public class ParValidator {
             if (StringUtils.isNotBlank(jwtRequest.getCodeChallengeMethod())) {
                 par.getAttributes().setCodeChallengeMethod(jwtRequest.getCodeChallengeMethod());
             }
+            if (StringUtils.isNotBlank(jwtRequest.getDpopJkt())) {
+                par.getAttributes().setDpopJkt(jwtRequest.getDpopJkt());
+            }
             if (jwtRequest.getDisplay() != null && StringUtils.isNotBlank(jwtRequest.getDisplay().getParamName())) {
                 par.getAttributes().setDisplay(jwtRequest.getDisplay().getParamName());
             }

@@ -62,7 +62,17 @@ public class ParAttributes implements Serializable {
     @JsonProperty
     private String claims;
     @JsonProperty
+    private String dpopJkt;
+    @JsonProperty
     private Map<String, String> customParameters;
+
+    public String getDpopJkt() {
+        return dpopJkt;
+    }
+
+    public void setDpopJkt(String dpopJkt) {
+        this.dpopJkt = dpopJkt;
+    }
 
     public String getScope() {
         return scope;
@@ -290,6 +300,7 @@ public class ParAttributes implements Serializable {
                 ", originHeaders='" + originHeaders + '\'' +
                 ", codeChallenge='" + codeChallenge + '\'' +
                 ", codeChallengeMethod='" + codeChallengeMethod + '\'' +
+                ", dpopJkt='" + dpopJkt + '\'' +
                 ", customResponseHeaders='" + customResponseHeaders + '\'' +
                 ", claims='" + claims + '\'' +
                 ", customParameters='" + customParameters + '\'' +

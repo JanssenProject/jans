@@ -813,6 +813,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Demonstration of Proof-of-Possession (DPoP) nonce cache time", defaultValue = "3600")
     private int dpopNonceCacheTime = 3600;
 
+    @DocProperty(description = "Force dpop_jkt presence and reject calls without it.", defaultValue = "false")
+    private Boolean dpopJktForceForAuthorizationCode = false;
+
     @DocProperty(description = "Specifies if a token without implicit grant types is allowed")
     private Boolean allowIdTokenWithoutImplicitGrantType;
 
@@ -866,6 +869,14 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
+
+    public Boolean getDpopJktForceForAuthorizationCode() {
+        return dpopJktForceForAuthorizationCode;
+    }
+
+    public void setDpopJktForceForAuthorizationCode(Boolean dpopJktForceForAuthorizationCode) {
+        this.dpopJktForceForAuthorizationCode = dpopJktForceForAuthorizationCode;
+    }
 
     public Boolean getForceRopcInAuthorizationEndpoint() {
         if (forceRopcInAuthorizationEndpoint == null) forceRopcInAuthorizationEndpoint = false;
