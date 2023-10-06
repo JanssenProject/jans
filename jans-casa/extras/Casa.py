@@ -268,7 +268,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return page
 
-        return "/casa/login.xhtml"
+        return "/jans-casa/login.xhtml"
 
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
@@ -390,7 +390,7 @@ class PersonAuthentication(PersonAuthenticationType):
             prefix = custPrefix if sets.isUseExternalBranding() else ""
 
             casaAssets = {
-                "contextPath": "/casa",
+                "contextPath": "/jans-casa",
                 "prefix" : prefix,
                 "faviconUrl" : faviconUrl,
                 "extraCss": sets.getExtraCssSnippet(),
