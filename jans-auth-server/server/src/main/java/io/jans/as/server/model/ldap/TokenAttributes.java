@@ -27,6 +27,16 @@ public class TokenAttributes implements Serializable {
     private boolean onlineAccess;
     @JsonProperty("attributes")
     private Map<String, String> attributes;
+    @JsonProperty("dpopJkt")
+    private String dpopJkt;
+
+    public String getDpopJkt() {
+        return dpopJkt;
+    }
+
+    public void setDpopJkt(String dpopJkt) {
+        this.dpopJkt = dpopJkt;
+    }
 
     public Map<String, String> getAttributes() {
         if (attributes == null) attributes = new HashMap<>();
@@ -59,6 +69,7 @@ public class TokenAttributes implements Serializable {
                 "attributes='" + attributes + '\'' +
                 "x5cs256='" + x5cs256 + '\'' +
                 "onlineAccess='" + onlineAccess + '\'' +
+                "dpopJkt='" + dpopJkt + '\'' +
                 '}';
     }
 }

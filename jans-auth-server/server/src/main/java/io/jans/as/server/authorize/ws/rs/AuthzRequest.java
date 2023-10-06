@@ -53,6 +53,7 @@ public class AuthzRequest {
     private String customResponseHeaders;
     private String claims;
     private String authReqId;
+    private String dpopJkt;
     private String httpMethod;
     private String deviceSession;
     private DeviceSession deviceSessionObject;
@@ -66,6 +67,14 @@ public class AuthzRequest {
     private Client client;
     private OAuth2AuditLog auditLog;
     private boolean promptFromJwt;
+
+    public String getDpopJkt() {
+        return dpopJkt;
+    }
+
+    public void setDpopJkt(String dpopJkt) {
+        this.dpopJkt = dpopJkt;
+    }
 
     public DeviceSession getDeviceSessionObject() {
         return deviceSessionObject;
