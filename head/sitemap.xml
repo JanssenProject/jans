@@ -3031,6 +3031,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-casa/</loc>
+         <lastmod>2023-10-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-certmanager/</loc>
          <lastmod>2023-10-06</lastmod>
          <changefreq>daily</changefreq>
