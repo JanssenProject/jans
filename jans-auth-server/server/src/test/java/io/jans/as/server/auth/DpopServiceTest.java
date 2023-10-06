@@ -3,6 +3,7 @@ package io.jans.as.server.auth;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.service.CacheService;
 import jakarta.ws.rs.WebApplicationException;
 import org.mockito.InjectMocks;
@@ -37,6 +38,9 @@ public class DpopServiceTest {
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
+
+    @Mock
+    private ApplicationAuditLogger applicationAuditLogger;
 
     @Test
     public void validateDpopThumprint_whenExistingDpopThumprintIsMissedAndConfIsFalse_shouldBeValid() {
