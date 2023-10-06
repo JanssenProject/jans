@@ -1,9 +1,8 @@
-
 ---
 tags:
-- administration
-- recipe 
-- casa
+  - administration
+  - recipe 
+  - casa
 ---
 
 # Casa - Self-service MFA portal
