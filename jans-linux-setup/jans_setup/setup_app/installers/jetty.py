@@ -123,6 +123,13 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     def web_app_xml_fn(self):
         return os.path.join(self.jetty_base, self.service_name, WEBAPPS, self.service_name+'.xml')
 
+    @property
+    def jetty_service_dir(self):
+        return os.path.join(self.jetty_base, self.service_name)
+
+    @property
+    def jetty_service_webapps(self):
+        return os.path.join(self.jetty_service_dir, 'webapps')
 
     def installJettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
         service_name = serviceConfiguration['name']
