@@ -1,0 +1,5 @@
+io.jans.configapi.plugin.fido2.extensions
+io.jans.configapi.plugin.fido2.model.config
+io.jans.configapi.plugin.fido2.rest
+io.jans.configapi.plugin.fido2.service
+io.jans.configapi.plugin.fido2.util
