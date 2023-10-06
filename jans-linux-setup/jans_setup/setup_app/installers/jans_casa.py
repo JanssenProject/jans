@@ -54,6 +54,7 @@ class CasaInstaller(JettyInstaller):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
 
+        base.extract_subdir(base.current_app.jans_zip, 'jans-casa/extras', self.pylib_dir)
         self.casa_scopes = self.create_scopes()
         self.add_plugins()
         self.enable()
@@ -69,10 +70,6 @@ class CasaInstaller(JettyInstaller):
                 plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
                 base.current_app.JansAuthInstaller.add_extra_class(plugin_class_path)
                 self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
-
-    def copy_static(self):
-        for fn in glob.glob(os.path.join(self.casa_dist_dir, 'pylib/*.py')):
-            self.copyFile(fn, self.pylib_dir)
 
 
     def generate_configuration(self):
@@ -91,7 +88,7 @@ class CasaInstaller(JettyInstaller):
         Config.templateRenderingDict['casa_frontchannel_logout_uri'] = f'https://{Config.hostname}/{self.service_name}/autologout'
 
         # prepare casa scipt ldif
-        base64_script_file = self.generate_base64_file(self.casa_script_files[0][0], 1)
+        base64_script_file = self.generate_base64_file(os.path.join(self.pylib_dir, 'Casa.py'), 1)
         Config.templateRenderingDict['casa_person_authentication_script'] = base64_script_file
         self.renderTemplateInOut(self.ldif_auth_script_fn, self.templates_dir, self.output_folder)
 
