@@ -1,6 +1,8 @@
 package io.jans.as.server.auth;
 
 import com.nimbusds.jose.jwk.JWKException;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -12,12 +14,16 @@ import io.jans.as.model.jwt.DPoPJwtPayloadParam;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.TokenErrorResponseType;
+import io.jans.as.model.token.TokenRequestParam;
+import io.jans.as.server.audit.ApplicationAuditLogger;
+import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.DPoPJti;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.service.CacheService;
 import jakarta.ejb.DependsOn;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -30,12 +36,20 @@ import java.security.NoSuchProviderException;
 import java.util.Date;
 import java.util.UUID;
 
+import static org.apache.commons.lang.BooleanUtils.isFalse;
+import static org.apache.commons.lang.BooleanUtils.isTrue;
+
 /**
  * @author Yuriy Z
  */
 @DependsOn("appInitializer")
 @Named
-public class DPoPService {
+public class DpopService {
+
+    public static final String NO_CACHE = "no-cache";
+    public static final String PRAGMA = "Pragma";
+    public static final String DPOP_NONCE = "DPoP-Nonce";
+    public static final String DPOP = "DPoP";
 
     @Inject
     private Logger log;
@@ -51,6 +65,26 @@ public class DPoPService {
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
+    @Inject
+    private ApplicationAuditLogger applicationAuditLogger;
+
+    public void validateDpopValuesCount(HttpServletRequest servletRequest) {
+        validateDpopValuesCount(servletRequest.getParameterValues(TokenRequestParam.DPOP));
+    }
+
+    public void validateDpopValuesCount(final String[] values) {
+        if (values != null && values.length > 1) {
+            log.trace("Multiple DPoP header values are not allowed. Count: {}", values.length);
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.INVALID_DPOP_PROOF, "Multiple DPoP header values"))
+                    .cacheControl(ServerUtil.cacheControl(true, false))
+                    .header(PRAGMA, NO_CACHE)
+                    .build());
+        }
+    }
 
     public boolean validateDpop(String dpop) {
         try {
@@ -78,12 +112,6 @@ public class DPoPService {
             log.error("Invalid dpop: " + dpop, e);
         }
         return false;
-    }
-
-    public String getDpopJwkThumbprint(String dpopStr) throws InvalidJwtException, NoSuchAlgorithmException, JWKException, NoSuchProviderException {
-        final Jwt dpop = Jwt.parseOrThrow(dpopStr);
-        JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
-        return jwk.getJwkThumbprint();
     }
 
     private boolean validateDpopSignature(Jwt dpop, JSONWebKey jwk, String dpopJwkThumbprint) throws InvalidJwtException, CryptoProviderException {
@@ -145,8 +173,8 @@ public class DPoPService {
                         .type(MediaType.APPLICATION_JSON_TYPE)
                         .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.USE_DPOP_NONCE, "Nonce is not set"))
                         .cacheControl(ServerUtil.cacheControl(true, false))
-                        .header("Pragma", "no-cache")
-                        .header("DPoP-Nonce", generateNonce()).build());
+                        .header(PRAGMA, NO_CACHE)
+                        .header(DPOP_NONCE, generateNonce()).build());
             }
 
             final Object nonceValue = cacheService.get(nonce);
@@ -156,8 +184,8 @@ public class DPoPService {
                         .type(MediaType.APPLICATION_JSON_TYPE)
                         .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.USE_NEW_DPOP_NONCE, "New nonce value is required"))
                         .cacheControl(ServerUtil.cacheControl(true, false))
-                        .header("Pragma", "no-cache")
-                        .header("DPoP-Nonce", generateNonce()).build());
+                        .header(PRAGMA, NO_CACHE)
+                        .header(DPOP_NONCE, generateNonce()).build());
             }
         }
     }
@@ -177,6 +205,75 @@ public class DPoPService {
         }
         if (dpop.getHeader().getJwk() == null) {
             throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is required.");
+        }
+    }
+
+    private Response response(Response.ResponseBuilder builder, OAuth2AuditLog oAuth2AuditLog) {
+        builder.cacheControl(ServerUtil.cacheControl(true, false));
+        builder.header(PRAGMA, NO_CACHE);
+
+        applicationAuditLogger.sendMessage(oAuth2AuditLog);
+
+        return builder.build();
+    }
+
+    private Response.ResponseBuilder error(int status, TokenErrorResponseType type, String reason) {
+        return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
+    }
+
+    public String getDpopJwkThumbprint(String dpopStr) throws InvalidJwtException, NoSuchAlgorithmException, JWKException, NoSuchProviderException {
+        final Jwt dpop = Jwt.parseOrThrow(dpopStr);
+        JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
+        return jwk.getJwkThumbprint();
+    }
+
+    public String getDPoPJwkThumbprint(HttpServletRequest httpRequest, Client client, OAuth2AuditLog oAuth2AuditLog) {
+        try {
+            String dpopStr = httpRequest.getHeader(DPOP);
+            final boolean isDpopBlank = StringUtils.isBlank(dpopStr);
+
+            if (isTrue(client.getAttributes().getDpopBoundAccessToken()) && isDpopBlank) {
+                log.debug("Client requires DPoP bound access token. Invalid request - DPoP header is not set.");
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, "Invalid request - DPoP header is not set."), oAuth2AuditLog));
+            }
+
+            if (isDpopBlank) return null;
+
+            String dpopJwkThumbprint = getDpopJwkThumbprint(dpopStr);
+
+            if (dpopJwkThumbprint == null)
+                throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
+
+            return dpopJwkThumbprint;
+        } catch (InvalidJwtException | JWKException | NoSuchAlgorithmException | NoSuchProviderException e) {
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, e.getMessage()), oAuth2AuditLog));
+        }
+    }
+
+    public void validateDpopThumprintIsPresent(String dpopJkt, String state) {
+        if (BooleanUtils.isTrue(appConfiguration.getDpopJktForceForAuthorizationCode()) && StringUtils.isBlank(dpopJkt)) {
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST.getStatusCode())
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "dpop_jkt is absent"))
+                    .build());
+        }
+    }
+
+    public void validateDpopThumprint(String existingThumprint, String requestThumprint) {
+        if (StringUtils.isBlank(existingThumprint) && isFalse(appConfiguration.getDpopJktForceForAuthorizationCode())) {
+            return; // nothing to check
+        }
+
+        if (!StringUtils.equals(existingThumprint, requestThumprint)) {
+            log.debug("DPoP Thumprint between saved one '{}' and send in request '{}' does NOT match. Reject request.", existingThumprint, requestThumprint);
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.INVALID_DPOP_PROOF, "Thumprint does not match"))
+                    .cacheControl(ServerUtil.cacheControl(true, false))
+                    .header(PRAGMA, NO_CACHE)
+                    .build());
         }
     }
 }

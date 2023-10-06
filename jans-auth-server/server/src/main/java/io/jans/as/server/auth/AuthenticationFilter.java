@@ -131,7 +131,7 @@ public class AuthenticationFilter implements Filter {
     private GrantService grantService;
 
     @Inject
-    private DPoPService dPoPService;
+    private DpopService dPoPService;
 
     private String realm;
 
@@ -537,6 +537,8 @@ public class AuthenticationFilter implements Filter {
         String errorReason = null;
 
         try {
+            dPoPService.validateDpopValuesCount(servletRequest);
+
             String dpopStr = servletRequest.getHeader(TokenRequestParam.DPOP);
             validDPoPProof = dPoPService.validateDpop(dpopStr);
             GrantType grantType = GrantType.fromString(servletRequest.getParameter("grant_type"));
@@ -585,7 +587,7 @@ public class AuthenticationFilter implements Filter {
         }
 
         if (!validDPoPProof) {
-            sendBadRequestError(servletResponse, errorReason);
+            sendInvalidDPoPError(servletResponse, errorReason);
         }
 
         if (!authorized) {
@@ -593,7 +595,7 @@ public class AuthenticationFilter implements Filter {
         }
     }
 
-    private void sendBadRequestError(HttpServletResponse servletResponse, String reason) {
+    private void sendInvalidDPoPError(HttpServletResponse servletResponse, String reason) {
         try (PrintWriter out = servletResponse.getWriter()) {
             servletResponse.setStatus(400);
             servletResponse.setContentType(Constants.CONTENT_TYPE_APPLICATION_JSON_UTF_8);

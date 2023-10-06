@@ -44,6 +44,49 @@ server uses steps laid out in the
 [specification](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-checking-dpop-proofs) to acertain 
 this.
 
+![](../../../assets/dpop-diagram.png)
+
+```text
+title DPoP sender-constraint access_token and refresh_token
+
+autonumber 1
+
+note right of RP: Authorization Code Flow
+RP->AS: Request authorization with dpop_jtk
+AS->AS: dpop_jkt saved for authorization code
+AS->RP: Return authorization code
+
+note right of RP: Token Request
+RP->AS: Request token with DPoP JWT
+AS->AS: Validates DPoP JWT
+AS->AS: Validates dpop_jkt against DPoP JWT if it's authz code
+
+AS->AS: Creates access_token bound to public key cnf/jkt
+note right of AS: if AT is bearer cnf/jkt is available via introspection 
+AS->RP: Returns DPoP-bound access_token with cnf/jkt (response token_type=DPoP)
+RP->RS: Request resource with access_token and DPoP JWT (with "ath" - AT hash)
+RS->RS: Validates access_token against DPoP (public key match cnf/jkt)
+RS->RS: Validates DPoP against access_token (access_token hash in DPoP "ath")
+RS->RP: Return protected resource
+```
+
+### Authorization Code Binding to DPoP Key
+
+Authorization Endpoint supports `dpop_jkt` parameter for DPoP binding of authorization code.
+
+```text
+ GET /authorize?response_type=code&client_id=s6BhdRkqt3&state=xyz\
+     &redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb\
+     &code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM\
+     &code_challenge_method=S256\
+     &dpop_jkt=NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs HTTP/1.1
+ Host: server.example.com
+```
+
+For PAR both ways of binging are supports:
+- via `dpop_jkt`
+- via `DPoP` header where `dpop_jkt` is calculated out of `DPoP` header value
+
 ### Using Introspection Endpoint
 
 Janssen Server [introspection endpoint](../../auth-server/endpoints/introspection.md) supports the JWK thumbprint
@@ -59,6 +102,9 @@ Following properties of the Janssen Server can be used to tailor the behavior co
 - [dpopJtiCacheTime](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopjticachetime)
 - [dpopSigningAlgValuesSupported](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopsigningalgvaluessupported)
 - [dpopTimeframe](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpoptimeframe)
+- [dpopUseNonce](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopusenonce)
+- [dpopNonceCacheTime](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopnoncecachetime)
+- [dpopJktForceForAuthorizationCode]((https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopjktforceforauthorizationcode))
 
 ## Have questions in the meantime?
 

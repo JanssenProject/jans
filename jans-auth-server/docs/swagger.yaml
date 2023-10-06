@@ -255,6 +255,12 @@ paths:
           description: CIBA authentication request Id.
           schema:
             type: string
+        - name: dpop_jkt
+          in: query
+          required: false
+          description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
+          schema:
+            type: string
       responses:
         200:
           description: OK
@@ -393,6 +399,13 @@ paths:
                 claims:
                   type: string
                   description: Requested Claims.
+                auth_req_id:
+                  type: string
+                  description: CIBA authentication request Id.
+                dpop_jkt:
+                  type: string
+                  description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
+
       responses:
         200:
           description: OK

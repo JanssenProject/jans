@@ -7,7 +7,6 @@
 package io.jans.as.server.token.ws.rs;
 
 import com.google.common.base.Strings;
-import com.nimbusds.jose.jwk.JWKException;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
@@ -20,13 +19,10 @@ import io.jans.as.model.common.TokenType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.exception.InvalidJwtException;
-import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.token.TokenErrorResponseType;
-import io.jans.as.model.token.TokenRequestParam;
 import io.jans.as.server.audit.ApplicationAuditLogger;
+import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.*;
@@ -62,8 +58,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -146,6 +140,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private StatService statService;
 
+    @Inject
+    private DpopService dPoPService;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
@@ -182,7 +179,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             Client client = tokenRestWebServiceValidator.validateClient(getClient(), auditLog);
             tokenRestWebServiceValidator.validateGrantType(gt, client, auditLog);
-            String dpopStr = runDPoP(request, client, auditLog);
+            String dpopStr = dPoPService.getDPoPJwkThumbprint(request, client, auditLog);
 
             final Function<JsonWebResponse, Void> idTokenTokingBindingPreprocessing = TokenBindingMessage.createIdTokenTokingBindingPreprocessing(
                     tokenBindingHeader, client.getIdTokenTokenBindingCnf()); // for all except authorization code grant
@@ -397,6 +394,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
         tokenRestWebServiceValidator.validateGrant(authorizationCodeGrant, client, code, executionContext.getAuditLog(), grant -> grantService.removeAllByAuthorizationCode(code));
         validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog());
+        dPoPService.validateDpopThumprint(authorizationCodeGrant.getDpopJkt(), executionContext.getDpop());
 
         authorizationCodeGrant.setIsCachedWithNoPersistence(false);
         authorizationCodeGrant.save();
@@ -593,32 +591,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     private ResponseBuilder error(int status, TokenErrorResponseType type, String reason) {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
-    }
-
-    private String runDPoP(HttpServletRequest httpRequest, Client client, OAuth2AuditLog oAuth2AuditLog) {
-        try {
-            String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
-            final boolean isDpopBlank = StringUtils.isBlank(dpopStr);
-
-            if (isTrue(client.getAttributes().getDpopBoundAccessToken()) && isDpopBlank) {
-                log.debug("Client requires DPoP bound access token. Invalid request - DPoP header is not set.");
-                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, "Invalid request - DPoP header is not set."), oAuth2AuditLog));
-            }
-
-            if (isDpopBlank) return null;
-
-            Jwt dpop = Jwt.parseOrThrow(dpopStr);
-
-            JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
-            String dpopJwkThumbprint = jwk.getJwkThumbprint();
-
-            if (dpopJwkThumbprint == null)
-                throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
-
-            return dpopJwkThumbprint;
-        } catch (InvalidJwtException | JWKException | NoSuchAlgorithmException | NoSuchProviderException e) {
-            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, e.getMessage()), oAuth2AuditLog));
-        }
     }
 
     /**

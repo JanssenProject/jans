@@ -334,6 +334,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 result.setTokenBindingHash(tokenEntity.getTokenBindingHash());
                 result.setNonce(nonce);
                 result.setX5cs256(tokenEntity.getAttributes().getX5cs256());
+                result.setDpopJkt(tokenEntity.getAttributes().getDpopJkt());
                 result.setTokenEntity(tokenEntity);
                 if (StringUtils.isNotBlank(grantId)) {
                     result.setGrantId(grantId);
