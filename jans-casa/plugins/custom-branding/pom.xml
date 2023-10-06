@@ -35,7 +35,7 @@
                     <archive>
                         <manifestEntries>
                             <Plugin-Id>${plugin.id}</Plugin-Id>
-                            <Plugin-Version>${plugin.version}</Plugin-Version>
+                            <Plugin-Version>${project.version}</Plugin-Version>
                             <Plugin-Provider>Janssen project</Plugin-Provider>
                             <Plugin-Class>io.jans.casa.plugins.branding.CustomBrandingPlugin</Plugin-Class>
                             <Plugin-Description>
