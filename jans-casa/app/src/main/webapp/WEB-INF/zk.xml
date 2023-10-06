@@ -3,7 +3,7 @@
 <zk>
     <preference>
         <name>org.zkoss.zk.ui.WebApp.name</name>
-        <value>Gluu Casa</value>
+        <value>Jans Casa</value>
     </preference>
 
     <!-- session timeout redirect -->
