@@ -63,6 +63,7 @@ public class RequestParameterService {
             AuthorizeRequestParam.ORIGIN_HEADERS,
             AuthorizeRequestParam.CODE_CHALLENGE,
             AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
+            AuthorizeRequestParam.DPOP_JKT,
             AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS,
             AuthorizeRequestParam.CLAIMS,
             AuthorizeRequestParam.AUTH_REQ_ID,

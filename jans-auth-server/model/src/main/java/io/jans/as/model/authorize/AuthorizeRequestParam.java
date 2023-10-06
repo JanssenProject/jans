@@ -38,6 +38,7 @@ public final class AuthorizeRequestParam {
     public static final String ORIGIN_HEADERS = "origin_headers";
     public static final String CODE_CHALLENGE = "code_challenge";
     public static final String CODE_CHALLENGE_METHOD = "code_challenge_method";
+    public static final String DPOP_JKT = "dpop_jkt";
     public static final String CUSTOM_RESPONSE_HEADERS = "custom_response_headers";
     public static final String AUTH_REQ_ID = "auth_req_id";
     public static final String SID = "sid";

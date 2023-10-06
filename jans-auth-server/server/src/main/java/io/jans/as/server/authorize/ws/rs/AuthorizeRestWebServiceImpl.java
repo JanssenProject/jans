@@ -25,6 +25,7 @@ import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.server.audit.ApplicationAuditLogger;
+import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushTokenDeliveryService;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
@@ -168,6 +169,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     @Inject
     private ExternalResourceOwnerPasswordCredentialsService externalResourceOwnerPasswordCredentialsService;
 
+    @Inject
+    private DpopService dpopService;
+
     @Context
     private HttpServletRequest servletRequest;
 
@@ -178,6 +182,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
+            String dpopJkt,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
         AuthzRequest authzRequest = new AuthzRequest();
@@ -197,6 +202,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setLoginHint(loginHint);
         authzRequest.setAcrValues(acrValues);
         authzRequest.setAmrValues(amrValues);
+        authzRequest.setDpopJkt(dpopJkt);
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
         authzRequest.setSessionId(sessionId);
@@ -220,6 +226,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
+            String dpopJkt,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
         AuthzRequest authzRequest = new AuthzRequest();
@@ -241,6 +248,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setAmrValues(amrValues);
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
+        authzRequest.setDpopJkt(dpopJkt);
         authzRequest.setSessionId(sessionId);
         authzRequest.setOriginHeaders(originHeaders);
         authzRequest.setCodeChallenge(codeChallenge);
@@ -337,6 +345,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
         authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getRedirectUriResponse());
 
+        dpopService.validateDpopThumprintIsPresent(authzRequest.getDpopJkt(), authzRequest.getState());
+
         authzRequestService.setAcrsIfNeeded(authzRequest);
 
         checkOfflineAccessScopes(responseTypes, authzRequest.getPromptList(), client, scopes);
@@ -389,6 +399,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             authorizationGrant.setCodeChallenge(authzRequest.getCodeChallenge());
             authorizationGrant.setCodeChallengeMethod(authzRequest.getCodeChallengeMethod());
             authorizationGrant.setClaims(authzRequest.getClaims());
+            authorizationGrant.setDpopJkt(authzRequest.getDpopJkt());
 
             // Store acr_values
             authorizationGrant.setAcrValues(getAcrForGrant(authzRequest.getAcrValues(), sessionUser));

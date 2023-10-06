@@ -97,6 +97,7 @@ public class JwtAuthorizationRequest {
     private String userCode;
     private String codeChallenge;
     private String codeChallengeMethod;
+    private String dpopJkt;
     private Integer requestedExpiry;
     private ResponseMode responseMode;
 
@@ -309,6 +310,7 @@ public class JwtAuthorizationRequest {
         userCode = jsonPayload.optString("user_code", null);
         codeChallenge = jsonPayload.optString("code_challenge", null);
         codeChallengeMethod = jsonPayload.optString("code_challenge_method", null);
+        dpopJkt = jsonPayload.optString("dpop_jkt", null);
 
         if (jsonPayload.has("requested_expiry")) {
             // requested_expirity is an exception, it could be String or Number.
@@ -465,6 +467,14 @@ public class JwtAuthorizationRequest {
 
     public String getCodeChallengeMethod() {
         return codeChallengeMethod;
+    }
+
+    public String getDpopJkt() {
+        return dpopJkt;
+    }
+
+    public void setDpopJkt(String dpopJkt) {
+        this.dpopJkt = dpopJkt;
     }
 
     @Nullable
