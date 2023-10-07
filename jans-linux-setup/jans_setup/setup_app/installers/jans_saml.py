@@ -14,9 +14,12 @@ from setup_app.utils.ldif_utils import create_client_ldif
 class JansSamlInstaller(JettyInstaller):
 
     source_files = [
-        (os.path.join(Config.dist_jans_dir, 'jans-keycloak-storage-api.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-keycloak-storage-api/{0}/jans-keycloak-storage-api-{0}.jar').format(base.current_app.app_info['ox_version'])),
-        (os.path.join(Config.dist_jans_dir, 'jans-scim-model.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-model/{0}/jans-scim-model-{0}.jar').format(base.current_app.app_info['ox_version'])),
-        (os.path.join(Config.dist_jans_dir, 'jans-keycloak-storage-api.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-keycloak-storage-api/{0}/jans-keycloak-storage-api-{0}.zip').format(base.current_app.app_info['ox_version'])),
+        (os.path.join(Config.dist_jans_dir, 'jans-keycloak-storage-api.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-keycloak-storage-api/{0}/jans-keycloak-storage-api-{0}.jar').format(base.current_app.app_info['jans_version'])),
+        (os.path.join(Config.dist_jans_dir, 'jans-scim-model.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-model/{0}/jans-scim-model-{0}.jar').format(base.current_app.app_info['jans_version'])),
+        (os.path.join(Config.dist_jans_dir, 'jans-keycloak-storage-api.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-keycloak-storage-api/{0}/jans-keycloak-storage-api-{0}.zip').format(base.current_app.app_info['jans_version'])),
+        (os.path.join(Config.dist_app_dir, 'keycloak.zip'), 'https://github.com/keycloak/keycloak/releases/download/{0}/keycloak-{0}.zip'.format(base.current_app.app_info['KC_VERSION'])),
+        (os.path.join(Config.dist_jans_dir, 'jans-authenticator.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-authenticator/{0}/jans-authenticator-{0}.jar').format(base.current_app.app_info['jans_version'])),
+        (os.path.join(Config.dist_jans_dir, 'jans-authenticator-deps.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-authenticator/{0}/jans-authenticator-{0}-deps.zip').format(base.current_app.app_info['jans_version'])),
             ]
 
     def __init__(self):
@@ -61,6 +64,7 @@ class JansSamlInstaller(JettyInstaller):
         """installation steps"""
         self.create_scim_client()
         self.copy_files()
+        self.install_keycloack()
 
     def extract_files(self):
         base.extract_file(base.current_app.jans_zip, 'jans-keycloak/storage-api/src/main/resources/jans-keycloak-storage-api.properties', self.templates_folder)
@@ -91,7 +95,7 @@ class JansSamlInstaller(JettyInstaller):
     def create_scim_client(self):
         result = self.check_clients([('saml_scim_client_id', '2100.')])
         if result.get('2100.') == -1:
-            
+
             scopes = ['inum=F0C4,ou=scopes,o=jans']
             users_write_search_result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(jansId=https://jans.io/scim/users.write)')
             if users_write_search_result:
@@ -119,3 +123,11 @@ class JansSamlInstaller(JettyInstaller):
         self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
         self.copyFile(self.source_files[1][0], self.idp_config_providers_dir)
         base.unpack_zip(self.source_files[2][0], self.idp_config_providers_dir)
+
+
+    def install_keycloack(self):
+        self.logIt("Installing KC", pbar=self.service_name)
+        base.unpack_zip(self.source_files[3][0], self.idp_config_data_dir, with_par_dir=False)
+        self.copyFile(self.source_files[4][0], self.idp_config_providers_dir)
+        base.unpack_zip(self.source_files[5][0], self.idp_config_providers_dir)
+
