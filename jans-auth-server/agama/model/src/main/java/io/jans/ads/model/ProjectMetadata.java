@@ -18,7 +18,7 @@ public class ProjectMetadata {
 
     @JsonProperty("configs")
     @JsonInclude(JsonInclude.Include.ALWAYS)
-    private Map<String, Object> configHints;
+    private Map<String, Map<String, Object>> configHints;
 
     @JsonProperty("noDirectLaunch")
     private List<String> noDirectLaunchFlows;
@@ -63,11 +63,11 @@ public class ProjectMetadata {
         this.version = version;
     }
 
-    public Map<String, Object> getConfigHints() {
+    public Map<String, Map<String, Object>> getConfigHints() {
         return configHints;
     }
 
-    public void setConfigHints(Map<String, Object> configHints) {
+    public void setConfigHints(Map<String, Map<String, Object>> configHints) {
         this.configHints = configHints;
     }
 
