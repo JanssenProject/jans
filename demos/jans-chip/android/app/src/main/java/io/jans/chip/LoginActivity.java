@@ -52,6 +52,8 @@ public class LoginActivity extends AppCompatActivity {
         if (oidcClientList == null || oidcClientList.isEmpty()) {
             createErrorDialog("OpenID client not found in database.");
             errorDialog.show();
+            loginButton.setEnabled(false);
+            return;
         }
         OIDCClient oidcClient = oidcClientList.get(0);
         if (oidcClient == null || oidcClient.getClientId() == null) {
