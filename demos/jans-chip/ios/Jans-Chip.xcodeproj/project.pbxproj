@@ -15,6 +15,24 @@
 		3063E56C2ACC0BAF002B4879 /* MainViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E56B2ACC0BAF002B4879 /* MainViewPresenter.swift */; };
 		3063E56E2ACC0BFE002B4879 /* MainViewAssembler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E56D2ACC0BFE002B4879 /* MainViewAssembler.swift */; };
 		3063E5702ACC0CE9002B4879 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E56F2ACC0CE9002B4879 /* MainView.swift */; };
+		3063E5732ACD54C9002B4879 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 3063E5722ACD54C9002B4879 /* Alamofire */; };
+		3063E5792ACD60D7002B4879 /* TokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5782ACD60D7002B4879 /* TokenResponse.swift */; };
+		3063E57C2ACD6139002B4879 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E57B2ACD6139002B4879 /* Error.swift */; };
+		3063E5812ACD7897002B4879 /* EndpointConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5802ACD7897002B4879 /* EndpointConfiguration.swift */; };
+		3063E5832ACD78DF002B4879 /* EndpointRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5822ACD78DF002B4879 /* EndpointRouter.swift */; };
+		3063E5852ACD7EEC002B4879 /* OPConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5842ACD7EEC002B4879 /* OPConfiguration.swift */; };
+		3063E5872ACEB4F8002B4879 /* ServiceClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5862ACEB4F8002B4879 /* ServiceClient.swift */; };
+		3063E5902AD04A34002B4879 /* RegisterViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E58B2AD04A34002B4879 /* RegisterViewPresenter.swift */; };
+		3063E5912AD04A34002B4879 /* RegisterViewAssembler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E58C2AD04A34002B4879 /* RegisterViewAssembler.swift */; };
+		3063E5922AD04A34002B4879 /* RegisterViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E58D2AD04A34002B4879 /* RegisterViewState.swift */; };
+		3063E5932AD04A34002B4879 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E58E2AD04A34002B4879 /* RegisterView.swift */; };
+		3063E5942AD04A34002B4879 /* RegisterViewInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E58F2AD04A34002B4879 /* RegisterViewInteractor.swift */; };
+		3063E5972AD051D7002B4879 /* JansButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5962AD051D7002B4879 /* JansButton.swift */; };
+		3063E59E2AD406D3002B4879 /* LoginViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5992AD406D3002B4879 /* LoginViewPresenter.swift */; };
+		3063E59F2AD406D3002B4879 /* LoginViewAssembler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E59A2AD406D3002B4879 /* LoginViewAssembler.swift */; };
+		3063E5A02AD406D3002B4879 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E59B2AD406D3002B4879 /* LoginView.swift */; };
+		3063E5A12AD406D3002B4879 /* LoginViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E59C2AD406D3002B4879 /* LoginViewState.swift */; };
+		3063E5A22AD406D3002B4879 /* LoginViewInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E59D2AD406D3002B4879 /* LoginViewInteractor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +45,23 @@
 		3063E56B2ACC0BAF002B4879 /* MainViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewPresenter.swift; sourceTree = "<group>"; };
 		3063E56D2ACC0BFE002B4879 /* MainViewAssembler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewAssembler.swift; sourceTree = "<group>"; };
 		3063E56F2ACC0CE9002B4879 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		3063E5782ACD60D7002B4879 /* TokenResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenResponse.swift; sourceTree = "<group>"; };
+		3063E57B2ACD6139002B4879 /* Error.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
+		3063E5802ACD7897002B4879 /* EndpointConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointConfiguration.swift; sourceTree = "<group>"; };
+		3063E5822ACD78DF002B4879 /* EndpointRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointRouter.swift; sourceTree = "<group>"; };
+		3063E5842ACD7EEC002B4879 /* OPConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPConfiguration.swift; sourceTree = "<group>"; };
+		3063E5862ACEB4F8002B4879 /* ServiceClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceClient.swift; sourceTree = "<group>"; };
+		3063E58B2AD04A34002B4879 /* RegisterViewPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterViewPresenter.swift; sourceTree = "<group>"; };
+		3063E58C2AD04A34002B4879 /* RegisterViewAssembler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterViewAssembler.swift; sourceTree = "<group>"; };
+		3063E58D2AD04A34002B4879 /* RegisterViewState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterViewState.swift; sourceTree = "<group>"; };
+		3063E58E2AD04A34002B4879 /* RegisterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
+		3063E58F2AD04A34002B4879 /* RegisterViewInteractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterViewInteractor.swift; sourceTree = "<group>"; };
+		3063E5962AD051D7002B4879 /* JansButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JansButton.swift; sourceTree = "<group>"; };
+		3063E5992AD406D3002B4879 /* LoginViewPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewPresenter.swift; sourceTree = "<group>"; };
+		3063E59A2AD406D3002B4879 /* LoginViewAssembler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewAssembler.swift; sourceTree = "<group>"; };
+		3063E59B2AD406D3002B4879 /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		3063E59C2AD406D3002B4879 /* LoginViewState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewState.swift; sourceTree = "<group>"; };
+		3063E59D2AD406D3002B4879 /* LoginViewInteractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewInteractor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -34,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3063E5732ACD54C9002B4879 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,6 +95,11 @@
 		304311F02ACC05E4006B8D40 /* Jans-Chip */ = {
 			isa = PBXGroup;
 			children = (
+				3063E5952AD051BD002B4879 /* UIComponents */,
+				3063E57D2ACD6153002B4879 /* Networking */,
+				3063E5772ACD5FF0002B4879 /* Models */,
+				3063E5982AD406D3002B4879 /* LoginView */,
+				3063E58A2AD04A34002B4879 /* RegisterView */,
 				3063E5662ACC0852002B4879 /* MainView */,
 				304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */,
 				304311F52ACC05E5006B8D40 /* Assets.xcassets */,
@@ -87,6 +128,66 @@
 			path = MainView;
 			sourceTree = "<group>";
 		};
+		3063E5772ACD5FF0002B4879 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3063E57A2ACD6128002B4879 /* General */,
+				3063E5782ACD60D7002B4879 /* TokenResponse.swift */,
+				3063E5842ACD7EEC002B4879 /* OPConfiguration.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		3063E57A2ACD6128002B4879 /* General */ = {
+			isa = PBXGroup;
+			children = (
+				3063E57B2ACD6139002B4879 /* Error.swift */,
+			);
+			path = General;
+			sourceTree = "<group>";
+		};
+		3063E57D2ACD6153002B4879 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				3063E5802ACD7897002B4879 /* EndpointConfiguration.swift */,
+				3063E5822ACD78DF002B4879 /* EndpointRouter.swift */,
+				3063E5862ACEB4F8002B4879 /* ServiceClient.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		3063E58A2AD04A34002B4879 /* RegisterView */ = {
+			isa = PBXGroup;
+			children = (
+				3063E58B2AD04A34002B4879 /* RegisterViewPresenter.swift */,
+				3063E58C2AD04A34002B4879 /* RegisterViewAssembler.swift */,
+				3063E58D2AD04A34002B4879 /* RegisterViewState.swift */,
+				3063E58E2AD04A34002B4879 /* RegisterView.swift */,
+				3063E58F2AD04A34002B4879 /* RegisterViewInteractor.swift */,
+			);
+			path = RegisterView;
+			sourceTree = "<group>";
+		};
+		3063E5952AD051BD002B4879 /* UIComponents */ = {
+			isa = PBXGroup;
+			children = (
+				3063E5962AD051D7002B4879 /* JansButton.swift */,
+			);
+			path = UIComponents;
+			sourceTree = "<group>";
+		};
+		3063E5982AD406D3002B4879 /* LoginView */ = {
+			isa = PBXGroup;
+			children = (
+				3063E5992AD406D3002B4879 /* LoginViewPresenter.swift */,
+				3063E59A2AD406D3002B4879 /* LoginViewAssembler.swift */,
+				3063E59B2AD406D3002B4879 /* LoginView.swift */,
+				3063E59C2AD406D3002B4879 /* LoginViewState.swift */,
+				3063E59D2AD406D3002B4879 /* LoginViewInteractor.swift */,
+			);
+			path = LoginView;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -103,6 +204,9 @@
 			dependencies = (
 			);
 			name = "Jans-Chip";
+			packageProductDependencies = (
+				3063E5722ACD54C9002B4879 /* Alamofire */,
+			);
 			productName = "Jans-Chip";
 			productReference = 304311EE2ACC05E4006B8D40 /* Jans-Chip.app */;
 			productType = "com.apple.product-type.application";
@@ -131,6 +235,9 @@
 				Base,
 			);
 			mainGroup = 304311E52ACC05E4006B8D40;
+			packageReferences = (
+				3063E5712ACD54C9002B4879 /* XCRemoteSwiftPackageReference "Alamofire" */,
+			);
 			productRefGroup = 304311EF2ACC05E4006B8D40 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -157,12 +264,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3063E57C2ACD6139002B4879 /* Error.swift in Sources */,
+				3063E59E2AD406D3002B4879 /* LoginViewPresenter.swift in Sources */,
 				3063E5702ACC0CE9002B4879 /* MainView.swift in Sources */,
+				3063E5A22AD406D3002B4879 /* LoginViewInteractor.swift in Sources */,
 				3063E5682ACC0890002B4879 /* MainViewInteractor.swift in Sources */,
+				3063E5792ACD60D7002B4879 /* TokenResponse.swift in Sources */,
+				3063E59F2AD406D3002B4879 /* LoginViewAssembler.swift in Sources */,
+				3063E5922AD04A34002B4879 /* RegisterViewState.swift in Sources */,
+				3063E5972AD051D7002B4879 /* JansButton.swift in Sources */,
+				3063E5872ACEB4F8002B4879 /* ServiceClient.swift in Sources */,
+				3063E5902AD04A34002B4879 /* RegisterViewPresenter.swift in Sources */,
 				3063E56E2ACC0BFE002B4879 /* MainViewAssembler.swift in Sources */,
 				3063E56C2ACC0BAF002B4879 /* MainViewPresenter.swift in Sources */,
+				3063E5832ACD78DF002B4879 /* EndpointRouter.swift in Sources */,
+				3063E5812ACD7897002B4879 /* EndpointConfiguration.swift in Sources */,
 				304311F22ACC05E4006B8D40 /* Jans_ChipApp.swift in Sources */,
+				3063E5A02AD406D3002B4879 /* LoginView.swift in Sources */,
 				3063E56A2ACC0973002B4879 /* MainViewState.swift in Sources */,
+				3063E5932AD04A34002B4879 /* RegisterView.swift in Sources */,
+				3063E5A12AD406D3002B4879 /* LoginViewState.swift in Sources */,
+				3063E5912AD04A34002B4879 /* RegisterViewAssembler.swift in Sources */,
+				3063E5942AD04A34002B4879 /* RegisterViewInteractor.swift in Sources */,
+				3063E5852ACD7EEC002B4879 /* OPConfiguration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,6 +487,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3063E5712ACD54C9002B4879 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3063E5722ACD54C9002B4879 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3063E5712ACD54C9002B4879 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 304311E62ACC05E4006B8D40 /* Project object */;
 }

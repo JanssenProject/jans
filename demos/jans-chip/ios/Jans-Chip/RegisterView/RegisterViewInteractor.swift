@@ -1,5 +1,5 @@
 //
-//  MainViewInteractor.swift
+//  RegisterViewInteractor.swift
 //  Jans-Chip
 //
 //  Created by Nazar Yavornytskyi on 03.10.2023.
@@ -8,14 +8,14 @@
 import Foundation
 import Combine
 
-protocol MainViewInteractor: AnyObject {
+protocol RegisterViewInteractor: AnyObject {
     
     func onRegisterClick()
 }
 
-final class MainViewInteractorImpl: MainViewInteractor {
+final class RegisterViewInteractorImpl: RegisterViewInteractor {
     
-    private let presenter: MainViewPresenterImpl
+    private let presenter: RegisterViewPresenterImpl
     
     private lazy var serviceClient = {
         ServiceClient()
@@ -23,7 +23,7 @@ final class MainViewInteractorImpl: MainViewInteractor {
     
     private var cancellableSet : Set<AnyCancellable> = []
     
-    init(presenter: MainViewPresenterImpl) {
+    init(presenter: RegisterViewPresenterImpl) {
         self.presenter = presenter
     
 //        serviceClient.getOPConfiguration()
