@@ -3,8 +3,8 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.jans</groupId>
-  <artifactId>jans-authenticator</artifactId>
-  <name>jans-authenticator</name>
+  <artifactId>kc-jans-authn-plugin</artifactId>
+  <name>kc-jans-authn-plugin</name>
   <packaging>jar</packaging>
 
   <parent>
@@ -75,7 +75,6 @@
      <!-- end maven deps plugin -->
 
      <!-- maven assembly plugin -->
-     
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -96,8 +95,19 @@
             </execution>
         </executions>
      </plugin>
-     
      <!-- end maven assembly plugin -->
+
+     <!-- maven compiler plugin -->
+     <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-compiler-plugin</artifactId>
+       <version>${maven.compiler.version}</version>
+       <configuration>
+        <source>${maven.compiler.source}</source>
+        <target>${maven.compiler.target}</target>
+       </configuration>
+     </plugin>
+     <!-- end maven compiler plugin -->
     </plugins>
   </build>
 </project>
