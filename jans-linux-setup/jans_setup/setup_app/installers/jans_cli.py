@@ -135,6 +135,8 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         config.write(self.config_ini_fn.open('w'))
         self.config_ini_fn.chmod(0o600)
 
+    def installed(self):
+        return os.path.exists(self.pylib_dir)
 
     def render_import_templates(self):
         self.renderTemplateInOut(self.ldif_client, self.templates_folder, self.output_folder)
