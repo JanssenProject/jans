@@ -20,8 +20,8 @@ It resides at the url
 https://jenkins.jans.io/maven/io/jans/jans-authenticator/<version>/
 Binaries of interest  have to be copied to the
 `/opt/keycloak/providers/` directory. They are:
-- `jans-authenticator-<version>.jar`
-- `jans-authenticator-<version>-deps.zip`. It's contents have to 
+- `kc-jans-authn-plugin-<version>.jar`
+- `kc-jans-authn-plugin-<version>-deps.zip`. It's contents have to 
 be unzipped into the directory. These are the plugin's dependencies.
 
 No further action is needed after copying these files.
