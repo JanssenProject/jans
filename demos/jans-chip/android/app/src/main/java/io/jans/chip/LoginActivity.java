@@ -1,34 +1,26 @@
 package io.jans.chip;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.UUID;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 
-import io.jans.chip.factories.DPoPProofFactory;
+import java.util.List;
+
 import io.jans.chip.modal.LoginResponse;
 import io.jans.chip.modal.OIDCClient;
-import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.TokenResponse;
-import io.jans.chip.retrofit.RetrofitClient;
-import io.jans.chip.services.DBHandler;
-import io.jans.chip.utils.AppConfig;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.jans.chip.modal.UserInfoResponse;
+import io.jans.chip.modelview.LoginViewModel;
+import io.jans.chip.modelview.TokenViewModel;
+import io.jans.chip.modelview.UserInfoViewModel;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -38,19 +30,30 @@ public class LoginActivity extends AppCompatActivity {
     ProgressBar loginProgressBar;
     AlertDialog.Builder errorDialog;
     public static final String USER_INFO = "io.jans.DPoP.LoginActivity.USER_INFO";
+    AppDatabase appDatabase;
+    LoginViewModel loginViewModel;
+    TokenViewModel tokenViewModel;
+    UserInfoViewModel userInfoViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         errorDialog = new AlertDialog.Builder(this);
+        appDatabase = AppDatabase.getInstance(this);
+        loginViewModel = new LoginViewModel(getApplicationContext());
+        tokenViewModel = new TokenViewModel(getApplicationContext());
+        userInfoViewModel = new UserInfoViewModel(getApplicationContext());
 
         loginProgressBar = findViewById(R.id.loginProgressBar);
         loginButton = findViewById(R.id.loginButton);
-        // Initialize the database handler
-        DBHandler dbH = new DBHandler(LoginActivity.this, AppConfig.SQLITE_DB_NAME, null, 1);
         // Check if OIDCClient is available, if not, navigate to MainActivity
-        OIDCClient oidcClient = dbH.getOIDCClient(1);
+        List<OIDCClient> oidcClientList = appDatabase.oidcClientDao().getAll();
+        if (oidcClientList == null || oidcClientList.isEmpty()) {
+            createErrorDialog("OpenID client not found in database.");
+            errorDialog.show();
+        }
+        OIDCClient oidcClient = oidcClientList.get(0);
         if (oidcClient == null || oidcClient.getClientId() == null) {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
@@ -60,8 +63,22 @@ public class LoginActivity extends AppCompatActivity {
         if (oidcClient.getRecentGeneratedAccessToken() != null) {
             loginProgressBar.setVisibility(View.VISIBLE);
             loginButton.setEnabled(false);
-
-            getUserInfo(oidcClient.getRecentGeneratedAccessToken(), dbH, true);
+            userInfoViewModel.getUserInfo(oidcClient.getRecentGeneratedAccessToken(), true)
+                    .observe(this, new Observer<UserInfoResponse>() {
+                        @Override
+                        public void onChanged(UserInfoResponse userInfoResponse) {
+                            if (userInfoResponse.isSuccessful()) {
+                                Intent intent = new Intent(LoginActivity.this, AfterLoginActivity.class);
+                                intent.putExtra(USER_INFO, userInfoResponse.getReponse().toString());
+                                startActivity(intent);
+                            } else {
+                                createErrorDialog(userInfoResponse.getOperationError().getMessage());
+                                errorDialog.show();
+                                loginButton.setEnabled(true);
+                                loginProgressBar.setVisibility(View.INVISIBLE);
+                            }
+                        }
+                    });
         }
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,15 +89,55 @@ public class LoginActivity extends AppCompatActivity {
                 String usernameText = username.getText().toString();
                 String passwordText = password.getText().toString();
 
-                if(validateInputs()) {
+                if (validateInputs()) {
                     loginProgressBar.setVisibility(View.VISIBLE);
                     loginButton.setEnabled(false);
 
-                    processlogin(usernameText, passwordText, dbH);
+                    loginViewModel.processlogin(usernameText, passwordText).observe(LoginActivity.this, new Observer<LoginResponse>() {
+
+                        @Override
+                        public void onChanged(LoginResponse loginResponse) {
+                            if (loginResponse.isSuccessful()) {
+                                tokenViewModel.getToken(loginResponse.getAuthorizationCode(), usernameText, passwordText)
+                                        .observe(LoginActivity.this, new Observer<TokenResponse>() {
+
+                                            @Override
+                                            public void onChanged(TokenResponse tokenResponse) {
+                                                if (tokenResponse.isSuccessful()) {
+                                                    userInfoViewModel.getUserInfo(tokenResponse.getAccessToken(), false)
+                                                            .observe(LoginActivity.this, new Observer<UserInfoResponse>() {
+                                                                @Override
+                                                                public void onChanged(UserInfoResponse userInfoResponse) {
+                                                                    if (userInfoResponse.isSuccessful()) {
+                                                                        Intent intent = new Intent(LoginActivity.this, AfterLoginActivity.class);
+                                                                        intent.putExtra(USER_INFO, userInfoResponse.getReponse().toString());
+                                                                        startActivity(intent);
+                                                                    } else {
+                                                                        createErrorDialog(userInfoResponse.getOperationError().getMessage());
+                                                                        errorDialog.show();
+                                                                        loginButton.setEnabled(true);
+                                                                        loginProgressBar.setVisibility(View.INVISIBLE);
+                                                                    }
+                                                                }
+                                                            });
+                                                } else {
+                                                    createErrorDialog(tokenResponse.getOperationError().getMessage());
+                                                    errorDialog.show();
+                                                }
+
+                                            }
+                                        });
+                            } else {
+                                createErrorDialog(loginResponse.getOperationError().getMessage());
+                                errorDialog.show();
+                            }
+                        }
+                    });
                 }
             }
         });
     }
+
     private boolean validateInputs() {
         if (username == null || username.length() == 0) {
             createErrorDialog("Username cannot be left empty.");
@@ -93,149 +150,6 @@ public class LoginActivity extends AppCompatActivity {
             return false;
         }
         return true;
-    }
-
-    // Function to handle the login process
-    private void processlogin(String usernameText, String passwordText, DBHandler dbH) {
-        // Get OPConfiguration and OIDCClient
-        OPConfiguration opConfiguration = dbH.getOPConfiguration();
-        OIDCClient oidcClient = dbH.getOIDCClient(1);
-
-        // Create a call to request an authorization challenge
-        Call<LoginResponse> call = RetrofitClient.getInstance(opConfiguration.getIssuer()).getAPIInterface().
-                getAuthorizationChallenge(oidcClient.getClientId(),
-                        usernameText,
-                        passwordText,
-                        UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(),
-                        opConfiguration.getAuthorizationChallengeEndpoint());
-        call.enqueue(new Callback<LoginResponse>() {
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.code() == 200) {
-                    LoginResponse responseFromAPI = response.body();
-                    Log.d("processlogin Response :: getAuthorizationCode ::", responseFromAPI.getAuthorizationCode());
-
-                    if (responseFromAPI.getAuthorizationCode() != null && !responseFromAPI.getAuthorizationCode().isEmpty()) {
-                        getToken(responseFromAPI.getAuthorizationCode(), usernameText, passwordText, dbH);
-                    }
-                } else {
-                    createErrorDialog("Error in  generating authorization code.\n Error code: " + response.code() + "\n Error message: " + response.message());
-                    errorDialog.show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Log.e("Inside processlogin :: onFailure :: ", t.getMessage());
-                createErrorDialog("Error in  generating authorization code.\n" + t.getMessage());
-                errorDialog.show();
-            }
-        });
-    }
-
-    // Function to request a token
-    private void getToken(String authorizationCode, String usernameText, String passwordText, DBHandler dbH) {
-        // Get OPConfiguration and OIDCClient
-        OPConfiguration opConfiguration = dbH.getOPConfiguration();
-        OIDCClient oidcClient = dbH.getOIDCClient(1);
-
-        try {
-            Log.d("dpop token", DPoPProofFactory.getInstance().issueDPoPJWTToken("POST", opConfiguration.getIssuer()));
-            // Create a call to request a token
-            Call<TokenResponse> call = RetrofitClient.getInstance(opConfiguration.getIssuer()).getAPIInterface()
-                    .getToken(oidcClient.getClientId(),
-                            authorizationCode,
-                            "authorization_code",
-                            opConfiguration.getIssuer(),
-                            "openid",
-                            "Basic " + Base64.encodeToString((oidcClient.getClientId() + ":" + oidcClient.getClientSecret()).getBytes(), Base64.NO_WRAP),
-                            DPoPProofFactory.getInstance().issueDPoPJWTToken("POST", opConfiguration.getIssuer()),
-                            opConfiguration.getTokenEndpoint());
-            call.enqueue(new Callback<TokenResponse>() {
-                @Override
-                public void onResponse(Call<TokenResponse> call, Response<TokenResponse> response) {
-                    // this method is called when we get response from our api.
-                    if (response.code() == 200) {
-                        TokenResponse responseFromAPI = response.body();
-
-                        if (responseFromAPI.getAccessToken() != null && !responseFromAPI.getAccessToken().isEmpty()) {
-                            Log.d("getToken Response :: getIdToken ::", responseFromAPI.getIdToken());
-                            Log.d("getToken Response :: getTokenType ::", responseFromAPI.getTokenType());
-                            oidcClient.setRecentGeneratedIdToken(responseFromAPI.getIdToken());
-                            oidcClient.setRecentGeneratedAccessToken(responseFromAPI.getAccessToken());
-                            dbH.updateOIDCClient(oidcClient);
-                            getUserInfo(responseFromAPI.getAccessToken(), dbH);
-                        }
-                    } else {
-                        createErrorDialog("Error in Token generation.\n Error code: " + response.code() + "\n Error message: " + response.message());
-                        errorDialog.show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<TokenResponse> call, Throwable t) {
-                    Log.e("Inside getToken :: onFailure :: ", t.getMessage());
-                    //Toast.makeText(LoginActivity.this, "Error in Token generation : " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                    createErrorDialog("Error in fetching configuration.\n" + t.getMessage());
-                    errorDialog.show();
-                }
-            });
-        } catch (InvalidAlgorithmParameterException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchProviderException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    // Function to get user information
-    private void getUserInfo(String accessToken, DBHandler dbH) {
-        getUserInfo(accessToken, dbH, false);
-    }
-
-    // Overloaded function to get user information with silentOnError flag
-    private void getUserInfo(String accessToken, DBHandler dbH, boolean silentOnError) {
-        OPConfiguration opConfiguration = dbH.getOPConfiguration();
-        // Create a call to fetch user information
-        Call<Object> call = RetrofitClient.getInstance(opConfiguration.getIssuer()).getAPIInterface().getUserInfo(accessToken, "Bearer " + accessToken, opConfiguration.getUserinfoEndpoint());
-        call.enqueue(new Callback<Object>() {
-            @Override
-            public void onResponse(Call<Object> call, Response<Object> response) {
-                // this method is called when we get response from our api.
-
-                if (response.code() == 200) {
-                    Object responseFromAPI = response.body();
-                    Log.d("getUserInfo Response :: getUserInfo ::", responseFromAPI.toString());
-
-                    if (responseFromAPI != null) {
-                        Intent intent = new Intent(LoginActivity.this, AfterLoginActivity.class);
-                        intent.putExtra(USER_INFO, responseFromAPI.toString());
-                        startActivity(intent);
-                    }
-                } else {
-                    if (!silentOnError) {
-                        createErrorDialog("Error in fetching getUserInfo.\n Error code: " + response.code() + "\n Error message: " + response.message());
-                        errorDialog.show();
-                    }
-                }
-                loginButton.setEnabled(true);
-                loginProgressBar.setVisibility(View.INVISIBLE);
-            }
-
-            @Override
-            public void onFailure(Call<Object> call, Throwable t) {
-                Log.e("Error in fetching getUserInfo :: ", t.getMessage());
-                //Toast.makeText(LoginActivity.this, "Error found is : " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                if (!silentOnError) {
-                    createErrorDialog("Error in fetching getUserInfo :: " + t.getMessage());
-                    errorDialog.show();
-                }
-                loginButton.setEnabled(true);
-                loginProgressBar.setVisibility(View.INVISIBLE);
-            }
-        });
     }
 
     private void createErrorDialog(String message) {
