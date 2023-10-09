@@ -3,19 +3,19 @@ package io.jans.chip.modal.appIntegrity;
 import java.util.List;
 
 public class DeviceIntegrity{
-    private List<String> appRecognitionVerdict;
+    private List<String> deviceRecognitionVerdict;
 
-    public List<String> getAppRecognitionVerdict() {
-        return appRecognitionVerdict;
+    public List<String> getDeviceRecognitionVerdict() {
+        return deviceRecognitionVerdict;
     }
 
-    public void setAppRecognitionVerdict(List<String> appRecognitionVerdict) {
-        this.appRecognitionVerdict = appRecognitionVerdict;
+    public void setDeviceRecognitionVerdict(List<String> deviceRecognitionVerdict) {
+        this.deviceRecognitionVerdict = deviceRecognitionVerdict;
     }
 
     public String commasSeparatedString(){
-        if(this.appRecognitionVerdict != null) {
-            return String.join(",", this.appRecognitionVerdict);
+        if(this.deviceRecognitionVerdict != null) {
+            return String.join(",", this.deviceRecognitionVerdict);
         }
         return null;
     }

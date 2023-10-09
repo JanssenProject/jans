@@ -2,6 +2,8 @@ package io.jans.chip.modal.appIntegrity;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.jans.chip.modal.OperationError;
+
 public class AppIntegrityResponse {
     @SerializedName("requestDetails")
     private RequestDetails requestDetails;
@@ -13,7 +15,24 @@ public class AppIntegrityResponse {
     private AccountDetails accountDetails;
     @SerializedName("error")
     private String error;
+    private boolean isSuccessful;
+    private OperationError operationError;
 
+    public AppIntegrityResponse(RequestDetails requestDetails, AppIntegrity appIntegrity, DeviceIntegrity deviceIntegrity, AccountDetails accountDetails, String error) {
+        this.requestDetails = requestDetails;
+        this.appIntegrity = appIntegrity;
+        this.deviceIntegrity = deviceIntegrity;
+        this.accountDetails = accountDetails;
+        this.error = error;
+    }
+
+    public AppIntegrityResponse(boolean isSuccessful, OperationError operationError) {
+        this.isSuccessful = isSuccessful;
+        this.operationError = operationError;
+    }
+
+    public AppIntegrityResponse() {
+    }
 
     public RequestDetails getRequestDetails() {
         return requestDetails;
@@ -53,5 +72,21 @@ public class AppIntegrityResponse {
 
     public void setError(String error) {
         this.error = error;
+    }
+
+    public boolean isSuccessful() {
+        return isSuccessful;
+    }
+
+    public void setSuccessful(boolean successful) {
+        isSuccessful = successful;
+    }
+
+    public OperationError getOperationError() {
+        return operationError;
+    }
+
+    public void setOperationError(OperationError operationError) {
+        this.operationError = operationError;
     }
 }

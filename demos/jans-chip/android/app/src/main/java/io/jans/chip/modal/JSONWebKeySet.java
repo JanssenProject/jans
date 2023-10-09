@@ -9,6 +9,10 @@ import java.util.Map;
 
 public class JSONWebKeySet {
 
+    public JSONWebKeySet(List<Map<String, ?>> keys) {
+        this.keys = keys;
+    }
+
     private List<Map<String, ?>> keys;
 
     public JSONWebKeySet() {

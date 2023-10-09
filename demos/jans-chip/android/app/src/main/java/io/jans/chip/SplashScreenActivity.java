@@ -1,38 +1,49 @@
 package io.jans.chip;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
-import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+
+import java.util.List;
+
 import io.jans.chip.modal.OIDCClient;
-import io.jans.chip.services.DBHandler;
-import io.jans.chip.services.PlayIntegrityService;
-import io.jans.chip.utils.AppConfig;
+import io.jans.chip.modal.appIntegrity.AppIntegrityEntity;
+import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
+import io.jans.chip.modelview.PlayIntegrityViewModel;
 
-public class SplashScreenActivity extends Activity {
+public class SplashScreenActivity extends AppCompatActivity {
+    public static final String TAG = "SplashScreenActivity";
     Handler handler;
     int handlerDelay = 1000;
+    PlayIntegrityViewModel playIntegrityViewModel;
+    AppDatabase appDatabase;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
         // Initialize a Handler to manage the delay
         handler = new Handler();
-
-        DBHandler dbH = new DBHandler(SplashScreenActivity.this, AppConfig.SQLITE_DB_NAME, null, 1);
-
+        playIntegrityViewModel = new PlayIntegrityViewModel(getApplicationContext());
+        appDatabase = AppDatabase.getInstance(this);
         //check app integrity
-        checkAppIntegrity(dbH);
+        checkAppIntegrity(appDatabase);
 
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
 
                 // Create a database handler to interact with your database
-                OIDCClient client = dbH.getOIDCClient(1);
+                List<OIDCClient> oidcClientList = appDatabase.oidcClientDao().getAll();
+                OIDCClient client = null;
+                if (oidcClientList != null && !oidcClientList.isEmpty()) {
+                    client = oidcClientList.get(0);
+                }
 
                 if (client == null || client.getClientId() == null) {
                     // If the client is not found or its client ID is null, navigate to the MainActivity
@@ -41,7 +52,7 @@ public class SplashScreenActivity extends Activity {
                     finish();
                 } else {
                     // If the client is found, log its details and navigate to the LoginActivity
-                    Log.d("client", client.toString());
+                    Log.d(TAG, "client" + client.toString());
                     Intent intent = new Intent(SplashScreenActivity.this, LoginActivity.class);
                     startActivity(intent);
                     finish();
@@ -51,12 +62,24 @@ public class SplashScreenActivity extends Activity {
         }, handlerDelay); // Delay execution for 1000 milliseconds (1 second)
     }
 
-    private void checkAppIntegrity(DBHandler dbH) {
-        AppIntegrityResponse appIntegrity = dbH.getAppIntegrity();
-        if(appIntegrity == null || appIntegrity.getError() != null) {
-            dbH.deleteAppIntegrity();
-            PlayIntegrityService playIntegrityService = new PlayIntegrityService(getApplicationContext());
-            playIntegrityService.checkAppIntegrity();
+    private void checkAppIntegrity(AppDatabase appDatabase) {
+        List<AppIntegrityEntity> appIntegrityEntityList = appDatabase.appIntegrityDao().getAll();
+        AppIntegrityEntity appIntegrityEntity = null;
+        if (appIntegrityEntityList != null && !appIntegrityEntityList.isEmpty()) {
+            appIntegrityEntity = appIntegrityEntityList.get(0);
+        }
+        if (appIntegrityEntity == null || appIntegrityEntity.getError() != null) {
+            appDatabase.appIntegrityDao().deleteAll();
+            playIntegrityViewModel.checkAppIntegrity()
+                    .observe(SplashScreenActivity.this, new Observer<AppIntegrityResponse>() {
+
+                        @Override
+                        public void onChanged(AppIntegrityResponse appIntegrityResponse) {
+                            if (!appIntegrityResponse.isSuccessful()) {
+                                Toast.makeText(SplashScreenActivity.this, appIntegrityResponse.getOperationError().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
             handlerDelay = 20000;
         }
     }

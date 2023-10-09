@@ -1,29 +1,49 @@
-package io.jans.chip.services;
+package io.jans.chip.repository;
 
 import android.content.Context;
 import android.util.Log;
+
+import androidx.lifecycle.MutableLiveData;
+
 import com.google.android.gms.tasks.Task;
 import com.google.android.play.core.integrity.IntegrityManager;
 import com.google.android.play.core.integrity.IntegrityManagerFactory;
 import com.google.android.play.core.integrity.IntegrityTokenRequest;
 import com.google.android.play.core.integrity.IntegrityTokenResponse;
 import com.google.android.play.core.integrity.model.IntegrityErrorCode;
+
 import java.util.UUID;
+
+import io.jans.chip.AppDatabase;
+import io.jans.chip.modal.OperationError;
+import io.jans.chip.modal.appIntegrity.AppIntegrityEntity;
 import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
 import io.jans.chip.retrofit.RetrofitClient;
 import io.jans.chip.utils.AppConfig;
 import retrofit2.Call;
 import retrofit2.Callback;
 
-public class PlayIntegrityService {
+public class PlayIntegrityRepository {
+    public static final String TAG = "PlayIntegrityRepository";
+    private MutableLiveData<AppIntegrityResponse> appIntegrityResponseLiveData = new MutableLiveData<>();
     Context context;
+    AppDatabase appDatabase;
 
-    public PlayIntegrityService(Context context) {
+    private PlayIntegrityRepository(Context context) {
         this.context = context;
+        appDatabase = AppDatabase.getInstance(context);
     }
 
-    public void checkAppIntegrity() {
-        DBHandler dbH = new DBHandler(context, AppConfig.SQLITE_DB_NAME, null, 1);
+    private static PlayIntegrityRepository playIntegrityRepository;
+
+    public static PlayIntegrityRepository getInstance(Context context) {
+        if (playIntegrityRepository == null) {
+            playIntegrityRepository = new PlayIntegrityRepository(context);
+        }
+        return playIntegrityRepository;
+    }
+
+    public MutableLiveData<AppIntegrityResponse> checkAppIntegrity() {
         // Create an instance of a manager.
         IntegrityManager integrityManager = IntegrityManagerFactory.create(this.context);
 
@@ -33,17 +53,23 @@ public class PlayIntegrityService {
         integrityTokenResponse.addOnSuccessListener(integrityTokenResponse1 -> {
             String integrityToken = integrityTokenResponse1.token();
             Log.d("Integrity token Obtained result", "success");
-            getTokenResponse(dbH, integrityToken);
+            appIntegrityResponseLiveData = getTokenResponse(integrityToken);
         });
 
         integrityTokenResponse.addOnFailureListener(e -> {
             Log.e("Integrity token Obtained result", "failure");
-            dbH.addAppIntegrity(setErrorInAppIntegrityObj("Error in obtaining integrity token :: " + getErrorText(e)));
-            throw new RuntimeException(e);
+            appDatabase.appIntegrityDao().insert(setErrorInAppIntegrityEntity("Error in obtaining integrity token :: " + getErrorText(e)));
+            OperationError operationError = new OperationError.Builder()
+                    .title("Error")
+                    .message("Error in obtaining integrity token :: " + getErrorText(e))
+                    .build();
+            AppIntegrityResponse appIntegrityResponse = new AppIntegrityResponse(false, operationError);
+            appIntegrityResponseLiveData.setValue(appIntegrityResponse);
         });
+        return appIntegrityResponseLiveData;
     }
 
-    private void getTokenResponse(DBHandler dbH, String integrityToken) {
+    private MutableLiveData<AppIntegrityResponse> getTokenResponse(String integrityToken) {
         Log.d("INTEGRITY_APP_SERVER_URL", AppConfig.INTEGRITY_APP_SERVER_URL + "/api/check?token=" + integrityToken);
         Call<AppIntegrityResponse> call = RetrofitClient.getInstance(AppConfig.INTEGRITY_APP_SERVER_URL).getAPIInterface().verifyIntegrityTokenOnAppServer(AppConfig.INTEGRITY_APP_SERVER_URL + "/api/check?token=" + integrityToken);
 
@@ -55,32 +81,45 @@ public class PlayIntegrityService {
 
                     if (appIntegrityResponse == null) {
                         Log.e("Response from App server :: ", "Response body is empty");
-                        dbH.addAppIntegrity(setErrorInAppIntegrityObj("Empty response obtained from App Server."));
-                    }
-                    if (appIntegrityResponse.getError() != null) {
+                        appDatabase.appIntegrityDao().insert(setErrorInAppIntegrityEntity("Empty response obtained from App Server."));
+                        appIntegrityResponseLiveData.setValue(setErrorInLiveObject("Empty response obtained from App Server."));
+                    } else if (appIntegrityResponse.getError() != null) {
                         Log.e("Response from App server :: ", "Response body has error");
-                        dbH.addAppIntegrity(setErrorInAppIntegrityObj("Response from App server has error :: " + appIntegrityResponse.getError()));
-                    }
-                    if (appIntegrityResponse.getAppIntegrity() == null || appIntegrityResponse.getAppIntegrity().getAppRecognitionVerdict() == null) {
+                        appDatabase.appIntegrityDao().insert(setErrorInAppIntegrityEntity("Response from App server has error :: " + appIntegrityResponse.getError()));
+                        appIntegrityResponseLiveData.setValue(setErrorInLiveObject("Response from App server has error :: " + appIntegrityResponse.getError()));
+                    } else if (appIntegrityResponse.getAppIntegrity() == null || appIntegrityResponse.getAppIntegrity().getAppRecognitionVerdict() == null) {
                         Log.e("Response from App server :: ", "Response body do not have appIntegrity");
-                        dbH.addAppIntegrity(setErrorInAppIntegrityObj("Response body do not have appIntegrity."));
+                        appDatabase.appIntegrityDao().insert(setErrorInAppIntegrityEntity("Response body do not have appIntegrity."));
+                        appIntegrityResponseLiveData.setValue(setErrorInLiveObject("Response body do not have appIntegrity."));
+                    } else {
+                        Log.d("Inside getTokenResponse :: appIntegrityResponse ::", appIntegrityResponse.getAppIntegrity().getAppRecognitionVerdict());
+                        AppIntegrityEntity appIntegrityEntity = new AppIntegrityEntity(AppConfig.DEFAULT_S_NO, appIntegrityResponse.getAppIntegrity().getAppRecognitionVerdict(),
+                                appIntegrityResponse.getDeviceIntegrity().commasSeparatedString(),
+                                appIntegrityResponse.getAccountDetails().getAppLicensingVerdict(),
+                                appIntegrityResponse.getRequestDetails().getRequestPackageName(),
+                                appIntegrityResponse.getRequestDetails().getNonce(),
+                                appIntegrityResponse.getError());
+                        appDatabase.appIntegrityDao().insert(appIntegrityEntity);
+                        appIntegrityResponse.setSuccessful(true);
+                        appIntegrityResponseLiveData.setValue(appIntegrityResponse);
                     }
 
-                    Log.d("Inside getTokenResponse :: appIntegrityResponse ::", appIntegrityResponse.getAppIntegrity().getAppRecognitionVerdict());
-                    dbH.addAppIntegrity(appIntegrityResponse);
                 } else {
                     Log.e("Response from App server :: Unsuccessful, Response code :: ", String.valueOf(response.code()));
-                    dbH.addAppIntegrity(setErrorInAppIntegrityObj("Error in obtaining response from aap server :: Response code :: " + response.code()));
+                    appDatabase.appIntegrityDao().insert(setErrorInAppIntegrityEntity("Error in obtaining response from aap server :: Response code :: " + response.code()));
+                    appIntegrityResponseLiveData.setValue(setErrorInLiveObject("Error in obtaining response from aap server :: Response code :: " + response.code()));
                 }
             }
 
             @Override
             public void onFailure(Call<AppIntegrityResponse> call, Throwable t) {
                 Log.e("Error in fetching AppIntegrity :: ", t.getMessage());
-                dbH.addAppIntegrity(setErrorInAppIntegrityObj("Error in fetching AppIntegrity :: " + t.getMessage()));
+                appDatabase.appIntegrityDao().insert(setErrorInAppIntegrityEntity("Error in fetching AppIntegrity :: " + t.getMessage()));
+                appIntegrityResponseLiveData.setValue(setErrorInLiveObject("Error in fetching AppIntegrity :: " + t.getMessage()));
 
             }
         });
+        return appIntegrityResponseLiveData;
     }
 
     private String getErrorText(Exception e) {
@@ -139,10 +178,19 @@ public class PlayIntegrityService {
         }
     }
 
-    private AppIntegrityResponse setErrorInAppIntegrityObj(String error) {
-        AppIntegrityResponse appIntegrity = new AppIntegrityResponse();
-        appIntegrity.setError(error);
-        return appIntegrity;
+    private AppIntegrityEntity setErrorInAppIntegrityEntity(String error) {
+        AppIntegrityEntity appIntegrityEntity = new AppIntegrityEntity();
+        appIntegrityEntity.setError(error);
+        return appIntegrityEntity;
 
+    }
+
+    private AppIntegrityResponse setErrorInLiveObject(String errorMessage) {
+        OperationError operationError = new OperationError.Builder()
+                .title("Error")
+                .message(errorMessage)
+                .build();
+        AppIntegrityResponse appIntegrityResponse = new AppIntegrityResponse(false, operationError);
+        return appIntegrityResponse;
     }
 }
