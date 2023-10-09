@@ -5,6 +5,33 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class DCRequest {
+    public DCRequest() {
+    }
+
+    public DCRequest(String issuer,
+                     List<String> redirectUris,
+                     String scope,
+                     List<String> responseTypes,
+                     List<String> postLogoutRedirectUris,
+                     List<String> grantTypes,
+                     String applicationType,
+                     String clientName,
+                     String tokenEndpointAuthMethod,
+                     String evidence,
+                     String jwks) {
+        this.issuer = issuer;
+        this.redirectUris = redirectUris;
+        this.scope = scope;
+        this.responseTypes = responseTypes;
+        this.postLogoutRedirectUris = postLogoutRedirectUris;
+        this.grantTypes = grantTypes;
+        this.applicationType = applicationType;
+        this.clientName = clientName;
+        this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
+        this.evidence = evidence;
+        this.jwks = jwks;
+    }
+
     @SerializedName("issuer")
     private String issuer;
     @SerializedName("redirect_uris")
