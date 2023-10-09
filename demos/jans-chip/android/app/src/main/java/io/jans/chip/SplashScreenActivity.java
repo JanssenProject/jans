@@ -1,6 +1,5 @@
 package io.jans.chip;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,16 +12,17 @@ import androidx.lifecycle.Observer;
 import java.util.List;
 
 import io.jans.chip.modal.OIDCClient;
-import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.appIntegrity.AppIntegrityEntity;
 import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
 import io.jans.chip.modelview.PlayIntegrityViewModel;
 
 public class SplashScreenActivity extends AppCompatActivity {
+    public static final String TAG = "SplashScreenActivity";
     Handler handler;
     int handlerDelay = 1000;
     PlayIntegrityViewModel playIntegrityViewModel;
     AppDatabase appDatabase;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +52,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                     finish();
                 } else {
                     // If the client is found, log its details and navigate to the LoginActivity
-                    Log.d("client", client.toString());
+                    Log.d(TAG, "client" + client.toString());
                     Intent intent = new Intent(SplashScreenActivity.this, LoginActivity.class);
                     startActivity(intent);
                     finish();
@@ -65,17 +65,17 @@ public class SplashScreenActivity extends AppCompatActivity {
     private void checkAppIntegrity(AppDatabase appDatabase) {
         List<AppIntegrityEntity> appIntegrityEntityList = appDatabase.appIntegrityDao().getAll();
         AppIntegrityEntity appIntegrityEntity = null;
-        if(appIntegrityEntityList != null && !appIntegrityEntityList.isEmpty()){
+        if (appIntegrityEntityList != null && !appIntegrityEntityList.isEmpty()) {
             appIntegrityEntity = appIntegrityEntityList.get(0);
         }
-        if(appIntegrityEntity == null || appIntegrityEntity.getError() != null) {
+        if (appIntegrityEntity == null || appIntegrityEntity.getError() != null) {
             appDatabase.appIntegrityDao().deleteAll();
             playIntegrityViewModel.checkAppIntegrity()
                     .observe(SplashScreenActivity.this, new Observer<AppIntegrityResponse>() {
 
                         @Override
                         public void onChanged(AppIntegrityResponse appIntegrityResponse) {
-                            if(!appIntegrityResponse.isSuccessful()) {
+                            if (!appIntegrityResponse.isSuccessful()) {
                                 Toast.makeText(SplashScreenActivity.this, appIntegrityResponse.getOperationError().getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }
