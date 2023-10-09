@@ -23,7 +23,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.*;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
@@ -100,10 +99,10 @@ public class Deployer {
                 new String[]{ "jansId", "jansStartDate", "jansEndDate", "adsPrjDeplDetails" });
         
         //Find the oldest, non-active entry without finish timestamp. Pick that one
-        Deployment deployment = depls.stream().filter(d -> d.getFinishedAt() == null)
+        Deployment dep = depls.stream().filter(d -> d.getFinishedAt() == null)
                 .min((d1, d2) -> d1.getCreatedAt().compareTo(d2.getCreatedAt())).orElse(null);
 
-        if (deployment == null) {
+        if (dep == null) {
             updateFlowsAndAssets(depls);
 
             //find deployments in course
@@ -113,13 +112,13 @@ public class Deployer {
             removeStaleDeployments(entryManager.findEntries(BASE_DN, Deployment.class, filter,
                         new String[]{ "jansId", "jansStartDate" }), System.currentTimeMillis());
         } else {
-            deployProject(deployment.getDn(), deployment.getId(),
-                    deployment.getDetails().getProjectMetadata().getProjectName());
+            deployProject(dep.getDn(), dep.getId(), dep.getDetails().isAutoconfigure(),
+                    dep.getDetails().getProjectMetadata().getProjectName());
         }
         
     }
     
-    private void deployProject(String dn, String prjId, String name) throws IOException {
+    private void deployProject(String dn, String prjId, boolean autoconf, String name) throws IOException {
 
         logger.info("Deploying project {}", name);
         DeploymentDetails dd = new DeploymentDetails();
@@ -148,7 +147,7 @@ public class Deployer {
             try {
                 //craft a path so assets of different projects do not collide, see jans#4501
                 String prjBasepath = makeShortSafePath(prjId);
-                Set<String> flowIds = createFlows(pcode, dd, prjBasepath);
+                Set<String> flowIds = createFlows(pcode, dd, prjBasepath, autoconf);
                 if (dd.getError() == null) {
                     projectsFlows.put(prjId, flowIds);
 
@@ -203,7 +202,8 @@ public class Deployer {
 
     }
     
-    private Set<String> createFlows(Path dir, DeploymentDetails dd, String prjBasepath) throws IOException {
+    private Set<String> createFlows(Path dir, DeploymentDetails dd, 
+                String prjBasepath, boolean autoconfigure) throws IOException {
 
         BiPredicate<Path, BasicFileAttributes> matcher = 
             (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith("." + FLOW_EXT);
@@ -230,6 +230,8 @@ public class Deployer {
         ProjectMetadata prjMetadata = dd.getProjectMetadata();
         List<String> noDirectLaunch = Optional.ofNullable(
                 prjMetadata.getNoDirectLaunchFlows()).orElse(Collections.emptyList());
+        Map<String, Map<String, Object>> configHints = Optional.ofNullable(
+                prjMetadata.getConfigHints()).orElse(Collections.emptyMap());
         
         for (Path p: flowsPaths) {
             String error = null;
@@ -271,7 +273,12 @@ public class Deployer {
                     meta.setDescription(prvMeta.getDescription());
                     meta.setProperties(prvMeta.getProperties());
                 }
-    
+
+                if (autoconfigure) {
+                    logger.warn("Setting flow configuration as provided in project archive");
+                    meta.setProperties(configHints.get(qname));
+                }
+                
                 String compiled = tresult.getCode();
                 fl.setMetadata(meta);
                 fl.setSource(source);
