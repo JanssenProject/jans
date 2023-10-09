@@ -51,7 +51,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=1.0.19-SNAPSHOT
-ENV CN_BUILD_DATE='2023-09-23 10:17'
+ENV CN_BUILD_DATE='2023-10-05 08:23'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -74,46 +74,25 @@ RUN mkdir -p /usr/share/java \
 
 ARG TWILIO_VERSION=7.17.0
 ARG JSMPP_VERSION=2.3.7
-ARG CASA_CONFIG_VERSION=5.0.0-SNAPSHOT
+ARG CASA_CONFIG_VERSION=1.0.19-SNAPSHOT
 ARG CASA_CONFIG_BUILD_DATE="2023-02-13 11:44"
 ARG FIDO2_CLIENT_VERSION=1.0.19-SNAPSHOT
 ARG FIDO2_CLIENT_BUILD_DATE="2023-01-31 15:04"
 
 RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
-    && wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
+    && wget -q https://jenkins.jans.io/maven/io/jans/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
     && wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
-
-# =====================
-# Casa external scripts
-# =====================
-
-ARG FLEX_SOURCE_VERSION=3f0281bbf381a63b28229388d6b0ae536902b455
-ARG CASA_EXTRAS_DIR=casa/extras
-
-RUN mkdir -p /opt/jans/python/libs
-RUN git clone --filter blob:none --no-checkout https://github.com/GluuFederation/flex.git /tmp/flex \
-    && cd /tmp/flex \
-    && git sparse-checkout init --cone \
-    && git checkout ${FLEX_SOURCE_VERSION} \
-    && git sparse-checkout add ${CASA_EXTRAS_DIR} \
-    && cd /opt/jans/python/libs \
-    && cp /tmp/flex/${CASA_EXTRAS_DIR}/casa-external_* . \
-    && rm -rf /tmp/flex
-
-# ===========
-# Agama files
-# ===========
-
-RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
-    ${JETTY_BASE}/jans-auth/agama/ftl \
-    ${JETTY_BASE}/jans-auth/agama/scripts
 
 # =====================
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=14a4ee5d21b788db7bb3e9bb94a1d1caf228f95a
+RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
+    ${JETTY_BASE}/jans-auth/agama/ftl \
+    ${JETTY_BASE}/jans-auth/agama/scripts
+
+ENV JANS_SOURCE_VERSION=eb4e84a3b7fbf9a3ad778b3cc77b40dec3210e5d
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
@@ -122,10 +101,12 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add agama/misc \
-    && git sparse-checkout add jans-linux-setup/jans_setup/static/auth/conf
-
-RUN cp -R /tmp/jans/agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
-    && cp -R /tmp/jans/jans-linux-setup/jans_setup/static/auth/conf /etc/certs
+    && git sparse-checkout add jans-linux-setup/jans_setup/static/auth/conf \
+    && git sparse-checkout add jans-casa/extras \
+    && cp -R agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
+    && cp -R jans-linux-setup/jans_setup/static/auth/conf /etc/certs \
+    && mkdir -p /opt/jans/python/libs \
+    && cp jans-casa/extras/casa-external_* /opt/jans/python/libs
 
 # ======
 # Python

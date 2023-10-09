@@ -185,6 +185,8 @@ public class AuthzRequestService {
 
         authzRequest.setState(StringUtils.isNotBlank(par.getAttributes().getState()) ? par.getAttributes().getState() : "");
 
+        if (StringUtils.isNotBlank(par.getAttributes().getDpopJkt()))
+            authzRequest.setDpopJkt(par.getAttributes().getDpopJkt());
         if (StringUtils.isNotBlank(par.getAttributes().getNonce()))
             authzRequest.setNonce(par.getAttributes().getNonce());
         if (StringUtils.isNotBlank(par.getAttributes().getSessionId()))
@@ -270,6 +272,9 @@ public class AuthzRequestService {
                 }
                 if (StringUtils.isNotBlank(jwtRequest.getCodeChallengeMethod())) {
                     authzRequest.setCodeChallengeMethod(jwtRequest.getCodeChallengeMethod());
+                }
+                if (StringUtils.isNotBlank(jwtRequest.getDpopJkt())) {
+                    authzRequest.setDpopJkt(jwtRequest.getDpopJkt());
                 }
                 if (jwtRequest.getDisplay() != null && StringUtils.isNotBlank(jwtRequest.getDisplay().getParamName())) {
                     authzRequest.setDisplay(jwtRequest.getDisplay().getParamName());

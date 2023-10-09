@@ -28,7 +28,7 @@ spec:
   - name: {{ .Release.Name }}-istio-casa
     match:
     - uri:
-        prefix: /casa
+        prefix: /jans-casa
     route:
     - destination:
         host: {{ .Values.global.casa.casaServiceName }}.{{.Release.Namespace}}.svc.cluster.local

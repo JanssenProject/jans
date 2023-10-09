@@ -448,6 +448,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setClientId(getClientId());
 
         result.getAttributes().setX5cs256(token.getX5ts256());
+        result.getAttributes().setDpopJkt(getDpopJkt());
 
         result.setDpop(token.getDpop());
 
