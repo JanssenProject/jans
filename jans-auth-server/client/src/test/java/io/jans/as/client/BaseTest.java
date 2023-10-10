@@ -1292,15 +1292,15 @@ public abstract class BaseTest {
         List<String> softwareRolesAux = Collections.singletonList("password");
         List<String> grantTypesAux = Collections.singletonList("client_credentials");
         return createSsa(accessToken, orgIdAux, expirationAux, descriptionAux, softwareIdAux, softwareRolesAux,
-                grantTypesAux, oneTimeUse, Boolean.TRUE);
+                grantTypesAux, oneTimeUse, Boolean.TRUE, 86400);
     }
 
     public SsaCreateResponse createSsa(String accessToken, String orgId, Long expiration, String description,
                                        String softwareId, List<String> softwareRoles, List<String> grantTypes,
-                                       Boolean oneTimeUse, Boolean rotateSsa) {
+                                       Boolean oneTimeUse, Boolean rotateSsa, Integer lifetime) {
         SsaCreateClient ssaCreateClient = new SsaCreateClient(ssaEndpoint);
         SsaCreateResponse response = ssaCreateClient.execSsaCreate(accessToken, orgId, expiration, description, softwareId,
-                softwareRoles, grantTypes, oneTimeUse, rotateSsa);
+                softwareRoles, grantTypes, oneTimeUse, rotateSsa, lifetime);
         showClient(ssaCreateClient);
         AssertBuilder.ssaCreate(ssaCreateClient.getRequest(), response);
         return response;

@@ -101,14 +101,16 @@ public class SsaCreateAction {
      * @param httpRequest   Http request
      * @return {@link Response} with status {@code 201} (Created) and response body containing the SSA in JWT format.
      */
-    public Response create(String requestParams, HttpServletRequest httpRequest) {
+    public Response create(String requestParams, HttpServletRequest httpRequest) throws WebApplicationException {
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
+        log.trace("Ssa request = {}", requestParams);
         Response.ResponseBuilder builder = Response.status(Response.Status.CREATED);
         try {
             JSONObject jsonRequest = new JSONObject(requestParams);
             final SsaCreateRequest ssaCreateRequest = SsaCreateRequest.fromJson(jsonRequest);
             log.debug("Attempting to create ssa: {}", ssaCreateRequest);
-            log.trace("Ssa request = {}", requestParams);
+
+            ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest);
 
             String ssaBaseDN = staticConfiguration.getBaseDn().getSsa();
             String inum = inumService.generateDefaultId();
@@ -133,6 +135,7 @@ public class SsaCreateAction {
             ssa.getAttributes().setClientDn(client.getDn());
             ssa.getAttributes().setOneTimeUse(ssaCreateRequest.getOneTimeUse());
             ssa.getAttributes().setRotateSsa(ssaCreateRequest.getRotateSsa());
+            ssa.getAttributes().setLifetime(ssaCreateRequest.getLifetime());
             ssa.setCreatorType(CreatorType.CLIENT);
             ssa.setState(SsaState.ACTIVE);
             ssa.setCreatorId(client.getClientId());
@@ -197,6 +200,7 @@ public class SsaCreateAction {
         ssaFields.add(SsaRequestParam.SOFTWARE_ID.getName());
         ssaFields.add(SsaRequestParam.ONE_TIME_USE.getName());
         ssaFields.add(SsaRequestParam.ROTATE_SSA.getName());
+        ssaFields.add(SsaRequestParam.LIFETIME.getName());
         ssaFields.addAll(appConfiguration.getSsaConfiguration().getSsaCustomAttributes());
         jsonRequest.toMap().forEach((k, v) -> {
             if (!ssaFields.contains(k)) log.warn("Field: {} is not defined", k);
