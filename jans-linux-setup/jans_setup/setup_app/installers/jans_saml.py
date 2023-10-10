@@ -13,6 +13,9 @@ from setup_app.utils.ldif_utils import create_client_ldif
 
 class JansSamlInstaller(JettyInstaller):
 
+    install_var = 'install_jans_saml'
+    setattr(Config, install_var + '_pre_released', True)
+
     source_files = [
         (os.path.join(Config.dist_jans_dir, 'jans-keycloak-storage-api.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-keycloak-storage-api/{0}/jans-keycloak-storage-api-{0}.jar').format(base.current_app.app_info['jans_version'])),
         (os.path.join(Config.dist_jans_dir, 'jans-scim-model.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-model/{0}/jans-scim-model-{0}.jar').format(base.current_app.app_info['jans_version'])),
@@ -28,7 +31,7 @@ class JansSamlInstaller(JettyInstaller):
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'install_jans_saml'
+
         self.register_progess()
 
         self.saml_enabled = True
