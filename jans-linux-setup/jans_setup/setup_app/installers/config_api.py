@@ -180,8 +180,7 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['configOauthEnabled'] = 'false' if base.argsp.disable_config_api_security else 'true'
         Config.templateRenderingDict['apiApprovedIssuer'] = base.argsp.approved_issuer or 'https://{}'.format(Config.hostname)
 
-        oxauth_config_str = base64.decodebytes(Config.templateRenderingDict['oxauth_config_base64'].encode())
-        oxauth_config = json.loads(oxauth_config_str.decode())
+        _, oxauth_config = self.dbUtils.get_oxAuthConfDynamic()
         for param in ('issuer', 'openIdConfigurationEndpoint', 'introspectionEndpoint', 'tokenEndpoint', 'tokenRevocationEndpoint'):
             Config.templateRenderingDict[param] = oxauth_config[param]
 
