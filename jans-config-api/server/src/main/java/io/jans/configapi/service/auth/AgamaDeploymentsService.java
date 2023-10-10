@@ -54,7 +54,7 @@ public class AgamaDeploymentsService {
 
     }
     
-    public boolean createDeploymentTask(String name, byte[] gamaBinary) {
+    public boolean createDeploymentTask(String name, byte[] gamaBinary, boolean autoconfigure) {
         
         Deployment d = null;
         String id = idFromName(name);
@@ -75,7 +75,8 @@ public class AgamaDeploymentsService {
             return false;
         }
         
-        DeploymentDetails dd = new DeploymentDetails();
+        DeploymentDetails dd = new DeploymentDetails();        
+        dd.setAutoconfigure(autoconfigure);
         dd.getProjectMetadata().setProjectName(name);
 
         if (!existing) {

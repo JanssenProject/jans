@@ -223,6 +223,10 @@ paths:
         required: true
         schema:
           type: string
+      - name: autoconfigure
+        in: query
+        schema:
+          type: string
       requestBody:
         content:
           application/zip:
@@ -7294,6 +7298,8 @@ components:
             type: string
         error:
           type: string
+        autoconfigure:
+          type: boolean
         flowsError:
           type: object
           additionalProperties:
@@ -7317,6 +7323,8 @@ components:
           type: object
           additionalProperties:
             type: object
+            additionalProperties:
+              type: object
         noDirectLaunch:
           type: array
           items:
@@ -7450,19 +7458,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanAccess:
+          type: boolean
         userCanView:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8970,10 +8978,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
