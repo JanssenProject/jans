@@ -625,9 +625,17 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_casa')
 
 
+    def prompt_to_install(self, install_var):
+        if Config.installed_instance and Config.get(install_var):
+            return False
+
+        if not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
+            return False
+
+        return True
 
     def prompt_for_jans_saml(self):
-        if Config.installed_instance and Config.install_jans_saml:
+        if not self.prompt_to_install('install_jans_saml'):
             return
 
         prompt = self.getPrompt("Install Jans SAML?",

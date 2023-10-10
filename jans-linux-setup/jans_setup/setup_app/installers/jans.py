@@ -69,6 +69,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'Java Type'.ljust(30) + Config.java_type.rjust(35) + "\n"
 
             def get_install_string(prefix, install_var):
+                if not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
+                    return ''
                 return prefix.ljust(30) + repr(getattr(Config, install_var, False)).rjust(35) + (' *' if install_var in Config.addPostSetupService else '') + '\n'
 
             txt += get_install_string('Install Apache 2 web server', 'installHttpd')
