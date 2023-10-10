@@ -1,10 +1,12 @@
 package io.jans.as.server.authorize.ws.rs;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.server.service.ScopeService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.mockito.InjectMocks;
@@ -33,6 +35,36 @@ public class AuthorizationChallengeValidatorTest {
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
+
+    @Mock
+    private ScopeService scopeService;
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateAccess_whenClientIsNull_shouldThrowError() {
+        when(errorResponseFactory.newErrorResponse(Response.Status.BAD_REQUEST)).thenCallRealMethod();
+
+        authorizationChallengeValidator.validateAccess(null);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateAccess_whenClientDoesNotHaveRequiredScopes_shouldThrowError() {
+        when(errorResponseFactory.newErrorResponse(Response.Status.BAD_REQUEST)).thenCallRealMethod();
+
+        Client client = new Client();
+        client.setScopes(new String[] {"id1"});
+
+        authorizationChallengeValidator.validateAccess(client);
+    }
+
+    @Test
+    public void validateAccess_whenClientHasAuthorizationChallengeScope_shouldPass() {
+        when(scopeService.getScopeIdsByDns(Lists.newArrayList("id1"))).thenReturn(Lists.newArrayList("authorization_challenge"));
+
+        Client client = new Client();
+        client.setScopes(new String[] {"id1"});
+
+        authorizationChallengeValidator.validateAccess(client);
+    }
 
     @Test(expectedExceptions = WebApplicationException.class)
     public void validateGrantType_whenClientIsNull_shouldThrowError() {
