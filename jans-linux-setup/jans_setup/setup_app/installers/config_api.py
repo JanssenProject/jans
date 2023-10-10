@@ -25,6 +25,7 @@ class ConfigApiInstaller(JettyInstaller):
                 (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/fido2-plugin/{0}/fido2-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_jans_dir, 'jans-link-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/jans-link-plugin/{0}/jans-link-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'saml-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/saml-plugin/{0}/saml-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 ]
 
     def __init__(self):
@@ -69,6 +70,9 @@ class ConfigApiInstaller(JettyInstaller):
 
         if Config.install_jans_link:
             self.install_plugin('jans-link-plugin')
+
+        if Config.install_jans_saml:
+            self.install_plugin('saml-plugin')
 
         self.enable()
 

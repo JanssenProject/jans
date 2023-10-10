@@ -421,11 +421,25 @@ def extract_subdir(zip_fn, sub_dir, target_dir, par_dir=None):
         shutil.unpack_archive(zip_fn, unpack_dir, format='zip')
         shutil.copytree(os.path.join(unpack_dir, par_dir, sub_dir), target_dir)
 
-def unpack_zip(zip_fn, extract_dir):
-    with zipfile.ZipFile(zip_fn, 'r') as zf:
-        for info in zf.infolist():
-            zf.extract(info.filename, path=extract_dir)
-            out_path = os.path.join(extract_dir, info.filename)
+def unpack_zip(zip_fn, extract_dir, with_par_dir=True):
+    logIt(f"Extracting {zip_fn} to {extract_dir} with parent directory {with_par_dir}")
+    if not with_par_dir and not os.path.exists(extract_dir):
+        os.makedirs(extract_dir)
+
+    with zipfile.ZipFile(zip_fn) as zip_file:
+        info_list = zip_file.infolist()
+        for info in info_list:
+            fpath = Path(info.filename)
+            n = 0 if with_par_dir else 1
+            out_path = os.path.join(extract_dir, *fpath.parts[n:])
+
+            if info.is_dir():
+                if not os.path.exists(out_path):
+                    os.makedirs(out_path)
+            else:
+                with open(out_path, 'wb') as w:
+                    w.write(zip_file.read(info))
+
             perm = info.external_attr >> 16
             os.chmod(out_path, perm)
 

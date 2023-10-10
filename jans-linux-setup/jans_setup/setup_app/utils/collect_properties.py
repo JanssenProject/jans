@@ -155,6 +155,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('scim_client_id', '1201.', {'pw': 'scim_client_pw', 'encoded':'scim_client_encoded_pw'}),
                     ('admin_ui_client_id', '1901.', {'pw': 'admin_ui_client_pw', 'encoded': 'admin_ui_client_encoded_pw'}),
                     ('casa_client_id', CasaInstaller.client_id_prefix),
+                    ('saml_scim_client_id', '2100.'),
                     ]
         self.check_clients(client_var_id_list, create=False)
 
