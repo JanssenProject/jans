@@ -449,9 +449,10 @@ def main():
                         not Config.installed_instance and Config.get(jans_link_installer.install_var)):
                     jans_link_installer.start_installation()
 
-            if Config.install_jans_cli:
-                jansCliInstaller.start_installation()
-                jansCliInstaller.configure()
+            if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
+                    jansCliInstaller.start_installation()
+                    jansCliInstaller.configure()
 
             # if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
             #    oxdInstaller.start_installation()
