@@ -111,6 +111,7 @@ public class BaseService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ISS_CLAIM_NOT_FOUND.getDescription());
             }
             String issuer = StringUtils.removeEnd(claims.get("iss").toString(), "/");
+            String hardwareId = claims.get("org_id").toString();
             //claims.get("iss").toString();
             Map<String, String> body = new HashMap<>();
             body.put("software_statement", ssaJwt);
@@ -131,6 +132,7 @@ public class BaseService {
                 dcrResponse.setClientId(entity.getString("client_id"));
                 dcrResponse.setClientSecret(entity.getString("client_secret"));
                 dcrResponse.setOpHost(issuer);
+                dcrResponse.setHardwareId(hardwareId);
                 if (issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)) {
                     dcrResponse.setScanHostname(AppConstants.SCAN_DEV_SERVER);
                 }

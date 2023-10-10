@@ -156,10 +156,19 @@ def schema2json(schema_file, out_dir=None):
     with open(out_file, 'w') as w:
         w.write(schema_str)
 
-def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, display_name, trusted_client='false'):
+def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, display_name, trusted_client='false', grant_types=None, authorization_methods=None):
+    # create directory if not exists
+    dirname = os.path.dirname(ldif_fn)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
     clients_ldif_fd = open(ldif_fn, 'wb')
     ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
     client_dn = 'inum={},ou=clients,o=jans'.format(client_id)
+    if not grant_types:
+        grant_types = ['authorization_code', 'refresh_token', 'client_credentials']
+    if not authorization_methods:
+        authorization_methods = ['client_secret_basic']
 
     ldif_clients_writer.unparse(
         client_dn, {
@@ -173,7 +182,7 @@ def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, dis
         'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
         'jansClntSecret': [encoded_pw],
         'jansDisabled': ['false'],
-        'jansGrantTyp': ['authorization_code', 'refresh_token', 'client_credentials'],
+        'jansGrantTyp': grant_types,
         'jansIdTknSignedRespAlg': ['RS256'],
         'jansInclClaimsInIdTkn': ['false'],
         'jansLogoutSessRequired': ['false'],
@@ -182,7 +191,7 @@ def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, dis
         'jansRptAsJwt': ['false'],
         'jansScope': scopes,
         'jansSubjectTyp': ['pairwise'],
-        'jansTknEndpointAuthMethod': ['client_secret_basic'],
+        'jansTknEndpointAuthMethod': authorization_methods,
         'jansTrustedClnt': [trusted_client],
         'jansRedirectURI': redirect_uri
         })

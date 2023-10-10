@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import java.util.Arrays;
 import java.util.Optional;
 
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.jboss.weld.junit5.ExplicitParamInjection;
 import org.jboss.weld.junit5.auto.AddBeanClasses;
 import org.jboss.weld.junit5.auto.EnableAutoWeld;
@@ -136,6 +137,11 @@ public class FullFlowAndroidTest {
 	DeviceRegistrationService deviceRegistrationService = Mockito.mock(DeviceRegistrationService.class);
 
 	@Mock
+	@Produces
+	@ExcludeBean
+	ErrorResponseFactory errorResponseFactory = Mockito.mock(ErrorResponseFactory.class);
+
+	@Mock
 	ChallengeGenerator challengeGenerator = Mockito.mock(ChallengeGenerator.class);
 
 	@InjectMocks
@@ -236,6 +242,7 @@ public class FullFlowAndroidTest {
 		this.attestationChallenge = challenge;
 
 		JsonNode request = attestationSuperGluuController.buildFido2AttestationStartResponse(userName, applicationId, sessionId);
+		System.out.println(request);
         assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
         assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
         assertEquals(applicationId, request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());

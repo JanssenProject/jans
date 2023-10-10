@@ -1,0 +1,10 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native">
+
+    <li class="collapsible-menu-item di">
+        <a class="db pv2 pl2 hover-bg-washed-blue ${css.menuItem}" 
+           href="${zkService.contextPath}${base}/index.zul">
+            ${labels.bioid_title}
+        </a>
+    </li>
+
+</z:zk>

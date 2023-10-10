@@ -101,13 +101,13 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
             superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.NAME_PARAM_PATH)
     public Response deploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME)
-                String projectName, byte[] gamaBinary) {
+                String projectName, @QueryParam("autoconfigure") String autoconfigure, byte[] gamaBinary) {
         
         if (gamaBinary == null)
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Project name or binary data missing").build();
-        
-        if (ads.createDeploymentTask(projectName, gamaBinary))
+
+        if (ads.createDeploymentTask(projectName, gamaBinary, Boolean.parseBoolean(autoconfigure)))
             return Response.accepted().entity("A deployment task for project " + projectName + 
                     " has been queued. Use the GET endpoint to poll status").build();
 

@@ -209,13 +209,13 @@ if not(host and (client_id and client_secret or access_token)):
 
     if config_ini_fn.exists():
         config.read_string(config_ini_fn.read_text())
-        host = config['DEFAULT']['jans_host']
+        host = config['DEFAULT'].get('jans_host')
 
         if 'jca_test_client_id' in config['DEFAULT'] and test_client:
             client_id = config['DEFAULT']['jca_test_client_id']
             secret_key_str = 'jca_test_client_secret'
         else:
-            client_id = config['DEFAULT']['jca_client_id']
+            client_id = config['DEFAULT'].get('jca_client_id')
             secret_key_str = 'jca_client_secret'
 
         secret_enc_key_str = secret_key_str + '_enc'

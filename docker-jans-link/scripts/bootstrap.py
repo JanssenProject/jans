@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging.config
 import os
-import re
 import typing as _t
 from functools import cached_property
 from string import Template
@@ -24,9 +23,7 @@ from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
-from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import generate_base64_contents
-from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
@@ -38,7 +35,7 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("link")
 
 manager = get_manager()
 
@@ -46,8 +43,8 @@ manager = get_manager()
 def main():
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
 
-    render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
-    render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
+    render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
+    render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
 
     mapper = PersistenceMapper()
     persistence_groups = mapper.groups()
@@ -60,7 +57,7 @@ def main():
     if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
-            "/app/templates/jans-ldap.properties.tmpl",
+            "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
         sync_ldap_truststore(manager)
@@ -68,7 +65,7 @@ def main():
     if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
-            "/app/templates/jans-couchbase.properties.tmpl",
+            "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
         sync_couchbase_truststore(manager)
@@ -78,14 +75,14 @@ def main():
 
         render_sql_properties(
             manager,
-            f"/app/templates/jans-{db_dialect}.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties",
             "/etc/jans/conf/jans-sql.properties",
         )
 
     if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
-            "/app/templates/jans-spanner.properties.tmpl",
+            "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
 
@@ -95,7 +92,7 @@ def main():
     cert_to_truststore(
         "web_https",
         "/etc/certs/web_https.crt",
-        "/usr/java/latest/jre/lib/security/cacerts",
+        "/opt/java/lib/security/cacerts",
         "changeit",
     )
 
@@ -172,7 +169,7 @@ def configure_logging():
     ]):
         config["log_prefix"] = "${sys:link.log.console.prefix}%X{link.log.console.group} - "
 
-    with open("/app/templates/log4j2.xml") as f:
+    with open("/app/templates/jans-link/log4j2.xml") as f:
         txt = f.read()
 
     logfile = "/opt/jans/jetty/jans-link/resources/log4j2.xml"
@@ -222,11 +219,10 @@ class PersistenceSetup:
 
     @cached_property
     def ldif_files(self) -> list[str]:
-        files = [
+        return [
             f"/app/templates/jans-link/{file_}"
             for file_ in ["configuration.ldif"]
         ]
-        return files
 
     def import_ldif_files(self) -> None:
         for file_ in self.ldif_files:

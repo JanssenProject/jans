@@ -64,6 +64,7 @@ nav:
     - Passwordless Authentication: admin/planning/passwordless-auth.md
     - Machine-to-Machine Authentication: admin/planning/machine-to-machine.md
   - Installation:
+    - admin/install/README.md
     - VM Installation:
       - admin/install/vm-install/README.md
       - VM Requirements: admin/install/vm-install/vm-requirements.md
@@ -94,6 +95,7 @@ nav:
     - Logs: admin/kubernetes-ops/logs.md
     - External Secrets and Configmaps: admin/kubernetes-ops/external-secrets-configmaps.md
     - Health Check: admin/kubernetes-ops/health-check.md
+    - TUI K8s: admin/kubernetes-ops/tui-k8s.md
   - VM Operation Guide:
     - admin/vm-ops/README.md
     - Upgrade: admin/vm-ops/upgrade.md
@@ -108,23 +110,22 @@ nav:
   - Configuration Guide:
     - Configuration Tools:
       - Config API:
-        - admin/config-guide/config-api/README.md
-        - Settings: admin/config-guide/config-api/config.md
-        - Attributes: admin/config-guide/config-api/attribute.md
-        - Security: admin/config-guide/config-api/security.md
-        - Logs: admin/config-guide/config-api/logs.md
-        - Monitoring: admin/config-guide/config-api/monitoring.md
-        - Plugins: admin/config-guide/config-api/plugins.md
-      - CURL Guide: admin/config-guide/curl-guide.md
+        - admin/config-guide/config-tools/config-api/README.md
+        - Settings: admin/config-guide/config-tools/config-api/config.md
+        - Attributes: admin/config-guide/config-tools/config-api/attribute.md
+        - Security: admin/config-guide/config-tools/config-api/security.md
+        - Logs: admin/config-guide/config-tools/config-api/logs.md
+        - Monitoring: admin/config-guide/config-tools/config-api/monitoring.md
+        - Plugins: admin/config-guide/config-tools/config-api/plugins.md
+      - CURL Guide: admin/config-guide/config-tools/curl-guide.md
       - Text-Based User Interface (TUI):
-        - admin/config-guide/jans-tui/README.md
-        - Navigation Guide: admin/config-guide/jans-tui/navigation-guide.md
+        - admin/config-guide/config-tools/jans-tui/README.md
+        - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
       - Command Line Interface (CLI):
-        - admin/config-guide/jans-cli/README.md
-      - CLI For Agama Developer Studio: admin/config-guide/jans-cli/cli-agama.md
-      - SCIM CLI: admin/config-guide/scim-cli.md
-    - Standalone Installation: admin/config-guide/jans-cli/install.md
-    - Attribute: admin/config-guide/cli-attribute.md
+        - admin/config-guide/config-tools/jans-cli/README.md
+      - CLI For Agama Developer Studio: admin/config-guide/agama-configuration.md
+      - SCIM CLI: admin/config-guide/config-tools/scim-cli.md
+    - Attribute: admin/config-guide/attribute-configuration.md
     - Default Authentication: admin/config-guide/default-authentication-method-config.md
     - Cache Configuration: admin/config-guide/cache-configuration.md
     - Auth Server Configuration: admin/config-guide/jans-authorization-server-config.md
@@ -163,9 +164,10 @@ nav:
       - Spanner Configuration: admin/reference/database/spanner-config.md
       - Spanner Operation: admin/reference/database/spanner-ops.md
     - PostgreSQL:
-      - PostgreSQL Schema: admin/reference/database/postgres-schema.md
-      - PostgreSQL Configuration: admin/reference/database/postgres-config.md
-      - PostgreSQL Operation: admin/reference/database/postgres-ops.md
+      - PostgreSQL Schema: admin/reference/database/pgsql-schema.md
+      - PostgreSQL Indexes: admin/reference/database/pgsql-schema-indexes.md
+      - PostgreSQL Configuration: admin/reference/database/pgsql-config.md
+      - PostgreSQL Operation: admin/reference/database/pgsql-ops.md
     - Converting Data: admin/reference/database/converting-data.md
   - Auth Server Admin Guide:
     - admin/auth-server/README.md
@@ -181,16 +183,13 @@ nav:
       - OpenID id_token: admin/auth-server/tokens/openid-id-token.md
       - OpenID Userinfo Token: admin/auth-server/tokens/openid-userinfo-token.md
       - UMA RPT Token: admin/auth-server/tokens/uma-rpt-token.md
-    - Scopes:
-      - admin/auth-server/scopes/README.md
-      - OAuth Scopes: admin/auth-server/scopes/oauth.md
-      - OpenID Scopes: admin/auth-server/scopes/openid.md
-      - UMA Scopes: admin/auth-server/scopes/uma.md
+    - Scopes: admin/auth-server/scopes/README.md
     - Endpoints:
       - admin/auth-server/endpoints/README.md
       - OpenID Configuration: admin/auth-server/endpoints/configuration.md
       - Client Registration: admin/auth-server/endpoints/client-registration.md
       - Authorization: admin/auth-server/endpoints/authorization.md
+      - Authorization Challenge: admin/auth-server/endpoints/authorization-challenge.md
       - Token: admin/auth-server/endpoints/token.md
       - SSA: admin/auth-server/endpoints/ssa.md
       - Userinfo: admin/auth-server/endpoints/userinfo.md
@@ -198,6 +197,7 @@ nav:
       - Session Revocation: admin/auth-server/endpoints/session-revocation.md
       - End Session: admin/auth-server/endpoints/end-session.md
       - Clientinfo: admin/auth-server/endpoints/clientinfo.md
+      - JWKS URI: admin/auth-server/endpoints/jwks-uri.md
       - Introspection: admin/auth-server/endpoints/introspection.md
       - Device Authorization: admin/auth-server/endpoints/device-authorization.md
       - PAR: admin/auth-server/endpoints/par.md
@@ -225,7 +225,6 @@ nav:
         - admin/auth-server/openid-features/user-claims/README.md
         - Built-in Claims: admin/auth-server/openid-features/user-claims/built-in-claims.md
         - Adding Custom Claims: admin/auth-server/openid-features/user-claims/custom-claims.md
-        - Claim Uniqueness/Validation: admin/auth-server/openid-features/user-claims/claim-uniqueness-validation.md
       - Logout:
         - admin/auth-server/openid-features/logout/README.md
         - Front Channel: admin/auth-server/openid-features/logout/front-channel.md
@@ -280,8 +279,6 @@ nav:
       - Engine and bridge configurations: admin/developer/agama/engine-bridge-config.md
       - FAQ: admin/developer/agama/faq.md      
       - Quick Start Using Agama Lab: admin/developer/agama/quick-start-using-agama-lab.md
-    - Interception Script Overview: admin/developer/interception-scripts.md
-    - Script Debugging: admin/developer/interception-scripts-debug.md
     - External Libraries: admin/developer/external-libraries.md
     - CORS: admin/developer/cors.md
     - Managed Beans: admin/developer/managed-beans.md
@@ -289,15 +286,16 @@ nav:
       - admin/developer/customization/README.md
       - Customize Web pages: admin/developer/customization/customize-web-pages.md
       - Custom client logs: admin/developer/customization/custom-client-logs.md
-    - Scripts:
+    - Interception Scripts:
       - admin/developer/scripts/README.md
+      - Script Debugging: admin/developer/scripts/interception-scripts-debug.md
       - Person Authentication: admin/developer/scripts/person-authentication.md
       - Consent Gathering: admin/developer/scripts/consent-gathering.md
       - Post Authentication: admin/developer/scripts/post-authentication.md
       - Select Account: admin/developer/scripts/select-account.md
       - Resource Owner Password Credentials: admin/developer/scripts/ropc.md
       - CIBA End User Notification: admin/developer/scripts/ciba.md
-      - OpenID Configuration: admin/developer/scripts/openid-config.md
+      - OpenID Configuration: admin/developer/scripts/discovery.md
       - Dynamic Scope: admin/developer/scripts/dynamic-scope.md
       - Spontaneous Scope: admin/developer/scripts/spontaneous-scope.md
       - Application Session: admin/developer/scripts/application-session.md
@@ -313,6 +311,7 @@ nav:
       - SCIM: admin/developer/scripts/scim.md
       - Persistence: admin/developer/scripts/persistence.md
       - Config API: admin/developer/scripts/config-api.md
+      - Authorization Challenge: admin/developer/scripts/authorization-challenge.md
   - Reference Guide:
     - admin/reference/README.md
     - Javadocs / OpenAPI:
@@ -8715,6 +8714,7 @@ nav:
       - Config and Secret Keys: admin/reference/kubernetes/config-secret-keys.md
       - Image Config Properties:
         - Auth Server: admin/reference/kubernetes/docker-jans-auth-server.md
+        - Casa: admin/reference/kubernetes/docker-jans-casa.md
         - Cert Manager: admin/reference/kubernetes/docker-jans-certmanager.md
         - Config API: admin/reference/kubernetes/docker-jans-config-api.md
         - Configurator: admin/reference/kubernetes/docker-jans-configurator.md
@@ -8743,6 +8743,7 @@ nav:
     - Security Considerations: admin/scim/security.md
     - Bulk Adding Users: admin/scim/bulk-users.md
     - Adding Custom Attributes: admin/scim/custom-attributes.md
+  - Link Guide: admin/link/README.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md
@@ -8753,8 +8754,6 @@ nav:
     - Locking or Disabling Accounts: admin/recipes/locking-accounts.md
     - Stepped-up Authentication: admin/recipes/stepped-up-authn.md
     - User Journeys: admin/recipes/ACRouter.md
-  - Upgrade Guide:
-    - admin/upgrade/README.md
   - User Management:
       - admin/usermgmt/README.md
       - Using SCIM: admin/usermgmt/usermgmt-scim.md
@@ -8790,6 +8789,24 @@ nav:
   - Language reference: agama/language-reference.md
   - Execution rules: agama/execution-rules.md
   - gama format: agama/gama-format.md
+- 'Jans Casa':
+    - 'casa/index.md'
+    - Quick Start: 'casa/quick-start.md'
+    - 'Installation': 'casa/administration/installation.md'
+    - Administration Guide:
+        - 'About 2FA': 'casa/administration/2fa-basics.md'
+        - 'Admin console': 'casa/administration/admin-console.md'
+        - 'Credentials storage': 'casa/administration/credentials-stored.md'
+        - 'Custom branding': 'casa/administration/custom-branding.md'
+        - 'URL path customization': 'casa/administration/change-context-path.md'
+        - 'Localization': 'casa/administration/localization.md'
+        - 'Plugins':
+            - '2FA Settings': 'casa/plugins/2fa-settings.md'
+            #            - 'BioID': 'casa/plugins/bioid.md'
+            - 'Consent Management': 'casa/plugins/consent-management.md'
+            - 'Custom Branding': 'casa/plugins/custom-branding.md'
+        - 'FAQ': 'casa/administration/faq.md'
+    - User Guide: 'casa/user-guide.md'
 plugins:
 - tags
 - search

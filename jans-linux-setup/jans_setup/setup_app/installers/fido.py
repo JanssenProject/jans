@@ -12,7 +12,7 @@ from setup_app.installers.jetty import JettyInstaller
 class FidoInstaller(JettyInstaller):
 
     source_files = [
-                (os.path.join(Config.dist_jans_dir, 'jans-fido2.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_jans_dir, 'jans-fido2.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_app_dir, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN']),
                 (os.path.join(Config.dist_app_dir, 'fido2/mds/toc/toc.jwt'), 'https://mds.fidoalliance.org/'),
                 (os.path.join(Config.dist_app_dir, 'fido2/mds/cert/root-r3.crt'), 'https://secure.globalsign.com/cacert/root-r3.crt'),
@@ -31,6 +31,7 @@ class FidoInstaller(JettyInstaller):
         self.output_folder = os.path.join(Config.output_dir, 'jans-fido2')
         self.template_folder = os.path.join(Config.templateFolder, 'jans-fido2')
         self.fido2_dynamic_conf_json = os.path.join(self.output_folder, 'dynamic-conf.json')
+        self.fido2_error_json = os.path.join(self.output_folder, 'jans-fido2-errors.json')
         self.fido2_static_conf_json = os.path.join(self.output_folder, 'static-conf.json')
         self.ldif_fido2 = os.path.join(self.output_folder, 'fido2.ldif')
 
@@ -50,9 +51,11 @@ class FidoInstaller(JettyInstaller):
     def render_import_templates(self):
 
         self.renderTemplateInOut(self.fido2_dynamic_conf_json, self.template_folder, self.output_folder)
+        self.renderTemplateInOut(self.fido2_error_json, self.template_folder, self.output_folder)
         self.renderTemplateInOut(self.fido2_static_conf_json, self.template_folder, self.output_folder)
 
         Config.templateRenderingDict['fido2_dynamic_conf_base64'] = self.generate_base64_file(self.fido2_dynamic_conf_json, 1)
+        Config.templateRenderingDict['fido2_error_base64'] = self.generate_base64_file(self.fido2_error_json, 1)
         Config.templateRenderingDict['fido2_static_conf_base64'] = self.generate_base64_file(self.fido2_static_conf_json, 1)
 
         self.renderTemplateInOut(self.ldif_fido2, self.template_folder, self.output_folder)

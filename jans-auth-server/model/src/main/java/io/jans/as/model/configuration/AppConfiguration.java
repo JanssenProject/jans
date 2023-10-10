@@ -33,6 +33,7 @@ public class AppConfiguration implements Configuration {
     public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
+    public static final String DEFAULT_AUTHORIZATION_CHALLENGE_ACR = "default_challenge";
 
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
@@ -42,6 +43,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "The authorization endpoint URL")
     private String authorizationEndpoint;
+
+    @DocProperty(description = "The authorization challenge endpoint URL")
+    private String authorizationChallengeEndpoint;
 
     @DocProperty(description = "The token endpoint URL")
     private String tokenEndpoint;
@@ -90,6 +94,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint")
     private String mtlsAuthorizationEndpoint;
+
+    @DocProperty(description = "URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Authorization Challenge Endpoint")
+    private String mtlsAuthorizationChallengeEndpoint;
 
     @DocProperty(description = "URL for Mutual TLS (mTLS) Authorization token Endpoint")
     private String mtlsTokenEndpoint;
@@ -660,6 +667,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value indicating if DCR authorization allowed with MTLS", defaultValue = "false")
     private Boolean dcrAuthorizationWithMTLS = false;
 
+    @DocProperty(description = "Boolean value indicating if DCR attestation evidence is required", defaultValue = "false")
+    private Boolean dcrAttestationEvidenceRequired = false;
+
     @DocProperty(description = "List of trusted SSA issuers with configuration (e.g. automatically granted scopes).")
     private Map<String, TrustedIssuerConfig> trustedSsaIssuers = new HashMap<>();
 
@@ -803,8 +813,14 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Demonstration of Proof-of-Possession (DPoP) nonce cache time", defaultValue = "3600")
     private int dpopNonceCacheTime = 3600;
 
+    @DocProperty(description = "Force dpop_jkt presence and reject calls without it.", defaultValue = "false")
+    private Boolean dpopJktForceForAuthorizationCode = false;
+
     @DocProperty(description = "Specifies if a token without implicit grant types is allowed")
     private Boolean allowIdTokenWithoutImplicitGrantType;
+
+    @DocProperty(description = "Specifies whether to force ROPC custom script for Authorization Endpoint.", defaultValue = "false")
+    private Boolean forceRopcInAuthorizationEndpoint = false;
 
     @DocProperty(description = "Lifetime of discovery cache", defaultValue = "60")
     private int discoveryCacheLifetimeInMinutes = 60;
@@ -839,6 +855,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Enable/Disable block authorizations that originate from Webview (Mobile apps).", defaultValue = "false")
     private Boolean blockWebviewAuthorizationEnabled = false;
 
+    @DocProperty(description = "Authorization Challenge Endpoint Default ACR if no value is specified in acr_values request parameter.", defaultValue = DEFAULT_AUTHORIZATION_CHALLENGE_ACR)
+    private String authorizationChallengeDefaultAcr;
+
+    @DocProperty(description = "Boolean value specifying whether to generate session_id (AS object and cookie) during authorization at Authorization Challenge Endpoint", defaultValue = "false")
+    private Boolean authorizationChallengeShouldGenerateSession = false;
+
     @DocProperty(description = "List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc.")
     private Map<String, String> dateFormatterPatterns = new HashMap<>();
 
@@ -847,6 +869,23 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
+
+    public Boolean getDpopJktForceForAuthorizationCode() {
+        return dpopJktForceForAuthorizationCode;
+    }
+
+    public void setDpopJktForceForAuthorizationCode(Boolean dpopJktForceForAuthorizationCode) {
+        this.dpopJktForceForAuthorizationCode = dpopJktForceForAuthorizationCode;
+    }
+
+    public Boolean getForceRopcInAuthorizationEndpoint() {
+        if (forceRopcInAuthorizationEndpoint == null) forceRopcInAuthorizationEndpoint = false;
+        return forceRopcInAuthorizationEndpoint;
+    }
+
+    public void setForceRopcInAuthorizationEndpoint(Boolean forceRopcInAuthorizationEndpoint) {
+        this.forceRopcInAuthorizationEndpoint = forceRopcInAuthorizationEndpoint;
+    }
 
     public Map<String, String> getDateFormatterPatterns() {
         return dateFormatterPatterns;
@@ -1314,6 +1353,15 @@ public class AppConfiguration implements Configuration {
         this.dcrSignatureValidationJwksUri = dcrSignatureValidationJwksUri;
     }
 
+    public Boolean getDcrAttestationEvidenceRequired() {
+        if (dcrAttestationEvidenceRequired == null) dcrAttestationEvidenceRequired = false;
+        return dcrAttestationEvidenceRequired;
+    }
+
+    public void setDcrAttestationEvidenceRequired(Boolean dcrAttestationEvidenceRequired) {
+        this.dcrAttestationEvidenceRequired = dcrAttestationEvidenceRequired;
+    }
+
     public Boolean getDcrAuthorizationWithMTLS() {
         if (dcrAuthorizationWithMTLS == null) dcrAuthorizationWithMTLS = false;
         return dcrAuthorizationWithMTLS;
@@ -1501,6 +1549,24 @@ public class AppConfiguration implements Configuration {
      */
     public void setAuthorizationEndpoint(String authorizationEndpoint) {
         this.authorizationEndpoint = authorizationEndpoint;
+    }
+
+    /**
+     * Gets authorization challenge endpoint.
+     *
+     * @return authorization challenge endpoint
+     */
+    public String getAuthorizationChallengeEndpoint() {
+        return authorizationChallengeEndpoint;
+    }
+
+    /**
+     * Sets authorization challenge endpoint
+     *
+     * @param authorizationChallengeEndpoint authorization challenge endpoint
+     */
+    public void setAuthorizationChallengeEndpoint(String authorizationChallengeEndpoint) {
+        this.authorizationChallengeEndpoint = authorizationChallengeEndpoint;
     }
 
     /**
@@ -3075,6 +3141,24 @@ public class AppConfiguration implements Configuration {
         this.mtlsAuthorizationEndpoint = mtlsAuthorizationEndpoint;
     }
 
+    /**
+     * Gets MTLS Authorization Challenge Endpoint.
+     *
+     * @return MTLS Authorization Challenge Endpoint.
+     */
+    public String getMtlsAuthorizationChallengeEndpoint() {
+        return mtlsAuthorizationChallengeEndpoint;
+    }
+
+    /**
+     * Sets MTLS Authorization Challenge Endpoint.
+     *
+     * @param mtlsAuthorizationChallengeEndpoint MTLS Authorization Challenge Endpoint.
+     */
+    public void setMtlsAuthorizationChallengeEndpoint(String mtlsAuthorizationChallengeEndpoint) {
+        this.mtlsAuthorizationChallengeEndpoint = mtlsAuthorizationChallengeEndpoint;
+    }
+
     public String getMtlsTokenEndpoint() {
         return mtlsTokenEndpoint;
     }
@@ -3226,6 +3310,24 @@ public class AppConfiguration implements Configuration {
 
     public void setSsaConfiguration(SsaConfiguration ssaConfiguration) {
         this.ssaConfiguration = ssaConfiguration;
+    }
+
+    public Boolean getAuthorizationChallengeShouldGenerateSession() {
+        if (authorizationChallengeShouldGenerateSession == null) authorizationChallengeShouldGenerateSession = false;
+        return authorizationChallengeShouldGenerateSession;
+    }
+
+    public void setAuthorizationChallengeShouldGenerateSession(Boolean authorizationChallengeShouldGenerateSession) {
+        this.authorizationChallengeShouldGenerateSession = authorizationChallengeShouldGenerateSession;
+    }
+
+    public String getAuthorizationChallengeDefaultAcr() {
+        if (authorizationChallengeDefaultAcr == null) authorizationChallengeDefaultAcr = DEFAULT_AUTHORIZATION_CHALLENGE_ACR;
+        return authorizationChallengeDefaultAcr;
+    }
+
+    public void setAuthorizationChallengeDefaultAcr(String authorizationChallengeDefaultAcr) {
+        this.authorizationChallengeDefaultAcr = authorizationChallengeDefaultAcr;
     }
 
     public Boolean getBlockWebviewAuthorizationEnabled() {

@@ -140,7 +140,7 @@ class GoogleSecret(BaseSecret):
         resp = self.client.list_secrets(
             request={
                 "parent": f"projects/{self.project_id}",
-                "filter": f"name:{self.google_secret_name}",
+                "filter": f"name:secrets/{self.google_secret_name}",
             }
         )
 
@@ -162,9 +162,9 @@ class GoogleSecret(BaseSecret):
         if not payload:
             return {}
 
-        try:
-            data = self._maybe_legacy_payload(payload)
-        except lzma.LZMAError:
+        data = self._maybe_legacy_payload(payload)
+        if not data:
+            logger.warning("Unable to load payload with zlib/lzma format; trying to load using new format.")
             data = json.loads(payload)
 
         # decoded payload
@@ -310,17 +310,23 @@ class GoogleSecret(BaseSecret):
         return name
 
     def _maybe_legacy_payload(self, payload: bytes) -> dict[str, _t.Any]:
-        try:
+        data = {}
+        payload_str = ""
+
+        with suppress(zlib.error):
             # previously data is compressed using zlib
             payload_str = zlib.decompress(payload).decode("UTF-8")
-            logger.warning("Decompressed legacy data.")
-        except zlib.error:
-            payload_str = lzma.decompress(payload).decode("UTF-8")
+
+        if not payload_str:
+            with suppress(lzma.LZMAError):
+                payload_str = lzma.decompress(payload).decode("UTF-8")
+
+        if not payload_str:
+            return data
 
         try:
             # previously data is double-encrypted
             data: dict[str, _t.Any] = json.loads(self._decrypt(payload_str))
-            logger.warning("Loaded legacy data.")
         except binascii.Error:
             data = json.loads(payload_str)
         return data

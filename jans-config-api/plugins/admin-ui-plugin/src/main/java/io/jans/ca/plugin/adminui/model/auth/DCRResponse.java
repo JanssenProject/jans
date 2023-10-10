@@ -5,6 +5,15 @@ public class DCRResponse {
     private String clientSecret;
     private String opHost;
     private String scanHostname;
+    private String hardwareId;
+
+    public String getHardwareId() {
+        return hardwareId;
+    }
+
+    public void setHardwareId(String hardwareId) {
+        this.hardwareId = hardwareId;
+    }
 
     public String getClientId() {
         return clientId;

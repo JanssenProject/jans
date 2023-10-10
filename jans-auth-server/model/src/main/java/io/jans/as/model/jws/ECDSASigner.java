@@ -13,18 +13,26 @@ import io.jans.as.model.crypto.signature.ECDSAPrivateKey;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Base64Util;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.ECPoint;
+import io.jans.as.model.util.Util;
+import io.jans.util.security.SecurityProviderUtility;
 
-import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
+
+import java.security.AlgorithmParameters;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPrivateKeySpec;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 
 /**
  * Implementing the AbstractJwsSigner, that uses ECDSA for signing.
@@ -87,15 +95,18 @@ public class ECDSASigner extends AbstractJwsSigner {
         }
 
         try {
-            ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(getSignatureAlgorithm().getCurve().getName());
-            ECPrivateKeySpec privateKeySpec = new ECPrivateKeySpec(ecdsaPrivateKey.getD(), ecSpec);
+            AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC", SecurityProviderUtility.getBCProvider());
+            parameters.init(new ECGenParameterSpec(getSignatureAlgorithm().getCurve().getName()));
+            ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
 
-            KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
+            ECPrivateKeySpec privateKeySpec = new ECPrivateKeySpec(ecdsaPrivateKey.getD(), ecParameters);
+
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", SecurityProviderUtility.getBCProvider());
             PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
 
-            Signature signer = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), "BC");
+            Signature signer = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), SecurityProviderUtility.getBCProvider());
             signer.initSign(privateKey);
-            signer.update(signingInput.getBytes(StandardCharsets.UTF_8));
+            signer.update(signingInput.getBytes(Util.UTF8_STRING_ENCODING));
 
             byte[] signature = signer.sign();
             if (AlgorithmFamily.EC.equals(getSignatureAlgorithm().getFamily())) {
@@ -104,6 +115,8 @@ public class ECDSASigner extends AbstractJwsSigner {
             }
 
             return Base64Util.base64urlencode(signature);
+        } catch (InvalidKeySpecException | InvalidKeyException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new SignatureException(e);
         } catch (Exception e) {
             throw new SignatureException(e);
         }
@@ -123,26 +136,45 @@ public class ECDSASigner extends AbstractJwsSigner {
         if (signingInput == null) {
             throw new SignatureException("The signing input is null");
         }
-        SignatureAlgorithm signatureAlgorithm = getSignatureAlgorithm();
+
+        String algorithm;
+        switch (getSignatureAlgorithm()) {
+            case ES256:
+                algorithm = "SHA256WITHECDSA";
+                break;
+            case ES384:
+                algorithm = "SHA384WITHECDSA";
+                break;
+            case ES512:
+                algorithm = "SHA512WITHECDSA";
+                break;
+            default:
+                throw new SignatureException("Unsupported signature algorithm");
+        }
+
         try {
             byte[] sigBytes = Base64Util.base64urldecode(signature);
             if (AlgorithmFamily.EC.equals(getSignatureAlgorithm().getFamily())) {
                 sigBytes = ECDSA.transcodeSignatureToDER(sigBytes);
             }
-            byte[] sigInBytes = signingInput.getBytes(StandardCharsets.UTF_8);
+            byte[] sigInBytes = signingInput.getBytes(Util.UTF8_STRING_ENCODING);
 
-            ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(signatureAlgorithm.getCurve().getAlias());
-            ECPoint pointQ = ecSpec.getCurve().createPoint(ecdsaPublicKey.getX(), ecdsaPublicKey.getY());
+            AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC", SecurityProviderUtility.getBCProvider());
+            parameters.init(new ECGenParameterSpec(getSignatureAlgorithm().getCurve().getName()));
+            ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
 
-            ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(pointQ, ecSpec);
+            ECPoint pubPoint = new ECPoint(ecdsaPublicKey.getX(), ecdsaPublicKey.getY());
+            KeySpec publicKeySpec = new ECPublicKeySpec(pubPoint, ecParameters);
 
-            KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", SecurityProviderUtility.getBCProvider());
             PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
 
-            Signature sig = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
+            Signature sig = Signature.getInstance(algorithm, SecurityProviderUtility.getBCProvider());
             sig.initVerify(publicKey);
             sig.update(sigInBytes);
             return sig.verify(sigBytes);
+        } catch (InvalidKeySpecException | InvalidKeyException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new SignatureException(e);
         } catch (Exception e) {
             throw new SignatureException(e);
         }

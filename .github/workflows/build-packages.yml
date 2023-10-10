@@ -140,7 +140,7 @@ jobs:
         run: |
           zypper addrepo https://download.opensuse.org/repositories/openSUSE:Leap:15.1/standard/openSUSE:Leap:15.1.repo
           zypper --gpg-auto-import-keys refresh
-          zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool python3-pip python3-setuptools python3-wheel          
+          zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool python3-pip python3-setuptools python3-wheel openssl
           zypper addrepo https://download.opensuse.org/repositories/home:smarty12:Python/RaspberryPi_Leap_15.2/home:smarty12:Python.repo
           zypper --gpg-auto-import-keys refresh
           zypper download python3-dev
@@ -284,8 +284,10 @@ jobs:
         npm install
         npm run build
         npm run pack
-        mv ./release/jans-tarp-*.zip ../demo-jans-tarp-$VER.zip
-        sha256sum ../demo-jans-tarp-$VER.zip > ../demo-jans-tarp-$VER.zip.sha256sum
+        mv ./release/jans-tarp-chrome-*.zip ../demo-jans-tarp-chrome-$VER.zip
+        mv ./release/jans-tarp-firefox-*.zip ../demo-jans-tarp-firefox-$VER.zip
+        sha256sum ../demo-jans-tarp-chrome-$VER.zip > ../demo-jans-tarp-chrome-$VER.zip.sha256sum
+        sha256sum ../demo-jans-tarp-firefox-$VER.zip > ../demo-jans-tarp-firefox-$VER.zip.sha256sum
         cd ..
         
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token

@@ -8,6 +8,8 @@ tags:
   - LDAP to MySQL Migration Script
 ---
 
+Below operations require to log into mysql workspace first with command: `mysql`
+
 ### **Change password for user `jans`** :
 
 *  `ALTER USER 'jans'@'localhost' IDENTIFIED BY 'TopSecret';`
@@ -31,23 +33,37 @@ Say we want to increase the size of `mail` field to 144. Do the following:<br>
 * c. Ensure you restart services after DB schema modification
 
 
+### Add user in Jans admin group
+
+* Search for inum of `JansGrp`
+  * `use jansdb; select * from jansGrp\G;` 
+* Add specific user in this group
+  * Get `DN` of user
+    * `use jansdb; select * from jansPerson where uid='testUser'\G;
+    * Copy `DN` of this user. i.e. `inum=83d43a5d-3311-4c93-ae26-df80c320557a,ou=people,o=jans` 
+  * Perform operation: `use jansdb; update jansGrp set member = '{"v": ["inum=e4fe2c89-f588-41a2-aac5-2f1afa63bed1,ou=people,o=jans", "inum=83d43a5d-3311-4c93-ae26-df80c320557a,ou=people,o=jans"]}';` 
+
+### Update user information 
+
+In this example we are doing to update one user's email address. 
+
+* Search for existing email address: `use jansdb; select * from jansPerson where uid='testUser'\G;`
+* Modify it: `use jansdb; update jansPerson set mail='newEmail@gluu.org' where uid='testUser';`
+### **Search user** : 
+
+* `use jansdb; select * from jansPerson where uid='admin'\G;`
+
+### Add custom attribute
+
+There are two steps here: 
+
+* Create attribute in MySQL database: `ALTER TABLE `jansdb`.`jansPerson` ADD COLUMN `cmdAttr` VARCHAR(64) NULL;` 
+* Create attribute from TUI: ![tui_custom_attribute](../../../assets/TUI_CustomAttribute.png)
+
 ### LDAP to MySQL Migration Script
 
-This script migrates data from ldap to MySQL.
+Please refer to [these steps](./converting-data.md#ldap-to-mysql-migration-script).
 
-1. To use this script, firt install **python3-ldap** module
-  `apt install python3-ldap`
 
-2. Install MySQL Server, create a database (namely **jansdb**), add a user (namely **jans**) and
-give grant previlages to user **jans** on **jansdb**
-
-3. Download script to `/opt/jans/jans-setup`
-  ```
-  wget https://raw.githubusercontent.com/JanssenProject/jans/jans-linux-setup-ldap2mysql/jans-linux-setup/tools/ldap2mysql/ldap2mysql.py -O /opt/jans/jans-setup/ldap2mysql.py
-  ```
-
-4. Execute
-  ```
-  cd /opt/jans/jans-setup`
-  python3 ldap2mysql.py -remote-rdbm=mysql -rdbm-user=jans -rdbm-password=<password> -rdbm-db=jansdb -rdbm-host=<rdbm_host>
-  ```
+!!! Contribute
+If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)

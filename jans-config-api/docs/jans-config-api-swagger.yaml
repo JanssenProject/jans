@@ -223,6 +223,10 @@ paths:
         required: true
         schema:
           type: string
+      - name: autoconfigure
+        in: query
+        schema:
+          type: string
       requestBody:
         content:
           application/zip:
@@ -7294,6 +7298,8 @@ components:
             type: string
         error:
           type: string
+        autoconfigure:
+          type: boolean
         flowsError:
           type: object
           additionalProperties:
@@ -7317,6 +7323,8 @@ components:
           type: object
           additionalProperties:
             type: object
+            additionalProperties:
+              type: object
         noDirectLaunch:
           type: array
           items:
@@ -7450,11 +7458,7 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanEdit:
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
@@ -7463,6 +7467,8 @@ components:
         adminCanEdit:
           type: boolean
         adminCanView:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -7483,6 +7489,8 @@ components:
         baseEndpoint:
           type: string
         authorizationEndpoint:
+          type: string
+        authorizationChallengeEndpoint:
           type: string
         tokenEndpoint:
           type: string
@@ -7515,6 +7523,8 @@ components:
         deviceAuthzEndpoint:
           type: string
         mtlsAuthorizationEndpoint:
+          type: string
+        mtlsAuthorizationChallengeEndpoint:
           type: string
         mtlsTokenEndpoint:
           type: string
@@ -8044,6 +8054,8 @@ components:
           type: boolean
         dcrAuthorizationWithMTLS:
           type: boolean
+        dcrAttestationEvidenceRequired:
+          type: boolean
         trustedSsaIssuers:
           type: object
           additionalProperties:
@@ -8164,6 +8176,8 @@ components:
           format: int32
         allowIdTokenWithoutImplicitGrantType:
           type: boolean
+        forceRopcInAuthorizationEndpoint:
+          type: boolean
         discoveryCacheLifetimeInMinutes:
           type: integer
           format: int32
@@ -8197,6 +8211,10 @@ components:
         ssaConfiguration:
           $ref: '#/components/schemas/SsaConfiguration'
         blockWebviewAuthorizationEnabled:
+          type: boolean
+        authorizationChallengeDefaultAcr:
+          type: string
+        authorizationChallengeShouldGenerateSession:
           type: boolean
         dateFormatterPatterns:
           type: object
@@ -8945,6 +8963,8 @@ components:
         requestedLifetime:
           type: integer
           format: int32
+        evidence:
+          type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -9144,6 +9164,7 @@ components:
           type: string
           enum:
           - person_authentication
+          - authorization_challenge
           - introspection
           - resource_owner_password_credentials
           - application_session

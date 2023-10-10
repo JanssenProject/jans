@@ -670,3 +670,59 @@ spec:
   {{- end }}
 {{- end }}
 
+---
+
+{{ if .Values.global.casa.ingress.casaEnabled -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-casa
+  labels:
+    app: {{ $fullName }}-casa
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.casaLabels }}
+{{ toYaml .Values.ingress.casaLabels | indent 4 }}
+{{- end }}
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-hash: sha1
+    nginx.ingress.kubernetes.io/session-cookie-name: "casa-route"
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
+{{- if .Values.ingress.casaAdditionalAnnotations }}
+{{ toYaml .Values.ingress.casaAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /jans-casa
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.global.casa.casaServiceName }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}

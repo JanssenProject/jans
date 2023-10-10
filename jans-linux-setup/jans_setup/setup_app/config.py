@@ -16,6 +16,7 @@ OPENBANKING_PROFILE = 'openbanking'
 class Config:
 
     # we define statics here so that is is acessible without construction
+    opt_dir = '/opt'
     jansOptFolder = '/opt/jans'
     distFolder = '/opt/dist'
     jre_home = '/opt/jre'
@@ -206,6 +207,7 @@ class Config:
         self.install_jans_link = True
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
+        self.install_jans_saml = False
 
         # backward compatibility
         self.os_type = base.os_type

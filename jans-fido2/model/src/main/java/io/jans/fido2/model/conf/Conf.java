@@ -7,6 +7,7 @@
 package io.jans.fido2.model.conf;
 
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.fido2.model.error.Fido2ErrorMessages;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
@@ -30,6 +31,10 @@ public class Conf {
     @JsonObject
     @AttributeName(name = "jansConfStatic")
     private StaticConfiguration staticConf;
+
+	@JsonObject
+	@AttributeName(name = "jansConfErrors")
+	private Fido2ErrorMessages errors;
 
     @AttributeName(name = "jansRevision")
     private long revision;
@@ -61,6 +66,14 @@ public class Conf {
 		this.staticConf = staticConf;
 	}
 
+	public Fido2ErrorMessages getErrors() {
+		return errors;
+	}
+
+	public void setErrors(Fido2ErrorMessages errors) {
+		this.errors = errors;
+	}
+
 	public long getRevision() {
 		return revision;
 	}
@@ -71,6 +84,12 @@ public class Conf {
 
 	@Override
 	public String toString() {
-		return "Conf [dn=" + dn + ", dynamicConf=" + dynamicConf + ", staticConf=" + staticConf + ", revision=" + revision + "]";
+		return "Conf{" +
+				"dn='" + dn + '\'' +
+				", dynamicConf=" + dynamicConf +
+				", staticConf=" + staticConf +
+				", errors=" + errors +
+				", revision=" + revision +
+				'}';
 	}
 }

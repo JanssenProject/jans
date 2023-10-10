@@ -186,8 +186,8 @@ def check_resources():
 
 
 def determineApacheVersion(full=False):
-    httpd_cmd = shutil.which(httpd_name)
-    cmd = httpd_name + " -v | egrep '^Server version'"
+    httpd_cmd = shutil.which(httpd_name) or shutil.which('apache2ctl')
+    cmd = httpd_cmd + " -v | egrep '^Server version'"
     output = run(cmd, shell=True)
     apache_version_re = re.search('Apache/(\d).(\d).(\d)', output.strip())
     if apache_version_re:
@@ -421,7 +421,30 @@ def extract_subdir(zip_fn, sub_dir, target_dir, par_dir=None):
         shutil.unpack_archive(zip_fn, unpack_dir, format='zip')
         shutil.copytree(os.path.join(unpack_dir, par_dir, sub_dir), target_dir)
 
-current_app.app_info = readJsonFile(os.path.join(par_dir, 'app_info.json'))
+def unpack_zip(zip_fn, extract_dir, with_par_dir=True):
+    logIt(f"Extracting {zip_fn} to {extract_dir} with parent directory {with_par_dir}")
+    if not with_par_dir and not os.path.exists(extract_dir):
+        os.makedirs(extract_dir)
+
+    with zipfile.ZipFile(zip_fn) as zip_file:
+        info_list = zip_file.infolist()
+        for info in info_list:
+            fpath = Path(info.filename)
+            n = 0 if with_par_dir else 1
+            out_path = os.path.join(extract_dir, *fpath.parts[n:])
+
+            if info.is_dir():
+                if not os.path.exists(out_path):
+                    os.makedirs(out_path)
+            else:
+                with open(out_path, 'wb') as w:
+                    w.write(zip_file.read(info))
+
+            perm = info.external_attr >> 16
+            os.chmod(out_path, perm)
+
+app_info_fn = os.environ.get('JANS_APP_INFO') or os.path.join(par_dir, 'app_info.json')
+current_app.app_info = readJsonFile(app_info_fn)
 current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')
 
 def as_bool(val):

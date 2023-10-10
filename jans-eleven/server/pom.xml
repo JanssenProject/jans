@@ -9,7 +9,7 @@
 	<parent>
 		<artifactId>jans-eleven-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.0.17-SNAPSHOT</version>
+		<version>1.0.19-SNAPSHOT</version>
 	</parent>
 
 	<build>
@@ -17,7 +17,13 @@
 	</build>
 
 	<dependencies>
-		<!-- oxEleven -->
+		<!-- jans-core -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-util</artifactId>
+		</dependency>
+
+		<!-- jans-eleven -->
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-eleven-model</artifactId>

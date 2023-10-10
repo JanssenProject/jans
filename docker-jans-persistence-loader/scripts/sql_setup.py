@@ -17,7 +17,7 @@ from hooks import get_ldif_mappings_hook
 FIELD_RE = re.compile(r"[^0-9a-zA-Z\s]+")
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("sql_setup")
+logger = logging.getLogger("persistence-loader")
 
 
 class SQLBackend:
@@ -374,6 +374,7 @@ class SQLBackend:
             ("jansClnt", "jansReqURI"),
             ("jansClnt", "jansClaimRedirectURI"),
             ("jansClnt", "jansAuthorizedOrigins"),
+            ("jansSessId", "deviceSecret"),
         ]:
             column_to_json(mod[0], mod[1])
 
@@ -456,6 +457,10 @@ class SQLBackend:
             ("jansFido2AuthnEntry", "jansApp"),
             ("jansFido2RegistrationEntry", "jansApp"),
             ("adsPrjDeployment", "adsPrjDeplDetails"),
+            ("jansFido2RegistrationEntry", "jansDeviceData"),
+            ("jansDeviceRegistration", "jansDeviceData"),
+            ("jansFido2RegistrationEntry", "jansDeviceNotificationConf"),
+            ("jansDeviceRegistration", "jansDeviceNotificationConf"),
         ]:
             change_column_type(mod[0], mod[1])
 

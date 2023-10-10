@@ -35,9 +35,9 @@ DB_DIR = os.environ.get("CN_CONFIGURATOR_DB_DIR", f"{CONFIGURATOR_DIR}/db")
 CERTS_DIR = os.environ.get("CN_CONFIGURATOR_CERTS_DIR", f"{CONFIGURATOR_DIR}/certs")
 JAVALIBS_DIR = f"{CONFIGURATOR_DIR}/javalibs"
 
-DEFAULT_CONFIG_FILE = f"{DB_DIR}/config.json"
-DEFAULT_SECRET_FILE = f"{DB_DIR}/secret.json"
-DEFAULT_GENERATE_FILE = f"{DB_DIR}/generate.json"
+DEFAULT_CONFIG_FILE = os.environ.get("CN_CONFIGURATOR_CONFIG_FILE", f"{DB_DIR}/config.json")
+DEFAULT_SECRET_FILE = os.environ.get("CN_CONFIGURATOR_SECRET_FILE", f"{DB_DIR}/secret.json")
+DEFAULT_GENERATE_FILE = os.environ.get("CN_CONFIGURATOR_GENERATE_FILE", f"{DB_DIR}/generate.json")
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("configurator")
@@ -295,8 +295,8 @@ class CtxGenerator:
         enc_keys = " ".join(enc_keys)
         self.set_config("auth_enc_keys", enc_keys)
 
-        # default exp = 2 hours + token lifetime (in hour)
-        exp = int(2 + (3600 / 3600))
+        # default exp = 48 hours + token lifetime (in hour)
+        exp = int(48 + (3600 / 3600))
 
         _, err, retcode = generate_openid_keys_hourly(
             self.get_secret("auth_openid_jks_pass"),

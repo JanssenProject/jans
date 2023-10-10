@@ -7,7 +7,6 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
@@ -50,7 +49,6 @@ import java.util.*;
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 import static io.jans.as.model.crypto.signature.SignatureAlgorithm.NONE;
 import static io.jans.as.model.crypto.signature.SignatureAlgorithm.RS256;
-import static io.jans.as.model.util.StringUtils.implode;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
@@ -97,6 +95,7 @@ public class AuthorizeRestWebServiceValidator {
 
     public Client validateClient(String clientId, String state, boolean isPar) {
         if (StringUtils.isBlank(clientId)) {
+            log.debug("client_id is empty or blank {}.", clientId);
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, "client_id is empty or blank."))
@@ -107,6 +106,7 @@ public class AuthorizeRestWebServiceValidator {
         try {
             final Client client = clientService.getClient(clientId);
             if (client == null) {
+                log.debug("Unable to find client by id {}.", clientId);
                 throw new WebApplicationException(Response
                         .status(Response.Status.UNAUTHORIZED)
                         .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, "Unable to find client."))
@@ -114,6 +114,7 @@ public class AuthorizeRestWebServiceValidator {
                         .build());
             }
             if (client.isDisabled()) {
+                log.debug("Client {} is disabled.", clientId);
                 throw new WebApplicationException(Response
                         .status(Response.Status.UNAUTHORIZED)
                         .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.DISABLED_CLIENT, state, "Client is disabled."))
@@ -132,6 +133,7 @@ public class AuthorizeRestWebServiceValidator {
 
             return client;
         } catch (EntryPersistenceException e) { // Invalid clientId
+            log.debug("Unable to find client on AS by client_id: {}", clientId);
             throw new WebApplicationException(Response
                     .status(Response.Status.UNAUTHORIZED)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, "Unable to find client on AS."))
@@ -408,11 +410,9 @@ public class AuthorizeRestWebServiceValidator {
         } catch (AcrChangedException e) { // Acr changed
             //See https://github.com/GluuFederation/oxTrust/issues/797
             if (e.isForceReAuthentication()) {
-                final List<Prompt> promptList = Lists.newArrayList(authzRequest.getPromptList());
-                if (!promptList.contains(Prompt.LOGIN)) {
+                if (!authzRequest.getPromptList().contains(Prompt.LOGIN)) {
                     log.info("ACR is changed, adding prompt=login to prompts");
-                    promptList.add(Prompt.LOGIN);
-                    authzRequest.setPrompt(implode(promptList, " "));
+                    authzRequest.addPrompt(Prompt.LOGIN);
 
                     sessionUser.setState(SessionIdState.UNAUTHENTICATED);
                     sessionUser.getSessionAttributes().put("prompt", authzRequest.getPrompt());

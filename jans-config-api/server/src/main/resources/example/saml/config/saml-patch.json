@@ -1,0 +1,18 @@
+[{
+    "op": "replace",
+    "path": "/samlEnabled",
+    "value": false
+},
+{
+   "op": "add",
+    "path": "/idpConfigs/1",
+    "value":  {
+            "configId": "shibboleth",
+            "rootDir": "/opt/idp/configs/shibboleth",
+            "enabled": false,
+            "metadataTempDir": "/opt/idp/configs/shibboleth/temp_metadata",
+            "metadataDir": "/opt/idp/configs/shibboleth/metadata",
+            "metadataFilePattern": "%s-idp-metadata.xml"
+        }
+}
+]

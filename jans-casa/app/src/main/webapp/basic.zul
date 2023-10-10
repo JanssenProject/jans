@@ -1,0 +1,25 @@
+<?page language="xhtml"?>
+<?variable-resolver class="org.zkoss.zkplus.cdi.DelegatingVariableResolver"?>
+<h:html xmlns:h="xhtml" xmlns:zk="zk" xmlns="native">
+    <h:head self="@insert(title)">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+        <link rel="icon" href="${zkService.contextPath}${assetsService.faviconUrl}" />
+        <script src="${zkService.contextPath}/scripts/jquery-3.5.1.min.js" />
+        <script src="${zkService.contextPath}/scripts/popper-1.16.min.js" />
+        <!-- insert ZK javascripts -->
+        <h:zkhead/>
+        <!-- order of stylesheets is important, do not move -->
+        <link rel="stylesheet" href="${zkService.contextPath}/styles/bootstrap.min.css" />
+        <link rel="stylesheet" href="${zkService.contextPath}${assetsService.prefix}/styles/gluu/style.css" />
+        <link rel="stylesheet" href="${zkService.contextPath}${assetsService.prefix}/styles/gluu/zk-overrides.css" />
+        <link rel="stylesheet" href="${zkService.contextPath}/styles/tachyons.min.css" />
+
+        <zk:zk if="${not empty assetsService.extraCss}">
+            <!-- load custom branding css snippets -->
+            <style>${assetsService.extraCss}</style>
+        </zk:zk>
+
+        <script src="${zkService.contextPath}/scripts/gluu/main-util.js" />
+    </h:head>
+    <h:body class="bg-near-white cust-body-rule" self="@insert(content)" />
+</h:html>

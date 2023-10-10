@@ -124,7 +124,7 @@ public class AttestationCertificateService {
 				
 				return getAttestationRootCertificates(metadata, attestationCertificates);
 			} catch (Fido2RuntimeException ex) {
-				log.warn("Failed to get metadata from Fido2 meta-data server");
+				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
 				
 				metadataForAuthenticator = dataMapperService.createObjectNode();
 			}

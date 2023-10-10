@@ -38,7 +38,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 1.  Enable [GKE API](https://console.cloud.google.com/kubernetes) if not enabled yet.
 
-2.  If you are using `Cloud Shell`, you can skip to step 4.
+2.  If you are using `Cloud Shell`, you can skip to step 6.
 
 3.  Install [gcloud](https://cloud.google.com/sdk/docs/quickstarts).
     
@@ -151,7 +151,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
     - Couchbase for pesistence storage
       
-        `Add the following yaml snippet to your `override.yaml` file:
+        Add the following yaml snippet to your `override.yaml` file:
 
         ```yaml
         global:
@@ -175,20 +175,44 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
             cnCouchbaseUrl: cbjanssen.default.svc.cluster.local
             # -- Couchbase restricted user
             cnCouchbaseUser: janssen
-        ````
+        ```
 
 
+    - PostgreSQL for persistence storage
 
+        In a production environment, a production grade PostgreSQL server should be used such as `Cloud SQL`
+
+        For testing purposes, you can deploy it on the GKE cluster using the following command:
+
+        ```
+        helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/postgresql
+        ```
+
+        Add the following yaml snippet to your `override.yaml` file:
+        
+        ```yaml
+        
+        global:
+          cnPersistenceType: sql
+        config:
+          configmap:
+            cnSqlDbName: jans
+            cnSqlDbPort: 5432
+            cnSqlDbDialect: pgsql
+            cnSqlDbHost: my-release-mysql.jans.svc
+            cnSqlDbUser: postgres
+            cnSqlDbTimezone: UTC
+            cnSqldbUserPassword: Test1234#
+        ```
 
     - MySQL for persistence storage
 
         In a production environment, a production grade MySQL server should be used such as `Cloud SQL`
 
-        For testing purposes, you can deploy it on the GKE cluster using the following commands:
+        For testing purposes, you can deploy it on the GKE cluster using the following command:
 
         ```
-        helm repo add bitnami https://charts.bitnami.com/bitnami
-        helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans
+        helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/mysql
         ```
 
         Add the following yaml snippet to your `override.yaml` file:
@@ -246,3 +270,6 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
       helm repo update
       helm install janssen janssen/janssen -n jans -f override.yaml
       ```
+
+## Configure Janssen
+  You can use the [TUI](../../kubernetes-ops/tui-k8s.md) to configure Janssen components. The TUI calls the Config API to perform ad hoc configuration.

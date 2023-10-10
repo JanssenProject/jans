@@ -1,7 +1,6 @@
 import json
 import logging.config
 import os
-import re
 import typing as _t
 from functools import cached_property
 from string import Template
@@ -28,7 +27,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("fido2")
 
 manager = get_manager()
 
@@ -36,8 +35,8 @@ manager = get_manager()
 def main():
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
 
-    render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
-    render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
+    render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
+    render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
 
     mapper = PersistenceMapper()
     persistence_groups = mapper.groups()
@@ -50,7 +49,7 @@ def main():
     if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
-            "/app/templates/jans-ldap.properties.tmpl",
+            "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
         sync_ldap_truststore(manager)
@@ -58,7 +57,7 @@ def main():
     if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
-            "/app/templates/jans-couchbase.properties.tmpl",
+            "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
         sync_couchbase_truststore(manager)
@@ -68,14 +67,14 @@ def main():
 
         render_sql_properties(
             manager,
-            f"/app/templates/jans-{db_dialect}.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties",
             "/etc/jans/conf/jans-sql.properties",
         )
 
     if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
-            "/app/templates/jans-spanner.properties.tmpl",
+            "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
 
@@ -85,7 +84,7 @@ def main():
     cert_to_truststore(
         "web_https",
         "/etc/certs/web_https.crt",
-        "/usr/java/latest/jre/lib/security/cacerts",
+        "/opt/java/lib/security/cacerts",
         "changeit",
     )
 
@@ -156,10 +155,10 @@ def configure_logging():
     if any([
         as_boolean(custom_config.get("enable_stdout_log_prefix")),
         as_boolean(os.environ.get("CN_ENABLE_STDOUT_LOG_PREFIX")),
-    ]) :
+    ]):
         config["log_prefix"] = "${sys:fido2.log.console.prefix}%X{fido2.log.console.group} - "
 
-    with open("/app/templates/log4j2.xml") as f:
+    with open("/app/templates/jans-fido2/log4j2.xml") as f:
         txt = f.read()
 
     logfile = "/opt/jans/jetty/jans-fido2/resources/log4j2.xml"
@@ -201,6 +200,10 @@ class PersistenceSetup:
         # pre-populate fido2_static_conf_base64
         with open("/app/templates/jans-fido2/static-conf.json") as f:
             ctx["fido2_static_conf_base64"] = generate_base64_contents(f.read())
+
+        # pre-populate fido2_error_base64
+        with open("/app/templates/jans-fido2/jans-fido2-errors.json") as f:
+            ctx["fido2_error_base64"] = generate_base64_contents(f.read())
         return ctx
 
     @cached_property

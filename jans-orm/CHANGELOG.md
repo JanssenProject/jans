@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.17...jans-orm-v1.0.18) (2023-09-23)
+
+
+### Bug Fixes
+
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.16...jans-orm-v1.0.17) (2023-09-17)
+
+
+### Bug Fixes
+
+* fix schema and update ldap samples ([#6024](https://github.com/JanssenProject/jans/issues/6024)) ([beabaef](https://github.com/JanssenProject/jans/commit/beabaef7835fa4331f2b889b69d8bb6fab436fcc))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
 ## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.15...jans-orm-v1.0.16) (2023-08-02)
 
 

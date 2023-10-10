@@ -52,9 +52,11 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
     ```
     You can adjust `node-type` and `nodes` number as per your desired cluster size
 
-6.  Install [Helm3](https://helm.sh/docs/intro/install/)
+6. To be able to attach volumes to your pod, you need to install the Amazon [EBS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html)
 
-7.  Create `jans` namespace where our resources will reside
+7.  Install [Helm3](https://helm.sh/docs/intro/install/)
+
+8.  Create `jans` namespace where our resources will reside
     ```
     kubectl create namespace jans
     ```
@@ -186,7 +188,32 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
             cnCouchbaseUser: janssen
         ```
 
+      - PostgreSQL for persistence storage
 
+        In a production environment, a production grade PostgreSQL server should be used such as `Amazon RDS`
+
+        For testing purposes, you can deploy it on the EKS cluster using the following command:
+
+        ```
+        helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/postgresql
+        ```
+
+        Add the following yaml snippet to your `override.yaml` file:
+        
+        ```yaml
+        
+        global:
+          cnPersistenceType: sql
+        config:
+          configmap:
+            cnSqlDbName: jans
+            cnSqlDbPort: 5432
+            cnSqlDbDialect: pgsql
+            cnSqlDbHost: my-release-mysql.jans.svc
+            cnSqlDbUser: postgres
+            cnSqlDbTimezone: UTC
+            cnSqldbUserPassword: Test1234#
+        ```
 
     - MySQL for persistence storage
 
@@ -195,8 +222,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
         For testing purposes, you can deploy it on the EKS cluster using the following commands:
 
         ```
-        helm repo add bitnami https://charts.bitnami.com/bitnami
-        helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans
+        helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/mysql        
         ```
 
         Add the following yaml snippet to your `override.yaml` file:
@@ -255,3 +281,6 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
       helm repo update
       helm install janssen janssen/janssen -n jans -f override.yaml
       ```
+
+## Configure Janssen
+  You can use the [TUI](../../kubernetes-ops/tui-k8s.md) to configure Janssen components. The TUI calls the Config API to perform ad hoc configuration.

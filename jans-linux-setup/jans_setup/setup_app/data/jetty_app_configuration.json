@@ -71,7 +71,7 @@
     "installed": false,
     "name": "jans-link"
   },
-  "casa": {
+  "jans-casa": {
     "memory": {
       "max_allowed_mb": 1024,
       "metaspace_mb": 128,
@@ -82,6 +82,6 @@
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,cdi-decorate"
     },
     "installed": false,
-    "name": "casa"
+    "name": "jans-casa"
     }
 }

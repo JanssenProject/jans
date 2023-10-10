@@ -180,6 +180,11 @@
             "id":"access_denied",
             "description":"The authorization server denied the request.",
             "uri":null
+        },
+        {
+            "id": "stale_evidence",
+            "description":"The provided evidence is not current. Resend fresh evidence.",
+            "uri":null
         }
     ],
     "token":[
@@ -557,6 +562,11 @@
         {
             "id": "invalid_client",
             "description": "The Client is not authorized to use this authentication flow.",
+            "uri": null
+        },
+        {
+            "id": "invalid_ssa_metadata",
+            "description": "The value of one of the SSA Metadata fields is invalid and the server has rejected this request. Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter of a SSA's Metadata.",
             "uri": null
         },
         {

@@ -21,7 +21,7 @@ from utils import get_role_scope_mappings
 from hooks import transform_auth_dynamic_config_hook
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("persistence-loader")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
@@ -862,6 +862,16 @@ def _transform_auth_errors_config(conf):
         if err["id"] in token_err_ids:
             continue
         conf["token"].append(err)
+        should_update = True
+
+    # add stale_evidence on register
+    reg_errors = [err["id"] for err in conf["register"]]
+    if "stale_evidence" not in reg_errors:
+        conf["register"].append({
+            "id": "stale_evidence",
+            "description": "The provided evidence is not current. Resend fresh evidence.",
+            "uri": None,
+        })
         should_update = True
 
     return conf, should_update

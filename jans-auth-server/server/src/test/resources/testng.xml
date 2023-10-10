@@ -24,18 +24,22 @@
             <class name="io.jans.as.server.service.LocalResponseCacheTest" />
             <class name="io.jans.as.server.service.SessionIdServiceTest" />
 
+            <class name="io.jans.as.server.auth.DpopServiceTest" />
             <class name="io.jans.as.server.token.ws.rs.TokenExchangeServiceTest" />
             <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceValidatorTest" />
             <class name="io.jans.as.server.ws.rs.stat.MonthsTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidatorTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImplTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeActionTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthorizationChallengeValidatorTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthzRequestTest" />
 
             <!-- REGISTER -->
             <class name="io.jans.as.server.register.ws.rs.SsaValidationConfigServiceTest" />
             <class name="io.jans.as.server.register.ws.rs.action.RegisterCreateActionTest" />
             <class name="io.jans.as.server.register.ws.rs.RegisterServiceTest" />
             <class name="io.jans.as.server.register.ws.rs.RegisterValidatorTest" />
+            <class name="io.jans.as.server.register.ws.rs.RegisterJsonServiceTest" />
 
             <!-- SESSION -->
             <class name="io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImplTest" />

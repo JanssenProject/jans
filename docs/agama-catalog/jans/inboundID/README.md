@@ -72,7 +72,7 @@ Let's add the required libraries to the authentication server:
 
 ### Make a `gama` archive
 
-[gama files](https://docs.jans.io/head/agama/gama-format/) are deployable units in the Agama engine. To create one, simply zip the contents of [project](./project) subdirectory. The resulting archive must have two folders at top-level: `web` and `code`. The file extension does not matter in the end.
+[gama files](https://docs.jans.io/head/agama/gama-format/) are deployable units in the Agama engine. To create one, simply zip the contents of [project](./project) subdirectory. The resulting archive must have three folders at top-level: `web`, `lib`, and `code`. The file extension does not matter in the end.
 
 To quickly collect the contents of _project_, you can download the whole Jans repository or make a shallow clone of main branch using `git`. Using `git` is probably a faster way.
 

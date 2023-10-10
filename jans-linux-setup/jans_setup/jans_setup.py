@@ -44,6 +44,7 @@ from setup_app.utils import arg_parser
 
 argsp = arg_parser.get_parser()
 
+
 # first import paths and make changes if necassary
 from setup_app import paths
 
@@ -93,7 +94,10 @@ base.argsp = argsp
 if 'SETUP_BRANCH' not in base.current_app.app_info:
     base.current_app.app_info['SETUP_BRANCH'] = argsp.setup_branch
 
-base.current_app.app_info['ox_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
+if argsp.java_version:
+    base.current_app.app_info['AMAZON_CORRETTO_VERSION'] = argsp.java_version
+
+base.current_app.app_info['jans_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
 
 
 # download pre-required apps
@@ -137,8 +141,10 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.fido import FidoInstaller
     from setup_app.installers.eleven import ElevenInstaller
     from setup_app.installers.jans_link import JansLinkInstaller
-    from setup_app.installers.casa import CasaInstaller
+    from setup_app.installers.jans_casa import CasaInstaller
 
+    from setup_app.installers.jans_saml import JansSamlInstaller
+    
 
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
@@ -203,7 +209,7 @@ if not Config.installed_instance:
     print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
     print("Profile         :  {}".format(Config.profile))
     print("Detected OS     :  {}".format(base.get_os_description()))
-    print("Janssen Version :  {}".format(base.current_app.app_info['ox_version']))
+    print("Janssen Version :  {}".format(base.current_app.app_info['jans_version']))
     print("Detected init   :  {}".format(base.os_initdaemon))
     print("Detected Apache :  {}".format(base.determineApacheVersion()))
     print()
@@ -259,6 +265,7 @@ if Config.profile == 'jans':
     elevenInstaller = ElevenInstaller()
     casa_installer = CasaInstaller()
     jans_link_installer = JansLinkInstaller()
+    jans_saml_installer = JansSamlInstaller()
 
 jansCliInstaller = JansCliInstaller()
 
@@ -342,9 +349,9 @@ def main():
         if Config.rdbm_install_type == static.InstallTypes.LOCAL:
             packageUtils.check_and_install_packages()
 
-        if Config.cb_install == static.InstallTypes.LOCAL:
-            print("Please wait while setup is installing couchbase package ...")
-            couchbaseInstaller.couchbaseInstall()
+    if Config.cb_install == static.InstallTypes.LOCAL:
+        print("Please wait while setup is installing couchbase package ...")
+        couchbaseInstaller.couchbaseInstall()
 
     # register post setup progress
     class PostSetup:
@@ -444,6 +451,16 @@ def main():
                 if (Config.installed_instance and jans_link_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jans_link_installer.install_var)):
                     jans_link_installer.start_installation()
+
+                if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
+                            not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
+                        jansCliInstaller.start_installation()
+                        jansCliInstaller.configure()
+
+                if (Config.installed_instance and jans_saml_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jans_saml_installer.install_var)):
+                    jans_saml_installer.start_installation()
+
 
             if Config.install_jans_cli:
                 jansCliInstaller.start_installation()
