@@ -1,5 +1,6 @@
 package io.jans.as.server.ssa.ws.rs;
 
+import io.jans.as.client.ssa.create.SsaCreateRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.ssa.Ssa;
 import io.jans.as.common.model.ssa.SsaState;
@@ -251,5 +252,37 @@ public class SsaRestWebServiceValidatorTest {
         WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.getValidSsaByJti(jti));
         assertEquals(ex.getResponse().getStatus(), 422);
         verify(log).warn(anyString(), eq(jti));
+    }
+
+    @Test
+    void validateSsaCreateRequest_happyPath_success() {
+        SsaCreateRequest ssaCreateRequest = new SsaCreateRequest();
+        ssaCreateRequest.setLifetime(86400);
+
+        ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest);
+        verifyNoInteractions(log, errorResponseFactory);
+    }
+
+    @Test
+    void validateSsaCreateRequest_ifLifetimeIsNull_success() {
+        SsaCreateRequest ssaCreateRequest = new SsaCreateRequest();
+        ssaCreateRequest.setLifetime(null);
+
+        ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest);
+        verifyNoInteractions(log, errorResponseFactory);
+    }
+
+    @Test
+    void validateSsaCreateRequest_ifLifetimeIsZero_webApplicationException() {
+        SsaCreateRequest ssaCreateRequest = new SsaCreateRequest();
+        ssaCreateRequest.setLifetime(0);
+        WebApplicationException webApplicationException = new WebApplicationException("Test exception");
+        when(errorResponseFactory.createWebApplicationException(any(), any(), anyString())).thenThrow(webApplicationException);
+
+        WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest));
+        assertNotNull(ex);
+        assertEquals(ex.getMessage(), "Test exception");
+        verify(log).warn(eq("SSA Metadata validation: 'lifetime' cannot be 0 or negative"));
+        verify(errorResponseFactory).createWebApplicationException(eq(Response.Status.BAD_REQUEST), eq(SsaErrorResponseType.INVALID_SSA_METADATA), eq("Invalid SSA Metadata"));
     }
 }
