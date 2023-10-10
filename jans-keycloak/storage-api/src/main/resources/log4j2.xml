@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="ERROR">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
+        </Console>
+        
+        <RollingFile name="FILE" fileName="${sys:log.base}/logs/jans-keycloak-user-spi.log" filePattern="${sys:log.base}/logs/jans-keycloak-user-spi-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+
+            <Policies>
+                <SizeBasedTriggeringPolicy size="5 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+		
+        
+    </Appenders>
+
+    <Loggers>
+        <Logger name="io.jans" level="${log4j.default.log.level}">
+            <AppenderRef ref="FILE" />
+        </Logger>
+		
+		<Logger name="io.jans.configapi" level="${log4j.default.log.level}">
+            <AppenderRef ref="FILE" />
+        </Logger>		
+
+        <Root level="INFO">
+			<AppenderRef ref="FILE" />
+			<AppenderRef ref="Console" />
+        </Root>
+		
+    </Loggers>
+
+</Configuration>
