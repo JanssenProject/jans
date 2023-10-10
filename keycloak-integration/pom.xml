@@ -25,6 +25,11 @@
       <maven-deps-plugin.version>3.6.0</maven-deps-plugin.version>
       <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
       <nimbus.oauth2-oidc-sdk.version>10.11</nimbus.oauth2-oidc-sdk.version>
+      <sonar.projectKey>JanssenProject_keycloak-integ</sonar.projectKey>
+      <sonar.moduleKey>${project.groupId}:${project
+      .artifactId}</sonar.moduleKey>
+      <sonar.organization>janssenproject</sonar.organization>
+      <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <prerequisites>
