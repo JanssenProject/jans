@@ -25,6 +25,7 @@ public enum SsaRequestParam {
     IAT("iat"),
     SSA("ssa"),
     STATUS("status"),
+    LIFETIME("lifetime")
     ;
 
     private final String name;

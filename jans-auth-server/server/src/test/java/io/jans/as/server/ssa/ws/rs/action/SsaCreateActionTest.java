@@ -41,8 +41,7 @@ import static io.jans.as.model.ssa.SsaRequestParam.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 @Listeners(MockitoTestNGListener.class)
 public class SsaCreateActionTest {
@@ -99,6 +98,7 @@ public class SsaCreateActionTest {
         ssa.getAttributes().setGrantTypes(Collections.singletonList("client_credentials"));
         ssa.getAttributes().setOneTimeUse(true);
         ssa.getAttributes().setRotateSsa(true);
+        ssa.getAttributes().setLifetime(86400);
 
         requestJson = new JSONObject();
         requestJson.put(ORG_ID.getName(), ssa.getOrgId());
@@ -109,6 +109,7 @@ public class SsaCreateActionTest {
         requestJson.put(GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
         requestJson.put(ONE_TIME_USE.getName(), ssa.getAttributes().getOneTimeUse());
         requestJson.put(ROTATE_SSA.getName(), ssa.getAttributes().getRotateSsa());
+        requestJson.put(LIFETIME.getName(), ssa.getAttributes().getLifetime());
     }
 
     @Test
@@ -171,6 +172,8 @@ public class SsaCreateActionTest {
         assertEquals(ssaAux.getAttributes().getOneTimeUse(), ssa.getAttributes().getOneTimeUse());
         assertNotNull(ssaAux.getAttributes().getRotateSsa(), "ssa rotate_ssa is null");
         assertEquals(ssaAux.getAttributes().getRotateSsa(), ssa.getAttributes().getRotateSsa());
+        assertNotNull(ssaAux.getAttributes().getLifetime(), "ssa lifetime is null");
+        assertEquals(ssaAux.getAttributes().getLifetime(), ssa.getAttributes().getLifetime());
         assertNotNull(ssaAux.getState(), "ssa state is null");
         assertEquals(ssaAux.getState(), SsaState.ACTIVE);
     }

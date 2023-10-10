@@ -79,6 +79,7 @@ public class SsaServiceTest {
         ssa.getAttributes().setGrantTypes(Collections.singletonList("client_credentials"));
         ssa.getAttributes().setOneTimeUse(true);
         ssa.getAttributes().setRotateSsa(true);
+        ssa.getAttributes().setLifetime(86400);
     }
 
     @Test
@@ -326,6 +327,7 @@ public class SsaServiceTest {
         ssa.getAttributes().setCustomAttributes(Collections.singletonMap("test-key", "test-value"));
         when(appConfiguration.getSsaConfiguration()).thenReturn(ssaConfiguration);
         when(appConfiguration.getIssuer()).thenReturn(issuer);
+        when(cryptoProvider.getKeyId(any(), any(), any(), any())).thenReturn("kid-test");
 
         Jwt jwt = ssaService.generateJwt(ssa);
         assertSsaJwt(ssaConfiguration.getSsaSigningAlg(), issuer, ssa, jwt);
@@ -401,5 +403,7 @@ public class SsaServiceTest {
         assertEquals(ssaAux.getAttributes().getOneTimeUse(), ssa.getAttributes().getOneTimeUse());
         assertNotNull(ssaAux.getAttributes().getRotateSsa(), "ssa rotate_ssa is null");
         assertEquals(ssaAux.getAttributes().getRotateSsa(), ssa.getAttributes().getRotateSsa());
+        assertNotNull(ssaAux.getAttributes().getLifetime(), "ssa lifetime is null");
+        assertEquals(ssaAux.getAttributes().getLifetime(), ssa.getAttributes().getLifetime());
     }
 }

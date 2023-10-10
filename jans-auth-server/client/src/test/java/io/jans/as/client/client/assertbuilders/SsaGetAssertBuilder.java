@@ -67,6 +67,7 @@ public class SsaGetAssertBuilder extends BaseAssertBuilder {
                     assertTrue(ssaJson.has(DESCRIPTION.getName()));
                     assertTrue(ssaJson.has(ONE_TIME_USE.getName()));
                     assertTrue(ssaJson.has(ROTATE_SSA.getName()));
+                    assertTrue(ssaJson.has(LIFETIME.getName()));
                 });
             }
         }

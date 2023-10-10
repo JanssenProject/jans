@@ -21,6 +21,13 @@ public enum SsaErrorResponseType implements IErrorType {
     INVALID_CLIENT("invalid_client"),
 
     /**
+     * The value of one of the SSA Metadata fields is invalid and the server has rejected this request.
+     * Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter
+     * of a SSA's Metadata.
+     */
+    INVALID_SSA_METADATA("invalid_ssa_metadata"),
+
+    /**
      * When creating a ssa, if you get an internal error.
      */
     UNKNOWN_ERROR("unknown_error"),

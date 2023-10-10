@@ -71,9 +71,10 @@ public class SsaJsonServiceTest {
         ssa.getAttributes().setGrantTypes(Collections.singletonList("client_credentials"));
         ssa.getAttributes().setOneTimeUse(true);
         ssa.getAttributes().setRotateSsa(true);
+        ssa.getAttributes().setLifetime(86400);
         ssa.setCreatorId("test@localhost");
 
-        JSONArray jsonArray = ssaJsonService.getJSONArray(Collections.singletonList(ssa));
+        JSONArray jsonArray = ssaJsonService.getJSONArray(Collections.singletonList(                                                                                                                                                                                                                                                                                                                                                                                                                                ssa));
         assertNotNull(jsonArray, "jsonObject response is null");
         assertEquals(jsonArray.length(), 1);
 
@@ -104,6 +105,8 @@ public class SsaJsonServiceTest {
         assertEquals(ssaJsonObject.get(IAT.getName()), DateUtil.dateToUnixEpoch(ssa.getCreationDate()));
         assertTrue(ssaJsonObject.has(ISS.getName()));
         assertEquals(ssaJsonObject.get(ISS.getName()), appConfiguration.getIssuer());
+        assertTrue(ssaJsonObject.has(LIFETIME.getName()));
+        assertEquals(ssaJsonObject.get(LIFETIME.getName()), ssa.getAttributes().getLifetime());
     }
 
     @Test

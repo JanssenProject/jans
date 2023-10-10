@@ -6,6 +6,7 @@
 
 package io.jans.as.server.ssa.ws.rs;
 
+import io.jans.as.client.ssa.create.SsaCreateRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.ssa.Ssa;
 import io.jans.as.common.model.ssa.SsaState;
@@ -116,5 +117,21 @@ public class SsaRestWebServiceValidator {
             throw new WebApplicationException(Response.status(422).build());
         }
         return ssa;
+    }
+
+    /**
+     * Validate SSA Metadata
+     * <p>
+     * This method validates the metadata of a new SSA.
+     * - "lifetime" cannot be 0 or negative
+     * </p>
+     *
+     * @param createRequest SSA Metadata
+     */
+    public void validateSsaCreateRequest(SsaCreateRequest createRequest) {
+        if (createRequest.getLifetime() != null && createRequest.getLifetime() < 1) {
+            log.warn("SSA Metadata validation: 'lifetime' cannot be 0 or negative");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, SsaErrorResponseType.INVALID_SSA_METADATA, "Invalid SSA Metadata");
+        }
     }
 }

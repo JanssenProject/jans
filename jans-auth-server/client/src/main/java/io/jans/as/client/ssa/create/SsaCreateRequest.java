@@ -20,8 +20,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.jans.as.client.util.ClientUtil.extractListByKey;
-import static io.jans.as.client.util.ClientUtil.longOrNull;
+import static io.jans.as.client.util.ClientUtil.*;
 import static io.jans.as.model.ssa.SsaRequestParam.*;
 
 public class SsaCreateRequest extends BaseRequest {
@@ -49,6 +48,9 @@ public class SsaCreateRequest extends BaseRequest {
 
     @JsonProperty(value = "rotate_ssa")
     private Boolean rotateSsa;
+
+    @JsonProperty(value = "lifetime")
+    private Integer lifetime;
 
     private String accessToken;
 
@@ -123,6 +125,14 @@ public class SsaCreateRequest extends BaseRequest {
         this.rotateSsa = rotateSsa;
     }
 
+    public Integer getLifetime() {
+        return lifetime;
+    }
+
+    public void setLifetime(Integer lifetime) {
+        this.lifetime = lifetime;
+    }
+
     public String getAccessToken() {
         return accessToken;
     }
@@ -146,6 +156,7 @@ public class SsaCreateRequest extends BaseRequest {
         result.setGrantTypes(extractListByKey(requestObject, GRANT_TYPES.getName()));
         result.setOneTimeUse(requestObject.optBoolean(ONE_TIME_USE.getName(), true));
         result.setRotateSsa(requestObject.optBoolean(ROTATE_SSA.getName(), true));
+        result.setLifetime(integerOrNull(requestObject, LIFETIME.getName()));
         return result;
     }
 
@@ -170,6 +181,7 @@ public class SsaCreateRequest extends BaseRequest {
         parameters.put(GRANT_TYPES.getName(), grantTypes);
         parameters.put(ONE_TIME_USE.getName(), oneTimeUse);
         parameters.put(ROTATE_SSA.getName(), rotateSsa);
+        parameters.put(LIFETIME.getName(), lifetime);
         return parameters;
     }
 
@@ -184,6 +196,7 @@ public class SsaCreateRequest extends BaseRequest {
                 ", grantTypes=" + grantTypes +
                 ", oneTimeUse=" + oneTimeUse +
                 ", rotateSsa=" + rotateSsa +
+                ", lifetime=" + lifetime +
                 '}';
     }
 }
