@@ -106,7 +106,7 @@ class msg:
                    "Organization Name: ......")
 
     installation_completed = "Janssen Server installation successful!\n"
-    post_installation = "Please exit from container and restart Janssen Server."
+    post_installation = "Please restart all Janssen Servers."
 
     installation_description_java = "Corretto is a build of the Open Java Development Kit (OpenJDK) with long-term support from Amazon. Corretto is certified using the Java Technical Compatibility Kit (TCK) to ensure it meets the Java SE standard."
     installation_description_opendj = "OpenDJ is an LDAPv3 compliant directory service, which has been developed for the Java platform, providing a high performance, highly available, and secure store for the identities managed by your organization."
