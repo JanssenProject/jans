@@ -38,6 +38,7 @@ public class SsaGetJwtAssertBuilder extends BaseAssertBuilder {
             assertNotNull(jwtClaims.getClaim(SOFTWARE_ID.getName()), "The software_id in jwt is null");
             assertNotNull(jwtClaims.getClaim(SOFTWARE_ROLES.getName()), "The software_roles in jwt is null");
             assertNotNull(jwtClaims.getClaim(GRANT_TYPES.getName()), "The grant_types in jwt is null");
+            assertNotNull(jwtClaims.getClaim(LIFETIME.getName()), "The lifetime in jwt is null");
 
             assertNotNull(jwtClaims.getClaim(JTI.getName()), "The jti in jwt is null");
             assertNotNull(jwtClaims.getClaim(ISS.getName()), "The iss in jwt is null");
