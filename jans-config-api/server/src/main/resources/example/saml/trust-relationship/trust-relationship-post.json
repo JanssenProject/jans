@@ -1,0 +1,23 @@
+{
+	"clientId": "test1",
+	"displayName": "Test Client 1",
+	"description": "Test Client description 1",
+	"rootUrl": "https://jans.com",
+	"adminUrl": null,
+	"baseUrl": "/realms/master/account/",
+	"enabled": true,
+	"alwaysDisplayInConsole": false,
+	"clientAuthenticatorType": "client-secret",
+	"secret": "secret123",
+	"registrationAccessToken": null,
+	"redirectUris": [
+		"/realms/master/account/*"
+	],
+	"webOrigins": [],
+	"spMetaDataSourceType": "FILE",
+	"spMetaDataFN":"sp_test_file",
+	"releasedAttributes":[
+	"inum=C4F7,ou=scopes,o=jans",
+	"inum=10B2,ou=scopes,o=jans"
+	]
+}

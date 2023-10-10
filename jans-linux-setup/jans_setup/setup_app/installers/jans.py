@@ -79,6 +79,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += get_install_string('Install Scim Server', 'install_scim_server')
                 txt += get_install_string('Install Jans Link Server', 'install_jans_link')
                 txt += get_install_string('Install Jans Casa Server', 'install_casa')
+                txt += get_install_string('Install Jans SAML', 'install_jans_saml')
+
 
             if Config.profile == 'jans' and Config.installEleven:
                 txt += get_install_string('Install Eleven Server', 'installEleven')
