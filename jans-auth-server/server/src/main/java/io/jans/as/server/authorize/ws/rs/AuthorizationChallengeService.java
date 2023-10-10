@@ -129,6 +129,7 @@ public class AuthorizationChallengeService {
 
         final Client client = authorizeRestWebServiceValidator.validateClient(authzRequest, false);
         authorizationChallengeValidator.validateGrantType(client, state);
+        authorizationChallengeValidator.validateAccess(client);
         Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
 
         final ExecutionContext executionContext = ExecutionContext.of(authzRequest);
