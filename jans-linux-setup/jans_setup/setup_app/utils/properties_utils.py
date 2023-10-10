@@ -655,9 +655,11 @@ class PropertiesUtils(SetupUtils):
                             )[0].lower()
 
         Config.install_config_api = prompt_for_config_api == 'y'
+        Config.install_jans_cli = Config.install_config_api
 
         if Config.installed_instance and Config.install_config_api:
             Config.addPostSetupService.append('install_config_api')
+            Config.addPostSetupService.append('install_jans_cli')
 
 
     def prompt_for_rdbm(self):
