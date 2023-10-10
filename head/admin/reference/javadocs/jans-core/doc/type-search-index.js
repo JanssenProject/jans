@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"io.jans.doc.annotation","l":"DocFeatureFlag"},{"p":"io.jans.doc.annotation","l":"DocFeatureFlagProcessor"},{"p":"io.jans.doc.annotation","l":"DocProperty"},{"p":"io.jans.doc.annotation","l":"DocPropertyProcessor"}]
