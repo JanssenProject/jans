@@ -132,7 +132,11 @@ components:
             type: string
         superGluuEnabled:
           type: boolean
+        sessionIdPersistInCache:
+          type: boolean
         oldU2fMigrationEnabled:
+          type: boolean
+        errorReasonEnabled:
           type: boolean
         fido2Configuration:
           $ref: '#/components/schemas/Fido2Configuration'
@@ -169,6 +173,10 @@ components:
             $ref: '#/components/schemas/RequestedParty'
         metadataUrlsProvider:
           type: string
+        skipDownloadMdsEnabled:
+          type: boolean
+        skipValidateMdsInAttestationEnabled:
+          type: boolean
     RequestedParty:
       type: object
       properties:

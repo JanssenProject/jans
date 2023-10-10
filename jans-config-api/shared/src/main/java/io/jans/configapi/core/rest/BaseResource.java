@@ -141,7 +141,7 @@ public class BaseResource {
 
     /**
      * @param attributeName
-     * @return
+     * @return Response
      */
     protected static Response getMissingAttributeError(String attributeName) {
         ApiError error = new ApiError.ErrorBuilder().withCode(MISSING_ATTRIBUTE_CODE)
