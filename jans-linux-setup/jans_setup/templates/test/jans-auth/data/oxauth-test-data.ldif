@@ -102,6 +102,11 @@ changetype: modify
 jansDefScope: true
 replace: jansDefScope
 
+dn: inum=6D92,ou=scopes,o=jans
+changetype: modify
+jansDefScope: true
+replace: jansDefScope
+
 dn: inum=341A,ou=scopes,o=jans
 changetype: modify
 add: jansClaim
@@ -164,6 +169,7 @@ jansScope: inum=764C,ou=scopes,o=jans
 jansScope: inum=43F1,ou=scopes,o=jans
 jansScope: inum=341A,ou=scopes,o=jans
 jansScope: inum=6D99,ou=scopes,o=jans
+jansScope: inum=6D92,ou=scopes,o=jans
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: true
 objectClass: top
@@ -185,6 +191,7 @@ jansRespTyp: code
 jansRespTyp: id_token
 jansScope: inum=6D99,ou=scopes,o=jans
 jansScope: inum=7D90,ou=scopes,o=jans
+jansScope: inum=6D92,ou=scopes,o=jans
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: true
 objectClass: top
