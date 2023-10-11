@@ -21,12 +21,24 @@ struct MainView: View {
     
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+            switch state.viewState {
+            case .initial:
+                Image("janssen_logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 250, height: 100)
+                Text("Loading...")
+            case .register:
+                RegisterViewAssembler.assembleNavigationWrapped()
+            case .login:
+                LoginViewAssembler.assembleNavigationWrapped()
+            case .afterLogin:
+                Text("No developed yet")
+            }
         }
-        .padding()
+        .onAppear {
+            interactor.onAppear()
+        }
     }
 }
 

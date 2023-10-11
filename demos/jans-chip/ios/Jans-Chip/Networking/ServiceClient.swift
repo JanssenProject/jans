@@ -11,7 +11,7 @@ import Combine
 
 protocol ServiceClientProtocol: AnyObject {
     
-    func getOPConfiguration(completion: @escaping (Result<OPConfiguration, AFError>) -> Void)
+    func getOPConfiguration(url: String, completion: @escaping (Result<OPConfiguration, AFError>) -> Void)
 }
 
 public final class ServiceClient {
@@ -31,16 +31,16 @@ public final class ServiceClient {
 // MARK: - ServiceClientProtocol
 extension ServiceClient: ServiceClientProtocol {
     
-    func getOPConfiguration(completion: @escaping (Result<OPConfiguration, AFError>) -> Void) {
+    func getOPConfiguration(url: String, completion: @escaping (Result<OPConfiguration, AFError>) -> Void) {
         let jsonDecoder = JSONDecoder()
         jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-        performRequest(route: .getOPConfiguration(""), decoder: jsonDecoder, completion: completion)
+        performRequest(route: .getOPConfiguration(url), decoder: jsonDecoder, completion: completion)
     }
     
-    func getOPConfiguration() -> AnyPublisher<Result<OPConfiguration, AFError>, Never> {
+    func getOPConfiguration(url: String) -> AnyPublisher<Result<OPConfiguration, AFError>, Never> {
         let jsonDecoder = JSONDecoder()
         jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-        let publisher: AnyPublisher<Result<OPConfiguration, AFError>, Never> = performRequest(route: .getOPConfiguration(""), decoder: jsonDecoder)
+        let publisher: AnyPublisher<Result<OPConfiguration, AFError>, Never> = performRequest(route: .getOPConfiguration(url), decoder: jsonDecoder)
         return publisher
     }
 }

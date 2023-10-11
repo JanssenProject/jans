@@ -33,6 +33,11 @@
 		3063E5A02AD406D3002B4879 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E59B2AD406D3002B4879 /* LoginView.swift */; };
 		3063E5A12AD406D3002B4879 /* LoginViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E59C2AD406D3002B4879 /* LoginViewState.swift */; };
 		3063E5A22AD406D3002B4879 /* LoginViewInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E59D2AD406D3002B4879 /* LoginViewInteractor.swift */; };
+		3063E5A62AD410F9002B4879 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3063E5A52AD410F9002B4879 /* RealmSwift */; };
+		3063E5AB2AD41238002B4879 /* OIDCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5AA2AD41238002B4879 /* OIDCClient.swift */; };
+		3063E5AE2AD6BE05002B4879 /* UIApplication+Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5AD2AD6BE05002B4879 /* UIApplication+Alert.swift */; };
+		3063E5B02AD6C623002B4879 /* RealmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5AF2AD6C623002B4879 /* RealmManager.swift */; };
+		3063E5B22AD6CAEB002B4879 /* DCResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5B12AD6CAEB002B4879 /* DCResponse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +67,10 @@
 		3063E59B2AD406D3002B4879 /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		3063E59C2AD406D3002B4879 /* LoginViewState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewState.swift; sourceTree = "<group>"; };
 		3063E59D2AD406D3002B4879 /* LoginViewInteractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewInteractor.swift; sourceTree = "<group>"; };
+		3063E5AA2AD41238002B4879 /* OIDCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OIDCClient.swift; sourceTree = "<group>"; };
+		3063E5AD2AD6BE05002B4879 /* UIApplication+Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Alert.swift"; sourceTree = "<group>"; };
+		3063E5AF2AD6C623002B4879 /* RealmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmManager.swift; sourceTree = "<group>"; };
+		3063E5B12AD6CAEB002B4879 /* DCResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DCResponse.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +78,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3063E5A62AD410F9002B4879 /* RealmSwift in Frameworks */,
 				3063E5732ACD54C9002B4879 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -95,6 +105,7 @@
 		304311F02ACC05E4006B8D40 /* Jans-Chip */ = {
 			isa = PBXGroup;
 			children = (
+				3063E5A32AD40FC9002B4879 /* Database */,
 				3063E5952AD051BD002B4879 /* UIComponents */,
 				3063E57D2ACD6153002B4879 /* Networking */,
 				3063E5772ACD5FF0002B4879 /* Models */,
@@ -134,6 +145,7 @@
 				3063E57A2ACD6128002B4879 /* General */,
 				3063E5782ACD60D7002B4879 /* TokenResponse.swift */,
 				3063E5842ACD7EEC002B4879 /* OPConfiguration.swift */,
+				3063E5B12AD6CAEB002B4879 /* DCResponse.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -171,6 +183,7 @@
 		3063E5952AD051BD002B4879 /* UIComponents */ = {
 			isa = PBXGroup;
 			children = (
+				3063E5AC2AD6BDED002B4879 /* Extension */,
 				3063E5962AD051D7002B4879 /* JansButton.swift */,
 			);
 			path = UIComponents;
@@ -186,6 +199,31 @@
 				3063E59D2AD406D3002B4879 /* LoginViewInteractor.swift */,
 			);
 			path = LoginView;
+			sourceTree = "<group>";
+		};
+		3063E5A32AD40FC9002B4879 /* Database */ = {
+			isa = PBXGroup;
+			children = (
+				3063E5A92AD4121A002B4879 /* DBModel */,
+				3063E5AF2AD6C623002B4879 /* RealmManager.swift */,
+			);
+			path = Database;
+			sourceTree = "<group>";
+		};
+		3063E5A92AD4121A002B4879 /* DBModel */ = {
+			isa = PBXGroup;
+			children = (
+				3063E5AA2AD41238002B4879 /* OIDCClient.swift */,
+			);
+			path = DBModel;
+			sourceTree = "<group>";
+		};
+		3063E5AC2AD6BDED002B4879 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				3063E5AD2AD6BE05002B4879 /* UIApplication+Alert.swift */,
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -206,6 +244,7 @@
 			name = "Jans-Chip";
 			packageProductDependencies = (
 				3063E5722ACD54C9002B4879 /* Alamofire */,
+				3063E5A52AD410F9002B4879 /* RealmSwift */,
 			);
 			productName = "Jans-Chip";
 			productReference = 304311EE2ACC05E4006B8D40 /* Jans-Chip.app */;
@@ -237,6 +276,7 @@
 			mainGroup = 304311E52ACC05E4006B8D40;
 			packageReferences = (
 				3063E5712ACD54C9002B4879 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				3063E5A42AD410F9002B4879 /* XCRemoteSwiftPackageReference "realm-swift" */,
 			);
 			productRefGroup = 304311EF2ACC05E4006B8D40 /* Products */;
 			projectDirPath = "";
@@ -264,17 +304,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3063E5B22AD6CAEB002B4879 /* DCResponse.swift in Sources */,
 				3063E57C2ACD6139002B4879 /* Error.swift in Sources */,
 				3063E59E2AD406D3002B4879 /* LoginViewPresenter.swift in Sources */,
 				3063E5702ACC0CE9002B4879 /* MainView.swift in Sources */,
 				3063E5A22AD406D3002B4879 /* LoginViewInteractor.swift in Sources */,
 				3063E5682ACC0890002B4879 /* MainViewInteractor.swift in Sources */,
+				3063E5AB2AD41238002B4879 /* OIDCClient.swift in Sources */,
 				3063E5792ACD60D7002B4879 /* TokenResponse.swift in Sources */,
+				3063E5AE2AD6BE05002B4879 /* UIApplication+Alert.swift in Sources */,
 				3063E59F2AD406D3002B4879 /* LoginViewAssembler.swift in Sources */,
 				3063E5922AD04A34002B4879 /* RegisterViewState.swift in Sources */,
 				3063E5972AD051D7002B4879 /* JansButton.swift in Sources */,
 				3063E5872ACEB4F8002B4879 /* ServiceClient.swift in Sources */,
 				3063E5902AD04A34002B4879 /* RegisterViewPresenter.swift in Sources */,
+				3063E5B02AD6C623002B4879 /* RealmManager.swift in Sources */,
 				3063E56E2ACC0BFE002B4879 /* MainViewAssembler.swift in Sources */,
 				3063E56C2ACC0BAF002B4879 /* MainViewPresenter.swift in Sources */,
 				3063E5832ACD78DF002B4879 /* EndpointRouter.swift in Sources */,
@@ -497,6 +541,14 @@
 				minimumVersion = 5.0.0;
 			};
 		};
+		3063E5A42AD410F9002B4879 /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.43.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -504,6 +556,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3063E5712ACD54C9002B4879 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		3063E5A52AD410F9002B4879 /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3063E5A42AD410F9002B4879 /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

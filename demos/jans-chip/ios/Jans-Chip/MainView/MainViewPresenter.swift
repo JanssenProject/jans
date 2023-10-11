@@ -9,7 +9,7 @@ import UIKit
 
 protocol MainViewPresenter: AnyObject {
     
-    func login()
+    func onViewStateChanged(viewState: ViewState)
 }
 
 final class MainViewPresenterImpl: MainViewPresenter {
@@ -20,7 +20,7 @@ final class MainViewPresenterImpl: MainViewPresenter {
         self.state = state
     }
     
-    func login() {
-        
+    func onViewStateChanged(viewState: ViewState) {
+        state.viewState = viewState
     }
 }

@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+enum ViewState {
+    case initial, register, login, afterLogin
+}
+
 final class MainViewState: ObservableObject {
     
+    @Published var viewState: ViewState = .initial
 }

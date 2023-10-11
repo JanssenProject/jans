@@ -8,9 +8,11 @@
 import Foundation
 import Combine
 
+typealias ServiceResult = (Bool, Error?) -> Void
+
 protocol RegisterViewInteractor: AnyObject {
     
-    func onRegisterClick()
+    func onRegisterClick(issuer: String, scope: String)
 }
 
 final class RegisterViewInteractorImpl: RegisterViewInteractor {
@@ -25,18 +27,39 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
     
     init(presenter: RegisterViewPresenterImpl) {
         self.presenter = presenter
-    
-//        serviceClient.getOPConfiguration()
-//            .sink { result in
-//                switch result {
-//                case .success(let configuration):
-//                    print("configuration: \(configuration)")
-//                case .failure(let error):
-//                    print("error: \(error)")
-//                }
-//            }
-//            .store(in: &cancellableSet)
     }
     
-    func onRegisterClick() {}
+    func onRegisterClick(issuer: String, scope: String) {
+        guard !issuer.isEmpty else {
+            presenter.onError(message: "'Issuer' value cannot be empty")
+            return
+        }
+        
+        guard !scope.isEmpty else {
+            presenter.onError(message: "'Scope' value cannot be empty")
+            return
+        }
+        
+        fetchOPConfiguration(configurationUrl: issuer, scopeText: scope)
+    }
+    
+    // Step 1: Get Configuration
+    private func fetchOPConfiguration(configurationUrl: String, scopeText: String) {
+        serviceClient.getOPConfiguration(url: configurationUrl)
+            .sink { [weak self] result in
+                switch result {
+                case .success(let configuration):
+                    print("configuration: \(configuration)")
+                    self?.handleFetchOPConfiguration(configuration: configuration)
+                case .failure(let error):
+                    print("error: \(error)")
+                }
+            }
+            .store(in: &cancellableSet)
+    }
+    
+    private func handleFetchOPConfiguration(configuration: OPConfiguration) {
+        // Save configuration into local DB
+//        RealmManager.shared.save(object: configuration)
+    }
 }

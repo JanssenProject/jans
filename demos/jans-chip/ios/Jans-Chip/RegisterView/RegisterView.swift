@@ -32,14 +32,14 @@ struct RegisterView: View {
                 .textFieldStyle(.roundedBorder)
             JansButton(title: "Register",
                        backgroundColor: Color.cyan) {
-                print("Hello World")
+                interactor.onRegisterClick(issuer: state.issuer, scope: state.scopes)
             }.padding(.top)
             if $state.loadingVisible.wrappedValue {
                 ProgressView()
             }
             Spacer()
         }
-        .frame(width: 250, height: .infinity)
+        .frame(width: 250, height: 500)
     }
 }
 

@@ -6,37 +6,25 @@
 //
 
 import Foundation
-import Combine
+import RealmSwift
 
 protocol MainViewInteractor: AnyObject {
     
-    func onRegisterClick()
+    func onAppear()
 }
 
 final class MainViewInteractorImpl: MainViewInteractor {
     
     private let presenter: MainViewPresenterImpl
     
-    private lazy var serviceClient = {
-        ServiceClient()
-    }()
-    
-    private var cancellableSet : Set<AnyCancellable> = []
+    @ObservedResults(OIDCClient.self) var oidcClient
     
     init(presenter: MainViewPresenterImpl) {
         self.presenter = presenter
-    
-//        serviceClient.getOPConfiguration()
-//            .sink { result in
-//                switch result {
-//                case .success(let configuration):
-//                    print("configuration: \(configuration)")
-//                case .failure(let error):
-//                    print("error: \(error)")
-//                }
-//            }
-//            .store(in: &cancellableSet)
     }
     
-    func onRegisterClick() {}
+    func onAppear() {
+        let viewState: ViewState = oidcClient.isEmpty ? .register : .login
+        presenter.onViewStateChanged(viewState: viewState)
+    }
 }

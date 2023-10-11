@@ -31,7 +31,12 @@ public enum EndpointRouter: EndpointConfiguration {
     
     // MARK: - BaseURL
     public var baseURL: String {
-        return "https://example.com/api"
+        switch self {
+        case .getOPConfiguration(let url):
+            return url
+        default:
+            return ""
+        }
     }
     
     // MARK: - Path

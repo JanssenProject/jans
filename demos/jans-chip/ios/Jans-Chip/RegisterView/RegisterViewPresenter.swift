@@ -9,7 +9,7 @@ import UIKit
 
 protocol RegisterViewPresenter: AnyObject {
     
-    func login()
+    func onError(message: String)
 }
 
 final class RegisterViewPresenterImpl: RegisterViewPresenter {
@@ -20,7 +20,7 @@ final class RegisterViewPresenterImpl: RegisterViewPresenter {
         self.state = state
     }
     
-    func login() {
-        
+    func onError(message: String) {
+        UIApplication.showAlert(message: message)
     }
 }
