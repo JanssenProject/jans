@@ -1,0 +1,5 @@
+io.jans.scim2.client
+io.jans.scim2.client.exception
+io.jans.scim2.client.factory
+io.jans.scim2.client.rest
+io.jans.scim2.client.rest.provider
