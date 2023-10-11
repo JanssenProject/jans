@@ -5,31 +5,17 @@
  */
 package io.jans.link.service.custom;
 
-import io.jans.link.model.config.StaticConfiguration;
 import io.jans.service.custom.script.AbstractCustomScriptService;
-import jakarta.annotation.Priority;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Alternative;
-import jakarta.inject.Inject;
-import jakarta.interceptor.Interceptor;
 
 /**
  * Operations with custom scripts
  *
  * @author Yuriy Movchan Date: 12/03/2014
  */
-@ApplicationScoped
-@Alternative
-@Priority(Interceptor.Priority.APPLICATION + 1)
-public class CustomScriptService extends AbstractCustomScriptService {
-
-	@Inject
-	private StaticConfiguration staticConfiguration;
+public abstract class CustomScriptService extends AbstractCustomScriptService {
 
 	private static final long serialVersionUID = -5283102477313448031L;
 
-    public String baseDn() {
-        return staticConfiguration.getBaseDn().getScripts();
-    }
+    public abstract String baseDn();
 
 }
