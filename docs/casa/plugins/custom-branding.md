@@ -4,7 +4,7 @@ This plugin allows admins to apply a design customization by choosing colors, fa
 
 ## Requirements
 
-- The plugin jar file must match the version of your Casa (and Gluu Flex Server) installation.
+- The plugin jar file must match the version of your Casa (and Janssen Server) installation.
     
 ## Installation
 

@@ -8,7 +8,7 @@ tags:
 
 ## Overview
 
-Gluu Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a [Gluu Flex Server](https://docs.gluu.org/). 
+Jans Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Server. 
 
 For example, as people interact with an organization's digital services, they may need to:
 
@@ -30,7 +30,7 @@ Out-of-the-box, Casa can be used to enroll and manage the following authenticato
 - OTP hardware cards like [these](https://www.ftsafe.com/Products/Power_Card/Standard) or dongles like [these](https://www.ftsafe.com/Products/OTP/Single_Button_OTP)      
 - OTP mobile apps like Google Authenticator, FreeOTP, etc.       
 - Mobile phone numbers able to receive OTPs via SMS   
-- Passwords (if stored in the corresponding Gluu Flex Server's local database, i.e. not a backend LDAP like AD)      
+- Passwords (if stored in the corresponding Janssen Server's local database, i.e. not a backend LDAP like AD)      
 
 Additional authenticators and use cases can be supported via [custom plugins](#plugin-oriented). 
 
@@ -60,17 +60,17 @@ Gluu has written a number of plugins to extend Casa, including plugins for:
 - [2FA settings](./plugins/2fa-settings.md)
 - [BioID authentication](./plugins/bioid.md)
 
-## Gluu Flex Server integration
+## Janssen Server integration
 
-Gluu Flex Server relies on "interception scripts" to implement user authentication. Casa itself has an interception script which defines authentication logic and routes authentications to specific 2FA mechanisms which also have their own scripts. All scripts must be enabled in the Gluu Flex Server.        
+Janssen Server relies on "interception scripts" to implement user authentication. Casa itself has an interception script which defines authentication logic and routes authentications to specific 2FA mechanisms which also have their own scripts. All scripts must be enabled in the Janssen Server.        
 
 ## User roles
 
-There are two types of users in Gluu Casa:
+There are two types of users in Jans Casa:
 
-- **Admin users**: Any user in the `Managers Group` in the Gluu Flex Server   
+- **Admin users**: Janssen Server admin user
 
-- **Regular users**: Any user in the Gluu Flex Server  
+- **Regular users**: Any user in the Janssen Server  
 
 Admin users have access to the Casa [admin console](./administration/admin-console.md). All users can manage their 2FA credentials, as outlined in the [user guide](./user-guide.md).  
 

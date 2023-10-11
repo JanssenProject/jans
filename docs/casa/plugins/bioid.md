@@ -7,7 +7,7 @@
 In order to use this authentication mechanism your organization will need to register for a BioID account. 
 
 ## Prerequisites
-- A Gluu Flex Server
+- A Janssen Server
 - [BioID interception script](https://github.com/GluuFederation/casa/blob/master/plugins/bioid/extras/BioIDExternalAuthenticator.py).
 - An account with [BioID](https://bwsportal.bioid.com/register).   
 
