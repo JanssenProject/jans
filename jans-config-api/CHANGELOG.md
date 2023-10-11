@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.18...jans-config-api-v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **agama:** add support for autoconfiguration  ([#6210](https://github.com/JanssenProject/jans/issues/6210)) ([18f15da](https://github.com/JanssenProject/jans/commit/18f15da64ec4ccf453b03ada92727ef1114a2043))
+* **config-api, keycloak:** saml plugin to create trust client in DB and keycloak storage provider to jans store ([#6155](https://github.com/JanssenProject/jans/issues/6155)) ([c4f5034](https://github.com/JanssenProject/jans/commit/c4f50343ef5f991cc3c0184cef0fa83ff1d7f03c))
+* keycloak refactoring referred to Issue [#5330](https://github.com/JanssenProject/jans/issues/5330) review ([#6157](https://github.com/JanssenProject/jans/issues/6157)) ([7319120](https://github.com/JanssenProject/jans/commit/73191202f2e39bf040749b69a31d01bdfbcec8eb))
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+
+### Documentation
+
+* update swagger descriptor [#6192](https://github.com/JanssenProject/jans/issues/6192) ([#6211](https://github.com/JanssenProject/jans/issues/6211)) ([0d34524](https://github.com/JanssenProject/jans/commit/0d3452483ea8ed011a9dd9583baac2a211e862d3))
+
 ## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.17...jans-config-api-v1.0.18) (2023-09-23)
 
 
