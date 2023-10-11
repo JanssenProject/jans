@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.18...jans-cli-tui-v1.0.19) (2023-10-11)
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** mail validation and link log level ([#6140](https://github.com/JanssenProject/jans/issues/6140)) ([f0a8a9a](https://github.com/JanssenProject/jans/commit/f0a8a9a5c389dc9a914aba46c92c63dab4c824e0))
+* **jans-linux-setup:** script hide attribute ([#6181](https://github.com/JanssenProject/jans/issues/6181)) ([b4711cd](https://github.com/JanssenProject/jans/commit/b4711cd1074dccc0b8aad81fc4e4bd238c8a516f))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
 ## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.17...jans-cli-tui-v1.0.18) (2023-09-23)
 
 
