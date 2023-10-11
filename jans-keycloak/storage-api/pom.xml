@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-keycloak-parent</artifactId>
-		<version>1.0.19-SNAPSHOT</version>
+		<version>1.0.19</version>
 	</parent>
 
 	<prerequisites>
