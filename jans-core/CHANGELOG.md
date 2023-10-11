@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.18...jans-core-v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **config-api, keycloak:** saml plugin to create trust client in DB and keycloak storage provider to jans store ([#6155](https://github.com/JanssenProject/jans/issues/6155)) ([c4f5034](https://github.com/JanssenProject/jans/commit/c4f50343ef5f991cc3c0184cef0fa83ff1d7f03c))
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
 ## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.17...jans-core-v1.0.18) (2023-09-23)
 
 
