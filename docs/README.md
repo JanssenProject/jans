@@ -39,4 +39,3 @@ The Janssen Project is licensed under the [Apache License 2.0](https://github.co
 ## Looking for older documentation versions?
 
 The Janssen Project posts the last five versions of the documentation. If you are looking for older versions, you can find them unprocessed in the [docs](https://github.com/JanssenProject/jans/tree/main/docs) folder. Select the version of choice from the tag dropdown in GitHub. If you want to process them you may do so following the steps [here](contribute/testing.md#testing-documentation-changes-locally).
-
