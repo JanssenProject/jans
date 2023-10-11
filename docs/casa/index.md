@@ -68,7 +68,7 @@ Janssen Server relies on "interception scripts" to implement user authentication
 
 There are two types of users in Jans Casa:
 
-- **Admin users**: Janssen Server admin user
+- **Admin users**: Any user in the `Managers Group` in the Janssen Server
 
 - **Regular users**: Any user in the Janssen Server  
 
