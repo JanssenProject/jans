@@ -18,9 +18,6 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class PairwiseIdService implements IPairwiseIdService, Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -758342433526960035L;
 
 	@Inject

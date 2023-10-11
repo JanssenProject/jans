@@ -20,7 +20,7 @@ from setup_app.utils.properties_utils import propertiesUtils
 from setup_app.pylib.jproperties import Properties
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.base import BaseInstaller
-from setup_app.installers.casa import CasaInstaller
+from setup_app.installers.jans_casa import CasaInstaller
 
 class CollectProperties(SetupUtils, BaseInstaller):
 
@@ -155,6 +155,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('scim_client_id', '1201.', {'pw': 'scim_client_pw', 'encoded':'scim_client_encoded_pw'}),
                     ('admin_ui_client_id', '1901.', {'pw': 'admin_ui_client_pw', 'encoded': 'admin_ui_client_encoded_pw'}),
                     ('casa_client_id', CasaInstaller.client_id_prefix),
+                    ('saml_scim_client_id', '2100.'),
                     ]
         self.check_clients(client_var_id_list, create=False)
 

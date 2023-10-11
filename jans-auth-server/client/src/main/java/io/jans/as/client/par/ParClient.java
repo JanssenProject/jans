@@ -79,6 +79,7 @@ public class ParClient extends BaseClient<ParRequest, ParResponse> {
         addReqParam(AuthorizeRequestParam.REQUEST_URI, getRequest().getAuthorizationRequest().getRequestUri());
         addReqParam(AuthorizeRequestParam.ACCESS_TOKEN, getRequest().getAuthorizationRequest().getAccessToken());
         addReqParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS, getRequest().getAuthorizationRequest().getCustomResponseHeadersAsString());
+        addReqParam(AuthorizeRequestParam.DPOP_JKT, getRequest().getAuthorizationRequest().getDpopJkt());
 
         // PKCE
         addReqParam(AuthorizeRequestParam.CODE_CHALLENGE, getRequest().getAuthorizationRequest().getCodeChallenge());

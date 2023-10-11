@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.0.19_dev
+    tag: 1.0.19-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -120,7 +120,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.19_dev
+    tag: 1.0.19-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -286,7 +286,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.0.19_dev
+    tag: 1.0.19-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- LDAP admin password if OpenDJ is used for persistence.
@@ -376,7 +376,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.0.19_dev
+    tag: 1.0.19-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -475,7 +475,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.0.19_dev
+    tag: 1.0.19-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -511,6 +511,106 @@ fido2:
     httpGet:
       path: /jans-fido2/sys/health-check
       port: http-fido2
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+  # -- Configure any additional volumes that need to be attached to the pod
+  volumes: []
+  # -- Configure any additional volumesMounts that need to be attached to the containers
+  volumeMounts: []
+  # Actions on lifecycle events such as postStart and preStop
+  # Example
+  # lifecycle:
+  #   postStart:
+  #     exec:
+  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+  lifecycle: {}
+
+  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
+  additionalLabels: { }
+  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
+  additionalAnnotations: { }
+# -- Janssen Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Auth Server.
+casa:
+  # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
+  # https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: {}
+    # -- Define below as many constraints as needed. The key name should follow the structure tsc1, tsc2...etc.
+    # Do not enter the key labelSelector in the entry/entries below as that is automatically injected by the chart
+    #tsc1:
+    #  maxSkew: 1
+    #  minDomains: 1 # optional; beta since v1.25
+    #  topologyKey: kubernetes.io/hostname
+    #  whenUnsatisfiable: DoNotSchedule
+    #  matchLabelKeys: [] # optional; alpha since v1.25
+    #  nodeAffinityPolicy: [] # optional; alpha since v1.25
+    #  nodeTaintsPolicy: [] # optional; alpha since v1.25
+    #tsc2:
+      #maxSkew: 1
+  # -- Configure the PodDisruptionBudget
+  pdb:
+    enabled: true
+    maxUnavailable: "90%"
+  # -- Configure the HorizontalPodAutoscaler
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 50
+    # -- metrics if targetCPUUtilizationPercentage is not set
+    metrics: []
+    # -- Scaling Policies
+    behavior: {}
+  # -- Add custom normal and secret envs to the service
+  usrEnvs:
+    # -- Add custom normal envs to the service
+    # variable1: value1
+    normal: {}
+    # -- Add custom secret envs to the service
+    # variable1: value1
+    secret: {}
+  # -- Add custom dns policy
+  dnsPolicy: ""
+  # -- Add custom dns config
+  dnsConfig: {}
+  image:
+    # -- Image pullPolicy to use for deploying.
+    pullPolicy: IfNotPresent
+    # -- Image  to use for deploying.
+    repository: ghcr.io/janssenproject/jans/casa
+    # -- Image  tag to use for deploying.
+    tag: 1.0.19-1
+    # -- Image Pull Secrets
+    pullSecrets: [ ]
+  # -- Service replica number.
+  replicas: 1
+  # -- Resource specs.
+  resources:
+    limits:
+      # -- CPU limit.
+      cpu: 500m
+      # -- Memory limit.
+      memory: 500Mi
+    requests:
+      # -- CPU request.
+      cpu: 500m
+      # -- Memory request.
+      memory: 500Mi
+  # -- Configure the liveness healthcheck for casa if needed.
+  livenessProbe:
+    httpGet:
+      # -- http liveness probe endpoint
+      path: /casa/health-check
+      port: http-casa
+    initialDelaySeconds: 25
+    periodSeconds: 25
+    timeoutSeconds: 5
+  # -- Configure the readiness healthcheck for the casa if needed.
+  readinessProbe:
+    httpGet:
+      # -- http readiness probe endpoint
+      path: /casa/health-check
+      port: http-casa
     initialDelaySeconds: 30
     periodSeconds: 30
     timeoutSeconds: 5
@@ -614,6 +714,27 @@ global:
   azureStorageAccountType: Standard_LRS
   # -- Azure storage kind if using Azure disks
   azureStorageKind: Managed
+  casa:
+    # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
+    appLoggers:
+      # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e casa ===> 2022-12-20 17:49:55,744 INFO
+      enableStdoutLogPrefix: "true"
+      # -- casa.log target
+      casaLogTarget: "STDOUT"
+      # -- casa.log level
+      casaLogLevel: "INFO"
+      # -- casa timer log target
+      timerLogTarget: "FILE"
+      # -- casa timer log level
+      timerLogLevel: "INFO"
+    # -- Name of the casa service. Please keep it as default.
+    casaServiceName: casa
+    # -- Boolean flag to enable/disable the casa chart.
+    enabled: true
+    # -- Enable endpoints in either istio or nginx ingress depending on users choice
+    ingress:
+      # -- Enable casa endpoints /casa
+      casaEnabled: false
   cloud:
     # -- Boolean flag if enabled will strip resources requests and limits from all services.
     testEnviroment: false
@@ -870,6 +991,10 @@ nginx-ingress:
     authServerLabels: { }
     # -- Auth server ingress resource additional annotations.
     authServerAdditionalAnnotations: { }
+    # -- Casa ingress resource labels. key app is taken
+    casaLabels: { }
+    # -- Casa ingress resource additional annotations.
+    casaAdditionalAnnotations: { }
     # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
     additionalLabels: { }
     # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
@@ -1052,7 +1177,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.0.19_dev
+    tag: 1.0.19-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1132,7 +1257,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 1.0.19_dev
+    tag: 1.0.19-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1237,7 +1362,7 @@ link:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/link
     # -- Image  tag to use for deploying.
-    tag: 1.0.19_dev
+    tag: 1.0.19-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.

@@ -130,6 +130,17 @@ jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
 
+dn: inum=6D92,ou=scopes,o=jans
+description: Authorization Challenge
+displayName: authorization_challenge
+inum: 6D92
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: false
+jansId: authorization_challenge
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+
 dn: inum=7D90,ou=scopes,o=jans
 description: revoke_session scope which is required to be able call /revoke_session endpoint
 displayName: revoke_session

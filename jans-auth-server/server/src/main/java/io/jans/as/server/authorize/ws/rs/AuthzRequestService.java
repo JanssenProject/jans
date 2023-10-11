@@ -32,6 +32,7 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.server.model.audit.Action;
@@ -48,6 +49,8 @@ import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -182,6 +185,8 @@ public class AuthzRequestService {
 
         authzRequest.setState(StringUtils.isNotBlank(par.getAttributes().getState()) ? par.getAttributes().getState() : "");
 
+        if (StringUtils.isNotBlank(par.getAttributes().getDpopJkt()))
+            authzRequest.setDpopJkt(par.getAttributes().getDpopJkt());
         if (StringUtils.isNotBlank(par.getAttributes().getNonce()))
             authzRequest.setNonce(par.getAttributes().getNonce());
         if (StringUtils.isNotBlank(par.getAttributes().getSessionId()))
@@ -267,6 +272,9 @@ public class AuthzRequestService {
                 }
                 if (StringUtils.isNotBlank(jwtRequest.getCodeChallengeMethod())) {
                     authzRequest.setCodeChallengeMethod(jwtRequest.getCodeChallengeMethod());
+                }
+                if (StringUtils.isNotBlank(jwtRequest.getDpopJkt())) {
+                    authzRequest.setDpopJkt(jwtRequest.getDpopJkt());
                 }
                 if (jwtRequest.getDisplay() != null && StringUtils.isNotBlank(jwtRequest.getDisplay().getParamName())) {
                     authzRequest.setDisplay(jwtRequest.getDisplay().getParamName());
@@ -570,5 +578,17 @@ public class AuthzRequestService {
         oAuth2AuditLog.setScope(authzRequest.getScope());
 
         authzRequest.setAuditLog(oAuth2AuditLog);
+    }
+
+    public void setCustomParameters(AuthzRequest authzRequest) {
+        final HttpServletRequest httpRequest = authzRequest.getHttpRequest();
+
+        authzRequest.setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString())));
+        if (authzRequest.getCustomParameters() == null) {
+            authzRequest.setCustomParameters(new HashMap<>());
+        }
+        if (HttpMethod.POST.endsWith(authzRequest.getHttpMethod())) {
+            requestParameterService.addCustomParameters(httpRequest, authzRequest.getCustomParameters());
+        }
     }
 }

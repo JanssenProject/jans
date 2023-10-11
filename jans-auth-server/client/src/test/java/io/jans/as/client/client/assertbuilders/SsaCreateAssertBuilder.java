@@ -2,8 +2,10 @@ package io.jans.as.client.client.assertbuilders;
 
 import io.jans.as.client.ssa.create.SsaCreateRequest;
 import io.jans.as.client.ssa.create.SsaCreateResponse;
+import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
+import io.jans.as.model.ssa.SsaErrorResponseType;
 import org.apache.http.HttpStatus;
 
 import static io.jans.as.model.ssa.SsaRequestParam.*;
@@ -16,6 +18,8 @@ public class SsaCreateAssertBuilder extends BaseAssertBuilder {
     private final SsaCreateResponse response;
     private int status = HttpStatus.SC_CREATED;
 
+    private IErrorType errorType;
+
     public SsaCreateAssertBuilder(SsaCreateRequest request, SsaCreateResponse response) {
         this.request = request;
         this.response = response;
@@ -23,6 +27,11 @@ public class SsaCreateAssertBuilder extends BaseAssertBuilder {
 
     public SsaCreateAssertBuilder status(int status) {
         this.status = status;
+        return this;
+    }
+
+    public SsaCreateAssertBuilder errorType(SsaErrorResponseType errorType) {
+        this.errorType = errorType;
         return this;
     }
 
@@ -45,6 +54,10 @@ public class SsaCreateAssertBuilder extends BaseAssertBuilder {
             assertEquals(jwtClaims.getClaimAsStringList(SOFTWARE_ROLES.getName()), request.getSoftwareRoles());
             assertNotNull(jwtClaims.getClaim(GRANT_TYPES.getName()), "The grant_types in jwt is null");
             assertEquals(jwtClaims.getClaimAsStringList(GRANT_TYPES.getName()), request.getGrantTypes());
+            if (request.getLifetime() != null) {
+                assertNotNull(jwtClaims.getClaim(LIFETIME.getName()), "The lifetime in jwt is null");
+                assertEquals(jwtClaims.getClaimAsInteger(LIFETIME.getName()), request.getLifetime());
+            }
 
             assertNotNull(jwtClaims.getClaim(JTI.getName()), "The jti in jwt is null");
             assertNotNull(jwtClaims.getClaim(ISS.getName()), "The iss in jwt is null");
@@ -56,6 +69,10 @@ public class SsaCreateAssertBuilder extends BaseAssertBuilder {
         } else {
             assertEquals(response.getStatus(), status, "Unexpected HTTP status response: " + response.getEntity());
             assertNotNull(response.getEntity(), "The entity is null");
+            if (errorType != null) {
+                assertNotNull(response.getErrorType());
+                assertEquals(response.getErrorType(), errorType, "Unexpected ErrorType response: " + response.getErrorType());
+            }
             assertNotNull(response.getErrorDescription());
         }
     }

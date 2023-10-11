@@ -12,7 +12,7 @@ info:
     url: https://github.com/JanssenProject/jans/jans-auth-server/blob/master/LICENSE
   version: "5.0"
 servers:
-  - url: https://gluu.org/
+  - url: https://jans.local.io/jans-auth
 tags:
   - name: developers
     description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint. Server is tightly coupled with Gluu Admin UI.
@@ -255,6 +255,12 @@ paths:
           description: CIBA authentication request Id.
           schema:
             type: string
+        - name: dpop_jkt
+          in: query
+          required: false
+          description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
+          schema:
+            type: string
       responses:
         200:
           description: OK
@@ -393,6 +399,13 @@ paths:
                 claims:
                   type: string
                   description: Requested Claims.
+                auth_req_id:
+                  type: string
+                  description: CIBA authentication request Id.
+                dpop_jkt:
+                  type: string
+                  description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
+
       responses:
         200:
           description: OK
@@ -4052,455 +4065,6 @@ paths:
                     type: string
         500:
           $ref: '#/components/responses/InternalServerError'
-  /fido/u2f/authentication:
-    get:
-      tags:
-        - FIDO U2F
-      summary: Performs FIDO U2F authentication of end-user.
-      description: Performs FIDO U2F authentication of end-user.
-      operationId: get-fido-u2f-authentication
-      parameters:
-        - name: username
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: keyhandle
-          in: query
-          schema:
-            type: string
-            description: Websafe-base64 encoding of the key handle obtained from the U2F token during registration.
-        - name: application
-          in: query
-          description: The application id that the RP would like to assert.
-          schema:
-            type: string
-        - name: session_id
-          in: query
-          schema:
-            type: string
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: AuthenticateRequestMessage
-                description: FIDO U2F device authentication request.
-                required:
-                  - version
-                  - challenge
-                  - appId
-                  - keyHandle
-                type: object
-                properties:
-                  version:
-                    type: string
-                    description: Version of the protocol that the to-be-registered U2F token must speak.
-                    example: U2F_V2
-                  challenge:
-                    type: string
-                    description: The websafe-base64-encoded challenge.
-                  appId:
-                    type: string
-                    description: The application id that the RP would like to assert.
-                  keyHandle:
-                    type: string
-                    description: Websafe-base64 encoding of the key handle obtained from the U2F token during registration.
-        403:
-          $ref: '#/components/responses/AccessDenied'
-        404:
-          description: Invalid parameters provided to endpoint.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - error
-                  - error_description
-                properties:
-                  error:
-                    type: string
-                    format: enum
-                    example:
-                      - no_eligable_devices
-                  error_description:
-                    type: string
-                  details:
-                    type: string
-        500:
-          description: Invalid parameters provided to endpoint.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - error
-                  - error_description
-                properties:
-                  error:
-                    type: string
-                    format: enum
-                    example:
-                      - server_error
-                  error_description:
-                    type: string
-                  details:
-                    type: string
-    post:
-      tags:
-        - FIDO U2F
-      summary: Performs FIDO U2F authentication of end-user.
-      description: Performs FIDO U2F authentication of end-user.
-      operationId: post-fido-u2f-authentication
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: GetClientTokenParams
-              required:
-                - username
-                - tokenResponse
-              type: object
-              properties:
-                username:
-                  type: string
-                tokenResponse:
-                  type: object
-                  properties:
-                    clientData:
-                      type: string
-                      description: base64(UTF8(client data))
-                    signatureData:
-                      type: string
-                      description: base64(raw response from U2F device)
-                    keyHandle:
-                      type: string
-                      description: keyHandle originally passed
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: AuthenticateStatus
-                description: FIDO U2F device authentication status.
-                required:
-                  - status
-                  - challenge
-                type: object
-                properties:
-                  status:
-                    type: string
-                    description: Version of the protocol that the to-be-registered U2F token must speak.
-                    example: U2F_V2
-                  challenge:
-                    type: string
-                    description: The websafe-base64-encoded challenge.
-        403:
-          description: Invalid parameters provided to endpoint.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - error
-                  - error_description
-                properties:
-                  error:
-                    type: string
-                    format: enum
-                    example:
-                      - session_expired
-                      - invalid_request
-                      - device_compromised
-                  error_description:
-                    type: string
-                  details:
-                    type: string
-        500:
-          description: Invalid parameters provided to endpoint.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - error
-                  - error_description
-                properties:
-                  error:
-                    type: string
-                    format: enum
-                    example:
-                      - server_error
-                  error_description:
-                    type: string
-                  details:
-                    type: string
-
-  /fido-configuration:
-    get:
-      tags:
-        - FIDO U2F
-      summary: Performs FIDO configuration data.
-      description: Performs FIDO configuration data.
-      operationId: fido-configuration
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: U2fConfiguration
-                description: FIDO U2F Configuration.
-                required:
-                  - version
-                  - issuer
-                properties:
-                  version:
-                    type: string
-                    description: The version of the FIDO U2F core protocol to which this server conforms. The value MUST be the string 1.0.
-                  issuer:
-                    type: string
-                    description: A URI indicating the party operating the FIDO U2F server.
-                  registration_endpoint:
-                    type: string
-                  authentication_endpoint:
-                    type: string
-        403:
-          $ref: '#/components/responses/AccessDenied'
-        500:
-          description: Invalid parameters provided to endpoint.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - error
-                  - error_description
-                properties:
-                  error:
-                    type: string
-                    format: enum
-                    example:
-                      - server_error
-                  error_description:
-                    type: string
-                  details:
-                    type: string
-  /fido/u2f/registration:
-    get:
-      tags:
-        - FIDO U2F
-      summary: U2F device registration.
-      description: U2F device registration.
-      operationId: get-fido-u2f-registration
-      parameters:
-        - name: username
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: application
-          in: query
-          description: The application id that the RP would like to assert.
-          schema:
-            type: string
-        - name: session_id
-          in: query
-          schema:
-            type: string
-        - name: enrollment_code
-          in: query
-          schema:
-            type: string
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: RegisterRequestMessage
-                description: RegisterRequestMessage
-                required:
-                  - authenticateRequests
-                  - registerRequests
-                type: object
-                properties:
-                  authenticateRequests:
-                    type: array
-                    items:
-                      type: object
-                      description: list of AuthenticateRequest
-                      properties:
-                        version:
-                          type: string
-                          description: Version of the protocol that the to-be-registered U2F token must speak.
-                          example: U2F_V2
-                        challenge:
-                          type: string
-                          description: The websafe-base64-encoded challenge.
-                        appId:
-                          type: string
-                          description: The application id that the RP would like to assert.
-                        keyHandle:
-                          type: string
-                          description: websafe-base64 encoding of the key handle obtained from the U2F token during registration
-                  registerRequests:
-                    type: array
-                    items:
-                      type: object
-                      description: list of RegisterRequest
-                      properties:
-                        version:
-                          type: string
-                          description: Version of the protocol that the to-be-registered U2F token must speak.
-                          example: U2F_V2
-                        challenge:
-                          type: string
-                          description: The websafe-base64-encoded challenge.
-                        appId:
-                          type: string
-                          description: The application id that the RP would like to assert.
-        403:
-          $ref: '#/components/responses/AccessDenied'
-        406:
-          description: Invalid parameters provided to endpoint.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - error
-                  - error_description
-                properties:
-                  error:
-                    type: string
-                    format: enum
-                    example:
-                      - registration_not_allowed
-                  error_description:
-                    type: string
-                  details:
-                    type: string
-        500:
-          description: Invalid parameters provided to endpoint.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - error
-                  - error_description
-                properties:
-                  error:
-                    type: string
-                    format: enum
-                    example:
-                      - server_error
-                  error_description:
-                    type: string
-                  details:
-                    type: string
-    post:
-      tags:
-        - FIDO U2F
-      summary: U2F device registration.
-      description: U2F device registration.
-      operationId: post-fido-u2f-registration
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: RegisterSiteParams
-              required:
-                - username
-              type: object
-              properties:
-                username:
-                  type: string
-                tokenResponse:
-                  type: object
-                  description: FIDO U2F device registration details
-                  properties:
-                    registrationData:
-                      type: string
-                    clientData:
-                      type: string
-                    deviceData:
-                      type: string
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: RegisterStatus
-                description: RegisterRequestMessage
-                type: object
-                properties:
-                  status:
-                    type: string
-                  challenge:
-                    type: string
-        403:
-          description: Invalid parameters provided to endpoint.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - error
-                  - error_description
-                properties:
-                  error:
-                    type: string
-                    format: enum
-                    example:
-                      - session_expired
-                      - invalid_request
-                  error_description:
-                    type: string
-                  details:
-                    type: string
-        406:
-          description: Invalid parameters provided to endpoint.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - error
-                  - error_description
-                properties:
-                  error:
-                    type: string
-                    format: enum
-                    example:
-                      - registration_not_allowed
-                  error_description:
-                    type: string
-                  details:
-                    type: string
-        500:
-          description: Invalid parameters provided to endpoint.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - error
-                  - error_description
-                properties:
-                  error:
-                    type: string
-                    format: enum
-                    example:
-                      - server_error
-                  error_description:
-                    type: string
-                  details:
-                    type: string
 
   /ssa:
     post:
@@ -4576,6 +4140,10 @@ paths:
                   type: boolean
                   description: TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.
                   default: true
+                lifetime:
+                  type: integer
+                  description: SSA lifetime in milliseconds.
+                  example: 86400
       responses:
         201:
           description: 'Created'
@@ -4587,6 +4155,8 @@ paths:
                   ssa:
                     type: string
                     example: eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BvcnRhbC5nbHV1Lm9yZyIsImlhdCI6IjE2NTUzMTkyNjgiLCJqdGkiOiJmN2I1OTkxYy00YzE4LTRjODEtYTY2NC1lNmY4NjcwZjVkNTEiLCJzb2Z0d2FyZV9pZCI6ImdsdXUtc2Nhbi1hcGkiLCJvcmdfaWQiOjEsInNvZnR3YXJlX3JvbGVzIjpbInBhc3N3dXJkIl0sImp3a3NfdXJpIjoiaHR0cHM6Ly9jbG91ZC1kZXYuZ2x1dS5jbG91ZC9wb3J0YWwvandrcyIsImdyYW50X3R5cGVzIjpbImNsaWVudF9jcmVkZW50aWFscyJdLCJleHAiOjE2NTkzMTkyNjh9.MkE-47SvBshmazBfyhAcHsqPpFIbg5CpA8k2TxDWhxc
+        404:
+          $ref: '#/components/responses/InvalidSSAMetadata'
         401:
           $ref: '#/components/responses/UnauthorizedSSA'
         500:
@@ -4608,7 +4178,8 @@ paths:
         **Security: OAuth 2.0**
 
         Scopes:
-        - `https://jans.io/auth/ssa.admin` - **SSA Admin**, Retrieves all `SSA`
+        - `https://jans.io/auth/ssa.admin` - **SSA Adm
+        .in**, Retrieves all `SSA`
         - `https://jans.io/auth/ssa.portal` - **SSA Portal**, Retrieves all `SSA`
         - `https://jans.io/auth/ssa.developer` - **SSA Developer**, Retrieves the `SSA` created by the same client
       operationId: get-ssa
@@ -4668,6 +4239,8 @@ paths:
                             type: string
                         exp:
                           type: integer
+                        lifetime:
+                          type: integer
               examples:
                 example-1:
                   value:
@@ -4687,6 +4260,7 @@ paths:
                         grant_types:
                           - client_credentials
                         exp: 1655419268
+                        lifetime: 86400
         401:
           $ref: '#/components/responses/UnauthorizedSSA'
         500:
@@ -4861,6 +4435,17 @@ components:
               value:
                 error: invalid_client
                 error_description: Client authentication failed (e.g. unknown client, no client authentication included, or unsupported authentication method).
+    InvalidSSAMetadata: #404 - INVALID SSA METADATA
+      description: Invalid SSA Metadata.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalid_ssa_metadata:
+              value:
+                error: invalid_ssa_metadata
+                error_description: The value of one of the SSA Metadata fields is invalid and the server has rejected this request. Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter of a SSA's Metadata.
     InternalServerErrorSSA: #500 - INTERNAL_SERVER_ERROR SSA
       description: Internal error occured. Please check log file for details.
       content:

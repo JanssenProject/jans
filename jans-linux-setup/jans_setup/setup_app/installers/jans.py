@@ -68,19 +68,24 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
                 txt += 'Java Type'.ljust(30) + Config.java_type.rjust(35) + "\n"
 
+            def get_install_string(prefix, install_var):
+                if not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
+                    return ''
+                return prefix.ljust(30) + repr(getattr(Config, install_var, False)).rjust(35) + (' *' if install_var in Config.addPostSetupService else '') + '\n'
 
-            txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installHttpd' in Config.addPostSetupService else '') + "\n"
-            txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
-            txt += 'Install Jans Config API'.ljust(30) + repr(Config.install_config_api).rjust(35) + "\n"
+            txt += get_install_string('Install Apache 2 web server', 'installHttpd')
+            txt += get_install_string('Install Auth Server', 'installOxAuth')
+            txt += get_install_string('Install Jans Config API', 'install_config_api')
             if Config.profile == 'jans':
-                txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Jans Link Server'.ljust(30) + repr(Config.install_jans_link).rjust(35) + (' *' if 'install_jans_link' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Gluu Casa Server'.ljust(30) + repr(Config.install_casa).rjust(35) + (' *' if 'install_casa' in Config.addPostSetupService else '') + "\n"
-                #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
+                txt += get_install_string('Install Fido2 Server', 'installFido2')
+                txt += get_install_string('Install Scim Server', 'install_scim_server')
+                txt += get_install_string('Install Jans Link Server', 'install_jans_link')
+                txt += get_install_string('Install Jans Casa Server', 'install_casa')
+                txt += get_install_string('Install Jans SAML', 'install_jans_saml')
+
 
             if Config.profile == 'jans' and Config.installEleven:
-                txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
+                txt += get_install_string('Install Eleven Server', 'installEleven')
 
             if base.argsp.t:
                 txt += 'Load Test Data '.ljust(30) + repr( base.argsp.t).rjust(35) + "\n"
@@ -111,7 +116,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         #Download jans-auth-client-jar-with-dependencies
         if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
-            oxauth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['ox_version'])
+            oxauth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['jans_version'])
             self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
             base.download(oxauth_client_jar_url, Config.non_setup_properties['oxauth_client_jar_fn'])
 

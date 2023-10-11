@@ -192,6 +192,7 @@ public class SsaService {
         jwt.getClaims().setClaim(ORG_ID.getName(), ssa.getOrgId());
         jwt.getClaims().setClaim(SOFTWARE_ROLES.getName(), ssa.getAttributes().getSoftwareRoles());
         jwt.getClaims().setClaim(GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
+        jwt.getClaims().setClaim(LIFETIME.getName(), ssa.getAttributes().getLifetime());
         if (!ssa.getAttributes().getCustomAttributes().isEmpty()) {
             ssa.getAttributes().getCustomAttributes().forEach((key, value) -> jwt.getClaims().setClaim(key, value));
         }

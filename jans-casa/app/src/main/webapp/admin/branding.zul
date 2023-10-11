@@ -1,0 +1,61 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.adm.title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.admin.CustomBrandingViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul"/>
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.adm.branding_title}</h2>
+                    <div class="pt2 pb3">
+                        <span class="i">${labels.adm.branding_logo}</span>
+                        <div class="pl4-ns pt2">
+                            <z:image src="@load(vm.logo.first)" sclass="bg-light-gray ba b--black b--dashed" />
+                            <z:button class="${css.linkButton} f7 ml3" label="${labels.adm.branding_change}"
+                                      upload="true,maxsize=100,multiple=false" onUpload="@('logoUploaded', event.media)" w:onClick="removeTooltip(this)"
+                                      ca:data-original-title="${labels.adm.branding_logo_hint}" ca:data-toggle="tooltip" ca:data-placement="right" />
+                        </div>
+                    </div>
+                    <div class="pb3">
+                        <span class="i">${labels.adm.branding_favicon}</span>
+                        <div class="pl4-ns pt2">
+                            <z:image src="@load(vm.favicon.first)" sclass="bg-light-gray ba b--black b--dashed" />
+                            <z:button class="f7 pa0 bw0 br0 blue hover-dark-blue underline-hover bg-transparent btn ml3" label="${labels.adm.branding_change}"
+                                      upload="true,maxsize=25,multiple=false" onUpload="@('faviconUploaded', event.media)" w:onClick="removeTooltip(this)"
+                                      ca:data-original-title="${labels.adm.branding_favicon_hint}" ca:data-toggle="tooltip" ca:data-placement="right" />
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success dn" id="feedback-branding" role="alert" />
+
+                    <div class="pt2">
+                        <z:button label="${labels.general.save}" sclass="${css.primaryButton} mr2"
+                                  w:onClick="alertRef = $('#feedback-branding')" onClick="@('save')" />
+                        <z:button label="${labels.adm.branding_revert}" sclass="${css.tertiaryButton}"
+                                  w:onClick="alertRef = $('#feedback-branding')" onClick="@('revert')" />
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <script>
+            function removeTooltip(widget){
+                try {
+                    $('#' + widget.$n().id).tooltip('hide');
+                } catch (e) {
+                }
+            }
+        </script>
+    </z:div>
+
+</zk:zk>

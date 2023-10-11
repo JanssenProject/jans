@@ -199,6 +199,7 @@ Optional:
 - `backchannel_logout_uri` (List of String) List of RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
 - `consent_gathering_scripts` (List of String) List of consent gathering scripts.
 - `dpop_bound_access_token` (Boolean) boolean value to indicate if DPoP bound access token is required.
+- `evidence` (String) Specifies the evidence that the client presents to the authorization server.
 - `id_token_lifetime` (Number) Specifies the Client-specific ID Token expiration.
 - `introspection_scripts` (List of String) List of introspection scripts.
 - `jans_auth_enc_resp_alg` (String) JWE alg algorithm JWA required for encrypting authorization responses.
