@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.19 (2023-10-11)
+
+
+### Bug Fixes
+
+* **jans-casa:** jans-casa installation issues ([#6198](https://github.com/JanssenProject/jans/issues/6198)) ([2775d6f](https://github.com/JanssenProject/jans/commit/2775d6f2b25e0bc62291b98d4db15856ff3ee48e))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
 ## [5.0.0-18](https://github.com/GluuFederation/flex/compare/casa-v5.0.0-16...casa-v5.0.0-18) (2023-09-23)
 
 
