@@ -2,20 +2,20 @@
 
 
 ## BioID Web Service
-[BioID Web Service](https://www.bioid.com) is a "Biometrics as a service" provider. This document will explain how to use Gluu's [BioID  interception script](https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/bioID/BioIDExternalAuthenticator.py) along with a Plugin in Casa to enroll a user's biometric traits and use it is as a method for 2FA. 
+[BioID Web Service](https://www.bioid.com) is a "Biometrics as a service" provider. This document will explain how to use Janssen Server [BioID interception script](../../script-catalog/person_authentication/bioid/BioIDExternalAuthenticator.py) along with a Plugin in Casa to enroll a user's biometric traits and use it is as a method for 2FA. 
 
 In order to use this authentication mechanism your organization will need to register for a BioID account. 
 
 ## Prerequisites
 - A Janssen Server
-- [BioID interception script](https://github.com/GluuFederation/casa/blob/master/plugins/bioid/extras/BioIDExternalAuthenticator.py).
+- [BioID interception script](../../script-catalog/person_authentication/bioid/BioIDExternalAuthenticator.py).
 - An account with [BioID](https://bwsportal.bioid.com/register).   
 
 ## Configure BioID Account
 
 1. [Sign up](https://bwsportal.bioid.com/register) for a BioID account.
 
-2. Upon registration, you will recieve an email with the instance name (listed as STORAGE in Gluu's BioID authentication script), partition number(listed as PARTITION in Gluu's BioID authentication script).
+2. Upon registration, you will recieve an email with the instance name (listed as STORAGE in Janssen Server's BioID authentication script), partition number(listed as PARTITION in Janssen Server's BioID authentication script).
 
 3. As the owner of this instance, you are entitled to access BWS Portal at https://bwsportal.bioid.com using the account associated with your email. 
 With the BWS Portal, you can do the following:  
@@ -33,7 +33,7 @@ With the BWS Portal, you can do the following:
 Log into oxTrust, and go to `Configuration` > `Person Authentication scripts` > `Add custom script configuration`. 
 ### Script contents
 
-Download this [file](https://github.com/GluuFederation/casa/raw/master/plugins/bioid/extras/BioIDExternalAuthenticator.py) and copy its contents in the `Script` form field.
+Download this [file](../../script-catalog/person_authentication/bioid/BioIDExternalAuthenticator.py) and copy its contents in the `Script` form field.
 
 ### Properties
 The mandatory properties in the BioID authentication script are as follows
@@ -68,7 +68,7 @@ Click on `Enable` under the script contents box, and press `Update` at the botto
 
 1. Click on `Add`
 
-Alternatively you can log into chroot and copy the jar file directly to `/opt/gluu/jetty/casa/plugins`.
+Alternatively you can log into Janssen Server and copy the jar file directly to `/opt/jans/jetty/casa/plugins`.
 
 ### Enable the authentication method
 

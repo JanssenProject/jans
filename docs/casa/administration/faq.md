@@ -16,21 +16,6 @@ tags:
 
 The application logs are located at `/opt/jans/jetty/casa/logs`. By default, Casa uses the INFO level for messages. You can change the log level at will using the app's admin UI.
 
-<!--
-**Note: check the logs**
-
-To work properly, Casa requires stable dependent components (filesystem, database, oxd, oxauth, servlet container, etc). Thus, it's important to determine if all expected services are working properly. 
-
-At startup, the app gathers a good amount of information from its environment. If something is missing or went wrong, messages will be shown in the log. Some messages may warn you about parameters not supplied that were simply inferred for you. 
-
-During normal use, the app will show feedback to users if operations were successful or failed. In the latter case, the log is also worth to look at to diagnose the anomalies.
-
-### How do I restart the application?
-
-Just [restart](https://gluu.org/docs/ce/4.4/operation/services/#restart) casa service.
--->
-
-
 ### How do I custom brand Casa?
 
 We have a dedicated page covering the topic of custom branding [here](./custom-branding.md).
@@ -59,7 +44,7 @@ This is the 503 HTTP error. There is an Apache server in front of the applicatio
 
 This reveals a problem in execution of *casa* custom script. Check if `jans-auth_script.log` is showing an error related to the authentication method in question.
 
-If you cannot diagnose the issue, please use the [support forum](https://support.gluu.org) to ask for help. 
+If you cannot diagnose the issue, please use the [Janssen Server discussions](https://github.com/JanssenProject/jans/discussions) to ask for help. 
 
 ### An "Unauthorized access" error is shown when accessing the application
 
@@ -113,4 +98,4 @@ Upon startup, the application needs to query the OpenID metadata URL of oxAuth t
 
 ## My problem is not listed here
 
-Feel free to open a [support](https://support.gluu.org) ticket.
+Feel free to [ask Janssen Server community](https://github.com/JanssenProject/jans/discussions).

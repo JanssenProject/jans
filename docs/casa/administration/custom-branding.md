@@ -52,7 +52,7 @@ Particularly, ZK's default theme CSS file was disabled to offer a higher degree 
 
 In the `/opt/jans/jetty/casa/static` folder, you can place your own version of the main stylesheet and images Casa uses. No other stylesheet should be overriden.
 
-To start, log in to the chroot and do the following:
+To start, log in to the Janssen Server and do the following:
 
 ```
 cd /opt/jans/jetty/casa/static

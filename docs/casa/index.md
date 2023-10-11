@@ -4,7 +4,7 @@ tags:
 - Introduction
 ---
 
-# Gluu Casa Documentation
+# Jans Casa Documentation
 
 ## Overview
 
@@ -40,7 +40,7 @@ To facilitate 2FA device enrollment during account registration, or elsewhere in
 
 - Phone numbers for SMS OTP   
 - OTP apps, cards or dongles        
-- Super Gluu Android and iOS devices  
+- [Super Gluu](https://super.gluu.org) Android and iOS devices  
 - FIDO2 security keys
 
 ## Configuration via APIs
@@ -90,6 +90,4 @@ Use the following links to get started with Casa:
 
 - [Home](./user-guide.md)
 
-## License
 
-Gluu Casa is made available under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).

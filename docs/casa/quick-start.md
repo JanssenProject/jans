@@ -13,7 +13,7 @@ Use this guide to install and configure a deployment of Casa.
 
 ## Installation
 
-Follow the Gluu Casa [installation guide](./administration/README.md) to install Gluu Casa.
+Follow the Jans Casa [installation guide](./administration/README.md) to install Gluu Casa.
 
 ## Configuration
 
@@ -44,4 +44,4 @@ Janssen Server using [TUI](../admin/config-guide/config-tools/jans-tui/README.md
 
 ### Check out available plugins
 
-Browse our [catalog of plugins](https://casa.gluu.org/plugins) to add features and expand Casa!.
+Browse our [catalog of plugins](./plugins) to add features and expand Casa!.
