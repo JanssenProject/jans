@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.18...jans-auth-server-v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **agama:** add support for autoconfiguration  ([#6210](https://github.com/JanssenProject/jans/issues/6210)) ([18f15da](https://github.com/JanssenProject/jans/commit/18f15da64ec4ccf453b03ada92727ef1114a2043))
+* **jans-auth-server:** added "authorization_challenge" scope enforcement [#5856](https://github.com/JanssenProject/jans/issues/5856) ([#6216](https://github.com/JanssenProject/jans/issues/6216)) ([b3db5c8](https://github.com/JanssenProject/jans/commit/b3db5c8cba829fc3e6aec350af7c0b4e5cf068c6))
+* **jans-auth-server:** added DPoP to authorization code and PAR ([#6196](https://github.com/JanssenProject/jans/issues/6196)) ([be559bf](https://github.com/JanssenProject/jans/commit/be559bfebdf61068a296a05334e731a78a2cc91a))
+* **jans-auth-server:** passing custom parameters in the body of POST authorization request and ROPC [#6141](https://github.com/JanssenProject/jans/issues/6141) ([#6148](https://github.com/JanssenProject/jans/issues/6148)) ([00673ae](https://github.com/JanssenProject/jans/commit/00673aea847eb5405d07ef0fbfb341eb0d6cc497))
+* **jans-auth:** new lifetime attribute in ssa ([#6214](https://github.com/JanssenProject/jans/issues/6214)) ([b049e33](https://github.com/JanssenProject/jans/commit/b049e334bbe9d0c3b0214694e9fd6501019b8530))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** apply clientWhiteList when session is valid (allowPostLogoutRedirectWithoutValidation=true ) ([#6162](https://github.com/JanssenProject/jans/issues/6162)) ([d10dee5](https://github.com/JanssenProject/jans/commit/d10dee59b2786599bc709010423c0f64c8618a32))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
 ## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.17...jans-auth-server-v1.0.18) (2023-09-23)
 
 
