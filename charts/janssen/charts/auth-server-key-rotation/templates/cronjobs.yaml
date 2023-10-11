@@ -15,7 +15,7 @@ metadata:
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
 {{- end }}
 spec:
-  schedule: "0 */{{ .Values.keysLife }} * * *"
+  schedule: "@every {{ .Values.keysLife }}h"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
