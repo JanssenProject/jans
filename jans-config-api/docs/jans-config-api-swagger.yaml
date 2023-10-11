@@ -4040,6 +4040,61 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/scripts.readonly
+  /api/v1/config/scripts/types:
+    get:
+      tags:
+      - Custom Scripts
+      summary: Fetch custom script types
+      description: Fetch custom script types
+      operationId: get-custom-script-by-name_1
+      responses:
+        "200":
+          description: CustomScript
+          content:
+            application/json:
+              schema:
+                type: string
+                enum:
+                - person_authentication
+                - authorization_challenge
+                - introspection
+                - resource_owner_password_credentials
+                - application_session
+                - cache_refresh
+                - client_registration
+                - id_generator
+                - uma_rpt_policy
+                - uma_rpt_claims
+                - uma_claims_gathering
+                - consent_gathering
+                - dynamic_scope
+                - spontaneous_scope
+                - end_session
+                - post_authn
+                - select_account
+                - scim
+                - ciba_end_user_notification
+                - revoke_token
+                - persistence_extension
+                - idp
+                - discovery
+                - update_token
+                - config_api_auth
+                - modify_ssa_response
+                - fido2_extension
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/scripts.readonly
   /api/v1/config/scripts/type/{type}:
     get:
       tags:
@@ -7458,17 +7513,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8174,6 +8231,8 @@ components:
         dpopNonceCacheTime:
           type: integer
           format: int32
+        dpopJktForceForAuthorizationCode:
+          type: boolean
         allowIdTokenWithoutImplicitGrantType:
           type: boolean
         forceRopcInAuthorizationEndpoint:
@@ -8224,8 +8283,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8235,6 +8292,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9217,14 +9276,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
