@@ -7460,15 +7460,13 @@ components:
           type: string
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
+        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
