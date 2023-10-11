@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.18...jans-fido2-v1.0.19) (2023-10-11)
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
 ## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.17...jans-fido2-v1.0.18) (2023-09-23)
 
 
