@@ -1,0 +1,10 @@
+io.jans.configapi.plugin.saml.configuration
+io.jans.configapi.plugin.saml.event
+io.jans.configapi.plugin.saml.extensions
+io.jans.configapi.plugin.saml.form
+io.jans.configapi.plugin.saml.model
+io.jans.configapi.plugin.saml.model.config
+io.jans.configapi.plugin.saml.rest
+io.jans.configapi.plugin.saml.service
+io.jans.configapi.plugin.saml.timer
+io.jans.configapi.plugin.saml.util
