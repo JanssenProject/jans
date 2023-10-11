@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"io.jans.orm.hybrid.impl","l":"HybridEntryManager"},{"p":"io.jans.orm.hybrid.impl","l":"HybridEntryManagerFactory"},{"p":"io.jans.orm.hybrid.impl","l":"HybridPersistenceOperationService"}]

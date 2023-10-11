@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.configapi.plugin.scim.configuration"},{"l":"io.jans.configapi.plugin.scim.extensions"},{"l":"io.jans.configapi.plugin.scim.model.config"},{"l":"io.jans.configapi.plugin.scim.rest"},{"l":"io.jans.configapi.plugin.scim.service"},{"l":"io.jans.configapi.plugin.scim.util"}]
