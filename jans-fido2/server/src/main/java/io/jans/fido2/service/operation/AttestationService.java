@@ -23,7 +23,7 @@ import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
-import io.jans.fido2.service.external.ExternalFido2Service;
+import io.jans.fido2.service.external.ExternalFido2ExtensionService;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.fido2.service.persist.UserSessionIdService;
@@ -85,7 +85,7 @@ public class AttestationService {
 	private Base64Service base64Service;
 
     @Inject
-    private ExternalFido2Service externalFido2InterceptionService;
+    private ExternalFido2ExtensionService externalFido2InterceptionService;
 
 	@Inject
     private ErrorResponseFactory errorResponseFactory;
