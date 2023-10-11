@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.19-1](https://github.com/JanssenProject/jans/compare/docker-jans-scim-v1.0.18-1...docker-jans-scim-v1.0.19-1) (2023-10-11)
+
+
+### Features
+
+* **docker-jans:** upgrade base image to Java 17 ([#6231](https://github.com/JanssenProject/jans/issues/6231)) ([8ed40e9](https://github.com/JanssenProject/jans/commit/8ed40e91a56c256cb34262659b6e0657571f8c97))
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
 ## [1.0.18-1](https://github.com/JanssenProject/jans/compare/docker-jans-scim-v1.0.17-1...docker-jans-scim-v1.0.18-1) (2023-09-23)
 
 
