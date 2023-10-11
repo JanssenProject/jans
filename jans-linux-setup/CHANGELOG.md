@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.18...jans-linux-setup-v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **config-api, keycloak:** saml plugin to create trust client in DB and keycloak storage provider to jans store ([#6155](https://github.com/JanssenProject/jans/issues/6155)) ([c4f5034](https://github.com/JanssenProject/jans/commit/c4f50343ef5f991cc3c0184cef0fa83ff1d7f03c))
+* **jans-auth-server:** added "authorization_challenge" scope enforcement [#5856](https://github.com/JanssenProject/jans/issues/5856) ([#6216](https://github.com/JanssenProject/jans/issues/6216)) ([b3db5c8](https://github.com/JanssenProject/jans/commit/b3db5c8cba829fc3e6aec350af7c0b4e5cf068c6))
+* **jans-auth:** new lifetime attribute in ssa ([#6214](https://github.com/JanssenProject/jans/issues/6214)) ([b049e33](https://github.com/JanssenProject/jans/commit/b049e334bbe9d0c3b0214694e9fd6501019b8530))
+* **jans-linux-setup:** hide saml setup for developers ([#6225](https://github.com/JanssenProject/jans/issues/6225)) ([7b8bae6](https://github.com/JanssenProject/jans/commit/7b8bae6c746492f9bdfc18eb0c43467ac831da56))
+
+
+### Bug Fixes
+
+* **jans-casa:** jans-casa installation issues ([#6198](https://github.com/JanssenProject/jans/issues/6198)) ([2775d6f](https://github.com/JanssenProject/jans/commit/2775d6f2b25e0bc62291b98d4db15856ff3ee48e))
+* **jans-linux-setup:** casa url ([#6187](https://github.com/JanssenProject/jans/issues/6187)) ([0df0c86](https://github.com/JanssenProject/jans/commit/0df0c86a684827a2fb932c1fd80d6cf472d3b355))
+* **jans-linux-setup:** post setup fix for config-api ([#6217](https://github.com/JanssenProject/jans/issues/6217)) ([ccfd8b1](https://github.com/JanssenProject/jans/commit/ccfd8b14001ae53fdd8d1e06125c4dba9a4bbc22))
+* **jans-linux-setup:** post-setup install issues ([#6212](https://github.com/JanssenProject/jans/issues/6212)) ([9379e66](https://github.com/JanssenProject/jans/commit/9379e66d3e095cbd06180aa36016c15e398db8c0))
+* **jans-linux-setup:** script hide attribute ([#6181](https://github.com/JanssenProject/jans/issues/6181)) ([b4711cd](https://github.com/JanssenProject/jans/commit/b4711cd1074dccc0b8aad81fc4e4bd238c8a516f))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
 ## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.17...jans-linux-setup-v1.0.18) (2023-09-23)
 
 
