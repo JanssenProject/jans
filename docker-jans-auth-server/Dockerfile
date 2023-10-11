@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-alpine:11.0.16
+FROM bellsoft/liberica-openjdk-alpine:17.0.8
 
 # ===============
 # Alpine packages
@@ -51,7 +51,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=1.0.19-SNAPSHOT
-ENV CN_BUILD_DATE='2023-10-05 08:23'
+ENV CN_BUILD_DATE='2023-10-10 08:38'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -74,10 +74,10 @@ RUN mkdir -p /usr/share/java \
 
 ARG TWILIO_VERSION=7.17.0
 ARG JSMPP_VERSION=2.3.7
-ARG CASA_CONFIG_VERSION=1.0.19-SNAPSHOT
-ARG CASA_CONFIG_BUILD_DATE="2023-02-13 11:44"
-ARG FIDO2_CLIENT_VERSION=1.0.19-SNAPSHOT
-ARG FIDO2_CLIENT_BUILD_DATE="2023-01-31 15:04"
+ARG CASA_CONFIG_VERSION=${CN_VERSION}
+ARG CASA_CONFIG_BUILD_DATE=${CN_BUILD_DATE}
+ARG FIDO2_CLIENT_VERSION=${CN_VERSION}
+ARG FIDO2_CLIENT_BUILD_DATE=${CN_BUILD_DATE}
 
 RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
@@ -92,7 +92,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/ftl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
-ENV JANS_SOURCE_VERSION=eb4e84a3b7fbf9a3ad778b3cc77b40dec3210e5d
+ENV JANS_SOURCE_VERSION=6f3b84f8ffe529855a28288e1a3e37d9fb2ba770
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
