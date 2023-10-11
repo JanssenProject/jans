@@ -4,19 +4,20 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.link.service;
+package io.jans.link.server.service;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Properties;
 
+import io.jans.link.timer.JansLinkTimer;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Lists;
 
+import io.jans.link.service.EncryptionService;
 import io.jans.link.service.config.ApplicationFactory;
 import io.jans.link.service.config.ConfigurationFactory;
-import io.jans.link.timer.CacheRefreshTimer;
 import io.jans.exception.ConfigurationException;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
@@ -90,7 +91,7 @@ public class AppInitializer {
 	private LoggerService loggerService;
 
 	@Inject
-	private CacheRefreshTimer cacheRefreshTimer;
+	private JansLinkTimer jansLinkTimer;
 
 	@PostConstruct
 	public void createApplicationComponents() {
@@ -126,7 +127,7 @@ public class AppInitializer {
 		configurationFactory.initTimer();
 		loggerService.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
-		cacheRefreshTimer.initTimer();
+		jansLinkTimer.initTimer();
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
 				.fire(new ApplicationInitializedEvent());

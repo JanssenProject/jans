@@ -4,18 +4,17 @@
  * Copyright (c) 2014, Gluu
  */
 
-package io.jans.link.service;
+package io.jans.keycloak.link.server.service;
 
-import java.io.Serializable;
-
-import org.slf4j.Logger;
-
-import io.jans.link.model.config.AppConfiguration;
-import io.jans.link.model.config.Conf;
-import io.jans.link.service.config.ConfigurationFactory;
+import io.jans.keycloak.link.model.config.AppConfiguration;
+import io.jans.keycloak.link.model.config.Conf;
+import io.jans.keycloak.link.service.config.ConfigurationFactory;
 import io.jans.orm.PersistenceEntryManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+
+import java.io.Serializable;
 
 /**
  * GluuConfiguration service
@@ -23,12 +22,12 @@ import jakarta.inject.Inject;
  * @author Reda Zerrad Date: 08.10.2012
  */
 @ApplicationScoped
-public class CacheRefrshConfigurationService implements Serializable {
+public class CacheRefreshConfigurationService implements Serializable {
 
-    private static final long serialVersionUID = 8842838732456296435L;
+    private Logger log;
 
     @Inject
-    private Logger log;
+    private static final long serialVersionUID = 8842838732456296435L;
 
     @Inject
     private PersistenceEntryManager persistenceEntryManager;
@@ -85,7 +84,7 @@ public class CacheRefrshConfigurationService implements Serializable {
      * @throws Exception
      */
     public String getDnForConfiguration() {
-    	String dn = configurationFactory.getBaseConfiguration().getString("link_ConfigurationEntryDN");
+    	String dn = configurationFactory.getBaseConfiguration().getString("keycloakLink_ConfigurationEntryDN");
         return dn;
     }
 

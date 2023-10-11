@@ -29,15 +29,11 @@ import java.util.*;
  * 
  * @author Yuriy Movchan Date: 10.13.2010
  */
-@ApplicationScoped
-public class AttributeService extends io.jans.service.AttributeService {
+public abstract class AttributeService extends io.jans.service.AttributeService {
 
     private GluuUserRole[] attributeEditTypes = new GluuUserRole[] { GluuUserRole.ADMIN, GluuUserRole.USER };
 
     private static final long serialVersionUID = 8223624816948822765L;
-
-    @Inject
-    private AppConfiguration appConfiguration;
 
     @Inject
     private OrganizationService organizationService;
@@ -73,10 +69,10 @@ public class AttributeService extends io.jans.service.AttributeService {
     private List<JansAttribute> getAllPersonAtributesImpl(GluuUserRole gluuUserRole,
             Collection<JansAttribute> attributes) {
         List<JansAttribute> attributeList = new ArrayList<JansAttribute>();
-        String[] objectClassTypes = appConfiguration.getPersonObjectClassTypes();
+        String[] objectClassTypes = getPersonObjectClassTypes();
         log.debug("objectClassTypes={}", Arrays.toString(objectClassTypes));
         for (JansAttribute attribute : attributes) {
-            if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), appConfiguration.getPersonCustomObjectClass())
+            if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), getPersonCustomObjectClass())
                     && (GluuUserRole.ADMIN == gluuUserRole)) {
                 attribute.setCustom(true);
                 attributeList.add(attribute);
@@ -113,10 +109,10 @@ public class AttributeService extends io.jans.service.AttributeService {
 
     private List<JansAttribute> getAllPersonAtributes(GluuUserRole gluuUserRole, Collection<JansAttribute> attributes) {
         List<JansAttribute> attributeList = new ArrayList<JansAttribute>();
-        String[] objectClassTypes = appConfiguration.getPersonObjectClassTypes();
+        String[] objectClassTypes = getPersonObjectClassTypes();
         log.debug("objectClassTypes={}", Arrays.toString(objectClassTypes));
         for (JansAttribute attribute : attributes) {
-            if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), appConfiguration.getPersonCustomObjectClass())
+            if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), getPersonCustomObjectClass())
                     && (GluuUserRole.ADMIN == gluuUserRole)) {
                 attribute.setCustom(true);
                 attributeList.add(attribute);
@@ -158,9 +154,9 @@ public class AttributeService extends io.jans.service.AttributeService {
     private List<JansAttribute> getAllContactAtributesImpl(GluuUserRole gluuUserRole,
             Collection<JansAttribute> attributes) {
         List<JansAttribute> returnAttributeList = new ArrayList<JansAttribute>();
-        String[] objectClassTypes = appConfiguration.getContactObjectClassTypes();
+        String[] objectClassTypes = getPersonObjectClassTypes();
         for (JansAttribute attribute : attributes) {
-            if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), appConfiguration.getPersonCustomObjectClass())
+            if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), getPersonCustomObjectClass())
                     && (GluuUserRole.ADMIN == gluuUserRole)) {
                 attribute.setCustom(true);
                 returnAttributeList.add(attribute);
@@ -345,8 +341,12 @@ public class AttributeService extends io.jans.service.AttributeService {
      * @return Current custom origin
      */
     public String getCustomOrigin() {
-        return appConfiguration.getPersonCustomObjectClass();
+        return getPersonCustomObjectClass();
     }
+
+    public abstract String getPersonCustomObjectClass();
+
+    public abstract String[] getPersonObjectClassTypes();
 
     @Override
     protected List<JansAttribute> getAllAtributesImpl(String baseDn) {
@@ -455,11 +455,11 @@ public class AttributeService extends io.jans.service.AttributeService {
         List<JansAttribute> attributeList = persistenceEntryManager.findEntries(getDnForAttribute(null),
                 JansAttribute.class, filter);
         String customOrigin = getCustomOrigin();
-        String[] objectClassTypes = appConfiguration.getPersonObjectClassTypes();
+        String[] objectClassTypes = getPersonObjectClassTypes();
         log.debug("objectClassTypes={}", Arrays.toString(objectClassTypes));
         List<JansAttribute> returnAttributeList = new ArrayList<JansAttribute>();
         for (JansAttribute attribute : attributeList) {
-            if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), appConfiguration.getPersonCustomObjectClass())
+            if (StringHelper.equalsIgnoreCase(attribute.getOrigin(), getPersonCustomObjectClass())
                     && (GluuUserRole.ADMIN == gluuUserRole)) {
                 attribute.setCustom(true);
                 returnAttributeList.add(attribute);
@@ -503,7 +503,7 @@ public class AttributeService extends io.jans.service.AttributeService {
     }
 
     public List<JansAttribute> searchPersonAttributes(String pattern, int sizeLimit) throws Exception {
-        String[] objectClassTypes = appConfiguration.getPersonObjectClassTypes();
+        String[] objectClassTypes = getPersonObjectClassTypes();
         String[] targetArray = new String[] { pattern };
         List<Filter> originFilters = new ArrayList<Filter>();
         Filter displayNameFilter = Filter.createSubstringFilter(JansConstants.displayName, null, targetArray, null);
