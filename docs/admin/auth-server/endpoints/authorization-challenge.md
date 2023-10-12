@@ -140,6 +140,106 @@ Full sample script can be found [here](../../../script-catalog/authorization_cha
 Device session is optional. AS does not return it by default. 
 It's possible to pass in request `use_device_session=true` which makes AS return it in error response.
 
+
+## Multi-step example
+
+Sometimes it's required to send data sequentially. Step by step. Calls to Authorization Challenge Endpoint must have 
+`use_device_session=true` parameter to force tracking data between request. 
+ 
+Lets consider example when RP first sends `username` and then in next request `OTP`.
+
+```text
+POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+Host: server.example.com
+Content-Type: application/x-www-form-urlencoded
+
+username=alice
+&scope=photos
+&client_id=bb16c14c73415
+```
+ 
+AS accepts `username` and returns back error with `device_session`.
+
+```text
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Cache-Control: no-store
+
+{
+  "error": "otp_required",
+  "device_session": "ce6772f5e07bc8361572f"
+}
+```
+
+In next call RP can send OTP and `device_session` (AS matches user from `device_session`)
+
+```text
+POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+Host: server.example.com
+Content-Type: application/x-www-form-urlencoded
+
+otp=ccnnju667d&device_session=ce6772f5e07bc8361572f
+```
+
+In custom script it's easy to code what data has to be kept in `device_session`.
+
+```text
+    private void createError(ExternalScriptContext context, String errorCode) {
+        String deviceSessionPart = prepareDeviceSessionSubJson(context);
+
+        final String entity = String.format("{\"error\": \"%s\"%s}", errorCode, deviceSessionPart);
+        context.createWebApplicationException(401, entity);
+    }
+
+    private String prepareDeviceSessionSubJson(ExternalScriptContext context) {
+        DeviceSession deviceSessionObject = context.getAuthzRequest().getDeviceSessionObject();
+        if (deviceSessionObject != null) {
+            prepareDeviceSession(context, deviceSessionObject);
+            return String.format(",\"device_session\":\"%s\"", deviceSessionObject.getId());
+        } else if (context.getAuthzRequest().isUseDeviceSession()) {
+            deviceSessionObject = prepareDeviceSession(context, null);
+            return String.format(",\"device_session\":\"%s\"", deviceSessionObject.getId());
+        }
+        return "";
+    }
+
+    private DeviceSession prepareDeviceSession(ExternalScriptContext context, DeviceSession deviceSessionObject) {
+        DeviceSessionService deviceSessionService = CdiUtil.bean(DeviceSessionService.class);
+        boolean newSave = deviceSessionObject == null;
+        if (newSave) {
+            final String id = UUID.randomUUID().toString();
+            deviceSessionObject = new DeviceSession();
+            deviceSessionObject.setId(id);
+            deviceSessionObject.setDn(deviceSessionService.buildDn(id));
+        }
+
+        String username = context.getHttpRequest().getParameter(USERNAME_PARAMETER);
+        if (StringUtils.isNotBlank(username)) {
+            deviceSessionObject.getAttributes().getAttributes().put(USERNAME_PARAMETER, username);
+        }
+
+        String otp = context.getHttpRequest().getParameter(OTP_PARAMETER);
+        if (StringUtils.isNotBlank(otp)) {
+            deviceSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
+        }
+
+        if (newSave) {
+            deviceSessionService.persist(deviceSessionObject);
+        } else {
+            deviceSessionService.merge(deviceSessionObject);
+        }
+
+        return deviceSessionObject;
+    }
+```
+
+
+More details in [Authorization Challenge Custom Script Page](../../developer/scripts/authorization-challenge.md).
+
+Full multi-step sample script can be found [here](../../../script-catalog/authorization_challenge/multi_step/AuthorizationChallenge.java)
+
+
+
 ## Full successful Authorization Challenge Flow sample
 
 ```
