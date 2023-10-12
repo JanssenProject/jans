@@ -226,7 +226,7 @@ const RegisterForm = (data) => {
     return (
         <div className="box">
             <legend><span className="number">O</span> Register OIDC Client</legend>
-            <legend><span className="redFont">{error}</span></legend>
+            {error.length > 0 ? <legend><span className="redFont">{error}</span></legend> : ""}
             <WindmillSpinner loading={pageLoading} color="#00ced1" />
             <label><b>Issuer</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Enter OpenID Provider URL and press ENTER to validate)</span> :</label>
             <CreatableSelect
@@ -275,7 +275,7 @@ const RegisterForm = (data) => {
                 className="inputText"
             />
 
-            <legend><span className="error">{error}</span></legend>
+            <legend><span className="redFont">{error}</span></legend>
             <button id="sbmtButton" onClick={registerClient}>Register</button>
         </div>
     )

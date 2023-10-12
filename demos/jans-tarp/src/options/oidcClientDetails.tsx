@@ -182,9 +182,7 @@ const OIDCClientDetails = (data) => {
                         tokenResponse.data.access_token
                     ) {
                         console.log('tokenResponse:' + JSON.stringify(tokenResponse))
-                        const userInfoData = qs.stringify({
-                            access_token: tokenResponse.data.access_token
-                        })
+
                         const userInfoOptions = {
                             method: 'GET',
                             headers: { 'Authorization': `Bearer ${tokenResponse.data.access_token}` },
@@ -322,7 +320,7 @@ const OIDCClientDetails = (data) => {
         <div className="box">
             <>
                 <legend><span className="number">O</span> Registered Client</legend>
-                <legend><span className="redFont">{message}</span></legend>
+                {message.length > 0 ? <legend><span className="redFont">{message}</span></legend> : ""}
 
                 <WindmillSpinner loading={loading} color="#00ced1" />
                 <label><b>OP Host:</b></label>
