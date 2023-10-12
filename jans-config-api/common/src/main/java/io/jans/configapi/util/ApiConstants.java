@@ -103,6 +103,7 @@ public class ApiConstants {
     public static final String SCOPE_INUM = "scope_inum";
     public static final String TYPE = "type";
     public static final String TYPES = "types";
+    public static final String SCRIPTS_TYPES = "script-types";
     public static final String NAME = "name";
     public static final String DISPLAY_NAME = "displayName";
     public static final String KID = "kid";
