@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -316,12 +317,12 @@ public class CustomScriptResource extends ConfigBaseResource {
     public Response getCustomScriptTypes() {
         logger.info("Fetch type of custom script ");
 
-        List<CustomScriptType> customScriptTypes = null;
+        Set<CustomScriptType> customScriptTypes = null;
         List<CustomScript> customScriptList = customScriptService.findAllCustomScripts(null);
         logger.info("Custom Scripts fetched :{}", customScriptList);
 
         if (customScriptList != null && !customScriptList.isEmpty()) {
-            customScriptTypes = customScriptList.stream().map(CustomScript::getScriptType).collect(Collectors.toList());
+            customScriptTypes = customScriptList.stream().map(CustomScript::getScriptType).collect(Collectors.toSet());
             logger.debug("Custom Scripts fetched :{}", customScriptList);
         }
         logger.info("Custom scripts type fetched customScriptTypes :{}", customScriptTypes);
