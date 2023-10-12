@@ -20,7 +20,6 @@ const createOption = (label: string) => ({
 const OIDCClientDetails = (data) => {
     const [additionalParam, setAdditionalParam] = useState("");
     const [message, setMessage] = useState("");
-    const [authorizationUrl, setAuthorizationUrl] = useState("");
     const [loading, setLoading] = useState(false);
     const [displayToken, setDisplayToken] = useState(false);
     const [acrValueOption, setAcrValueOption] = useState<IOption | null>();
@@ -133,8 +132,6 @@ const OIDCClientDetails = (data) => {
                     });
                 }
                 console.log('Obtained autorization URL: ' + authzUrl)
-                setAuthorizationUrl(authzUrl);
-                //setMessage(`<a href="${authzUrl}" target="_blank">Click here</a> if authz url does not open properly on another tab`)
 
                 const resultUrl: string = await new Promise((resolve, reject) => {
                     customLaunchWebAuthFlow({
@@ -326,40 +323,38 @@ const OIDCClientDetails = (data) => {
             <>
                 <legend><span className="number">O</span> Registered Client</legend>
                 <legend><span className="redFont">{message}</span></legend>
-                {authorizationUrl.length > 0 ?
-                    <><a href={authorizationUrl} target="_blank">Click here if authorization URL does not open properly on another tab</a></>
-                : ''}
-            <WindmillSpinner loading={loading} color="#00ced1" />
-            <label><b>OP Host:</b></label>
-            <input type="text" id="opHost" name="opHost" value={data.data.op_host} disabled />
 
-            <label><b>Client Id:</b></label>
-            <input type="text" id="clientId" name="clientId" value={data.data.client_id} disabled />
+                <WindmillSpinner loading={loading} color="#00ced1" />
+                <label><b>OP Host:</b></label>
+                <input type="text" id="opHost" name="opHost" value={data.data.op_host} disabled />
 
-            <label><b>Client Secret:</b></label>
-            <input type="text" id="clientSecret" name="clientSecret" value={data.data.client_secret} disabled />
+                <label><b>Client Id:</b></label>
+                <input type="text" id="clientId" name="clientId" value={data.data.client_id} disabled />
 
-            <label><b>Additional Params:</b></label>
-            <input type="text" id="additionalParam" name="additionalParam" value={additionalParam} onChange={updateInputValue}
-                placeholder='e.g. {"paramOne": "valueOne", "paramTwo": "valueTwo"}' autoComplete="off" className="inputText inputStyle" />
+                <label><b>Client Secret:</b></label>
+                <input type="text" id="clientSecret" name="clientSecret" value={data.data.client_secret} disabled />
 
-            <label><b>Acr Value:</b></label>
-            <Select
-                inputId="acrValues"
-                className="basic-single inputText"
-                classNamePrefix="select"
-                isClearable={true}
-                isSearchable={true}
-                name="color"
-                onChange={(newValue) => setAcrValueOption(newValue)}
-                options={acrValueOptions}
-            />
+                <label><b>Additional Params:</b></label>
+                <input type="text" id="additionalParam" name="additionalParam" value={additionalParam} onChange={updateInputValue}
+                    placeholder='e.g. {"paramOne": "valueOne", "paramTwo": "valueTwo"}' autoComplete="off" className="inputText inputStyle" />
 
-            <label><input type="checkbox" onChange={() => setDisplayToken(!displayToken)} /><b>Display Access Token and ID Token after authentication</b></label>
+                <label><b>Acr Value:</b></label>
+                <Select
+                    inputId="acrValues"
+                    className="basic-single inputText"
+                    classNamePrefix="select"
+                    isClearable={true}
+                    isSearchable={true}
+                    name="color"
+                    onChange={(newValue) => setAcrValueOption(newValue)}
+                    options={acrValueOptions}
+                />
 
-            <button id="trigCodeFlowButton" onClick={triggerCodeFlowButton}>Trigger Auth Code Flow</button>
-            <button id="resetButton" onClick={resetClient}>Reset</button>
-        </>
+                <label><input type="checkbox" onChange={() => setDisplayToken(!displayToken)} /><b>Display Access Token and ID Token after authentication</b></label>
+
+                <button id="trigCodeFlowButton" onClick={triggerCodeFlowButton}>Trigger Auth Code Flow</button>
+                <button id="resetButton" onClick={resetClient}>Reset</button>
+            </>
         </div >
     )
 };
