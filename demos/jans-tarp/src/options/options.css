@@ -122,7 +122,7 @@ label.light {
   border-radius: 100%;
 }
 
-.error {
+.redFont {
   color: #ff0000;
   font-size: 15px;
   text-align: center;

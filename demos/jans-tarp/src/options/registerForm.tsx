@@ -24,10 +24,11 @@ const RegisterForm = (data) => {
     const [inputValueIssuer, setInputValueIssuer] = useState('');
     const [inputValueScope, setInputValueScope] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [showClientExpiry, setShowClientExpiry] = useState(false);
     const [issuerOption, setIssuerOption] = useState<readonly IOption[]>([]);
     const [scopeOption, setScopeOption] = useState<readonly IOption[]>([createOption('openid')]);
     const [clientExpiryDate, setClientExpiryDate] = useState(moment().add(1, 'days').toDate());
-    
+
     const handleKeyDown: KeyboardEventHandler = async (event) => {
         const inputId = (event.target as HTMLInputElement).id;
         if (inputId === 'issuer') {
@@ -69,7 +70,7 @@ const RegisterForm = (data) => {
             issuer = issuer + '/.well-known/openid-configuration';
         }
 
-        if (!issuer.includes('https') || !issuer.includes('http')) {
+        if (!issuer.includes('https') && !issuer.includes('http')) {
             issuer = 'https://' + issuer;
         }
         return issuer;
@@ -102,7 +103,7 @@ const RegisterForm = (data) => {
         if (scopeOption.length === 0) {
             errorField += 'scope ';
         }
-        if(!clientExpiryDate) {
+        if (showClientExpiry && !clientExpiryDate) {
             errorField += 'client-expiry ';
         }
         if (errorField.trim() !== '') {
@@ -144,7 +145,6 @@ const RegisterForm = (data) => {
                 const registrationUrl = openapiConfig.data.registration_endpoint;
 
                 var registerObj: ILooseObject = {
-                    issuer: issuer,
                     redirect_uris: [issuer],
                     scope: scope,
                     post_logout_redirect_uris: [chrome.runtime.getURL('options.html')],
@@ -152,14 +152,16 @@ const RegisterForm = (data) => {
                     grant_types: ['authorization_code', 'client_credentials'],
                     application_type: 'web',
                     client_name: 'Gluu-RP-' + uuidv4(),
-                    token_endpoint_auth_method: 'client_secret_basic',
-                    lifetime: ((clientExpiryDate.getTime() - moment().toDate().getTime())/1000)
+                    token_endpoint_auth_method: 'client_secret_basic'
                 };
+
+                if (showClientExpiry) {
+                    registerObj.lifetime = ((clientExpiryDate.getTime() - moment().toDate().getTime()) / 1000);
+                }
 
                 const registrationResp = await registerOIDCClient(registrationUrl, registerObj);
 
                 if (registrationResp !== undefined) {
-
                     chrome.storage.local.set({
                         oidcClient: {
                             'op_host': issuer,
@@ -170,7 +172,8 @@ const RegisterForm = (data) => {
                             'authorization_endpoint': openapiConfig.data.authorization_endpoint,
                             'response_type': registerObj.response_types,
                             'post_logout_redirect_uris': registerObj.post_logout_redirect_uris,
-                            'expire_at': clientExpiryDate.getTime()
+                            'expire_at': clientExpiryDate.getTime(),
+                            'showClientExpiry': showClientExpiry
 
                         }
                     })
@@ -223,7 +226,7 @@ const RegisterForm = (data) => {
     return (
         <div className="box">
             <legend><span className="number">O</span> Register OIDC Client</legend>
-            <legend><span className="error">{error}</span></legend>
+            <legend><span className="redFont">{error}</span></legend>
             <WindmillSpinner loading={pageLoading} color="#00ced1" />
             <label><b>Issuer</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Enter OpenID Provider URL and press ENTER to validate)</span> :</label>
             <CreatableSelect
@@ -242,16 +245,19 @@ const RegisterForm = (data) => {
                 className="inputText"
             />
 
-            <label><b>Client expiry date</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Select the date)</span> :</label>
-            <DatePicker
-                showTimeSelect
-                selected={clientExpiryDate}
-                onChange={(date) => setClientExpiryDate(date)}
-                minDate={new Date()}
-                className="inputText inputStyle"
-                dateFormat="yyyy/MM/dd h:mm aa"
-            />
-
+            <label><input type="checkbox" onChange={() => setShowClientExpiry(!showClientExpiry)} /><b>Set Client Expiry</b></label>
+            {showClientExpiry ?
+                <>
+                    <label><b>Client expiry date</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Select the date)</span> :</label>
+                    <DatePicker
+                        showTimeSelect
+                        selected={clientExpiryDate}
+                        onChange={(date) => setClientExpiryDate(date)}
+                        minDate={new Date()}
+                        className="inputText inputStyle"
+                        dateFormat="yyyy/MM/dd h:mm aa"
+                    />
+                </> : ''}
             <label><b>Scopes</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Type and press enter)</span> :</label>
 
             <CreatableSelect
