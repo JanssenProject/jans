@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:11.0.16
+FROM bellsoft/liberica-openjre-alpine:17.0.8
 
 # ===============
 # Alpine packages
@@ -40,8 +40,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # SCIM
 # ====
 
-ENV CN_VERSION=1.0.19-SNAPSHOT
-ENV CN_BUILD_DATE='2023-09-23 10:24'
+ENV CN_VERSION=1.0.19
+ENV CN_BUILD_DATE='2023-10-11 10:26'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -59,7 +59,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=14a4ee5d21b788db7bb3e9bb94a1d1caf228f95a
+ENV JANS_SOURCE_VERSION=57137e446774f0769e54969b4edbc5d03b715298
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 

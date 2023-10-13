@@ -223,6 +223,10 @@ paths:
         required: true
         schema:
           type: string
+      - name: autoconfigure
+        in: query
+        schema:
+          type: string
       requestBody:
         content:
           application/zip:
@@ -7294,6 +7298,8 @@ components:
             type: string
         error:
           type: string
+        autoconfigure:
+          type: boolean
         flowsError:
           type: object
           additionalProperties:
@@ -7317,6 +7323,8 @@ components:
           type: object
           additionalProperties:
             type: object
+            additionalProperties:
+              type: object
         noDirectLaunch:
           type: array
           items:
@@ -8168,7 +8176,11 @@ components:
         dpopNonceCacheTime:
           type: integer
           format: int32
+        dpopJktForceForAuthorizationCode:
+          type: boolean
         allowIdTokenWithoutImplicitGrantType:
+          type: boolean
+        forceRopcInAuthorizationEndpoint:
           type: boolean
         discoveryCacheLifetimeInMinutes:
           type: integer

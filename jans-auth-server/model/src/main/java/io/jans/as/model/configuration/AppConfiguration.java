@@ -813,8 +813,14 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Demonstration of Proof-of-Possession (DPoP) nonce cache time", defaultValue = "3600")
     private int dpopNonceCacheTime = 3600;
 
+    @DocProperty(description = "Force dpop_jkt presence and reject calls without it.", defaultValue = "false")
+    private Boolean dpopJktForceForAuthorizationCode = false;
+
     @DocProperty(description = "Specifies if a token without implicit grant types is allowed")
     private Boolean allowIdTokenWithoutImplicitGrantType;
+
+    @DocProperty(description = "Specifies whether to force ROPC custom script for Authorization Endpoint.", defaultValue = "false")
+    private Boolean forceRopcInAuthorizationEndpoint = false;
 
     @DocProperty(description = "Lifetime of discovery cache", defaultValue = "60")
     private int discoveryCacheLifetimeInMinutes = 60;
@@ -863,6 +869,23 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
+
+    public Boolean getDpopJktForceForAuthorizationCode() {
+        return dpopJktForceForAuthorizationCode;
+    }
+
+    public void setDpopJktForceForAuthorizationCode(Boolean dpopJktForceForAuthorizationCode) {
+        this.dpopJktForceForAuthorizationCode = dpopJktForceForAuthorizationCode;
+    }
+
+    public Boolean getForceRopcInAuthorizationEndpoint() {
+        if (forceRopcInAuthorizationEndpoint == null) forceRopcInAuthorizationEndpoint = false;
+        return forceRopcInAuthorizationEndpoint;
+    }
+
+    public void setForceRopcInAuthorizationEndpoint(Boolean forceRopcInAuthorizationEndpoint) {
+        this.forceRopcInAuthorizationEndpoint = forceRopcInAuthorizationEndpoint;
+    }
 
     public Map<String, String> getDateFormatterPatterns() {
         return dateFormatterPatterns;

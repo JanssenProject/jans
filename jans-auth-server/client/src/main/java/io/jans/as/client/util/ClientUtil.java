@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLContext;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -102,7 +103,7 @@ public class ClientUtil {
     }
 
     public static Integer integerOrNull(JSONObject jsonObject, String key) {
-        return jsonObject.has(key) ? jsonObject.optInt(key) : null;
+        return jsonObject.has(key) ? (!Objects.equals(jsonObject.get(key).toString(), "null") ? jsonObject.optInt(key) : null) : null;
     }
 
     public static Boolean booleanOrNull(JSONObject jsonObject, String key) {

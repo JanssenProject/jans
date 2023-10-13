@@ -38,7 +38,6 @@ import io.jans.kc.spi.auth.oidc.OIDCTokenResponse;
 import io.jans.kc.spi.auth.oidc.OIDCUserInfoError;
 import io.jans.kc.spi.auth.oidc.OIDCUserInfoRequestError;
 import io.jans.kc.spi.auth.oidc.OIDCUserInfoResponse;
-import io.jans.kc.spi.rest.JansAuthResponseResourceProvider;
 
 public class JansAuthenticator implements Authenticator {
     

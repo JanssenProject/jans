@@ -9,6 +9,8 @@ on:
       - main
       - '!update-pycloud-in-**'
     paths:
+      - 'jans-link/**'
+      - 'keycloak-integration/**'
       - 'jans-auth-server/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
@@ -20,6 +22,7 @@ on:
       - 'jans-linux-setup/**'
       - 'jans-cli-tui/**'
       - 'jans-pycloudlib/**'
+      - 'jans-casa/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
 
@@ -32,6 +35,8 @@ on:
       - opened
       - synchronize
     paths:
+      - 'jans-link/**'
+      - 'keycloak-integration/**'
       - 'jans-auth-server/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
@@ -43,6 +48,7 @@ on:
       - 'jans-linux-setup/**'
       - 'jans-cli-tui/**'
       - 'jans-pycloudlib/**'
+      - 'jans-casa/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
 
@@ -55,9 +61,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib]
+        module: [keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, jans-link, jans-casa]
     env:
       JVM_PROJECTS: |
+        keycloak-integration
+        jans-link
         jans-auth-server
         jans-orm
         jans-config-api
@@ -65,6 +73,7 @@ jobs:
         jans-core
         jans-fido2
         jans-eleven
+        jans-casa
         agama
       NON_JVM_PROJECTS: |
         jans-linux-setup

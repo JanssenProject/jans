@@ -3,6 +3,18 @@ package io.jans.chip.modal;
 import com.google.gson.annotations.SerializedName;
 
 public class DCResponse {
+    public DCResponse(String clientId,
+                      String clientSecret,
+                      String clientName,
+                      String authorizationChallengeEndpoint,
+                      String endSessionEndpoint) {
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.clientName = clientName;
+        this.authorizationChallengeEndpoint = authorizationChallengeEndpoint;
+        this.endSessionEndpoint = endSessionEndpoint;
+    }
+
     @SerializedName("client_id")
     private String clientId;
     @SerializedName("client_secret")

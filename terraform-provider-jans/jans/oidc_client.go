@@ -39,6 +39,7 @@ type OidcClientAttribute struct {
 	AdditionalTokenEndpointAuthMethods      []string `schema:"additional_token_endpoint_auth_methods" json:"additionalTokenEndpointAuthMethods,omitempty"`
 	MinimumAcrPriorityList                  []string `schema:"minimum_acr_priority_list" json:"minimumAcrPriorityList,omitempty"`
 	RequestedLifetime                       int      `schema:"requested_lifetime" json:"requestedLifetime,omitempty"`
+	Evidence                                string   `schema:"evidence" json:"evidence,omitempty"`
 }
 
 // OidcClient is the definition of an OpenId Connect Client.

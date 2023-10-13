@@ -17,10 +17,10 @@ Deployment occurs through a REST API. Here is a typical workflow once a `.gama` 
 1. Poll (via GET) the status of the deployment. When the archive has been effectively deployed a status of 200 should be obtained. It may take up to 30 seconds for the process to complete once the archive is sent. This time may extend if there is another deployment in course
 1. Optionally supply configuration properties for flows if needed. This is done via PUT to the `/configs` endpoint. The response of the previous step may contain descriptive/sample configurations that can be used as a guide
 1. Test the deployed flows and adjust the archive for any changes required
-1. Go to point 1 if needed
+1. Go to point 1 if needed. If configuration properties were previously set and no changes are required in this regard, step 3 can be skipped 
 1. If desired, a request can be sent to undeploy the flows (via DELETE)
 
-The following tables summarize the available endpoints. All URLs are relative to `/jans-config-api/api/v1`. An OpenAPI document is also available [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger.yaml#L110-L254).
+The following tables summarize the available endpoints. All URLs are relative to `/jans-config-api/api/v1`. An OpenAPI document is also available [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger.yaml#L177).
 
 
 |Endpoint -> |`/agama-deployment`|
@@ -66,6 +66,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Method|POST|
 |Path params|`name` (the project's name)|
 |Body|The binary contents of a `.gama` file; example [here](#sample-file). Ensure to use header `Content-Type: application/zip`|
+|Query params|`autoconfigure` - passing `true` will make this project be configured with the sample configurations found in the provided binary archive (`configs` section of [project.json](../../../agama/gama-format.md#metadata)). This param should rarely be passed: use only in controlled environments where the archive is not shared with third parties|
 |Output|Textual explanation, e.g. `A deployment task for project XXX has been queued. Use the GET endpoint to poll status`|
 |Status|202 (the task was created and scheduled for deployment), 409 (there is a task already for this project and it hasn't finished yet), 400 (a param is missing)|
 

@@ -146,7 +146,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         return os.path.exists(self.oxd_server_yml_fn)
 
     def download_files(self, force=False):
-        oxd_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/oxd-server/{0}/oxd-server-{0}-distribution.zip').format(base.current_app.app_info['ox_version'])
+        oxd_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/oxd-server/{0}/oxd-server-{0}-distribution.zip').format(base.current_app.app_info['jans_version'])
 
         self.logIt("Downloading {} and preparing package".format(os.path.basename(oxd_url)))
 

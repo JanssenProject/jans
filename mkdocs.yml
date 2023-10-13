@@ -288,30 +288,30 @@ nav:
       - Custom client logs: admin/developer/customization/custom-client-logs.md
     - Interception Scripts:
       - admin/developer/scripts/README.md
-      - Script Debugging: admin/developer/scripts/interception-scripts-debug.md
-      - Person Authentication: admin/developer/scripts/person-authentication.md
-      - Consent Gathering: admin/developer/scripts/consent-gathering.md
-      - Post Authentication: admin/developer/scripts/post-authentication.md
-      - Select Account: admin/developer/scripts/select-account.md
-      - Resource Owner Password Credentials: admin/developer/scripts/ropc.md
-      - CIBA End User Notification: admin/developer/scripts/ciba.md
-      - OpenID Configuration: admin/developer/scripts/discovery.md
-      - Dynamic Scope: admin/developer/scripts/dynamic-scope.md
-      - Spontaneous Scope: admin/developer/scripts/spontaneous-scope.md
       - Application Session: admin/developer/scripts/application-session.md
-      - End Session: admin/developer/scripts/end-session.md
-      - Client Registration: admin/developer/scripts/client-registration.md
-      - Introspection: admin/developer/scripts/introspection.md
-      - Update Token: admin/developer/scripts/update-token.md
-      - Revoke Token: admin/developer/scripts/revoke-token.md
-      - ID Generator: admin/developer/scripts/id-generator.md
-      - UMA RPT Policies: admin/developer/scripts/uma-rpt.md
-      - UMA Claims Gathering (Web Flow): admin/developer/scripts/uma-claims-web.md
-      - UMA Claims (JWT Transformation): admin/developer/scripts/uma-claims-jwt.md
-      - SCIM: admin/developer/scripts/scim.md
-      - Persistence: admin/developer/scripts/persistence.md
-      - Config API: admin/developer/scripts/config-api.md
       - Authorization Challenge: admin/developer/scripts/authorization-challenge.md
+      - CIBA End User Notification: admin/developer/scripts/ciba.md
+      - Client Registration: admin/developer/scripts/client-registration.md
+      - Config API: admin/developer/scripts/config-api.md
+      - Consent Gathering: admin/developer/scripts/consent-gathering.md
+      - Dynamic Scope: admin/developer/scripts/dynamic-scope.md
+      - End Session: admin/developer/scripts/end-session.md
+      - ID Generator: admin/developer/scripts/id-generator.md
+      - Introspection: admin/developer/scripts/introspection.md
+      - OpenID Configuration: admin/developer/scripts/discovery.md
+      - Persistence: admin/developer/scripts/persistence.md
+      - Person Authentication: admin/developer/scripts/person-authentication.md
+      - Post Authentication: admin/developer/scripts/post-authentication.md
+      - Resource Owner Password Credentials: admin/developer/scripts/ropc.md
+      - Revoke Token: admin/developer/scripts/revoke-token.md
+      - SCIM: admin/developer/scripts/scim.md
+      - Script Debugging: admin/developer/scripts/interception-scripts-debug.md
+      - Select Account: admin/developer/scripts/select-account.md
+      - Spontaneous Scope: admin/developer/scripts/spontaneous-scope.md
+      - UMA Claims (JWT Transformation): admin/developer/scripts/uma-claims-jwt.md
+      - UMA Claims Gathering (Web Flow): admin/developer/scripts/uma-claims-web.md
+      - UMA RPT Policies: admin/developer/scripts/uma-rpt.md
+      - Update Token: admin/developer/scripts/update-token.md
   - Reference Guide:
     - admin/reference/README.md
     - Javadocs / OpenAPI:
@@ -8714,6 +8714,7 @@ nav:
       - Config and Secret Keys: admin/reference/kubernetes/config-secret-keys.md
       - Image Config Properties:
         - Auth Server: admin/reference/kubernetes/docker-jans-auth-server.md
+        - Casa: admin/reference/kubernetes/docker-jans-casa.md
         - Cert Manager: admin/reference/kubernetes/docker-jans-certmanager.md
         - Config API: admin/reference/kubernetes/docker-jans-config-api.md
         - Configurator: admin/reference/kubernetes/docker-jans-configurator.md
@@ -8788,6 +8789,24 @@ nav:
   - Language reference: agama/language-reference.md
   - Execution rules: agama/execution-rules.md
   - gama format: agama/gama-format.md
+- 'Jans Casa':
+    - 'casa/index.md'
+    - Quick Start: 'casa/quick-start.md'
+    - 'Installation': 'casa/administration/installation.md'
+    - Administration Guide:
+        - 'About 2FA': 'casa/administration/2fa-basics.md'
+        - 'Admin console': 'casa/administration/admin-console.md'
+        - 'Credentials storage': 'casa/administration/credentials-stored.md'
+        - 'Custom branding': 'casa/administration/custom-branding.md'
+        - 'URL path customization': 'casa/administration/change-context-path.md'
+        - 'Localization': 'casa/administration/localization.md'
+        - 'Plugins':
+            - '2FA Settings': 'casa/plugins/2fa-settings.md'
+            #            - 'BioID': 'casa/plugins/bioid.md'
+            - 'Consent Management': 'casa/plugins/consent-management.md'
+            - 'Custom Branding': 'casa/plugins/custom-branding.md'
+        - 'FAQ': 'casa/administration/faq.md'
+    - User Guide: 'casa/user-guide.md'
 plugins:
 - tags
 - search

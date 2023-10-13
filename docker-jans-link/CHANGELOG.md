@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.19-1](https://github.com/JanssenProject/jans/compare/docker-jans-link-v1.0.17-1...docker-jans-link-v1.0.19-1) (2023-10-11)
+
+
+### Features
+
+* **docker-jans:** upgrade base image to Java 17 ([#6231](https://github.com/JanssenProject/jans/issues/6231)) ([8ed40e9](https://github.com/JanssenProject/jans/commit/8ed40e91a56c256cb34262659b6e0657571f8c97))
+
 ## [1.0.17-1](https://github.com/JanssenProject/jans/compare/docker-jans-link-v1.0.16-1...docker-jans-link-v1.0.17-1) (2023-09-17)
 
 

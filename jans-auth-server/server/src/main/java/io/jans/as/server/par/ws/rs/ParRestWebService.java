@@ -15,31 +15,26 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
+import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidator;
+import io.jans.as.server.model.audit.Action;
+import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
 import io.jans.as.server.util.ServerUtil;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.ThreadContext;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
-import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.FormParam;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HEAD;
-import jakarta.ws.rs.OPTIONS;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -72,6 +67,9 @@ public class ParRestWebService {
 
     @Inject
     private RequestParameterService requestParameterService;
+
+    @Inject
+    private DpopService dpopService;
 
     @POST
     @Produces({MediaType.APPLICATION_JSON})
@@ -106,6 +104,10 @@ public class ParRestWebService {
         try {
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.PAR);
 
+            OAuth2AuditLog auditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.PAR_REQUEST);
+            auditLog.setClientId(clientId);
+            auditLog.setScope(scope);
+
             scope = ServerUtil.urlDecode(scope); // it may be encoded
             String tokenBindingHeader = httpRequest.getHeader("Sec-Token-Binding");
 
@@ -137,6 +139,7 @@ public class ParRestWebService {
             redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
 
             parValidator.validateRequestUriIsAbsent(requestUri);
+            final String dpopJkt = dpopService.getDPoPJwkThumbprint(httpRequest, client, auditLog);
 
             final Integer parLifetime = client.getAttributes().getParLifetime();
 
@@ -166,6 +169,7 @@ public class ParRestWebService {
             par.getAttributes().setOriginHeaders(originHeaders);
             par.getAttributes().setCodeChallenge(codeChallenge);
             par.getAttributes().setCodeChallengeMethod(codeChallengeMethod);
+            par.getAttributes().setDpopJkt(dpopJkt);
             par.getAttributes().setCustomResponseHeaders(customResponseHeaders);
             par.getAttributes().setClaims(claims);
             par.getAttributes().setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString())));

@@ -5,7 +5,7 @@
     <groupId>io.jans</groupId>
     <artifactId>keycloak-integration-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.19-SNAPSHOT</version>
+    <version>1.0.19</version>
     <name>keycloak-integration-parent</name>
 
     <distributionManagement>
@@ -18,7 +18,6 @@
 
     <properties>
       <maven.min-version>3.3.9</maven.min-version>
-      <maven.compiler.version>3.11.0</maven.compiler.version>
       <maven.compiler.source>11</maven.compiler.source>
       <maven.compiler.target>11</maven.compiler.target>
       <keycloak-server-spi.version>21.1.1</keycloak-server-spi.version>
@@ -26,6 +25,11 @@
       <maven-deps-plugin.version>3.6.0</maven-deps-plugin.version>
       <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
       <nimbus.oauth2-oidc-sdk.version>10.11</nimbus.oauth2-oidc-sdk.version>
+      <maven.compiler.version>3.11.0</maven.compiler.version>
+      <sonar.projectKey>JanssenProject_keycloak-integ</sonar.projectKey>
+      <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+      <sonar.organization>janssenproject</sonar.organization>
+      <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <prerequisites>

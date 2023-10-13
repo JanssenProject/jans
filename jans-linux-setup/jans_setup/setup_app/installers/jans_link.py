@@ -13,7 +13,7 @@ from setup_app.installers.jetty import JettyInstaller
 class JansLinkInstaller(JettyInstaller):
 
     source_files = [
-            (os.path.join(Config.dist_jans_dir, 'jans-link.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-link-server/{0}/jans-link-server-{0}.war').format(base.current_app.app_info['ox_version']))
+            (os.path.join(Config.dist_jans_dir, 'jans-link.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-link-server/{0}/jans-link-server-{0}.war').format(base.current_app.app_info['jans_version']))
             ]
 
     def __init__(self):
@@ -25,7 +25,6 @@ class JansLinkInstaller(JettyInstaller):
         self.install_var = 'install_jans_link'
         self.register_progess()
 
-        self.jetty_service_webapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')

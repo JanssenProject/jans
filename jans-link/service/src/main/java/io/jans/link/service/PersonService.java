@@ -37,7 +37,6 @@ public class PersonService implements Serializable, IPersonService {
 	@Inject
 	private OrganizationService organizationService;
 
-
 	public void addPersonWithoutCheck(GluuCustomPerson person) {
 		person.setCreationDate(new Date());
 		persistenceEntryManager.persist(person);

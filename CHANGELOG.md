@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.19](https://github.com/JanssenProject/jans/compare/v1.0.19...v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **docker-jans:** upgrade base image to Java 17 ([#6231](https://github.com/JanssenProject/jans/issues/6231)) ([8ed40e9](https://github.com/JanssenProject/jans/commit/8ed40e91a56c256cb34262659b6e0657571f8c97))
+* keycloak refactoring referred to Issue [#5330](https://github.com/JanssenProject/jans/issues/5330) review ([#6157](https://github.com/JanssenProject/jans/issues/6157)) ([7319120](https://github.com/JanssenProject/jans/commit/73191202f2e39bf040749b69a31d01bdfbcec8eb))
+
+
+### Bug Fixes
+
+* **charts:** use interval-based cronjob schedule syntax ([#6089](https://github.com/JanssenProject/jans/issues/6089)) ([2c0fc97](https://github.com/JanssenProject/jans/commit/2c0fc97dccc938f641596e85c96d1ed4523f8f63))
+* **docs:** autogenerate docs ([#6261](https://github.com/JanssenProject/jans/issues/6261)) ([57137e4](https://github.com/JanssenProject/jans/commit/57137e446774f0769e54969b4edbc5d03b715298))
+* **docs:** scripts should be shown alphabetically ([#6222](https://github.com/JanssenProject/jans/issues/6222)) ([f60010c](https://github.com/JanssenProject/jans/commit/f60010c8180e3da8f49450233e551cfefe51dd00))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
 ## [1.0.18](https://github.com/JanssenProject/jans/compare/v1.0.17...v1.0.18) (2023-09-23)
 
 
