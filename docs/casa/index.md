@@ -58,7 +58,7 @@ Gluu has written a number of plugins to extend Casa, including plugins for:
 - [Consent management](./plugins/consent-management.md) 
 - [Custom branding](./plugins/custom-branding.md)  
 - [2FA settings](./plugins/2fa-settings.md)
-- [BioID authentication](./plugins/bioid.md)
+<!-- - [BioID authentication](./plugins/bioid.md) -->
 
 ## Janssen Server integration
 
