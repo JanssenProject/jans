@@ -74,10 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                                 intent.putExtra(USER_INFO, userInfoResponse.getReponse().toString());
                                 startActivity(intent);
                             } else {
-                                createErrorDialog(userInfoResponse.getOperationError().getMessage());
-                                errorDialog.show();
-                                loginProgressBar.setVisibility(View.INVISIBLE);
-                                loginButton.setEnabled(true);
+                                showErrorDialog(userInfoResponse.getOperationError().getMessage());
                             }
                         }
                     });
@@ -116,31 +113,31 @@ public class LoginActivity extends AppCompatActivity {
                                                                         startActivity(intent);
                                                                         loginButton.setEnabled(true);
                                                                     } else {
-                                                                        createErrorDialog(userInfoResponse.getOperationError().getMessage());
-                                                                        errorDialog.show();
-                                                                        loginProgressBar.setVisibility(View.INVISIBLE);
-                                                                        loginButton.setEnabled(true);
+                                                                        showErrorDialog(userInfoResponse.getOperationError().getMessage());
                                                                     }
                                                                 }
                                                             });
                                                 } else {
-                                                    createErrorDialog(tokenResponse.getOperationError().getMessage());
-                                                    errorDialog.show();
-                                                    loginButton.setEnabled(true);
+                                                    showErrorDialog(tokenResponse.getOperationError().getMessage());
                                                 }
 
                                             }
                                         });
                             } else {
-                                createErrorDialog(loginResponse.getOperationError().getMessage());
-                                errorDialog.show();
-                                loginButton.setEnabled(true);
+                                showErrorDialog(loginResponse.getOperationError().getMessage());
                             }
                         }
                     });
                 }
             }
         });
+    }
+
+    private void showErrorDialog(String message) {
+        createErrorDialog(message);
+        errorDialog.show();
+        loginProgressBar.setVisibility(View.INVISIBLE);
+        loginButton.setEnabled(true);
     }
 
     private boolean validateInputs() {
@@ -150,7 +147,7 @@ public class LoginActivity extends AppCompatActivity {
             return false;
         }
         if (password == null || password.length() == 0) {
-            createErrorDialog("Password cannot be left empty.");
+            createErrorDialog("Password cannot be left http:.");
             errorDialog.show();
             return false;
         }

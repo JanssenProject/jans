@@ -78,18 +78,12 @@ public class RegisterActivity extends AppCompatActivity {
                                                     Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                                                     startActivity(intent);
                                                 } else {
-                                                    createErrorDialog(opConfiguration.getOperationError().getMessage());
-                                                    errorDialog.show();
-                                                    registerProgressBar.setVisibility(View.INVISIBLE);
-                                                    registerButton.setEnabled(true);
+                                                    showErrorDialog(opConfiguration.getOperationError().getMessage());
                                                 }
                                             }
                                         });
                                     } else {
-                                        createErrorDialog(opConfiguration.getOperationError().getMessage());
-                                        errorDialog.show();
-                                        registerProgressBar.setVisibility(View.INVISIBLE);
-                                        registerButton.setEnabled(true);
+                                        showErrorDialog(opConfiguration.getOperationError().getMessage());
                                     }
 
                                 }
@@ -97,6 +91,13 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void showErrorDialog(String message) {
+        createErrorDialog(message);
+        errorDialog.show();
+        registerProgressBar.setVisibility(View.INVISIBLE);
+        registerButton.setEnabled(true);
     }
 
     private void selectAllScopesByDefault(TextView scopesEditText, String[] scopeArray) {
