@@ -135,7 +135,7 @@ description: Authorization Challenge
 displayName: authorization_challenge
 inum: 6D92
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansDefScope: false
+jansDefScope: true
 jansId: authorization_challenge
 jansScopeTyp: oauth
 objectClass: top
