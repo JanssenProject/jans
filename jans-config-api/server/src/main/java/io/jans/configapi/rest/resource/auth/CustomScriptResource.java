@@ -303,11 +303,11 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(existingScript).build();
     }
 
-    @Operation(summary = "Fetch custom script types", description = "Fetch custom script types", operationId = "get-custom-script-by-name", tags = {
+    @Operation(summary = "Fetch custom script types", description = "Fetch custom script types", operationId = "get-custom-script-type", tags = {
             "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SCRIPTS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScriptType.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-type.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScriptType.class)), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-types.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -330,11 +330,11 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(customScriptTypes).build();
     }
     
-    @Operation(summary = "Fetch custom script types", description = "Fetch custom script types", operationId = "get-custom-script-by-name", tags = {
+    @Operation(summary = "Fetch custom script types", description = "Fetch custom script types", operationId = "get-custom-script-types", tags = {
             "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SCRIPTS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-type.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-types.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
