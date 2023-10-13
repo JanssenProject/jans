@@ -42,8 +42,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -298,6 +303,63 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(existingScript).build();
     }
 
+    @Operation(summary = "Fetch custom script types", description = "Fetch custom script types", operationId = "get-custom-script-by-name", tags = {
+            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.SCRIPTS_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScriptType.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-type.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @Path(PATH_SEPARATOR + ApiConstants.TYPES)
+    @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    public Response getCustomScriptTypes() {
+        logger.info("Fetch type of custom script ");
+
+        Set<CustomScriptType> customScriptTypes = null;
+        List<CustomScript> customScriptList = customScriptService.findAllCustomScripts(null);
+        logger.info("Custom Scripts fetched :{}", customScriptList);
+
+        if (customScriptList != null && !customScriptList.isEmpty()) {
+            customScriptTypes = customScriptList.stream().map(CustomScript::getScriptType).collect(Collectors.toSet());
+            logger.debug("Custom Scripts fetched :{}", customScriptList);
+        }
+        logger.info("Custom scripts type fetched customScriptTypes :{}", customScriptTypes);
+        return Response.ok(customScriptTypes).build();
+    }
+    
+    @Operation(summary = "Fetch custom script types", description = "Fetch custom script types", operationId = "get-custom-script-by-name", tags = {
+            "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.SCRIPTS_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "CustomScript", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-type.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @Path(PATH_SEPARATOR + ApiConstants.SCRIPTS_TYPES)
+    @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    public Response getCustomScriptTypesDetails() {
+        logger.info("Fetch type of custom script ");
+
+        Set<String> customScripts = new HashSet<>();
+        List<CustomScript> customScriptList = customScriptService.findAllCustomScripts(null);
+        logger.info("Custom Scripts fetched :{}", customScriptList);
+
+        if (customScriptList != null && !customScriptList.isEmpty()) {
+
+            customScriptList.forEach((item) -> {
+                customScripts.add(item.getScriptType().getValue());
+            });
+            logger.debug("Custom Scripts fetched :{}", customScriptList);
+        }
+        logger.info("Custom scripts type fetched customScripts :{}", customScripts);
+        return Response.ok(customScripts).build();
+    }
+
     private PagedResult<CustomScript> doSearch(SearchRequest searchReq, CustomScriptType type) {
 
         logger.debug(
@@ -331,7 +393,9 @@ public class CustomScriptResource extends ConfigBaseResource {
 
         if (ScriptLocationType.LDAP.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
 
-            throwBadRequestException("Invalid value for '"+customScript.LOCATION_TYPE_MODEL_PROPERTY+"' in request is 'ldap' which is deprecated. Use '"+ScriptLocationType.DB.getValue()+"' instead.");
+            throwBadRequestException("Invalid value for '" + CustomScript.LOCATION_TYPE_MODEL_PROPERTY
+                    + "' in request is 'ldap' which is deprecated. Use '" + ScriptLocationType.DB.getValue()
+                    + "' instead.");
         }
     }
     
