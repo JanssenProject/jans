@@ -100,7 +100,6 @@ public class PlayIntegrityRepository {
                                 appIntegrityResponse.getError());
                         appDatabase.appIntegrityDao().insert(appIntegrityEntity);
                         appIntegrityResponse.setSuccessful(true);
-                        appIntegrityResponse.setOperationError(null);
                         appIntegrityResponseLiveData.setValue(appIntegrityResponse);
                     }
 

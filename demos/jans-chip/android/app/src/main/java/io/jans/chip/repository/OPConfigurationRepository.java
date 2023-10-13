@@ -45,7 +45,6 @@ public class OPConfigurationRepository {
                     if (response.code() == 200) {
                         OPConfiguration opConfiguration = response.body();
                         opConfiguration.setSuccessful(true);
-                        opConfiguration.setOperationError(null);
                         opConfiguration.setSno(AppConfig.DEFAULT_S_NO);
                         Log.d(TAG, "Inside fetchOPConfiguration :: opConfiguration :: " + opConfiguration.toString());
                         appDatabase.opConfigurationDao().deleteAll();

@@ -69,7 +69,6 @@ public class LoginResponseRepository {
 
                     if (responseFromAPI.getAuthorizationCode() != null && !responseFromAPI.getAuthorizationCode().isEmpty()) {
                         responseFromAPI.setSuccessful(true);
-                        responseFromAPI.setOperationError(null);
                         loginResponseLiveData.setValue(responseFromAPI);
                     } else {
                         loginResponseLiveData.setValue(setErrorInLiveObject("Error in fetching OP Configuration. Authorization code is empty"));

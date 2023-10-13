@@ -61,7 +61,6 @@ public class UserInfoResponseRepository {
                         UserInfoResponse userInfoResponse = new UserInfoResponse();
                         userInfoResponse.setReponse(responseFromAPI);
                         userInfoResponse.setSuccessful(true);
-                        userInfoResponse.setOperationError(null);
                         userInfoResponseLiveData.setValue(userInfoResponse);
                     } else {
                         Log.e(TAG, "User-Info is null");

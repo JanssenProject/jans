@@ -81,7 +81,6 @@ public class TokenResponseRepository {
                             oidcClient.setRecentGeneratedAccessToken(responseFromAPI.getAccessToken());
                             appDatabase.oidcClientDao().update(oidcClient);
                             responseFromAPI.setSuccessful(true);
-                            responseFromAPI.setOperationError(null);
                             tokenResponseLiveData.setValue(responseFromAPI);
                         }
                     } else {

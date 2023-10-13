@@ -147,7 +147,7 @@ public class LoginActivity extends AppCompatActivity {
             return false;
         }
         if (password == null || password.length() == 0) {
-            createErrorDialog("Password cannot be left http:.");
+            createErrorDialog("Password cannot be left empty.");
             errorDialog.show();
             return false;
         }

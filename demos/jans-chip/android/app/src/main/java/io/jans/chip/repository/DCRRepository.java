@@ -126,7 +126,6 @@ public class DCRRepository {
                         client.setScope(scopeText);
                         appDatabase.oidcClientDao().insert(client);
                         client.setSuccessful(true);
-                        client.setOperationError(null);
                         oidcClientLiveData.setValue(client);
                     }
                 } else {

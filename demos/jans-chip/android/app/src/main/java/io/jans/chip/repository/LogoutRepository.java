@@ -64,7 +64,6 @@ public class LogoutRepository {
                     appDatabase.oidcClientDao().update(oidcClient);
                     LogoutResponse logoutResponse = new LogoutResponse();
                     logoutResponse.setSuccessful(true);
-                    logoutResponse.setOperationError(null);
                     logoutResponseLiveData.setValue(logoutResponse);
                 } else {
                     Log.e(TAG, "Error in logout.\n Error code: " + response.code() + "\n Error message: " + response.message());
