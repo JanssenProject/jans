@@ -1,0 +1,11 @@
+io.jans.jsf2.i18n
+io.jans.jsf2.model
+io.jans.jsf2.customization
+io.jans.jsf2.exception
+io.jans.jsf2.validator
+io.jans.jsf2.service
+io.jans.jsf2.component
+io.jans.jsf2.message
+io.jans.jsf2.io
+io.jans.jsf2.converter
+io.jans.service.el
