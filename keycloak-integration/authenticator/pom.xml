@@ -9,7 +9,7 @@
   <parent>
     <groupId>io.jans</groupId>
     <artifactId>keycloak-integration-parent</artifactId>
-    <version>1.0.19</version>
+    <version>1.0.20-SNAPSHOT</version>
   </parent>
 
   <prerequisites>

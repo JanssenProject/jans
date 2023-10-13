@@ -9,7 +9,7 @@
 	<parent>
 		<artifactId>jans-link-server-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.0.19</version>
+		<version>1.0.20-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
