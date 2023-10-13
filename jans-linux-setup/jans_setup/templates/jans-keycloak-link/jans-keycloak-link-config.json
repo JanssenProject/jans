@@ -4,7 +4,7 @@
   "inumConfig": {
     "configId": "local_inum",
     "bindDN": "cn=directory manager",
-    "bindPassword": "Qu7m/IlTzlYQ0e8HYKdl8g==",
+    "bindPassword": "%(ldap_bind_encoded_pw)s",
     "servers": [
       "localhost:1636"
     ],
@@ -70,7 +70,7 @@
       "destination": "mail"
     }
   ],
-  "snapshotFolder": "/var/Jans/Keycloak/cr-snapshots",
+  "snapshotFolder": "%(snapshots_dir)s",
   "snapshotMaxCount": 10,
   "keycloakConfiguration": {
     "serverUrl": "http://localhost:8180",
