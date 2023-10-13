@@ -76,8 +76,8 @@ public class LoginActivity extends AppCompatActivity {
                             } else {
                                 createErrorDialog(userInfoResponse.getOperationError().getMessage());
                                 errorDialog.show();
-                                loginButton.setEnabled(true);
                                 loginProgressBar.setVisibility(View.INVISIBLE);
+                                loginButton.setEnabled(true);
                             }
                         }
                     });
@@ -114,17 +114,19 @@ public class LoginActivity extends AppCompatActivity {
                                                                         Intent intent = new Intent(LoginActivity.this, AfterLoginActivity.class);
                                                                         intent.putExtra(USER_INFO, userInfoResponse.getReponse().toString());
                                                                         startActivity(intent);
+                                                                        loginButton.setEnabled(true);
                                                                     } else {
                                                                         createErrorDialog(userInfoResponse.getOperationError().getMessage());
                                                                         errorDialog.show();
-                                                                        loginButton.setEnabled(true);
                                                                         loginProgressBar.setVisibility(View.INVISIBLE);
+                                                                        loginButton.setEnabled(true);
                                                                     }
                                                                 }
                                                             });
                                                 } else {
                                                     createErrorDialog(tokenResponse.getOperationError().getMessage());
                                                     errorDialog.show();
+                                                    loginButton.setEnabled(true);
                                                 }
 
                                             }
@@ -132,6 +134,7 @@ public class LoginActivity extends AppCompatActivity {
                             } else {
                                 createErrorDialog(loginResponse.getOperationError().getMessage());
                                 errorDialog.show();
+                                loginButton.setEnabled(true);
                             }
                         }
                     });
