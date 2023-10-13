@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
-import androidx.lifecycle.MutableLiveData;
-
 import com.google.common.collect.Lists;
 
 import java.io.IOException;
@@ -28,6 +26,7 @@ import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.OperationError;
 import io.jans.chip.modal.appIntegrity.AppIntegrityEntity;
 import io.jans.chip.retrofit.RetrofitClient;
+import io.jans.chip.services.SingleLiveEvent;
 import io.jans.chip.utils.AppConfig;
 import io.jans.chip.utils.AppUtil;
 import retrofit2.Call;
@@ -36,7 +35,7 @@ import retrofit2.Response;
 
 public class DCRRepository {
     public static final String TAG = "DCRRepository";
-    private final MutableLiveData<OIDCClient> oidcClientLiveData = new MutableLiveData<>();
+    private final SingleLiveEvent<OIDCClient> oidcClientLiveData = new SingleLiveEvent<>();
     Context context;
 
     private static DCRRepository dcrRepository;
@@ -55,7 +54,7 @@ public class DCRRepository {
         appDatabase = AppDatabase.getInstance(context);
     }
 
-    public MutableLiveData<OIDCClient> doDCR(String scopeText) {
+    public SingleLiveEvent<OIDCClient> doDCR(String scopeText) {
 
         List<OPConfiguration> opConfigurationList = appDatabase.opConfigurationDao().getAll();
         if (opConfigurationList == null || opConfigurationList.isEmpty()) {
@@ -127,6 +126,7 @@ public class DCRRepository {
                         client.setScope(scopeText);
                         appDatabase.oidcClientDao().insert(client);
                         client.setSuccessful(true);
+                        client.setOperationError(null);
                         oidcClientLiveData.setValue(client);
                     }
                 } else {

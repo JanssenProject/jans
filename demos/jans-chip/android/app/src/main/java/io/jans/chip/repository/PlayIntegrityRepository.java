@@ -3,8 +3,6 @@ package io.jans.chip.repository;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.lifecycle.MutableLiveData;
-
 import com.google.android.gms.tasks.Task;
 import com.google.android.play.core.integrity.IntegrityManager;
 import com.google.android.play.core.integrity.IntegrityManagerFactory;
@@ -19,13 +17,14 @@ import io.jans.chip.modal.OperationError;
 import io.jans.chip.modal.appIntegrity.AppIntegrityEntity;
 import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
 import io.jans.chip.retrofit.RetrofitClient;
+import io.jans.chip.services.SingleLiveEvent;
 import io.jans.chip.utils.AppConfig;
 import retrofit2.Call;
 import retrofit2.Callback;
 
 public class PlayIntegrityRepository {
     public static final String TAG = "PlayIntegrityRepository";
-    private MutableLiveData<AppIntegrityResponse> appIntegrityResponseLiveData = new MutableLiveData<>();
+    private SingleLiveEvent<AppIntegrityResponse> appIntegrityResponseLiveData = new SingleLiveEvent<>();
     Context context;
     AppDatabase appDatabase;
 
@@ -43,7 +42,7 @@ public class PlayIntegrityRepository {
         return playIntegrityRepository;
     }
 
-    public MutableLiveData<AppIntegrityResponse> checkAppIntegrity() {
+    public SingleLiveEvent<AppIntegrityResponse> checkAppIntegrity() {
         // Create an instance of a manager.
         IntegrityManager integrityManager = IntegrityManagerFactory.create(this.context);
 
@@ -69,7 +68,7 @@ public class PlayIntegrityRepository {
         return appIntegrityResponseLiveData;
     }
 
-    private MutableLiveData<AppIntegrityResponse> getTokenResponse(String integrityToken) {
+    private SingleLiveEvent<AppIntegrityResponse> getTokenResponse(String integrityToken) {
         Log.d("INTEGRITY_APP_SERVER_URL", AppConfig.INTEGRITY_APP_SERVER_URL + "/api/check?token=" + integrityToken);
         Call<AppIntegrityResponse> call = RetrofitClient.getInstance(AppConfig.INTEGRITY_APP_SERVER_URL).getAPIInterface().verifyIntegrityTokenOnAppServer(AppConfig.INTEGRITY_APP_SERVER_URL + "/api/check?token=" + integrityToken);
 
@@ -101,6 +100,7 @@ public class PlayIntegrityRepository {
                                 appIntegrityResponse.getError());
                         appDatabase.appIntegrityDao().insert(appIntegrityEntity);
                         appIntegrityResponse.setSuccessful(true);
+                        appIntegrityResponse.setOperationError(null);
                         appIntegrityResponseLiveData.setValue(appIntegrityResponse);
                     }
 

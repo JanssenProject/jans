@@ -3,12 +3,11 @@ package io.jans.chip.repository;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.lifecycle.MutableLiveData;
-
 import io.jans.chip.AppDatabase;
 import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.OperationError;
 import io.jans.chip.retrofit.RetrofitClient;
+import io.jans.chip.services.SingleLiveEvent;
 import io.jans.chip.utils.AppConfig;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -16,7 +15,7 @@ import retrofit2.Response;
 
 public class OPConfigurationRepository {
     public static final String TAG = "OPConfigurationRepository";
-    private final MutableLiveData<OPConfiguration> opConfigurationLiveData = new MutableLiveData<>();
+    private final SingleLiveEvent<OPConfiguration> opConfigurationLiveData = new SingleLiveEvent<>();
     Context context;
     AppDatabase appDatabase;
     private OPConfigurationRepository(Context context) {
@@ -33,7 +32,7 @@ public class OPConfigurationRepository {
         return opConfigurationRepository;
     }
 
-    public MutableLiveData<OPConfiguration> fetchOPConfiguration(String configurationUrl) {
+    public SingleLiveEvent<OPConfiguration> fetchOPConfiguration(String configurationUrl) {
 
         String issuer = configurationUrl.replace("/.well-known/openid-configuration", "");
         Log.d(TAG, "Inside fetchOPConfiguration :: configurationUrl ::" + configurationUrl);
@@ -46,6 +45,7 @@ public class OPConfigurationRepository {
                     if (response.code() == 200) {
                         OPConfiguration opConfiguration = response.body();
                         opConfiguration.setSuccessful(true);
+                        opConfiguration.setOperationError(null);
                         opConfiguration.setSno(AppConfig.DEFAULT_S_NO);
                         Log.d(TAG, "Inside fetchOPConfiguration :: opConfiguration :: " + opConfiguration.toString());
                         appDatabase.opConfigurationDao().deleteAll();

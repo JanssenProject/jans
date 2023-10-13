@@ -3,8 +3,6 @@ package io.jans.chip.repository;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.lifecycle.MutableLiveData;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -14,13 +12,14 @@ import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.OperationError;
 import io.jans.chip.retrofit.RetrofitClient;
+import io.jans.chip.services.SingleLiveEvent;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LoginResponseRepository {
     public static final String TAG = "LoginRepository";
-    private final MutableLiveData<LoginResponse> loginResponseLiveData = new MutableLiveData<>();
+    private final SingleLiveEvent<LoginResponse> loginResponseLiveData = new SingleLiveEvent<>();
     Context context;
     AppDatabase appDatabase;
 
@@ -38,7 +37,7 @@ public class LoginResponseRepository {
         return dcrRepository;
     }
 
-    public MutableLiveData<LoginResponse> processlogin(String usernameText, String passwordText) {
+    public SingleLiveEvent<LoginResponse> processlogin(String usernameText, String passwordText) {
         // Get OPConfiguration and OIDCClient
         List<OPConfiguration> opConfigurationList = appDatabase.opConfigurationDao().getAll();
         if (opConfigurationList == null || opConfigurationList.isEmpty()) {
@@ -70,6 +69,7 @@ public class LoginResponseRepository {
 
                     if (responseFromAPI.getAuthorizationCode() != null && !responseFromAPI.getAuthorizationCode().isEmpty()) {
                         responseFromAPI.setSuccessful(true);
+                        responseFromAPI.setOperationError(null);
                         loginResponseLiveData.setValue(responseFromAPI);
                     } else {
                         loginResponseLiveData.setValue(setErrorInLiveObject("Error in fetching OP Configuration. Authorization code is empty"));

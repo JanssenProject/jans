@@ -4,8 +4,6 @@ import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
 
-import androidx.lifecycle.MutableLiveData;
-
 import java.util.List;
 
 import io.jans.chip.AppDatabase;
@@ -14,13 +12,14 @@ import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.OperationError;
 import io.jans.chip.retrofit.RetrofitClient;
+import io.jans.chip.services.SingleLiveEvent;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LogoutRepository {
     public static final String TAG = "LogoutRepository";
-    private final MutableLiveData<LogoutResponse> logoutResponseLiveData = new MutableLiveData<>();
+    private final SingleLiveEvent<LogoutResponse> logoutResponseLiveData = new SingleLiveEvent<>();
     Context context;
     AppDatabase appDatabase;
     private LogoutRepository(Context context) {
@@ -36,7 +35,7 @@ public class LogoutRepository {
         }
         return logoutRepository;
     }
-    public MutableLiveData<LogoutResponse> logout() {
+    public SingleLiveEvent<LogoutResponse> logout() {
         List<OPConfiguration> opConfigurationList = appDatabase.opConfigurationDao().getAll();
         if (opConfigurationList == null || opConfigurationList.isEmpty()) {
             logoutResponseLiveData.setValue(setErrorInLiveObject("OpenID configuration not found in database."));
@@ -65,6 +64,7 @@ public class LogoutRepository {
                     appDatabase.oidcClientDao().update(oidcClient);
                     LogoutResponse logoutResponse = new LogoutResponse();
                     logoutResponse.setSuccessful(true);
+                    logoutResponse.setOperationError(null);
                     logoutResponseLiveData.setValue(logoutResponse);
                 } else {
                     Log.e(TAG, "Error in logout.\n Error code: " + response.code() + "\n Error message: " + response.message());

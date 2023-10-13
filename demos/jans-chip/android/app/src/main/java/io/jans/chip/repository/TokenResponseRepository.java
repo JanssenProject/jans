@@ -4,8 +4,6 @@ import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
 
-import androidx.lifecycle.MutableLiveData;
-
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -18,13 +16,14 @@ import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.OperationError;
 import io.jans.chip.modal.TokenResponse;
 import io.jans.chip.retrofit.RetrofitClient;
+import io.jans.chip.services.SingleLiveEvent;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class TokenResponseRepository {
     public static final String TAG = "TokenResponseRepository";
-    private final MutableLiveData<TokenResponse> tokenResponseLiveData = new MutableLiveData<>();
+    private final SingleLiveEvent<TokenResponse> tokenResponseLiveData = new SingleLiveEvent<>();
     Context context;
     AppDatabase appDatabase;
     private TokenResponseRepository(Context context) {
@@ -41,7 +40,7 @@ public class TokenResponseRepository {
         return tokenResponseRepository;
     }
 
-    public MutableLiveData<TokenResponse> getToken(String authorizationCode, String usernameText, String passwordText) {
+    public SingleLiveEvent<TokenResponse> getToken(String authorizationCode, String usernameText, String passwordText) {
         // Get OPConfiguration and OIDCClient
         List<OPConfiguration> opConfigurationList = appDatabase.opConfigurationDao().getAll();
         if (opConfigurationList == null || opConfigurationList.isEmpty()) {
@@ -82,6 +81,7 @@ public class TokenResponseRepository {
                             oidcClient.setRecentGeneratedAccessToken(responseFromAPI.getAccessToken());
                             appDatabase.oidcClientDao().update(oidcClient);
                             responseFromAPI.setSuccessful(true);
+                            responseFromAPI.setOperationError(null);
                             tokenResponseLiveData.setValue(responseFromAPI);
                         }
                     } else {
