@@ -131,6 +131,19 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 
 Full TUI documentation can be found [here](../../config-guide/config-tools/jans-tui/README.md)
 
+## Let's Encrypt
+ To generate Let’s Encrypt CA certificate run below commands:
+```bash 
+sudo apt update && sudo apt install certbot python3-certbot-apache
+sudo certbot --apache -d FQDN
+or
+sudo certbot certonly --webroot -w /var/www/html -d FQDN
+sudo systemctl status certbot.timer
+```
+to renew certificate run
+```
+sudo certbot renew --dry-run
+```
 ## Uninstall
 
 Removing Janssen is a two step process:
