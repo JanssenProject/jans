@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.inbound"},{"l":"io.jans.inbound.oauth2"},{"l":"io.jans.util"}]
