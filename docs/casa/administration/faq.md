@@ -14,7 +14,7 @@ tags:
 
 ### Where are the logs?
 
-The application logs are located at `/opt/jans/jetty/casa/logs`. By default, Casa uses the INFO level for messages. You can change the log level at will using the app's admin UI.
+The application logs are located at `/opt/jans/jetty/jans-casa/logs`. By default, Casa uses the INFO level for messages. You can change the log level at will using the app's admin UI.
 
 ### How do I custom brand Casa?
 

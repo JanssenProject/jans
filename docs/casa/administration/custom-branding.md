@@ -55,8 +55,8 @@ In the `/opt/jans/jetty/casa/static` folder, you can place your own version of t
 To start, log in to the Janssen Server and do the following:
 
 ```
-cd /opt/jans/jetty/casa/static
-jar -xf ../webapps/casa.war images styles/gluu/style.css  
+cd /opt/jans/jetty/jans-casa/static
+jar -xf ../webapps/jans-casa.war images styles/gluu/style.css  
 ```
 
 This will copy the files you can edit later (these are the original versions provided out of the box in Casa).
@@ -64,7 +64,7 @@ This will copy the files you can edit later (these are the original versions pro
 If you place additional files in this directory, ensure ownership is set to recursive. For instance, you can:
 
 ```
-$ chown -R jetty:jetty /opt/jans/jetty/casa/static/
+$ chown -R jetty:jetty /opt/jans/jetty/jans-casa/static/
 ```
 
 ### Enable and apply your customizations
@@ -74,7 +74,7 @@ In the admin console, navigate to `Custom branding` > `Use Casa external assets 
 !!! Note  
     In CSS, the rules' order of appearance is important. Keep in mind that for all Casa pages, Bootstrap is loaded first, then style.css, and finally tachyons.css. This means rules for Tachyons have higher priority overall unless `!important` is used.  
     
-The main stylesheet (`style.css`) is located at `/opt/jans/jetty/casa/static/styles/gluu` if you have followed the instructions above.
+The main stylesheet (`style.css`) is located at `/opt/jans/jetty/jans-casa/static/styles/gluu` if you have followed the instructions above.
 
 Here are some tips for applying your customizations:
 

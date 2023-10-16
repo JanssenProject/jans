@@ -22,11 +22,11 @@ By default, Casa contains three bundles, each in a separate file. These bundles 
 To supply labels in a particular language (or even if you want to override the English translation provided), do the following:
 
 1. Log in to the Janssen Server using SSH
-1. Extract the Casa default labels: `/opt/jre/bin/jar -xf /opt/jans/jetty/casa/webapps/casa.war WEB-INF/classes/labels`
+1. Extract the Casa default labels: `/opt/jre/bin/jar -xf /opt/jans/jetty/jans-casa/webapps/casa.war WEB-INF/classes/labels`
 1. Run `cp WEB-INF/classes/labels/*.properties .` and delete WEB-INF dir: `rm -R WEB-INF/`
 1. Add the appropriate suffix to the properties files found in the current directory, ie. `_de` for German, `_es` for Spanish, `_ja` for Japanese, etc.
 1. Edit the contents of files accordingly. Use UTF-8 encoding for opening and saving
-1. `cd` to `/opt/jans/jetty/casa/static`
+1. `cd` to `/opt/jans/jetty/jans-casa/static`
 1. Create directory `i18n` if it does not exist: `mkdir i18n`
 1. Transfer the properties files to the `i18n` folder
 1. Ensure `jetty` user has permission for reading the files
@@ -54,7 +54,7 @@ To add your own translation for plugin texts, proceed as follows:
 1. Add the appropriate suffix to the properties file, ie. `_de` for German, `_es` for Spanish, `_ja` for Japanese, etc.
 1. Edit the contents accordingly. Use UTF-8 encoding for opening and saving
 1. Connect to your Janssen Server using SSH
-1. `cd` to `/opt/jans/jetty/casa/static`
+1. `cd` to `/opt/jans/jetty/jans-casa/static`
 1. Create directory `i18n` if it does not exist: `mkdir i18n`
 1. Transfer the properties file to the `i18n` folder
 1. Ensure `jetty` user has permission for reading

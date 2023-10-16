@@ -11,13 +11,17 @@ To publish the application at a location other than `/casa`, do the following:
 
 1. Log into Janssen Server using SSH       
       
-1. Edit tag `<Set name="contextPath">` in file `/opt/jans/jetty/casa/webapps/casa.xml` with the new path you want to use. For example, if you chose `/creds`, you would do the following:    
+1. Edit tag `<Set name="contextPath">` in file 
+   `/opt/jans/jetty/jans-casa/webapps/jans-casa.xml` with the new path you want 
+   to use. For example, if you chose `/creds`, you would do the following:    
    
     ```  
       <Set name="contextPath">/creds</Set>     
     ```  
 
-1. Edit tag `<Set name="contextPath">` in file `/opt/jans/jetty/casa/webapps/casa_web_resources.xml` appropriately with the new path you want to use.
+1. Edit tag `<Set name="contextPath">` in file 
+   `/opt/jans/jetty/jans-casa/webapps/jans-casa_web_resources.xml` 
+   appropriately with the new path you want to use.
     
 1. Adjust Apache's .conf file:    
 

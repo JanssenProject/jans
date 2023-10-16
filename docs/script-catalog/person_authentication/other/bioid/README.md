@@ -68,7 +68,7 @@ Click on `Enable` under the script contents box, and press `Update` at the botto
 
 1. Click on `Add`
 
-Alternatively you can log into Janssen Server and copy the jar file directly to `/opt/jans/jetty/casa/plugins`.
+Alternatively you can log into Janssen Server and copy the jar file directly to `/opt/jans/jetty/jans-casa/plugins`.
 
 ### Enable the authentication method
 
