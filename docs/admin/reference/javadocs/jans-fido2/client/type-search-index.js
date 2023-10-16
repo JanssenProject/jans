@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"io.jans.fido2.client","l":"AssertionService"},{"p":"io.jans.fido2.client","l":"AttestationService"},{"p":"io.jans.fido2.client","l":"ConfigurationService"},{"p":"io.jans.fido2.client","l":"Fido2ClientFactory"}]
