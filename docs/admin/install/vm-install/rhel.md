@@ -102,6 +102,31 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 
 Full TUI documentation can be found [here](../../config-guide/config-tools/jans-tui/README.md)
 
+## Let's Encrypt
+ To generate Let’s Encrypt CA certificate run below commands:
+```
+sudo yum install certbot python3-certbot-apache 
+sudo certbot certonly --apache
+```
+if getting error
+```
+Error while running apachectl configtest.
+
+AH00526: Syntax error on line 5 of /etc/httpd/conf.d/ssl.conf:
+Cannot define multiple Listeners on the same IP:port
+```
+solution : comment "listen 443" in ssl.conf
+
+Modify  https_jans.conf file for SSLCertificateFile and SSLCertificateKeyFile values with certificate location which we got from certbot command execution.
+
+```
+ sudo vi /etc/httpd/conf.d/https_jans.conf
+SSLCertificateFile location_of_fullchain.pem
+SSLCertificateKeyFile location_of_privkey.pem
+
+sudo service httpd restart
+```
+
 ## Uninstall
 
 Removing Janssen is a two step process:
