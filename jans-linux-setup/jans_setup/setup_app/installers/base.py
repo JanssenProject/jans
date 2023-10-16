@@ -58,7 +58,6 @@ class BaseInstaller:
             if os.path.exists(unit_file):
                 self.renderTemplateInOut(unit_file, unit_files_dir, Config.unit_files_path)
 
-
     def update_rendering_dict(self):
         mydict = {}
         for obj_name, obj in inspect.getmembers(self):

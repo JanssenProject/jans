@@ -216,31 +216,33 @@ def uninstall_jans():
                 print("Please type \033[1m yes \033[0m to uninstall")
 
     print("Uninstalling Jannsen Server...")
-    for service in os.listdir(jetty_home):
-        if os.path.exists(os.path.join(jetty_home, service)):
-            print("Stopping", service)
-            os.system('systemctl stop ' + service)
-            os.system('systemctl disable ' + service)
 
-            default_fn = os.path.join('/etc/default/', service)
-            if os.path.exists(default_fn):
-                print("Removing", default_fn)
-                os.remove(default_fn)
-
-            unit_fn = os.path.join('/etc/systemd/system', service + '.service')
-            if os.path.exists(unit_fn):
-                os.remove(unit_fn)
+    service_list = os.listdir(jetty_home)
+    if os.path.exists('/opt/keycloak'):
+        service_list.append('kc')
 
     if os.path.exists('/opt/opendj/bin/stop-ds'):
-        print("Stopping OpenDj Server")
-        os.system('/opt/opendj/bin/stop-ds')
-        os.system('systemctl disable opendj')
-        os.remove('/etc/systemd/system/opendj.service')
+        service_list.append('opendj')
+
+    for service in service_list:
+
+        print("Stopping", service)
+        os.system('systemctl stop ' + service)
+        os.system('systemctl disable ' + service)
+
+        default_fn = os.path.join('/etc/default/', service)
+        if os.path.exists(default_fn):
+            print("Removing", default_fn)
+            os.remove(default_fn)
+
+        unit_fn = os.path.join('/etc/systemd/system', service + '.service')
+        if os.path.exists(unit_fn):
+            os.remove(unit_fn)
 
     os.system('systemctl daemon-reload')
     os.system('systemctl reset-failed')
 
-    remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
+    remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*', '/opt/keycloak', '/opt/idp']
     if argsp.profile == 'jans':
         remove_list.append('/opt/opendj')
     if not argsp.keep_downloads:
