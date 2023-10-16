@@ -102,7 +102,7 @@ jobs:
       run : |
         echo '%_gpg_name moauto (automation) <54212639+mo-auto@users.noreply.github.com>' >> ~/.rpmmacros      
         ${{ matrix.sign_cmd }} ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
-        ls ${{github.workspace}}/${{ matrix.asset_path }}
+        gpg --armor --detach-sign ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
 
     - name: Create checksum
       id: create_checksum
@@ -133,8 +133,8 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sig
-        asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sig
+        file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.asc
+        asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.asc
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
   build_python_packages:
