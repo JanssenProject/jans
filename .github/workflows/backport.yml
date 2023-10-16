@@ -3,7 +3,9 @@ on:
   pull_request_target:
     types: [closed, labeled]
     branches: [main, release-*]
-
+  permissions:
+    contents: write # so it can comment
+    pull-requests: write # so it can create pull requests
 # WARNING:
 # When extending this action, be aware that $GITHUB_TOKEN allows write access to
 # the GitHub repository. This means that it should not evaluate user input in a
@@ -27,20 +29,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          # required to find all branches
-          fetch-depth: 0
-          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-          ref: ${{ github.event.pull_request.head.sha }}
       - name: Create backport PRs
-        # should be kept in sync with `version`
-        uses: zeebe-io/backport-action@v1.3.1
+        uses: korthout/backport-action@v1
         with:
           # Config README: https://github.com/zeebe-io/backport-action#backport-action
           github_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           github_workspace: ${{ github.workspace }}
-          # should be kept in sync with `uses`
-          version: v0.0.8
 
           # Regex pattern to match GitHub labels
           # The capture group catches the target branch
