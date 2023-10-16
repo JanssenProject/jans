@@ -92,7 +92,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/ftl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
-ENV JANS_SOURCE_VERSION=57137e446774f0769e54969b4edbc5d03b715298
+ENV JANS_SOURCE_VERSION=a8884f39ee4eea3ef65d7cd41120343201d2b3e6
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code

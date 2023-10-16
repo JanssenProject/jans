@@ -255,7 +255,8 @@ def test_exec_api_unsupported_method():
 def test_no_couchbase_hosts(gmanager, client_prop):
     from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 
-    client = CouchbaseClient(gmanager, {"hosts": "", "user": "admin", "password": "password"})
+    client = CouchbaseClient(gmanager, **{"user": "admin", "password": "password"})
+    client.hosts = ""
     with pytest.raises(ValueError):
         getattr(client, client_prop)
 
@@ -395,7 +396,7 @@ buckets: {bucket_prefix}, {bucket_prefix}_user, {bucket_prefix}_cache, {bucket_p
 bucket.default: {bucket_prefix}
 bucket.{bucket_prefix}_user.mapping: people, groups, authorizations
 bucket.{bucket_prefix}_cache.mapping: cache
-bucket.{bucket_prefix}_site.mapping: cache-refresh
+bucket.{bucket_prefix}_site.mapping: link
 bucket.{bucket_prefix}_token.mapping: tokens
 bucket.{bucket_prefix}_session.mapping: sessions
 """.strip().format(bucket_prefix=bucket_prefix)
@@ -494,7 +495,7 @@ def test_resolve_hybrid_storages(monkeypatch):
     expected = {
         "storages": "couchbase, ldap, spanner, sql",
         "storage.default": "sql",
-        "storage.couchbase.mapping": "cache-refresh",
+        "storage.couchbase.mapping": "link",
         "storage.ldap.mapping": "cache",
         "storage.spanner.mapping": "people, groups, authorizations",
         "storage.sql.mapping": "tokens, sessions",
@@ -524,7 +525,7 @@ storages: couchbase, ldap, spanner, sql
 storage.default: ldap
 storage.couchbase.mapping: people, groups, authorizations
 storage.spanner.mapping: tokens
-storage.sql.mapping: cache-refresh, cache, sessions
+storage.sql.mapping: link, cache, sessions
 """.strip()
 
     dest = tmpdir.join("jans-hybrid.properties")
@@ -925,7 +926,7 @@ def test_persistence_mapper_groups_rdn(monkeypatch):
 
     groups = {
         "couchbase": ["tokens"],
-        "ldap": ["cache-refresh"],
+        "ldap": ["link"],
         "spanner": ["people, groups, authorizations"],
         "sql": ["", "cache", "sessions"],
     }
