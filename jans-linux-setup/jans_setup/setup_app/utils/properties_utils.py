@@ -642,6 +642,7 @@ class PropertiesUtils(SetupUtils):
                                             self.getDefaultOption(Config.install_jans_saml)
                                             )[0].lower()
 
+        Config.install_jans_saml = prompt == 'y'
         if Config.installed_instance and Config.install_jans_saml:
             Config.addPostSetupService.append('install_jans_saml')
 

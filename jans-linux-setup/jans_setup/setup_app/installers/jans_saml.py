@@ -49,7 +49,7 @@ class JansSamlInstaller(JettyInstaller):
         self.idp_config_data_dir = os.path.join(Config.opt_dir, self.idp_config_id)
         self.idp_config_log_dir = os.path.join(self.idp_config_data_dir, 'logs')
         self.idp_config_providers_dir = os.path.join(self.idp_config_data_dir, 'providers')
-
+        self.idp_config_http_port = '8083'
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
