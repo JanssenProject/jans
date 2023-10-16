@@ -31,7 +31,7 @@ class JansSamlInstaller(JettyInstaller):
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-
+        self.systemd_units = ['kc']
         self.register_progess()
 
         self.saml_enabled = True
@@ -133,4 +133,6 @@ class JansSamlInstaller(JettyInstaller):
         base.unpack_zip(self.source_files[3][0], self.idp_config_data_dir, with_par_dir=False)
         self.copyFile(self.source_files[4][0], self.idp_config_providers_dir)
         base.unpack_zip(self.source_files[5][0], self.idp_config_providers_dir)
-
+        self.update_rendering_dict()
+        self.render_unit_file()
+        self.enable()
