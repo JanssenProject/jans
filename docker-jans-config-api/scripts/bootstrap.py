@@ -105,8 +105,9 @@ def main():
 
     configure_logging()
 
-    persistence_setup = PersistenceSetup(manager)
-    persistence_setup.import_ldif_files()
+    with manager.lock.create_lock("config-api-setup"):
+        persistence_setup = PersistenceSetup(manager)
+        persistence_setup.import_ldif_files()
 
     plugins = discover_plugins()
     logger.info(f"Loaded config-api plugins: {plugins}")
