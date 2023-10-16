@@ -186,7 +186,7 @@ def wait_for_ldap(manager: Manager, **kwargs: _t.Any) -> None:
     search_mapping = {
         "default": ("ou=jans-auth,ou=configuration,o=jans", "(objectClass=jansAppConf)"),
         "user": (_ADMIN_GROUP_DN, "(objectClass=jansGrp)"),
-        "site": ("ou=cache-refresh,o=site", "(ou=cache-refresh)"),
+        "site": ("ou=link,o=site", "(ou=link)"),
         "cache": ("ou=cache,o=jans", "(ou=cache)"),
         "token": ("ou=tokens,o=jans", "(ou=tokens)"),
         "session": ("ou=sessions,o=jans", "(ou=sessions)"),
