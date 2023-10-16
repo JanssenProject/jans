@@ -481,11 +481,13 @@ def main():
 
             jansInstaller.post_install_tasks()
 
+            jansInstaller.reload_daemon()
             for service in jansProgress.services:
                 if service['app_type'] == static.AppType.SERVICE:
                     jansProgress.progress(PostSetup.service_name,
                                           "Starting {}".format(service['name'].replace('-', ' ').replace('_', ' ').title()))
                     time.sleep(2)
+                    service['object'].enable()
                     service['object'].stop()
                     service['object'].start()
 
