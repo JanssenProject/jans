@@ -6,11 +6,11 @@
 //
 
 import Foundation
-import RealmSwift
 
 struct OPConfiguration: Codable {
     
     private enum CodingKeys: String, CodingKey {
+        case sno
         case issuer
         case registrationEndpoint = "registration_endpoint"
         case tokenEndpoint = "token_endpoint"
@@ -19,6 +19,7 @@ struct OPConfiguration: Codable {
         case revocationEndpoint = "revocation_endpoint"
     }
     
+    var sno: String
     var issuer: String
     var registrationEndpoint: String
     var tokenEndpoint: String
@@ -26,13 +27,28 @@ struct OPConfiguration: Codable {
     var authorizationChallengeEndpoint: String
     var revocationEndpoint: String
     
+    var isSuccessful: Bool = false
+    
     var toString: String {
         "OPConfiguration{" +
+        "sno='" + sno + "'\n" +
         "issuer='" + issuer + "'\n" +
         ", registrationEndpoint='" + registrationEndpoint + "'\n" +
         ", tokenEndpoint='" + tokenEndpoint + "'\n" +
         ", userinfoEndpoint='" + userinfoEndpoint + "'\n" +
         ", authorizationChallengeEndpoint='" + authorizationChallengeEndpoint + "'\n" +
         "}"
+    }
+    
+    var opConfigurationObject: OPConfigurationObject {
+        let opConfigurationObject = OPConfigurationObject()
+        opConfigurationObject.sno = sno
+        opConfigurationObject.issuer = issuer
+        opConfigurationObject.registrationEndpoint = registrationEndpoint
+        opConfigurationObject.tokenEndpoint = tokenEndpoint
+        opConfigurationObject.userinfoEndpoint = userinfoEndpoint
+        opConfigurationObject.authorizationChallengeEndpoint = authorizationChallengeEndpoint
+        
+        return opConfigurationObject
     }
 }

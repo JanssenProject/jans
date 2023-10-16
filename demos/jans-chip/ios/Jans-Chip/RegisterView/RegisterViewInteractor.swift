@@ -23,6 +23,8 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
         ServiceClient()
     }()
     
+    private let dcrRepository = DCRRepository()
+    
     private var cancellableSet : Set<AnyCancellable> = []
     
     init(presenter: RegisterViewPresenterImpl) {
@@ -48,18 +50,34 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
         serviceClient.getOPConfiguration(url: configurationUrl)
             .sink { [weak self] result in
                 switch result {
-                case .success(let configuration):
-                    print("configuration: \(configuration)")
-                    self?.handleFetchOPConfiguration(configuration: configuration)
+                case .success(let configurationResult):
+                    var configuration = configurationResult
+                    configuration.isSuccessful = true
+                    configuration.sno = AppConfig.DEFAULT_S_NO
+                    
+                    print("Inside fetchOPConfiguration :: opConfiguration :: \(configuration.toString)")
+                    
+                    self?.handleFetchOPConfiguration(configuration: configuration, scopeText: scopeText)
                 case .failure(let error):
                     print("error: \(error)")
+                    self?.presenter.onError(message: error.localizedDescription)
                 }
             }
             .store(in: &cancellableSet)
     }
     
-    private func handleFetchOPConfiguration(configuration: OPConfiguration) {
-        // Save configuration into local DB
-//        RealmManager.shared.save(object: configuration)
+    private func handleFetchOPConfiguration(configuration: OPConfiguration, scopeText: String) {
+        if configuration.isSuccessful {
+            // Save configuration into local DB
+            RealmManager.shared.deleteAllConfiguration()
+            RealmManager.shared.save(object: configuration.opConfigurationObject)
+            doDCR(scopeText: scopeText)
+        } else {
+            presenter.onError(message: "Error with fetching OPConfiguration")
+        }
+    }
+    
+    private func doDCR(scopeText: String) {
+        dcrRepository.doDCR(scopeText: scopeText)
     }
 }

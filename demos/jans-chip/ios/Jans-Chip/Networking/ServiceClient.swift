@@ -43,4 +43,11 @@ extension ServiceClient: ServiceClientProtocol {
         let publisher: AnyPublisher<Result<OPConfiguration, AFError>, Never> = performRequest(route: .getOPConfiguration(url), decoder: jsonDecoder)
         return publisher
     }
+    
+    func doDCR(url: String) -> AnyPublisher<Result<DCResponse, AFError>, Never> {
+        let jsonDecoder = JSONDecoder()
+        jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+        let publisher: AnyPublisher<Result<DCResponse, AFError>, Never> = performRequest(route: .doDCR(<#T##String#>, url), decoder: jsonDecoder)
+        return publisher
+    }
 }

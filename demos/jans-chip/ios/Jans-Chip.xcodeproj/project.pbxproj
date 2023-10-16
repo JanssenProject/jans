@@ -10,6 +10,13 @@
 		304311F22ACC05E4006B8D40 /* Jans_ChipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */; };
 		304311F62ACC05E5006B8D40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 304311F52ACC05E5006B8D40 /* Assets.xcassets */; };
 		304311F92ACC05E5006B8D40 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 304311F82ACC05E5006B8D40 /* Preview Assets.xcassets */; };
+		3049C20B2AD6D0BC00164883 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C20A2AD6D0BC00164883 /* AppConfig.swift */; };
+		3049C20D2AD6D27D00164883 /* OPConfigurationObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C20C2AD6D27D00164883 /* OPConfigurationObject.swift */; };
+		3049C2102AD7F59600164883 /* DCRRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C20F2AD7F59600164883 /* DCRRepository.swift */; };
+		3049C2122AD7F93100164883 /* DCRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C2112AD7F93100164883 /* DCRequest.swift */; };
+		3049C2142AD80D2F00164883 /* AppIntegrityEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C2132AD80D2F00164883 /* AppIntegrityEntity.swift */; };
+		3049C2162AD8151100164883 /* PlayIntegrityRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C2152AD8151100164883 /* PlayIntegrityRepository.swift */; };
+		3049C2182AD8163A00164883 /* AppIntegrityResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C2172AD8163A00164883 /* AppIntegrityResponse.swift */; };
 		3063E5682ACC0890002B4879 /* MainViewInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5672ACC0890002B4879 /* MainViewInteractor.swift */; };
 		3063E56A2ACC0973002B4879 /* MainViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5692ACC0973002B4879 /* MainViewState.swift */; };
 		3063E56C2ACC0BAF002B4879 /* MainViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E56B2ACC0BAF002B4879 /* MainViewPresenter.swift */; };
@@ -45,6 +52,13 @@
 		304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Jans_ChipApp.swift; sourceTree = "<group>"; };
 		304311F52ACC05E5006B8D40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		304311F82ACC05E5006B8D40 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		3049C20A2AD6D0BC00164883 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		3049C20C2AD6D27D00164883 /* OPConfigurationObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPConfigurationObject.swift; sourceTree = "<group>"; };
+		3049C20F2AD7F59600164883 /* DCRRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DCRRepository.swift; sourceTree = "<group>"; };
+		3049C2112AD7F93100164883 /* DCRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DCRequest.swift; sourceTree = "<group>"; };
+		3049C2132AD80D2F00164883 /* AppIntegrityEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntegrityEntity.swift; sourceTree = "<group>"; };
+		3049C2152AD8151100164883 /* PlayIntegrityRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayIntegrityRepository.swift; sourceTree = "<group>"; };
+		3049C2172AD8163A00164883 /* AppIntegrityResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntegrityResponse.swift; sourceTree = "<group>"; };
 		3063E5672ACC0890002B4879 /* MainViewInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewInteractor.swift; sourceTree = "<group>"; };
 		3063E5692ACC0973002B4879 /* MainViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewState.swift; sourceTree = "<group>"; };
 		3063E56B2ACC0BAF002B4879 /* MainViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewPresenter.swift; sourceTree = "<group>"; };
@@ -105,6 +119,7 @@
 		304311F02ACC05E4006B8D40 /* Jans-Chip */ = {
 			isa = PBXGroup;
 			children = (
+				3049C20E2AD7F58A00164883 /* Helper */,
 				3063E5A32AD40FC9002B4879 /* Database */,
 				3063E5952AD051BD002B4879 /* UIComponents */,
 				3063E57D2ACD6153002B4879 /* Networking */,
@@ -127,6 +142,15 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		3049C20E2AD7F58A00164883 /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				3049C20F2AD7F59600164883 /* DCRRepository.swift */,
+				3049C2152AD8151100164883 /* PlayIntegrityRepository.swift */,
+			);
+			path = Helper;
+			sourceTree = "<group>";
+		};
 		3063E5662ACC0852002B4879 /* MainView */ = {
 			isa = PBXGroup;
 			children = (
@@ -146,6 +170,8 @@
 				3063E5782ACD60D7002B4879 /* TokenResponse.swift */,
 				3063E5842ACD7EEC002B4879 /* OPConfiguration.swift */,
 				3063E5B12AD6CAEB002B4879 /* DCResponse.swift */,
+				3049C2112AD7F93100164883 /* DCRequest.swift */,
+				3049C2172AD8163A00164883 /* AppIntegrityResponse.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -154,6 +180,7 @@
 			isa = PBXGroup;
 			children = (
 				3063E57B2ACD6139002B4879 /* Error.swift */,
+				3049C20A2AD6D0BC00164883 /* AppConfig.swift */,
 			);
 			path = General;
 			sourceTree = "<group>";
@@ -214,6 +241,8 @@
 			isa = PBXGroup;
 			children = (
 				3063E5AA2AD41238002B4879 /* OIDCClient.swift */,
+				3049C20C2AD6D27D00164883 /* OPConfigurationObject.swift */,
+				3049C2132AD80D2F00164883 /* AppIntegrityEntity.swift */,
 			);
 			path = DBModel;
 			sourceTree = "<group>";
@@ -320,17 +349,24 @@
 				3063E5902AD04A34002B4879 /* RegisterViewPresenter.swift in Sources */,
 				3063E5B02AD6C623002B4879 /* RealmManager.swift in Sources */,
 				3063E56E2ACC0BFE002B4879 /* MainViewAssembler.swift in Sources */,
+				3049C2142AD80D2F00164883 /* AppIntegrityEntity.swift in Sources */,
 				3063E56C2ACC0BAF002B4879 /* MainViewPresenter.swift in Sources */,
+				3049C20B2AD6D0BC00164883 /* AppConfig.swift in Sources */,
 				3063E5832ACD78DF002B4879 /* EndpointRouter.swift in Sources */,
 				3063E5812ACD7897002B4879 /* EndpointConfiguration.swift in Sources */,
 				304311F22ACC05E4006B8D40 /* Jans_ChipApp.swift in Sources */,
 				3063E5A02AD406D3002B4879 /* LoginView.swift in Sources */,
 				3063E56A2ACC0973002B4879 /* MainViewState.swift in Sources */,
+				3049C2162AD8151100164883 /* PlayIntegrityRepository.swift in Sources */,
 				3063E5932AD04A34002B4879 /* RegisterView.swift in Sources */,
 				3063E5A12AD406D3002B4879 /* LoginViewState.swift in Sources */,
+				3049C2122AD7F93100164883 /* DCRequest.swift in Sources */,
+				3049C2182AD8163A00164883 /* AppIntegrityResponse.swift in Sources */,
+				3049C2102AD7F59600164883 /* DCRRepository.swift in Sources */,
 				3063E5912AD04A34002B4879 /* RegisterViewAssembler.swift in Sources */,
 				3063E5942AD04A34002B4879 /* RegisterViewInteractor.swift in Sources */,
 				3063E5852ACD7EEC002B4879 /* OPConfiguration.swift in Sources */,
+				3049C20D2AD6D27D00164883 /* OPConfigurationObject.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
