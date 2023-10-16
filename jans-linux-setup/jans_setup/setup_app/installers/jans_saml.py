@@ -135,4 +135,3 @@ class JansSamlInstaller(JettyInstaller):
         base.unpack_zip(self.source_files[5][0], self.idp_config_providers_dir)
         self.update_rendering_dict()
         self.render_unit_file()
-        self.enable()
