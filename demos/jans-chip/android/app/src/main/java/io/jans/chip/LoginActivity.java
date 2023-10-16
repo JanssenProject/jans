@@ -74,10 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                                 intent.putExtra(USER_INFO, userInfoResponse.getReponse().toString());
                                 startActivity(intent);
                             } else {
-                                createErrorDialog(userInfoResponse.getOperationError().getMessage());
-                                errorDialog.show();
-                                loginButton.setEnabled(true);
-                                loginProgressBar.setVisibility(View.INVISIBLE);
+                                showErrorDialog(userInfoResponse.getOperationError().getMessage());
                             }
                         }
                     });
@@ -114,30 +111,33 @@ public class LoginActivity extends AppCompatActivity {
                                                                         Intent intent = new Intent(LoginActivity.this, AfterLoginActivity.class);
                                                                         intent.putExtra(USER_INFO, userInfoResponse.getReponse().toString());
                                                                         startActivity(intent);
-                                                                    } else {
-                                                                        createErrorDialog(userInfoResponse.getOperationError().getMessage());
-                                                                        errorDialog.show();
                                                                         loginButton.setEnabled(true);
-                                                                        loginProgressBar.setVisibility(View.INVISIBLE);
+                                                                    } else {
+                                                                        showErrorDialog(userInfoResponse.getOperationError().getMessage());
                                                                     }
                                                                 }
                                                             });
                                                 } else {
-                                                    createErrorDialog(tokenResponse.getOperationError().getMessage());
-                                                    errorDialog.show();
+                                                    showErrorDialog(tokenResponse.getOperationError().getMessage());
                                                 }
 
                                             }
                                         });
                             } else {
-                                createErrorDialog(loginResponse.getOperationError().getMessage());
-                                errorDialog.show();
+                                showErrorDialog(loginResponse.getOperationError().getMessage());
                             }
                         }
                     });
                 }
             }
         });
+    }
+
+    private void showErrorDialog(String message) {
+        createErrorDialog(message);
+        errorDialog.show();
+        loginProgressBar.setVisibility(View.INVISIBLE);
+        loginButton.setEnabled(true);
     }
 
     private boolean validateInputs() {

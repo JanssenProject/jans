@@ -20,7 +20,7 @@
         android:id="@+id/registerButton"
         android:layout_width="215dp"
         android:layout_height="46dp"
-        android:text="Register"
+        android:text="@string/register"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Configuration Endpoint"
+        android:hint="@string/configuration_endpoint"
         android:inputType="text"
         app:layout_constraintBottom_toTopOf="@+id/registerButton"
         app:layout_constraintEnd_toEndOf="parent"
@@ -41,26 +41,27 @@
         app:layout_constraintTop_toBottomOf="@+id/logo1"
         app:layout_constraintVertical_bias="0.423" />
 
-    <EditText
+    <TextView
         android:id="@+id/scopes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="208dp"
+        android:layout_height="60dp"
+        android:background="@android:drawable/editbox_background"
+        android:drawableRight="@android:drawable/arrow_down_float"
         android:ems="10"
-        android:hint="Scopes"
-        android:inputType="text"
-        android:text="openid"
+        android:hint="@string/click_to_add_scopes"
+        android:inputType="none"
         app:layout_constraintBottom_toTopOf="@+id/registerButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.487"
+        app:layout_constraintHorizontal_bias="0.463"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/issuer"
-        app:layout_constraintVertical_bias="0.475" />
+        app:layout_constraintVertical_bias="0.376" />
 
     <TextView
         android:id="@+id/heading1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Register OIDC Client"
+        android:text="@string/register_oidc_client"
         android:textSize="24sp"
         android:textFontWeight="700"
         android:textColorLink="#009688"
@@ -97,7 +98,7 @@
         android:id="@+id/heading2"
         android:layout_width="163dp"
         android:layout_height="30dp"
-        android:text="App Integrity Status"
+        android:text="@string/app_integrity_status"
         android:textSize="18sp"
         android:textFontWeight="700"
         app:layout_constraintBottom_toTopOf="@+id/appIntegrityText"
