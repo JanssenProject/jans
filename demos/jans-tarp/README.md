@@ -13,7 +13,7 @@ This extension is for convenient testing of authentication flows on browser.
 
 ## Prerequisite
 
-- Node.js (>= v18.15.0) 
+- Node.js (>= v18.15.0)
 
 ## Build
 
@@ -39,6 +39,19 @@ The extension can directly installed on Firefox browser from https://addons.mozi
 1. In Firefox, open the `about:debugging` page.
 2. Click the `This Firefox` option.
 3. Click the `Load Temporary Add-on` button, then select the `jans-tarp-firefox-v{}.zip` zip file from `/jans-tarp/release/`.
+
+## Testing with Keycloak (installed on localhost)
+
+1. Login to KC admin console
+
+2. Go to `Clients --> Client registration --> Client details --> Trusted Hosts`  and set localhost as Trusted Hosts (as your KC is running on localhost).
+
+![Trusted Hosts](./docs/images/kc_trusted_hosts.png)
+
+3. Go to `Client scopes` and create a scope with name `openid`. The assigned type should be `Optional`.
+
+![Client scopes](./docs/images/kc_add_scope.png)
+
 
 Suggestions and pull requests are welcomed!.
 
