@@ -129,7 +129,7 @@ jobs:
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
     - name: Upload sig to release
-      id: upload_shas
+      id: upload_sigs
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
