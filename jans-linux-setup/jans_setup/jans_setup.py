@@ -97,7 +97,10 @@ if 'SETUP_BRANCH' not in base.current_app.app_info:
 if argsp.java_version:
     base.current_app.app_info['AMAZON_CORRETTO_VERSION'] = argsp.java_version
 
-base.current_app.app_info['jans_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
+if base.argsp.jans_app_version:
+    base.current_app.app_info['jans_version'] = base.argsp.jans_app_version
+else:
+    base.current_app.app_info['jans_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
 
 
 # download pre-required apps
