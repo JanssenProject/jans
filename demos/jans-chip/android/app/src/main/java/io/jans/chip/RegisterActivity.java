@@ -13,6 +13,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import io.jans.chip.modal.OIDCClient;
@@ -24,7 +27,7 @@ import io.jans.chip.modelview.OPConfigurationViewModel;
 public class RegisterActivity extends AppCompatActivity {
 
     EditText issuer;
-    EditText scopes;
+    TextView scopes;
     Button registerButton;
     ProgressBar registerProgressBar;
     AlertDialog.Builder errorDialog;
@@ -33,6 +36,7 @@ public class RegisterActivity extends AppCompatActivity {
     OPConfigurationViewModel opConfigurationViewModel;
     DCRViewModel dcrViewModel;
     AppDatabase appDatabase;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,18 +48,20 @@ public class RegisterActivity extends AppCompatActivity {
 
         registerProgressBar = findViewById(R.id.registerProgressBar);
         registerButton = findViewById(R.id.registerButton);
+        issuer = findViewById(R.id.issuer);
+        scopes = findViewById(R.id.scopes);
+
+        String[] scopeArray = {"openid", "authorization_challenge"};
+        showItemSelectionPopup(scopes, scopeArray);
 
         //Display app integrity
         displayAppIntegrity(appDatabase);
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                issuer = findViewById(R.id.issuer);
-                scopes = findViewById(R.id.scopes);
+                selectAllScopesByDefault(scopes, scopeArray);
                 String issuerText = issuer.getText().toString();
                 String scopeText = scopes.getText().toString();
-
                 if (validateInputs()) {
                     registerProgressBar.setVisibility(View.VISIBLE);
                     registerButton.setEnabled(false);
@@ -72,23 +78,118 @@ public class RegisterActivity extends AppCompatActivity {
                                                     Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                                                     startActivity(intent);
                                                 } else {
-                                                    createErrorDialog(opConfiguration.getOperationError().getMessage());
-                                                    errorDialog.show();
-                                                    registerProgressBar.setVisibility(View.INVISIBLE);
-                                                    registerButton.setEnabled(true);
+                                                    showErrorDialog(opConfiguration.getOperationError().getMessage());
                                                 }
                                             }
                                         });
                                     } else {
-                                        createErrorDialog(opConfiguration.getOperationError().getMessage());
-                                        errorDialog.show();
-                                        registerProgressBar.setVisibility(View.INVISIBLE);
-                                        registerButton.setEnabled(true);
+                                        showErrorDialog(opConfiguration.getOperationError().getMessage());
                                     }
 
                                 }
                             });
                 }
+            }
+        });
+    }
+
+    private void showErrorDialog(String message) {
+        createErrorDialog(message);
+        errorDialog.show();
+        registerProgressBar.setVisibility(View.INVISIBLE);
+        registerButton.setEnabled(true);
+    }
+
+    private void selectAllScopesByDefault(TextView scopesEditText, String[] scopeArray) {
+        // Initialize string builder
+        StringBuilder stringBuilder = new StringBuilder();
+        // use for loop
+        for (int j = 0; j < scopeArray.length; j++) {
+            // concat array value
+            stringBuilder.append(scopeArray[j]);
+            stringBuilder.append(" ");
+        }
+        // set text on textView
+        scopesEditText.setText(stringBuilder.toString());
+    }
+
+    private void showItemSelectionPopup(TextView scopesEditText, String[] scopeArray) {
+
+        boolean[] selectedScope = new boolean[scopeArray.length];
+        List<Integer> scopeList = new ArrayList<>();
+        scopesEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                // Initialize alert dialog
+                AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+                // set title
+                builder.setTitle("Select Scope");
+                // set dialog non cancelable
+                builder.setCancelable(false);
+                builder.setMultiChoiceItems(scopeArray, selectedScope, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i, boolean b) {
+                        // check condition
+                        if (b) {
+                            // when checkbox selected
+                            // Add position  in scope list
+                            scopeList.add(i);
+                            // Sort array list
+                            Collections.sort(scopeList);
+                        } else {
+                            // when checkbox unselected
+                            // Remove position from scopeList
+                            scopeList.remove(Integer.valueOf(i));
+                        }
+                    }
+                });
+
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Initialize string builder
+                        StringBuilder stringBuilder = new StringBuilder();
+                        // use for loop
+                        for (int j = 0; j < scopeList.size(); j++) {
+                            // concat array value
+                            stringBuilder.append(scopeArray[scopeList.get(j)]);
+                            // check condition
+                            if (j != scopeList.size() - 1) {
+                                // When j value  not equal
+                                // to scope list size - 1
+                                // add comma
+                                stringBuilder.append(" ");
+                            }
+                        }
+                        // set text on textView
+                        scopesEditText.setText(stringBuilder.toString());
+                    }
+                });
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // dismiss dialog
+                        dialogInterface.dismiss();
+                    }
+                });
+                builder.setNeutralButton("Clear All", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // use for loop
+                        for (int j = 0; j < selectedScope.length; j++) {
+                            // remove all selection
+                            selectedScope[j] = false;
+                            // clear scope list
+                            scopeList.clear();
+                            // clear text view value
+                            scopesEditText.setText("");
+                        }
+                    }
+                });
+                // show dialog
+                builder.show();
             }
         });
     }
