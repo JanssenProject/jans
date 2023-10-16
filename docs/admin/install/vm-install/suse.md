@@ -112,6 +112,23 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 
 Full TUI documentation can be found [here](../../config-guide/config-tools/jans-tui/README.md)
 
+## Let's Encrypt
+ To generate Let’s Encrypt CA certificate run below commands:
+```
+sudo zypper -n install certbot
+sudo certbot certonly --webroot -w /var/www/html -d FQDN
+```
+Modify  https_jans.conf file for SSLCertificateFile and SSLCertificateKeyFile values with certificate location which we got from certbot command execution.
+
+```
+ sudo vi /etc/httpd/conf.d/https_jans.conf
+
+SSLCertificateFile location_of_fullchain.pem
+SSLCertificateKeyFile location_of_privkey.pem
+
+sudo /usr/sbin/rcapache2 restart
+```
+
 ## Uninstall
 
 Uninstall process involves two steps
