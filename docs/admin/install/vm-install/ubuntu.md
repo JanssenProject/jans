@@ -132,12 +132,13 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 Full TUI documentation can be found [here](../../config-guide/config-tools/jans-tui/README.md)
 
 ## Let's Encrypt
- To generate Let’s Encrypt CA certificate run below commands:
+ To generate Let’s Encrypt CA certificate run below commands and add required information at prompt:
 ```bash 
 sudo apt update && sudo apt install certbot python3-certbot-apache
 sudo certbot --apache -d FQDN
-or
-sudo certbot certonly --webroot -w /var/www/html -d FQDN
+```
+to check certbot status
+```
 sudo systemctl status certbot.timer
 ```
 to renew certificate run
