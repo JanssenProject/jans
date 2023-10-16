@@ -3,9 +3,9 @@ on:
   pull_request_target:
     types: [closed, labeled]
     branches: [main, release-*]
-  permissions:
-    contents: write # so it can comment
-    pull-requests: write # so it can create pull requests
+permissions:
+  contents: write # so it can comment
+  pull-requests: write # so it can create pull requests
 # WARNING:
 # When extending this action, be aware that $GITHUB_TOKEN allows write access to
 # the GitHub repository. This means that it should not evaluate user input in a
