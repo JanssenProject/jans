@@ -2,10 +2,12 @@ package io.jans.chip.modelview;
 
 import android.content.Context;
 
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
 import io.jans.chip.modal.LoginResponse;
 import io.jans.chip.repository.LoginResponseRepository;
+import io.jans.chip.services.SingleLiveEvent;
+
 public class LoginViewModel extends ViewModel {
     LoginResponseRepository loginResponseRepository;
 
@@ -13,7 +15,7 @@ public class LoginViewModel extends ViewModel {
         loginResponseRepository = LoginResponseRepository.getInstance(context);
     }
 
-    public MutableLiveData<LoginResponse> processlogin(String usernameText, String passwordText) {
+    public SingleLiveEvent<LoginResponse> processlogin(String usernameText, String passwordText) {
         return loginResponseRepository.processlogin(usernameText, passwordText);
     }
 }

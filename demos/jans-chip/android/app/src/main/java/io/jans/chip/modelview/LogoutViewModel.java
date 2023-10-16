@@ -2,10 +2,11 @@ package io.jans.chip.modelview;
 
 import android.content.Context;
 
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
 import io.jans.chip.modal.LogoutResponse;
 import io.jans.chip.repository.LogoutRepository;
+import io.jans.chip.services.SingleLiveEvent;
 
 public class LogoutViewModel extends ViewModel {
     LogoutRepository logoutRepository;
@@ -14,7 +15,7 @@ public class LogoutViewModel extends ViewModel {
         logoutRepository = LogoutRepository.getInstance(context);
     }
 
-    public MutableLiveData<LogoutResponse> logout() {
+    public SingleLiveEvent<LogoutResponse> logout() {
         return logoutRepository.logout();
     }
 }

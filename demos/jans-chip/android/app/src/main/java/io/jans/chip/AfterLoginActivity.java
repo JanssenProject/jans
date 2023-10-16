@@ -51,7 +51,6 @@ public class AfterLoginActivity extends AppCompatActivity {
 
                     }
                 });
-                //logout(dbH);
             }
         });
     }
