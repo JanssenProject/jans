@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"io.jans.radius.model","l":"RadiusClient"},{"p":"io.jans.radius.model","l":"ServerConfiguration"}]
