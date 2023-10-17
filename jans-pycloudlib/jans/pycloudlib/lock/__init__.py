@@ -23,6 +23,7 @@ from jans.pycloudlib.lock.spanner_lock import SpannerLock
 from jans.pycloudlib.lock.sql_lock import SqlLock
 from jans.pycloudlib.lock.ldap_lock import LdapLock
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -240,7 +241,7 @@ class LockRecord(BaseLockRecord):
             An instance of lock adapter class.
 
         Raises:
-            ValueError: If the value of `CN_PERSISTENCE_TYPE` environment variable is not supported.
+            ValueError: If the value of `CN_LOCK_ADAPTER` or `CN_PERSISTENCE_TYPE` environment variable is not supported.
 
         Examples:
 
@@ -258,7 +259,7 @@ class LockRecord(BaseLockRecord):
         - `couchbase`: returns and instance of [CouchbaseLock][jans.pycloudlib.lock.couchbase_lock.CouchbaseLock]
         - `ldap`: returns and instance of [LdapLock][jans.pycloudlib.lock.ldap_lock.LdapLock]
         """
-        _adapter = os.environ.get("CN_LOCK_ADAPTER") or os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+        _adapter = os.environ.get("CN_LOCK_ADAPTER") or PersistenceMapper().mapping["default"]
 
         if _adapter == "sql":
             return SqlLock()
