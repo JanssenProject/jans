@@ -1,6 +1,8 @@
-from functools import partial
 import asyncio
+from functools import partial
+
 from prompt_toolkit.application.current import get_app
+from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
@@ -21,7 +23,7 @@ from edit_script_dialog import EditScriptDialog
 from prompt_toolkit.application import Application
 from utils.multi_lang import _
 from utils.static import DialogResult, cli_style, common_strings
-
+from utils.utils import common_data
 
 class Plugin():
     """This is a general class for plugins 
@@ -39,11 +41,27 @@ class Plugin():
         self.app = app
         self.pid = 'scripts'
         self.name = 'Sc[r]ipts'
+        common_data.script_types = []
 
         self.scripts_prepare_containers()
 
     def process(self) -> None:
         pass
+
+    def on_page_enter(self, focus_container=False) -> None:
+
+        async def coroutine():
+            # retreive auth ldap servers
+            cli_args = {'operation_id': 'get-custom-script-type'}
+            self.app.start_progressing(_("Retreiving Script Types..."))
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+
+            if response.status_code == 200:
+                common_data.script_types = response.json()
+
+        if not common_data.script_types:
+            asyncio.ensure_future(coroutine())
 
     def set_center_frame(self) -> None:
         """center frame content
@@ -67,10 +85,10 @@ class Plugin():
                     ],style='class:outh_containers_scopes')
 
     def get_scripts(
-        self,
-        start_index: Optional[int] = 0,
-        pattern: Optional[str] = '',
-    ) -> None:
+            self,
+            start_index: Optional[int] = 0,
+            pattern: Optional[str] = '',
+        ) -> None:
         """Get the current Scripts from server
 
         Args:
@@ -104,9 +122,9 @@ class Plugin():
         asyncio.ensure_future(coroutine())
 
     def scripts_update_list(
-        self,
-        pattern: Optional[str] = '',
-    ) -> None:
+            self,
+            pattern: Optional[str] = '',
+        ) -> None:
         """Updates Scripts data from server
 
         Args:
