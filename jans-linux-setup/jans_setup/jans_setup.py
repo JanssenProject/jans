@@ -505,8 +505,8 @@ def main():
         do_installation()
         print('\n', static.colors.OKGREEN)
         if Config.install_config_api or Config.install_scim_server:
-            msg.installation_completed += "To manage your Janssen Identity Provider:\n"
             if Config.install_config_api:
+                msg.installation_completed += "To manage your Janssen Identity Provider:\n"
                 msg.installation_completed += '/opt/jans/jans-cli/config-cli-tui.py'
                 if base.current_app.profile == static.SetupProfiles.OPENBANKING:
                     ca_dir = os.path.join(Config.output_dir, 'CA')
@@ -514,8 +514,9 @@ def main():
                     key_fn = os.path.join(ca_dir, 'client.key')
                     msg.installation_completed += ' -CC {} -CK {}'.format(crt_fn, key_fn)
                 msg.installation_completed +="\n"
-            #if  Config.profile == 'jans' and Config.install_scim_server:
-            #    msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
+
+        if Config.install_casa:
+            msg.installation_completed += f"Browse https://{Config.hostname}/jans-casa\n"
 
         msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(
             Config.hostname)
