@@ -38,6 +38,7 @@
 
     <modules>
       <module>authenticator</module>
+      <module>task-scheduling</module>
     </modules>
 
     <repositories>
