@@ -15,8 +15,8 @@ from prompt_toolkit.widgets import Button, Label, TextArea, RadioList,\
     Button, Dialog, Frame
 
 from utils.multi_lang import _
-from utils.utils import DialogUtils
 from utils.static import DialogResult
+from utils.utils import DialogUtils, common_data
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
@@ -122,35 +122,12 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
         schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/CustomScript')
 
-        script_types = [
-                        ['person_authentication', 'Person Authentication'],
-                        ['consent_gathering', 'Consent Gathering'],
-                        ['post_authn', 'Post Authentication'],
-                        ['id_token', 'id_token'],
-                        ['password_grant', 'Password Grant'],
-                        ['ciba_end_user_notification', 'CIBA End User Notification'],
-                        #['OpenID Configuration', 'OpenID Configuration'],
-                        ['dynamic_scope', 'Dynamic Scope', ],
-                        ['spontaneous_scope', 'Spontaneous Scope',],
-                        ['application_session', 'Application Session'],
-                        ['end_session', 'End Session'],
-                        ['client_registration', 'Client Registration'],
-                        ['introspection', 'Introspection'],
-                        ['update_token', 'Update Token'],
-                        ['config_api', 'Config API'],
-                        ['idp', 'IDP'],
-                        ['resource_owner_password_credentials', 'Resource Owner Password Credentials'],
-                        ['cache_refresh', 'Cache Refresh'],
-                        ['id_generator', 'Id Generator'],
-                        ['uma_rpt_policy', 'Uma Rpt Policy'],
-                        ['uma_rpt_claims', 'Uma Rpt Claims'],
-                        ['uma_claims_gathering', 'Uma Claims Gathering'],
-                        ['scim', 'SCIM'],
-                        ['revoke_token', 'Revoke Token'],
-                        ['persistence_extension', 'Persistence Extension'],
-                        ['discovery', 'Discovery'],
-                        ['fido2_extension', 'Fido2 Extension'],
-                        ]
+
+        script_types = []
+        for scr_type in common_data.script_types:
+            scr_name = ' '.join([w.title() for w in scr_type.split('_')])
+            script_types.append((scr_type, scr_name))
+        script_types.sort()
 
         self.location_widget = self.myparent.getTitledText(
             _("          Path"), 
