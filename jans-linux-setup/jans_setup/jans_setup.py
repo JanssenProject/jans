@@ -141,6 +141,7 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.fido import FidoInstaller
     from setup_app.installers.eleven import ElevenInstaller
     from setup_app.installers.jans_link import JansLinkInstaller
+    from setup_app.installers.jans_keycloak_link import JansKCLinkInstaller
     from setup_app.installers.jans_casa import CasaInstaller
 
     from setup_app.installers.jans_saml import JansSamlInstaller
@@ -265,6 +266,7 @@ if Config.profile == 'jans':
     elevenInstaller = ElevenInstaller()
     casa_installer = CasaInstaller()
     jans_link_installer = JansLinkInstaller()
+    jans_keycloak_link_installer = JansKCLinkInstaller()
     jans_saml_installer = JansSamlInstaller()
 
 jansCliInstaller = JansCliInstaller()
@@ -452,6 +454,10 @@ def main():
                         not Config.installed_instance and Config.get(jans_link_installer.install_var)):
                     jans_link_installer.start_installation()
 
+                if (Config.installed_instance and jans_keycloak_link_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jans_keycloak_link_installer.install_var)):
+                    jans_keycloak_link_installer.start_installation()
+
                 if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
                             not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
                         jansCliInstaller.start_installation()
@@ -460,11 +466,6 @@ def main():
                 if (Config.installed_instance and jans_saml_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jans_saml_installer.install_var)):
                     jans_saml_installer.start_installation()
-
-
-            if Config.install_jans_cli:
-                jansCliInstaller.start_installation()
-                jansCliInstaller.configure()
 
             # if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
             #    oxdInstaller.start_installation()

@@ -3,15 +3,15 @@
   ],
   "inumConfig": {
     "configId": "local_inum",
-    "bindDN": "%(ldap_binddn)s",
+    "bindDN": "cn=directory manager",
     "bindPassword": "%(ldap_bind_encoded_pw)s",
     "servers": [
-      "%(ldap_hostname)s:%(ldaps_port)s"
+      "localhost:1636"
     ],
     "maxConnections": 10,
     "useSSL": true,
     "baseDNs": [
-      "ou=link,o=site"
+      "ou=keycloak-link,o=site"
     ],
     "primaryKey": null,
     "localPrimaryKey": null,
@@ -37,15 +37,15 @@
   },
   "ldapSearchSizeLimit": 1000,
   "keyAttributes": [
-    "uid"
+    "username"
   ],
   "keyObjectClasses": [
     "gluuPerson"
   ],
   "sourceAttributes": [
-    "mail",
-    "cn",
-    "sn"
+    "email",
+    "firstName",
+    "lastName"
   ],
   "customLdapFilter": "",
   "updateMethod": "copy",
@@ -54,28 +54,37 @@
   "useSearchLimit": false,
   "attributeMapping": [
     {
-      "source": "uid",
+      "source": "username",
       "destination": "uid"
     },
     {
-      "source": "cn",
+      "source": "firstName",
       "destination": "cn"
     },
     {
-      "source": "sn",
+      "source": "lastName",
       "destination": "sn"
+    },
+    {
+      "source": "email",
+      "destination": "mail"
     }
   ],
   "snapshotFolder": "%(snapshots_dir)s",
   "snapshotMaxCount": 10,
-  "baseDN": "o=jans",
-  "personObjectClassTypes": [
-    "jansCustomPerson",
-    "jansPerson",
-    "eduPerson"
-  ],
-  "personCustomObjectClass": "jansCustomPerson",
-  "contactObjectClassTypes": [],
+  "keycloakConfiguration": {
+    "serverUrl": "http://localhost:8180",
+    "realm": "master",
+    "clientId": "clientserviceaccount",
+    "clientSecret": "cbyFHt3MMU2vNluAmzXopl9SHx9CUmfC",
+    "grantType": "client_credentials",
+    "username": "admin",
+    "password": "keycloak"
+  },
+  "baseDN": null,
+  "personObjectClassTypes": null,
+  "personCustomObjectClass": null,
+  "contactObjectClassTypes": null,
   "allowPersonModification": false,
   "supportedUserStatus": [
     "active",
@@ -89,11 +98,11 @@
   "metricReporterEnabled": null,
   "disableJdkLogger": true,
   "cleanServiceInterval": 0,
-  "linkEnabled": false,
-  "serverIpAddress": "255.255.255.255",
-  "pollingInterval": null,
-  "lastUpdate": 1688581648776,
-  "lastUpdateCount": "0",
-  "problemCount": "3",
+  "keycloakLinkEnabled": true,
+  "keycloakLinkServerIpAddress": "255.255.255.255",
+  "keycloakLinkPollingInterval": null,
+  "keycloakLinkLastUpdate": 1697130936294,
+  "keycloakLinkLastUpdateCount": "5",
+  "keycloakLinkProblemCount": "1",
   "useLocalCache": false
 }
