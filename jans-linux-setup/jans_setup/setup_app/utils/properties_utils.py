@@ -611,6 +611,19 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_jans_link')
 
 
+    def prompt_for_jans_keycloak_link(self):
+        if Config.installed_instance and Config.install_jans_keycloak_link:
+            return
+
+        prompt_to_install = self.getPrompt("Install Jans Keycloak Link Server?",
+                                            self.getDefaultOption(Config.install_jans_keycloak_link)
+                                            )[0].lower()
+
+        Config.install_jans_keycloak_link = prompt_to_install == 'y'
+
+        if Config.installed_instance and Config.install_jans_keycloak_link:
+            Config.addPostSetupService.append('install_jans_keycloak_link')
+
     def prompt_for_casa(self):
         if Config.installed_instance and Config.install_casa:
             return
@@ -1002,6 +1015,7 @@ class PropertiesUtils(SetupUtils):
             self.promptForScimServer()
             self.promptForFido2Server()
             self.prompt_for_jans_link()
+            self.prompt_for_jans_keycloak_link()
             self.prompt_for_casa()
 
             self.prompt_for_jans_saml()

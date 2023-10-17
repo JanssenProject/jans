@@ -64,7 +64,8 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if not Config.persistence_type in ('couchbase', 'sql') and os.path.exists(Config.ox_ldap_properties):
             jans_ldap_prop = base.read_properties_file(Config.ox_ldap_properties)
             Config.ldap_binddn = jans_ldap_prop['bindDN']
-            Config.ldapPass = self.unobscure(jans_ldap_prop['bindPassword'])
+            Config.ldap_bind_encoded_pw = jans_ldap_prop['bindPassword']
+            Config.ldapPass = self.unobscure(Config.ldap_bind_encoded_pw)
             Config.opendj_p12_pass = self.unobscure(jans_ldap_prop['ssl.trustStorePin'])
             Config.ldap_hostname, Config.ldaps_port = jans_ldap_prop['servers'].split(',')[0].split(':')
 
@@ -243,6 +244,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
         Config.install_jans_link = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-link'))
         Config.install_casa = os.path.exists(os.path.join(Config.jetty_base, 'casa/start.d'))
+        Config.install_jans_keycloak_link = os.path.exists(os.path.join(Config.jetty_base, 'jans-keycloak-link/start.d'))
 
     def save(self):
         if os.path.exists(Config.setup_properties_fn):
