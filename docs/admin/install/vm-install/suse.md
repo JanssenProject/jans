@@ -112,6 +112,8 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 
 Full TUI documentation can be found [here](../../config-guide/config-tools/jans-tui/README.md)
 
+If you have selected casa during installation you can access casa using url ```https://<host>/jans-casa```
+
 ## Let's Encrypt
  To generate Let’s Encrypt CA certificate run below commands:
 ```
