@@ -15,7 +15,7 @@
     "memory": {
       "max_allowed_mb": 512,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.15
+      "ratio": 0.10
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,threadpool,console-capture,jsp"
@@ -27,7 +27,7 @@
     "memory": {
       "max_allowed_mb": 1024,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.2
+      "ratio": 0.15
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
@@ -76,12 +76,24 @@
       "max_allowed_mb": 1024,
       "metaspace_mb": 128,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.1
+      "ratio": 0.10
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,cdi-decorate"
     },
     "installed": false,
     "name": "jans-casa"
-    }
+    },  
+  "jans-keycloak-link": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.10
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "jans-keycloak-link"
+  }
 }
