@@ -3,8 +3,6 @@ package io.jans.chip.repository;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.lifecycle.MutableLiveData;
-
 import java.util.List;
 
 import io.jans.chip.AppDatabase;
@@ -12,13 +10,14 @@ import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.OperationError;
 import io.jans.chip.modal.UserInfoResponse;
 import io.jans.chip.retrofit.RetrofitClient;
+import io.jans.chip.services.SingleLiveEvent;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UserInfoResponseRepository {
     public static final String TAG = "UserInfoResponseRepository";
-    private final MutableLiveData<UserInfoResponse> userInfoResponseLiveData = new MutableLiveData<>();
+    private final SingleLiveEvent<UserInfoResponse> userInfoResponseLiveData = new SingleLiveEvent<>();
     Context context;
     AppDatabase appDatabase;
     private UserInfoResponseRepository(Context context) {
@@ -35,12 +34,12 @@ public class UserInfoResponseRepository {
         return userInfoResponseRepository;
     }
 
-    public MutableLiveData<UserInfoResponse> getUserInfo(String accessToken) {
+    public SingleLiveEvent<UserInfoResponse> getUserInfo(String accessToken) {
         return getUserInfo(accessToken, false);
     }
 
     // Overloaded function to get user information with silentOnError flag
-    public MutableLiveData<UserInfoResponse> getUserInfo(String accessToken, boolean silentOnError) {
+    public SingleLiveEvent<UserInfoResponse> getUserInfo(String accessToken, boolean silentOnError) {
         List<OPConfiguration> opConfigurationList = appDatabase.opConfigurationDao().getAll();
         if (opConfigurationList == null || opConfigurationList.isEmpty()) {
             userInfoResponseLiveData.setValue(setErrorInLiveObject("OpenID configuration not found in database."));

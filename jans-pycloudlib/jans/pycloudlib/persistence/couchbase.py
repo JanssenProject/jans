@@ -911,7 +911,7 @@ def get_bucket_for_key(key: str) -> str:
 
     if key_prefix in ("groups_", "people_", "authorizations_"):
         bucket = f"{bucket_prefix}_user"
-    elif key_prefix in ("site_", "cache-refresh_"):
+    elif key_prefix in ("site_", "link_"):
         bucket = f"{bucket_prefix}_site"
     elif key_prefix in ("tokens_",):
         bucket = f"{bucket_prefix}_token"

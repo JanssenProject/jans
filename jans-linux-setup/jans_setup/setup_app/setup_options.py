@@ -19,6 +19,7 @@ def get_setup_options():
         'installFido2': True,
         'installEleven': False,
         'install_jans_link': True,
+        'install_jans_keycloak_link': False,
         'install_casa': False,
         'install_jans_saml': False,
         'loadTestData': False,
@@ -106,6 +107,9 @@ def get_setup_options():
 
         if base.argsp.install_jans_link:
             setupOptions['install_jans_link'] = True
+
+        if base.argsp.install_jans_keycloak_link:
+            setupOptions['install_jans_keycloak_link'] = True
 
         if base.argsp.with_casa:
             setupOptions['install_casa'] = True
