@@ -97,7 +97,10 @@ if 'SETUP_BRANCH' not in base.current_app.app_info:
 if argsp.java_version:
     base.current_app.app_info['AMAZON_CORRETTO_VERSION'] = argsp.java_version
 
-base.current_app.app_info['jans_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
+if base.argsp.jans_app_version:
+    base.current_app.app_info['jans_version'] = base.argsp.jans_app_version
+else:
+    base.current_app.app_info['jans_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
 
 
 # download pre-required apps
@@ -479,11 +482,13 @@ def main():
 
             jansInstaller.post_install_tasks()
 
+            jansInstaller.reload_daemon()
             for service in jansProgress.services:
                 if service['app_type'] == static.AppType.SERVICE:
                     jansProgress.progress(PostSetup.service_name,
                                           "Starting {}".format(service['name'].replace('-', ' ').replace('_', ' ').title()))
                     time.sleep(2)
+                    service['object'].enable()
                     service['object'].stop()
                     service['object'].start()
 
