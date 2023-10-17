@@ -566,6 +566,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Specifies if authorization to be skipped for introspection")
     private Boolean introspectionSkipAuthorization;
 
+    @DocProperty(description = "If True, allow client request only own tokens. Otherwise allow to introspect all tokens.", defaultValue = "false")
+    private Boolean introspectionRestrictBasicAuthnToOwnTokens = false;
+
     @DocProperty(description = "Choose whether to accept access tokens to call end_session endpoint")
     private Boolean endSessionWithAccessToken;
 
@@ -1455,6 +1458,15 @@ public class AppConfiguration implements Configuration {
 
     public void setIntrospectionSkipAuthorization(Boolean introspectionSkipAuthorization) {
         this.introspectionSkipAuthorization = introspectionSkipAuthorization;
+    }
+
+    public Boolean getIntrospectionRestrictBasicAuthnToOwnTokens() {
+        if (introspectionRestrictBasicAuthnToOwnTokens == null) introspectionRestrictBasicAuthnToOwnTokens = false;
+        return introspectionRestrictBasicAuthnToOwnTokens;
+    }
+
+    public void setIntrospectionRestrictBasicAuthnToOwnTokens(Boolean introspectionRestrictBasicAuthnToOwnTokens) {
+        this.introspectionRestrictBasicAuthnToOwnTokens = introspectionRestrictBasicAuthnToOwnTokens;
     }
 
     public Boolean getUmaRptAsJwt() {
