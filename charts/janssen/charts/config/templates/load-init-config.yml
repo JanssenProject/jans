@@ -66,6 +66,28 @@ spec:
           secret:
             secretName: {{ .Release.Name }}-google-sa
         {{- end }}
+        {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
+        - name: cb-pass
+          secret:
+            secretName: {{ .Release.Name }}-cb-pass
+            items:
+              # we are mostly need non-superuser couchbase password file here
+              - key: couchbase_password
+                path: couchbase_password
+        {{- end }}
+        {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
+        - name: sql-pass
+          secret:
+            secretName: {{ .Release.Name }}-sql-pass
+        {{- end }}
+        {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
+        - name: ldap-pass
+          secret:
+            secretName: {{ .Release.Name }}-ldap-pass
+            items:
+              - key: ldap_password
+                path: ldap_password
+        {{- end }}
       containers:
       - name: {{ include "config.name" . }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -76,7 +98,7 @@ spec:
           {{- include "config.usr-envs" . | indent 12 }}
           {{- include "config.usr-secret-envs" . | indent 12 }}
         lifecycle:
-{{- toYaml .Values.lifecycle | nindent 10 }}          
+{{- toYaml .Values.lifecycle | nindent 10 }}
         volumeMounts:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
@@ -102,6 +124,21 @@ spec:
           - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
             name: google-sa
             subPath: google-credentials.json
+          {{- end }}
+          {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
+          - name: cb-pass
+            mountPath: {{ .Values.global.cnCouchbasePasswordFile }}
+            subPath: couchbase_password
+          {{- end }}
+          {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
+          - name: ldap-pass
+            mountPath: {{ .Values.global.cnLdapPasswordFile }}
+            subPath: ldap_password
+          {{- end }}
+          {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
+          - name: sql-pass
+            mountPath: {{ .Values.global.cnSqlPasswordFile }}
+            subPath: sql_password
           {{- end }}
         envFrom:
         - configMapRef:

@@ -37,7 +37,7 @@ data:
   {{- end }}
   {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
   # [aws_envs] Envs related to using AWS
-  {{- if .Values.configmap.cnAwsSecretsEndpointUrl }}  
+  {{- if .Values.configmap.cnAwsSecretsEndpointUrl }}
   CN_AWS_SECRETS_ENDPOINT_URL: {{ .Values.configmap.cnAwsSecretsEndpointUrl }}
   {{- end }}
   CN_AWS_SECRETS_PREFIX: {{ .Values.configmap.cnAwsSecretsNamePrefix }}
@@ -184,7 +184,7 @@ data:
   }}
   {{- end }}
   {{- if .Values.global.casa.enabled }}  # CASA
-  GLUU_CASA_APP_LOGGERS: {{ .Values.global.casa.appLoggers
+  CN_CASA_APP_LOGGERS: {{ .Values.global.casa.appLoggers
   | toJson
   | replace "casaLogTarget" "casa_log_target"
   | replace "casaLogLevel" "casa_log_level"
@@ -194,6 +194,15 @@ data:
   | squote
   }}
   {{- end }}
+  CN_SQL_PASSWORD_FILE: {{ .Values.global.cnSqlPasswordFile }}
+  CN_COUCHBASE_PASSWORD_FILE: {{ .Values.global.cnCouchbasePasswordFile }}
+  CN_COUCHBASE_SUPERUSER_PASSWORD_FILE: {{ .Values.global.cnCouchbaseSuperuserPasswordFile }}
+  CN_LDAP_PASSWORD_FILE: {{ .Values.global.cnLdapPasswordFile }}
+  CN_LDAP_TRUSTSTORE_PASSWORD_FILE: {{ .Values.global.cnLdapTruststorePasswordFile }}
+  CN_LDAP_CERT_FILE: {{ .Values.global.cnLdapCertFile }}
+  CN_LDAP_KEY_FILE: {{ .Values.global.cnLdapKeyFile }}
+  CN_LDAP_CACERT_FILE: {{ .Values.global.cnLdapCacertFile }}
+  CN_LDAP_TRUSTSTORE_FILE: {{ .Values.global.cnLdapTruststoreFile }}
 ---
 
 apiVersion: v1
