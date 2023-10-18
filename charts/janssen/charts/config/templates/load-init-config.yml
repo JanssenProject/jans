@@ -161,11 +161,10 @@ spec:
           - -c
           - |
               {{- if .Values.migration.enabled }}
-               /app/scripts/entrypoint.sh migrate --migration-dir {{ .Values.migration.migrationDir | quote }} --data-format {{ .Values.migration.migrationDataFormat | quote }}
+               /app/scripts/entrypoint.sh migrate --migration-dir {{ .Values.migration.migrationDir | quote }} --data-format {{ .Values.migration.migrationDataFormat | quote }} && /usr/bin/python3 /scripts/tls_generator.py
                {{- else }}
-               /app/scripts/entrypoint.sh load
+               /app/scripts/entrypoint.sh load && /usr/bin/python3 /scripts/tls_generator.py
                {{- end }}
-               /usr/bin/python3 /scripts/tls_generator.py
                {{- if .Values.global.istio.enabled }}
                curl -X POST http://localhost:15020/quitquitquit
                {{- end }}
