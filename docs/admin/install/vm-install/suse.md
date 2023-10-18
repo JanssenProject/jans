@@ -115,12 +115,11 @@ Full TUI documentation can be found [here](../../config-guide/config-tools/jans-
 If you have selected casa during installation you can access casa using url ```https://<host>/jans-casa```
 
 ## Let's Encrypt
- To generate Let’s Encrypt CA certificate run below commands:
-```
-sudo zypper -n install certbot
-sudo certbot certonly --webroot -w /var/www/html -d FQDN
-```
-Modify  https_jans.conf file for SSLCertificateFile and SSLCertificateKeyFile values with certificate location which we got from certbot command execution.
+Let's Encrypt provide a trusted certificate for domain at free of cost.
+
+ To generate Let’s Encrypt CA certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/edit/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
+ 
+once created certificate, modify https_jans.conf file for SSLCertificateFile and SSLCertificateKeyFile values with certificate location which we got from certbot command execution.
 
 ```
  sudo vi /etc/httpd/conf.d/https_jans.conf
