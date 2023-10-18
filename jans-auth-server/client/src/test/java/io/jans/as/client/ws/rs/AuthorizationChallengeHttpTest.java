@@ -39,7 +39,7 @@ public class AuthorizationChallengeHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
         List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name", "authorization_challenge");
 
         // 1. Register client
         RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, scopes);
@@ -139,7 +139,7 @@ public class AuthorizationChallengeHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
         List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name", "authorization_challenge");
 
         // 1. Register client
         RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, scopes);
