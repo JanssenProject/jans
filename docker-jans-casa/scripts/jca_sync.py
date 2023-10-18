@@ -12,7 +12,7 @@ from webdav3.exceptions import NoConnection
 from settings import LOGGING_CONFIG
 
 ROOT_DIR = "/repository/default"
-SYNC_DIR = "/opt/jans/jetty/casa"
+SYNC_DIR = "/opt/jans/jetty/jans-casa"
 TMP_DIR = "/tmp/webdav"
 
 logging.config.dictConfig(LOGGING_CONFIG)

@@ -1,18 +1,44 @@
-# BioID Web Service
-## Overview
-[BioID Web Service](https://www.bioid.com) is a "Biometrics as a service" provider. This document will explain how to use Gluu's [BioID  interception script](https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/bioID/BioIDExternalAuthenticator.py) to configure the Gluu Server for a two-step authentication process with username and password as the first step, and BioID's biometric authentication as the second step. 
+# Integrating BioID's biometric authentication with Casa
 
-In order to use this authentication mechanism your organization will need to register for a BioID account. 
 
-## Prerequisitesm
-- A Gluu Server ([installation instructions](../../../../installation-guide/index.md));
-- [BioID interception script](https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/bioID/BioIDExternalAuthenticator.py) (included in the default Gluu Server distribution);
-- An account with [BioID](https://bwsportal.bioid.com/register).   
+## BioID Web Service
+[BioID Web Service](https://www.bioid.com) is a "Biometrics as a service" provider. This document will explain how to use Janssen Server [BioID interception script](./BioIDExternalAuthenticator.py) along with a Plugin in Casa to enroll a user's biometric traits and use it is as a method for 2FA.
 
-## Properties
+In order to use this authentication mechanism your organization will need to register for a BioID account.
+
+## Prerequisites
+- A Janssen Server
+- [BioID interception script](./BioIDExternalAuthenticator.py).
+- An account with [BioID](https://bwsportal.bioid.com/register).
+
+## Configure BioID Account
+
+1. [Sign up](https://bwsportal.bioid.com/register) for a BioID account.
+
+2. Upon registration, you will recieve an email with the instance name (listed as STORAGE in Janssen Server's BioID authentication script), partition number(listed as PARTITION in Janssen Server's BioID authentication script).
+
+3. As the owner of this instance, you are entitled to access BWS Portal at https://bwsportal.bioid.com using the account associated with your email.
+   With the BWS Portal, you can do the following:  
+   a. View your trial information such as your credentials (e.g. your client certificate), enrolled classes, BWS logs and more.  
+   b. Create your App ID and App secret, under "Web API keys".
+
+## BioID Documentation
+
+1. You can find all API reference at https://developer.bioid.com/bwsreference.
+2. Lots of useful information about BWS is available at https://developer.bioid.com/blog.
+3. For liveness detection, you will find information about motion trigger helpful: https://developer.bioid.com/app-developer-guide/bioid-motion-detection
+
+## Script configurations
+
+Log into oxTrust, and go to `Configuration` > `Person Authentication scripts` > `Add custom script configuration`.
+### Script contents
+
+Download this [file](./BioIDExternalAuthenticator.py) and copy its contents in the `Script` form field.
+
+### Properties
 The mandatory properties in the BioID authentication script are as follows
-|	Property	|	Description		|	Example	|
-|-----------------------|-------------------------------|---------------|
+|	Property	|	Description	|	Example		|
+|---------------|---------------|---------------|
 |ENDPOINT 		|URL of the BioID Web Service|`https://bws.bioid.com/extension/`|
 |APP_IDENTIFIER 	|API key |`c20b04cc-776a-45ed-7a1f-06347f8edf6c`|
 |APP_SECRET 	|API secret |`sTGB4n4HAkvc2BnJp6KeNUTk`|
@@ -20,53 +46,57 @@ The mandatory properties in the BioID authentication script are as follows
 |PARTITION 	|A number assigned to your company by BioID. |`12345`|
 
 
+### Save changes
 
-## Configure BioID Account
+Click on `Enable` under the script contents box, and press `Update` at the bottom of the page.
 
-1. [Sign up](https://bwsportal.bioid.com/register) for a BioID account.
 
-2. Upon registration, you will recieve an email with the instance name (listed as STORAGE in Gluu's BioID authentication script), partition number(listed as PARTITION in Gluu's BioID authentication script).
+## Plugin installation
 
-3. As the owner of this instance, you are entitled to access BWS Portal at https://bwsportal.bioid.com using the account associated with your email. 
-With the BWS Portal, you can do the following:
-a. View your trial information such as your credentials (e.g. your client certificate), enrolled classes, BWS logs and more.
-b. Create your App ID and App secret, under "Web API keys".
 
-## BioID Documentation
+### Add the plugin to Casa
 
-You can find all API reference at https://developer.bioid.com/bwsreference. 
-Lots of useful information about BWS is available at https://developer.bioid.com/blog.
-If you intend to use liveness detection, you will find information about motion trigger helpful: https://developer.bioid.com/app-developer-guide/bioid-motion-detection
+1. [Download the plugin](https://maven.gluu.org/maven/org/gluu/casa/plugins/bioid-plugin/4.5.0.Final/bioid-plugin-4.5.0.Final-jar-with-dependencies.jar)
 
-## Configure oxTrust 
+1. Log in to Casa using an administrator account
 
-Follow the steps below to configure the BioID module in the oxTrust Admin GUI.
+1. Visit `Administration console` > `Casa plugins`
 
-1. Navigate to `Configuration` > `Person Authentication Scripts`.
-1. Scroll down to the BioID authentication script   
-![bioid-script](../img/admin-guide/multi-factor/bioid-script.png)
+   ![plugins page](../../../../assets/casa/plugins/bioid-plugin.png)
 
-1. Configure the properties, all of which are mandatory, according to your API    
+1. Click on `Add a plugin...` and select the plugin jar file
 
-1. Enable the script by ticking the check box    
-![enable](../img/admin-guide/enable.png)
+1. Click on `Add`
 
-Now BioID's biometric authentication is available as an authentication mechanism for your Gluu Server. This means that, using OpenID Connect `acr_values`, applications can now request BioID biometric authentication for users. 
+Alternatively you can log into Janssen Server and copy the jar file directly to `/opt/jans/jetty/jans-casa/plugins`.
 
-!!! Note 
-    To make sure BioID has been enabled successfully, you can check your Gluu Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"bioid"`. 
+### Enable the authentication method
 
-## Make BioID the Default Authentication Mechanism
+Wait for one minute, then visit `Administration Console` > `Enabled methods` and tick `bioid`. On the right, the plugin will be selected by default. Finally save the changes.
 
-Now applications can request BioID's biometric authentication. To make BioID biometic authentication your default authentication mechanism, follow these instructions: 
+## Testing
+So far, users that log into Casa should be able to see a new entry "Biometric credentials" that will appear under "2FA credentials" .
 
-1. Navigate to `Configuration` > `Manage Authentication`. 
-2. Select the `Default Authentication Method` tab. 
-3. In the Default Authentication Method window you will see two options: `Default acr` and `oxTrust acr`. 
+![plugins page](../../../../assets/casa/plugins/bioid-menu.png)
 
-    - The `oxTrust acr` field controls the authentication mechanism that is presented to access the oxTrust dashboard GUI (the application you are in).    
-    - The `Default acr` field controls the default authentication mechanism that is presented to users from all applications that leverage your Gluu Server for authentication.    
+From there they can enroll their biometric traits.
+The steps to enroll your facial and periocular traits are self explanatory. Follow the instructions on the web page.
+You can enroll again or delete your credentials by visiting your registered credential.
 
-You can change one or both fields to BioID authentication as you see fit. If you want BioID to be the default authentication mechanism for access to oxTrust and all other applications that leverage your Gluu Server, change both fields to bioid.  
- 
-![BioID](../img/admin-guide/multi-factor/bioID.png)
+![plugins page](../../../../assets/casa/plugins/enroll_bioid.png)
+
+
+
+Note - When you first use BioID you may wish to enroll a few times at different times of days or in different locations under a variety of environmental conditions. Once you can be reliably recognized, you only need to enroll again if something in your face changes significantly (such as after an accident or cosmetic surgery, or if you radically change eyeglasses, facial hair, facial jewelry, etc.) or if you often have to try more than once to be recognized. Once recognized, BioID typically adjusts itself to adapt to the changes right away.
+
+![plugins page](../../../../assets/casa/plugins/bioid_edit_delete.png)
+
+### Use the biometric credential as a second factor
+Ensure you have added another credential, hopefully of a different kind, for example a mobile phone number or an OTP token. Then visit the home page and click the toggle to turn 2FA on and logout.
+Try to access the application once more and supply the username and password for the account recently used to enroll the biometric credential. Depending on the numeric level assigned to the `bioid` script, you will be prompted for a different factor, for instance, to enter an OTP code. If so, click on `Try an alternative way to sign in` and click on `Biometric credential`.
+
+Follow the instructions on the screen for verification of facial and periocular traits.
+
+Finally, you will be redirected and get access to the application.
+
+

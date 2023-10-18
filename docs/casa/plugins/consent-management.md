@@ -1,11 +1,11 @@
 # Consent Management Plugin
 
 ## Overview 
-The Consent Management plugin gives end-users the ability to view and revoke previously granted authorizations provided to applications accessed with their account in a Gluu Flex Server. 
+The Consent Management plugin gives end-users the ability to view and revoke previously granted authorizations provided to applications accessed with their account in a Janssen Server. 
 
 ## Requirements
 
-- The plugin jar file must match the version of your Casa (and Gluu Flex Server) installation.
+- The plugin jar file must match the version of your Casa (and Janssen Server) installation.
 
 ## Installation
 

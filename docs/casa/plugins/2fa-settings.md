@@ -42,11 +42,11 @@ A device/location is considered trustworthy when the user has presented a strong
 
 ## Requirements
 
-- The plugin jar file must match the version of your Casa (and Gluu Flex Server) installation.
+- The plugin jar file must match the version of your Janssen Server installation.
     
 ## Installation
 
-1. [Download the plugin](https://maven.gluu.org/maven/org/gluu/casa/plugins/strong-authn-settings/5.0.0-16/strong-authn-settings-5.0.0-16-jar-with-dependencies.jar)
+1. [Download the plugin](https://maven.jans.io/maven/io/jans/casa/plugins/strong-authn-settings/replace-janssen-version/strong-authn-settings-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Log in to Casa using an administrator account
 
@@ -70,4 +70,4 @@ For regular users, proper details appear in the widget where 2FA is turned on.
 
 ## API
 
-Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://github.com/GluuFederation/flex/raw/main/casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
+Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
