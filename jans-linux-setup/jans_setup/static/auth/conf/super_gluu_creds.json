@@ -12,6 +12,6 @@
         }
     },
     "jans":{
-        "server_uri":"https://account.gluu.org/scan/push-api-server"
+        "server_uri":"https://cloud.gluu.org/scan/push-api-server"
     }
 }
