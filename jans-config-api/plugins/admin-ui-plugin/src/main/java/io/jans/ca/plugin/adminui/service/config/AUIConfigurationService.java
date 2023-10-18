@@ -96,24 +96,24 @@ public class AUIConfigurationService extends BaseService {
         AUIConfiguration auiConfig = new AUIConfiguration();
         AppConfiguration appConfiguration = configurationService.find();
         auiConfig.setAppType(appType);
-        auiConfig.setAuthServerHost(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getOpHost());
-        auiConfig.setAuthServerClientId(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getClientId());
-        auiConfig.setAuthServerClientSecret(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getClientSecret());
-        auiConfig.setAuthServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getScopes(), "+"));
-        auiConfig.setAuthServerRedirectUrl(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getRedirectUri());
-        auiConfig.setAuthServerFrontChannelLogoutUrl(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getFrontchannelLogoutUri());
-        auiConfig.setAuthServerPostLogoutRedirectUri(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getPostLogoutUri());
-        auiConfig.setAuthServerAuthzBaseUrl(appConfiguration.getAuthorizationEndpoint());
-        auiConfig.setAuthServerTokenEndpoint(appConfiguration.getTokenEndpoint());
-        auiConfig.setAuthServerIntrospectionEndpoint(appConfiguration.getIntrospectionEndpoint());
-        auiConfig.setAuthServerUserInfoEndpoint(appConfiguration.getUserInfoEndpoint());
-        auiConfig.setAuthServerEndSessionEndpoint(appConfiguration.getEndSessionEndpoint());
-        auiConfig.setAuthServerAcrValues(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getAcrValues(), "+"));
+        auiConfig.setAuiWebServerHost(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getOpHost());
+        auiConfig.setAuiWebServerClientId(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getClientId());
+        auiConfig.setAuiWebServerClientSecret(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getClientSecret());
+        auiConfig.setAuiWebServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getScopes(), "+"));
+        auiConfig.setAuiWebServerRedirectUrl(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getRedirectUri());
+        auiConfig.setAuiWebServerFrontChannelLogoutUrl(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getFrontchannelLogoutUri());
+        auiConfig.setAuiWebServerPostLogoutRedirectUri(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getPostLogoutUri());
+        auiConfig.setAuiWebServerAuthzBaseUrl(appConfiguration.getAuthorizationEndpoint());
+        auiConfig.setAuiWebServerTokenEndpoint(appConfiguration.getTokenEndpoint());
+        auiConfig.setAuiWebServerIntrospectionEndpoint(appConfiguration.getIntrospectionEndpoint());
+        auiConfig.setAuiWebServerUserInfoEndpoint(appConfiguration.getUserInfoEndpoint());
+        auiConfig.setAuiWebServerEndSessionEndpoint(appConfiguration.getEndSessionEndpoint());
+        auiConfig.setAuiWebServerAcrValues(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAcrValues(), "+"));
 
-        auiConfig.setTokenServerClientId(appConf.getMainSettings().getOidcConfig().getTokenServerClient().getClientId());
-        auiConfig.setTokenServerClientSecret(appConf.getMainSettings().getOidcConfig().getTokenServerClient().getClientSecret());
-        auiConfig.setTokenServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getTokenServerClient().getScopes(), "+"));
-        auiConfig.setTokenServerTokenEndpoint(appConf.getMainSettings().getOidcConfig().getTokenServerClient().getTokenEndpoint());
+        auiConfig.setAuiBackendApiServerClientId(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getClientId());
+        auiConfig.setAuiBackendApiServerClientSecret(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getClientSecret());
+        auiConfig.setAuiBackendApiServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getScopes(), "+"));
+        auiConfig.setAuiBackendApiServerTokenEndpoint(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getTokenEndpoint());
 
         return auiConfig;
     }

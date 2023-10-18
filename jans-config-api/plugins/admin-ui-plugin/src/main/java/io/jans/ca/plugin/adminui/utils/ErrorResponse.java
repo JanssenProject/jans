@@ -35,6 +35,7 @@ public enum ErrorResponse {
     UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE("Permission is mapped to role so cannot be deleted. Please remove the permission mapped to the role before deleting it."),
     ERROR_IN_READING_CONFIGURATION("Error in reading Admin UI configuration."),
     TOKEN_GENERATION_ERROR("Error in generating SCAN API access token."),
+    ERROR_IN_SAVING_LICENSE_CLIENT("There is an error when attempting to save the OpenID client configuration for accessing the license APIs in a persistence layer."),
     RETRIEVE_LICENSE_ERROR("Error in retrieving license. Check logs for further details."),
     BLANK_JWT("JWT is blank or empty"),
     ISS_CLAIM_NOT_FOUND("ISS claim not fount in jwt"),
