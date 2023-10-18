@@ -450,11 +450,11 @@ class CtxGenerator:
         if "redis" in opt_scopes:
             self.redis_ctx()
 
-        if "couchbase" in opt_scopes:
-            self.couchbase_ctx()
+        # if "couchbase" in opt_scopes:
+        #     self.couchbase_ctx()
 
-        if "sql" in opt_scopes:
-            self.sql_ctx()
+        # if "sql" in opt_scopes:
+        #     self.sql_ctx()
 
         # populated config
         return self.ctx
