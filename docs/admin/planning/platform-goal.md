@@ -11,7 +11,7 @@ Online trust is a fundamental challenge to our digital society. The Internet has
 
 Nothing builds trust like source code. At the Janssen Project, we believe that
 the software that powers the world's digital identity services must be open
-source. And that the open source project behind digital identity must be
+source. And that the open-source project behind digital identity must be
 community governed. And that the community must have a mechanism to extend the
 software to solve any digital identity challenge.
 
@@ -28,14 +28,14 @@ governance platform.
 
 # Security Goals
 
-Janssen project seeks to tack the most challenging security requirements. This means keeping current with OpenID certifications, enabling cryptographic conformance with FIPS 140-2 and implementing best practices for software development lifecycle, including a transparent build process to enable
+Janssen project seeks to tackle the most challenging security requirements. This means keeping current with OpenID certifications, enabling cryptographic conformance with FIPS 140-2, and implementing best practices for the software development lifecycle, including a transparent build process to enable
 government and non-government organizations to trust the software.
 
 Janssen Project is unapologetically Java. The reason is simple: Java has the
 most cryptographic implementations. Java Cryptographic Engines (JCE) are
-written by many companies and open source projects. It takes a long time
+written by many companies and open-source projects. It takes a long time
 to trust a cryptographic implementation. Not only does Java have the most
-options for cryptography, it also has some of the most trusted implementations,
+options for cryptography, but it also has some of the most trusted implementations,
 and when new algorithms are announced, it frequently has code first.
 
 # Community Goals
@@ -55,7 +55,7 @@ for non-production instances.
 * Linux system administrators should have packages for easy installation
 and update for smaller deployments.
 
-* Cloud native deployments should be available for high end deployments,
+* Cloud native deployments should be available for high-end deployments,
 including high concurrency and high availability. Janssen should take
 advantage of auto-scaling horizontally--enabling hypothetically any concurrency
 by adding more compute and memory.
