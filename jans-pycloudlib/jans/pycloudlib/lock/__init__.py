@@ -100,14 +100,12 @@ class LockManager:
         jitter=None,
         interval=10,
     )
-    # def check_connection(self) -> bool:
     def check_connection(self, lock) -> None:
         """Check if connection is established.
 
         Returns:
             A boolean to indicate connection is established.
         """
-        # connected = self.adapter.connected()
         if lock.adapter is None:
             return
 
@@ -313,7 +311,6 @@ class LockRecord(BaseLockRecord):
         self.candidate["updated_at"] = datetime.utcnow().strftime(_DATETIME_FMT)
 
         # create record with candidate data
-        # return self.lock_storage.put(
         return self.adapter.put(
             self.name,
             owner=self.candidate["owner"],
@@ -327,7 +324,6 @@ class LockRecord(BaseLockRecord):
         Returns:
             A `dict` contains of lock record (if any).
         """
-        # return self.lock_storage.get(self.name)
         return self.adapter.get(self.name)
 
     def _delete_record(self) -> bool:
@@ -336,7 +332,6 @@ class LockRecord(BaseLockRecord):
         Returns:
             Boolean to indicate whether lock record is deleted from storage.
         """
-        # return self.lock_storage.delete(self.name)
         return self.adapter.delete(self.name)
 
     def _get_start_delay(self):
