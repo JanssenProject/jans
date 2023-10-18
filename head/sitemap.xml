@@ -1991,6 +1991,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/casa/administration/</loc>
+         <lastmod>2023-10-18</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/casa/administration/2fa-basics/</loc>
          <lastmod>2023-10-18</lastmod>
          <changefreq>daily</changefreq>
@@ -2021,22 +2026,12 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/casa/administration/installation/</loc>
-         <lastmod>2023-10-18</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/casa/administration/localization/</loc>
          <lastmod>2023-10-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/casa/plugins/2fa-settings/</loc>
-         <lastmod>2023-10-18</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/casa/plugins/bioid/</loc>
          <lastmod>2023-10-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
