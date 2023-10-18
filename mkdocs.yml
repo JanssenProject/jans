@@ -8792,8 +8792,8 @@ nav:
 - 'Jans Casa':
     - 'casa/index.md'
     - Quick Start: 'casa/quick-start.md'
-    - 'Installation': 'casa/administration/installation.md'
     - Administration Guide:
+        - 'casa/administration/README.md'
         - 'About 2FA': 'casa/administration/2fa-basics.md'
         - 'Admin console': 'casa/administration/admin-console.md'
         - 'Credentials storage': 'casa/administration/credentials-stored.md'
@@ -8802,7 +8802,6 @@ nav:
         - 'Localization': 'casa/administration/localization.md'
         - 'Plugins':
             - '2FA Settings': 'casa/plugins/2fa-settings.md'
-            #            - 'BioID': 'casa/plugins/bioid.md'
             - 'Consent Management': 'casa/plugins/consent-management.md'
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'
