@@ -7,22 +7,22 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OIDCSettings {
 
-    private OIDCClientSettings authServerClient;
-    private OIDCClientSettings tokenServerClient;
+    private OIDCClientSettings auiWebClient;
+    private OIDCClientSettings auiBackendApiClient;
 
-    public OIDCClientSettings getAuthServerClient() {
-        return authServerClient;
+    public OIDCClientSettings getAuiWebClient() {
+        return auiWebClient;
     }
 
-    public void setAuthServerClient(OIDCClientSettings authServerClient) {
-        this.authServerClient = authServerClient;
+    public void setAuiWebClient(OIDCClientSettings auiWebClient) {
+        this.auiWebClient = auiWebClient;
     }
 
-    public OIDCClientSettings getTokenServerClient() {
-        return tokenServerClient;
+    public OIDCClientSettings getAuiBackendApiClient() {
+        return auiBackendApiClient;
     }
 
-    public void setTokenServerClient(OIDCClientSettings tokenServerClient) {
-        this.tokenServerClient = tokenServerClient;
+    public void setAuiBackendApiClient(OIDCClientSettings auiBackendApiClient) {
+        this.auiBackendApiClient = auiBackendApiClient;
     }
 }

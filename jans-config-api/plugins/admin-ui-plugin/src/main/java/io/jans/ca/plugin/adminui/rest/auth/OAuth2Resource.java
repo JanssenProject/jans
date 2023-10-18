@@ -49,16 +49,16 @@ public class OAuth2Resource {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
             OAuth2ConfigResponse oauth2Config = new OAuth2ConfigResponse();
-            oauth2Config.setAuthServerHost(auiConfiguration.getAuthServerHost());
-            oauth2Config.setAuthzBaseUrl(auiConfiguration.getAuthServerAuthzBaseUrl());
-            oauth2Config.setClientId(auiConfiguration.getAuthServerClientId());
+            oauth2Config.setAuthServerHost(auiConfiguration.getAuiWebServerHost());
+            oauth2Config.setAuthzBaseUrl(auiConfiguration.getAuiWebServerAuthzBaseUrl());
+            oauth2Config.setClientId(auiConfiguration.getAuiWebServerClientId());
             oauth2Config.setResponseType("code");
-            oauth2Config.setScope(auiConfiguration.getAuthServerScope());
-            oauth2Config.setRedirectUrl(auiConfiguration.getAuthServerRedirectUrl());
-            oauth2Config.setAcrValues(auiConfiguration.getAuthServerAcrValues());
-            oauth2Config.setFrontChannelLogoutUrl(auiConfiguration.getAuthServerFrontChannelLogoutUrl());
-            oauth2Config.setPostLogoutRedirectUri(auiConfiguration.getAuthServerPostLogoutRedirectUri());
-            oauth2Config.setEndSessionEndpoint(auiConfiguration.getAuthServerEndSessionEndpoint());
+            oauth2Config.setScope(auiConfiguration.getAuiWebServerScope());
+            oauth2Config.setRedirectUrl(auiConfiguration.getAuiWebServerRedirectUrl());
+            oauth2Config.setAcrValues(auiConfiguration.getAuiWebServerAcrValues());
+            oauth2Config.setFrontChannelLogoutUrl(auiConfiguration.getAuiWebServerFrontChannelLogoutUrl());
+            oauth2Config.setPostLogoutRedirectUri(auiConfiguration.getAuiWebServerPostLogoutRedirectUri());
+            oauth2Config.setEndSessionEndpoint(auiConfiguration.getAuiWebServerEndSessionEndpoint());
 
             return Response.ok(oauth2Config).build();
         } catch (ApplicationException e) {

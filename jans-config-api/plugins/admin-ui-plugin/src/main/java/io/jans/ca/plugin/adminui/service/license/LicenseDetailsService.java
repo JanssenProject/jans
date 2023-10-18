@@ -80,6 +80,11 @@ public class LicenseDetailsService extends BaseService {
             if (dcrResponse == null) {
                 return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
             }
+            try {
+                saveCreateClientInPersistence(licenseConfig.getSsa(), dcrResponse);
+            } catch (Exception e) {
+                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_SAVING_LICENSE_CLIENT.getDescription());
+            }
             tokenResponse = generateToken(licenseConfig.getOidcClient().getOpHost(), licenseConfig.getOidcClient().getClientId(), licenseConfig.getOidcClient().getClientSecret());
 
             if (tokenResponse == null) {
@@ -456,36 +461,7 @@ public class LicenseDetailsService extends BaseService {
             if (dcrResponse == null) {
                 return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
             }
-            AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-            LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
-            licenseConfig.setSsa(ssaRequest.getSsa());
-            licenseConfig.setScanLicenseApiHostname(dcrResponse.getScanHostname());
-            licenseConfig.setLicenseHardwareKey(dcrResponse.getHardwareId());
-            OIDCClientSettings oidcClient = new OIDCClientSettings(dcrResponse.getOpHost(), dcrResponse.getClientId(), dcrResponse.getClientSecret());
-            licenseConfig.setOidcClient(oidcClient);
-            appConf.getMainSettings().setLicenseConfig(licenseConfig);
-            entryManager.merge(appConf);
-
-            // The above code is setting various properties of the `LicenseConfiguration` object obtained from the
-            // `AUIConfiguration` object. These properties include the scan authentication server hostname, scan API client
-            // ID, scan API client secret, hardware ID, and scan API hostname. After setting these properties, the
-            // `LicenseConfiguration` object is set back to the `AUIConfiguration` object, and the updated
-            // `AUIConfiguration` object is set back to the `auiConfigurationService`.
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-            LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
-
-            if(licenseConfiguration == null){
-                licenseConfiguration = new LicenseConfiguration();
-            }
-
-            licenseConfiguration.setScanAuthServerHostname(dcrResponse.getOpHost());
-            licenseConfiguration.setScanApiClientId(dcrResponse.getClientId());
-            licenseConfiguration.setScanApiClientSecret(dcrResponse.getClientSecret());
-            licenseConfiguration.setHardwareId(dcrResponse.getHardwareId());
-            licenseConfiguration.setScanApiHostname(dcrResponse.getScanHostname());
-            auiConfiguration.setLicenseConfiguration(licenseConfiguration);
-            auiConfigurationService.setAuiConfiguration(auiConfiguration);
-
+            saveCreateClientInPersistence(ssaRequest.getSsa(), dcrResponse);
             return CommonUtils.createGenericResponse(true, 201, "SSA saved successfully.");
 
         } catch (Exception e) {
@@ -494,6 +470,53 @@ public class LicenseDetailsService extends BaseService {
         }
     }
 
+    /**
+     * The function saves the client information and license configuration in the persistence layer.
+     *
+     * @param ssa The parameter "ssa" is a string that represents the SSA value. It is
+     * used to set the SSA value in the license configuration.
+     * @param dcrResponse DCRResponse is an object that contains the response data from a Dynamic Client Registration (DCR)
+     * request. It has the following properties:
+     */
+    private void saveCreateClientInPersistence(String ssa, DCRResponse dcrResponse) throws Exception {
+        AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+        LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
+        licenseConfig.setSsa(ssa);
+        licenseConfig.setScanLicenseApiHostname(dcrResponse.getScanHostname());
+        licenseConfig.setLicenseHardwareKey(dcrResponse.getHardwareId());
+        OIDCClientSettings oidcClient = new OIDCClientSettings(dcrResponse.getOpHost(), dcrResponse.getClientId(), dcrResponse.getClientSecret());
+        licenseConfig.setOidcClient(oidcClient);
+        appConf.getMainSettings().setLicenseConfig(licenseConfig);
+        entryManager.merge(appConf);
+
+        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+        LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
+
+        if(licenseConfiguration == null){
+            licenseConfiguration = new LicenseConfiguration();
+        }
+
+        licenseConfiguration.setScanAuthServerHostname(dcrResponse.getOpHost());
+        licenseConfiguration.setScanApiClientId(dcrResponse.getClientId());
+        licenseConfiguration.setScanApiClientSecret(dcrResponse.getClientSecret());
+        licenseConfiguration.setHardwareId(dcrResponse.getHardwareId());
+        licenseConfiguration.setScanApiHostname(dcrResponse.getScanHostname());
+        auiConfiguration.setLicenseConfiguration(licenseConfiguration);
+        auiConfigurationService.setAuiConfiguration(auiConfiguration);
+    }
+
+    /**
+     * The function generates a token using client credentials and returns the token response.
+     *
+     * @param opHost The `opHost` parameter represents the hostname or URL of the authorization server. It is used to
+     * construct the URL for the token endpoint.
+     * @param clientId The `clientId` parameter is the unique identifier assigned to the client application by the
+     * authorization server. It is used to identify the client when making requests to the server.
+     * @param clientSecret The `clientSecret` parameter is a secret key that is used to authenticate the client application
+     * when requesting an access token from the authorization server. It is typically provided by the authorization server
+     * when registering the client application.
+     * @return The method is returning a `io.jans.as.client.TokenResponse` object.
+     */
     private io.jans.as.client.TokenResponse generateToken(String opHost, String clientId, String clientSecret) {
         try {
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);

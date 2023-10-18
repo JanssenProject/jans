@@ -66,12 +66,12 @@ public class OAuth2Service extends BaseService {
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(code);
             tokenRequest.setCodeVerifier(codeVerifier);
-            tokenRequest.setAuthUsername(auiConfiguration.getAuthServerClientId());
-            tokenRequest.setAuthPassword(encryptionService.decrypt(auiConfiguration.getAuthServerClientSecret()));
+            tokenRequest.setAuthUsername(auiConfiguration.getAuiWebServerClientId());
+            tokenRequest.setAuthPassword(encryptionService.decrypt(auiConfiguration.getAuiWebServerClientSecret()));
             tokenRequest.setGrantType(GrantType.AUTHORIZATION_CODE);
-            tokenRequest.setRedirectUri(auiConfiguration.getAuthServerRedirectUrl());
-            tokenRequest.setScope(auiConfiguration.getAuthServerScope());
-            io.jans.as.client.TokenResponse tokenResponse = getToken(tokenRequest, auiConfiguration.getAuthServerTokenEndpoint());
+            tokenRequest.setRedirectUri(auiConfiguration.getAuiWebServerRedirectUrl());
+            tokenRequest.setScope(auiConfiguration.getAuiWebServerScope());
+            io.jans.as.client.TokenResponse tokenResponse = getToken(tokenRequest, auiConfiguration.getAuiWebServerTokenEndpoint());
 
             TokenResponse tokenResp = new TokenResponse();
             tokenResp.setAccessToken(tokenResponse.getAccessToken());
@@ -98,16 +98,16 @@ public class OAuth2Service extends BaseService {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-            tokenRequest.setAuthUsername(auiConfiguration.getTokenServerClientId());
-            tokenRequest.setAuthPassword(encryptionService.decrypt(auiConfiguration.getTokenServerClientSecret()));
+            tokenRequest.setAuthUsername(auiConfiguration.getAuiBackendApiServerClientId());
+            tokenRequest.setAuthPassword(encryptionService.decrypt(auiConfiguration.getAuiBackendApiServerClientSecret()));
             tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
-            tokenRequest.setRedirectUri(auiConfiguration.getTokenServerRedirectUrl());
+            tokenRequest.setRedirectUri(auiConfiguration.getAuiBackendApiServerRedirectUrl());
 
             if (Strings.isNullOrEmpty(userInfoJwt)) {
                 log.warn(ErrorResponse.USER_INFO_JWT_BLANK.getDescription());
                 tokenRequest.setScope(scopeAsString(Arrays.asList(OAuth2Resource.SCOPE_OPENID)));
             }
-            io.jans.as.client.TokenResponse tokenResponse = getToken(tokenRequest, auiConfiguration.getTokenServerTokenEndpoint(), userInfoJwt);
+            io.jans.as.client.TokenResponse tokenResponse = getToken(tokenRequest, auiConfiguration.getAuiBackendApiServerTokenEndpoint(), userInfoJwt);
 
             final Jwt tokenJwt = Jwt.parse(tokenResponse.getAccessToken());
             Map<String, Object> claims = getClaims(tokenJwt);
@@ -168,7 +168,7 @@ public class OAuth2Service extends BaseService {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
             body.putSingle("access_token", accessToken);
 
-            Invocation.Builder request = ClientFactory.instance().getClientBuilder(auiConfiguration.getAuthServerUserInfoEndpoint());
+            Invocation.Builder request = ClientFactory.instance().getClientBuilder(auiConfiguration.getAuiWebServerUserInfoEndpoint());
             request.header("Authorization", "Bearer " + accessToken);
 
             Response response = request
