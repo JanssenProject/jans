@@ -83,7 +83,7 @@ Below is an illustration of the Janssen Server's default FIDO2 login page:
 
 ![fido2](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/image_fido2.png)
 
-The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/head/admin/developer/customization/customize-web-pages/).
+The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/vreplace-janssen-version/admin/developer/customization/customize-web-pages/).
 
 ## Using FIDO2 tokens
 

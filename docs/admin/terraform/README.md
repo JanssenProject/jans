@@ -76,9 +76,9 @@ Let's have an example on `importing` the current `logging level` of a deployment
     - **VM:** grab `client_id` and `client_pw` from `/opt/jans/jans-setup/setup.properties.last` file.
 
     - **K8s:** 
-        1. client_id: `kubectl get cm cn -n <namespace>  --template={{.data.jca_client_id}}` 
+        1. client_id: `kubectl get cm cn -n <namespace>  --template={{.data.test_client_id}}` 
 
-        2. client_secret: `kubectl get secret cn -n <namespace> --template={{.data.jca_client_pw}} | base64 -d`
+        2. client_secret: `kubectl get secret cn -n <namespace> --template={{.data.test_client_pw}} | base64 -d`
 
 5.  In your `variables.tf` file, add your `client_id`, `client_secret` and `FQDN`
     ```
