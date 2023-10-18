@@ -105,21 +105,11 @@ Full TUI documentation can be found [here](../../config-guide/config-tools/jans-
 If you have selected casa during installation you can access casa using url``` https://<host>/jans-casa ```
 
 ## Let's Encrypt
- To generate Let’s Encrypt CA certificate run below commands:
-```
-sudo yum install certbot python3-certbot-apache 
-sudo certbot certonly --apache
-```
-if getting error
-```
-Error while running apachectl configtest.
+Let's Encrypt provide a trusted certificate for domain at free of cost.
 
-AH00526: Syntax error on line 5 of /etc/httpd/conf.d/ssl.conf:
-Cannot define multiple Listeners on the same IP:port
-```
-solution : comment "listen 443" in ssl.conf
+ To generate certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/edit/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
 
-Modify  https_jans.conf file for SSLCertificateFile and SSLCertificateKeyFile values with certificate location which we got from certbot command execution.
+once created certificate modify https_jans.conf file for SSLCertificateFile and SSLCertificateKeyFile values with certificate location which we got from certbot command execution.
 
 ```
  sudo vi /etc/httpd/conf.d/https_jans.conf
