@@ -134,19 +134,10 @@ Full TUI documentation can be found [here](../../config-guide/config-tools/jans-
 If you have selected casa during installation you can access casa using url ```https://<host>/jans-casa```
 
 ## Let's Encrypt
- To generate Let’s Encrypt CA certificate run below commands and add required information at prompt:
-```bash 
-sudo apt update && sudo apt install certbot python3-certbot-apache
-sudo certbot --apache -d FQDN
-```
-to check certbot status
-```
-sudo systemctl status certbot.timer
-```
-to renew certificate run
-```
-sudo certbot renew --dry-run
-```
+Let's Encrypt provide a trusted certificate for domain at free of cost.
+
+ To generate Let’s Encrypt CA certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
+ 
 ## Uninstall
 
 Removing Janssen is a two step process:
