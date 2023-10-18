@@ -30,7 +30,7 @@ Once you supply your files, color values, and footer text, click on `Save` and s
 
 With "Primary buttons" we refer to the vast majority of buttons that trigger some action such as saving, updating or accepting - whether in the user pages or the admin UI itself. "Cancel" covers undo, close or cancel, while "Misc" is for anything not fitting any of the previous usages.
 
-You can choose "Use defaults" if you feel comfortable with the [Bootstrap-like](https://getbootstrap.com/docs/4.4/components/buttons/) colors offered in Gluu Casa.
+You can choose "Use defaults" if you feel comfortable with the [Bootstrap-like](https://getbootstrap.com/docs/4.4/components/buttons/) colors offered in Jans Casa.
 
 ## Using the external assets directory
 
@@ -52,11 +52,11 @@ Particularly, ZK's default theme CSS file was disabled to offer a higher degree 
 
 In the `/opt/jans/jetty/casa/static` folder, you can place your own version of the main stylesheet and images Casa uses. No other stylesheet should be overriden.
 
-To start, log in to the chroot and do the following:
+To start, log in to the Janssen Server and do the following:
 
 ```
-cd /opt/jans/jetty/casa/static
-jar -xf ../webapps/casa.war images styles/gluu/style.css  
+cd /opt/jans/jetty/jans-casa/static
+jar -xf ../webapps/jans-casa.war images styles/gluu/style.css  
 ```
 
 This will copy the files you can edit later (these are the original versions provided out of the box in Casa).
@@ -64,7 +64,7 @@ This will copy the files you can edit later (these are the original versions pro
 If you place additional files in this directory, ensure ownership is set to recursive. For instance, you can:
 
 ```
-$ chown -R jetty:jetty /opt/jans/jetty/casa/static/
+$ chown -R jetty:jetty /opt/jans/jetty/jans-casa/static/
 ```
 
 ### Enable and apply your customizations
@@ -74,7 +74,7 @@ In the admin console, navigate to `Custom branding` > `Use Casa external assets 
 !!! Note  
     In CSS, the rules' order of appearance is important. Keep in mind that for all Casa pages, Bootstrap is loaded first, then style.css, and finally tachyons.css. This means rules for Tachyons have higher priority overall unless `!important` is used.  
     
-The main stylesheet (`style.css`) is located at `/opt/jans/jetty/casa/static/styles/gluu` if you have followed the instructions above.
+The main stylesheet (`style.css`) is located at `/opt/jans/jetty/jans-casa/static/styles/gluu` if you have followed the instructions above.
 
 Here are some tips for applying your customizations:
 
