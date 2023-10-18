@@ -2,7 +2,7 @@
 
 This project uses Weld, the reference implementation of CDI: Contexts and Dependency Injection for the Java EE Platform - a JCP standard for dependency injection and contextual lifecycle management.
 
-If you want to learn more about Weld, please visit its website: https://weld.cdi-spec.org/
+If you want to learn more about Weld, please visit its [website](https://weld.cdi-spec.org/)
 
 ## Objective
 
