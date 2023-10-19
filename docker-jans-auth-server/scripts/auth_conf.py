@@ -12,10 +12,7 @@ logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("auth")
 
 
-manager = get_manager()
-
-
-def push_auth_conf() -> None:
+def push_auth_conf(manager) -> None:
     conf_files = (
         "otp_configuration.json",
         "super_gluu_creds.json",
@@ -40,4 +37,7 @@ def digest_equals(val1: str, val2: str) -> bool:
 
 if __name__ == "__main__":
     if as_boolean(os.environ.get("CN_SHARE_AUTH_CONF", "false")):
-        push_auth_conf()
+        manager = get_manager()
+
+        with manager.lock.create_lock("auth-share-conf"):
+            push_auth_conf(manager)
