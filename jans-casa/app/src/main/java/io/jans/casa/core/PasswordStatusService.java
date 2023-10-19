@@ -15,8 +15,6 @@ import java.util.List;
 @SessionScoped
 public class PasswordStatusService implements Serializable {
 
-    private static final String EXTERNAL_IDENTITIES_PREFIX = "passport-";
-
     @Inject
     private Logger logger;
 
@@ -31,11 +29,6 @@ public class PasswordStatusService implements Serializable {
 
     private boolean passSetAvailable;
     private boolean passResetAvailable;
-    private boolean password2faRequisite;
-
-    public boolean isPassword2faRequisite() {
-        return password2faRequisite;
-    }
 
     public boolean isPassSetAvailable() {
         return passSetAvailable;
@@ -46,27 +39,10 @@ public class PasswordStatusService implements Serializable {
     }
 
     public void reloadStatus() {
-        /*
-         offer pass set if
-          - user has no password and
-          - has oxExternalUid like passport-*
-         offer pass reset if
-          - user has password and
-          - app config allows this
-         offer 2fa when
-          - user has password or
-          - backend ldap detected
-         */
-        passResetAvailable = false;
-        passSetAvailable = false;
-        IdentityPerson p = persistenceService.get(IdentityPerson.class, persistenceService.getPersonDn(asco.getUser().getId()));
 
-        if (p.hasPassword()) {
-            passResetAvailable = confSettings.isEnablePassReset();
-        } else {
-            passSetAvailable = hasPassportPrefix(p.getJansExtUid()) || hasPassportPrefix(p.getJansUnlinkedExternalUids());
-        }
-        password2faRequisite = p.hasPassword() || persistenceService.isBackendLdapEnabled();
+        passSetAvailable = false;   //Setting user's password is a disabled feature in Jans Casa
+        IdentityPerson p = persistenceService.get(IdentityPerson.class, persistenceService.getPersonDn(asco.getUser().getId()));
+        passResetAvailable = p.hasPassword() && confSettings.isEnablePassReset();        
 
     }
 
@@ -96,10 +72,6 @@ public class PasswordStatusService implements Serializable {
         }
         return success;
 
-    }
-
-    private boolean hasPassportPrefix(List<String> externalUids) {
-        return externalUids.stream().anyMatch(uid -> uid.startsWith(EXTERNAL_IDENTITIES_PREFIX));
     }
 
 }
