@@ -33,6 +33,7 @@ if [[ -z $EXT_IP ]]; then
 fi
 
 sudo apt-get update
+sudo apt-get install openssl -y
 sudo apt-get install python3-pip -y
 sudo pip3 install pip --upgrade
 sudo pip3 install setuptools --upgrade
@@ -93,12 +94,31 @@ fi
 
 ENABLE_LDAP="false"
 if [[ $JANS_PERSISTENCE == "LDAP" ]]; then
+  openssl req \
+    -x509 \
+    -newkey rsa:2048 \
+    -sha256 \
+    -days 365 \
+    -nodes \
+    -keyout opendj.key \
+    -out opendj.crt \
+    -subj "/CN=$JANS_FQDN" \
+    -addext 'subjectAltName=DNS:ldap,DNS:opendj'
+
+  LDAP_CERT_B64=$(base64 opendj.crt -w0)
+  LDAP_KEY_B64=$(base64 opendj.key -w0)
+
+  rm -f opendj.crt opendj.key
+
   cat << EOF > override.yaml
 config:
   countryCode: US
   email: support@gluu.org
   orgName: Gluu
   city: Austin
+  configmap:
+    cnLdapCrt: $LDAP_CERT_B64
+    cnLdapKey: $LDAP_KEY_B64
 EOF
   PERSISTENCE_TYPE="ldap"
   ENABLE_LDAP="true"
