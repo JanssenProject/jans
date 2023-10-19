@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.idp.keycloak.exception;
+package io.jans.kc.spi.storage.exception;
 
 public class JansConfigurationException extends RuntimeException {
 

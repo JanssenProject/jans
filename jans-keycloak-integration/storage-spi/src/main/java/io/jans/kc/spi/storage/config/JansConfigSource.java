@@ -1,6 +1,6 @@
-package io.jans.idp.keycloak.config;
+package io.jans.kc.spi.storage.config;
 
-import io.jans.idp.keycloak.util.Constants;
+import io.jans.kc.spi.storage.util.Constants;
 
 import java.io.FileInputStream;
 import java.nio.file.FileSystems;

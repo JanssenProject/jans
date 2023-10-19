@@ -1,6 +1,6 @@
-package io.jans.idp.keycloak.service;
+package io.jans.kc.spi.storage.service;
 
-import io.jans.idp.keycloak.util.JansDataUtil;
+import io.jans.kc.spi.storage.util.JansDataUtil;
 import io.jans.scim.model.scim2.user.UserResource;
 import io.jans.scim.model.scim2.util.DateUtil;
 

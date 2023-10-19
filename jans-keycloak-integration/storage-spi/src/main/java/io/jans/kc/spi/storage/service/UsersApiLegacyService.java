@@ -1,4 +1,4 @@
-package io.jans.idp.keycloak.service;
+package io.jans.kc.spi.storage.service;
 
 import io.jans.scim.model.scim2.user.UserResource;
 

@@ -1,7 +1,7 @@
-package io.jans.idp.keycloak.service;
+package io.jans.kc.spi.storage.service;
 
-import io.jans.idp.keycloak.util.Constants;
-import io.jans.idp.keycloak.util.JansUtil;
+import io.jans.kc.spi.storage.util.Constants;
+import io.jans.kc.spi.storage.util.JansUtil;
 
 import jakarta.ws.rs.core.MediaType;
 

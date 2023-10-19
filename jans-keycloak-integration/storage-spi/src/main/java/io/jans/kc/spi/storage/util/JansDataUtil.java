@@ -1,4 +1,4 @@
-package io.jans.idp.keycloak.util;
+package io.jans.kc.spi.storage.util;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;

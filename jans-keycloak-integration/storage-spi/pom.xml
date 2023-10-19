@@ -68,7 +68,7 @@
 		  <artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 
-		<!-- commons -->
+		<!-- apache commons -->
 		<dependency>
 		  <groupId>org.apache.commons</groupId>
 		  <artifactId>commons-collections4</artifactId>
@@ -76,12 +76,6 @@
 		<dependency>
 		  <groupId>org.apache.commons</groupId>
 		  <artifactId>commons-lang3</artifactId>
-		</dependency>
-		
-		<!-- apache -->
-		<dependency>
-		  <groupId>org.apache.commons</groupId>
-		  <artifactId>commons-collections4</artifactId>
 		</dependency>
 		
 		<!-- com.fasterxml.jackson -->

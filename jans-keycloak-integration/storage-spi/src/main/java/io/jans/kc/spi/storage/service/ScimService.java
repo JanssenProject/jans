@@ -1,8 +1,8 @@
-package io.jans.idp.keycloak.service;
+package io.jans.kc.spi.storage.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.jans.idp.keycloak.util.JansUtil;
+import io.jans.kc.spi.storage.util.JansUtil;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.user.UserResource;
 import jakarta.ws.rs.WebApplicationException;

@@ -1,8 +1,8 @@
-package io.jans.idp.keycloak.util;
+package io.jans.kc.spi.storage.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.jans.idp.keycloak.config.JansConfigSource;
+import io.jans.kc.spi.storage.config.JansConfigSource;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.WebApplicationException;

@@ -1,6 +1,6 @@
-package io.jans.idp.keycloak.service;
+package io.jans.kc.spi.storage.service;
 
-import io.jans.idp.keycloak.util.Constants;
+import io.jans.kc.spi.storage.util.Constants;
 
 import org.keycloak.Config;
 import org.keycloak.component.ComponentModel;

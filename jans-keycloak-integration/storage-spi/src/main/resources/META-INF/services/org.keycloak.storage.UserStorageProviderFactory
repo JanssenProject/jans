@@ -1,1 +1,1 @@
-io.jans.idp.keycloak.service.RemoteUserStorageProviderFactory
+io.jans.kc.spi.storage.service.RemoteUserStorageProviderFactory
