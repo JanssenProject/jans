@@ -106,7 +106,7 @@ If you have selected casa during installation you can access casa using url``` h
 
 ## Let's Encrypt
 
- To generate Let's Encrypt certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/edit/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
+ To generate Let's Encrypt certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
 
 To enable communication with Janssen Server over tls (https) in production environment, Janssen Server needs details about CA certificate. Update the modify https_jans.conf file for SSLCertificateFile and SSLCertificateKeyFile values as shown below:
 
