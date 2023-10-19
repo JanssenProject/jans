@@ -4,7 +4,7 @@
         <h:ul id="menu" class="list pl0"
               if="${sessionContext.user ne null}" viewModel="@('io.jans.casa.ui.vm.MenuViewModel')">
 
-            <z:div visible="@load(not empty vm.authnMethods and vm.pst.password2faRequisite)">
+            <z:div visible="@load(not empty vm.authnMethods)">
                 <li>
                     <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}/user.zul">
                         <i class="mh1 fas fa-tags" /><!-- fa-key fa-address-book fa-address-book-o fa-address-card fa-address-card-o fa-id-badge fa-id-card fa-id-card-o -->
