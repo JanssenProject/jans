@@ -30,6 +30,8 @@ https://janssen.server.host/jans-auth/restv1/authorization_challenge
 In order to call Authorization Challenge Endpoint client must have `authorization_challenge` scope. 
 If scope is not present AS rejects call with 401 (unauthorized) http status code. 
 
+Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).
+
 More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification 
 of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization_Challenge).
 
