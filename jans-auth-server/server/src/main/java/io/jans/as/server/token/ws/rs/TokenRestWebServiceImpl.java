@@ -6,12 +6,10 @@
 
 package io.jans.as.server.token.ws.rs;
 
-import com.google.common.base.Strings;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
-import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
@@ -393,7 +391,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
         tokenRestWebServiceValidator.validateGrant(authorizationCodeGrant, client, code, executionContext.getAuditLog(), grant -> grantService.removeAllByAuthorizationCode(code));
-        validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog());
+        tokenRestWebServiceValidator.validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog());
         dPoPService.validateDpopThumprint(authorizationCodeGrant.getDpopJkt(), executionContext.getDpop());
 
         authorizationCodeGrant.setIsCachedWithNoPersistence(false);
@@ -556,27 +554,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             }
             log.debug("The authentication request has expired for deviceCode: '{}'", deviceCode);
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), executionContext.getAuditLog()));
-        }
-    }
-
-    private void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier, OAuth2AuditLog oAuth2AuditLog) {
-        log.trace("PKCE validation, code_verifier: {}, code_challenge: {}, method: {}",
-                codeVerifier, grant.getCodeChallenge(), grant.getCodeChallengeMethod());
-
-        if (isTrue(appConfiguration.getRequirePkce()) && (Strings.isNullOrEmpty(codeVerifier) || Strings.isNullOrEmpty(grant.getCodeChallenge()))) {
-            if (log.isErrorEnabled()) {
-                log.error("PKCE is required but code_challenge or code verifier is blank, grantId: {}, codeVerifier: {}, codeChallenge: {}", grant.getGrantId(), codeVerifier, grant.getCodeChallenge());
-            }
-            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "PKCE check fails. Code challenge does not match to request code verifier."), oAuth2AuditLog));
-        }
-
-        if (Strings.isNullOrEmpty(grant.getCodeChallenge()) && Strings.isNullOrEmpty(codeVerifier)) {
-            return; // if no code challenge then it's valid, no PKCE check
-        }
-
-        if (!CodeVerifier.matched(grant.getCodeChallenge(), grant.getCodeChallengeMethod(), codeVerifier)) {
-            log.error("PKCE check fails. Code challenge does not match to request code verifier, grantId: {}, codeVerifier: {}", grant.getGrantId(), codeVerifier);
-            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "PKCE check fails. Code challenge does not match to request code verifier."), oAuth2AuditLog));
         }
     }
 
