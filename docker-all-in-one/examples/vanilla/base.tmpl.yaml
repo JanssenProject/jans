@@ -1,0 +1,296 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gluu
+  labels:
+    istio-injection: enabled
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: flex-aio-gen-params
+  namespace: gluu
+  labels:
+    APP_NAME: configurator
+type: Opaque
+stringData:
+  generate.json: |-
+    {
+      "hostname": "flex-aio.gluu.org",
+      "country_code": "US",
+      "state": "TX",
+      "city": "Austin",
+      "admin_pw": "S3cr3t+pass",
+      "ldap_pw": "S3cr3t+pass",
+      "redis_pw": "S3cr3t+[ass]",
+      "email": "support@flex-aio.gluu.org",
+      "org_name": "Gluu Federation",
+      "sql_pw": "S3cr3t+pass",
+      "couchbase_pw": "S3cr3t+pass",
+      "couchbase_superuser_pw": "S3cr3t+pass",
+      "optional_scopes": ["sql", "ldap", "couchbase"]
+    }
+
+---
+
+apiVersion: v1
+stringData:
+  tls.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIID1zCCAr+gAwIBAgIUU2/+9BJKKhDaVhu5B1PqYIRk2zcwDQYJKoZIhvcNAQEL
+    BQAwgYQxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJUWDEPMA0GA1UEBwwGQXVzdGlu
+    MRgwFgYDVQQKDA9HbHV1IEZlZGVyYXRpb24xEzARBgNVBAMMCkphbnNzZW4gQ0Ex
+    KDAmBgkqhkiG9w0BCQEWGXN1cHBvcnRAZmxleC1haW8uZ2x1dS5vcmcwHhcNMjMw
+    NjI4MDkxNjM4WhcNMjQwNjI3MDkxNjM4WjCBizELMAkGA1UEBhMCVVMxCzAJBgNV
+    BAgMAlRYMQ8wDQYDVQQHDAZBdXN0aW4xGDAWBgNVBAoMD0dsdXUgRmVkZXJhdGlv
+    bjEaMBgGA1UEAwwRZmxleC1haW8uZ2x1dS5vcmcxKDAmBgkqhkiG9w0BCQEWGXN1
+    cHBvcnRAZmxleC1haW8uZ2x1dS5vcmcwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+    ggEKAoIBAQCcLfdoVSmxOMh0GrQkJwPZSiOYb9nEZd94rAF2vrjuzyMgQeGNKemk
+    gwoBJMS+PSxKAaStw7O1NdFFqqXE2LXzjoQaC+/w/iWhkkRn5i/U3mWPiR6mMSX6
+    Vc4grGNc3LuGmOrpmStmjCFIcjbwpqvtZL//q/PD+rkBRuR6YqEqVj6Q5LBvZliG
+    FhR4+5VuvwiEbo8DHsX8i56+9eP+yrBX+HZpEFhjf2pWyNjSqRPdeIo3UJQp4jAH
+    pBrWjDV3AJhspT9sSnxD0PmUtr7jN+vrj1AIsYA4zZNbSdtKYKTQbrj7798NzBJr
+    dEirTpRQEGR8myl7jgImoFKshItRFHrDAgMBAAGjODA2MCcGA1UdEQQgMB6CCXdl
+    Yl9odHRwc4IRZmxleC1haW8uZ2x1dS5vcmcwCwYDVR0PBAQDAgXgMA0GCSqGSIb3
+    DQEBCwUAA4IBAQAjPNxiEWaYWBcJ+3CQyl27T66cN4Vbxhd6JfVhXsRBN4FnZ4Jz
+    tGWqu+4u+AJGF/ITrMmIC62xWqjKle1P6ba+7sNo8XYJIDDzK2B4UG4GVIB3C4k+
+    5jFB+0459d5LdXSW1LjWnb2JZygSilr2BsUOhHG1W9txiTlxWiMTE8kDJRcm7mqQ
+    nBqQyagtvKd7duVexI/AlfSv+e/tgxIb3atRNmYpJhU1r4lXW6GaGSvspqw9qc5Z
+    E9MnrdPo0kwyyuQnZIMzNLnKHnwFpwdsdA4ArA4vQL+hyrjq3tqF+RrmnMwYwHoe
+    PZVg0sFHwlGb0p9+QIFwHOEEqAXZwryfGarX
+    -----END CERTIFICATE-----
+  tls.key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEpAIBAAKCAQEAnC33aFUpsTjIdBq0JCcD2UojmG/ZxGXfeKwBdr647s8jIEHh
+    jSnppIMKASTEvj0sSgGkrcOztTXRRaqlxNi1846EGgvv8P4loZJEZ+Yv1N5lj4ke
+    pjEl+lXOIKxjXNy7hpjq6ZkrZowhSHI28Kar7WS//6vzw/q5AUbkemKhKlY+kOSw
+    b2ZYhhYUePuVbr8IhG6PAx7F/IuevvXj/sqwV/h2aRBYY39qVsjY0qkT3XiKN1CU
+    KeIwB6Qa1ow1dwCYbKU/bEp8Q9D5lLa+4zfr649QCLGAOM2TW0nbSmCk0G64++/f
+    DcwSa3RIq06UUBBkfJspe44CJqBSrISLURR6wwIDAQABAoIBABpXEkvxWQe/qOcT
+    /d+/CMIj4974tkSOXeMvN0v8nJoCK01sbwrsz6/kPdK1jcz76jVNE6YOxIdCXVof
+    jrelSQKbvaHa84u0gUo/rfPL+bMwEvbjTF0BGwOeZxZRnKxzudjYf34ITC6OYaqj
+    QKrToVl3TX5kVMdvyLXza+NMMRw/jduD3Xbu4WjcvnVIRUlOGulY9HpJyoBS0ScT
+    CCOCSIOsicMuL/j0SmsZpH41bRZinJg/iOTbqSr9TBvXzBtUU3qnRlhDhU2fUz/I
+    HtF4N1lZMMS7U03E7rY5yKZcqy75DFNi/bvAXhYecczTpfID235kwZKUvCeQ2ToE
+    ZJbKuxECgYEA1BAL8q8pCzXDTZywvUe9vIWHVB3QAu3hCmzoLjtjQ+QE1q55Kup3
+    82VJB1Plz8hoZuEMSg0v647ouqn0Cz5QJpMRG9YbcxFZw8LTtYsyuPlgoXcfg5Kj
+    lC5OnmCDuopsXh0AqHE+4cn7AL8kdK3EErsE0V9WfPoMbRlCT3jZcwkCgYEAvInW
+    72PRjGkgF8MBtiNzzOxasT5VNKMHd7gS9nCX2mBs9HtijU9s+KL7TL0vEvwr+moc
+    451vrblRS6CEnjuNGvMnfXxWyluP5ymFIJtrHLivFaMxluZoVd055EXCSlS7/AoB
+    vUyqm71e4Q7Bw8jjnoeQF2nSnP/+Enze56BhtmsCgYEAj2f2nHwldmY6F98xih7c
+    yYNHG/Q5OfHh8GnrrXAN1dh6CS/d0s7SpS9GboUm8RemuoPQCrfWQybWbX0HAx91
+    llB4DmoBEBSYrpCvGKL0fzBtT2O+VPyyUD/sfJ/qFRkM5awZSM+kZY5whnW8Uoc8
+    BCqivHALjeKOyqx9Mj8YVfkCgYEAlTz2qZ91q5M7GBQAMtB1RWyBjXMttvClZJqM
+    SA5v5SgWlp9kLz8DnvxDt0a5EGoT1bBRFcr1L6pVM2voDehNlVuLksTtXliD3BL9
+    kgX0D1QRIyt+gVf4lp76yDp/xJ61/pddMR6SnZyUkclAj11g74eXAzF8yVHJJ5E4
+    UFiff+kCgYBlAcGGGZ6BF73hGCwFxcVRqVe40OTpE/J0fHKwfHeCAJV9Iv6QTUxe
+    uGfdoUHeiUmPCPYqjWQxUPycpBq68bm2al8uP0Rv5nEhbdjlJjrZLFEpR2zXWxAI
+    U/+OWtQwPZYZMGGf2E7YHWDXzhtsNTTPDo+KGJeV308M1fPp0Zrykw==
+    -----END RSA PRIVATE KEY-----
+kind: Secret
+metadata:
+  name: tls-certificate
+  namespace: gluu
+type: kubernetes.io/tls
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: flex-aio-ssa-jwt
+  namespace: gluu
+type: Opaque
+data:
+  ssa: ${FLEX_AIO_SSA}
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flex-aio-envs
+  namespace: gluu
+data:
+  CN_CONFIG_ADAPTER: "kubernetes"
+  CN_SECRET_ADAPTER: "kubernetes"
+  CN_SECRET_KUBERNETES_NAMESPACE: "gluu"
+  CN_CONFIG_KUBERNETES_NAMESPACE: "gluu"
+  CN_PERSISTENCE_TYPE: "sql"
+  CN_SQL_DB_DIALECT: "mysql"
+  CN_SQL_DB_HOST: "mysql.sql.svc.cluster.local"
+  CN_CONFIG_API_PLUGINS: "admin-ui,fido2,scim,user-mgt"
+  FLEX_COMPONENTS: "configurator,persistence-loader,jans-auth,jans-config-api,jans-fido2,jans-scim,casa,admin-ui"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: flex-aio
+  labels:
+    app: flex-aio
+  namespace: gluu
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http-proxy
+  selector:
+    app: flex-aio
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flex-aio
+  labels:
+    app: flex-aio
+    # APP_NAME: auth-server
+  namespace: gluu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flex-aio
+  template:
+    metadata:
+      labels:
+        app: flex-aio
+        # APP_NAME: auth-server
+      namespace: gluu
+    spec:
+      containers:
+      - name: flex-aio
+        image: ${FLEX_AIO_IMAGE}
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "8Gi"
+          limits:
+            memory: "16Gi"
+        # ports:
+        # - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: flex-aio-envs
+        volumeMounts:
+          - name: flex-aio-gen-params
+            mountPath: /opt/jans/configurator/db/generate.json
+            subPath: generate.json
+          - name: tls-certificate
+            mountPath: /opt/jans/configurator/certs/web_https.crt
+            subPath: web_https.crt
+          - name: tls-certificate
+            mountPath: /opt/jans/configurator/certs/web_https.key
+            subPath: web_https.key
+          - name: flex-aio-ssa-jwt
+            mountPath: /etc/jans/conf/ssa
+            subPath: ssa
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+          runAsGroup: 1000
+        livenessProbe:
+          exec:
+            command: ["python3", "/app/flex_aio/jans_auth/healthcheck.py"]
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          exec:
+            command: ["python3", "/app/flex_aio/jans_auth/healthcheck.py"]
+          initialDelaySeconds: 25
+          periodSeconds: 25
+      volumes:
+        - name: flex-aio-gen-params
+          secret:
+            secretName: flex-aio-gen-params
+        - name: flex-aio-ssa-jwt
+          secret:
+            secretName: flex-aio-ssa-jwt
+        - name: tls-certificate
+          secret:
+            secretName: tls-certificate
+            items:
+              - key: tls.crt
+                path: web_https.crt
+              - key: tls.key
+                path: web_https.key
+      hostAliases:
+      - ip: ${NODE_IP_ADDR}
+        hostnames:
+        - flex-aio.gluu.org
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sql
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+  namespace: sql
+type: Opaque
+stringData:
+  MYSQL_ROOT_PASSWORD: S3cr3t+pass
+  MYSQL_DATABASE: jans
+  MYSQL_USER: jans
+  MYSQL_PASSWORD: S3cr3t+pass
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+  namespace: sql
+spec:
+  ports:
+  - port: 3306
+    name: mysql
+  selector:
+    app: mysql
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+  namespace: sql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+      namespace: sql
+    spec:
+      containers:
+      - name: mysql
+        image: docker.io/mysql:8.0.30
+        resources:
+          requests:
+            memory: "1000Mi"
+          limits:
+            memory: "1536Mi"
+        ports:
+        - containerPort: 3306
+        envFrom:
+        - secretRef:
+            name: mysql-secret

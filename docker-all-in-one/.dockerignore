@@ -1,0 +1,6 @@
+# exclude everything
+*
+
+# include required files/directories
+!app
+!LICENSE
