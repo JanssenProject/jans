@@ -12,20 +12,17 @@
             
             <p class="f6">${vm.introText}</p>
 
-            <zk:zk if="${vm.has2faRequisites and vm.pst.password2faRequisite}">
+            <zk:zk if="${vm.has2faRequisites}">
                 <div class="alert alert-warning" role="alert">${labels.usr.warn_lock}</div>
             </zk:zk>
-            <zk:zk if="${not vm.methodsAvailability and vm.pst.password2faRequisite}">
+            <zk:zk if="${not vm.methodsAvailability}">
                 <div class="alert alert-danger" role="alert">
                     ${c:l(sessionContext.user.admin ? 'usr.strong.unavailable_admin' : 'usr.strong.unavailable')}
                 </div>
             </zk:zk>
-            <zk:zk if="${vm.pst.passSetAvailable and not vm.pst.password2faRequisite}">
-                <div class="alert alert-danger" role="alert">${labels.usr.warn_setpass}</div>
-            </zk:zk>
         </div>
 
-        <zk:zk if="${vm.has2faRequisites and vm.pst.password2faRequisite}">
+        <zk:zk if="${vm.has2faRequisites}">
             <div class="${css['sectionsWrapper']}">
                 <z:include src="user/preferred.zul" />
 
@@ -70,7 +67,7 @@
             </div>
         </zk:zk>
 
-        <zk:zk if="${(vm.pre2faMethods.size() gt 0) and not vm.has2faRequisites and vm.pst.password2faRequisite}">
+        <zk:zk if="${(vm.pre2faMethods.size() gt 0) and not vm.has2faRequisites}">
             <div class="${css['sectionsWrapper']}">
                 <section class="${css.section}">
                     <div class="${css.panel}">

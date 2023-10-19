@@ -10,7 +10,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static jakarta.ws.rs.core.Response.Status.OK;
 
@@ -25,28 +24,7 @@ public class PasswordResetAvailWS extends BaseWS {
 
     @Inject
     private PersistenceService persistenceService;
-    
-    @GET
-    @Path("available")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response available() {
 
-        Response.Status httpStatus;
-        String json;
-        
-        logger.trace("PasswordResetAvailWS available operation called");
-        try {
-            json = Boolean.toString(isPwdResetAvailable());
-            httpStatus = OK;
-        } catch (Exception e) {
-            json = e.getMessage();
-            logger.error(json, e);
-            httpStatus = INTERNAL_SERVER_ERROR;
-        }
-        return Response.status(httpStatus).entity(json).build();
-        
-    }
-    
     @GET
     @Path("enabled")
     @Produces(MediaType.APPLICATION_JSON)
@@ -57,7 +35,7 @@ public class PasswordResetAvailWS extends BaseWS {
         
         logger.trace("PasswordResetAvailWS isEnabled operation called");
         try {
-            json = Boolean.toString(isPwdResetAvailable() && mainSettings.isEnablePassReset());
+            json = Boolean.toString(mainSettings.isEnablePassReset());
             httpStatus = OK;
         } catch (Exception e) {
             json = e.getMessage();
@@ -91,18 +69,12 @@ public class PasswordResetAvailWS extends BaseWS {
         boolean value = mainSettings.isEnablePassReset();
         
         try {
-            if (isPwdResetAvailable()) {
-                if (value != flag) {
-                    mainSettings.setEnablePassReset(flag);
-                    logger.trace("Persisting configuration change");
-                    confHandler.saveSettings();
-                }
-                httpStatus = OK;
-            } else {
-                httpStatus = BAD_REQUEST;
-                json = "Password reset is not available. Your server may be using an external " +
-                    "LDAP for identities synchronization"; 
+            if (value != flag) {
+                mainSettings.setEnablePassReset(flag);
+                logger.trace("Persisting configuration change");
+                confHandler.saveSettings();
             }
+            httpStatus = OK;
         } catch (Exception e) {
             json = e.getMessage();
             logger.error(json, e);
@@ -113,10 +85,6 @@ public class PasswordResetAvailWS extends BaseWS {
         }
         return Response.status(httpStatus).entity(json).build();  
 
-    }
-    
-    private boolean isPwdResetAvailable() {
-        return !persistenceService.isBackendLdapEnabled();
     }
     
 }
