@@ -45,6 +45,7 @@
 		3063E5AE2AD6BE05002B4879 /* UIApplication+Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5AD2AD6BE05002B4879 /* UIApplication+Alert.swift */; };
 		3063E5B02AD6C623002B4879 /* RealmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5AF2AD6C623002B4879 /* RealmManager.swift */; };
 		3063E5B22AD6CAEB002B4879 /* DCResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5B12AD6CAEB002B4879 /* DCResponse.swift */; };
+		3079EC482AE1532600ECA57C /* LoginResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3079EC472AE1532600ECA57C /* LoginResponse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -85,6 +86,7 @@
 		3063E5AD2AD6BE05002B4879 /* UIApplication+Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Alert.swift"; sourceTree = "<group>"; };
 		3063E5AF2AD6C623002B4879 /* RealmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmManager.swift; sourceTree = "<group>"; };
 		3063E5B12AD6CAEB002B4879 /* DCResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DCResponse.swift; sourceTree = "<group>"; };
+		3079EC472AE1532600ECA57C /* LoginResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginResponse.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,6 +174,7 @@
 				3063E5B12AD6CAEB002B4879 /* DCResponse.swift */,
 				3049C2112AD7F93100164883 /* DCRequest.swift */,
 				3049C2172AD8163A00164883 /* AppIntegrityResponse.swift */,
+				3079EC472AE1532600ECA57C /* LoginResponse.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -367,6 +370,7 @@
 				3063E5942AD04A34002B4879 /* RegisterViewInteractor.swift in Sources */,
 				3063E5852ACD7EEC002B4879 /* OPConfiguration.swift in Sources */,
 				3049C20D2AD6D27D00164883 /* OPConfigurationObject.swift in Sources */,
+				3079EC482AE1532600ECA57C /* LoginResponse.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

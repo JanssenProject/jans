@@ -9,7 +9,7 @@ import SwiftUI
 
 final class RegisterViewState: ObservableObject {
     
-    @State var issuer = ""
-    @State var scopes = "openid"
+    @Published var issuer = "https://duttarnab-coherent-imp.gluu.info"
+    @Published var scopes = "openid, authorization_challenge"
     @State var loadingVisible = false
 }

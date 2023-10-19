@@ -10,17 +10,24 @@ import UIKit
 protocol RegisterViewPresenter: AnyObject {
     
     func onError(message: String)
+    func onMainStateChanged(viewState: ViewState)
 }
 
 final class RegisterViewPresenterImpl: RegisterViewPresenter {
     
     private let state: RegisterViewState
+    private let mainViewState: MainViewState
     
-    init(state: RegisterViewState) {
+    init(state: RegisterViewState, mainViewState: MainViewState) {
         self.state = state
+        self.mainViewState = mainViewState
     }
     
     func onError(message: String) {
         UIApplication.showAlert(message: message)
+    }
+    
+    func onMainStateChanged(viewState: ViewState) {
+        mainViewState.viewState = viewState
     }
 }

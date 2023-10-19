@@ -34,7 +34,7 @@ final class MainViewInteractorImpl: MainViewInteractor {
     
     // MARK: - Private part
     private func checkAppIntegrity() {
-        let appIntegrity = RealmManager.shared.getObject() as? AppIntegrityEntity
+        let appIntegrity: AppIntegrityEntity? = RealmManager.shared.getObject()
         if appIntegrity == nil {
             RealmManager.shared.deleteAllAppIntegrity()
             integrityRepository.checkAppIntegrity()

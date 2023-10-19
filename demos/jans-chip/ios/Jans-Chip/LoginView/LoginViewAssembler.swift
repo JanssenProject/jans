@@ -9,10 +9,10 @@ import SwiftUI
 
 struct LoginViewAssembler {
 
-    static func assembleNavigationWrapped() -> LoginView {
+    static func assembleNavigationWrapped(mainViewState: MainViewState) -> LoginView {
 
         let state = LoginViewState()
-        let presenter = LoginViewPresenterImpl(state: state)
+        let presenter = LoginViewPresenterImpl(state: state, mainViewState: mainViewState)
         let interactor = LoginViewInteractorImpl(presenter: presenter)
         let view = LoginView(state: state, interactor: interactor)
         

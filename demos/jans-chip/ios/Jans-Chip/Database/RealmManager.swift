@@ -27,17 +27,18 @@ final class RealmManager {
     }
     
     func getObject<T: Object>() -> T? {
+        var result: T? = nil
         do {
             let realm = try Realm()
             try realm.write {
                 let objects = realm.objects(T.self)
-                return objects.first
+                result = objects.first
             }
         } catch(let error) {
             print("Error getting object, reason: \(error.localizedDescription)")
         }
         
-        return nil
+        return result
     }
     
     // MARK: - OP Configuration
@@ -51,20 +52,6 @@ final class RealmManager {
         } catch(let error) {
             print("Error deleting object, reason: \(error.localizedDescription)")
         }
-    }
-    
-    func getConfiguration() -> OPConfigurationObject? {
-        do {
-            let realm = try Realm()
-            try realm.write {
-                let configurations = realm.objects(OPConfigurationObject.self)
-                return configurations.first
-            }
-        } catch(let error) {
-            print("Error getting object, reason: \(error.localizedDescription)")
-        }
-        
-        return nil
     }
     
     // MARK: - AppIntegrity

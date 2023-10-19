@@ -28,18 +28,21 @@ struct LoginView: View {
             Text("User Login")
             TextField("User name", text: $state.userName)
                 .textFieldStyle(.roundedBorder)
-            TextField("Scopes", text: $state.password)
+            SecureField("Password", text: $state.password)
                 .textFieldStyle(.roundedBorder)
             JansButton(title: "Login",
                        backgroundColor: Color.cyan) {
-                print("Start login flow")
+                interactor.onLoginClick(username: state.userName, password: state.password)
             }.padding(.top)
             if $state.loadingVisible.wrappedValue {
                 ProgressView()
             }
             Spacer()
         }
-        .frame(width: 250, height: .infinity)
+        .frame(width: 250, height: 500)
+        .onAppear {
+            interactor.onAppear()
+        }
     }
 }
 
@@ -49,7 +52,12 @@ struct LoginView_Previews: PreviewProvider {
         LoginView(
             state: LoginViewState(),
             interactor:
-                LoginViewInteractorImpl(presenter: LoginViewPresenterImpl(state: LoginViewState()))
+                LoginViewInteractorImpl(
+                    presenter: LoginViewPresenterImpl(
+                        state: LoginViewState(),
+                        mainViewState: MainViewState()
+                    )
+                )
         )
     }
 }

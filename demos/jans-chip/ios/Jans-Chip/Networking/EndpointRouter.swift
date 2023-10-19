@@ -11,7 +11,7 @@ import Alamofire
 public enum EndpointRouter: EndpointConfiguration {
     
     case getOPConfiguration(String)
-    case doDCR(String, String)
+    case doDCR(DCRequest, String)
     case getAuthorizationChallenge(String, String, String, String, String, String)
     case getToken(String, String, String, String, String, String)
     case getUserInfo(String, String, String)
@@ -32,22 +32,29 @@ public enum EndpointRouter: EndpointConfiguration {
     // MARK: - BaseURL
     public var baseURL: String {
         switch self {
-        case .getOPConfiguration(let url):
+        case .doDCR, .getAuthorizationChallenge:
+            return ""
+        default:
+            return "https://duttarnab-coherent-imp.gluu.info/"
+        }
+    }
+    
+    // MARK: - Path
+    public var path: String {
+        switch self {
+        case .getOPConfiguration:
+            return ".well-known/openid-configuration"
+        case .doDCR(_, let url), .getAuthorizationChallenge(_, _, _, _, _, let url):
             return url
         default:
             return ""
         }
     }
     
-    // MARK: - Path
-    public var path: String {
-        ""
-    }
-    
     // MARK: - Parameters
     public var parameters: Parameters? {
         switch self {
-        case .getOPConfiguration, .doDCR, .verifyIntegrityTokenOnAppServer:
+        case .doDCR, .getOPConfiguration, .verifyIntegrityTokenOnAppServer:
             return nil
         case let .getAuthorizationChallenge(clientId, username, password, state, nonce, _):
             return [
@@ -107,7 +114,7 @@ public enum EndpointRouter: EndpointConfiguration {
         
         if let parameters = parameters {
             switch self {
-            case .getOPConfiguration, .doDCR, .verifyIntegrityTokenOnAppServer:
+            case .doDCR, .getOPConfiguration, .verifyIntegrityTokenOnAppServer:
                 return urlRequest
             case .getAuthorizationChallenge, .getToken, .getUserInfo, .logout:
                 var urlComponents = URLComponents(string: urlWithPathValue)!
@@ -123,6 +130,16 @@ public enum EndpointRouter: EndpointConfiguration {
                 }
                 urlRequest.url = url
             }
+        }
+        
+        switch self {
+        case .doDCR(let dcRequest, _):
+            let jsonBody: [String: Any] = dcRequest.asParameters
+            let jsonData = try? JSONSerialization.data(withJSONObject: jsonBody)
+            urlRequest.httpBody = jsonData
+            
+        default:
+            break
         }
         
         return urlRequest

@@ -78,6 +78,15 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
     }
     
     private func doDCR(scopeText: String) {
-        dcrRepository.doDCR(scopeText: scopeText)
+        dcrRepository.doDCR(scopeText: scopeText) { [weak self] result, error in
+            guard let error = error else {
+                if result {
+                    self?.presenter.onMainStateChanged(viewState: .login)
+                }
+                return
+            }
+            
+            self?.presenter.onError(message: error.localizedDescription)
+        }
     }
 }

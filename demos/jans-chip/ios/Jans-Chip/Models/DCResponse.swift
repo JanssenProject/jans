@@ -20,6 +20,6 @@ struct DCResponse: Codable {
     var clientId: String
     var clientSecret: String
     var clientName: String
-    var authorizationChallengeEndpoint: String
-    var endSessionEndpoint: String
+    var authorizationChallengeEndpoint: String?
+    var endSessionEndpoint: String?
 }

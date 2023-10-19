@@ -19,7 +19,7 @@ struct OPConfiguration: Codable {
         case revocationEndpoint = "revocation_endpoint"
     }
     
-    var sno: String
+    var sno: String?
     var issuer: String
     var registrationEndpoint: String
     var tokenEndpoint: String
@@ -31,7 +31,7 @@ struct OPConfiguration: Codable {
     
     var toString: String {
         "OPConfiguration{" +
-        "sno='" + sno + "'\n" +
+        "sno='" + (sno ?? "") + "'\n" +
         "issuer='" + issuer + "'\n" +
         ", registrationEndpoint='" + registrationEndpoint + "'\n" +
         ", tokenEndpoint='" + tokenEndpoint + "'\n" +
@@ -42,7 +42,7 @@ struct OPConfiguration: Codable {
     
     var opConfigurationObject: OPConfigurationObject {
         let opConfigurationObject = OPConfigurationObject()
-        opConfigurationObject.sno = sno
+        opConfigurationObject.sno = sno ?? ""
         opConfigurationObject.issuer = issuer
         opConfigurationObject.registrationEndpoint = registrationEndpoint
         opConfigurationObject.tokenEndpoint = tokenEndpoint

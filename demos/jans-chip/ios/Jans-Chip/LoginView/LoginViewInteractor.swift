@@ -7,10 +7,12 @@
 
 import Foundation
 import Combine
+import RealmSwift
 
 protocol LoginViewInteractor: AnyObject {
     
-    func onRegisterClick()
+    func onAppear()
+    func onLoginClick(username: String, password: String)
 }
 
 final class LoginViewInteractorImpl: LoginViewInteractor {
@@ -23,20 +25,36 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
     
     private var cancellableSet : Set<AnyCancellable> = []
     
+    @ObservedResults(OIDCClient.self) var oidcClient
+    @ObservedResults(OPConfigurationObject.self) var opConfiguration
+    
     init(presenter: LoginViewPresenterImpl) {
         self.presenter = presenter
-    
-//        serviceClient.getOPConfiguration()
-//            .sink { result in
-//                switch result {
-//                case .success(let configuration):
-//                    print("configuration: \(configuration)")
-//                case .failure(let error):
-//                    print("error: \(error)")
-//                }
-//            }
-//            .store(in: &cancellableSet)
     }
     
-    func onRegisterClick() {}
+    func onAppear() {
+        let viewState: ViewState = oidcClient.isEmpty ? .register : .login
+        presenter.onViewStateChanged(viewState: viewState)
+    }
+    
+    func onLoginClick(username: String, password: String) {
+        // Get OPConfiguration and OIDCClient
+        guard let oidcClient: OIDCClient = RealmManager.shared.getObject(), let opConfiguration: OPConfigurationObject = RealmManager.shared.getObject() else {
+            return
+        }
+        
+        // Create a call to request an authorization challenge
+        
+        serviceClient.getAuthorizationChallenge(clientId: oidcClient.clientId, username: username, password: password, authorizationChallengeEndpoint: opConfiguration.authorizationChallengeEndpoint, url: opConfiguration.issuer)
+            .sink { [weak self] result in
+                switch result {
+                case .success(let configuration):
+                    print("configuration: \(configuration)")
+                case .failure(let error):
+                    print("error: \(error)")
+                    self?.presenter.onError(message: "Error in generating authorization code. Erorr: \(error.localizedDescription)")
+                }
+            }
+            .store(in: &cancellableSet)
+    }
 }

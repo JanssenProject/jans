@@ -12,6 +12,8 @@ import Combine
 protocol ServiceClientProtocol: AnyObject {
     
     func getOPConfiguration(url: String, completion: @escaping (Result<OPConfiguration, AFError>) -> Void)
+    func doDCR(dcRequest: DCRequest, url: String) -> AnyPublisher<Result<DCResponse, AFError>, Never>
+    func getAuthorizationChallenge(clientId: String, username: String, password: String, authorizationChallengeEndpoint: String, url: String) -> AnyPublisher<Result<LoginResponse, AFError>, Never>
 }
 
 public final class ServiceClient {
@@ -33,21 +35,24 @@ extension ServiceClient: ServiceClientProtocol {
     
     func getOPConfiguration(url: String, completion: @escaping (Result<OPConfiguration, AFError>) -> Void) {
         let jsonDecoder = JSONDecoder()
-        jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
         performRequest(route: .getOPConfiguration(url), decoder: jsonDecoder, completion: completion)
     }
     
     func getOPConfiguration(url: String) -> AnyPublisher<Result<OPConfiguration, AFError>, Never> {
         let jsonDecoder = JSONDecoder()
-        jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
         let publisher: AnyPublisher<Result<OPConfiguration, AFError>, Never> = performRequest(route: .getOPConfiguration(url), decoder: jsonDecoder)
         return publisher
     }
     
-    func doDCR(url: String) -> AnyPublisher<Result<DCResponse, AFError>, Never> {
+    func doDCR(dcRequest: DCRequest, url: String) -> AnyPublisher<Result<DCResponse, AFError>, Never> {
         let jsonDecoder = JSONDecoder()
-        jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-        let publisher: AnyPublisher<Result<DCResponse, AFError>, Never> = performRequest(route: .doDCR(<#T##String#>, url), decoder: jsonDecoder)
+        let publisher: AnyPublisher<Result<DCResponse, AFError>, Never> = performRequest(route: .doDCR(dcRequest, url), decoder: jsonDecoder)
+        return publisher
+    }
+    
+    func getAuthorizationChallenge(clientId: String, username: String, password: String, authorizationChallengeEndpoint: String, url: String) -> AnyPublisher<Result<LoginResponse, AFError>, Never> {
+        let jsonDecoder = JSONDecoder()
+        let publisher: AnyPublisher<Result<LoginResponse, AFError>, Never> = performRequest(route: .getAuthorizationChallenge(clientId, username, password, UUID().uuidString, UUID().uuidString, authorizationChallengeEndpoint), decoder: jsonDecoder)
         return publisher
     }
 }

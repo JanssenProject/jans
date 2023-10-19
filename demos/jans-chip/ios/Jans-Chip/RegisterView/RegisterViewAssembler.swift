@@ -9,10 +9,10 @@ import SwiftUI
 
 struct RegisterViewAssembler {
 
-    static func assembleNavigationWrapped() -> RegisterView {
+    static func assembleNavigationWrapped(mainViewState: MainViewState) -> RegisterView {
 
         let state = RegisterViewState()
-        let presenter = RegisterViewPresenterImpl(state: state)
+        let presenter = RegisterViewPresenterImpl(state: state, mainViewState: mainViewState)
         let interactor = RegisterViewInteractorImpl(presenter: presenter)
         let view = RegisterView(state: state, interactor: interactor)
 //        let hosting = UIHostingController(rootView: view)

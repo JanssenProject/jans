@@ -48,7 +48,12 @@ struct RegisterView_Previews: PreviewProvider {
     static var previews: some View {
         RegisterView(
             state: RegisterViewState(),
-            interactor: RegisterViewInteractorImpl(presenter: RegisterViewPresenterImpl(state: RegisterViewState()))
+            interactor: RegisterViewInteractorImpl(
+                presenter: RegisterViewPresenterImpl(
+                    state: RegisterViewState(),
+                    mainViewState: MainViewState()
+                )
+            )
         )
     }
 }

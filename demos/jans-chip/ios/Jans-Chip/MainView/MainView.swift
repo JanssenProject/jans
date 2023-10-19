@@ -29,9 +29,9 @@ struct MainView: View {
                     .frame(width: 250, height: 100)
                 Text("Loading...")
             case .register:
-                RegisterViewAssembler.assembleNavigationWrapped()
+                RegisterViewAssembler.assembleNavigationWrapped(mainViewState: state)
             case .login:
-                LoginViewAssembler.assembleNavigationWrapped()
+                LoginViewAssembler.assembleNavigationWrapped(mainViewState: state)
             case .afterLogin:
                 Text("No developed yet")
             }

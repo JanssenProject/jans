@@ -9,18 +9,25 @@ import UIKit
 
 protocol LoginViewPresenter: AnyObject {
     
-    func login()
+    func onViewStateChanged(viewState: ViewState)
+    func onError(message: String)
 }
 
 final class LoginViewPresenterImpl: LoginViewPresenter {
     
     private let state: LoginViewState
+    private let mainViewState: MainViewState
     
-    init(state: LoginViewState) {
+    init(state: LoginViewState, mainViewState: MainViewState) {
         self.state = state
+        self.mainViewState = mainViewState
     }
     
-    func login() {
-        
+    func onViewStateChanged(viewState: ViewState) {
+        mainViewState.viewState = viewState
+    }
+    
+    func onError(message: String) {
+        UIApplication.showAlert(message: message)
     }
 }
