@@ -116,7 +116,7 @@ SSLCertificateFile location_of_fullchain.pem
 SSLCertificateKeyFile location_of_privkey.pem
 
 
-sudo /usr/sbin/rcapache2 restart
+sudo service httpd restart
 ```
 ## Uninstall
 
