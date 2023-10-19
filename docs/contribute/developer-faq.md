@@ -22,33 +22,53 @@ to enable and configure logging for CLI and TUI tools:
   ```
 - Close currently open TUI session if any and open a new one
 - Logs should get available at location configured in `log_dir` in files `cli_debug.log` and `dev-tui.log`
+
 ## How to get certificate from Let's encrypt
 
- To generate Let’s Encrypt CA certificate run below commands:
+ `Let's Encrypt` is a CA that provides free CA certificates. You can use these
+certificates to enable HTTPS communication with Janssen Server. Refer to this
+ [guide](https://letsencrypt.org/getting-started/) from Let's Encrypt to know
+more. We have compiled a set of commands for different OS platforms to help
+you as a quick reference to generate Let's Encrypt CA certificates.
+
 ### Suse
-```
+
+```bash
 sudo zypper -n install certbot
+```
+
+```bash
 sudo certbot certonly --webroot -w /srv/www/htdocs -d FQDN
 ```
+
 ### Ubuntu
+
 ```bash 
 sudo apt update && sudo apt install certbot python3-certbot-apache
+```
+```bash
 sudo certbot --apache -d FQDN
 ```
 
-to check certbot status
-```
+To check certbot status
+```bash
 sudo systemctl status certbot.timer
 ```
-to renew certificate run
-```
+
+To renew certificate run
+```bash
 sudo certbot renew --dry-run
 ```
+
 ### RHEL
+
+```bash
+sudo yum install certbot python3-certbot-apache
 ```
-sudo yum install certbot python3-certbot-apache 
+```bash
 sudo certbot certonly --apache
 ```
+
 ## How to install Janssen Server OpenBanking for testing?
 
 !!! Note
