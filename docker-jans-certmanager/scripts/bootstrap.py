@@ -7,7 +7,7 @@ import click
 from jans.pycloudlib import get_manager
 
 from settings import LOGGING_CONFIG
-from ldap_handler import LdapHandler
+# from ldap_handler import LdapHandler
 from auth_handler import AuthHandler
 # from oxshibboleth_handler import OxshibbolethHandler
 # from passport_handler import PassportHandler
@@ -21,7 +21,7 @@ PATCH_SERVICE_MAP = {
     "web": WebHandler,
     # "oxshibboleth": OxshibbolethHandler,
     "auth": AuthHandler,
-    "ldap": LdapHandler,
+    # "ldap": LdapHandler,
     # "passport": PassportHandler,
 }
 
@@ -72,7 +72,9 @@ def patch(service, dry_run, opts):
     logger.info(f"Processing updates for service {service}")
     parsed_opts = _parse_opts(opts)
     callback_cls = PATCH_SERVICE_MAP[service]
-    callback_cls(manager, dry_run, **parsed_opts).patch()
+
+    with manager.lock.create_lock(f"certmanager-patch-{service}"):
+        callback_cls(manager, dry_run, **parsed_opts).patch()
 
 
 @cli.command()
@@ -95,7 +97,9 @@ def prune(service, dry_run, opts):
     logger.info(f"Processing updates for service {service}")
     parsed_opts = _parse_opts(opts)
     callback_cls = PRUNE_SERVICE_MAP[service]
-    callback_cls(manager, dry_run, **parsed_opts).prune()
+
+    with manager.lock.create_lock(f"certmanager-prune-{service}"):
+        callback_cls(manager, dry_run, **parsed_opts).prune()
 
 
 if __name__ == "__main__":

@@ -64,7 +64,7 @@ spec:
             name: {{ .Release.Name }}-global-user-custom-envs
         {{- end }}
         lifecycle:
-{{- toYaml .Values.lifecycle | nindent 10 }}        
+{{- toYaml .Values.lifecycle | nindent 10 }}
         volumeMounts:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
@@ -86,9 +86,25 @@ spec:
             subPath: google-credentials.json
         {{- end }}
         {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid")  }}
-          - name: cb-crt 
+          - name: cb-crt
             mountPath: "/etc/certs/couchbase.crt"
             subPath: couchbase.crt
+          - name: cb-pass
+            mountPath: {{ .Values.global.cnCouchbasePasswordFile }}
+            subPath: couchbase_password
+          - name: cb-pass
+            mountPath: {{ .Values.global.cnCouchbaseSuperuserPasswordFile }}
+            subPath: couchbase_superuser_password
+        {{- end }}
+        {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
+          - name: sql-pass
+            mountPath: {{ .Values.global.cnSqlPasswordFile }}
+            subPath: sql_password
+        {{- end }}
+        {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
+          - name: ldap-pass
+            mountPath: {{ .Values.global.cnLdapPasswordFile }}
+            subPath: ldap_password
         {{- end }}
         resources:
 {{- toYaml .Values.resources | nindent 10 }}
@@ -122,7 +138,28 @@ spec:
             secretName: {{ .Release.Name }}-google-sa
       {{- end }}
       {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid")  }}
-        - name: cb-crt 
+        - name: cb-crt
           secret:
             secretName: {{ .Release.Name }}-cb-crt
+        - name: cb-pass
+          secret:
+            secretName: {{ .Release.Name }}-cb-pass
+            items:
+              - key: couchbase_password
+                path: couchbase_password
+              - key: couchbase_superuser_password
+                path: couchbase_superuser_password
+      {{- end }}
+      {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
+        - name: sql-pass
+          secret:
+            secretName: {{ .Release.Name }}-sql-pass
+      {{- end }}
+      {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
+        - name: ldap-pass
+          secret:
+            secretName: {{ .Release.Name }}-ldap-pass
+            items:
+              - key: ldap_password
+                path: ldap_password
       {{- end }}
