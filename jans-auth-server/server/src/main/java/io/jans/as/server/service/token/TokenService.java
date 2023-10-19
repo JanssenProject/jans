@@ -109,8 +109,8 @@ public class TokenService {
     }
 
     @NotNull
-    public String getClientDn(@Nullable String p_authorization) {
-        final AuthorizationGrant grant = getAuthorizationGrant(p_authorization);
+    public String getClientDn(@Nullable String authorization) {
+        final AuthorizationGrant grant = getAuthorizationGrant(authorization);
         if (grant != null) {
             return grant.getClientDn();
         }
