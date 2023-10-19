@@ -10,8 +10,7 @@ ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:1.0.20_dev
 ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:1.0.20_dev
 ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:1.0.20_dev
 ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:1.0.20_dev
-ARG FLEX_CASA_IMAGE=ghcr.io/gluufederation/flex/casa:1.0.20_dev
-ARG FLEX_ADMIN_UI_IMAGE=ghcr.io/gluufederation/flex/admin-ui:1.0.20_dev
+ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:1.0.20_dev
 
 # original Janssen version
 ARG CN_VERSION=1.0.20-SNAPSHOT
@@ -32,15 +31,13 @@ FROM ${JANS_FIDO2_IMAGE} AS jans-fido2-src
 
 FROM ${JANS_SCIM_IMAGE} AS jans-scim-src
 
-FROM ${FLEX_CASA_IMAGE} AS flex-casa-src
-
-FROM ${FLEX_ADMIN_UI_IMAGE} AS flex-admin-ui-src
+FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 
 # ===
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:11.0.19
+FROM bellsoft/liberica-openjdk-alpine:17.0.8
 
 # hadolint ignore=DL3018
 RUN apk update \
@@ -78,65 +75,48 @@ COPY LICENSE /licenses/LICENSE
 RUN mkdir -p /app/bin
 
 COPY --from=jans-configurator-src /opt/jans/configurator/javalibs /opt/jans/configurator/javalibs
-COPY --from=jans-configurator-src /app/scripts /app/flex_aio/configurator
-RUN ln -sf /app/flex_aio/configurator/entrypoint.sh /app/bin/configurator-entrypoint.sh
+COPY --from=jans-configurator-src /app/scripts /app/jans_aio/configurator
+RUN ln -sf /app/jans_aio/configurator/entrypoint.sh /app/bin/configurator-entrypoint.sh
 
 COPY --from=jans-persistence-loader-src /app/templates /app/templates
 COPY --from=jans-persistence-loader-src /app/schema /app/schema
 COPY --from=jans-persistence-loader-src /app/static /app/static
 COPY --from=jans-persistence-loader-src /app/script-catalog /app/script-catalog
-COPY --from=jans-persistence-loader-src /app/scripts /app/flex_aio/persistence_loader
-RUN ln -sf /app/flex_aio/persistence_loader/entrypoint.sh /app/bin/persistence-loader-entrypoint.sh
+COPY --from=jans-persistence-loader-src /app/scripts /app/jans_aio/persistence_loader
+RUN ln -sf /app/jans_aio/persistence_loader/entrypoint.sh /app/bin/persistence-loader-entrypoint.sh
 
 COPY --from=jans-auth-src /opt/jetty /opt/jetty
 COPY --from=jans-auth-src /opt/jython /opt/jython
-COPY --from=jans-auth-src /opt/jans/jetty/jans-auth /opt/jans/jetty/jans-auth
-COPY --from=jans-auth-src /opt/jans/jetty/common /opt/jans/jetty/common
-COPY --from=jans-auth-src /usr/share/java /opt/jans/jetty/jans-auth/custom/libs
+COPY --from=jans-auth-src /opt/jans/jetty /opt/jans/jetty
 COPY --from=jans-auth-src /etc/certs /etc/certs
 COPY --from=jans-auth-src /opt/jans/python/libs /opt/jans/python/libs
-COPY --from=jans-auth-src /app/templates/jans-couchbase.properties.tmpl /app/templates/etc/jans/conf/jans-couchbase.properties
-COPY --from=jans-auth-src /app/templates/jans-ldap.properties.tmpl /app/templates/etc/jans/conf/jans-ldap.properties
-COPY --from=jans-auth-src /app/templates/jans-mysql.properties.tmpl /app/templates/etc/jans/conf/jans-mysql.properties
-COPY --from=jans-auth-src /app/templates/jans-pgsql.properties.tmpl /app/templates/etc/jans/conf/jans-pgsql.properties
-COPY --from=jans-auth-src /app/templates/jans-spanner.properties.tmpl /app/templates/etc/jans/conf/jans-spanner.properties
-COPY --from=jans-auth-src /app/templates/jans.properties.tmpl /app/templates/etc/jans/conf/jans.properties
-COPY --from=jans-auth-src /app/templates/salt.tmpl /app/templates/etc/jans/conf/salt
-COPY --from=jans-auth-src /app/templates/log4j2.xml /app/templates/opt/jans/jetty/jans-auth/resources/log4j2.xml
-COPY --from=jans-auth-src /opt/jans/jetty/jans-auth/webapps/jans-auth.xml /app/templates/opt/jans/jetty/jans-auth/webapps/jans-auth.xml
+COPY --from=jans-auth-src /app/templates /app/templates
 COPY --from=jans-auth-src /opt/prometheus /opt/prometheus
+COPY --from=jans-auth-src /app/scripts /app/jans_aio/jans_auth
+RUN ln -sf /app/jans_aio/jans_auth/entrypoint.sh /app/bin/jans-auth-entrypoint.sh
 
 COPY --from=jans-config-api-src /opt/jans/jetty/jans-config-api /opt/jans/jetty/jans-config-api
 COPY --from=jans-config-api-src /app/templates/jans-config-api /app/templates/jans-config-api
-COPY --from=jans-config-api-src /app/templates/log4j2.xml /app/templates/opt/jans/jetty/jans-config-api/resources/log4j2.xml
-COPY --from=jans-config-api-src /app/plugins/admin-ui/log4j2-adminui.xml /app/templates/opt/jans/jetty/jans-config-api/custom/config/log4j2-adminui.xml
-COPY --from=jans-config-api-src /opt/jans/jetty/jans-config-api/webapps/jans-config-api.xml /app/templates/opt/jans/jetty/jans-config-api/webapps/jans-config-api.xml
-COPY --from=jans-config-api-src /usr/share/java /opt/jans/jetty/jans-config-api/_plugins
 COPY --from=jans-config-api-src /usr/bin/facter /usr/local/bin/facter
+COPY --from=jans-config-api-src /app/scripts /app/jans_aio/jans_config_api
+RUN ln -sf /app/jans_aio/jans_config_api/entrypoint.sh /app/bin/jans-config-api-entrypoint.sh
 
 COPY --from=jans-fido2-src /opt/jans/jetty/jans-fido2 /opt/jans/jetty/jans-fido2
 COPY --from=jans-fido2-src /app/templates/jans-fido2 /app/templates/jans-fido2
 COPY --from=jans-fido2-src /etc/jans/conf/fido2 /etc/jans/conf/fido2
-COPY --from=jans-fido2-src /app/templates/log4j2.xml /app/templates/opt/jans/jetty/jans-fido2/resources/log4j2.xml
-COPY --from=jans-fido2-src /opt/jans/jetty/jans-fido2/webapps/jans-fido2.xml /app/templates/opt/jans/jetty/jans-fido2/webapps/jans-fido2.xml
+COPY --from=jans-fido2-src /app/scripts /app/jans_aio/jans_fido2
+RUN ln -sf /app/jans_aio/jans_fido2/entrypoint.sh /app/bin/jans-fido2-entrypoint.sh
 
 COPY --from=jans-scim-src /opt/jans/jetty/jans-scim /opt/jans/jetty/jans-scim
 COPY --from=jans-scim-src /app/templates/jans-scim /app/templates/jans-scim
-COPY --from=jans-scim-src /app/static /app/static
-COPY --from=jans-scim-src /app/templates/log4j2.xml /app/templates/opt/jans/jetty/jans-scim/resources/log4j2.xml
-COPY --from=jans-scim-src /opt/jans/jetty/jans-scim/webapps/jans-scim.xml /app/templates/opt/jans/jetty/jans-scim/webapps/jans-scim.xml
+COPY --from=jans-scim-src /app/scripts /app/jans_aio/jans_scim
+RUN ln -sf /app/jans_aio/jans_scim/entrypoint.sh /app/bin/jans-scim-entrypoint.sh
 
-COPY --from=flex-casa-src /opt/jans/jetty/casa /opt/jans/jetty/casa
-COPY --from=flex-casa-src /app/templates /app/templates
-COPY --from=flex-casa-src /app/static /app/static
-COPY --from=flex-casa-src /app/templates/log4j2.xml /app/templates/opt/jans/jetty/casa/resources/log4j2.xml
-COPY --from=flex-casa-src /opt/jans/jetty/casa/webapps/casa.xml /app/templates/opt/jans/jetty/casa/webapps/casa.xml
-
-COPY --from=flex-admin-ui-src /opt/flex/admin-ui /opt/flex/admin-ui
-COPY --from=flex-admin-ui-src /app/templates/admin-ui /app/templates/admin-ui
-COPY --from=flex-admin-ui-src /run/nginx/nginx.pid /run/nginx/nginx.pid
-COPY --from=flex-admin-ui-src /app/scripts /app/flex_aio/admin_ui
-RUN ln -sf /app/flex_aio/admin_ui/entrypoint.sh /app/bin/admin-ui-entrypoint.sh
+COPY --from=jans-casa-src /opt/jans/jetty/jans-casa /opt/jans/jetty/jans-casa
+COPY --from=jans-casa-src /app/templates/jans-casa /app/templates/jans-casa
+COPY --from=jans-casa-src /app/scripts /app/jans_aio/jans_casa
+COPY --from=jans-casa-src /app/static/extension/person_authentication/Casa.py /app/static/extension/person_authentication/Casa.py
+RUN ln -sf /app/jans_aio/jans_casa/entrypoint.sh /app/bin/jans-casa-entrypoint.sh
 
 # ----
 # misc
@@ -147,9 +127,8 @@ RUN ln -sf /usr/lib/jvm/jdk /opt/java
 RUN mkdir -p /opt/jans/configurator/db \
     /opt/jans/configurator/certs \
     /opt/jetty/temp \
-    /opt/flex/admin-ui/_plugins \
-    /etc/nginx/flex-aio \
-    /var/lib/nginx/html/admin
+    /etc/nginx/jans-aio \
+    /usr/share/java
 
 COPY app /app
 
@@ -158,12 +137,8 @@ ENV PYTHONPATH=/app
 
 ENV JETTY_BASE=/opt/jans/jetty \
     JETTY_HOME=/opt/jetty \
-    FLEX_COMPONENTS="" \
-    GLUU_CASA_ADMIN_LOCK_FILE=/opt/jans/jetty/casa/resources/.administrable \
-    GLUU_CASA_JWKS_SIZE_LIMIT=100000 \
-    GLUU_CASA_JAVA_OPTIONS="" \
-    GLUU_ADMIN_UI_ENABLE_NGINX=false \
-    GLUU_ADMIN_UI_PUBLIC_DIR=/var/lib/nginx/html/admin \
+    CN_AIO_COMPONENTS="" \
+    CN_AIO_ENABLE_MONITOR=false \
     CN_ENABLE_STDOUT_LOG_PREFIX=true \
     CN_DUO_ENABLED=false \
     CN_AUTH_JAVA_OPTIONS="" \
@@ -172,26 +147,45 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_SCIM_JAVA_OPTIONS=""  \
     CN_JETTY_REQUEST_HEADER_SIZE=8192 \
     CN_CONFIG_API_CREATE_SCOPES=true \
-    FLEX_AIO_ENABLE_MONITOR=false
+    CN_AUTH_JETTY_HOST=127.0.0.1 \
+    CN_AUTH_JETTY_PORT=8081 \
+    CN_CONFIG_API_JETTY_HOST=127.0.0.1 \
+    CN_CONFIG_API_JETTY_PORT=8074 \
+    CN_FIDO2_JETTY_HOST=127.0.0.1 \
+    CN_FIDO2_JETTY_PORT=8073 \
+    CN_SCIM_JETTY_HOST=127.0.0.1 \
+    CN_SCIM_JETTY_PORT=8087 \
+    CN_CASA_JETTY_HOST=127.0.0.1 \
+    CN_CASA_JETTY_PORT=8082 \
+    CN_CASA_ADMIN_LOCK_FILE=/opt/jans/jetty/jans-casa/resources/.administrable \
+    CN_CASA_JWKS_SIZE_LIMIT=100000 \
+    CN_CASA_JAVA_OPTIONS="" \
+    CN_SHARE_AUTH_CONF=false \
+    CN_SQL_PASSWORD_FILE=/etc/jans/conf/sql_password \
+    CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
+    CN_COUCHBASE_SUPERUSER_PASSWORD_FILE=/etc/jans/conf/couchbase_superuser_password \
+    CN_LDAP_PASSWORD_FILE=/etc/jans/conf/ldap_password \
+    CN_LDAP_TRUSTSTORE_PASSWORD_FILE=/etc/jans/conf/ldap_truststore_password
 
-LABEL org.opencontainers.image.url="gluufederation/flex-aio" \
-    org.opencontainers.image.authors="Gluu Inc. <support@gluu.org>" \
-    org.opencontainers.image.vendor="Gluu Federation" \
-    org.opencontainers.image.version="1.0.0" \
-    org.opencontainers.image.title="Gluu Flex Cloud" \
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.20" \
+    org.opencontainers.image.title="Janssen All-in-One" \
     org.opencontainers.image.description=""
 
 # forward logs to stdout and stderr
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
 
-RUN cp /app/templates/nginx/*-upstream.conf /etc/nginx/flex-aio/ \
-    && cp /app/templates/nginx/*-location.conf /etc/nginx/flex-aio \
-    && cp /app/templates/nginx/admin-index.html /var/lib/nginx/html/admin/index.html
+RUN cp /app/templates/nginx/*-upstream.conf /etc/nginx/jans-aio/ \
+    && cp /app/templates/nginx/*-location.conf /etc/nginx/jans-aio
+
+RUN touch /run/nginx/nginx.pid
 
 # create non-root user
-RUN adduser -s /bin/sh -h /home/1000 -D -u 1000 flex \
-    && addgroup flex root
+RUN adduser -s /bin/sh -h /home/1000 -D -u 1000 jans \
+    && addgroup jans root
 
 # adjust ownership and permission
 RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
@@ -209,11 +203,10 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-scim/custom \
     ${JETTY_BASE}/jans-scim/resources \
     ${JETTY_BASE}/jans-scim/logs \
-    ${JETTY_BASE}/casa/static \
-    ${JETTY_BASE}/casa/plugins \
-    ${JETTY_BASE}/casa/resources \
-    ${JETTY_BASE}/casa/logs \
-    /opt/flex/admin-ui/_plugins \
+    ${JETTY_BASE}/jans-casa/static \
+    ${JETTY_BASE}/jans-casa/plugins \
+    ${JETTY_BASE}/jans-casa/resources \
+    ${JETTY_BASE}/jans-casa/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
@@ -222,7 +215,8 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     /app \
     /var/lib/nginx \
     /var/log/nginx \
-    /etc/nginx/flex-aio
+    /etc/nginx/jans-aio \
+    /usr/share/java
 
 RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \
@@ -239,11 +233,10 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-scim/custom \
     ${JETTY_BASE}/jans-scim/resources \
     ${JETTY_BASE}/jans-scim/logs \
-    ${JETTY_BASE}/casa/static \
-    ${JETTY_BASE}/casa/plugins \
-    ${JETTY_BASE}/casa/resources \
-    ${JETTY_BASE}/casa/logs \
-    /opt/flex/admin-ui/_plugins \
+    ${JETTY_BASE}/jans-casa/static \
+    ${JETTY_BASE}/jans-casa/plugins \
+    ${JETTY_BASE}/jans-casa/resources \
+    ${JETTY_BASE}/jans-casa/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
@@ -252,10 +245,10 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     /app \
     /var/lib/nginx \
     /var/log/nginx \
-    /etc/nginx/flex-aio
+    /etc/nginx/jans-aio \
+    /usr/share/java
 
-RUN chown 1000:1000 /opt/flex/admin-ui \
-    /opt/java/lib/security/cacerts \
+RUN chown 1000:1000 /opt/java/lib/security/cacerts \
     /run/nginx/nginx.pid \
     /etc/nginx/http.d/default.conf
 

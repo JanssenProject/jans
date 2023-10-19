@@ -8,7 +8,7 @@ from jans.pycloudlib.validators import validate_persistence_type
 from jans.pycloudlib.validators import validate_persistence_hybrid_mapping
 from jans.pycloudlib.validators import validate_persistence_sql_dialect
 
-from flex_aio.settings import LOGGING_CONFIG
+from jans_aio.settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
 

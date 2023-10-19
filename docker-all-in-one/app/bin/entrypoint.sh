@@ -13,6 +13,6 @@ get_prometheus_lib() {
 }
 
 get_prometheus_lib
-python3 /app/flex_aio/bootstrap.py
+python3 /app/jans_aio/bootstrap.py
 
 exec supervisord -c /app/conf/supervisord.conf

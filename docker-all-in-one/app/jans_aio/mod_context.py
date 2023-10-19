@@ -11,8 +11,8 @@ from collections import namedtuple
 from jans.pycloudlib.persistence import PersistenceMapper
 from jans.pycloudlib.utils import exec_cmd
 
-from flex_aio.settings import LOGGING_CONFIG
-from flex_aio.utils import get_template_paths
+from jans_aio.settings import LOGGING_CONFIG
+from jans_aio.utils import get_template_paths
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans_auth")

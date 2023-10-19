@@ -1,3 +1,3 @@
-# flex-aio
+# jans-aio
 
-Flex All-In-One image
+Janssen All-In-One image

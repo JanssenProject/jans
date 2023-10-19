@@ -28,12 +28,9 @@ SUPERVISORD_PROGRAMS = {
         "mem_ratio": 0.2,
         "java_opts_env": "CN_SCIM_JAVA_OPTIONS",
     },
-    "casa": {
+    "jans-casa": {
         "mem_ratio": 0.1,
-        "java_opts_env": "GLUU_CASA_JAVA_OPTIONS",
-    },
-    "admin-ui": {
-        "mem_ratio": 0,
+        "java_opts_env": "CN_CASA_JAVA_OPTIONS",
     },
 }
 
@@ -102,7 +99,7 @@ def get_heap_sizes(mem_alloc: int) -> tuple[int, int]:
 def get_enabled_programs():
     user_components = [
         _comp.strip()
-        for _comp in os.environ.get("FLEX_COMPONENTS", "").split(",")
+        for _comp in os.environ.get("CN_AIO_COMPONENTS", "").split(",")
         if _comp
     ]
 
@@ -120,7 +117,7 @@ def render_supervisord_conf(components: _t.Optional[list[str]] = None) -> None:
     components = components or []
 
     # include aio-monitor only if enabled by user
-    if as_boolean(os.environ.get("FLEX_AIO_ENABLE_MONITOR")):
+    if as_boolean(os.environ.get("CN_AIO_ENABLE_MONITOR")):
         components.append("aio-monitor")
 
     includes = " ".join([f"supervisord.conf.d/{comp}.conf" for comp in components])
@@ -219,8 +216,7 @@ def render_nginx_default_conf(enabled_programs):
         ("jans-config-api", ["upstream", "location"]),
         ("jans-fido2", ["upstream", "location"]),
         ("jans-scim", ["upstream", "location"]),
-        ("casa", ["upstream", "location"]),
-        ("admin-ui", ["location"]),
+        ("jans-casa", ["upstream", "location"]),
     ]
 
     for program, types in includes:
@@ -228,7 +224,7 @@ def render_nginx_default_conf(enabled_programs):
             file_no_ext = f"{program}-{type_}"
 
             key = file_no_ext.replace("-", "_")
-            val = f"include /etc/nginx/flex-aio/{file_no_ext}.conf;"
+            val = f"include /etc/nginx/jans-aio/{file_no_ext}.conf;"
             ctx[key] = f"{val}"
 
             if program not in enabled_programs:

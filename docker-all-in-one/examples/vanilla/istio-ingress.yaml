@@ -2,56 +2,54 @@ apiVersion: v1
 stringData:
   tls.crt: |
     -----BEGIN CERTIFICATE-----
-    MIID1zCCAr+gAwIBAgIUU2/+9BJKKhDaVhu5B1PqYIRk2zcwDQYJKoZIhvcNAQEL
-    BQAwgYQxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJUWDEPMA0GA1UEBwwGQXVzdGlu
-    MRgwFgYDVQQKDA9HbHV1IEZlZGVyYXRpb24xEzARBgNVBAMMCkphbnNzZW4gQ0Ex
-    KDAmBgkqhkiG9w0BCQEWGXN1cHBvcnRAZmxleC1haW8uZ2x1dS5vcmcwHhcNMjMw
-    NjI4MDkxNjM4WhcNMjQwNjI3MDkxNjM4WjCBizELMAkGA1UEBhMCVVMxCzAJBgNV
-    BAgMAlRYMQ8wDQYDVQQHDAZBdXN0aW4xGDAWBgNVBAoMD0dsdXUgRmVkZXJhdGlv
-    bjEaMBgGA1UEAwwRZmxleC1haW8uZ2x1dS5vcmcxKDAmBgkqhkiG9w0BCQEWGXN1
-    cHBvcnRAZmxleC1haW8uZ2x1dS5vcmcwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
-    ggEKAoIBAQCcLfdoVSmxOMh0GrQkJwPZSiOYb9nEZd94rAF2vrjuzyMgQeGNKemk
-    gwoBJMS+PSxKAaStw7O1NdFFqqXE2LXzjoQaC+/w/iWhkkRn5i/U3mWPiR6mMSX6
-    Vc4grGNc3LuGmOrpmStmjCFIcjbwpqvtZL//q/PD+rkBRuR6YqEqVj6Q5LBvZliG
-    FhR4+5VuvwiEbo8DHsX8i56+9eP+yrBX+HZpEFhjf2pWyNjSqRPdeIo3UJQp4jAH
-    pBrWjDV3AJhspT9sSnxD0PmUtr7jN+vrj1AIsYA4zZNbSdtKYKTQbrj7798NzBJr
-    dEirTpRQEGR8myl7jgImoFKshItRFHrDAgMBAAGjODA2MCcGA1UdEQQgMB6CCXdl
-    Yl9odHRwc4IRZmxleC1haW8uZ2x1dS5vcmcwCwYDVR0PBAQDAgXgMA0GCSqGSIb3
-    DQEBCwUAA4IBAQAjPNxiEWaYWBcJ+3CQyl27T66cN4Vbxhd6JfVhXsRBN4FnZ4Jz
-    tGWqu+4u+AJGF/ITrMmIC62xWqjKle1P6ba+7sNo8XYJIDDzK2B4UG4GVIB3C4k+
-    5jFB+0459d5LdXSW1LjWnb2JZygSilr2BsUOhHG1W9txiTlxWiMTE8kDJRcm7mqQ
-    nBqQyagtvKd7duVexI/AlfSv+e/tgxIb3atRNmYpJhU1r4lXW6GaGSvspqw9qc5Z
-    E9MnrdPo0kwyyuQnZIMzNLnKHnwFpwdsdA4ArA4vQL+hyrjq3tqF+RrmnMwYwHoe
-    PZVg0sFHwlGb0p9+QIFwHOEEqAXZwryfGarX
+    MIIDNDCCAhygAwIBAgIUJg+HTzcEQRVVhywCKgjRwIo9y6wwDQYJKoZIhvcNAQEL
+    BQAwGzEZMBcGA1UEAwwQamFucy1haW8uamFucy5pbzAeFw0yMzEwMTkyMDUwNTRa
+    Fw0yNDEwMTgyMDUwNTRaMBsxGTAXBgNVBAMMEGphbnMtYWlvLmphbnMuaW8wggEi
+    MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCjU8zFEFq2b/RXyPd/3ziGGDso
+    Cm5PAzbOGtY+TMf+N3dXE1luWLYFdsnwxyl+J24ga96Ad1cvxa97ntreOVxSimKG
+    gJOMOAmT8UrL51f5qUOs/4+ngCM8vC9Vw4jBMGQgrxr6Dk33EGyOWYe5xR+1Rf5J
+    2r3GjjVpKyQ9lIMCQXYVDpQNa+k/kZyeeVoXbFIfNGIFfmnZIXML/6RgswMonlyQ
+    FfPJHEG+wCazuZiMkHK5TXtzIKyi0V2I3EHZEX6AAkDK1FMFbYIvcpJTPKgR0snn
+    e/ehhcMi6lucbKVkdHdBU3Qlf/BEZca2MY1TYAodZlEN6MXiCBQdWsVvpEfhAgMB
+    AAGjcDBuMB0GA1UdDgQWBBSMMzOqckxjpxVcVCw6vuBWPr34xjAfBgNVHSMEGDAW
+    gBSMMzOqckxjpxVcVCw6vuBWPr34xjAPBgNVHRMBAf8EBTADAQH/MBsGA1UdEQQU
+    MBKCEGphbnMtYWlvLmphbnMuaW8wDQYJKoZIhvcNAQELBQADggEBAIIKQuMvr1L+
+    yz7iR8173h+K6qgJYniK4/s8S9i0iPtg/1i2lh25IcTxN5XK03AknLV317YkC1bw
+    pGzX3aRs9MdkWes0f/krsnmGTJEAWWhGj4z06yVYCXFPV6xHC+kEBmRRvF9b14nL
+    gCajFoxXct1vULCb4VYJThv1gO6++hncTHP4VpkJ7qY/o+v3lJ3IrIX1FzhN+hsU
+    lJNuTEqSRJGXv1tR2gfNNW7hEowtGOpJdFlbmAtYOQfWmWcaRVcKNoItl2CbIGLk
+    sTNVfGneSFfYkTcXjdRRWy7uRiO/ubmalu9vAxPV4oUR7FB4orDvGLDqa3rAfKsh
+    sqoy+0x0w6A=
     -----END CERTIFICATE-----
   tls.key: |
-    -----BEGIN RSA PRIVATE KEY-----
-    MIIEpAIBAAKCAQEAnC33aFUpsTjIdBq0JCcD2UojmG/ZxGXfeKwBdr647s8jIEHh
-    jSnppIMKASTEvj0sSgGkrcOztTXRRaqlxNi1846EGgvv8P4loZJEZ+Yv1N5lj4ke
-    pjEl+lXOIKxjXNy7hpjq6ZkrZowhSHI28Kar7WS//6vzw/q5AUbkemKhKlY+kOSw
-    b2ZYhhYUePuVbr8IhG6PAx7F/IuevvXj/sqwV/h2aRBYY39qVsjY0qkT3XiKN1CU
-    KeIwB6Qa1ow1dwCYbKU/bEp8Q9D5lLa+4zfr649QCLGAOM2TW0nbSmCk0G64++/f
-    DcwSa3RIq06UUBBkfJspe44CJqBSrISLURR6wwIDAQABAoIBABpXEkvxWQe/qOcT
-    /d+/CMIj4974tkSOXeMvN0v8nJoCK01sbwrsz6/kPdK1jcz76jVNE6YOxIdCXVof
-    jrelSQKbvaHa84u0gUo/rfPL+bMwEvbjTF0BGwOeZxZRnKxzudjYf34ITC6OYaqj
-    QKrToVl3TX5kVMdvyLXza+NMMRw/jduD3Xbu4WjcvnVIRUlOGulY9HpJyoBS0ScT
-    CCOCSIOsicMuL/j0SmsZpH41bRZinJg/iOTbqSr9TBvXzBtUU3qnRlhDhU2fUz/I
-    HtF4N1lZMMS7U03E7rY5yKZcqy75DFNi/bvAXhYecczTpfID235kwZKUvCeQ2ToE
-    ZJbKuxECgYEA1BAL8q8pCzXDTZywvUe9vIWHVB3QAu3hCmzoLjtjQ+QE1q55Kup3
-    82VJB1Plz8hoZuEMSg0v647ouqn0Cz5QJpMRG9YbcxFZw8LTtYsyuPlgoXcfg5Kj
-    lC5OnmCDuopsXh0AqHE+4cn7AL8kdK3EErsE0V9WfPoMbRlCT3jZcwkCgYEAvInW
-    72PRjGkgF8MBtiNzzOxasT5VNKMHd7gS9nCX2mBs9HtijU9s+KL7TL0vEvwr+moc
-    451vrblRS6CEnjuNGvMnfXxWyluP5ymFIJtrHLivFaMxluZoVd055EXCSlS7/AoB
-    vUyqm71e4Q7Bw8jjnoeQF2nSnP/+Enze56BhtmsCgYEAj2f2nHwldmY6F98xih7c
-    yYNHG/Q5OfHh8GnrrXAN1dh6CS/d0s7SpS9GboUm8RemuoPQCrfWQybWbX0HAx91
-    llB4DmoBEBSYrpCvGKL0fzBtT2O+VPyyUD/sfJ/qFRkM5awZSM+kZY5whnW8Uoc8
-    BCqivHALjeKOyqx9Mj8YVfkCgYEAlTz2qZ91q5M7GBQAMtB1RWyBjXMttvClZJqM
-    SA5v5SgWlp9kLz8DnvxDt0a5EGoT1bBRFcr1L6pVM2voDehNlVuLksTtXliD3BL9
-    kgX0D1QRIyt+gVf4lp76yDp/xJ61/pddMR6SnZyUkclAj11g74eXAzF8yVHJJ5E4
-    UFiff+kCgYBlAcGGGZ6BF73hGCwFxcVRqVe40OTpE/J0fHKwfHeCAJV9Iv6QTUxe
-    uGfdoUHeiUmPCPYqjWQxUPycpBq68bm2al8uP0Rv5nEhbdjlJjrZLFEpR2zXWxAI
-    U/+OWtQwPZYZMGGf2E7YHWDXzhtsNTTPDo+KGJeV308M1fPp0Zrykw==
-    -----END RSA PRIVATE KEY-----
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCjU8zFEFq2b/RX
+    yPd/3ziGGDsoCm5PAzbOGtY+TMf+N3dXE1luWLYFdsnwxyl+J24ga96Ad1cvxa97
+    ntreOVxSimKGgJOMOAmT8UrL51f5qUOs/4+ngCM8vC9Vw4jBMGQgrxr6Dk33EGyO
+    WYe5xR+1Rf5J2r3GjjVpKyQ9lIMCQXYVDpQNa+k/kZyeeVoXbFIfNGIFfmnZIXML
+    /6RgswMonlyQFfPJHEG+wCazuZiMkHK5TXtzIKyi0V2I3EHZEX6AAkDK1FMFbYIv
+    cpJTPKgR0snne/ehhcMi6lucbKVkdHdBU3Qlf/BEZca2MY1TYAodZlEN6MXiCBQd
+    WsVvpEfhAgMBAAECggEACjrVSwyHWgDwzCTKwmgaqWTQI7sPhgRnWjPFHS7VofRw
+    avRLzYUMlZKx+vzxJN/XCScoebcVL2lRi0vRB/U4yp9fT28IjtJIYKCkNNmfIYSQ
+    DWsOYN6Tlm9vruP/PKEezGCbWckr6fXN5CvzES1/GxgGDDMsCskydY1ds5EJ6Z9S
+    k97Qy/VANypKjhQ9PT3UBR4bkHAEl1rDPaZkMpnlRZ2CN5W0TfsvwBF+5jz9iqvB
+    n5T3FfnDaGRnFevlR0A6WO02ju0PjXgpqVzqNZIiCv1KuSxCYOV8L2/nnmxypnBK
+    Hy9GtCTnWdM4VK0nBgvVKuYn8sd0BvEHyUktJ2kyqQKBgQC3C2Rt1dfB3fUS0TIW
+    oQKfdlatF+16Q1sFMPb2sB/IiC2rXnnGFlpTzUsBFS9ddrgaFPygSO7FVqHQlssi
+    IS3Ylq2/lOmOSPS0kmLiqPpdaGL2XEGdo8hrS+4mmMmhNsAyYqb1DsDPdvnNJ6TI
+    ZRkMurG2oAXB1/ozt6GJs3FH1QKBgQDkbJqReqZdN+YgUZbXxNf8QRpIk1QbX6P8
+    rZT9VLnHX+UrkeLzECkr6IDSW25gpoZehlKqJjPawJ+iFoqex2WnO3YxhQUxKCHr
+    fCigvWTrDu0a+bBQC2f6/ifOttxWBQEJhS+IiCQjyB3E5/EFDQhPPHndTKxCs888
+    qw44cfOx3QKBgHKdupQgHArz/fp7bb7HsUnCowGeAwDU3lDA2VOc8znxM4+kB+Jm
+    qsbgvL9/0XnX1e3XCF0hbgm5dneThLzpQ7jkmQVmrFyBCGFtbGf7YVJOA/G50Qhx
+    vxSYphYbA95j1zN1nI/EXi1KlZ7F3SPyUh4rZQ4y44f+wlfR+1+rMhrFAoGATnJJ
+    xwpzFfJ7kr/SaPmOH3CQQTpvmRMIc199ml69io4RWxw377euHAk2LIf/6StnXBEP
+    VKXYCxk5+WV6Z7sc2wjdt3XyaYZZ19CE92bzwJIYtbnoZiT0qcsdCq3cD6KaT5Ww
+    1FfE6ZDxQE1ThaOLJgMj6u9I/YNY+YHZWWMxCPUCgYEAqaAK6pa2wJST653a/Maj
+    XVgB+IByelf96k+/z4jy+ZNap7PyfBOOo3asFYt9zz+Kh9n6S9I3KVfiLS2D9afW
+    yB3QSx8onKEI1Bd0NpLwPUv6GSRE6uH/ywZSOX4GFZhh4hT8nYc2W06w8e/njSLW
+    APfbTcT/F1g0Zpct75HLRmc=
+    -----END PRIVATE KEY-----
 kind: Secret
 metadata:
   name: istio-tls-certificate
@@ -63,8 +61,8 @@ type: kubernetes.io/tls
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
-  name: flex-aio-gateway
-  namespace: gluu
+  name: jans-aio-gateway
+  namespace: jans
 spec:
   selector:
     istio: ingressgateway
@@ -74,7 +72,7 @@ spec:
         name: http
         protocol: HTTP
       hosts:
-        - flex-aio.gluu.org
+        - jans-aio.jans.io
       tls:
         httpsRedirect: true
     - port:
@@ -82,7 +80,7 @@ spec:
         name: https
         protocol: HTTPS
       hosts:
-        - flex-aio.gluu.org
+        - jans-aio.jans.io
       tls:
         mode: SIMPLE
         credentialName: istio-tls-certificate
@@ -92,23 +90,21 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: istio-ingress-flex-aio
-  namespace: gluu
+  name: istio-ingress-jans-aio
+  namespace: jans
 spec:
   hosts:
-    - flex-aio.gluu.org
+    - jans-aio.jans.io
   gateways:
-    - flex-aio-gateway
+    - jans-aio-gateway
   http:
-    - name: flex-aio-base
+    - name: jans-aio-base
       match:
         - uri:
             prefix: /
-      rewrite:
-        uri: /
       route:
         - destination:
-            host: flex-aio.gluu.svc.cluster.local
+            host: jans-aio.jans.svc.cluster.local
             port:
               number: 8080
 
@@ -117,10 +113,15 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
-  name: istio-ingress-flex-aio
-  namespace: gluu
+  name: istio-ingress-jans-aio
+  namespace: jans
 spec:
-  host: flex-aio.gluu.org
+  host: jans-aio.jans.io
   trafficPolicy:
     tls:
-      mode: SIMPLE
+      mode: ISTIO_MUTUAL
+    loadBalancer:
+      consistentHash:
+        httpCookie:
+          name: jans-aio-route
+          ttl: 60s

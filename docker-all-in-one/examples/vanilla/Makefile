@@ -5,14 +5,14 @@ INGRESS?=nginx
 
 # double dollar signs for char escape in sed inside Makefile
 export NODE_IP_ADDR?=$(shell ip route get 1 | sed 's/^.*src \([^ ]*\).*$$/\1/;q')
-export FLEX_AIO_IMAGE?=${IMAGE_NAME}:${DEV_VERSION}
-export FLEX_AIO_SSA?=$(shell cat ssa.jwt | base64 -w0)
+export JANS_AIO_IMAGE?=${IMAGE_NAME}:${DEV_VERSION}
+export JANS_AIO_SSA?=$(shell cat ssa.jwt | base64 -w0)
 
 .PHONY: test clean all install uninstall build-dev
 .DEFAULT_GOAL := install
 
 install:
-	@echo "[I] Installing ${FLEX_AIO_IMAGE}"
+	@echo "[I] Installing ${JANS_AIO_IMAGE}"
 	@envsubst < base.tmpl.yaml | microk8s.kubectl apply -f -
 	@case ${INGRESS} in \
 		nginx|istio) \
@@ -23,7 +23,7 @@ install:
 	esac
 
 uninstall:
-	@echo "[I] Uninstalling ${FLEX_AIO_IMAGE}"
+	@echo "[I] Uninstalling ${JANS_AIO_IMAGE}"
 	@case ${INGRESS} in \
 		nginx|istio) \
 			microk8s.kubectl delete -f ${INGRESS}-ingress.yaml \
@@ -35,5 +35,5 @@ uninstall:
 
 build-dev:
 	@cd ../.. && $(MAKE) build-dev
-	@echo "[I] Importing ${FLEX_AIO_IMAGE} into microk8s container registry"
-	@docker save ${FLEX_AIO_IMAGE} > flex-aio.tar && sudo microk8s.ctr image import flex-aio.tar
+	@echo "[I] Importing ${JANS_AIO_IMAGE} into microk8s container registry"
+	@docker save ${JANS_AIO_IMAGE} > jans-aio.tar && sudo microk8s.ctr image import jans-aio.tar

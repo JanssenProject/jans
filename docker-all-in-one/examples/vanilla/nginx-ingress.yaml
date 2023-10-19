@@ -1,8 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-flex-aio
-  namespace: gluu
+  name: ingress-jans-aio
+  namespace: jans
   annotations:
     kubernetes.io/ingress.class: "nginx"
     # nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -10,21 +10,25 @@ metadata:
     # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     # ingress.kubernetes.io/use-port-in-redirects: "true"
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-hash: sha1
+    nginx.ingress.kubernetes.io/session-cookie-name: "jans-aio-route"
 spec:
   tls:
     - hosts:
-      - flex-aio.gluu.org
+      - jans-aio.jans.io
       secretName: tls-certificate
   ingressClassName: nginx
   rules:
-  - host: flex-aio.gluu.org
+  - host: jans-aio.jans.io
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: flex-aio
+            name: jans-aio
             port:
               number: 8080
 

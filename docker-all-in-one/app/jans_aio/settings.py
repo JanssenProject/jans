@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "flex_aio": {
+        "jans_aio": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": True,
@@ -26,20 +26,19 @@ LOGGING_CONFIG = {
 }
 
 
-_FLEX_AIO_COMPONENTS = (
-    # "configurator",
-    # "persistence_loader",
-    "jans_auth",
-    "jans_config_api",
-    "jans_fido2",
-    "jans_scim",
-    "casa",
-    "admin_ui",
-)
+# _JANS_AIO_COMPONENTS = (
+#     # "configurator",
+#     # "persistence_loader",
+#     # "jans_auth",
+#     # "jans_config_api",
+#     # "jans_fido2",
+#     # "jans_scim",
+#     # "jans-casa",
+# )
 
-for comp in _FLEX_AIO_COMPONENTS:
-    LOGGING_CONFIG["loggers"][comp] = {
-        "handlers": ["console"],
-        "level": "INFO",
-        "propagate": False,
-    }
+# for comp in _JANS_AIO_COMPONENTS:
+#     LOGGING_CONFIG["loggers"][comp] = {
+#         "handlers": ["console"],
+#         "level": "INFO",
+#         "propagate": False,
+#     }
