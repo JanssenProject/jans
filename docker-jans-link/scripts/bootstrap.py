@@ -98,8 +98,9 @@ def main():
 
     configure_logging()
 
-    persistence_setup = PersistenceSetup(manager)
-    persistence_setup.import_ldif_files()
+    with manager.lock.create_lock("link-setup"):
+        persistence_setup = PersistenceSetup(manager)
+        persistence_setup.import_ldif_files()
 
 
 def configure_logging():

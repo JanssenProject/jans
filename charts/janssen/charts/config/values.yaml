@@ -114,6 +114,10 @@ configmap:
   cnSecretKubernetesSecret: cn
   # -- Loadbalancer address for AWS if the FQDN is not registered.
   lbAddr: ""
+  # -- OpenDJ certificate string. This must be encoded using base64.
+  cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+  # -- OpenDJ key string. This must be encoded using base64.
+  cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
 # -- Country code. Used for certificate creation.
 countryCode: US
 # -- Email address of the administrator usually. Used for certificate creation.
@@ -127,6 +131,8 @@ image:
   pullSecrets: [ ]
 # -- LDAP admin password if OpennDJ is used for persistence.
 ldapPassword: P@ssw0rds
+# -- LDAP truststore password if OpenDJ is used for persistence
+ldapTruststorePassword: changeit
 # -- Organization name. Used for certificate creation.
 orgName: Janssen
 # -- Redis admin password if `config.configmap.cnCacheType` is set to `REDIS`.

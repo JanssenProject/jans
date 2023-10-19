@@ -278,6 +278,10 @@ config:
     cnSecretKubernetesSecret: cn
     # -- Load balancer address for AWS if the FQDN is not registered.
     lbAddr: ""
+    # -- OpenDJ certificate string. This must be encoded using base64.
+    cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+    # -- OpenDJ key string. This must be encoded using base64.
+    cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- Country code. Used for certificate creation.
   countryCode: US
   # -- Email address of the administrator usually. Used for certificate creation.
@@ -291,6 +295,8 @@ config:
     pullSecrets: [ ]
   # -- LDAP admin password if OpenDJ is used for persistence.
   ldapPassword: P@ssw0rds
+  # -- LDAP truststore password if OpenDJ is used for persistence
+  ldapTruststorePassword: changeit
   # -- Organization name. Used for certificate creation.
   orgName: Janssen
   # -- Redis admin password if `config.configmap.cnCacheType` is set to `REDIS`.
@@ -600,7 +606,7 @@ casa:
   livenessProbe:
     httpGet:
       # -- http liveness probe endpoint
-      path: /casa/health-check
+      path: /jans-casa/health-check
       port: http-casa
     initialDelaySeconds: 25
     periodSeconds: 25
@@ -609,7 +615,7 @@ casa:
   readinessProbe:
     httpGet:
       # -- http readiness probe endpoint
-      path: /casa/health-check
+      path: /jans-casa/health-check
       port: http-casa
     initialDelaySeconds: 30
     periodSeconds: 30
@@ -939,6 +945,24 @@ global:
     ingress:
       # Enable link endpoints /jans-link
       linkEnabled: true
+  # -- Path to SQL password file
+  cnSqlPasswordFile: /etc/jans/conf/sql_password
+  # -- Path to Couchbase password file
+  cnCouchbasePasswordFile: /etc/jans/conf/couchbase_password
+  # -- Path to Couchbase superuser password file
+  cnCouchbaseSuperuserPasswordFile: /etc/jans/conf/couchbase_superuser_password
+  # -- Path to LDAP password file
+  cnLdapPasswordFile: /etc/jans/conf/ldap_password
+  # -- Path to LDAP truststore password file
+  cnLdapTruststorePasswordFile: /etc/jans/conf/ldap_truststore_password
+  # -- Path to OpenDJ cert file
+  cnLdapCertFile: /etc/certs/opendj.crt
+  # -- Path to OpenDJ key file
+  cnLdapKeyFile: /etc/certs/opendj.key
+  # -- Path to OpenDJ CA cert file
+  cnLdapCacertFile: /etc/certs/opendj.pem
+  # -- Path to OpenDJ truststore file
+  cnLdapTruststoreFile: /etc/certs/opendj.pkcs12
 
 # -- Nginx ingress definitions chart
 nginx-ingress:
@@ -1382,20 +1406,24 @@ link:
   # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
     # -- http liveness probe endpoint
-    httpGet:
-      path: /jans-link/api/v1/health/live
-      port: 9091
+    exec:
+      command:
+        - python3
+        - /app/scripts/healthcheck.py
     initialDelaySeconds: 30
     periodSeconds: 30
     timeoutSeconds: 5
   readinessProbe:
     # -- http readiness probe endpoint
-    httpGet:
-      path: jans-link/api/v1/health/ready
-      port: 9091
+    exec:
+      command:
+        - python3
+        - /app/scripts/healthcheck.py
     initialDelaySeconds: 25
     periodSeconds: 25
     timeoutSeconds: 5
+
+
   # -- Configure any additional volumes that need to be attached to the pod
   volumes: []
   # -- Configure any additional volumesMounts that need to be attached to the containers
