@@ -203,22 +203,6 @@ paths:
           schema:
             type: string
 
-  /pwd-reset/available:
-    get:
-      description: Returns if password reset feature is available in this installation
-      produces:
-        - application/json
-
-      responses:
-        200:
-          description: Successful operation. A JSON boolean is returned (ie. true or false)
-          schema:
-            type: boolean
-        500:
-          description: There was a failure executing the operation. Error description in response body
-          schema:
-            type: string
-
   /pwd-reset/enabled:
     get:
       description: Returns if password reset feature is enabled
