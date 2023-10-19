@@ -433,6 +433,12 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.load_agama_test_data()
 
+        # change super gluu credentials url for test
+        super_gluu_creds_fn = os.path.join(Config.certFolder, 'super_gluu_creds.json')
+        super_gluu_creds = base.readJsonFile(super_gluu_creds_fn)
+        super_gluu_creds['jans']['server_uri'] = 'https://cloud-dev.gluu.cloud/scan/push-api-server'
+        self.writeFile(super_gluu_creds_fn, json.dumps(super_gluu_creds, indent=2), backup=False)
+        self.chown(super_gluu_creds_fn, Config.jetty_user, Config.root_user)
 
         # Disable token binding module
         if base.os_name in ('ubuntu18', 'ubuntu20'):
