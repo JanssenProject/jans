@@ -60,26 +60,18 @@ https://demoexample.jans.io/.well-known/openid-configuration
 
 ## Configure Janssen Server
 
-Access the Docker container shell using:
+1. Access the Docker container shell using:
 
-```bash
-docker exec -ti docker-jans-monolith-jans-1 bash
-```
+    ```bash
+    docker exec -ti docker-jans-monolith-jans-1 bash
+    ```
 
-And then use CLI tools to configure Janssen Server as needed.
+2. Grab a pair of client_id and client_pw(secret) from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
 
-```bash
-/opt/jans/jans-cli/config-cli.py
-#or
-/opt/jans/jans-cli/scim-cli.py
-```
-Administrative password can be collected from `setup.properties.last` file. 
-
-```bash
- - find / -name 'setup.properties.last'
- - cat /var/lib/docker/overlay2/xxxxxx/diff/opt/jans/jans-setup/setup.properties.last | grep -i password
- - `admin_password` value is the password
-```
+3. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen Server as needed. For example you can run the [TUI](../../config-guide/config-tools/jans-tui/README.md):
+    ```bash
+    python3 /opt/jans/jans-cli/config-cli-tui.py
+    ```
 
 
 ## Uninstall / Remove the Janssen Server
