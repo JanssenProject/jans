@@ -104,18 +104,23 @@ Full TUI documentation can be found [here](../../config-guide/config-tools/jans-
 
 If you have selected casa during installation you can access casa using url``` https://<host>/jans-casa ```
 
-## Let's Encrypt
+## Enabling HTTPS Using Transport Layer Security 
 
- To generate Let's Encrypt certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
+To enable communication with Janssen Server over TLS (https) in a production 
+environment, Janssen Server needs details about CA certificate. Update the 
+HTTPS cofiguration file `https_jans.conf` as shown below:
 
-To enable communication with Janssen Server over tls (https) in production environment, Janssen Server needs details about CA certificate. Update the modify https_jans.conf file for SSLCertificateFile and SSLCertificateKeyFile values as shown below:
+!!! Note
+Want to use `Let's Encrypt` to get a certificate? Follow [this guide](../../../contribute/developer-faq.md).
 
+```bash
+sudo vi /etc/httpd/conf.d/https_jans.conf
 ```
- sudo vi /etc/httpd/conf.d/https_jans.conf
+```bash
 SSLCertificateFile location_of_fullchain.pem
 SSLCertificateKeyFile location_of_privkey.pem
-
-
+```
+```bash
 sudo service httpd restart
 ```
 ## Uninstall
