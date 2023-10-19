@@ -290,11 +290,6 @@ public class PersistenceService implements IPersistenceService {
         //return documentStoreConfiguration;
     }
 
-    public boolean isBackendLdapEnabled() {
-        //TODO: remove dependency on this method
-        return false;
-    }
-
     public boolean authenticate(String uid, String pass) throws Exception {
         return entryManager.authenticate(rootDn, Person.class, uid, pass);
     }
