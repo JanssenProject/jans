@@ -18,8 +18,7 @@
 
                     <div class="flex justify-center">
                         <z:checkbox mold="switch" label="@load(c:toUpperCase(c:l(vm.passResetEnabled ? 'general.on' : 'general.off')))"
-                                    disabled="${vm.passResetImpossible}" checked="@bind(vm.passResetEnabled)"
-                                    w:onClick="alertRef = $('#feedback-pass-reset')" onCheck="@('change')" />
+                                    checked="@bind(vm.passResetEnabled)" w:onClick="alertRef = $('#feedback-pass-reset')" onCheck="@('change')" />
                     </div>
                 </div>
             </section>
