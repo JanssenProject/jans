@@ -9,7 +9,6 @@ import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
-import java.util.List;
 
 @Named
 @SessionScoped
