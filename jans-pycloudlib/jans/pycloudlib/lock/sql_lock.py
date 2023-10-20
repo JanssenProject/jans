@@ -15,6 +15,7 @@ from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy.exc import SAWarning
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy.sql import select
 
 from jans.pycloudlib.lock.base_lock import BaseLock
@@ -31,6 +32,7 @@ logger = logging.getLogger(__name__)
 class SqlLock(BaseLock):
     def __init__(self) -> None:
         self._metadata: _t.Optional[MetaData] = None
+        self._dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
 
     @cached_property
     def engine(self) -> Engine:
@@ -55,9 +57,7 @@ class SqlLock(BaseLock):
         with open(password_file) as f:
             password = f.read().strip()
 
-        dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-
-        if dialect in ("pgsql", "postgresql"):
+        if self._dialect in ("pgsql", "postgresql"):
             connector = "postgresql+psycopg2"
         else:
             connector = "mysql+pymysql"
@@ -84,16 +84,29 @@ class SqlLock(BaseLock):
         return self._metadata
 
     def _prepare_table(self, table_name) -> None:
-        # prepare table
-        Table(
-            table_name,
-            self.metadata,
-            Column("doc_id", String(128), primary_key=True),
-            # handle type compatibility with current Janssen by using TEXT instead of JSON/JSONB
-            Column("jansData", Text(), default="{}"),
-            extend_existing=True,
-        )
-        self.metadata.create_all(self.engine)
+        try:
+            # prepare table
+            Table(
+                table_name,
+                self.metadata,
+                Column("doc_id", String(128), primary_key=True),
+                # handle type compatibility with current Janssen by using TEXT instead of JSON/JSONB
+                Column("jansData", Text(), default="{}"),
+                extend_existing=True,
+            )
+            self.metadata.create_all(self.engine)
+
+        except DatabaseError as exc:
+            raise_on_error = False
+
+            # if error is not about duplicated table, force raising exception
+            if self._dialect in ("pgsql", "postgresql") and exc.orig.pgcode != "42P07":
+                raise_on_error = True
+            elif self._dialect == "mysql" and exc.orig.args[0] != 1050:
+                raise_on_error = True
+
+            if raise_on_error:
+                raise exc
 
     @property
     def table(self):
