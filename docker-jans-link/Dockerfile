@@ -59,7 +59,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-link/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=a8884f39ee4eea3ef65d7cd41120343201d2b3e6
+ENV JANS_SOURCE_VERSION=04582fa2a7edbb8eed0805cb1fabdcd95482b83f
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -214,7 +214,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase \
     ${JETTY_HOME}/temp \
     /usr/share/java \
-    /var/jans/cr-snapshots
+    /var/jans/link-snapshots
 
 COPY templates /app/templates/
 RUN cp /app/templates/jans-link/jans-link.xml ${JETTY_BASE}/jans-link/webapps/
@@ -238,7 +238,7 @@ RUN chmod 664 ${JETTY_BASE}/jans-link/resources/log4j2.xml \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-link/webapps/jans-link.xml \
-    && chown -R 1000:0 /var/jans/cr-snapshots \
+    && chown -R 1000:0 /var/jans/link-snapshots \
     && chown -R 1000:0 ${JETTY_HOME}/temp
 
 USER 1000
