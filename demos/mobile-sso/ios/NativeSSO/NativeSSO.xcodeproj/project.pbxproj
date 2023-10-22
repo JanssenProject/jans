@@ -1,0 +1,470 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E01C8EEA293E091700343CB6 /* SwiftKeychainWrapper in Frameworks */ = {isa = PBXBuildFile; productRef = E01C8EE9293E091700343CB6 /* SwiftKeychainWrapper */; };
+		E01C8EEC293E0AFF00343CB6 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01C8EEB293E0AFF00343CB6 /* KeychainManager.swift */; };
+		E04A26ED2931646200B3AEDD /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = E04A26EC2931646200B3AEDD /* Token.swift */; };
+		E056A5F5292BA2E80090753E /* NativeSSOApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056A5F4292BA2E80090753E /* NativeSSOApp.swift */; };
+		E056A5F7292BA2E80090753E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056A5F6292BA2E80090753E /* ContentView.swift */; };
+		E056A5F9292BA2ED0090753E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E056A5F8292BA2ED0090753E /* Assets.xcassets */; };
+		E056A5FC292BA2ED0090753E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E056A5FB292BA2ED0090753E /* Preview Assets.xcassets */; };
+		E056A603292BA4C10090753E /* ContentViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056A602292BA4C10090753E /* ContentViewState.swift */; };
+		E056A607292BA79A0090753E /* GluuTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056A606292BA79A0090753E /* GluuTextField.swift */; };
+		E056A609292BAC1F0090753E /* ContentViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056A608292BAC1F0090753E /* ContentViewPresenter.swift */; };
+		E056A60B292BAC2E0090753E /* ContentViewInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056A60A292BAC2E0090753E /* ContentViewInteractor.swift */; };
+		E056A60E292BC1790090753E /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056A60D292BC1790090753E /* NetworkManager.swift */; };
+		E056A610292BC2C90090753E /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056A60F292BC2C90090753E /* Configuration.swift */; };
+		E056A612292BC7E40090753E /* Register.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056A611292BC7E40090753E /* Register.swift */; };
+		E056A614292E4C760090753E /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056A613292E4C760090753E /* WebView.swift */; };
+		E06FDA152930EA5100281F24 /* BetterSafariView in Frameworks */ = {isa = PBXBuildFile; productRef = E06FDA142930EA5100281F24 /* BetterSafariView */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		E01C8EEB293E0AFF00343CB6 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
+		E04A26EC2931646200B3AEDD /* Token.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
+		E056A5F1292BA2E80090753E /* NativeSSO.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NativeSSO.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E056A5F4292BA2E80090753E /* NativeSSOApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeSSOApp.swift; sourceTree = "<group>"; };
+		E056A5F6292BA2E80090753E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		E056A5F8292BA2ED0090753E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E056A5FB292BA2ED0090753E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		E056A602292BA4C10090753E /* ContentViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewState.swift; sourceTree = "<group>"; };
+		E056A606292BA79A0090753E /* GluuTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GluuTextField.swift; sourceTree = "<group>"; };
+		E056A608292BAC1F0090753E /* ContentViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewPresenter.swift; sourceTree = "<group>"; };
+		E056A60A292BAC2E0090753E /* ContentViewInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewInteractor.swift; sourceTree = "<group>"; };
+		E056A60D292BC1790090753E /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
+		E056A60F292BC2C90090753E /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		E056A611292BC7E40090753E /* Register.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Register.swift; sourceTree = "<group>"; };
+		E056A613292E4C760090753E /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
+		E06FDA162930EE8000281F24 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		E09D3DDE293F358100A74B68 /* NativeSSO.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NativeSSO.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E056A5EE292BA2E80090753E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E01C8EEA293E091700343CB6 /* SwiftKeychainWrapper in Frameworks */,
+				E06FDA152930EA5100281F24 /* BetterSafariView in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E04A26EB2931644D00B3AEDD /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				E056A611292BC7E40090753E /* Register.swift */,
+				E04A26EC2931646200B3AEDD /* Token.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		E056A5E8292BA2E80090753E = {
+			isa = PBXGroup;
+			children = (
+				E056A5F3292BA2E80090753E /* NativeSSO */,
+				E056A5F2292BA2E80090753E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E056A5F2292BA2E80090753E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E056A5F1292BA2E80090753E /* NativeSSO.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E056A5F3292BA2E80090753E /* NativeSSO */ = {
+			isa = PBXGroup;
+			children = (
+				E09D3DDE293F358100A74B68 /* NativeSSO.entitlements */,
+				E06FDA162930EE8000281F24 /* Info.plist */,
+				E056A60C292BAC3A0090753E /* ContentView */,
+				E056A605292BA7830090753E /* Components */,
+				E056A604292BA4CC0090753E /* Networking */,
+				E056A5F4292BA2E80090753E /* NativeSSOApp.swift */,
+				E056A5F8292BA2ED0090753E /* Assets.xcassets */,
+				E056A5FA292BA2ED0090753E /* Preview Content */,
+				E056A60F292BC2C90090753E /* Configuration.swift */,
+				E01C8EEB293E0AFF00343CB6 /* KeychainManager.swift */,
+			);
+			path = NativeSSO;
+			sourceTree = "<group>";
+		};
+		E056A5FA292BA2ED0090753E /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				E056A5FB292BA2ED0090753E /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		E056A604292BA4CC0090753E /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				E04A26EB2931644D00B3AEDD /* Model */,
+				E056A60D292BC1790090753E /* NetworkManager.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		E056A605292BA7830090753E /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				E056A606292BA79A0090753E /* GluuTextField.swift */,
+				E056A613292E4C760090753E /* WebView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		E056A60C292BAC3A0090753E /* ContentView */ = {
+			isa = PBXGroup;
+			children = (
+				E056A5F6292BA2E80090753E /* ContentView.swift */,
+				E056A602292BA4C10090753E /* ContentViewState.swift */,
+				E056A608292BAC1F0090753E /* ContentViewPresenter.swift */,
+				E056A60A292BAC2E0090753E /* ContentViewInteractor.swift */,
+			);
+			path = ContentView;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E056A5F0292BA2E80090753E /* NativeSSO */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E056A5FF292BA2ED0090753E /* Build configuration list for PBXNativeTarget "NativeSSO" */;
+			buildPhases = (
+				E056A5ED292BA2E80090753E /* Sources */,
+				E056A5EE292BA2E80090753E /* Frameworks */,
+				E056A5EF292BA2E80090753E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NativeSSO;
+			packageProductDependencies = (
+				E06FDA142930EA5100281F24 /* BetterSafariView */,
+				E01C8EE9293E091700343CB6 /* SwiftKeychainWrapper */,
+			);
+			productName = NativeSSO;
+			productReference = E056A5F1292BA2E80090753E /* NativeSSO.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E056A5E9292BA2E80090753E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1400;
+				LastUpgradeCheck = 1400;
+				TargetAttributes = {
+					E056A5F0292BA2E80090753E = {
+						CreatedOnToolsVersion = 14.0.1;
+					};
+				};
+			};
+			buildConfigurationList = E056A5EC292BA2E80090753E /* Build configuration list for PBXProject "NativeSSO" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E056A5E8292BA2E80090753E;
+			packageReferences = (
+				E06FDA132930EA5100281F24 /* XCRemoteSwiftPackageReference "BetterSafariView" */,
+				E01C8EE8293E091700343CB6 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */,
+			);
+			productRefGroup = E056A5F2292BA2E80090753E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E056A5F0292BA2E80090753E /* NativeSSO */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E056A5EF292BA2E80090753E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E056A5FC292BA2ED0090753E /* Preview Assets.xcassets in Resources */,
+				E056A5F9292BA2ED0090753E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E056A5ED292BA2E80090753E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E056A607292BA79A0090753E /* GluuTextField.swift in Sources */,
+				E056A614292E4C760090753E /* WebView.swift in Sources */,
+				E056A5F7292BA2E80090753E /* ContentView.swift in Sources */,
+				E056A5F5292BA2E80090753E /* NativeSSOApp.swift in Sources */,
+				E056A612292BC7E40090753E /* Register.swift in Sources */,
+				E056A60E292BC1790090753E /* NetworkManager.swift in Sources */,
+				E056A60B292BAC2E0090753E /* ContentViewInteractor.swift in Sources */,
+				E01C8EEC293E0AFF00343CB6 /* KeychainManager.swift in Sources */,
+				E04A26ED2931646200B3AEDD /* Token.swift in Sources */,
+				E056A609292BAC1F0090753E /* ContentViewPresenter.swift in Sources */,
+				E056A610292BC2C90090753E /* Configuration.swift in Sources */,
+				E056A603292BA4C10090753E /* ContentViewState.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		E056A5FD292BA2ED0090753E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		E056A5FE292BA2ED0090753E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E056A600292BA2ED0090753E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NativeSSO/NativeSSO.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"NativeSSO/Preview Content\"";
+				DEVELOPMENT_TEAM = FLRS8NH8Y9;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NativeSSO/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gluu.NativeSSO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E056A601292BA2ED0090753E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NativeSSO/NativeSSO.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"NativeSSO/Preview Content\"";
+				DEVELOPMENT_TEAM = FLRS8NH8Y9;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NativeSSO/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gluu.NativeSSO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E056A5EC292BA2E80090753E /* Build configuration list for PBXProject "NativeSSO" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E056A5FD292BA2ED0090753E /* Debug */,
+				E056A5FE292BA2ED0090753E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E056A5FF292BA2ED0090753E /* Build configuration list for PBXNativeTarget "NativeSSO" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E056A600292BA2ED0090753E /* Debug */,
+				E056A601292BA2ED0090753E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E01C8EE8293E091700343CB6 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jrendel/SwiftKeychainWrapper";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.0;
+			};
+		};
+		E06FDA132930EA5100281F24 /* XCRemoteSwiftPackageReference "BetterSafariView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stleamist/BetterSafariView.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E01C8EE9293E091700343CB6 /* SwiftKeychainWrapper */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E01C8EE8293E091700343CB6 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */;
+			productName = SwiftKeychainWrapper;
+		};
+		E06FDA142930EA5100281F24 /* BetterSafariView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E06FDA132930EA5100281F24 /* XCRemoteSwiftPackageReference "BetterSafariView" */;
+			productName = BetterSafariView;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = E056A5E9292BA2E80090753E /* Project object */;
+}

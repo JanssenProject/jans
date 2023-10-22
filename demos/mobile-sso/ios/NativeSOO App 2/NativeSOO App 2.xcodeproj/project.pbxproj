@@ -1,0 +1,468 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E09AC8112948A2E700A8C18A /* NativeSOO_App_2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC8102948A2E700A8C18A /* NativeSOO_App_2App.swift */; };
+		E09AC8152948A2EA00A8C18A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E09AC8142948A2EA00A8C18A /* Assets.xcassets */; };
+		E09AC8182948A2EA00A8C18A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E09AC8172948A2EA00A8C18A /* Preview Assets.xcassets */; };
+		E09AC82F2948A3F600A8C18A /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC8202948A3F600A8C18A /* WebView.swift */; };
+		E09AC8302948A3F600A8C18A /* GluuTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC8212948A3F600A8C18A /* GluuTextField.swift */; };
+		E09AC8312948A3F600A8C18A /* ContentViewInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC8232948A3F600A8C18A /* ContentViewInteractor.swift */; };
+		E09AC8322948A3F600A8C18A /* ContentViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC8242948A3F600A8C18A /* ContentViewPresenter.swift */; };
+		E09AC8332948A3F600A8C18A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC8252948A3F600A8C18A /* ContentView.swift */; };
+		E09AC8342948A3F600A8C18A /* ContentViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC8262948A3F600A8C18A /* ContentViewState.swift */; };
+		E09AC8362948A3F600A8C18A /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC8292948A3F600A8C18A /* NetworkManager.swift */; };
+		E09AC8372948A3F600A8C18A /* Register.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC82B2948A3F600A8C18A /* Register.swift */; };
+		E09AC8382948A3F600A8C18A /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC82C2948A3F600A8C18A /* Token.swift */; };
+		E09AC8392948A3F600A8C18A /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC82D2948A3F600A8C18A /* KeychainManager.swift */; };
+		E09AC83A2948A3F600A8C18A /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09AC82E2948A3F600A8C18A /* Configuration.swift */; };
+		E09AC83D2948A43600A8C18A /* SwiftKeychainWrapper in Frameworks */ = {isa = PBXBuildFile; productRef = E09AC83C2948A43600A8C18A /* SwiftKeychainWrapper */; };
+		E09AC8402948A46300A8C18A /* BetterSafariView in Frameworks */ = {isa = PBXBuildFile; productRef = E09AC83F2948A46300A8C18A /* BetterSafariView */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		E09AC80D2948A2E700A8C18A /* NativeSOO App 2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NativeSOO App 2.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E09AC8102948A2E700A8C18A /* NativeSOO_App_2App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeSOO_App_2App.swift; sourceTree = "<group>"; };
+		E09AC8142948A2EA00A8C18A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E09AC8172948A2EA00A8C18A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		E09AC81E2948A38900A8C18A /* NativeSOO-App-2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "NativeSOO-App-2-Info.plist"; sourceTree = SOURCE_ROOT; };
+		E09AC8202948A3F600A8C18A /* WebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
+		E09AC8212948A3F600A8C18A /* GluuTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GluuTextField.swift; sourceTree = "<group>"; };
+		E09AC8232948A3F600A8C18A /* ContentViewInteractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentViewInteractor.swift; sourceTree = "<group>"; };
+		E09AC8242948A3F600A8C18A /* ContentViewPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentViewPresenter.swift; sourceTree = "<group>"; };
+		E09AC8252948A3F600A8C18A /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		E09AC8262948A3F600A8C18A /* ContentViewState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentViewState.swift; sourceTree = "<group>"; };
+		E09AC8292948A3F600A8C18A /* NetworkManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
+		E09AC82B2948A3F600A8C18A /* Register.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Register.swift; sourceTree = "<group>"; };
+		E09AC82C2948A3F600A8C18A /* Token.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
+		E09AC82D2948A3F600A8C18A /* KeychainManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
+		E09AC82E2948A3F600A8C18A /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		E09AC8412948B7F700A8C18A /* NativeSOO App 2.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "NativeSOO App 2.entitlements"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E09AC80A2948A2E700A8C18A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E09AC83D2948A43600A8C18A /* SwiftKeychainWrapper in Frameworks */,
+				E09AC8402948A46300A8C18A /* BetterSafariView in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E09AC8042948A2E700A8C18A = {
+			isa = PBXGroup;
+			children = (
+				E09AC80F2948A2E700A8C18A /* NativeSOO App 2 */,
+				E09AC80E2948A2E700A8C18A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E09AC80E2948A2E700A8C18A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E09AC80D2948A2E700A8C18A /* NativeSOO App 2.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E09AC80F2948A2E700A8C18A /* NativeSOO App 2 */ = {
+			isa = PBXGroup;
+			children = (
+				E09AC8412948B7F700A8C18A /* NativeSOO App 2.entitlements */,
+				E09AC81F2948A3F600A8C18A /* Components */,
+				E09AC82E2948A3F600A8C18A /* Configuration.swift */,
+				E09AC8222948A3F600A8C18A /* ContentView */,
+				E09AC82D2948A3F600A8C18A /* KeychainManager.swift */,
+				E09AC8282948A3F600A8C18A /* Networking */,
+				E09AC81E2948A38900A8C18A /* NativeSOO-App-2-Info.plist */,
+				E09AC8102948A2E700A8C18A /* NativeSOO_App_2App.swift */,
+				E09AC8142948A2EA00A8C18A /* Assets.xcassets */,
+				E09AC8162948A2EA00A8C18A /* Preview Content */,
+			);
+			path = "NativeSOO App 2";
+			sourceTree = "<group>";
+		};
+		E09AC8162948A2EA00A8C18A /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				E09AC8172948A2EA00A8C18A /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		E09AC81F2948A3F600A8C18A /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				E09AC8202948A3F600A8C18A /* WebView.swift */,
+				E09AC8212948A3F600A8C18A /* GluuTextField.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		E09AC8222948A3F600A8C18A /* ContentView */ = {
+			isa = PBXGroup;
+			children = (
+				E09AC8232948A3F600A8C18A /* ContentViewInteractor.swift */,
+				E09AC8242948A3F600A8C18A /* ContentViewPresenter.swift */,
+				E09AC8252948A3F600A8C18A /* ContentView.swift */,
+				E09AC8262948A3F600A8C18A /* ContentViewState.swift */,
+			);
+			path = ContentView;
+			sourceTree = "<group>";
+		};
+		E09AC8282948A3F600A8C18A /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				E09AC8292948A3F600A8C18A /* NetworkManager.swift */,
+				E09AC82A2948A3F600A8C18A /* Model */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		E09AC82A2948A3F600A8C18A /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				E09AC82B2948A3F600A8C18A /* Register.swift */,
+				E09AC82C2948A3F600A8C18A /* Token.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E09AC80C2948A2E700A8C18A /* NativeSOO App 2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E09AC81B2948A2EA00A8C18A /* Build configuration list for PBXNativeTarget "NativeSOO App 2" */;
+			buildPhases = (
+				E09AC8092948A2E700A8C18A /* Sources */,
+				E09AC80A2948A2E700A8C18A /* Frameworks */,
+				E09AC80B2948A2E700A8C18A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "NativeSOO App 2";
+			packageProductDependencies = (
+				E09AC83C2948A43600A8C18A /* SwiftKeychainWrapper */,
+				E09AC83F2948A46300A8C18A /* BetterSafariView */,
+			);
+			productName = "NativeSOO App 2";
+			productReference = E09AC80D2948A2E700A8C18A /* NativeSOO App 2.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E09AC8052948A2E700A8C18A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1410;
+				LastUpgradeCheck = 1410;
+				TargetAttributes = {
+					E09AC80C2948A2E700A8C18A = {
+						CreatedOnToolsVersion = 14.1;
+					};
+				};
+			};
+			buildConfigurationList = E09AC8082948A2E700A8C18A /* Build configuration list for PBXProject "NativeSOO App 2" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E09AC8042948A2E700A8C18A;
+			packageReferences = (
+				E09AC83B2948A43600A8C18A /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */,
+				E09AC83E2948A46300A8C18A /* XCRemoteSwiftPackageReference "BetterSafariView" */,
+			);
+			productRefGroup = E09AC80E2948A2E700A8C18A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E09AC80C2948A2E700A8C18A /* NativeSOO App 2 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E09AC80B2948A2E700A8C18A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E09AC8182948A2EA00A8C18A /* Preview Assets.xcassets in Resources */,
+				E09AC8152948A2EA00A8C18A /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E09AC8092948A2E700A8C18A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E09AC8392948A3F600A8C18A /* KeychainManager.swift in Sources */,
+				E09AC8342948A3F600A8C18A /* ContentViewState.swift in Sources */,
+				E09AC83A2948A3F600A8C18A /* Configuration.swift in Sources */,
+				E09AC8372948A3F600A8C18A /* Register.swift in Sources */,
+				E09AC8302948A3F600A8C18A /* GluuTextField.swift in Sources */,
+				E09AC8382948A3F600A8C18A /* Token.swift in Sources */,
+				E09AC8362948A3F600A8C18A /* NetworkManager.swift in Sources */,
+				E09AC8322948A3F600A8C18A /* ContentViewPresenter.swift in Sources */,
+				E09AC8332948A3F600A8C18A /* ContentView.swift in Sources */,
+				E09AC82F2948A3F600A8C18A /* WebView.swift in Sources */,
+				E09AC8112948A2E700A8C18A /* NativeSOO_App_2App.swift in Sources */,
+				E09AC8312948A3F600A8C18A /* ContentViewInteractor.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		E09AC8192948A2EA00A8C18A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		E09AC81A2948A2EA00A8C18A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E09AC81C2948A2EA00A8C18A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "NativeSOO App 2/NativeSOO App 2.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"NativeSOO App 2/Preview Content\"";
+				DEVELOPMENT_TEAM = FLRS8NH8Y9;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "NativeSOO-App-2-Info.plist";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.gluu.NativeSOO-App-2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E09AC81D2948A2EA00A8C18A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "NativeSOO App 2/NativeSOO App 2.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"NativeSOO App 2/Preview Content\"";
+				DEVELOPMENT_TEAM = FLRS8NH8Y9;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "NativeSOO-App-2-Info.plist";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.gluu.NativeSOO-App-2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E09AC8082948A2E700A8C18A /* Build configuration list for PBXProject "NativeSOO App 2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E09AC8192948A2EA00A8C18A /* Debug */,
+				E09AC81A2948A2EA00A8C18A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E09AC81B2948A2EA00A8C18A /* Build configuration list for PBXNativeTarget "NativeSOO App 2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E09AC81C2948A2EA00A8C18A /* Debug */,
+				E09AC81D2948A2EA00A8C18A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E09AC83B2948A43600A8C18A /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jrendel/SwiftKeychainWrapper";
+			requirement = {
+				branch = develop;
+				kind = branch;
+			};
+		};
+		E09AC83E2948A46300A8C18A /* XCRemoteSwiftPackageReference "BetterSafariView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stleamist/BetterSafariView.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E09AC83C2948A43600A8C18A /* SwiftKeychainWrapper */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E09AC83B2948A43600A8C18A /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */;
+			productName = SwiftKeychainWrapper;
+		};
+		E09AC83F2948A46300A8C18A /* BetterSafariView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E09AC83E2948A46300A8C18A /* XCRemoteSwiftPackageReference "BetterSafariView" */;
+			productName = BetterSafariView;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = E09AC8052948A2E700A8C18A /* Project object */;
+}
