@@ -85,8 +85,8 @@ public class DCRRepository {
             checksum = AppUtil.getChecksum(context);
             claims.put("app_checksum", checksum);
         } catch (IOException | NoSuchAlgorithmException | PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "Error in generating app checksum.\n" + e.getMessage());
             oidcClientLiveData.setValue(setErrorInLiveObject("Error in generating app checksum.\n" + e.getMessage()));
-            e.printStackTrace();
             return oidcClientLiveData;
         }
         List<AppIntegrityEntity> appIntegrityList = appDatabase.appIntegrityDao().getAll();

@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import io.jans.chip.modal.LoginResponse;
 import io.jans.chip.repository.LoginResponseRepository;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
 
 public class LoginViewModel extends ViewModel {
     LoginResponseRepository loginResponseRepository;
