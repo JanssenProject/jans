@@ -18,14 +18,13 @@
 	<prerequisites>
 		<maven>${maven.min-version}</maven>
 	</prerequisites>
-	<properties>		
-        <smallrye.config.version>3.0.0-RC1</smallrye.config.version>
+	<properties>
+		<smallrye.config.version>3.0.0-RC1</smallrye.config.version>
 		<log4j.version>2.19.0</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<commons.lang.version>4.4</commons.lang.version>
 		<jackson.coreutils.version>1.8</jackson.coreutils.version>
-   </properties>
-
+	</properties>
 
 	<dependencies>
 
@@ -58,7 +57,7 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-model-legacy</artifactId>
-			          <version>${keycloak-server-spi.version}</version>
+			<version>${keycloak-server-spi.version}</version>
 		</dependency>
 
 
@@ -92,24 +91,24 @@
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 		</dependency>
-		
+
 		<!-- apache -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>${commons.lang.version}</version>
 		</dependency>
-		
+
 		<!-- com.fasterxml.jackson -->
 		<dependency>
-		    <groupId>com.fasterxml.jackson.jaxrs</groupId>
-		    <artifactId>jackson-jaxrs-base</artifactId>
-		    <version>2.12.6</version>
+			<groupId>com.fasterxml.jackson.jaxrs</groupId>
+			<artifactId>jackson-jaxrs-base</artifactId>
+			<version>2.12.6</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.fasterxml.jackson.jaxrs</groupId>
-		    <artifactId>jackson-jaxrs-json-provider</artifactId>
-		    <version>2.12.6</version>
+			<groupId>com.fasterxml.jackson.jaxrs</groupId>
+			<artifactId>jackson-jaxrs-json-provider</artifactId>
+			<version>2.12.6</version>
 		</dependency>
 
 
@@ -131,7 +130,7 @@
 			</resource>
 		</resources>
 
-		<!--<plugins>
+		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -154,29 +153,6 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler.version}</version>
-				<configuration>
-					<release>${maven-compiler.release}</release>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<classpathPrefix>libs/</classpathPrefix>
-
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
@@ -194,7 +170,7 @@
 				</executions>
 			</plugin>
 
-		</plugins>-->
+		</plugins>
 	</build>
 
 </project>
