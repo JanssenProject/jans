@@ -157,14 +157,14 @@ public class IntrospectionWebService {
             final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
 
             AbstractToken tokenToIntrospect = fillResponse(token, response, grantOfIntrospectionToken);
-            JSONObject responseAsJsonObject = createResponseAsJsonObject(response, tokenToIntrospect);
+            JSONObject responseAsJsonObject = createResponseAsJsonObject(response, grantOfIntrospectionToken);
 
             ExternalIntrospectionContext context = new ExternalIntrospectionContext(authorizationGrant, httpRequest, httpResponse, appConfiguration, attributeService);
             context.setGrantOfIntrospectionToken(grantOfIntrospectionToken);
             if (externalIntrospectionService.executeExternalModifyResponse(responseAsJsonObject, context)) {
                 log.trace("Successfully run external introspection scripts.");
             } else {
-                responseAsJsonObject = createResponseAsJsonObject(response, tokenToIntrospect);
+                responseAsJsonObject = createResponseAsJsonObject(response, grantOfIntrospectionToken);
                 log.trace("Canceled changes made by external introspection script since method returned `false`.");
             }
 
@@ -177,7 +177,11 @@ public class IntrospectionWebService {
                 return Response.status(Response.Status.OK).entity(introspectionService.createResponseAsJwt(responseAsJsonObject, grantOfIntrospectionToken)).build();
             }
 
-            return Response.status(Response.Status.OK).entity(responseAsJsonObject.toString()).type(MediaType.APPLICATION_JSON_TYPE).build();
+            final String entity = responseAsJsonObject.toString();
+            if (log.isTraceEnabled()) {
+                log.trace("Response entity: {}", entity);
+            }
+            return Response.status(Response.Status.OK).entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
 
         } catch (WebApplicationException e) {
             if (log.isErrorEnabled()) {
@@ -227,12 +231,21 @@ public class IntrospectionWebService {
         return tokenToIntrospect;
     }
 
-    private static JSONObject createResponseAsJsonObject(IntrospectionResponse response, AbstractToken tokenToIntrospect) throws JSONException, IOException {
+    private JSONObject createResponseAsJsonObject(IntrospectionResponse response, AuthorizationGrant grantOfIntrospectionToken) throws JSONException, IOException {
         final JSONObject result = new JSONObject(ServerUtil.asJson(response));
-        if (tokenToIntrospect != null && StringUtils.isNotBlank(tokenToIntrospect.getX5ts256())) {
-            final JSONObject cnf = new JSONObject();
-            cnf.put("x5t#S256", tokenToIntrospect.getX5ts256());
-            result.put("cnf", cnf);
+
+        if (log.isTraceEnabled()) {
+            log.trace("grantOfIntrospectionToken: {}, x5ts256: {}", (grantOfIntrospectionToken != null), (grantOfIntrospectionToken != null ? grantOfIntrospectionToken.getX5ts256() : ""));
+        }
+
+        if (grantOfIntrospectionToken != null && StringUtils.isNotBlank(grantOfIntrospectionToken.getX5ts256())) {
+            JSONObject cnf = result.optJSONObject("cnf");
+            if (cnf == null) {
+                cnf = new JSONObject();
+                result.put("cnf", cnf);
+            }
+
+            cnf.put("x5t#S256", grantOfIntrospectionToken.getX5ts256());
         }
 
         return result;
