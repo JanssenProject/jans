@@ -38,6 +38,7 @@
 
     <modules>
       <module>authenticator</module>
+	  <module>storage-api</module>
     </modules>
 
     <repositories>
