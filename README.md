@@ -144,7 +144,7 @@ the development process.
 
 If you find a bug in the Janssen project, would like to suggest a new feature, or
 have a "howto" question, please post on
-[GitHub Discussions](https://github.com/JanssenProject/jans/discussion), which
+[GitHub Discussions](https://github.com/JanssenProject/jans/discussions), which
 is the main channel for community support. There is also a
 [community chat on Gitter](https://app.gitter.im/#/room/#JanssenProject_Lobby:gitter.im).
 
