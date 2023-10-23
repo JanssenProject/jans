@@ -42,17 +42,18 @@
     </modules>
 
     <repositories>
+			<repository>
+			<id>jans</id>
+			<name>Janssen project repository</name>
+			<url>https://maven.jans.io/maven</url>
+		</repository>
       <repository>
         <id>jans.io</id>
         <name>Janssen project repository</name>
         <url>https://jenkins.jans.io/maven/</url>
       </repository>
 
-		<repository>
-			<id>jans</id>
-			<name>Janssen project repository</name>
-			<url>https://maven.jans.io/maven</url>
-		</repository>
+
     </repositories>
 
 	<scm>

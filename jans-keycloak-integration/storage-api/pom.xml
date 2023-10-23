@@ -22,7 +22,7 @@
         <smallrye.config.version>3.0.0-RC1</smallrye.config.version>
 		<log4j.version>2.19.0</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
-		<commons.lang.version>2.6</commons.lang.version>
+		<commons.lang.version>4.4</commons.lang.version>
 		<jackson.coreutils.version>1.8</jackson.coreutils.version>
    </properties>
 
@@ -97,7 +97,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-					<version>${commons.lang.version}</version>
+			<version>${commons.lang.version}</version>
 		</dependency>
 		
 		<!-- com.fasterxml.jackson -->
