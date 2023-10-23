@@ -1,5 +1,7 @@
 package io.jans.kc.spi.storage.service;
 
+import io.jans.kc.spi.storage.config.PluginConfiguration;
+import io.jans.kc.spi.storage.util.JansUtil;
 import io.jans.scim.model.scim2.user.UserResource;
 
 import org.keycloak.component.ComponentModel;
@@ -23,14 +25,15 @@ public class RemoteUserStorageProvider implements CredentialInputValidator, User
     private KeycloakSession session;
     private ComponentModel model;
     private UsersApiLegacyService usersService;
-    private CredentialAuthenticatingService credentialAuthenticatingService = new CredentialAuthenticatingService();
+    private CredentialAuthenticatingService credentialAuthenticatingService;
 
-    public RemoteUserStorageProvider(KeycloakSession session, ComponentModel model) {
+    public RemoteUserStorageProvider(KeycloakSession session, ComponentModel model, PluginConfiguration pluginConfiguration) {
         logger.info("RemoteUserStorageProvider() -  session:{}, model:{}", session, model);
-
+        JansUtil jansUtil = new JansUtil(pluginConfiguration);
         this.session = session;
         this.model = model;
-        this.usersService = new UsersApiLegacyService(session, model);
+        this.usersService = new UsersApiLegacyService(session, model,new ScimService(jansUtil));
+        this.credentialAuthenticatingService = new CredentialAuthenticatingService(jansUtil);
     }
 
     @Override

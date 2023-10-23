@@ -10,6 +10,7 @@ public class Constants {
 
     private Constants() {}
 
+    public static final String PROVIDER_ID = "kc-jans-storage";
     public static final String JANS_CONFIG_PROP_PATH = "jans.config.prop.path";
     public static final String KEYCLOAK_USER = "/keycloak-user";
     public static final String BASE_URL = "https://localhost";
