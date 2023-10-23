@@ -11,17 +11,20 @@
 
 	<parent>
 		<groupId>io.jans</groupId>
-		<artifactId>jans-keycloak-parent</artifactId>
+		<artifactId>jans-keycloak-integration-parent</artifactId>
 		<version>1.0.20-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
 		<maven>${maven.min-version}</maven>
 	</prerequisites>
-
-	<properties>
+	<properties>		
+        <smallrye.config.version>3.0.0-RC1</smallrye.config.version>
+		<log4j.version>2.19.0</log4j.version>
+		<slf4j.version>1.7.36</slf4j.version>
+		<commons.lang.version>2.6</commons.lang.version>
 		<jackson.coreutils.version>1.8</jackson.coreutils.version>
-	</properties>
+   </properties>
 
 
 	<dependencies>
@@ -55,6 +58,7 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-model-legacy</artifactId>
+			          <version>${keycloak-server-spi.version}</version>
 		</dependency>
 
 
@@ -62,6 +66,7 @@
 		<dependency>
 			<groupId>io.smallrye.config</groupId>
 			<artifactId>smallrye-config</artifactId>
+			<version>${smallrye.config.version}</version>
 		</dependency>
 
 		<!-- log -->
@@ -92,6 +97,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
+					<version>${commons.lang.version}</version>
 		</dependency>
 		
 		<!-- com.fasterxml.jackson -->
@@ -106,12 +112,6 @@
 		    <version>2.12.6</version>
 		</dependency>
 
-
-		<!-- Swagger -->
-		<dependency>
-			<groupId>io.swagger.core.v3</groupId>
-			<artifactId>swagger-core-jakarta</artifactId>
-		</dependency>
 
 	</dependencies>
 
@@ -131,7 +131,7 @@
 			</resource>
 		</resources>
 
-		<plugins>
+		<!--<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -194,7 +194,7 @@
 				</executions>
 			</plugin>
 
-		</plugins>
+		</plugins>-->
 	</build>
 
 </project>

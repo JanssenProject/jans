@@ -2,10 +2,10 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.jans</groupId>
-    <artifactId>keycloak-integration-parent</artifactId>
+    <artifactId>jans-keycloak-integration-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0.20-SNAPSHOT</version>
-    <name>keycloak-integration-parent</name>
+    <name>jans-keycloak-integration-parent</name>
 
     <distributionManagement>
       <repository>
@@ -19,6 +19,7 @@
       <maven.min-version>3.3.9</maven.min-version>
       <maven.compiler.source>11</maven.compiler.source>
       <maven.compiler.target>11</maven.compiler.target>
+	  <jans.version>${project.version}</jans.version>
       <keycloak-server-spi.version>21.1.1</keycloak-server-spi.version>
       <nimbus.oauth-sdk.version>10.11</nimbus.oauth-sdk.version>
       <maven-deps-plugin.version>3.6.0</maven-deps-plugin.version>
@@ -46,21 +47,31 @@
         <url>https://jenkins.jans.io/maven/</url>
       </repository>
 
-      <repository>
-        <id>mavencentral</id>
-        <name>maven central</name>
-        <url>https://repo1.maven.org/maven2</url>
-      </repository>
+		<repository>
+			<id>jans</id>
+			<name>Janssen project repository</name>
+			<url>https://maven.jans.io/maven</url>
+		</repository>
     </repositories>
 
-    <scm>
-      <url>https://github.com/JanssenProject/keycloak-integration-jans</url>
-      <connection>scm:git:git://github.com/JanssenProject/keycloak-integration-jans</connection>
-      <developerConnection>scm:git:git@github.com:v/keycloak-integration-jans.git</developerConnection>
-    </scm>
+	<scm>
+		<url>https://github.com/JanssenProject/jans</url>
+		<connection>scm:git:git://github.com/JanssenProject/jans.git</connection>
+		<developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
+	</scm>
 
     <dependencyManagement>
       <dependencies>
+	  
+	        <!-- keycloak dependencies -->
+			<dependency>
+	  				<groupId>io.jans</groupId>
+				<artifactId>jans-bom</artifactId>
+				<version>${jans.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+			
         <!-- keycloak dependencies -->
         <dependency>
           <groupId>org.keycloak</groupId>
