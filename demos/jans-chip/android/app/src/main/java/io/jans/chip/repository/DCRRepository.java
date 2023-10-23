@@ -26,7 +26,7 @@ import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.OperationError;
 import io.jans.chip.modal.appIntegrity.AppIntegrityEntity;
 import io.jans.chip.retrofit.RetrofitClient;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
 import io.jans.chip.utils.AppConfig;
 import io.jans.chip.utils.AppUtil;
 import retrofit2.Call;
@@ -86,6 +86,7 @@ public class DCRRepository {
             claims.put("app_checksum", checksum);
         } catch (IOException | NoSuchAlgorithmException | PackageManager.NameNotFoundException e) {
             oidcClientLiveData.setValue(setErrorInLiveObject("Error in generating app checksum.\n" + e.getMessage()));
+            e.printStackTrace();
             return oidcClientLiveData;
         }
         List<AppIntegrityEntity> appIntegrityList = appDatabase.appIntegrityDao().getAll();
@@ -100,6 +101,7 @@ public class DCRRepository {
             Log.d(TAG, "Inside doDCR :: evidence :: " + evidenceJwt);
         } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException |
                  NoSuchProviderException e) {
+            Log.e(TAG, "Error in  generating DPoP jwt.\n" + e.getMessage());
             oidcClientLiveData.setValue(setErrorInLiveObject("Error in  generating DPoP jwt.\n" + e.getMessage()));
             return oidcClientLiveData;
         }
