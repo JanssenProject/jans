@@ -123,7 +123,7 @@ nav:
         - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
       - Command Line Interface (CLI):
         - admin/config-guide/config-tools/jans-cli/README.md
-      - CLI For Agama Developer Studio: admin/config-guide/agama-configuration.md
+      - CLI For Agama: admin/config-guide/agama-configuration.md
       - SCIM CLI: admin/config-guide/config-tools/scim-cli.md
     - Attribute: admin/config-guide/attribute-configuration.md
     - Default Authentication: admin/config-guide/default-authentication-method-config.md
@@ -268,6 +268,10 @@ nav:
       - Audit Logs: admin/auth-server/logging/audit-logs.md
       - Custom Logs: admin/auth-server/logging/custom-logs.md
       - log4j2 Configuration: admin/auth-server/logging/log4j2.md
+  - Keycloak:
+      - admin/keycloak/README.md
+      - SAML SSO: admin/keycloak/keycloak-saml-sso.md
+      - Inbound SAML: admin/keycloak/keycloak-saml-inbound.md
   - Developer Guide:
     - admin/developer/README.md
     - Agama:
@@ -8743,7 +8747,10 @@ nav:
     - Security Considerations: admin/scim/security.md
     - Bulk Adding Users: admin/scim/bulk-users.md
     - Adding Custom Attributes: admin/scim/custom-attributes.md
-  - Link Guide: admin/link/README.md
+  - Link Guide:
+    - admin/link/README.md
+    - Jans Link: admin/link/jans-link.md
+    - Keycloak Synch: admin/link/keycloak-synch.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md
