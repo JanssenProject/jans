@@ -30,7 +30,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<jans.version>${project.version}</jans.version>
-		<keycloak.version>21.1.1</keycloak.version>
+		<keycloak.version>22.0.1</keycloak.version>
 		<jakarta.servlet.api.version>6.0.0</jakarta.servlet.api.version>
 		<jakarta.ws.rs.api.version>3.0.0</jakarta.ws.rs.api.version>
 		<log4j.version>2.19.0</log4j.version>
