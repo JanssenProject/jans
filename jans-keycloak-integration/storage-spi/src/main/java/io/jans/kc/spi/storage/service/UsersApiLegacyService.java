@@ -12,17 +12,14 @@ import org.slf4j.LoggerFactory;
 public class UsersApiLegacyService {
 
     private static Logger logger = LoggerFactory.getLogger(UsersApiLegacyService.class);
-    private ScimService scimService = new ScimService();
 
-    private KeycloakSession session;
-    private ComponentModel model;
+    private ScimService scimService;
     protected Properties jansProperties = new Properties();
 
-    public UsersApiLegacyService(KeycloakSession session, ComponentModel model) {
+    public UsersApiLegacyService(KeycloakSession session, ComponentModel model, ScimService scimService) {
+        
         logger.info(" UsersApiLegacyService() - session:{}, model:{}", session, model);
-
-        this.session = session;
-        this.model = model;
+        this.scimService = scimService;
     }
 
     public UserResource getUserById(String inum) {

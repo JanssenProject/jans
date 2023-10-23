@@ -18,7 +18,12 @@ import org.keycloak.util.JsonSerialization;
 public class ScimService {
 
     private static Logger LOG = LoggerFactory.getLogger(ScimService.class);
-    private static JansUtil jansUtil = new JansUtil();
+
+    private JansUtil jansUtil;
+
+    public ScimService(JansUtil jansUtil) {
+        this.jansUtil = jansUtil;
+    }
 
     private String getScimUserEndpoint() {
         String scimUserEndpoint = jansUtil.getScimUserEndpoint();

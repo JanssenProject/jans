@@ -2,7 +2,7 @@ package io.jans.kc.spi.storage.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.jans.kc.spi.storage.config.JansConfigSource;
+import io.jans.kc.spi.storage.config.PluginConfiguration;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.WebApplicationException;
@@ -24,59 +24,60 @@ import org.slf4j.LoggerFactory;
 
 public class JansUtil {
     private static Logger logger = LoggerFactory.getLogger(JansUtil.class);
-    private JansConfigSource jansConfigSource = new JansConfigSource();
-    private Map<String, String> configProperties = null;
+    private PluginConfiguration pluginConfiguration;
 
-    public JansUtil() {
-        logger.debug("\nJ ansUtil() - Getting properties");
-        configProperties = jansConfigSource.getProperties();
-        if (configProperties == null || configProperties.isEmpty()) {
-            throw new WebApplicationException("Config properties is null!!!");
+    public JansUtil(PluginConfiguration pluginConfiguration) {
+
+        this.pluginConfiguration = pluginConfiguration;
+        if (this.pluginConfiguration == null || !this.pluginConfiguration.isValid()) {
+            throw new RuntimeException("Plugin configuration missing or invalid");
         }
     }
 
     public String getTokenEndpoint() {
-        logger.debug("\n JansUtil::getTokenEndpoint() - configProperties.get(Constants.AUTH_TOKEN_ENDPOINT)():{}",
-                configProperties.get(Constants.AUTH_TOKEN_ENDPOINT));
-        return configProperties.get(Constants.AUTH_TOKEN_ENDPOINT);
+        logger.debug("\n JansUtil::getTokenEndpoint() - {}",
+                pluginConfiguration.getAuthTokenEndpoint());
+
+        return pluginConfiguration.getAuthTokenEndpoint();
     }
 
     public String getScimUserEndpoint() {
-        logger.debug(" \n JansUtil::getScimUserEndpoint() - configProperties.get(Constants.SCIM_USER_ENDPOINT)():{}",
-                configProperties.get(Constants.SCIM_USER_ENDPOINT));
-        return configProperties.get(Constants.SCIM_USER_ENDPOINT);
+        logger.debug(" \n JansUtil::getScimUserEndpoint() - {}",
+                pluginConfiguration.getScimUserEndpoint());
+        
+        return pluginConfiguration.getScimUserEndpoint();
     }
 
     public String getScimUserSearchEndpoint() {
         logger.debug(
-                "\n JansUtil::getScimUserSearchEndpoint() - configProperties.get(Constants.SCIM_USER_SEARCH_ENDPOINT)():{}",
-                configProperties.get(Constants.SCIM_USER_SEARCH_ENDPOINT));
-        return configProperties.get(Constants.SCIM_USER_SEARCH_ENDPOINT);
+                "\n JansUtil::getScimUserSearchEndpoint() - {}",
+                pluginConfiguration.getScimUserSearchEndpoint());
+        return pluginConfiguration.getScimUserSearchEndpoint();
     }
 
-    public String getClientId() {
-        logger.debug(" \n JansUtil::getClientId() - configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_ID)():{}",
-                configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_ID));
-        return configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_ID);
+    public String getScimClientId() {
+        logger.debug(" \n JansUtil::getScimClientId() - {}",
+               pluginConfiguration.getScimClientId());
+        return pluginConfiguration.getScimClientId();
     }
 
-    public String getClientPassword() {
-        logger.debug(" \n JansUtil::getClientPassword() - configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_PASSWORD)():{}",
-                configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_PASSWORD));
-        return configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_PASSWORD);
+    public String getScimClientSecret() {
+        logger.debug(" \n JansUtil::getClientPassword() - {}",
+                pluginConfiguration.getScimClientSecret());
+        return pluginConfiguration.getScimClientSecret();
     }
 
     public String getScimOauthScope() {
-        logger.debug(" \n  JansUtil::getScimOauthScope() - configProperties.get(Constants.SCIM_OAUTH_SCOPE)():{}",
-                configProperties.get(Constants.SCIM_OAUTH_SCOPE));
-        return configProperties.get(Constants.SCIM_OAUTH_SCOPE);
+        logger.debug(" \n  JansUtil::getScimOauthScope() - :{}",
+                pluginConfiguration.getScimOauthScope());
+        return pluginConfiguration.getScimOauthScope();
     }
 
     public String requestScimAccessToken() throws IOException {
         logger.info(" \n JansUtil::requestScimAccessToken() ");
         List<String> scopes = new ArrayList<>();
         scopes.add(getScimOauthScope());
-        String token = requestAccessToken(getClientId(), scopes);
+        String token = requestAccessToken(getScimClientId(), scopes);
         logger.info("JansUtil::requestScimAccessToken() - token:{} ", token);
         return token;
     }
@@ -98,7 +99,7 @@ public class JansUtil {
                 clientId, scopes);
 
         // Get clientSecret
-        String clientSecret = this.getClientPassword();
+        String clientSecret = getScimClientSecret();
         logger.info("JansUtil::getAccessToken() - Access Token Request - clientId:{}, clientSecret:{}", clientId,
                 clientSecret);
 
@@ -153,8 +154,8 @@ public class JansUtil {
                 tokenUrl, username, password, scope, grantType, authenticationMethod, mediaType);
         String token = null;
         try {
-            String clientId = this.getClientId();
-            String clientSecret = this.getClientPassword();
+            String clientId = this.getScimClientId();
+            String clientSecret = this.getScimClientSecret();
 
             logger.info(
                     " JansUtil::requestUserToken() - clientId:{} , clientSecret:{}, this.getEncodedCredentials():{}",

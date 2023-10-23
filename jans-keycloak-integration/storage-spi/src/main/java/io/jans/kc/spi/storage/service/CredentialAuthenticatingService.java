@@ -12,7 +12,12 @@ import org.slf4j.LoggerFactory;
 public class CredentialAuthenticatingService {
 
     private static Logger logger = LoggerFactory.getLogger(CredentialAuthenticatingService.class);
-    private static JansUtil jansUtil = new JansUtil();
+    
+    private JansUtil jansUtil;
+
+    public CredentialAuthenticatingService(JansUtil jansUtil) {
+        this.jansUtil = jansUtil;
+    }
 
     public boolean authenticateUser(final String username, final String password) {
         logger.info("CredentialAuthenticatingService::authenticateUser() -  username:{}, password:{} ", username,
