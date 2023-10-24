@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.jans</groupId>
-    <artifactId>jans-keycloak-integration-parent</artifactId>
+    <artifactId>kc-jans-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0.20-SNAPSHOT</version>
     <name>keycloak-integration-parent</name>

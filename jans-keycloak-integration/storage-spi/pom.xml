@@ -11,7 +11,7 @@
 
 	<parent>
 		<groupId>io.jans</groupId>
-		<artifactId>jans-keycloak-integration-parent</artifactId>
+		<artifactId>kc-jans-parent</artifactId>
 		<version>1.0.20-SNAPSHOT</version>
 	</parent>
 
