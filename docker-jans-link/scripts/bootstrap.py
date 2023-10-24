@@ -25,6 +25,7 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import encode_text
 
 from settings import LOGGING_CONFIG
 
@@ -98,8 +99,9 @@ def main():
 
     configure_logging()
 
-    persistence_setup = PersistenceSetup(manager)
-    persistence_setup.import_ldif_files()
+    with manager.lock.create_lock("link-setup"):
+        persistence_setup = PersistenceSetup(manager)
+        persistence_setup.import_ldif_files()
 
 
 def configure_logging():
@@ -154,10 +156,10 @@ def configure_logging():
     # mapping between the ``log_target`` value and their appenders
     file_aliases = {
         "link_log_target": "FILE",
-        "persistence_log_target": "JANS_CACHEREFRESH_PERSISTENCE_FILE",
-        "persistence_duration_log_target": "JANS_CACHEREFRESH_PERSISTENCE_DURATION_FILE",
-        "ldap_stats_log_target": "JANS_CACHEREFRESH_PERSISTENCE_LDAP_STATISTICS_FILE",
-        "script_log_target": "JANS_CACHEREFRESH_SCRIPT_LOG_FILE",
+        "persistence_log_target": "JANS_LINK_PERSISTENCE_FILE",
+        "persistence_duration_log_target": "JANS_LINK_PERSISTENCE_DURATION_FILE",
+        "ldap_stats_log_target": "JANS_LINK_PERSISTENCE_LDAP_STATISTICS_FILE",
+        "script_log_target": "JANS_LINK_SCRIPT_LOG_FILE",
     }
     for key, value in file_aliases.items():
         if config[key] == "FILE":
@@ -199,19 +201,29 @@ class PersistenceSetup:
 
     @cached_property
     def ctx(self) -> dict[str, _t.Any]:
+        host, port = os.environ.get("CN_LDAP_URL", "localhost:1636").split(":")
+
+        password = self.manager.secret.get("encoded_ox_ldap_pw")
+        salt = self.manager.secret.get("encoded_salt")
+        password_file = os.environ.get("CN_LDAP_PASSWORD_FILE", "/etc/jans/conf/ldap_password")
+
+        if not password and os.path.isfile(password_file):
+            with open(password_file) as f:
+                password = encode_text(f.read().strip(), salt).decode()
+
         ctx = {
-            "ldap_binddn": self.manager.config.get("ldap_binddn"),
-            "ldap_hostname": self.manager.config.get("ldap_init_host"),
-            "ldaps_port": self.manager.config.get("ldap_init_port"),
-            "encoded_ox_ldap_pw": self.manager.secret.get("encoded_ox_ldap_pw"),
-            "snapshots_dir": "/var/jans/cr-snapshots",
+            "ldap_binddn": self.manager.config.get("ldap_binddn") or "cn=Directory Manager",
+            "ldap_hostname": self.manager.config.get("ldap_init_host") or host,
+            "ldaps_port": self.manager.config.get("ldap_init_port") or port,
+            "ldap_bind_encoded_pw": password,
+            "snapshots_dir": "/var/jans/link-snapshots",
         }
 
-        # pre-populate jans_cacherefresh_config_base64
+        # pre-populate jans_link_config_base64
         with open("/app/templates/jans-link/jans-link-config.json") as f:
             ctx["jans_link_config_base64"] = generate_base64_contents(f.read() % ctx)
 
-        # pre-populate jans_cacherefresh_static_conf_base64
+        # pre-populate jans_link_static_conf_base64
         with open("/app/templates/jans-link/jans-link-static-config.json") as f:
             ctx["jans_link_static_conf_base64"] = generate_base64_contents(f.read())
 

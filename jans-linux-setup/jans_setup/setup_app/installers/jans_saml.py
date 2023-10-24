@@ -31,7 +31,7 @@ class JansSamlInstaller(JettyInstaller):
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-
+        self.systemd_units = ['kc']
         self.register_progess()
 
         self.saml_enabled = True
@@ -49,7 +49,7 @@ class JansSamlInstaller(JettyInstaller):
         self.idp_config_data_dir = os.path.join(Config.opt_dir, self.idp_config_id)
         self.idp_config_log_dir = os.path.join(self.idp_config_data_dir, 'logs')
         self.idp_config_providers_dir = os.path.join(self.idp_config_data_dir, 'providers')
-
+        self.idp_config_http_port = '8083'
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
@@ -133,4 +133,5 @@ class JansSamlInstaller(JettyInstaller):
         base.unpack_zip(self.source_files[3][0], self.idp_config_data_dir, with_par_dir=False)
         self.copyFile(self.source_files[4][0], self.idp_config_providers_dir)
         base.unpack_zip(self.source_files[5][0], self.idp_config_providers_dir)
-
+        self.update_rendering_dict()
+        self.render_unit_file()

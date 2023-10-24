@@ -55,14 +55,10 @@ def get_sql_password(manager: Manager) -> str:
         with open(password_file) as f:
             password = f.read().strip()
             manager.secret.set(secret_name, password)
-            logger.warning(
-                f"Loading password from {password_file} file is deprecated and will be removed in future releases. "
-                f"Note, the password has been saved to secrets with key {secret_name} for later usage."
-            )
     else:
         # get from secrets (if any)
         password = manager.secret.get(secret_name)
-    return password
+    return password  # noqa: R504
 
 
 class PostgresqlAdapter:

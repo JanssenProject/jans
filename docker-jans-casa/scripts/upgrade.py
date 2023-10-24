@@ -306,8 +306,10 @@ class Upgrade:
 
 def main():
     manager = get_manager()
-    upgrade = Upgrade(manager)
-    upgrade.invoke()
+
+    with manager.lock.create_lock("casa-upgrade"):
+        upgrade = Upgrade(manager)
+        upgrade.invoke()
 
 
 if __name__ == "__main__":

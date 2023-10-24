@@ -27,12 +27,14 @@ def main():
     if not backend_cls:
         raise ValueError("Unsupported persistence backend")
 
-    backend = backend_cls(manager)
-    backend.initialize()
+    with manager.lock.create_lock("persistence-loader-init"):
+        backend = backend_cls(manager)
+        backend.initialize()
 
     # run upgrade if needed
-    upgrade = Upgrade(manager)
-    upgrade.invoke()
+    with manager.lock.create_lock("persistence-loader-upgrade"):
+        upgrade = Upgrade(manager)
+        upgrade.invoke()
 
 
 if __name__ == "__main__":
