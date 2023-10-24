@@ -569,7 +569,7 @@ livenessProbe:
   exec:
     command:
       - python3
-      - /app/scripts/healthcheck.py
+      - /app/jans_aio/jans_auth/healthcheck.py
   initialDelaySeconds: 30
   periodSeconds: 30
   timeoutSeconds: 5
@@ -579,7 +579,7 @@ readinessProbe:
   exec:
     command:
       - python3
-      - /app/scripts/healthcheck.py
+      - /app/jans_aio/jans_auth/healthcheck.py
   initialDelaySeconds: 25
   periodSeconds: 25
   timeoutSeconds: 5
