@@ -83,9 +83,10 @@ Authorization Endpoint supports `dpop_jkt` parameter for DPoP binding of authori
  Host: server.example.com
 ```
 
-For PAR both ways of binging are supports:
-- via `dpop_jkt`
-- via `DPoP` header where `dpop_jkt` is calculated out of `DPoP` header value
+For PAR, both ways of binging are supported:
+
+- Via `dpop_jkt`
+- Via `DPoP` header where `dpop_jkt` is calculated out of `DPoP` header value
 
 ### Using Introspection Endpoint
 
