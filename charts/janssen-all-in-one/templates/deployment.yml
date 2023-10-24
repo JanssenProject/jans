@@ -98,6 +98,12 @@ spec:
             name: google-sa
             subPath: google-credentials.json
         {{- end }}
+          - mountPath: /app/db/generate.json
+            name: {{ include "janssen-all-in-one.name" . }}-mount-gen-file
+            subPath: generate.json
+          - mountPath: /scripts/tls_generator.py
+            name: {{ include "janssen-all-in-one.name" . }}-tls-script
+            subPath: tls_generator.py
         {{- if not .Values.isFqdnRegistered }}
           - name: {{ include "janssen-all-in-one.fullname" .}}-updatelbip
             mountPath: "/scripts"
@@ -162,7 +168,12 @@ spec:
           secret:
             secretName: {{ .Release.Name }}-google-sa
       {{- end }}
-
+        - name: {{ include "janssen-all-in-one.name" . }}-mount-gen-file
+          secret:
+            secretName: {{ include "janssen-all-in-one.name" . }}-gen-json-file
+        - name: {{ include "janssen-all-in-one.name" . }}-tls-script
+          configMap:
+            name: {{ include "janssen-all-in-one.name" . }}-tls-script
       {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
 
         {{- if not .Values.istio.enabled }}

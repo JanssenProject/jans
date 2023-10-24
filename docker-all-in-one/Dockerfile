@@ -185,8 +185,9 @@ RUN touch /run/nginx/nginx.pid
 
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -u 1000 jans \
-    && addgroup jans root
+    && addgroup jans root \
 
+RUN chmod +x /app/bin/entrypoint.sh
 # adjust ownership and permission
 RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \

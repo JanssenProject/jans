@@ -459,7 +459,7 @@ certManager:
     tlsSecretName: tls-certificate
 nginx-ingress:
   # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
-  enabled: false
+  enabled: true
   ingress:
     # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
     additionalLabels: { }
