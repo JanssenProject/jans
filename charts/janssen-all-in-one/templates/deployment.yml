@@ -170,10 +170,10 @@ spec:
       {{- end }}
         - name: {{ include "janssen-all-in-one.name" . }}-mount-gen-file
           secret:
-            secretName: {{ include "janssen-all-in-one.name" . }}-gen-json-file
+            secretName: {{ include "janssen-all-in-one.fullname" . }}-gen-json-file
         - name: {{ include "janssen-all-in-one.name" . }}-tls-script
           configMap:
-            name: {{ include "janssen-all-in-one.name" . }}-tls-script
+            name: {{ include "janssen-all-in-one.fullname" . }}-tls-script
       {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
 
         {{- if not .Values.istio.enabled }}
