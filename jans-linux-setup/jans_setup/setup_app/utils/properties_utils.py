@@ -656,9 +656,15 @@ class PropertiesUtils(SetupUtils):
                                             )[0].lower()
 
         Config.install_jans_saml = prompt == 'y'
-        if Config.installed_instance and Config.install_jans_saml:
-            Config.addPostSetupService.append('install_jans_saml')
-
+        if Config.installed_instance:
+            if Config.install_jans_saml:
+                Config.addPostSetupService.append('install_jans_saml')
+                if Config.install_config_api and not Config.install_scim_server:
+                    Config.addPostSetupService.append('install_scim_server')
+                    Config.install_scim_server = True
+        else:
+            if Config.install_jans_saml and Config.install_config_api:
+                Config.install_scim_server = True
 
     def promptForConfigApi(self):
         if Config.installed_instance and Config.install_config_api:
