@@ -32,6 +32,10 @@ SUPERVISORD_PROGRAMS = {
         "mem_ratio": 0.1,
         "java_opts_env": "CN_CASA_JAVA_OPTIONS",
     },
+    "jans-link": {
+        "mem_ratio": 0.1,
+        "java_opts_env": "CN_LINK_JAVA_OPTIONS",
+    },
 }
 
 
@@ -217,6 +221,7 @@ def render_nginx_default_conf(enabled_programs):
         ("jans-fido2", ["upstream", "location"]),
         ("jans-scim", ["upstream", "location"]),
         ("jans-casa", ["upstream", "location"]),
+        ("jans-link", ["upstream", "location"]),
     ]
 
     for program, types in includes:

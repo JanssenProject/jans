@@ -13,8 +13,6 @@ The following example is tested using `microk8s`
     make build-dev
     ```
 
-1. File contains SSA, saved as `ssa.jwt`
-
 ## Configure
 
 1.  Enable `microk8s` add-ons:

@@ -6,7 +6,6 @@ INGRESS?=nginx
 # double dollar signs for char escape in sed inside Makefile
 export NODE_IP_ADDR?=$(shell ip route get 1 | sed 's/^.*src \([^ ]*\).*$$/\1/;q')
 export JANS_AIO_IMAGE?=${IMAGE_NAME}:${DEV_VERSION}
-export JANS_AIO_SSA?=$(shell cat ssa.jwt | base64 -w0)
 
 .PHONY: test clean all install uninstall build-dev
 .DEFAULT_GOAL := install

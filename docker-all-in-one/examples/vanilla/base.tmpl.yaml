@@ -98,17 +98,6 @@ type: kubernetes.io/tls
 apiVersion: v1
 kind: Secret
 metadata:
-  name: jans-aio-ssa-jwt
-  namespace: jans
-type: Opaque
-data:
-  ssa: ${JANS_AIO_SSA}
-
----
-
-apiVersion: v1
-kind: Secret
-metadata:
   name: jans-aio-sql-pass
   namespace: jans
 stringData:
@@ -130,7 +119,7 @@ data:
   CN_SQL_DB_DIALECT: "mysql"
   CN_SQL_DB_HOST: "mysql.sql.svc.cluster.local"
   CN_CONFIG_API_PLUGINS: "admin-ui,fido2,scim,user-mgt"
-  CN_AIO_COMPONENTS: "configurator,persistence-loader,jans-auth,jans-config-api,jans-fido2,jans-scim,jans-casa"
+  CN_AIO_COMPONENTS: "configurator,persistence-loader,jans-auth,jans-config-api,jans-fido2,jans-scim,jans-casa,jans-link"
 
 ---
 
@@ -194,9 +183,6 @@ spec:
           - name: tls-certificate
             mountPath: /opt/jans/configurator/certs/web_https.key
             subPath: web_https.key
-          - name: jans-aio-ssa-jwt
-            mountPath: /etc/jans/conf/ssa
-            subPath: ssa
           - name: jans-aio-sql-pass
             mountPath: /etc/jans/conf/sql_password
             subPath: sql_password
@@ -218,9 +204,6 @@ spec:
         - name: jans-aio-gen-params
           secret:
             secretName: jans-aio-gen-params
-        - name: jans-aio-ssa-jwt
-          secret:
-            secretName: jans-aio-ssa-jwt
         - name: tls-certificate
           secret:
             secretName: tls-certificate

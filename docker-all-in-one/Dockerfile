@@ -11,6 +11,7 @@ ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:1.0.20_dev
 ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:1.0.20_dev
 ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:1.0.20_dev
 ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:1.0.20_dev
+ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:1.0.20_dev
 
 # original Janssen version
 ARG CN_VERSION=1.0.20-SNAPSHOT
@@ -32,6 +33,8 @@ FROM ${JANS_FIDO2_IMAGE} AS jans-fido2-src
 FROM ${JANS_SCIM_IMAGE} AS jans-scim-src
 
 FROM ${JANS_CASA_IMAGE} AS jans-casa-src
+
+FROM ${JANS_LINK_IMAGE} AS jans-link-src
 
 # ===
 # app
@@ -118,6 +121,11 @@ COPY --from=jans-casa-src /app/scripts /app/jans_aio/jans_casa
 COPY --from=jans-casa-src /app/static/extension/person_authentication/Casa.py /app/static/extension/person_authentication/Casa.py
 RUN ln -sf /app/jans_aio/jans_casa/entrypoint.sh /app/bin/jans-casa-entrypoint.sh
 
+COPY --from=jans-link-src /opt/jans/jetty/jans-link /opt/jans/jetty/jans-link
+COPY --from=jans-link-src /app/templates/jans-link /app/templates/jans-link
+COPY --from=jans-link-src /app/scripts /app/jans_aio/jans_link
+RUN ln -sf /app/jans_aio/jans_link/entrypoint.sh /app/bin/jans-link-entrypoint.sh
+
 # ----
 # misc
 # ----
@@ -160,6 +168,9 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_CASA_ADMIN_LOCK_FILE=/opt/jans/jetty/jans-casa/resources/.administrable \
     CN_CASA_JWKS_SIZE_LIMIT=100000 \
     CN_CASA_JAVA_OPTIONS="" \
+    CN_LINK_JETTY_HOST=127.0.0.1 \
+    CN_LINK_JETTY_PORT=9091 \
+    CN_LINK_JAVA_OPTIONS="" \
     CN_SHARE_AUTH_CONF=false \
     CN_SQL_PASSWORD_FILE=/etc/jans/conf/sql_password \
     CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
@@ -185,9 +196,10 @@ RUN touch /run/nginx/nginx.pid
 
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -u 1000 jans \
-    && addgroup jans root \
+    && addgroup jans root
 
 RUN chmod +x /app/bin/entrypoint.sh
+
 # adjust ownership and permission
 RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \
