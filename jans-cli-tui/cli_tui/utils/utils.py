@@ -13,6 +13,7 @@ from wui_components.jans_spinner import Spinner
 from wui_components.jans_vetrical_nav import JansVerticalNav
 
 from wui_components.jans_date_picker import DateSelectWidget
+from utils.multi_lang import _
 
 common_data = SimpleNamespace()
 
@@ -75,7 +76,7 @@ class DialogUtils:
         return data
 
 
-    def check_required_fields(self, container=None, data=None):
+    def check_required_fields(self, container=None, data=None, tobefocused=None):
         missing_fields = []
         if not data:
             data = self.data
@@ -89,7 +90,8 @@ class DialogUtils:
                         missing_fields.append(item.children[1].jans_name)
 
         if missing_fields:
-            self.myparent.show_message("Please fill required fields", "The following fields are required:\n" + ', '.join(missing_fields))
+            app = self.app if hasattr(self, 'app') else self.myparent
+            app.show_message(_("Please fill required fields"), _("The following fields are required:\n") + ', '.join(missing_fields), tobefocused=tobefocused)
             return False
 
         return True
