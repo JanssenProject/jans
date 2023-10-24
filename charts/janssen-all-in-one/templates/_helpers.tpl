@@ -125,3 +125,32 @@ Create topologySpreadConstraints lists
   {{- end}}
 {{- end }}
 {{- end }}
+
+{{/*
+Create aio enabled list
+*/}}
+{{- define "janssen-all-in-one.aioComponents"}}
+{{ $newList := list }}
+{{- if .Values.config.enabled }}
+{{ $newList = append $newList ("configurator")  }}
+{{- end}}
+{{ if .Values.persistence.enabled }}
+{{ $newList = append $newList ("persistence-loader") }}
+{{- end}}
+{{ if index .Values "auth-server" "enabled" }}
+{{ $newList = append $newList ("jans-auth") }}
+{{- end }}
+{{- if index .Values "config-api" "enabled" }}
+{{ $newList = append $newList ("jans-config-api") }}
+{{- end}}
+{{- if .Values.fido2.enabled}}
+{{ $newList = append $newList ("jans-fido2") }}
+{{- end}}
+{{- if .Values.casa.enabled}}
+{{ $newList = append $newList ("jans-casa") }}
+{{- end}}
+{{- if .Values.scim.enabled}}
+{{ $newList = append $newList ("jans-scim") }}
+{{- end}}
+{{ toJson $newList }}
+{{- end }}
