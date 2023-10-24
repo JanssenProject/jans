@@ -1,0 +1,126 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>io.jans</groupId>
+	<artifactId>jans-keycloak-integration-parent</artifactId>
+	<packaging>pom</packaging>
+	<version>1.0.20-SNAPSHOT</version>
+	<name>jans-keycloak-integration-parent</name>
+
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>Github Packages</name>
+			<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+		</repository>
+	</distributionManagement>
+
+	<properties>
+		<maven.min-version>3.3.9</maven.min-version>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<maven-compiler.version>3.10.1</maven-compiler.version>
+		<jans.version>${project.version}</jans.version>
+		<keycloak-server-spi.version>21.1.1</keycloak-server-spi.version>
+		<nimbus.oauth-sdk.version>10.11</nimbus.oauth-sdk.version>
+		<maven-deps-plugin.version>3.6.0</maven-deps-plugin.version>
+		<maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
+		<nimbus.oauth2-oidc-sdk.version>10.11</nimbus.oauth2-oidc-sdk.version>
+		<sonar.projectKey>JanssenProject_keycloak-integ</sonar.projectKey>
+		<sonar.moduleKey>${project.groupId}:${project
+			.artifactId}</sonar.moduleKey>
+		<sonar.organization>janssenproject</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+	</properties>
+
+	<prerequisites>
+		<maven>${maven.min-version}</maven>
+	</prerequisites>
+
+	<modules>
+		<module>authenticator</module>
+		<module>storage-api</module>
+	</modules>
+
+	<repositories>
+		<repository>
+			<id>jans</id>
+			<name>Janssen project repository</name>
+			<url>https://maven.jans.io/maven</url>
+		</repository>
+		<repository>
+			<id>jans.io</id>
+			<name>Janssen project repository</name>
+			<url>https://jenkins.jans.io/maven/</url>
+		</repository>
+	</repositories>
+
+	<scm>
+		<url>https://github.com/JanssenProject/jans</url>
+		<connection>scm:git:git://github.com/JanssenProject/jans.git</connection>
+		<developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
+	</scm>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- jans dependencies -->
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-bom</artifactId>
+				<version>${jans.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
+			<!-- keycloak dependencies -->
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>
+					keycloak-core</artifactId>
+				<scope>provided</scope>
+				<version>
+					${keycloak-server-spi.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>
+					org.keycloak</groupId>
+				<artifactId>keycloak-server-spi</artifactId>
+				<scope>
+					provided</scope>
+				<version>${keycloak-server-spi.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>
+					org.keycloak</groupId>
+				<artifactId>keycloak-server-spi-private</artifactId>
+				<scope>
+					provided</scope>
+				<version>${keycloak-server-spi.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>
+					org.keycloak</groupId>
+				<artifactId>keycloak-services</artifactId>
+				<scope>provided</scope>
+				<version>
+					${keycloak-server-spi.version}</version>
+			</dependency>
+			<!-- end keycloak dependencies-->
+
+			<!-- nimbus dependencies -->
+			<dependency>
+				<groupId>
+					com.nimbusds</groupId>
+				<artifactId>oauth2-oidc-sdk</artifactId>
+				<version>
+					${nimbus.oauth2-oidc-sdk.version}</version>
+			</dependency>
+			<!-- end nimbus dependencies-->
+		</dependencies>
+	</dependencyManagement>
+</project>
