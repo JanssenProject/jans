@@ -1,7 +1,9 @@
 ---
 tags:
   - administration
-  - link
+  - keycloak
+  - SAML
+  - SSO
 ---
 
 ## This content is in progress
