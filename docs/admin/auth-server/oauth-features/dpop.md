@@ -44,12 +44,13 @@ server uses steps laid out in the
 [specification](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-checking-dpop-proofs) to acertain 
 this.
 
-![](../../../assets/dpop-diagram.png)
+```mermaid
 
-```text
+sequenceDiagram
+
 title DPoP sender-constraint access_token and refresh_token
 
-autonumber 1
+autonumber
 
 note right of RP: Authorization Code Flow
 RP->AS: Request authorization with dpop_jtk
@@ -68,6 +69,7 @@ RP->RS: Request resource with access_token and DPoP JWT (with "ath" - AT hash)
 RS->RS: Validates access_token against DPoP (public key match cnf/jkt)
 RS->RS: Validates DPoP against access_token (access_token hash in DPoP "ath")
 RS->RP: Return protected resource
+
 ```
 
 ### Authorization Code Binding to DPoP Key
