@@ -106,7 +106,8 @@ spec:
             subPath: tls_generator.py
         {{- if not .Values.isFqdnRegistered }}
           - name: {{ include "janssen-all-in-one.fullname" .}}-updatelbip
-            mountPath: "/scripts"
+            mountPath: /scripts/updatelbip.py
+            subPath: updatelbip.py
         {{- end }}
         {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
           {{- if not .Values.istio.enabled }}
