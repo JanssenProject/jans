@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ index .Values "auth-server" "authServerServiceName" }}
+  name: {{ .Values.service.name }}
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
