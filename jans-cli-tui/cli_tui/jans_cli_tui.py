@@ -678,8 +678,6 @@ class JansCliApp(Application):
             next_widget = None
             ) -> AnyContainer:
 
-        title += ': '
-
         ta = TextArea(
                 text=str(value),
                 multiline=height > 1,
@@ -703,13 +701,14 @@ class JansCliApp(Application):
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 
-        titled_text_widgets = [Window(FormattedTextControl(title), width=len(title)+1, style=style, height=height), ta]
+        titled_text_widgets = [Window(FormattedTextControl(title+': '), width=len(title)+1, style=style, height=height), ta]
         if next_widget:
             titled_text_widgets.append(Window(width=1))
             titled_text_widgets.append(next_widget)
 
         v = VSplit(titled_text_widgets)
         v.me = ta
+        v.title = title
 
         if jans_list_type:
             v.jans_list_type = True
