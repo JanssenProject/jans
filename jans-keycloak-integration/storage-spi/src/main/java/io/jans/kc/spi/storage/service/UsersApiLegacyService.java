@@ -4,63 +4,60 @@ import io.jans.scim.model.scim2.user.UserResource;
 
 import java.util.Properties;
 
+import org.jboss.logging.Logger;
+
 import org.keycloak.component.ComponentModel;
 import org.keycloak.models.KeycloakSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class UsersApiLegacyService {
 
-    private static Logger logger = LoggerFactory.getLogger(UsersApiLegacyService.class);
+    private static Logger log = Logger.getLogger(UsersApiLegacyService.class);
 
     private ScimService scimService;
     protected Properties jansProperties = new Properties();
 
     public UsersApiLegacyService(KeycloakSession session, ComponentModel model, ScimService scimService) {
-        
-        logger.info(" UsersApiLegacyService() - session:{}, model:{}", session, model);
+
+        log.debugv(" UsersApiLegacyService() - session:{0}, model:{1}", session, model);
         this.scimService = scimService;
     }
 
     public UserResource getUserById(String inum) {
-        logger.info("UsersApiLegacyService::getUserById() - inum:{}", inum);
+        log.debugv("UsersApiLegacyService::getUserById() - inum:{0}", inum);
         try {
             return scimService.getUserById(inum);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(
-                    "UsersApiLegacyService::getUserById() - Error fetching user based on inum:{} from external service is:{} - {} ",
-                    inum, ex.getMessage(), ex);
+            log.errorv(ex,
+                    "UsersApiLegacyService::getUserById() - Error fetching user based on inum:{0} from external service",
+                    inum);
 
         }
         return null;
     }
 
     public UserResource getUserByName(String username) {
-        logger.info(" UsersApiLegacyService::getUserByName() - username:{}", username);
+        log.debugv(" UsersApiLegacyService::getUserByName() - username:{0}", username);
         try {
 
             return scimService.getUserByName(username);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(
-                    "UsersApiLegacyService::getUserByName() - Error fetching user based on username:{} from external service is:{} - {} ",
-                    username, ex.getMessage(), ex);
+            log.errorv(ex,
+                    "UsersApiLegacyService::getUserByName() - Error fetching user based on username:{0} from external service",
+                    username);
 
         }
         return null;
     }
 
     public UserResource getUserByEmail(String email) {
-        logger.info(" UsersApiLegacyService::getUserByEmail() - email:{}", email);
+        log.infov(" UsersApiLegacyService::getUserByEmail() - email:{0}", email);
         try {
 
             return scimService.getUserByEmail(email);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error(
-                    " UsersApiLegacyService::getUserByEmail() - Error fetching user based on email:{} from external service is:{} - {} ",
-                    email, ex.getMessage(), ex);
+            log.errorv(
+                    " UsersApiLegacyService::getUserByEmail() - Error fetching user based on email:{0}",
+                    email);
 
         }
         return null;

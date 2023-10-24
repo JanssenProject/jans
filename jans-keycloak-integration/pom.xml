@@ -135,11 +135,13 @@
           <groupId>jakarta.ws.rs</groupId>
           <artifactId>jakarta.ws.rs-api</artifactId>
           <version>${jakarta.ws-rs-api.version}</version>
+          <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>jakarta.servlet</groupId>
           <artifactId>jakarta.servlet-api</artifactId>
           <version>${jakarta.servlet-api.version}</version>
+          <scope></scope>
         </dependency>
         <!-- end jakarta dependencies -->
 
@@ -241,6 +243,15 @@
                 <outputDirectory>${project.build.directory}/deps/</outputDirectory>
                 <includeScope>runtime</includeScope>
                 <excludeTransitive>false</excludeTransitive>
+                <excludeGroupIds>
+                  com.sun.activation,
+                  jakarta.activation,
+                  jakarta.annotation,
+                  jakarta.servlet,
+                  jakarta.validation,
+                  jakarta.xml.bind,
+                  org.jboss.resteasy
+                </excludeGroupIds>
               </configuration>
             </execution>
           </executions>

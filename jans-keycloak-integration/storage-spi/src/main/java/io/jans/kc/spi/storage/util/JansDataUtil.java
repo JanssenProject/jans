@@ -11,16 +11,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 public class JansDataUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(JansDataUtil.class);
+    private static final Logger log = Logger.getLogger(JansDataUtil.class);
 
     public static Object invokeMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        logger.debug("JansDataUtil::invokeMethod() - Invoke clazz:{} on methodName:{} with name:{} ", clazz, methodName,
+        log.debugv("JansDataUtil::invokeMethod() - Invoke clazz:{0} on methodName:{1} with name:{2} ", clazz, methodName,
                 parameterTypes);
         Object obj = null;
         if (clazz == null || methodName == null || parameterTypes == null) {
@@ -29,48 +28,47 @@ public class JansDataUtil {
         Method m = clazz.getDeclaredMethod(methodName, parameterTypes);
         obj = m.invoke(null, parameterTypes);
 
-        logger.debug("JansDataUtil::invokeMethod() - methodName:{} returned obj:{} ", methodName, obj);
+        log.debugv("JansDataUtil::invokeMethod() - methodName:{0} returned obj:{1} ", methodName, obj);
         return obj;
     }
 
     public Object invokeReflectionGetter(Object obj, String variableName) {
-        logger.debug("JansDataUtil::invokeMethod() - Invoke obj:{}, variableName:{}", obj, variableName);
+        log.debugv("JansDataUtil::invokeMethod() - Invoke obj:{0}, variableName:{1}", obj, variableName);
         try {
             if (obj == null) {
                 return obj;
             }
             PropertyDescriptor pd = new PropertyDescriptor(variableName, obj.getClass());
             Method getter = pd.getReadMethod();
-            logger.debug("JansDataUtil::invokeMethod() - Invoke getter:{}", getter);
+            log.debugv("JansDataUtil::invokeMethod() - Invoke getter:{0}", getter);
             if (getter != null) {
                 return getter.invoke(obj);
             } else {
-                logger.error(
-                        "JansDataUtil::invokeReflectionGetter() - Getter Method not found for class:{} property:{}",
+                log.errorv(
+                        "JansDataUtil::invokeReflectionGetter() - Getter Method not found for class:{0} property:{1}",
                         obj.getClass().getName(), variableName);
             }
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | IntrospectionException e) {
-            logger.error(String.format(
-                    "JansDataUtil::invokeReflectionGetter() - Getter Method ERROR for class: %s property: %s",
-                    obj.getClass().getName(), variableName), e);
+            log.errorv(e,"JansDataUtil::invokeReflectionGetter() - Getter Method ERROR for class: {0} property: {1}",
+                    obj.getClass().getName(), variableName);
         }
         return obj;
     }
 
     public static List<Field> getAllFields(Class<?> type) {
-        logger.debug("JansDataUtil::getAllFields() - type:{} ", type);
+        log.debugv("JansDataUtil::getAllFields() - type:{0} ", type);
         List<Field> allFields = new ArrayList<>();
         if (type == null) {
             return allFields;
         }
         getAllFields(allFields, type);
-        logger.debug("JansDataUtil::getAllFields() - Fields:{} of type:{}  ", allFields, type);
+        log.debugv("JansDataUtil::getAllFields() - Fields:{0} of type:{1}  ", allFields, type);
         return allFields;
     }
 
     public static List<Field> getAllFields(List<Field> fields, Class<?> type) {
-        logger.debug("JansDataUtil::getAllFields() - fields:{} , type:{} ", fields, type);
+        log.debugv("JansDataUtil::getAllFields() - fields:{0} , type:{1} ", fields, type);
         if (fields == null || type == null) {
             return fields;
         }
@@ -79,12 +77,12 @@ public class JansDataUtil {
         if (type.getSuperclass() != null) {
             getAllFields(fields, type.getSuperclass());
         }
-        logger.debug("JansDataUtil::getAllFields() - Final fields:{} of type:{} ", fields, type);
+        log.debugv("JansDataUtil::getAllFields() - Final fields:{0} of type:{1} ", fields, type);
         return fields;
     }
 
     public static Map<String, String> getFieldTypeMap(Class<?> clazz) {
-        logger.debug("JansDataUtil::getFieldTypeMap() - clazz:{} ", clazz);
+        log.debugv("JansDataUtil::getFieldTypeMap() - clazz:{0} ", clazz);
         Map<String, String> propertyTypeMap = new HashMap<>();
 
         if (clazz == null) {
@@ -92,17 +90,17 @@ public class JansDataUtil {
         }
 
         List<Field> fields = getAllFields(clazz);
-        logger.debug("JansDataUtil::getFieldTypeMap() - all-fields:{} ", fields);
+        log.debugv("JansDataUtil::getFieldTypeMap() - all-fields:{0} ", fields);
 
         for (Field field : fields) {
-            logger.debug(
-                    "JansDataUtil::getFieldTypeMap() - field:{} , field.getAnnotatedType():{}, field.getAnnotations():{} , field.getType().getAnnotations():{}, field.getType().getCanonicalName():{} , field.getType().getClass():{} , field.getType().getClasses():{} , field.getType().getComponentType():{}",
+            log.debugv(
+                    "JansDataUtil::getFieldTypeMap() - field:{0} , field.getAnnotatedType():{1}, field.getAnnotations():{2} , field.getType().getAnnotations():{3}, field.getType().getCanonicalName():{4} , field.getType().getClass():{5} , field.getType().getClasses():{6} , field.getType().getComponentType():{7}",
                     field, field.getAnnotatedType(), field.getAnnotations(), field.getType().getAnnotations(),
                     field.getType().getCanonicalName(), field.getType().getClass(), field.getType().getClasses(),
                     field.getType().getComponentType());
             propertyTypeMap.put(field.getName(), field.getType().getSimpleName());
         }
-        logger.debug("JansDataUtil::getFieldTypeMap() - Final propertyTypeMap{} ", propertyTypeMap);
+        log.debugv("JansDataUtil::getFieldTypeMap() - Final propertyTypeMap{0} ", propertyTypeMap);
         return propertyTypeMap;
     }
 

@@ -47,27 +47,6 @@
 		  <artifactId>keycloak-model-legacy</artifactId>
 		</dependency>
 
-
-		<!-- smallrye -->
-		<dependency>
-		  <groupId>io.smallrye.config</groupId>
-		  <artifactId>smallrye-config</artifactId>
-		</dependency>
-
-		<!-- log -->
-		<dependency>
-		  <groupId>org.apache.logging.log4j</groupId>
-		  <artifactId>log4j-api</artifactId>
-		</dependency>
-		<dependency>
-		  <groupId>org.apache.logging.log4j</groupId>
-		  <artifactId>log4j-core</artifactId>
-		</dependency>
-		<dependency>
-		  <groupId>org.slf4j</groupId>
-		  <artifactId>slf4j-log4j12</artifactId>
-		</dependency>
-
 		<!-- apache commons -->
 		<dependency>
 		  <groupId>org.apache.commons</groupId>

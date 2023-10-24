@@ -6,12 +6,12 @@ import io.jans.kc.spi.storage.util.JansUtil;
 import jakarta.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.jboss.logging.Logger;
 
 public class CredentialAuthenticatingService {
 
-    private static Logger logger = LoggerFactory.getLogger(CredentialAuthenticatingService.class);
+    private static Logger log = Logger.getLogger(CredentialAuthenticatingService.class);
     
     private JansUtil jansUtil;
 
@@ -20,7 +20,7 @@ public class CredentialAuthenticatingService {
     }
 
     public boolean authenticateUser(final String username, final String password) {
-        logger.info("CredentialAuthenticatingService::authenticateUser() -  username:{}, password:{} ", username,
+        log.debugv("CredentialAuthenticatingService::authenticateUser() -  username:{0}, password:{1} ", username,
                 password);
         boolean isValid = false;
         try {
@@ -28,14 +28,13 @@ public class CredentialAuthenticatingService {
             String token = jansUtil.requestUserToken(jansUtil.getTokenEndpoint(), username, password, null,
                     Constants.RESOURCE_OWNER_PASSWORD_CREDENTIALS, null, MediaType.APPLICATION_FORM_URLENCODED);
 
-            logger.info("CredentialAuthenticatingService::authenticateUser() -  Final token token  - {}", token);
+            log.debugv("CredentialAuthenticatingService::authenticateUser() -  Final token token  - {0}", token);
 
             if (StringUtils.isNotBlank(token)) {
                 isValid = true;
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.error("CredentialAuthenticatingService::authenticateUser() - Error while authenticating is ", ex);
+            log.debug("CredentialAuthenticatingService::authenticateUser() - Error while authenticating", ex);
         }
         return isValid;
     }
