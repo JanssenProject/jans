@@ -1,5 +1,7 @@
 from collections import OrderedDict
+from functools import partial
 from typing import Any
+
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import (
     HSplit,
@@ -15,7 +17,7 @@ from prompt_toolkit.widgets import (
     Frame
 )
 from prompt_toolkit.layout import Window
-
+from prompt_toolkit.filters import Condition
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.application.current import get_app
 from asyncio import Future, ensure_future
@@ -223,6 +225,29 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.tabs = OrderedDict()
 
+        self.tf = True
+        client_secret_next_widget_texts = (_("View"), _("Hide"))
+
+        client_secret_next_widget = Button(client_secret_next_widget_texts[0])
+
+        def change_view_hide(me):
+            self.tf = not self.tf  
+            client_secret_next_widget.text = client_secret_next_widget_texts[not self.tf]
+
+        client_secret_widget = self.myparent.getTitledText(
+                _("Client Secret"),
+                name='clientSecret',
+                value=self.data.get('clientSecret', ''),
+                jans_help=self.myparent.get_help_from_schema(
+                    schema, 'clientSecret'),
+                style=cli_style.check_box,
+                password=Condition(lambda: self.tf),
+                next_widget=client_secret_next_widget
+                )
+
+        client_secret_next_widget.handler = partial(change_view_hide, client_secret_widget)
+
+
         basic_tab_widgets = [
             self.myparent.getTitledText(
                 _("Client_ID"),
@@ -248,13 +273,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     schema, 'clientName'),
                 style=cli_style.edit_text),
 
-            self.myparent.getTitledText(
-                _("Client Secret"),
-                name='clientSecret',
-                value=self.data.get('clientSecret', ''),
-                jans_help=self.myparent.get_help_from_schema(
-                    schema, 'clientSecret'),
-                style=cli_style.check_box),
+            client_secret_widget,
 
             self.myparent.getTitledText(
                 _("Description"),
