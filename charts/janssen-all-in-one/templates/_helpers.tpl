@@ -81,9 +81,6 @@ Create optional scopes list
 {{ if eq .Values.cnPersistenceType "sql" }}
 {{ $newList = append $newList ("sql" | quote) }}
 {{- end }}
-{{- if .Values.opendj.enabled}}
-{{ $newList = append $newList ("ldap" | quote) }}
-{{- end}}
 {{- if .Values.fido2.enabled}}
 {{ $newList = append $newList ("fido2" | quote) }}
 {{- end}}

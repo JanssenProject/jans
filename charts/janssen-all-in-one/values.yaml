@@ -1,123 +1,21 @@
-nameOverride: ""
-fullNameOverride: ""
-service:
-  # -- The name of the aio port within the aio service. Please keep it as default.
-  name: http-aio
-  # -- Port of the fido2 service. Please keep it as default.
-  port: 8080
-  # -- Default set to None If you want to make sure that connections from a particular client are passed to the same Pod each time, you can select the session affinity based on the client's IP addresses by setting this to ClientIP
-  sessionAffinity: None
-  # -- the maximum session sticky time if sessionAffinity is ClientIP
-  sessionAffinityConfig:
-    clientIP:
-      timeoutSeconds: 10800
-# -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
-# https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
-topologySpreadConstraints: {}
-  # -- Define below as many constraints as needed. The key name should follow the structure tsc1, tsc2...etc.
-  # Do not enter the key labelSelector in the entry/entries below as that is automatically injected by the chart
-  #tsc1:
-  #  maxSkew: 1
-  #  minDomains: 1 # optional; beta since v1.25
-  #  topologyKey: kubernetes.io/hostname
-  #  whenUnsatisfiable: DoNotSchedule
-  #  matchLabelKeys: [] # optional; alpha since v1.25
-  #  nodeAffinityPolicy: [] # optional; alpha since v1.25
-  #  nodeTaintsPolicy: [] # optional; alpha since v1.25
-  #tsc2:
-    #maxSkew: 1
-# -- Configure the PodDisruptionBudget
-pdb:
-  enabled: true
-  maxUnavailable: "90%"
-# -- Configure the HorizontalPodAutoscaler
-hpa:
-  enabled: true
-  minReplicas: 1
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 50
-  # -- metrics if targetCPUUtilizationPercentage is not set
-  metrics: []
-  # -- Scaling Policies
-  behavior: {}
-# -- Add custom normal and secret envs to the service
-usrEnvs:
-  # -- Add custom normal envs to the service
-  # variable1: value1
-  normal: {}
-  # -- Add custom secret envs to the service
-  # variable1: value1
-  secret: {}
-# -- Add custom dns policy
-dnsPolicy: ""
-# -- Add custom dns config
-dnsConfig: {}
-image:
-  # -- Image pullPolicy to use for deploying.
-  pullPolicy: IfNotPresent
-  # -- Image  to use for deploying.
-  repository: ghcr.io/janssenproject/jans/all-in-one
-  # -- Image  tag to use for deploying.
-  tag: 1.0.20_dev
-  # -- Image Pull Secrets
-  pullSecrets: [ ]
-# -- Service replica number.
-replicas: 1
-# -- Resource specs.
-resources:
-  limits:
-    # -- CPU limit.
-    cpu: 2500m
-    # -- Memory limit.
-    memory: 2500Mi
-  requests:
-    # -- CPU request.
-    cpu: 2500m
-    # -- Memory request.
-    memory: 2500Mi
-# -- Configure the liveness healthcheck for the auth server if needed.
-livenessProbe:
-  # -- Executes the python3 healthcheck.
-  # https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py
-  exec:
-    command:
-      - python3
-      - /app/scripts/healthcheck.py
-  initialDelaySeconds: 30
-  periodSeconds: 30
-  timeoutSeconds: 5
-# -- Configure the readiness healthcheck for the auth server if needed.
-# https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py
-readinessProbe:
-  exec:
-    command:
-      - python3
-      - /app/scripts/healthcheck.py
-  initialDelaySeconds: 25
-  periodSeconds: 25
-  timeoutSeconds: 5
-# -- Configure any additional volumes that need to be attached to the pod
-volumes: []
-# -- Configure any additional volumesMounts that need to be attached to the containers
-volumeMounts: []
-# Actions on lifecycle events such as postStart and preStop
-# Example
-# lifecycle:
-#   postStart:
-#     exec:
-#       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
-lifecycle: {}
-# -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
-additionalLabels: { }
-# -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
-additionalAnnotations: { }
-
-
 # -- Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
+# -- Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services.
+fqdn: demoexample.jans.io
 # -- Admin password to log in to the UI.
 adminPassword: Test1234#
 # -- City. Used for certificate creation.
 city: Austin
+# -- Country code. Used for certificate creation.
+countryCode: US
+# -- Email address of the administrator usually. Used for certificate creation.
+email: support@jans.io
+# -- Organization name. Used for certificate creation.
+orgName: Janssen
+# -- Resource specs.
+# -- State code. Used for certificate creation.
+state: TX
+# -- Persistence backend to run Janssen with couchbase|hybrid|sql|spanner.
+cnPersistenceType: sql
 configmap:
   # -- Jetty header size in bytes in the auth server
   cnJettyRequestHeaderSize: 8192
@@ -158,7 +56,7 @@ configmap:
   # -- Couchbase restricted user. Used only when cnPersistenceType is hybrid or couchbase.
   cnCouchbaseUser: janssen
   # [google_envs] Envs related to using Google
-  # -- Service account with roles roles/secretmanager.admin base64 encoded string. This is used often inside the services to reach the configuration layer. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
+  # -- Service account with roles roles/secretmanager.admin base64 encoded string. This is used often inside the services to reach the configuration layer. Used only when configAdapterName and configSecretAdapter is set to google.
   cnGoogleSecretManagerServiceAccount: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- Project id of the Google project the secret manager belongs to. Used only when configAdapterName and configSecretAdapter is set to google.
   cnGoogleProjectId: google-project-to-save-config-and-secrets-to
@@ -193,22 +91,10 @@ configmap:
   cnAwsSecretsReplicaRegions: []
   # [aws_secret_manager_envs] END
   # [aws_envs] END
-  # -- OpenDJ internal address. Leave as default. Used when `cnPersistenceType` is set to `ldap`.
-  cnLdapUrl: "opendj:1636"
   # -- Value passed to Java option -XX:MaxRAMPercentage
   cnMaxRamPercent: "75.0"
   # -- SCIM protection mode OAUTH|TEST|UMA
   cnScimProtectionMode: "OAUTH"
-  # -- Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
-  #{
-  #  "default": "<couchbase|ldap|spanner|sql>",
-  #  "user": "<couchbase|ldap|spanner|sql>",
-  #  "site": "<couchbase|ldap|spanner|sql>",
-  #  "cache": "<couchbase|ldap|spanner|sql>",
-  #  "token": "<couchbase|ldap|spanner|sql>",
-  #  "session": "<couchbase|ldap|spanner|sql>",
-  #}
-  cnPersistenceHybridMapping: "{}"
   # -- Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
   cnRedisSentinelGroup: ""
   # -- Redis SSL truststore. Optional. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
@@ -227,21 +113,20 @@ configmap:
   cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- OpenDJ key string. This must be encoded using base64.
   cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
-# -- Country code. Used for certificate creation.
-countryCode: US
-# -- Email address of the administrator usually. Used for certificate creation.
-email: support@jans.io
-# -- LDAP admin password if OpenDJ is used for persistence.
-ldapPassword: P@ssw0rds
-# -- LDAP truststore password if OpenDJ is used for persistence
-ldapTruststorePassword: changeit
-# -- Organization name. Used for certificate creation.
-orgName: Janssen
-# -- Redis admin password if `config.configmap.cnCacheType` is set to `REDIS`.
+nameOverride: ""
+fullNameOverride: ""
+# -- Redis admin password if `configmap.cnCacheType` is set to `REDIS`.
 redisPassword: P@assw0rd
-# -- Resource specs.
-# -- State code. Used for certificate creation.
-state: TX
+config:
+  # -- Boolean flag to enable/disable the configuration job. This normally should never be false
+  enabled: true
+persistence:
+  # -- Boolean flag to enable/disable the persistence job.
+  enabled: true
+
+
+
+
 alb:
   # -- switches the service to Nodeport for ALB ingress
   ingress: false
@@ -362,14 +247,9 @@ auth-server-key-rotation:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: {}
-  # -- Boolean flag to enable/disable the auth-server-key rotation cronjob chart.
-  enabled: false
-# -- Volume storage type if using AWS volumes.
-awsStorageType: io1
-# -- Volume storage type if using Azure disks.
-azureStorageAccountType: Standard_LRS
-# -- Azure storage kind if using Azure disks
-azureStorageKind: Managed
+  # -- Boolean flag to enable/disable the auth-server-key rotation cronjob.
+  enabled: true
+
 casa:
   # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
   appLoggers:
@@ -391,32 +271,6 @@ casa:
   ingress:
     # -- Enable casa endpoints /casa
     casaEnabled: false
-cloud:
-  # -- Boolean flag if enabled will strip resources requests and limits from all services.
-  testEnviroment: false
-# -- Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number.
-cnPrometheusPort: ""
-# -- Document store type to use for shibboleth files LOCAL.
-cnDocumentStoreType: LOCAL
-# -- Persistence backend to run Janssen with ldap|couchbase|hybrid|sql|spanner.
-cnPersistenceType: sql
-config:
-  # -- Boolean flag to enable/disable the configuration chart. This normally should never be false
-  enabled: true
-# -- https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/
-jobTtlSecondsAfterFinished: 300
-# -- The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes
-configAdapterName: kubernetes
-# -- The config backend adapter that will hold Janssen secret layer. aws|google|kubernetes
-configSecretAdapter: kubernetes
-# -- Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner. Leave as this is a sensible default.
-cnGoogleApplicationCredentials: /etc/jans/conf/google-credentials.json
-# The location of the shared credentials file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).Leave as this is a sensible default.
-cnAwsSharedCredentialsFile: /etc/jans/conf/aws_shared_credential_file
-# The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). Leave as this is a sensible default.
-cnAwsConfigFile: /etc/jans/conf/aws_config_file
-# The location of file contains replica regions definition (if any). This file is mostly used in primary region. Example of contents of the file: `[{"Region": "us-west-1"}]`.  Used only when global.configAdapterName and global.configSecretAdapter is set to aws. Leave as this is a sensible default.
-cnAwsSecretsReplicaRegionsFile: /etc/jans/conf/aws_secrets_replica_regions
 config-api:
   # -- Name of the config-api service. Please keep it as default.
   configApiServerServiceName: config-api
@@ -450,8 +304,6 @@ config-api:
   ingress:
     # Enable config API endpoints /jans-config-api
     configApiEnabled: true
-# -- Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services.
-fqdn: demoexample.jans.io
 fido2:
   # -- Name of the fido2 service. Please keep it as default.
   fido2ServiceName: fido2
@@ -481,36 +333,6 @@ fido2:
   ingress:
     # -- Enable endpoint /.well-known/fido2-configuration
     fido2ConfigEnabled: false
-# -- GCE storage kind if using Google disks
-gcePdStorageType: pd-standard
-# -- Boolean flag to enable mapping global.lbIp  to global.fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.
-isFqdnRegistered: false
-istio:
-  # -- Boolean flag that enables using istio side-cars with Janssen services.
-  enabled: false
-  # -- Boolean flag that enables using istio gateway for Janssen. This assumes istio ingress is installed and hence the LB is available.
-  ingress: false
-  # -- The namespace istio is deployed in. The is normally istio-system.
-  namespace: istio-system
-  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
-  additionalLabels: { }
-  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
-  additionalAnnotations: { }
-  # -- Override the gateway that can be created by default. This is used when istio ingress has already been setup and the gateway exists.
-  gateways: [ ]
-# -- The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `global.fqdn` is globally resolvable.
-lbIp: 22.22.22.22
-nginx-ingress:
-  # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
-  enabled: true
-opendj:
-  # -- Boolean flag to enable/disable the OpenDJ  chart.
-  enabled: false
-  # -- Name of the OpenDJ service. Please keep it as default.
-  ldapServiceName: opendj
-persistence:
-  # -- Boolean flag to enable/disable the persistence chart.
-  enabled: true
 scim:
   # -- Name of the scim service. Please keep it as default.
   scimServiceName: scim
@@ -546,22 +368,6 @@ scim:
     scimConfigEnabled: false
     # -- Enable SCIM endpoints /jans-scim
     scimEnabled: false
-# -- StorageClass section for OpenDJ charts. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.
-storageClass:
-  allowVolumeExpansion: true
-  allowedTopologies: []
-  mountOptions:
-  - debug
-  # -- parameters:
-  #fsType: ""
-  #kind: ""
-  #pool: ""
-  #storageAccountType: ""
-  #type: ""
-  parameters: {}
-  provisioner: microk8s.io/hostpath
-  reclaimPolicy: Retain
-  volumeBindingMode: WaitForFirstConsumer
 link:
   # -- Name of the link service. Please keep it as default.
   linkServiceName: link
@@ -595,21 +401,200 @@ link:
   ingress:
     # Enable link endpoints /jans-link
     linkEnabled: true
+
+
+# Global properties
+# -- Boolean flag to enable mapping lbIp  to fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.
+isFqdnRegistered: false
+# -- The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `fqdn` is globally resolvable.
+lbIp: 22.22.22.22
+# -- Boolean flag if enabled will strip resources requests and limits from all services.
+testEnviroment: false
+# -- The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes
+configAdapterName: kubernetes
+# -- The config backend adapter that will hold Janssen secret layer. aws|google|kubernetes
+configSecretAdapter: kubernetes
+# -- Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner. Leave as this is a sensible default.
+cnGoogleApplicationCredentials: /etc/jans/conf/google-credentials.json
+# The location of the shared credentials file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).Leave as this is a sensible default.
+cnAwsSharedCredentialsFile: /etc/jans/conf/aws_shared_credential_file
+# The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). Leave as this is a sensible default.
+cnAwsConfigFile: /etc/jans/conf/aws_config_file
+# The location of file contains replica regions definition (if any). This file is mostly used in primary region. Example of contents of the file: `[{"Region": "us-west-1"}]`.  Used only when configAdapterName and configSecretAdapter is set to aws. Leave as this is a sensible default.
+cnAwsSecretsReplicaRegionsFile: /etc/jans/conf/aws_secrets_replica_regions
+# -- Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number.
+cnPrometheusPort: ""
+# -- Document store type to use for shibboleth files LOCAL.
+cnDocumentStoreType: LOCAL
 # -- Path to SQL password file
 cnSqlPasswordFile: /etc/jans/conf/sql_password
 # -- Path to Couchbase password file
 cnCouchbasePasswordFile: /etc/jans/conf/couchbase_password
 # -- Path to Couchbase superuser password file
 cnCouchbaseSuperuserPasswordFile: /etc/jans/conf/couchbase_superuser_password
-# -- Path to LDAP password file
-cnLdapPasswordFile: /etc/jans/conf/ldap_password
-# -- Path to LDAP truststore password file
-cnLdapTruststorePasswordFile: /etc/jans/conf/ldap_truststore_password
-# -- Path to OpenDJ cert file
-cnLdapCertFile: /etc/certs/opendj.crt
-# -- Path to OpenDJ key file
-cnLdapKeyFile: /etc/certs/opendj.key
-# -- Path to OpenDJ CA cert file
-cnLdapCacertFile: /etc/certs/opendj.pem
-# -- Path to OpenDJ truststore file
-cnLdapTruststoreFile: /etc/certs/opendj.pkcs12
+
+# ingress properties
+istio:
+  # -- Boolean flag that enables using istio side-cars with Janssen services.
+  enabled: false
+  # -- Boolean flag that enables using istio gateway for Janssen. This assumes istio ingress is installed and hence the LB is available.
+  ingress: false
+  # -- The namespace istio is deployed in. The is normally istio-system.
+  namespace: istio-system
+  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
+  additionalLabels: { }
+  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
+  additionalAnnotations: { }
+  # -- Override the gateway that can be created by default. This is used when istio ingress has already been setup and the gateway exists.
+  gateways: [ ]
+  tlsSecretName: istio-tls-certificate
+certManager:
+  # Enable deploying a certificate that uses dns01 challenge instead of passing an annotation nginx-ingress.ingress.additionalAnnotations for nginx http01 challenge.
+  certificate:
+    enabled: false
+    issuerKind: ClusterIssuer
+    # Issuer name which you will create manually. Can be letsencrypt-production.
+    issuerName: ""
+    issuerGroup: cert-manager.io
+    tlsSecretName: tls-certificate
+nginx-ingress:
+  # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
+  enabled: false
+  ingress:
+    # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
+    additionalLabels: { }
+    # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
+    # Enable client certificate authentication
+    # nginx.ingress.kubernetes.io/auth-tls-verify-client: "optional"
+    # Create the secret containing the trusted ca certificates
+    # nginx.ingress.kubernetes.io/auth-tls-secret: "janssen/tls-certificate"
+    # Specify the verification depth in the client certificates chain
+    # nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+    # Specify if certificates are passed to upstream server
+    # nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+    additionalAnnotations: {}
+    # Change ingressClassName to "public" if using microk8s
+    ingressClassName: nginx
+    path: /
+    hosts:
+      - demoexample.jans.io
+    # -- Secrets holding HTTPS CA cert and key.
+    tls:
+      - secretName: tls-certificate
+        hosts:
+          - demoexample.jans.io
+# Service manifest properties
+service:
+  # -- The name of the aio port within the aio service. Please keep it as default.
+  name: http-aio
+  # -- Port of the fido2 service. Please keep it as default.
+  port: 8080
+  # -- Default set to None If you want to make sure that connections from a particular client are passed to the same Pod each time, you can select the session affinity based on the client's IP addresses by setting this to ClientIP
+  sessionAffinity: None
+  # -- the maximum session sticky time if sessionAffinity is ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+
+
+# Deployment manifest properties
+# -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
+# https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+topologySpreadConstraints: {}
+  # -- Define below as many constraints as needed. The key name should follow the structure tsc1, tsc2...etc.
+  # Do not enter the key labelSelector in the entry/entries below as that is automatically injected by the chart
+  #tsc1:
+  #  maxSkew: 1
+  #  minDomains: 1 # optional; beta since v1.25
+  #  topologyKey: kubernetes.io/hostname
+  #  whenUnsatisfiable: DoNotSchedule
+  #  matchLabelKeys: [] # optional; alpha since v1.25
+  #  nodeAffinityPolicy: [] # optional; alpha since v1.25
+  #  nodeTaintsPolicy: [] # optional; alpha since v1.25
+  #tsc2:
+    #maxSkew: 1
+# -- Configure the PodDisruptionBudget
+pdb:
+  enabled: true
+  maxUnavailable: "90%"
+# -- Configure the HorizontalPodAutoscaler
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 50
+  # -- metrics if targetCPUUtilizationPercentage is not set
+  metrics: []
+  # -- Scaling Policies
+  behavior: {}
+# -- Add custom normal and secret envs to the service
+usrEnvs:
+  # -- Add custom normal envs to the service
+  # variable1: value1
+  normal: {}
+  # -- Add custom secret envs to the service
+  # variable1: value1
+  secret: {}
+# -- Add custom dns policy
+dnsPolicy: ""
+# -- Add custom dns config
+dnsConfig: {}
+image:
+  # -- Image pullPolicy to use for deploying.
+  pullPolicy: IfNotPresent
+  # -- Image  to use for deploying.
+  repository: ghcr.io/janssenproject/jans/all-in-one
+  # -- Image  tag to use for deploying.
+  tag: 1.0.20_dev
+  # -- Image Pull Secrets
+  pullSecrets: [ ]
+# -- Service replica number.
+replicas: 1
+# -- Resource specs.
+resources:
+  limits:
+    # -- CPU limit.
+    cpu: 2500m
+    # -- Memory limit.
+    memory: 2500Mi
+  requests:
+    # -- CPU request.
+    cpu: 2500m
+    # -- Memory request.
+    memory: 2500Mi
+# -- Configure the liveness healthcheck for the auth server if needed.
+livenessProbe:
+  # -- Executes the python3 healthcheck.
+  # https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py
+  exec:
+    command:
+      - python3
+      - /app/scripts/healthcheck.py
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+# -- Configure the readiness healthcheck for the auth server if needed.
+# https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py
+readinessProbe:
+  exec:
+    command:
+      - python3
+      - /app/scripts/healthcheck.py
+  initialDelaySeconds: 25
+  periodSeconds: 25
+  timeoutSeconds: 5
+# -- Configure any additional volumes that need to be attached to the pod
+volumes: []
+# -- Configure any additional volumesMounts that need to be attached to the containers
+volumeMounts: []
+# Actions on lifecycle events such as postStart and preStop
+# Example
+# lifecycle:
+#   postStart:
+#     exec:
+#       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+lifecycle: {}
+# -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
+additionalLabels: { }
+# -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
+additionalAnnotations: { }

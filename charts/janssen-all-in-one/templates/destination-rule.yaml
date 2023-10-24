@@ -15,7 +15,7 @@ metadata:
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
 {{- end }}
 spec:
-  host: {{ index .Values "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
+  host: {{ .Values.service.name }}.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL

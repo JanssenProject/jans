@@ -103,18 +103,11 @@ data:
   | squote
   }}
   {{- end }}
-  {{- if and (not .Values.isFqdnRegistered ) (or (eq .Values.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.storageClass.provisioner "openebs.io/local")) }}
+  {{- if not .Values.isFqdnRegistered }}
   LB_ADDR: {{ .Values.configmap.lbAddr }}
   {{- end }}
   CN_PERSISTENCE_TYPE: {{ .Values.cnPersistenceType }}
-  {{- if or (eq .Values.cnPersistenceType "ldap") (eq .Values.cnPersistenceType "hybrid")  }}
-  # used only if CN_PERSISTENCE_TYPE is ldap or hybrid
-  {{- if .Values.configmap.cnLdapUrl }}
-  CN_LDAP_URL: {{ .Values.configmap.cnLdapUrl | quote }}
-  {{- else }}
-  CN_LDAP_URL: {{ cat ( .Values.opendj.ldapServiceName ) ":1636" | quote | nospace }}
-  {{- end }}
-  {{- else if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
+  {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
   #  used only if CN_PERSISTENCE_TYPE is couchbase or hybrid
   CN_COUCHBASE_URL: {{ .Values.configmap.cnCouchbaseUrl }}
   CN_COUCHBASE_BUCKET_PREFIX: {{ .Values.configmap.cnCouchbaseBucketPrefix }}
@@ -131,12 +124,6 @@ data:
   CN_SSL_CERT_FROM_SECRETS: "true"
   {{- end }}
   CN_CONTAINER_MAIN_NAME: {{ .Release.Name }}-auth-server
-  # options: default/user/site/cache/statistic used only if CN_PERSISTENCE_TYPE is hybrid or hybrid
-  {{- if or (eq .Values.cnPersistenceType "hybrid") (eq .Values.cnPersistenceType "ldap") }}
-   # must the same as the opendj service name
-  CN_CERT_ALT_NAME: {{ .Values.opendj.ldapServiceName }} #{{ template "janssen-all-in-one.fullname" . }}-service
-  CN_HYBRID_MAPPING: {{ .Values.configmap.cnPersistenceHybridMapping | quote }}
-  {{- end }}
   # Auto enable installation of some services
   {{ if eq .Values.configmap.cnCacheType "REDIS" }}
   CN_REDIS_URL: {{ .Values.configmap.cnRedisUrl | quote }}
