@@ -17,9 +17,9 @@ class JansSamlInstaller(JettyInstaller):
     setattr(Config, install_var + '_pre_released', True)
 
     source_files = [
-        (os.path.join(Config.dist_jans_dir, 'jans-keycloak-storage-api.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-keycloak-storage-api/{0}/jans-keycloak-storage-api-{0}.jar').format(base.current_app.app_info['jans_version'])),
+        (os.path.join(Config.dist_jans_dir, 'kc-jans-storage-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-storage-plugin/{0}/kc-jans-storage-plugin-{0}.jar').format(base.current_app.app_info['jans_version'])),
         (os.path.join(Config.dist_jans_dir, 'jans-scim-model.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-model/{0}/jans-scim-model-{0}.jar').format(base.current_app.app_info['jans_version'])),
-        (os.path.join(Config.dist_jans_dir, 'jans-keycloak-storage-api.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-keycloak-storage-api/{0}/jans-keycloak-storage-api-{0}.zip').format(base.current_app.app_info['jans_version'])),
+        (os.path.join(Config.dist_jans_dir, 'kc-jans-storage-plugin-deps.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-storage-plugin/{0}/kc-jans-storage-plugin-{0}-deps.zip').format(base.current_app.app_info['jans_version'])),
         (os.path.join(Config.dist_app_dir, 'keycloak.zip'), 'https://github.com/keycloak/keycloak/releases/download/{0}/keycloak-{0}.zip'.format(base.current_app.app_info['KC_VERSION'])),
         (os.path.join(Config.dist_jans_dir, 'kc-jans-authn-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-authn-plugin/{0}/kc-jans-authn-plugin-{0}.jar').format(base.current_app.app_info['jans_version'])),
         (os.path.join(Config.dist_jans_dir, 'kc-jans-authn-plugin-deps.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-authn-plugin/{0}/kc-jans-authn-plugin-{0}-deps.zip').format(base.current_app.app_info['jans_version'])),
