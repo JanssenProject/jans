@@ -1,4 +1,4 @@
-package io.jans.chip.services;
+package io.jans.chip.modal;
 
 import android.support.annotation.MainThread;
 import android.support.annotation.Nullable;

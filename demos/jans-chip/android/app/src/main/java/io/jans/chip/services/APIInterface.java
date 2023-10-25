@@ -29,6 +29,7 @@ public interface APIInterface {
                                                    @Field("password") String password,
                                                    @Field("state") String state,
                                                    @Field("nonce") String nonce,
+                                                   @Field("use_device_session") boolean useDeviceSession,
                                                    @Url String url);
     @FormUrlEncoded
     @POST
