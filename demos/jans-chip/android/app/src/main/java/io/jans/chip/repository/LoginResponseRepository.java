@@ -12,7 +12,7 @@ import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.OperationError;
 import io.jans.chip.retrofit.RetrofitClient;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -59,6 +59,7 @@ public class LoginResponseRepository {
                         passwordText,
                         UUID.randomUUID().toString(),
                         UUID.randomUUID().toString(),
+                        true,
                         opConfiguration.getAuthorizationChallengeEndpoint());
         call.enqueue(new Callback<LoginResponse>() {
             @Override
