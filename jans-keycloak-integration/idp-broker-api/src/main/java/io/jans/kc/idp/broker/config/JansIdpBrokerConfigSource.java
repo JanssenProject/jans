@@ -1,4 +1,4 @@
-package io.jans.idp.keycloak.config;
+package io.jans.kc.idp.broker.config;
 
 import io.jans.idp.keycloak.util.Constants;
 
@@ -16,17 +16,17 @@ import org.keycloak.component.ComponentValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JansConfigSource implements ConfigSource {
+public class JansIdpBrokerConfigSource implements ConfigSource {
 
-    private static Logger logger = LoggerFactory.getLogger(JansConfigSource.class);
-    private static final String CONFIG_FILE_NAME = "jans-keycloak-storage-api.properties";
+    private static Logger logger = LoggerFactory.getLogger(JansIdpBrokerConfigSource.class);
+    private static final String CONFIG_FILE_NAME = "jans-kc-idp-broker.properties";
     
     private String configFilePath = null;
     private Properties properties = null;
     private Map<String, String> propertiesMap = new HashMap<>();
 
-    public JansConfigSource() {
-        this.configFilePath = System.getProperty(Constants.JANS_CONFIG_PROP_PATH);
+    public JansIdpBrokerConfigSource() {
+        this.configFilePath = System.getProperty(Constants.JANS_KC-IDP-CONFIG_PROP_PATH);
         logger.info("this.configFilePath:{}", configFilePath);
        
         if (StringUtils.isBlank(configFilePath)) {
@@ -63,7 +63,7 @@ public class JansConfigSource implements ConfigSource {
     @Override
     public String getValue(String name) {
         try {
-            logger.trace("JansConfigSource()::getValue() - name:{} - :{}", name, properties.getProperty(name));
+            logger.trace("JansIdpBrokerConfigSource()::getValue() - name:{} - :{}", name, properties.getProperty(name));
             return properties.getProperty(name);
         } catch (Exception e) {
             logger.error("Unable to read properties from file:{} - error is :{} ", CONFIG_FILE_NAME, e);
@@ -79,16 +79,16 @@ public class JansConfigSource implements ConfigSource {
 
     public String getQualifiedFileName() {
         String fileSeparator = FileSystems.getDefault().getSeparator();
-        logger.info("\n\n JansConfigSource()::getQualifiedFileName() - fileSeparator:{}", fileSeparator);
+        logger.info("\n\n JansIdpBrokerConfigSource()::getQualifiedFileName() - fileSeparator:{}", fileSeparator);
         return this.configFilePath + fileSeparator + CONFIG_FILE_NAME;
     }
 
     private Properties loadProperties() {
-        logger.info("\n\n\n ***** JansConfigSource::loadProperties() - Properties form Config.Scope ");
+        logger.info("\n\n\n ***** JansIdpBrokerConfigSource::loadProperties() - Properties form Config.Scope ");
 
         // Get file path
         String filePath = getQualifiedFileName();
-        logger.info("\n\n\n ***** JansConfigSource::loadProperties() - properties:{}, filePath:{}", properties, filePath);
+        logger.info("\n\n\n ***** JansIdpBrokerConfigSource::loadProperties() - properties:{}, filePath:{}", properties, filePath);
 
         if (StringUtils.isBlank(filePath)) {
             logger.error("Property filePath is null!");
@@ -97,7 +97,7 @@ public class JansConfigSource implements ConfigSource {
 
         // load the file handle for main.properties
         try (FileInputStream file = new FileInputStream(filePath)) {
-            logger.info(" JansConfigSource::loadProperties() - file:{}", file);
+            logger.info(" JansIdpBrokerConfigSource::loadProperties() - file:{}", file);
 
             // load all the properties from this file
             properties = new Properties();
@@ -105,7 +105,7 @@ public class JansConfigSource implements ConfigSource {
             properties.stringPropertyNames().stream()
                     .forEach(key -> propertiesMap.put(key, properties.getProperty(key)));
 
-            logger.debug("JansConfigSource()::loadProperties() - properties :{}", properties);
+            logger.debug("JansIdpBrokerConfigSource()::loadProperties() - properties :{}", properties);
 
             if (properties.isEmpty()) {
                 logger.error("Could not load config properties!");

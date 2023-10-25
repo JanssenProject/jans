@@ -1,4 +1,4 @@
-package io.jans.idp.keycloak.util;
+package io.jans.kc.idp.broker.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

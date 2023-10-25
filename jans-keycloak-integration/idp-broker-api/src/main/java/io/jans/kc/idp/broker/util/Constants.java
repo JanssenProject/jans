@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.idp.keycloak.util;
+package io.jans.kc.idp.broker.util;
 
 public class Constants {
 
