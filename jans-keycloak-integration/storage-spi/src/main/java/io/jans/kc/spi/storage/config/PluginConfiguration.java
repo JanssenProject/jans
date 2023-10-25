@@ -6,10 +6,10 @@ public class PluginConfiguration {
 
     private static final String AUTH_TOKEN_ENDPOINT_KEY = "jans-storage-auth-token-endpoint";
     private static final String SCIM_USER_ENDPOINT_KEY = "jans-storage-scim-user-endpoint";
-    private static final String SCIM_USER_SEARCH_ENDPOINT_KEY = "jans-storage-search-endpoint";
+    private static final String SCIM_USER_SEARCH_ENDPOINT_KEY = "jans-storage-scim-user-search-endpoint";
     private static final String SCIM_OAUTH_SCOPE_KEY = "jans-storage-scim-oauth-scope";
-    private static final String SCIM_CLIENT_ID_KEY = "jans-storage-client-id";
-    private static final String SCIM_CLIENT_SECRET = "jans-storage-client-secret";
+    private static final String SCIM_CLIENT_ID_KEY = "jans-storage-scim-client-id";
+    private static final String SCIM_CLIENT_SECRET = "jans-storage-scim-client-secret";
 
     private String authTokenEndpoint;
     private String scimUserEndpoint;
