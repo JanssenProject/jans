@@ -1,0 +1,16 @@
+{{- if .Values.certManager.certificate.enabled }}
+{{- $domain := (required "Domain is required in chartValues when certManager is enabled" .Values.fqdn) }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  secretName: {{ .Values.certManager.certificate.tlsSecretName }}
+  dnsNames:
+  - {{ quote $domain }}
+  issuerRef:
+    name: {{ required "nginx-ingress.certManager.certificate.issuerName is required in chart values" (index .Values "nginx-ingress" "certManager" "certificate" "issuerName") }}
+    kind: {{ required "nginx-ingress.certManager.certificate.issuerKind is required in chart values" (index .Values "nginx-ingress" "certManager" "certificate" "issuerKind") }}
+    group: {{ required "nginx-ingress.certManager.certificate.issuerGroup is required in chart values" (index .Values "nginx-ingress" "certManager" "certificate" "issuerGroup") }}
+{{- end }}
