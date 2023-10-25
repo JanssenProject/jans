@@ -105,7 +105,7 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim", "docker-jans-monolith", "docker-jans-link", "docker-jans-casa" ]
+        simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim", "docker-jans-monolith", "docker-jans-link", "docker-jans-casa", "docker-jans-all-in-one" ]
     steps:
     - name: Checkout
       uses: actions/checkout@v3

@@ -40,7 +40,7 @@ jobs:
       - name: Update stable requirements in docker images
         id: build_stable_reqs
         run: |
-          dockerimages="auth-server certmanager config-api configurator fido2 persistence-loader scim link"
+          dockerimages="auth-server certmanager config-api configurator fido2 persistence-loader scim link casa all-in-one"
           for image in $dockerimages; do
             sed -i '/git+https/c\git+https://github.com/${{ github.repository }}@${{ github.sha }}#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
           done
