@@ -7,4 +7,7 @@ public enum AppConfig {
     public static final String SQLITE_DB_NAME = "chipDB";
     public static final String APP_NAME = "jans-chip";
     public static final String DEFAULT_S_NO = "1";
+    public static final int ROOM_DATABASE_VERSION = 1;
+    public static final String[] scopeArray = {"openid", "authorization_challenge", "profile"};
+    public static final String[] defaultScopeArray = {"openid", "authorization_challenge"};
 }

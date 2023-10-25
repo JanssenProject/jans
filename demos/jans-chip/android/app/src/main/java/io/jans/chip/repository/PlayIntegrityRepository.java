@@ -17,7 +17,7 @@ import io.jans.chip.modal.OperationError;
 import io.jans.chip.modal.appIntegrity.AppIntegrityEntity;
 import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
 import io.jans.chip.retrofit.RetrofitClient;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
 import io.jans.chip.utils.AppConfig;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -179,6 +179,7 @@ public class PlayIntegrityRepository {
 
     private AppIntegrityEntity setErrorInAppIntegrityEntity(String error) {
         AppIntegrityEntity appIntegrityEntity = new AppIntegrityEntity();
+        appIntegrityEntity.setSno(AppConfig.DEFAULT_S_NO);
         appIntegrityEntity.setError(error);
         return appIntegrityEntity;
 

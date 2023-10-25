@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import io.jans.chip.modal.TokenResponse;
 import io.jans.chip.repository.TokenResponseRepository;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
 
 public class TokenViewModel extends ViewModel {
     TokenResponseRepository tokenResponseRepository;

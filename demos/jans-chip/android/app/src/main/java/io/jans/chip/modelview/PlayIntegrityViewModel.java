@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import io.jans.chip.modal.appIntegrity.AppIntegrityResponse;
 import io.jans.chip.repository.PlayIntegrityRepository;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
 
 public class PlayIntegrityViewModel extends ViewModel {
     PlayIntegrityRepository playIntegrityRepository;
