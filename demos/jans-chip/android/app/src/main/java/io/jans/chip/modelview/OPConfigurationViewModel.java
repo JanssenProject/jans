@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.repository.OPConfigurationRepository;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
 
 public class OPConfigurationViewModel extends ViewModel {
     OPConfigurationRepository opConfigurationRepository;

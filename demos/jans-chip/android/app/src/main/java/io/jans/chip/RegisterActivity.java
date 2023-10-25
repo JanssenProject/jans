@@ -16,13 +16,16 @@ import androidx.lifecycle.Observer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.appIntegrity.AppIntegrityEntity;
 import io.jans.chip.modelview.DCRViewModel;
 import io.jans.chip.modelview.OPConfigurationViewModel;
+import io.jans.chip.utils.AppConfig;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -50,16 +53,14 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton = findViewById(R.id.registerButton);
         issuer = findViewById(R.id.issuer);
         scopes = findViewById(R.id.scopes);
-
-        String[] scopeArray = {"openid", "authorization_challenge"};
-        showItemSelectionPopup(scopes, scopeArray);
+        showItemSelectionPopup(scopes, AppConfig.scopeArray);
 
         //Display app integrity
         displayAppIntegrity(appDatabase);
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selectAllScopesByDefault(scopes, scopeArray);
+                selectScopesByDefault(scopes, AppConfig.defaultScopeArray);
                 String issuerText = issuer.getText().toString();
                 String scopeText = scopes.getText().toString();
                 if (validateInputs()) {
@@ -100,15 +101,20 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton.setEnabled(true);
     }
 
-    private void selectAllScopesByDefault(TextView scopesEditText, String[] scopeArray) {
+    private void selectScopesByDefault(TextView scopesEditText, String[] scopeArray) {
         // Initialize string builder
         StringBuilder stringBuilder = new StringBuilder();
-        // use for loop
-        for (int j = 0; j < scopeArray.length; j++) {
-            // concat array value
-            stringBuilder.append(scopeArray[j]);
+        Set<String> scopeSet = new HashSet<>();
+        scopeSet.addAll(Arrays.asList(scopeArray));
+
+        String scopesString = scopesEditText.getText().toString();
+        scopeSet.addAll(Arrays.asList(scopesString.split(" ")));
+
+        scopeSet.stream().forEach(scope -> {
+            stringBuilder.append(scope);
             stringBuilder.append(" ");
-        }
+        });
+
         // set text on textView
         scopesEditText.setText(stringBuilder.toString());
     }

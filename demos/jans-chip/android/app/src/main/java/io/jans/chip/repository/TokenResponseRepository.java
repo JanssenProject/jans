@@ -16,7 +16,8 @@ import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.OperationError;
 import io.jans.chip.modal.TokenResponse;
 import io.jans.chip.retrofit.RetrofitClient;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
+import io.jans.chip.utils.AppConfig;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -63,7 +64,7 @@ public class TokenResponseRepository {
                             authorizationCode,
                             "authorization_code",
                             opConfiguration.getIssuer(),
-                            "openid",
+                            oidcClient.getScope(),
                             "Basic " + Base64.encodeToString((oidcClient.getClientId() + ":" + oidcClient.getClientSecret()).getBytes(), Base64.NO_WRAP),
                             DPoPProofFactory.getInstance().issueDPoPJWTToken("POST", opConfiguration.getIssuer()),
                             opConfiguration.getTokenEndpoint());

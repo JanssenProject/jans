@@ -10,7 +10,7 @@ import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.OperationError;
 import io.jans.chip.modal.UserInfoResponse;
 import io.jans.chip.retrofit.RetrofitClient;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -70,6 +70,8 @@ public class UserInfoResponseRepository {
                     Log.e(TAG, "Error in fetching getUserInfo.\n Error code: " + response.code() + "\n Error message: " + response.message());
                     if (!silentOnError) {
                         userInfoResponseLiveData.setValue(setErrorInLiveObject("Error in fetching getUserInfo.\n Error code: " + response.code() + "\n Error message: " + response.message()));
+                    } else {
+                        userInfoResponseLiveData.setValue(setErrorInLiveObject("Error in fetching getUserInfo. The previous session has expired.\n Error code: " + response.code() + "\n Error message: " + response.message()));
                     }
                 }
             }
@@ -79,7 +81,8 @@ public class UserInfoResponseRepository {
                 Log.e(TAG, "Error in fetching getUserInfo :: " + t.getMessage());
                 if (!silentOnError) {
                     userInfoResponseLiveData.setValue(setErrorInLiveObject("Error in fetching getUserInfo :: " + t.getMessage()));
-
+                } else {
+                    userInfoResponseLiveData.setValue(setErrorInLiveObject("Error in fetching getUserInfo :: " + t.getMessage()));
                 }
             }
         });

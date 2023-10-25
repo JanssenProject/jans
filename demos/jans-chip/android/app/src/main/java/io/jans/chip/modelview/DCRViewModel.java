@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import io.jans.chip.modal.OIDCClient;
 import io.jans.chip.repository.DCRRepository;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
 
 public class DCRViewModel extends ViewModel {
     DCRRepository dcrRepository;
