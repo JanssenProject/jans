@@ -11,7 +11,7 @@
 
 	<parent>
 		<groupId>io.jans</groupId>
-		<artifactId>kc-jans-parent</artifactId>
+		<artifactId>jans-kc-parent</artifactId>
 		<version>1.0.20-SNAPSHOT</version>
 	</parent>
 
