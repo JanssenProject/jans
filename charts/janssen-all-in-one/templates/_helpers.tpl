@@ -140,6 +140,9 @@ Create aio enabled list
 {{- if index .Values "config-api" "enabled" }}
 {{ $newList = append $newList ("jans-config-api") }}
 {{- end}}
+{{- if .Values.link.enabled}}
+{{ $newList = append $newList ("jans-link") }}
+{{- end}}
 {{- if .Values.fido2.enabled}}
 {{ $newList = append $newList ("jans-fido2") }}
 {{- end}}
