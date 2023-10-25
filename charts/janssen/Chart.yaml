@@ -26,7 +26,7 @@ annotations:
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
   catalog.cattle.io/release-name: janssen
-  catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
+  catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management Microservices
 apiVersion: v2
 appVersion: "1.0.20-dev"
 icon: >-
@@ -38,7 +38,7 @@ sources:
 maintainers:
   - name: moabu
     email: support@jans.io
-description: Janssen Access and Identity Management
+description: Janssen Access and Identity Management Microservices Chart. This chart deploys each janssen microservice as a separate deployment.
 name: janssen
 version: 1.0.20-dev
 dependencies:

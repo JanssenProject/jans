@@ -2,7 +2,7 @@
 
 ![Version: 1.0.20-dev](https://img.shields.io/badge/Version-1.0.20--dev-informational?style=flat-square) ![AppVersion: 1.0.20-dev](https://img.shields.io/badge/AppVersion-1.0.20--dev-informational?style=flat-square)
 
-Janssen Access and Identity Management
+Janssen Access and Identity Management Microservices Chart. This chart deploys each janssen microservice as a separate deployment.
 
 **Homepage:** <https://jans.io>
 
