@@ -78,11 +78,14 @@ ARG CASA_CONFIG_VERSION=${CN_VERSION}
 ARG CASA_CONFIG_BUILD_DATE=${CN_BUILD_DATE}
 ARG FIDO2_CLIENT_VERSION=${CN_VERSION}
 ARG FIDO2_CLIENT_BUILD_DATE=${CN_BUILD_DATE}
+ARG AGAMA_INBOUND_VERSION=${CN_VERSION}
+ARG AGAMA_INBOUND_BUILD_DATE=${CN_BUILD_DATE}
 
 RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://jenkins.jans.io/maven/io/jans/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
-    && wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
+    && wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
+    && wget -q https://jenkins.jans.io/maven/io/jans/agama-inbound/${AGAMA_INBOUND_VERSION}/agama-inbound-${AGAMA_INBOUND_VERSION}-jar-with-dependencies.jar -P ${JETTY_BASE}/jans-auth/_libs
 
 # =====================
 # jans-linux-setup sync
