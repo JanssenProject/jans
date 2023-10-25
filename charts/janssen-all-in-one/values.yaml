@@ -461,6 +461,58 @@ nginx-ingress:
   # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
   enabled: true
   ingress:
+    # -- openid-configuration ingress resource labels. key app is taken
+    openidConfigLabels: { }
+    # -- openid-configuration ingress resource additional annotations.
+    openidAdditionalAnnotations: { }
+    # -- device-code ingress resource labels. key app is taken
+    deviceCodeLabels: { }
+    # -- device-code ingress resource additional annotations.
+    deviceCodeAdditionalAnnotations: { }
+    # -- Firebase Messaging ingress resource labels. key app is taken
+    firebaseMessagingLabels: { }
+    # -- Firebase Messaging ingress resource additional annotations.
+    firebaseMessagingAdditionalAnnotations: { }
+    # -- uma2 config ingress resource labels. key app is taken
+    uma2ConfigLabels: { }
+    # -- uma2 config ingress resource additional annotations.
+    uma2AdditionalAnnotations: { }
+    # -- webfinger ingress resource labels. key app is taken
+    webfingerLabels: { }
+    # -- webfinger ingress resource additional annotations.
+    webfingerAdditionalAnnotations: { }
+    # -- webdiscovery ingress resource labels. key app is taken
+    webdiscoveryLabels: { }
+    # -- webdiscovery ingress resource additional annotations.
+    webdiscoveryAdditionalAnnotations: { }
+    # -- SCIM config ingress resource labels. key app is taken
+    scimConfigLabels: { }
+    # -- SCIM config ingress resource additional annotations.
+    scimConfigAdditionalAnnotations: { }
+    # -- SCIM config ingress resource labels. key app is taken
+    scimLabels: { }
+    # -- SCIM ingress resource additional annotations.
+    scimAdditionalAnnotations: { }
+    # -- configAPI ingress resource labels. key app is taken
+    configApiLabels: { }
+    # -- ConfigAPI ingress resource additional annotations.
+    configApiAdditionalAnnotations: { }
+    # -- u2f config ingress resource labels. key app is taken
+    u2fConfigLabels: { }
+    # -- u2f config ingress resource additional annotations.
+    u2fAdditionalAnnotations: { }
+    # -- fido2 config ingress resource labels. key app is taken
+    fido2ConfigLabels: { }
+    # -- fido2 config ingress resource additional annotations.
+    fido2ConfigAdditionalAnnotations: { }
+    # -- Auth server ingress resource labels. key app is taken
+    authServerLabels: { }
+    # -- Auth server ingress resource additional annotations.
+    authServerAdditionalAnnotations: { }
+    # -- Casa ingress resource labels. key app is taken
+    casaLabels: { }
+    # -- Casa ingress resource additional annotations.
+    casaAdditionalAnnotations: { }
     # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
     additionalLabels: { }
     # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
@@ -476,13 +528,8 @@ nginx-ingress:
     # Change ingressClassName to "public" if using microk8s
     ingressClassName: nginx
     path: /
-    hosts:
-      - demoexample.jans.io
     # -- Secrets holding HTTPS CA cert and key.
-    tls:
-      - secretName: tls-certificate
-        hosts:
-          - demoexample.jans.io
+    tlsSecretName: tls-certificate
 # Service manifest properties
 service:
   # -- The name of the aio port within the aio service. Please keep it as default.
