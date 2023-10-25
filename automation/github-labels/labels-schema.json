@@ -80,6 +80,24 @@
       "title-prefixes": []
     }
   },
+  "comp-docker-jans-link": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-link",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-link"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docker-jans-all-in-one": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-all-in-one",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-all-in-one"],
+      "title-prefixes": []
+    }
+  },
   "comp-docker-jans-certmanager": {
     "color": "0052CC",
     "description": "Touching folder /docker-jans-certmanager",
