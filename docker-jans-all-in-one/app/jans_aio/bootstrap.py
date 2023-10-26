@@ -4,39 +4,10 @@ from pathlib import Path
 from contextlib import suppress
 
 from jans.pycloudlib.utils import as_boolean
+from pluggy import PluginManager
 
-SUPERVISORD_PROGRAMS = {
-    "configurator": {
-        "mem_ratio": 0,
-    },
-    "persistence-loader": {
-        "mem_ratio": 0,
-    },
-    "jans-auth": {
-        "mem_ratio": 0.25,
-        "java_opts_env": "CN_AUTH_JAVA_OPTIONS",
-    },
-    "jans-config-api": {
-        "mem_ratio": 0.15,
-        "java_opts_env": "CN_CONFIG_API_JAVA_OPTIONS",
-    },
-    "jans-fido2": {
-        "mem_ratio": 0.15,
-        "java_opts_env": "CN_FIDO2_JAVA_OPTIONS",
-    },
-    "jans-scim": {
-        "mem_ratio": 0.2,
-        "java_opts_env": "CN_SCIM_JAVA_OPTIONS",
-    },
-    "jans-casa": {
-        "mem_ratio": 0.1,
-        "java_opts_env": "CN_CASA_JAVA_OPTIONS",
-    },
-    "jans-link": {
-        "mem_ratio": 0.1,
-        "java_opts_env": "CN_LINK_JAVA_OPTIONS",
-    },
-}
+from jans_aio.hooks import AioPlugin
+from jans_aio.utils import import_from_string
 
 
 def get_max_memory() -> int:
@@ -53,7 +24,11 @@ def get_max_memory() -> int:
     return int(max_mem_bytes / (1024.**2))  # in MB
 
 
-def get_apps_resources(max_memory: int, enabled_programs: _t.Optional[list[str]] = None) -> dict[str, int]:
+def get_apps_resources(
+    max_memory: int,
+    supervisor_programs: dict[str, _t.Any],
+    enabled_programs: _t.Optional[list[str]] = None
+) -> dict[str, int]:
     """Calculate max. memory allocated to all apps in total.
 
     The amount will be `85%` of given `max_memory`.
@@ -69,7 +44,7 @@ def get_apps_resources(max_memory: int, enabled_programs: _t.Optional[list[str]]
     apps_max_mem = int(max_memory * 0.85)  # - (len(enabled_programs) * 128)
 
     used_ratio = 0.001 + sum([
-        SUPERVISORD_PROGRAMS[program]["mem_ratio"]
+        supervisor_programs[program]["mem_ratio"]
         for program in enabled_programs
     ])
 
@@ -77,7 +52,7 @@ def get_apps_resources(max_memory: int, enabled_programs: _t.Optional[list[str]]
 
     apps_mem_alloc = {}
     for program in enabled_programs:
-        allowed_ratio = SUPERVISORD_PROGRAMS[program]["mem_ratio"] * ratio_multiplier
+        allowed_ratio = supervisor_programs[program]["mem_ratio"] * ratio_multiplier
         apps_mem_alloc[program] = int(round(allowed_ratio * int(apps_max_mem)))
     return apps_mem_alloc
 
@@ -100,14 +75,14 @@ def get_heap_sizes(mem_alloc: int) -> tuple[int, int]:
     return min_heap_size, max_heap_size
 
 
-def get_enabled_programs():
+def get_enabled_programs(supervisor_programs):
     user_components = [
         _comp.strip()
         for _comp in os.environ.get("CN_AIO_COMPONENTS", "").split(",")
         if _comp
     ]
 
-    components = list(SUPERVISORD_PROGRAMS.keys())
+    components = list(supervisor_programs.keys())
     if user_components:
         components = [
             comp for comp in user_components
@@ -152,27 +127,6 @@ def render_java_program_conf(program: str, mem_alloc: int, java_opts_env: str = 
     )
 
 
-def main():
-    enabled_programs = get_enabled_programs()
-    apps_mem_alloc = get_apps_resources(get_max_memory(), enabled_programs)
-
-    for program, memory in apps_mem_alloc.items():
-        if "java_opts_env" not in SUPERVISORD_PROGRAMS[program]:
-            continue
-
-        render_java_program_conf(
-            program,
-            memory,
-            SUPERVISORD_PROGRAMS[program]["java_opts_env"],
-        )
-
-    # main supervisord config
-    render_supervisord_conf(list(apps_mem_alloc.keys()))
-
-    # render /etc/nginx/http.d/default.conf
-    render_nginx_default_conf(enabled_programs)
-
-
 def _max_memory_from_cgroups() -> int:
     """Determine max. memory from cgroup.
 
@@ -210,35 +164,134 @@ def _max_memory_from_sysconf() -> int:
     return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
 
 
-def render_nginx_default_conf(enabled_programs):
-    # context for rendered templates
-    ctx = {}
+def render_nginx_default_conf(enabled_programs, nginx_includes):
+    upstream_includes = []
+    location_includes = []
 
-    # list of supported includes per program
-    includes = [
-        ("jans-auth", ["upstream", "location"]),
-        ("jans-config-api", ["upstream", "location"]),
-        ("jans-fido2", ["upstream", "location"]),
-        ("jans-scim", ["upstream", "location"]),
-        ("jans-casa", ["upstream", "location"]),
-        ("jans-link", ["upstream", "location"]),
-    ]
-
-    for program, types in includes:
+    for program, types in nginx_includes.items():
         for type_ in types:
             file_no_ext = f"{program}-{type_}"
 
-            key = file_no_ext.replace("-", "_")
             val = f"include /etc/nginx/jans-aio/{file_no_ext}.conf;"
-            ctx[key] = f"{val}"
 
             if program not in enabled_programs:
                 # disable the include by commenting out the line
-                ctx[key] = f"# {val}"
+                val = f"# {val}"
 
+            if type_ == "upstream":
+                upstream_includes.append(val)
+            else:
+                location_includes.append(val)
+
+    # context for rendered templates
+    ctx = {
+        "upstream_includes": "\n".join(upstream_includes),
+        "location_includes": "\n\t".join(location_includes),
+    }
     tmpl = Path("/app/templates/nginx/nginx-default.conf").read_text().strip()
     Path("/etc/nginx/http.d/default.conf").write_text(tmpl % ctx)
 
 
+class App:
+    def __init__(self):
+        self.plugin_manager = PluginManager("jans_aio")
+        self.plugin_manager.add_hookspecs(AioPlugin)
+
+    def get_supervisor_programs(self):
+        programs = {
+            "configurator": {
+                "mem_ratio": 0,
+            },
+            "persistence-loader": {
+                "mem_ratio": 0,
+            },
+            "jans-auth": {
+                "mem_ratio": 0.25,
+                "java_opts_env": "CN_AUTH_JAVA_OPTIONS",
+            },
+            "jans-config-api": {
+                "mem_ratio": 0.15,
+                "java_opts_env": "CN_CONFIG_API_JAVA_OPTIONS",
+            },
+            "jans-fido2": {
+                "mem_ratio": 0.15,
+                "java_opts_env": "CN_FIDO2_JAVA_OPTIONS",
+            },
+            "jans-scim": {
+                "mem_ratio": 0.2,
+                "java_opts_env": "CN_SCIM_JAVA_OPTIONS",
+            },
+            "jans-casa": {
+                "mem_ratio": 0.1,
+                "java_opts_env": "CN_CASA_JAVA_OPTIONS",
+            },
+            "jans-link": {
+                "mem_ratio": 0.1,
+                "java_opts_env": "CN_LINK_JAVA_OPTIONS",
+            },
+        }
+
+        plugin_programs = self.plugin_manager.hook.add_supervisor_programs()
+        for program in plugin_programs:
+            programs.update(program)
+
+        # merged supervisor programs
+        return programs
+
+    def get_nginx_includes(self):
+        includes = {
+            "jans-auth": ["upstream", "location"],
+            "jans-config-api": ["upstream", "location"],
+            "jans-fido2": ["upstream", "location"],
+            "jans-scim": ["upstream", "location"],
+            "jans-casa": ["upstream", "location"],
+            "jans-link": ["upstream", "location"],
+        }
+
+        plugin_includes = self.plugin_manager.hook.add_nginx_includes()
+        for include in plugin_includes:
+            includes.update(include)
+
+        # merged nginx includes
+        return includes
+
+    def discover_plugins(self) -> None:
+        plugin_names = [
+            name for name in os.environ.get("CN_AIO_PLUGINS", "").split(",")
+            if name
+        ]
+
+        for name in plugin_names:
+            plugin = import_from_string(name)
+            self.plugin_manager.register(plugin())
+
+    def bootstrap(self) -> None:
+        self.discover_plugins()
+
+        supervisor_programs = app.get_supervisor_programs()
+        nginx_includes = app.get_nginx_includes()
+
+        enabled_programs = get_enabled_programs(supervisor_programs)
+
+        apps_mem_alloc = get_apps_resources(get_max_memory(), supervisor_programs, enabled_programs)
+
+        for program, memory in apps_mem_alloc.items():
+            if "java_opts_env" not in supervisor_programs[program]:
+                continue
+
+            render_java_program_conf(
+                program,
+                memory,
+                supervisor_programs[program]["java_opts_env"],
+            )
+
+        # main supervisord config
+        render_supervisord_conf(list(apps_mem_alloc.keys()))
+
+        # render /etc/nginx/http.d/default.conf
+        render_nginx_default_conf(enabled_programs, nginx_includes)
+
+
 if __name__ == "__main__":
-    main()
+    app = App()
+    app.bootstrap()

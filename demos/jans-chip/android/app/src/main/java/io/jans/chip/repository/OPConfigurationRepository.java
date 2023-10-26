@@ -7,7 +7,7 @@ import io.jans.chip.AppDatabase;
 import io.jans.chip.modal.OPConfiguration;
 import io.jans.chip.modal.OperationError;
 import io.jans.chip.retrofit.RetrofitClient;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
 import io.jans.chip.utils.AppConfig;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -64,6 +64,7 @@ public class OPConfigurationRepository {
                 }
             });
         } catch (Exception e) {
+            Log.e(TAG, "Error in  fetching OP Configuration.\n" + e.getMessage());
             opConfigurationLiveData.setValue(setErrorInLiveObject("Error in  fetching OP Configuration.\n" + e.getMessage()));
         }
         return opConfigurationLiveData;

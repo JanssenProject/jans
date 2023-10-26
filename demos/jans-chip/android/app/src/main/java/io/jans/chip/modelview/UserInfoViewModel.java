@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import io.jans.chip.modal.UserInfoResponse;
 import io.jans.chip.repository.UserInfoResponseRepository;
-import io.jans.chip.services.SingleLiveEvent;
+import io.jans.chip.modal.SingleLiveEvent;
 
 public class UserInfoViewModel extends ViewModel {
     UserInfoResponseRepository userInfoResponseRepository;
