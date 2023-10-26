@@ -24,21 +24,3 @@ LOGGING_CONFIG = {
         },
     },
 }
-
-
-# _JANS_AIO_COMPONENTS = (
-#     # "configurator",
-#     # "persistence_loader",
-#     # "jans_auth",
-#     # "jans_config_api",
-#     # "jans_fido2",
-#     # "jans_scim",
-#     # "jans-casa",
-# )
-
-# for comp in _JANS_AIO_COMPONENTS:
-#     LOGGING_CONFIG["loggers"][comp] = {
-#         "handlers": ["console"],
-#         "level": "INFO",
-#         "propagate": False,
-#     }

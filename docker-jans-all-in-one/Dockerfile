@@ -45,7 +45,7 @@ FROM bellsoft/liberica-openjdk-alpine:17.0.8
 # hadolint ignore=DL3018
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache tini bash curl openssl python3 py3-cryptography py3-psycopg2 py3-grpcio nodejs npm nginx \
+    && apk add --no-cache tini bash curl openssl python3 py3-cryptography py3-psycopg2 py3-grpcio nginx \
     && apk add --no-cache --virtual .build-deps git wget
 
 # ------
