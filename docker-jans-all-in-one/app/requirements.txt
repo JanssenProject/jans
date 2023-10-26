@@ -7,4 +7,5 @@ fqdn==1.4.0
 ruamel.yaml==0.16.10
 supervisor==4.2.5
 jwcrypto==1.4.2
+pluggy==1.3.0
 git+https://github.com/JanssenProject/jans@25633cf9ab019fdf60a65d2c27f2665c359abab7#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
