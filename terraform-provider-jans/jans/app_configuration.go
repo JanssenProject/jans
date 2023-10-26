@@ -359,7 +359,9 @@ type AppConfiguration struct {
 	DpopJtiCacheTime                                          int                                   `schema:"dpop_jti_cache_time" json:"dpopJtiCacheTime"`
 	DpopUseNonce                                              bool                                  `schema:"dpop_use_nonce" json:"dpopUseNonce"`
 	DpopNonceCacheTime                                        int                                   `schema:"dpop_nonce_cache_time" json:"dpopNonceCacheTime"`
+	DpopJktForceForAuthorizationCode                          bool                                  `schema:"dpop_jkt_force_for_authorization_code" json:"dpopJktForceForAuthorizationCode"`
 	AllowIdTokenWithoutImplicitGrantType                      bool                                  `schema:"allow_id_token_without_implicit_grant_type" json:"allowIdTokenWithoutImplicitGrantType"`
+	ForceRopcInAuthorizationEndpoint                          bool                                  `schema:"force_ropc_in_authorization_endpoint" json:"forceRopcInAuthorizationEndpoint"`
 	DiscoveryCacheLifetimeInMinutes                           int                                   `schema:"discovery_cache_lifetime_in_minutes" json:"discoveryCacheLifetimeInMinutes"`
 	DiscoveryAllowedKeys                                      []string                              `schema:"discovery_allowed_keys" json:"discoveryAllowedKeys"`
 	DiscoveryDenyKeys                                         []string                              `schema:"discovery_deny_keys" json:"discoveryDenyKeys"`
