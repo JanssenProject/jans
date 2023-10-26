@@ -1,3 +1,12 @@
+terraform {
+  required_version = ">= 0.12.0"
+  required_providers {
+    janssen = {
+      source = "JanssenProject/jans"
+      version = "0.6.0"
+    }
+  }
+}
 
 provider "jans" {
   url           = "https://test-instnace.jans.io"

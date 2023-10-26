@@ -15,8 +15,9 @@ type ProjectMetadata struct {
 }
 
 type DeploymentDetails struct {
-	Folders []string `json:"folders" schema:"folders"`
-	Libs    []string `json:"libs" schema:"libs"`
+	Folders       []string `json:"folders" schema:"folders"`
+	Libs          []string `json:"libs" schema:"libs"`
+	Autoconfigure bool     `json:"autoconfigure" schema:"autoconfigure"`
 	// FlowsError []string `json:"flowsError" schema:"flows_error"`
 	Error           string          `json:"error" schema:"error"`
 	ProjectMetadata ProjectMetadata `json:"projectMetadata" schema:"project_metadata"`
@@ -97,7 +98,7 @@ func (c *Client) GetAgamaDeployment(ctx context.Context, qname string) (*AgamaDe
 }
 
 // CreateAgamaDeployment creates a new Agama flow.
-func (c *Client) CreateAgamaDeployment(ctx context.Context, name string, data []byte) error {
+func (c *Client) CreateAgamaDeployment(ctx context.Context, name string, autoconfig bool, data []byte) error {
 
 	if name == "" {
 		return fmt.Errorf("agama project name may not be empty")
@@ -108,7 +109,12 @@ func (c *Client) CreateAgamaDeployment(ctx context.Context, name string, data []
 		return fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.postZipFile(ctx, "/jans-config-api/api/v1/agama-deployment/"+name, token, data, nil); err != nil {
+	url := "/jans-config-api/api/v1/agama-deployment/" + name
+	if autoconfig {
+		url += "?autoconfigure=true"
+	}
+
+	if err := c.postZipFile(ctx, url, token, data, nil); err != nil {
 		return fmt.Errorf("post request failed: %w", err)
 	}
 
