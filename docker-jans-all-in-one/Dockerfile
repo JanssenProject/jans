@@ -220,6 +220,8 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-casa/plugins \
     ${JETTY_BASE}/jans-casa/resources \
     ${JETTY_BASE}/jans-casa/logs \
+    ${JETTY_BASE}/jans-link/resources \
+    ${JETTY_BASE}/jans-link/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
@@ -250,6 +252,8 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-casa/plugins \
     ${JETTY_BASE}/jans-casa/resources \
     ${JETTY_BASE}/jans-casa/logs \
+    ${JETTY_BASE}/jans-link/resources \
+    ${JETTY_BASE}/jans-link/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
