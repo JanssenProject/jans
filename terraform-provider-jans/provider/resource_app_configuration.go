@@ -1939,10 +1939,20 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Demonstration of Proof-of-Possession (DPoP) nonce cache time.",
 			},
+			"dpop_jkt_force_for_authorization_code": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Demonstration of Proof-of-Possession (DPoP) JWK Thumbprint force for authorization code.",
+			},
 			"allow_id_token_without_implicit_grant_type": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Specifies if a token without implicit grant types is allowed.",
+			},
+			"force_ropc_in_authorization_endpoint": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Specifies if ROPC is forced in authorization endpoint.",
 			},
 			"discovery_cache_lifetime_in_minutes": {
 				Type:        schema.TypeInt,

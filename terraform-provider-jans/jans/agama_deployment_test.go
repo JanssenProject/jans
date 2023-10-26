@@ -2,7 +2,7 @@ package jans
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -40,7 +40,7 @@ func TestAgamaDeployment(t *testing.T) {
 	}
 
 	// read file into byte array
-	contents, err := ioutil.ReadAll(zipFile)
+	contents, err := io.ReadAll(zipFile)
 	if err != nil {
 		t.Fatalf("failed to read test file: %v", err)
 	}
@@ -51,7 +51,7 @@ func TestAgamaDeployment(t *testing.T) {
 	})
 
 	// upload test file
-	if err = client.CreateAgamaDeployment(ctx, "testDeployment", contents); err != nil {
+	if err = client.CreateAgamaDeployment(ctx, "testDeployment", true, contents); err != nil {
 		t.Fatalf("failed to create test deployment: %v", err)
 	}
 
@@ -63,6 +63,15 @@ func TestAgamaDeployment(t *testing.T) {
 
 	if deployment.Name != "testDeployment" {
 		t.Errorf("expected deployment name to be 'testDeployment', got '%s'", deployment.Name)
+	}
+
+	deployments, err = client.GetAgamaDeployments(ctx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(deployments) != 1 {
+		t.Errorf("expected 1 deployment, got %d", len(deployments))
 	}
 
 	// delete test deployment
