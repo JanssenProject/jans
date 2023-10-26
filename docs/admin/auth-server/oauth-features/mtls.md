@@ -628,7 +628,7 @@ URL parameters:
 
 The field we need to obtain is the `code`.
 
-![mtls5](/home/villcabo/IdeaProjects/janssen/jans/docs/assets/mtls5.png)
+![mtls5.png](../../../assets/mtls5.png)
 
 ### 3. Call `token` endpoint
 
