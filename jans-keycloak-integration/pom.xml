@@ -42,7 +42,7 @@
 	<modules>
 		<module>authenticator</module>
 		<module>storage-api</module>
-		<module>keycloak-idp-api</module>
+		<module>idp-broker-api</module>
 	</modules>
 
 	<repositories>

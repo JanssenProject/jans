@@ -32,7 +32,7 @@ import jakarta.ws.rs.core.Response;
 @Path(Constants.SCIM_CONFIG)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class KcIdentityBrokerResource {
+public class KcSAMLIdentityBrokerResource {
 
     @Inject
     Logger log;
@@ -40,8 +40,8 @@ public class KcIdentityBrokerResource {
     @Inject
     ScimConfigService scimConfigService;
 
-    @Operation(summary = "Retrieves SCIM App configuration", description = "Retrieves SCIM App configuration", operationId = "get-scim-config", tags = {
-            "SCIM - Config Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+    @Operation(summary = "Retrieves SAML Trusted IDP ", description = "Retrieves SAML Trusted IDP", operationId = "get-saml-idp", tags = {
+            "Jans - Keycloak Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     "https://jans.io/scim/config.readonly" }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),

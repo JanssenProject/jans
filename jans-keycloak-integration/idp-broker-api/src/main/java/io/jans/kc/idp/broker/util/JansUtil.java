@@ -2,7 +2,7 @@ package io.jans.kc.idp.broker.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.jans.idp.keycloak.config.JansConfigSource;
+import io.jans.kc.idp.broker.config.JansIdpBrokerConfigSource;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.WebApplicationException;
@@ -24,12 +24,12 @@ import org.slf4j.LoggerFactory;
 
 public class JansUtil {
     private static Logger logger = LoggerFactory.getLogger(JansUtil.class);
-    private JansConfigSource jansConfigSource = new JansConfigSource();
+    private JansIdpBrokerConfigSource jansKcIdpBrokerConfigSource = new JansIdpBrokerConfigSource();
     private Map<String, String> configProperties = null;
 
     public JansUtil() {
-        logger.debug("\nJ ansUtil() - Getting properties");
-        configProperties = jansConfigSource.getProperties();
+        logger.debug("\n JansUtil() - Getting properties");
+        configProperties = jansKcIdpBrokerConfigSource.getProperties();
         if (configProperties == null || configProperties.isEmpty()) {
             throw new WebApplicationException("Config properties is null!!!");
         }
@@ -41,18 +41,7 @@ public class JansUtil {
         return configProperties.get(Constants.AUTH_TOKEN_ENDPOINT);
     }
 
-    public String getScimUserEndpoint() {
-        logger.debug(" \n JansUtil::getScimUserEndpoint() - configProperties.get(Constants.SCIM_USER_ENDPOINT)():{}",
-                configProperties.get(Constants.SCIM_USER_ENDPOINT));
-        return configProperties.get(Constants.SCIM_USER_ENDPOINT);
-    }
-
-    public String getScimUserSearchEndpoint() {
-        logger.debug(
-                "\n JansUtil::getScimUserSearchEndpoint() - configProperties.get(Constants.SCIM_USER_SEARCH_ENDPOINT)():{}",
-                configProperties.get(Constants.SCIM_USER_SEARCH_ENDPOINT));
-        return configProperties.get(Constants.SCIM_USER_SEARCH_ENDPOINT);
-    }
+   
 
     public String getClientId() {
         logger.debug(" \n JansUtil::getClientId() - configProperties.get(Constants.KEYCLOAK_SCIM_CLIENT_ID)():{}",

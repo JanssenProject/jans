@@ -14,7 +14,16 @@ public class Constants {
     public static final String KEYCLOAK_USER = "/keycloak-user";
     public static final String BASE_URL = "https://localhost";
     
-    public static final String SCOPE_TYPE_OPENID = "openid";
+    public static final String SAML_PATH = "/saml";
+    public static final String IDP_PATH = "/idp";
+    public static final String INUM_PARAM_PATH = "/{inum}";
+    public static final String NAME_PARAM_PATH = "/{name}";
+
+    public static final String SAML = "saml";
+    public static final String IDP = "idp";
+    public static final String ID = "id";
+    
+
     public static final String UTF8_STRING_ENCODING = "UTF-8";
     public static final String CLIENT_SECRET_BASIC = "client_secret_basic";
     public static final String CLIENT_CREDENTIALS = "client_credentials";
@@ -23,11 +32,13 @@ public class Constants {
     //properties
     public static final String KEYCLOAK_SERVER_URL = "keycloak.server.url";
     public static final String AUTH_TOKEN_ENDPOINT = "auth.token.endpoint";
-    public static final String SCIM_USER_ENDPOINT = "scim.user.endpoint";
-    public static final String SCIM_USER_SEARCH_ENDPOINT = "scim.user.search.endpoint";
-    public static final String SCIM_OAUTH_SCOPE = "scim.oauth.scope";
     public static final String KEYCLOAK_SCIM_CLIENT_ID = "keycloak.scim.client.id";
     public static final String KEYCLOAK_SCIM_CLIENT_PASSWORD = "keycloak.scim.client.password";
+    
+    
+    public static final String KC_SAML_IDP_READ_ACCESS = "https://jans.io/keycloak/saml/idp/config.readonly";
+    public static final String KC_SAML_IDP_WRITE_ACCESS = "https://jans.io/keycloak/saml/idp/config.write";
+    
     
 
 }

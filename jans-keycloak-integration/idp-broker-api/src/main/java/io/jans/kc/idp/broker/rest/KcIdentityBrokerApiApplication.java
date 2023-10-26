@@ -1,5 +1,7 @@
 package io.jans.kc.idp.broker.rest;
 
+import io.jans.kc.idp.broker.util.Constants;
+
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.*;
@@ -13,7 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @ApplicationPath("/kc-saml-identity-broker")
-@OpenAPIDefinition(info = @Info(title = "Jans Config API - Keycloak SAML Identity Broker", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
+@OpenAPIDefinition(info = @Info(title = "Jans Config API - Keycloak", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
 
 license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
 
@@ -22,8 +24,8 @@ tags = { @Tag(name = "Jans - Keycloak SAML Identity Broker") },
 servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
-@OAuthScope(name = "https://jans.io/keycloak/config.readonly", description = "View Jans Keycloak SAML Identity-broker related information"),
-@OAuthScope(name = "https://jans.io/keycloak/config.write", description = "Manage Jans Keycloak SAML Identity-broker related information")}
+@OAuthScope(name = Constants.KC_SAML_IDP_READ_ACCESS, description = "View Jans Keycloak SAML Identity-broker related information"),
+@OAuthcope(name = "https://jans.io/keycloak/saml/config.write", description = "Manage Jans Keycloak SAML Identity-broker related information")}
 )))
 public class KcIdentityBrokerApiApplication extends Application  
 
@@ -31,7 +33,7 @@ public class KcIdentityBrokerApiApplication extends Application
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
 
-        classes.add(KcIdentityBrokerResource.class);
+        classes.add(KcSAMLIdentityBrokerResource.class);
         
         return classes;
     }

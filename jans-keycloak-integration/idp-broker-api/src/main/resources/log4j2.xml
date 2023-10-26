@@ -5,7 +5,7 @@
             <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
         </Console>
         
-        <RollingFile name="FILE" fileName="${sys:log.base}/logs/jans-keycloak-user-spi.log" filePattern="${sys:log.base}/logs/jans-keycloak-user-spi-%d{yyyy-MM-dd}-%i.log">
+        <RollingFile name="FILE" fileName="${sys:log.base}/logs/jans-kc-idp-broker.log" filePattern="${sys:log.base}/logs/jans-kc-idp-broker-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
 
             <Policies>
@@ -22,7 +22,7 @@
             <AppenderRef ref="FILE" />
         </Logger>
 		
-		<Logger name="io.jans.configapi" level="${log4j.default.log.level}">
+		<Logger name="io.jans.kc" level="${log4j.default.log.level}">
             <AppenderRef ref="FILE" />
         </Logger>		
 
