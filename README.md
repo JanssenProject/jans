@@ -23,13 +23,13 @@ The Janssen Project is the home of
 for web login flows. Agama also defines the `.gama` file extension, an archive
 format to standardize deployment of Agama code on any IDP.
 
-The Janssen Project is a self-funded project chartered directly under the
-Linux Foundation. It has been recognized as a
+Janssen is a self-funded project chartered directly under the
+Linux Foundation. It is recognized as a
 [Digital Public Good](https://app.digitalpublicgoods.net/a/10470) by the
 [DPGA](https://digitalpublicgoods.net/). The core contributors of the Janssen
 Project are the [Gluu team](https://gluu.org), who monetize a commercial
-distribution of the Janssen platform software called
-[Gluu Flex](https://gluu.org/flex).
+distribution Janssen [Gluu Flex](https://gluu.org/flex).
+
 [![The Linux Foundation](https://img.shields.io/badge/Member-The%20Linux%20Foundation-blue?style=flat-square)](https://www.linuxfoundation.org/press/press-release/the-janssen-project-takes-on-worlds-most-demanding-digital-trust-challenges-at-linux-foundation)
 [![DPGA](https://img.shields.io/badge/DPGA-digital%20public%20good-green?style=flat-square)](https://app.digitalpublicgoods.net/a/10470)
 
@@ -57,43 +57,44 @@ distribution of the Janssen platform software called
 
 #### Internal
 
-1. **[jans-auth-server](jans-auth-server)**: A very complete Java OAuth
-Authorization Server and an OIDF certified OpenID Connect Provider. It's the
+1. **[Jans Auth Server](jans-auth-server)**: A very complete Java OAuth
+Authorization Server and a [certified](https://openid.net/certification/)
+OpenID Connect Provider. It's the
 upstream open-source core of [Gluu Flex](https://gluu.org/flex).
 
 1. **[Agama](https://docs.jans.io/head/agama/introduction/)**: Agama offers an
 interoperable way to design authentication flows, coded in a DSL purpose-built
 for writing identity journeys.
 
-1. **[jans-config-api](jans-config-api)**: Config API is a
-RESTful control plane for all Janssen components.
-
-1. **[jans-fido2](jans-fido2)**: Enables end-users to enroll and
+1. **[Jans FIDO](jans-fido2)**: Enables end-users to enroll and
 authenticate with passkeys and other FIDO authenticators.
 
-1. **[jans-scim](jans-scim)**: [SCIM](http://www.simplecloud.info/) JSON/REST
+1. **[Jans SCIM](jans-scim)**: [SCIM](http://www.simplecloud.info/) JSON/REST
 [API](https://docs.jans.io/head/admin/reference/openapi/) for user
 management, including associated FIDO devices.
 
-1. **[jans-cli-tui](jans-cli-tui)**: Command line and interactive configuration
-tools to help you correctly call the Config API.
+1. **[Jans Config API](jans-config-api)**: Config API is a
+RESTful control plane for all Janssen components.
+
+1. **[Text UI ("TUI")](jans-cli-tui)**: Command line and interactive
+configuration tools to help you correctly call the Config API.
 
 1. **[Jans Chip](demos/jans-chip)**: Sample iOS and Android mobile applications
 that implement the full OAuth and FIDO security stack for app integrity,  
 client constrained access tokens, and user presence.
 
-1. **[Jans Tarp](demos/jans-tarp)**: An OpenID Connect test tool that runs as
-a browser plugin in Chrome or Firefox.
+1. **[Jans Tarp](demos/jans-tarp)**: An OpenID Connect RP test website that runs
+as a browser plugin in Chrome or Firefox.
 
 1. **[Jans Lock](jans-lock)**: A Pub/Sub client that retrieves the latest
-data about OAuth access and transaction tokens.
+data about OAuth access and transaction tokens and updates OPA.
 
 #### External
 
 1. **[Keycloak](https://www.cncf.io/projects/keycloak/)**: provides an array of
-IAM services in a single lightweight container image. It's handy for many
-workforce requirements like SAML. The Janssen authenticator module (SPI)
-simplifies SSO across Janssen and Keycloak websites.
+out of the box IAM services in a single lightweight container image. It's handy
+for many workforce requirements like SAML. The Janssen authenticator module
+(SPI) simplifies SSO across Janssen and Keycloak websites.
 
 1. **[Open Policy Agent](https://www.cncf.io/projects/open-policy-agent-opa/)**:
 A general-purpose policy engine that runs next to the services that need
@@ -177,19 +178,18 @@ Below is the list of current mega releases that hold information about every sin
 ### Janssen History
 
 In 2020, [Gluu](https://gluu.org) decided to give contributors a role in the
-governance of its open-source software, and collaborated with the
-Linux Foundation to charter the Janssen Project. The initial software
-contribution for the Janssen Project was a fork of the "Gluu
-Server". After this initial contribution, the Janssen Project developers added
-a new configuration control plane, tools, demos, documentation, packaging and
+governance and collaborated with the Linux Foundation to charter the Janssen
+Project. The initial software contribution for the Janssen Project was a fork of
+the "Gluu Server". Subsequently, the Janssen Project developers added a new
+configuration control plane, tools, demos, documentation, packaging and
 deployment assets.
 
 ### Why the name Janssen?
 
 Pigeons (or doves...) are universally regarded as a symbol of peace--which I
-think every can agree we need more of today. But pigeons are also really fast,
+think everyone can agree we need more of today. But pigeons are also really fast,
 capable of flying 1000 kilometers in a single day, powered by
 a handful of seeds. The **Janssen brothers of Arendonk** in Belgium bred the
 world's fastest family of racing pigeons. Janssen racing pigeons revolutionized
 the sport. The Janssen Project seeks to revolutionize how open-source
-digital identity scales in the clouds. 
+digital identity scales in the clouds.
