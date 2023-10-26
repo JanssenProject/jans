@@ -8,7 +8,7 @@ tags:
   - introspectionScriptBackwardCompatibility
 ---
 
-# Overview
+# Introspection Endpoint
 
 Introspection endpoint allows a protected resource to determine the active state of an OAuth 2.0 token and to determine 
 meta-information about this token. This endpoint can be used to introspect
@@ -24,6 +24,7 @@ More information about request and response of the Introspection endpoint can be
 the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
 
 **Request parameters**
+
 - `token` - REQUIRED.  The string value of the token.  For access tokens, this is the "access_token" value returned from the token endpoint
 - `token_type_hint` - OPTIONAL.  A hint about the type of the token submitted for introspection. Not used in current implementation of the AS. 
 - `response_as_jwt` - OPTIONAL. Boolean value with default value false. If true, returns introspection response as JWT (signed based on client configuration used for authentication to Introspection Endpoint).
@@ -32,13 +33,13 @@ the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-
 
 ### Request
 
-```
+```shell
 curl -X 'GET'   'https://janssen.server.host/jans-auth/restv1/introspection?token=368fea2b-be14-4d30-bd57-bcc4cde2033c&response_as_jwt=false'   -H 'accept: application/json' -H   "Authorization: Bearer 111d51a4-2828-4b47-abce-77034cddcfb5"
 ```
 
 ### Response
 
-```
+```json
 {
     "sub": "",
     "iss": "https://janssen.server.host",
@@ -60,7 +61,7 @@ curl -X 'GET'   'https://janssen.server.host/jans-auth/restv1/introspection?toke
 
 ### Request
 
-```
+```shell
 curl -X 'POST' \
   'https://janssen.server.host/jans-auth/restv1/introspection' \
   -H 'accept: application/json' \
@@ -71,7 +72,7 @@ curl -X 'POST' \
 
 ### Response
 
-```
+```json
 {
     "sub": "",
     "iss": "https://janssen.server.host",
@@ -95,13 +96,14 @@ curl -X 'POST' \
 
 Response is returned as JWT if `Accept` header has value `application/token-introspection+jwt` or otherwise if explicit endpoint parameter `response_as_jwt` is set to `true`.
 
-```
+```text
 POST /introspect HTTP/1.1
 Host: as.example.com
 Accept: application/token-introspection+jwt
 ```  
 
 Sample decoded JWT payload
+
 ```json
 {
   "iss":"https://as.example.com/",
@@ -127,7 +129,7 @@ Sample decoded JWT payload
 
 Sample response (line breaks in payload is for convenience)
 
-```
+```text
 HTTP/1.1 200 OK
 Content-Type: application/token-introspection+jwt
 
@@ -196,6 +198,7 @@ navigate to
 ![](../../../assets/image-tui-client-config-token-screen.png)
 
 ### References for custom scripts
+
 1. Interface - [IntrospectionType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java)
 2. [Introspection scripts](../../../script-catalog/introspection/README.md)
 3. [Introspection script vs Update Token Script](https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/scripts/update-token.md#introspectiontype-script-vs-updatetokentype-script)
