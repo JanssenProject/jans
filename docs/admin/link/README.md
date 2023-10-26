@@ -15,3 +15,4 @@ While this documentation is in progress, you can ask questions through [GitHub D
 ## Want to contribute?
 
 If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+(https://github.com/JanssenProject/jans/discussions)

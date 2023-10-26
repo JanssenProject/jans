@@ -17,6 +17,7 @@ connection in which both parties use X.509 digital certificates
 to authenticate each other. **mTLS** can help mitigate the risk of moving services to the cloud and can help prevent
 malicious third parties from imitating genuine apps.
 
+
 ## Where Is mTLS Useful?
 
 Mutual client certificate authentication can be used any time the server needs to ensure the authenticity and validity
