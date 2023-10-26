@@ -305,7 +305,7 @@ jansConfProperty: {"value1":"AS_CLIENT_ID","value2":"","description":""}
 jansConfProperty: {"value1":"AS_CLIENT_SECRET","value2":"","description":""}
 jansConfProperty: {"value1":"qr_options","value2":"{ size: 500, mSize: 0.05 }","description":""}
 jansConfProperty: {"value1":"label","value2":"Super Gluu","description":""}
-jansConfProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
+jansConfProperty: {"value1":"registration_uri","value2":"","description":""}
 jansConfProperty: {"value1":"authentication_mode","value2":"two_step","description":""}
 jansConfProperty: {"value1":"notification_service_mode","value2":"jans","description":""}
 jansConfProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
