@@ -83,7 +83,7 @@ setup(
     package_data={'': ['*.yaml', '.enabled']},
     zip_safe=False,
     install_requires=[
-        "ruamel.yaml>=0.16.5",
+        "ruamel.yaml>=0.16.5,<0.18.0",
         "PyJWT==2.4.0",
         "pygments",
         "prompt_toolkit==3.0.33",
