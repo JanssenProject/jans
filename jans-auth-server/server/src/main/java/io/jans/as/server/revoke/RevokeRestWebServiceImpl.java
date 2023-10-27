@@ -126,41 +126,45 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST.getStatusCode())
                     .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(errorResponseFactory.errorAsJson(TokenRevocationErrorResponseType.INVALID_REQUEST, "Failed to validate token."))
+                    .entity(errorResponseFactory.errorAsJson(TokenRevocationErrorResponseType.INVALID_REQUEST, "Failed to validate token"))
                     .build());
         }
 
-        boolean isSingle = tokens.length == 1;
         for (String token : tokens) {
-            final Response removeTokenResponse = removeToken(token, executionContext, tth, oAuth2AuditLog, isSingle);
-            if (removeTokenResponse != null) {
-                return removeTokenResponse;
-            }
+            removeToken(token, executionContext, tth);
         }
 
         return response(builder, oAuth2AuditLog);
     }
 
-    private Response removeToken(String token, ExecutionContext executionContext, TokenTypeHint tth, OAuth2AuditLog oAuth2AuditLog, boolean single) {
+    private void removeToken(String token, ExecutionContext executionContext, TokenTypeHint tth) {
         final Client client = executionContext.getClient();
-        AuthorizationGrant authorizationGrant = findAuthorizationGrant(client, token, tth);
-
-        if (authorizationGrant == null && !single) {
-            log.trace("Unable to find token.");
-            return response(executionContext.getResponseBuilder(), oAuth2AuditLog);
+        AuthorizationGrant authorizationGrant = findAuthorizationGrant(token, tth);
+        if (log.isTraceEnabled()) {
+            String msg = authorizationGrant != null ? authorizationGrant.getGrantId() : "not";
+            log.trace("Grant {} found for token {}", msg, token);
         }
 
-        if (!single && !authorizationGrant.getClientId().equals(client.getClientId())) {
-            log.trace("Token was issued with client {} but revoke is requested with client {}. Skip revoking.", authorizationGrant.getClientId(), client.getClientId());
-            return response(executionContext.getResponseBuilder(), oAuth2AuditLog);
+        if (authorizationGrant == null) {
+            log.trace("Unable to find grant for token {}", token);
+            return;
         }
 
-        if (authorizationGrant != null) {
-            grantService.removeAllByGrantId(authorizationGrant.getGrantId());
-            log.trace("Revoked successfully token {}", token);
-        }
+        validateSameClient(authorizationGrant, client);
 
-        return null;
+        grantService.removeAllByGrantId(authorizationGrant.getGrantId());
+        log.trace("Revoked successfully token {}", token);
+    }
+
+    public void validateSameClient(AuthorizationGrant grant, Client client) {
+        if (!grant.getClientId().equals(client.getClientId()) && !appConfiguration.getAllowRevokeForOtherClients()) {
+            log.trace("Token was issued with client {} but revoke is requested with client {}. Skip revoking.", grant.getClientId(), client.getClientId());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST.getStatusCode())
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(errorResponseFactory.errorAsJson(TokenRevocationErrorResponseType.INVALID_REQUEST, "Failed to validate token."))
+                    .build());
+        }
     }
 
     private void removeAllTokens(TokenTypeHint tth, ExecutionContext executionContext) {
@@ -174,20 +178,13 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
         }
     }
 
-    private AuthorizationGrant findAuthorizationGrant(Client client, String token, TokenTypeHint tth) {
+    private AuthorizationGrant findAuthorizationGrant(String token, TokenTypeHint tth) {
         if (tth == TokenTypeHint.ACCESS_TOKEN) {
             return authorizationGrantList.getAuthorizationGrantByAccessToken(token);
-        } else if (tth == TokenTypeHint.REFRESH_TOKEN) {
-            return authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), token);
-        } else {
-            // Since the hint about the type of the token submitted for revocation is optional. Jans Auth will
-            // search it as Access Token then as Refresh Token.
-            AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
-            if (authorizationGrant == null) {
-                authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), token);
-            }
-            return authorizationGrant;
         }
+
+        final TokenEntity grantByCode = grantService.getGrantByCode(token);
+        return authorizationGrantList.asGrant(grantByCode);
     }
 
     private void validateToken(String token) {
