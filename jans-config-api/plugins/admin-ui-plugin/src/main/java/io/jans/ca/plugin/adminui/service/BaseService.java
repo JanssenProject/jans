@@ -31,7 +31,7 @@ public class BaseService {
     Logger log;
 
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) {
-        return getToken(tokenRequest, tokenEndpoint, null);
+        return getToken(tokenRequest, tokenEndpoint, null, null);
     }
 
     /**
@@ -42,7 +42,7 @@ public class BaseService {
      * @param userInfoJwt   This is the JWT that is returned from the userinfo endpoint.
      * @return A TokenResponse object
      */
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) {
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt, List<String> permissionTags) {
 
         try {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
@@ -56,6 +56,10 @@ public class BaseService {
 
             if (!Strings.isNullOrEmpty(userInfoJwt)) {
                 body.putSingle("ujwt", userInfoJwt);
+            }
+
+            if (permissionTags != null && !permissionTags.isEmpty()) {
+                body.put("permission_tag", Collections.singletonList(String.join(" ", permissionTags)));
             }
 
             if (!Strings.isNullOrEmpty(tokenRequest.getCodeVerifier())) {
