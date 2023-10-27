@@ -15,10 +15,6 @@ struct RegisterViewAssembler {
         let presenter = RegisterViewPresenterImpl(state: state, mainViewState: mainViewState)
         let interactor = RegisterViewInteractorImpl(presenter: presenter)
         let view = RegisterView(state: state, interactor: interactor)
-//        let hosting = UIHostingController(rootView: view)
-//        hosting.hidesBottomBarWhenPushed = true
-//
-//        return hosting
         
         return view
     }

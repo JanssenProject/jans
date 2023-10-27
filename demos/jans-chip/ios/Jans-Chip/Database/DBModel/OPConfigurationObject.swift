@@ -9,6 +9,11 @@ import RealmSwift
 
 final class OPConfigurationObject: Object, ObjectKeyIdentifiable {
     
+    override static func primaryKey() -> String? {
+        "id"
+    }
+    
+    @Persisted var id: String = "1"
     @Persisted var sno: String
     @Persisted var issuer: String
     @Persisted var registrationEndpoint: String

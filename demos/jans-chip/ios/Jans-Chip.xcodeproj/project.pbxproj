@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3003B0632AE69A7F0068F411 /* UserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3003B0622AE69A7F0068F411 /* UserInfo.swift */; };
+		3004A9F92AEBDE79000CDB62 /* DPoPProofFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3004A9F82AEBDE79000CDB62 /* DPoPProofFactory.swift */; };
+		3004A9FC2AEBE414000CDB62 /* SwiftJWT in Frameworks */ = {isa = PBXBuildFile; productRef = 3004A9FB2AEBE414000CDB62 /* SwiftJWT */; };
+		3004A9FE2AEBEF66000CDB62 /* Heimdall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3004A9FD2AEBEF66000CDB62 /* Heimdall.swift */; };
 		304311F22ACC05E4006B8D40 /* Jans_ChipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */; };
 		304311F62ACC05E5006B8D40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 304311F52ACC05E5006B8D40 /* Assets.xcassets */; };
 		304311F92ACC05E5006B8D40 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 304311F82ACC05E5006B8D40 /* Preview Assets.xcassets */; };
@@ -49,6 +53,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3003B0622AE69A7F0068F411 /* UserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfo.swift; sourceTree = "<group>"; };
+		3004A9F82AEBDE79000CDB62 /* DPoPProofFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DPoPProofFactory.swift; sourceTree = "<group>"; };
+		3004A9FD2AEBEF66000CDB62 /* Heimdall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Heimdall.swift; sourceTree = "<group>"; };
 		304311EE2ACC05E4006B8D40 /* Jans-Chip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Jans-Chip.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Jans_ChipApp.swift; sourceTree = "<group>"; };
 		304311F52ACC05E5006B8D40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -96,6 +103,7 @@
 			files = (
 				3063E5A62AD410F9002B4879 /* RealmSwift in Frameworks */,
 				3063E5732ACD54C9002B4879 /* Alamofire in Frameworks */,
+				3004A9FC2AEBE414000CDB62 /* SwiftJWT in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,6 +157,8 @@
 			children = (
 				3049C20F2AD7F59600164883 /* DCRRepository.swift */,
 				3049C2152AD8151100164883 /* PlayIntegrityRepository.swift */,
+				3004A9F82AEBDE79000CDB62 /* DPoPProofFactory.swift */,
+				3004A9FD2AEBEF66000CDB62 /* Heimdall.swift */,
 			);
 			path = Helper;
 			sourceTree = "<group>";
@@ -175,6 +185,7 @@
 				3049C2112AD7F93100164883 /* DCRequest.swift */,
 				3049C2172AD8163A00164883 /* AppIntegrityResponse.swift */,
 				3079EC472AE1532600ECA57C /* LoginResponse.swift */,
+				3003B0622AE69A7F0068F411 /* UserInfo.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -277,6 +288,7 @@
 			packageProductDependencies = (
 				3063E5722ACD54C9002B4879 /* Alamofire */,
 				3063E5A52AD410F9002B4879 /* RealmSwift */,
+				3004A9FB2AEBE414000CDB62 /* SwiftJWT */,
 			);
 			productName = "Jans-Chip";
 			productReference = 304311EE2ACC05E4006B8D40 /* Jans-Chip.app */;
@@ -309,6 +321,7 @@
 			packageReferences = (
 				3063E5712ACD54C9002B4879 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				3063E5A42AD410F9002B4879 /* XCRemoteSwiftPackageReference "realm-swift" */,
+				3004A9FA2AEBE414000CDB62 /* XCRemoteSwiftPackageReference "Swift-JWT" */,
 			);
 			productRefGroup = 304311EF2ACC05E4006B8D40 /* Products */;
 			projectDirPath = "";
@@ -349,12 +362,15 @@
 				3063E5922AD04A34002B4879 /* RegisterViewState.swift in Sources */,
 				3063E5972AD051D7002B4879 /* JansButton.swift in Sources */,
 				3063E5872ACEB4F8002B4879 /* ServiceClient.swift in Sources */,
+				3004A9FE2AEBEF66000CDB62 /* Heimdall.swift in Sources */,
 				3063E5902AD04A34002B4879 /* RegisterViewPresenter.swift in Sources */,
 				3063E5B02AD6C623002B4879 /* RealmManager.swift in Sources */,
 				3063E56E2ACC0BFE002B4879 /* MainViewAssembler.swift in Sources */,
+				3003B0632AE69A7F0068F411 /* UserInfo.swift in Sources */,
 				3049C2142AD80D2F00164883 /* AppIntegrityEntity.swift in Sources */,
 				3063E56C2ACC0BAF002B4879 /* MainViewPresenter.swift in Sources */,
 				3049C20B2AD6D0BC00164883 /* AppConfig.swift in Sources */,
+				3004A9F92AEBDE79000CDB62 /* DPoPProofFactory.swift in Sources */,
 				3063E5832ACD78DF002B4879 /* EndpointRouter.swift in Sources */,
 				3063E5812ACD7897002B4879 /* EndpointConfiguration.swift in Sources */,
 				304311F22ACC05E4006B8D40 /* Jans_ChipApp.swift in Sources */,
@@ -573,6 +589,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3004A9FA2AEBE414000CDB62 /* XCRemoteSwiftPackageReference "Swift-JWT" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Kitura/Swift-JWT.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.0;
+			};
+		};
 		3063E5712ACD54C9002B4879 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire";
@@ -592,6 +616,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3004A9FB2AEBE414000CDB62 /* SwiftJWT */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3004A9FA2AEBE414000CDB62 /* XCRemoteSwiftPackageReference "Swift-JWT" */;
+			productName = SwiftJWT;
+		};
 		3063E5722ACD54C9002B4879 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3063E5712ACD54C9002B4879 /* XCRemoteSwiftPackageReference "Alamofire" */;

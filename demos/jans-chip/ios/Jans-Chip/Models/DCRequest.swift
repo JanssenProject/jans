@@ -49,6 +49,7 @@ public struct DCRequest: Codable {
             "evidence": evidence,
             "jwks": jwks
         ]
+//        "issuer=\(issuer)&redirect_uris=\(redirectUris)&scope=\(scope)&response_types=\(responseTypes)&post_logout_redirect_uris=\(postLogoutRedirectUris)&grant_types=\(grantTypes)&application_type=\(applicationType)&client_name=\(clientName)&token_endpoint_auth_method=\(tokenEndpointAuthMethod)&evidence=\(evidence)&jwks=\(jwks)"
     }
 }
 

@@ -41,8 +41,6 @@ struct JansButton: View {
     
     private let title: String
     private let action: () -> Void
-    
-    // It would be nice to make this into a binding.
     private let disabled: Bool
     
     init(title: String,

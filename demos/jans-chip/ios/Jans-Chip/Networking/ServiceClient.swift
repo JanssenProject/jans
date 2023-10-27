@@ -14,6 +14,8 @@ protocol ServiceClientProtocol: AnyObject {
     func getOPConfiguration(url: String, completion: @escaping (Result<OPConfiguration, AFError>) -> Void)
     func doDCR(dcRequest: DCRequest, url: String) -> AnyPublisher<Result<DCResponse, AFError>, Never>
     func getAuthorizationChallenge(clientId: String, username: String, password: String, authorizationChallengeEndpoint: String, url: String) -> AnyPublisher<Result<LoginResponse, AFError>, Never>
+    func getToken(clientId: String, code: String, grantType: String, redirectUri: String, scope: String, authHeader: String, dpopJwt: String, url: String) -> AnyPublisher<Result<TokenResponse, AFError>, Never>
+    func getUserInfo(accessToken: String, authHeader: String, url: String) -> AnyPublisher<Result<UserInfo, AFError>, Never>
 }
 
 public final class ServiceClient {
@@ -53,6 +55,18 @@ extension ServiceClient: ServiceClientProtocol {
     func getAuthorizationChallenge(clientId: String, username: String, password: String, authorizationChallengeEndpoint: String, url: String) -> AnyPublisher<Result<LoginResponse, AFError>, Never> {
         let jsonDecoder = JSONDecoder()
         let publisher: AnyPublisher<Result<LoginResponse, AFError>, Never> = performRequest(route: .getAuthorizationChallenge(clientId, username, password, UUID().uuidString, UUID().uuidString, authorizationChallengeEndpoint), decoder: jsonDecoder)
+        return publisher
+    }
+    
+    func getToken(clientId: String, code: String, grantType: String, redirectUri: String, scope: String, authHeader: String, dpopJwt: String, url: String) -> AnyPublisher<Result<TokenResponse, AFError>, Never> {
+        let jsonDecoder = JSONDecoder()
+        let publisher: AnyPublisher<Result<TokenResponse, AFError>, Never> = performRequest(route: .getToken(clientId, code, grantType, redirectUri, scope, authHeader, dpopJwt, url), decoder: jsonDecoder)
+        return publisher
+    }
+    
+    func getUserInfo(accessToken: String, authHeader: String, url: String) -> AnyPublisher<Result<UserInfo, AFError>, Never> {
+        let jsonDecoder = JSONDecoder()
+        let publisher: AnyPublisher<Result<UserInfo, AFError>, Never> = performRequest(route: .getUserInfo(accessToken, authHeader, url), decoder: jsonDecoder)
         return publisher
     }
 }

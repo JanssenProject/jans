@@ -19,7 +19,7 @@ final class RealmManager {
             let realm = try Realm()
             
             try realm.write {
-                realm.add(object)
+                realm.add(object, update: .all)
             }
         } catch(let error) {
             print("Error saving object, reason: \(error.localizedDescription)")
@@ -41,6 +41,19 @@ final class RealmManager {
         return result
     }
     
+    func updateOIDCClient(oidcCClient: OIDCClient, with recentGeneratedAccessToken: String, and recentGeneratedIdToken: String) {
+        do {
+            let realm = try Realm()
+            
+            try realm.write {
+                oidcCClient.recentGeneratedAccessToken = recentGeneratedAccessToken
+                oidcCClient.recentGeneratedIdToken = recentGeneratedIdToken
+            }
+        } catch(let error) {
+            print("Error saving object, reason: \(error.localizedDescription)")
+        }
+    }
+    
     // MARK: - OP Configuration
     func deleteAllConfiguration() {
         do {
@@ -60,6 +73,18 @@ final class RealmManager {
             let realm = try Realm()
             try realm.write {
                 let configurations = realm.objects(AppIntegrityEntity.self)
+                realm.delete(configurations)
+            }
+        } catch(let error) {
+            print("Error deleting object, reason: \(error.localizedDescription)")
+        }
+    }
+    
+    func deleteAllOIDCClient() {
+        do {
+            let realm = try Realm()
+            try realm.write {
+                let configurations = realm.objects(OIDCClient.self)
                 realm.delete(configurations)
             }
         } catch(let error) {

@@ -42,6 +42,7 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
             return
         }
         
+        presenter.onLoading(visible: true)
         fetchOPConfiguration(configurationUrl: issuer, scopeText: scope)
     }
     
@@ -61,6 +62,7 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
                 case .failure(let error):
                     print("error: \(error)")
                     self?.presenter.onError(message: error.localizedDescription)
+                    self?.presenter.onLoading(visible: true)
                 }
             }
             .store(in: &cancellableSet)
@@ -74,6 +76,7 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
             doDCR(scopeText: scopeText)
         } else {
             presenter.onError(message: "Error with fetching OPConfiguration")
+            presenter.onLoading(visible: true)
         }
     }
     
@@ -87,6 +90,7 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
             }
             
             self?.presenter.onError(message: error.localizedDescription)
+            self?.presenter.onLoading(visible: true)
         }
     }
 }

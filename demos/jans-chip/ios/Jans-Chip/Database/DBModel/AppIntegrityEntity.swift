@@ -9,6 +9,11 @@ import RealmSwift
 
 final class AppIntegrityEntity: Object, ObjectKeyIdentifiable {
     
+    override static func primaryKey() -> String? {
+        "id"
+    }
+    
+    @Persisted var id: String = "1"
     @Persisted var sno: String
     @Persisted var appIntegrity: String
     @Persisted var deviceIntegrity: String

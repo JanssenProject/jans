@@ -7,8 +7,17 @@
 
 import Foundation
 
-struct ChatPreveiwMessage: Codable {
-    var access_token: String
-    var id_token: String
-    var token_type: String
+struct TokenResponse: Codable {
+    
+    private enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case idToken = "id_token"
+        case tokenType = "token_type"
+        case expiresIn = "expires_in"
+    }
+    
+    var accessToken: String
+    var idToken: String?
+    var tokenType: String
+    var expiresIn: Int?
 }

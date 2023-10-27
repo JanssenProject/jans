@@ -31,6 +31,7 @@ struct RegisterView: View {
             TextField("Scopes", text: $state.scopes)
                 .textFieldStyle(.roundedBorder)
             JansButton(title: "Register",
+                       disabled: state.loadingVisible,
                        backgroundColor: Color.cyan) {
                 interactor.onRegisterClick(issuer: state.issuer, scope: state.scopes)
             }.padding(.top)

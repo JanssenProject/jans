@@ -11,6 +11,7 @@ protocol RegisterViewPresenter: AnyObject {
     
     func onError(message: String)
     func onMainStateChanged(viewState: ViewState)
+    func onLoading(visible: Bool)
 }
 
 final class RegisterViewPresenterImpl: RegisterViewPresenter {
@@ -29,5 +30,9 @@ final class RegisterViewPresenterImpl: RegisterViewPresenter {
     
     func onMainStateChanged(viewState: ViewState) {
         mainViewState.viewState = viewState
+    }
+    
+    func onLoading(visible: Bool) {
+        state.loadingVisible = visible
     }
 }
