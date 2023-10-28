@@ -32,7 +32,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.20-dev
-    created: "2023-10-27T23:46:11.374396279Z"
+    created: "2023-10-28T07:20:34.391470347Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -80,7 +80,7 @@ entries:
       version: 1.0.20-dev
     description: Janssen Access and Identity Management Microservices Chart. This
       chart deploys each janssen microservice as a separate deployment.
-    digest: 9672950f67b288ada20414048caf818c5e99cef47c67457a16d3cda017835a9b
+    digest: 53667aa771c810835b0558d215489d9ca9e47b5aa7f89933bfec419a2095072f
     home: https://jans.io
     icon: https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
     kubeVersion: '>=v1.22.0-0'
@@ -124,7 +124,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.19
-    created: "2023-10-27T23:46:11.363493439Z"
+    created: "2023-10-28T07:20:34.380018976Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -215,7 +215,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.19-dev
-    created: "2023-10-27T23:46:11.351193593Z"
+    created: "2023-10-28T07:20:34.366380492Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -304,7 +304,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.18
-    created: "2023-10-27T23:46:11.338338434Z"
+    created: "2023-10-28T07:20:34.353461913Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -389,7 +389,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.18-dev
-    created: "2023-10-27T23:46:11.327256584Z"
+    created: "2023-10-28T07:20:34.341323738Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -474,7 +474,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.17
-    created: "2023-10-27T23:46:11.314818327Z"
+    created: "2023-10-28T07:20:34.329903868Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -559,7 +559,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.17-dev
-    created: "2023-10-27T23:46:11.30438228Z"
+    created: "2023-10-28T07:20:34.317855894Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -644,7 +644,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.16
-    created: "2023-10-27T23:46:11.292268325Z"
+    created: "2023-10-28T07:20:34.306179922Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -729,7 +729,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.16-dev
-    created: "2023-10-27T23:46:11.281027674Z"
+    created: "2023-10-28T07:20:34.294302548Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -814,7 +814,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.15
-    created: "2023-10-27T23:46:11.270412525Z"
+    created: "2023-10-28T07:20:34.283346781Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -895,7 +895,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.15-dev
-    created: "2023-10-27T23:46:11.26035608Z"
+    created: "2023-10-28T07:20:34.271649609Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -976,7 +976,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.14
-    created: "2023-10-27T23:46:11.250991337Z"
+    created: "2023-10-28T07:20:34.260562141Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1057,7 +1057,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.14-dev
-    created: "2023-10-27T23:46:11.239574585Z"
+    created: "2023-10-28T07:20:34.249879075Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1138,7 +1138,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.13
-    created: "2023-10-27T23:46:11.229085937Z"
+    created: "2023-10-28T07:20:34.239644712Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1219,7 +1219,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.13-dev
-    created: "2023-10-27T23:46:11.218971191Z"
+    created: "2023-10-28T07:20:34.227877939Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1300,7 +1300,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.12
-    created: "2023-10-27T23:46:11.204751027Z"
+    created: "2023-10-28T07:20:34.214019954Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1381,7 +1381,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.12-dev
-    created: "2023-10-27T23:46:11.193329575Z"
+    created: "2023-10-28T07:20:34.203354088Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1434,4 +1434,4 @@ entries:
     urls:
     - janssen-1.0.12-dev.tgz
     version: 1.0.12-dev
-generated: "2023-10-27T23:46:11.16588935Z"
+generated: "2023-10-28T07:20:34.190801811Z"
