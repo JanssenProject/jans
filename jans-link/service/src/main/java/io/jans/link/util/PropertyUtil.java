@@ -26,7 +26,6 @@ import jakarta.inject.Inject;
  * 
  * @author Yuriy Movchan Date: 08.02.2011
  */
-@ApplicationScoped
 public class PropertyUtil {
 
 	private static final Logger log = Logger.getLogger(PropertyUtil.class);
@@ -39,16 +38,6 @@ public class PropertyUtil {
 			return encryptionService.encrypt(value);
 		} catch (StringEncrypter.EncryptionException ex) {
 			log.error("Failed to encrypt string: " + value, ex);
-		}
-
-		return null;
-	}
-
-	public String decryptString(String value) {
-		try {
-			return encryptionService.decrypt(value);
-		} catch (StringEncrypter.EncryptionException ex) {
-			log.error("Failed to decrypt string: " + value, ex);
 		}
 
 		return null;

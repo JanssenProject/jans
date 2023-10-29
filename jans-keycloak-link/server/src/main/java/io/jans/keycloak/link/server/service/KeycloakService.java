@@ -3,7 +3,9 @@ package io.jans.keycloak.link.server.service;
 import io.jans.keycloak.link.model.config.CacheRefreshConfiguration;
 import io.jans.keycloak.link.model.config.KeycloakConfiguration;
 import io.jans.keycloak.link.service.config.ConfigurationFactory;
+import io.jans.link.service.EncryptionService;
 import io.jans.link.util.PropertyUtil;
+import io.jans.util.security.StringEncrypter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
@@ -27,7 +29,7 @@ public class KeycloakService implements Serializable{
     private ConfigurationFactory configurationFactory;
 
     @Inject
-    private PropertyUtil propertyUtil;
+    private EncryptionService encryptionService;
 
     boolean isEncoded;
 
@@ -35,13 +37,13 @@ public class KeycloakService implements Serializable{
         CacheRefreshConfiguration cacheRefreshConfiguration = configurationFactory.getAppConfiguration();
 
         KeycloakConfiguration keycloakConfiguration = cacheRefreshConfiguration.getKeycloakConfiguration();
-        String clientSecret = propertyUtil.decryptString(keycloakConfiguration.getClientSecret());
+        String clientSecret = decryptString(keycloakConfiguration.getClientSecret());
         if(clientSecret == null){
             log.info("clientSecret is null or not encrypted");
             clientSecret = keycloakConfiguration.getClientSecret();
         }
 
-        String password = propertyUtil.decryptString(keycloakConfiguration.getPassword());
+        String password = decryptString(keycloakConfiguration.getPassword());
         if (password == null){
             log.info("password is null or not encrypted");
             password = keycloakConfiguration.getPassword();
@@ -86,26 +88,13 @@ public class KeycloakService implements Serializable{
         return finalUsersResourceList;
     }
 
-    public Keycloak getKeycloakInstanceDecrypt() {
-        CacheRefreshConfiguration cacheRefreshConfiguration = configurationFactory.getAppConfiguration();
+    public String decryptString(String value) {
+        try {
+            return encryptionService.decrypt(value);
+        } catch (StringEncrypter.EncryptionException ex) {
+            log.error("Failed to decrypt string: " + value, ex);
+        }
 
-        KeycloakConfiguration  keycloakConfiguration = cacheRefreshConfiguration.getKeycloakConfiguration();
-
-        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        Keycloak instance = KeycloakBuilder.builder()
-                .serverUrl(keycloakConfiguration.getServerUrl())
-                .realm(keycloakConfiguration.getRealm())
-                .clientId(keycloakConfiguration.getClientId())
-                .clientSecret(keycloakConfiguration.getClientSecret())
-                //.grantType(OAuth2Constants.CLIENT_CREDENTIALS)
-                .grantType(keycloakConfiguration.getGrantType())
-                .username(keycloakConfiguration.getUsername())
-                .password(keycloakConfiguration.getPassword())
-                //.resteasyClient(new ResteasyClientBuilderImpl().connectionPoolSize(10).build())
-                .build();
-        log.info("getKeycloakInstance() instance::"+instance.getClass());
-
-        return instance;
+        return null;
     }
 }

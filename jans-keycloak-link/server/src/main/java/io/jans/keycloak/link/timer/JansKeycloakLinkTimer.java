@@ -764,6 +764,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 					jansSimplePerson.getCustomAttributes().add(jansCustomAttribute);
 				}
 				jansSimplePerson.setDn(personService.getDnForPerson(personService.generateInumForNewPersonImpl()));
+				jansSimplePerson.setSourceServerName("Keycloak to jans");
 
 				sourceJansSimplePerson.add(jansSimplePerson);
 
