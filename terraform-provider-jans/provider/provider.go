@@ -99,6 +99,7 @@ func Provider() *schema.Provider {
 		// Resource instances for data sources must have a Read function
 		// and must *not* implement Create, Update or Delete.
 		DataSourcesMap: map[string]*schema.Resource{
+			"jans_custom_script_types":     dataSourceCustomScriptTypes(),
 			"jans_fido2_configuration":     dataSourceFido2Configuration(),
 			"jans_persistence_config":      dataSourcePersistenceConfiguration(),
 			"jans_plugins":                 dataSourcePlugins(),

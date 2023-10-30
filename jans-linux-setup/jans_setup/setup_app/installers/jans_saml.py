@@ -70,7 +70,7 @@ class JansSamlInstaller(JettyInstaller):
         self.install_keycloack()
 
     def extract_files(self):
-        base.extract_file(base.current_app.jans_zip, 'jans-keycloak/storage-api/src/main/resources/jans-keycloak-storage-api.properties', self.templates_folder)
+        base.extract_file(base.current_app.jans_zip, 'jans-keycloak-integration/storage-api/src/main/resources/jans-keycloak-storage-api.properties', self.templates_folder)
 
 
     def render_import_templates(self):
@@ -135,3 +135,4 @@ class JansSamlInstaller(JettyInstaller):
         base.unpack_zip(self.source_files[5][0], self.idp_config_providers_dir)
         self.update_rendering_dict()
         self.render_unit_file()
+        self.chown(self.idp_config_data_dir, Config.jetty_user, Config.jetty_group, recursive=True)

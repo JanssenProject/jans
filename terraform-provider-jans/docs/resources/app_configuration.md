@@ -118,6 +118,7 @@ resource "jans_app_configuration" "global" {
 								Example: id_generation_endpoint, auth_level_mapping, etc.
 - `display_values_supported` (List of String) A list of the display parameter values that the OpenID Provider supports. One of 'page', 'popup'.
 - `dn_name` (String) DN of certificate issuer.
+- `dpop_jkt_force_for_authorization_code` (Boolean) Demonstration of Proof-of-Possession (DPoP) JWK Thumbprint force for authorization code.
 - `dpop_jti_cache_time` (Number) Demonstration of Proof-of-Possession (DPoP) cache time.
 - `dpop_nonce_cache_time` (Number) Demonstration of Proof-of-Possession (DPoP) nonce cache time.
 - `dpop_signing_alg_values_supported` (List of String) Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported.
@@ -150,6 +151,7 @@ resource "jans_app_configuration" "global" {
 - `feature_flags` (List of String) List of feature flags.
 - `force_id_token_hint_precense` (Boolean) Boolean value specifying whether force id_token_hint parameter presence.
 - `force_offline_access_scope_to_enable_refresh_token` (Boolean) Boolean value specifying whether force offline_access scope to enable refresh_token grant type.
+- `force_ropc_in_authorization_endpoint` (Boolean) Specifies if ROPC is forced in authorization endpoint.
 - `force_signed_request_object` (Boolean) Boolean value true indicates that signed request object is mandatory.
 - `front_channel_logout_session_supported` (Boolean) Boolean value to specify support for front channel logout session.
 - `grant_types_and_response_types_autofix_enabled` (Boolean) Boolean value specifying whether to Grant types and Response types can be auto fixed.
