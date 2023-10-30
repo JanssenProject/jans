@@ -26,6 +26,8 @@ import org.testng.annotations.Test;
 import java.util.Date;
 import java.util.UUID;
 
+import static io.jans.as.server.model.config.Constants.REVOKE_ANY_TOKEN_SCOPE;
+
 /**
  * @author Yuriy Z
  */
@@ -101,5 +103,44 @@ public class RevokeRestWebServiceImplTest {
         AuthorizationGrant grant = new SimpleAuthorizationGrant();
         grant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
         service.validateSameClient(grant, anotherClient);
+    }
+
+    @Test
+    public void validateScope_whenClientHasRevokeAnyTokenClient_shouldPassSuccessfully() {
+        final Client client = new Client();
+        client.setClientId(UUID.randomUUID().toString());
+        client.setScopes(new String[] {REVOKE_ANY_TOKEN_SCOPE});
+
+        final Client anotherClient = new Client();
+        anotherClient.setClientId(UUID.randomUUID().toString());
+
+        AuthorizationGrant grant = new SimpleAuthorizationGrant();
+        grant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, anotherClient, new Date());
+        service.validateScope(grant, client);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateScope_whenClientHasNoRevokeAnyTokenScope_shouldFail() {
+        final Client client = new Client();
+        client.setClientId(UUID.randomUUID().toString());
+        client.setScopes(new String[] {"openid"});
+
+        final Client anotherClient = new Client();
+        anotherClient.setClientId(UUID.randomUUID().toString());
+
+        AuthorizationGrant grant = new SimpleAuthorizationGrant();
+        grant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, anotherClient, new Date());
+        service.validateScope(grant, client);
+    }
+
+    @Test
+    public void validateScope_whenClientHasNoRevokeAnyTokenScopeButRevokeOwnToken_shouldPassSuccessfully() {
+        final Client client = new Client();
+        client.setClientId(UUID.randomUUID().toString());
+        client.setScopes(new String[] {"openid"});
+
+        AuthorizationGrant grant = new SimpleAuthorizationGrant();
+        grant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
+        service.validateScope(grant, client);
     }
 }

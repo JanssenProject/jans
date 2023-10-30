@@ -28,6 +28,7 @@ import io.jans.as.server.service.GrantService;
 import io.jans.as.server.service.external.ExternalRevokeTokenService;
 import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -39,7 +40,11 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+
+import java.util.Arrays;
 import java.util.List;
+
+import static io.jans.as.server.model.config.Constants.REVOKE_ANY_TOKEN_SCOPE;
 
 /**
  * Provides interface for token revocation REST web services
@@ -151,13 +156,31 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
         }
 
         validateSameClient(authorizationGrant, client);
+        validateScope(authorizationGrant, client);
 
         grantService.removeAllByGrantId(authorizationGrant.getGrantId());
         log.trace("Revoked successfully token {}", token);
     }
 
+    public void validateScope(AuthorizationGrant authorizationGrant, Client client) {
+        if (authorizationGrant.getClientId().equals(client.getClientId())) {
+            return; // client owns this client -> nothing to do
+        }
+
+        if (client.getScopes() != null && Arrays.asList(client.getScopes()).contains(REVOKE_ANY_TOKEN_SCOPE)) {
+            return; // client has 'revoke_any_token' scope
+        }
+
+        log.trace("Client {} does not have 'revoke_any_token' scope which is required to be able revoke other client's tokens", client.getClientId());
+        throw new WebApplicationException(Response
+                .status(Response.Status.BAD_REQUEST.getStatusCode())
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(errorResponseFactory.errorAsJson(TokenRevocationErrorResponseType.INVALID_REQUEST, "Client does not have 'revoke_any_token' scope"))
+                .build());
+    }
+
     public void validateSameClient(AuthorizationGrant grant, Client client) {
-        if (!grant.getClientId().equals(client.getClientId()) && !appConfiguration.getAllowRevokeForOtherClients()) {
+        if (!grant.getClientId().equals(client.getClientId()) && BooleanUtils.isFalse(appConfiguration.getAllowRevokeForOtherClients())) {
             log.trace("Token was issued with client {} but revoke is requested with client {}. Skip revoking.", grant.getClientId(), client.getClientId());
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST.getStatusCode())
