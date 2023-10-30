@@ -427,11 +427,24 @@ public class LicenseDetailsService extends BaseService {
                     licenseResponse.setMaxActivations(entity.getInt("max_activations"));
                     licenseResponse.setLicenseKey(entity.getString("license_key"));
                     licenseResponse.setValidityPeriod(entity.getString("validity_period"));
-                    licenseResponse.setCompanyName(entity.getJsonObject("customer").getString("company_name"));
-                    licenseResponse.setCustomerEmail(entity.getJsonObject("customer").getString("email"));
-                    licenseResponse.setCustomerFirstName(entity.getJsonObject("customer").getString("first_name"));
-                    licenseResponse.setCustomerLastName(entity.getJsonObject("customer").getString("last_name"));
                     licenseResponse.setLicenseActive(entity.getBoolean("license_active"));
+
+                    JsonObject customer = entity.getJsonObject("customer");
+                    if(customer != null) {
+                        if(customer.get("company_name") != null) {
+                            licenseResponse.setCompanyName(customer.get("company_name").toString());
+                        }
+                        if(customer.get("email") != null) {
+                            licenseResponse.setCustomerEmail(customer.get("email").toString());
+                        }
+                        if(customer.get("first_name") != null) {
+                            licenseResponse.setCustomerFirstName(customer.get("first_name").toString());
+                        }
+                        if(customer.get("last_name") != null) {
+                            licenseResponse.setCustomerLastName(customer.get("last_name").toString());
+                        }
+                    }
+
                     return licenseResponse;
                 }
             }
@@ -444,7 +457,6 @@ public class LicenseDetailsService extends BaseService {
             licenseResponse.setLicenseEnabled(false);
             return licenseResponse;
         }
-
     }
 
     /**
