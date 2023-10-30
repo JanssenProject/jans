@@ -1,1 +1,1 @@
-io.jans.configapi.plugin.saml.model.config.SamlConfigSource
+io.jans.configapi.plugin.keycloak.idp.broker.model.config.IdpConfigSource
