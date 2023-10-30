@@ -20,7 +20,7 @@ public class KcIdentityBrokerService {
     private static Logger LOG = LoggerFactory.getLogger(KcIdentityBrokerService.class);
     private static JansUtil jansUtil = new JansUtil();
 
-    private String getScimUserEndpoint() {
+    private String getKeycloakServerUrl() {
         String scimUserEndpoint = jansUtil.getScimUserEndpoint();
         LOG.info("KcIdentityBrokerService::getScimUserEndpoint() - scimUserEndpoint:{}", scimUserEndpoint);
         return scimUserEndpoint;

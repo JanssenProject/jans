@@ -7590,15 +7590,15 @@ components:
           type: string
         userCanView:
           type: boolean
-        adminCanView:
+        adminCanEdit:
           type: boolean
-        adminCanAccess:
+        adminCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanEdit:
-          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8107,6 +8107,8 @@ components:
         introspectionAccessTokenMustHaveIntrospectionScope:
           type: boolean
         introspectionSkipAuthorization:
+          type: boolean
+        introspectionRestrictBasicAuthnToOwnTokens:
           type: boolean
         endSessionWithAccessToken:
           type: boolean

@@ -10,11 +10,14 @@ public class Constants {
 
     private Constants() {}
 
-    public static final String JANS_CONFIG_PROP_PATH = "jans.config.prop.path";
+    public static final String JANS_KC_IDP_CONFIG_PROP_PATH = "jans.kc.idp.prop.path";
     public static final String KEYCLOAK_USER = "/keycloak-user";
     public static final String BASE_URL = "https://localhost";
     
+    public static final String KEYCLOAK= "/kc";
+    public static final String IDENTITY_PROVIDER = "/identity-provider";
     public static final String SAML_PATH = "/saml";
+
     public static final String IDP_PATH = "/idp";
     public static final String INUM_PARAM_PATH = "/{inum}";
     public static final String NAME_PARAM_PATH = "/{name}";
@@ -40,5 +43,4 @@ public class Constants {
     public static final String KC_SAML_IDP_WRITE_ACCESS = "https://jans.io/keycloak/saml/idp/config.write";
     
     
-
 }

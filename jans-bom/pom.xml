@@ -47,6 +47,8 @@
 		<jackson.version>2.13.4</jackson.version>
 		<jackson.databind.version>2.13.4.2</jackson.databind.version>
 		<json.version>20230227</json.version>
+		
+		<keycloak.version>21.1.1</keycloak.version>
 
 		<log4j.version>2.19.0</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
@@ -811,6 +813,26 @@
 				<artifactId>aws-java-sdk-sns</artifactId>
 				<version>${aws.sns.version}</version>
 			</dependency>
+			
+		   <!-- keycloak dependencies -->
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-core</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-admin-client-jakarta</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-services</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
+		<!-- end keycloak dependencies-->
 
 			<!-- Other -->
 			<dependency>

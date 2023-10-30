@@ -4,11 +4,8 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.plugin.scim.service.ScimConfigService;
 import io.jans.configapi.core.util.Jackson;
-import io.jans.configapi.plugin.scim.util.Constants;
-import io.jans.scim.model.conf.AppConfiguration;
-import io.jans.scim.model.conf.Conf;
+import io.jans.kc.idp.broker.util.Constants;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -20,8 +17,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
-import org.slf4j.Logger;
-
 import java.io.IOException;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
@@ -29,7 +24,10 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path(Constants.SCIM_CONFIG)
+import org.slf4j.Logger;
+import org.keycloak.representations.idm.IdentityProviderRepresentation;
+
+@Path(Constants.IDENTITY_PROVIDER + Constants.SAML_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class KcSAMLIdentityBrokerResource {
@@ -38,50 +36,40 @@ public class KcSAMLIdentityBrokerResource {
     Logger log;
 
     @Inject
-    ScimConfigService scimConfigService;
+    JansKeycloakService jansKeycloakService;
 
-    @Operation(summary = "Retrieves SAML Trusted IDP ", description = "Retrieves SAML Trusted IDP", operationId = "get-saml-idp", tags = {
+    @Operation(summary = "Retrieves SAML Identity Provider", description = "Retrieves SAML Identity Provider", operationId = "get-saml-identity-provider", tags = {
             "Jans - Keycloak Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/scim/config.readonly" }))
+                    Constants.KC_SAML_IDP_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdentityProviderRepresentation.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { "https://jans.io/scim/config.readonly" })
-    public Response getAppConfiguration() {
-        AppConfiguration appConfiguration = scimConfigService.find();
-        log.debug("SCIM appConfiguration:{}", appConfiguration);
-        return Response.ok(appConfiguration).build();
+    @ProtectedApi(scopes = {Constants.KC_SAML_IDP_READ_ACCESS})
+    public Response getAllSamlIdentityProvider() {
+       
+        
+        return Response.ok("OK").build();
     }
 
-    @Operation(summary = "Patch SCIM App configuration", description = "Patch SCIM App configuration", operationId = "patch-scim-config", tags = {
-            "SCIM - Config Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/scim/config.write" }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = {
-            @ExampleObject(value = "[ {op:replace, path: loggingLevel, value: DEBUG } ]") }))
+    @Operation(summary = "Create SAML Identity Provider", description = "Create SAML Identity Provider", operationId = "postt-saml-identity-provider", tags = {
+            "Jans - Keycloak Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.KC_SAML_IDP_WRITE_ACCESS }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProviderRepresentation.class), examples = {
+            @ExampleObject(value = "") }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdentityProviderRepresentation.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @PATCH
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { "https://jans.io/scim/config.write" })
-    public Response patchAppConfigurationProperty(@NotNull String requestString)
+    @POST
+    @ProtectedApi(scopes = { Constants.KC_SAML_IDP_WRITE_ACCESS })
+    public Response patchAppConfigurationProperty(@NotNull IdentityProviderRepresentation identityProviderRepresentation)
             throws IOException, JsonPatchException {
-        log.debug("AUTH CONF details to patch - requestString:{}", requestString);
-        Conf conf = scimConfigService.findConf();
-        AppConfiguration appConfiguration = conf.getDynamicConf();
-        log.trace("AUTH CONF details BEFORE patch - conf:{}, appConfiguration:{}", conf, appConfiguration);
-
-        appConfiguration = Jackson.applyPatch(requestString, appConfiguration);
-        log.trace("AUTH CONF details BEFORE patch merge - appConfiguration:{}", appConfiguration);
-        conf.setDynamicConf(appConfiguration);
-
-        scimConfigService.merge(conf);
-        appConfiguration = scimConfigService.find();
-        log.debug("AUTH CONF details AFTER patch merge - appConfiguration:{}", appConfiguration);
-        return Response.ok(appConfiguration).build();
+        log.debug("Create identityProviderRepresentation:{}", identityProviderRepresentation);
+       
+        log.debug("Created identityProviderRepresentation:{}", identityProviderRepresentation);
+        return Response.ok(identityProviderRepresentation).build();
     }
 
 }

@@ -1,6 +1,6 @@
 package io.jans.kc.idp.broker.config;
 
-import io.jans.idp.keycloak.util.Constants;
+import io.jans.kc.idp.broker.util.Constants;
 
 import java.io.FileInputStream;
 import java.nio.file.FileSystems;
@@ -16,6 +16,8 @@ import org.keycloak.component.ComponentValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.keycloak.representations.idm.IdentityProviderRepresentation;
+
 public class JansIdpBrokerConfigSource implements ConfigSource {
 
     private static Logger logger = LoggerFactory.getLogger(JansIdpBrokerConfigSource.class);
@@ -26,7 +28,7 @@ public class JansIdpBrokerConfigSource implements ConfigSource {
     private Map<String, String> propertiesMap = new HashMap<>();
 
     public JansIdpBrokerConfigSource() {
-        this.configFilePath = System.getProperty(Constants.JANS_KC-IDP-CONFIG_PROP_PATH);
+        this.configFilePath = System.getProperty(Constants.JANS_KC_IDP_CONFIG_PROP_PATH);
         logger.info("this.configFilePath:{}", configFilePath);
        
         if (StringUtils.isBlank(configFilePath)) {
