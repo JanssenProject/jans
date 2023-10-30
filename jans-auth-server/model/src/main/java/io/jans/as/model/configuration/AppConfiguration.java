@@ -143,6 +143,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value true allow all value for revoke endpoint", defaultValue = "false")
     private Boolean allowAllValueForRevokeEndpoint = false;
 
+    @DocProperty(description = "Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint", defaultValue = "false")
+    private Boolean allowRevokeForOtherClients = false;
+
     @DocProperty(description = "Sector Identifier cache lifetime in minutes", defaultValue = "1440")
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
 
@@ -936,6 +939,15 @@ public class AppConfiguration implements Configuration {
 
     public void setAllowAllValueForRevokeEndpoint(Boolean allowAllValueForRevokeEndpoint) {
         this.allowAllValueForRevokeEndpoint = allowAllValueForRevokeEndpoint;
+    }
+
+    public Boolean getAllowRevokeForOtherClients() {
+        if (allowRevokeForOtherClients == null) allowRevokeForOtherClients = false;
+        return allowRevokeForOtherClients;
+    }
+
+    public void setAllowRevokeForOtherClients(Boolean allowRevokeForOtherClients) {
+        this.allowRevokeForOtherClients = allowRevokeForOtherClients;
     }
 
     public Boolean getReturnDeviceSecretFromAuthzEndpoint() {
