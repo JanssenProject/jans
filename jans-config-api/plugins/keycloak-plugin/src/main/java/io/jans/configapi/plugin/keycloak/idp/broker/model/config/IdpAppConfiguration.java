@@ -1,4 +1,4 @@
-package o.jans.configapi.plugin.keycloak.idp.broker.model.config;
+package io.jans.configapi.plugin.keycloak.idp.broker.model.config;
 
 import java.util.List;
 

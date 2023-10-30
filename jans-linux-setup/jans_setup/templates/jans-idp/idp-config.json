@@ -4,7 +4,7 @@
   "idpEnabled": "${idp_enabled}",
   "idpServerUrl":"https://%(keycloak-server)",
   "idpRootDir": "${idp_root_dir}",
-  "idpTrmpDir": "${idp_root_dir}",
+  "idpTempDir": "${idp_root_dir}",
   "spMetadataFilePattern":"%s-sp-metadata.xml",
   "spMetadataFile":"sp-metadata.xml",
   "clientId":"%(idp_client_id)s",
