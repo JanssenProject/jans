@@ -118,12 +118,12 @@ jobs:
           echo event before: ${{ github.event.before }}
           echo GH sha: $GITHUB_SHA
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'adopt'
           
       - name: Cache SonarCloud packages for JVM based project
