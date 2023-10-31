@@ -22,5 +22,8 @@ public class IdpAppConfiguration implements Configuration {
     private String grantType;
     private String username;
     private String password;
+    
+    
+    
      
 }
