@@ -7,9 +7,11 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
 
+import io.jans.kc.spi.ProviderIDs;
+
 public class JansAuthResponseResourceProviderFactory implements RealmResourceProviderFactory {
 
-    private static final String ID = "janssen-auth-response-bridge";
+    private static final String ID = ProviderIDs.JANS_AUTH_RESPONSE_REST_PROVIDER;
 
     @Override
     public String getId() {
