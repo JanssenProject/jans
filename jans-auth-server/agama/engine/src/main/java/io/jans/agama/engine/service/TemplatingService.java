@@ -66,7 +66,7 @@ public class TemplatingService {
     @PostConstruct
     private void init() {
 
-        fmConfig = new Configuration(Configuration.VERSION_2_3_31);
+        fmConfig = new Configuration(Configuration.VERSION_2_3_32);
         fmConfig.setDefaultEncoding(UTF_8.toString());
         fmConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         fmConfig.setLogTemplateExceptions(false);
