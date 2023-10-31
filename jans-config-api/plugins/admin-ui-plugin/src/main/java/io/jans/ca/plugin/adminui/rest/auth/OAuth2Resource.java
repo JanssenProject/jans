@@ -1,9 +1,8 @@
 package io.jans.ca.plugin.adminui.rest.auth;
 
+import io.jans.ca.plugin.adminui.model.auth.ApiTokenRequest;
 import io.jans.ca.plugin.adminui.model.auth.OAuth2ConfigResponse;
 import io.jans.ca.plugin.adminui.model.auth.TokenResponse;
-import io.jans.ca.plugin.adminui.model.auth.UserInfoRequest;
-import io.jans.ca.plugin.adminui.model.auth.UserInfoResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.service.auth.OAuth2Service;
@@ -76,37 +75,13 @@ public class OAuth2Resource {
         }
     }
 
-    @GET
-    @Path(OAUTH2_ACCESS_TOKEN)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getAccessToken(@QueryParam("code") String code, @PathParam("codeVerifier") String codeVerifier, @PathParam("appType") String appType) {
-        try {
-            log.info("Access token request to Auth Server.");
-            TokenResponse tokenResponse = oAuth2Service.getAccessToken(code, codeVerifier, appType);
-            log.info("Access token received from Auth Server.");
-            return Response.ok(tokenResponse).build();
-        } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription(), e);
-            return Response
-                    .status(e.getErrorCode())
-                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription(), e);
-            return Response
-                    .serverError()
-                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription()))
-                    .build();
-        }
-    }
-
-    @GET
+    @POST
     @Path(OAUTH2_API_PROTECTION_TOKEN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getApiProtectionToken(@QueryParam("ujwt") String ujwt, @PathParam("appType") String appType) {
+    public Response getApiProtectionToken(@Valid @NotNull ApiTokenRequest apiTokenRequest, @PathParam("appType") String appType) {
         try {
             log.info("Api protection token request to Auth Server.");
-            TokenResponse tokenResponse = oAuth2Service.getApiProtectionToken(ujwt, appType);
+            TokenResponse tokenResponse = oAuth2Service.getApiProtectionToken(apiTokenRequest, appType);
             log.info("Api protection token received from Auth Server.");
             return Response.ok(tokenResponse).build();
         } catch (ApplicationException e) {
@@ -120,30 +95,6 @@ public class OAuth2Resource {
             return Response
                     .serverError()
                     .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription()))
-                    .build();
-        }
-    }
-
-    @POST
-    @Path(OAUTH2_API_USER_INFO)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserInfo(@Valid @NotNull UserInfoRequest userInfoRequest, @PathParam("appType") String appType) {
-        try {
-            log.info("Get User-Info request to Auth Server.");
-            UserInfoResponse userInfoResponse = oAuth2Service.getUserInfo(userInfoRequest, appType);
-            log.info("Get User-Info received from Auth Server.");
-            return Response.ok(userInfoResponse).build();
-        } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e);
-            return Response
-                    .status(e.getErrorCode())
-                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e);
-            return Response
-                    .serverError()
-                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_USER_INFO_ERROR.getDescription()))
                     .build();
         }
     }
