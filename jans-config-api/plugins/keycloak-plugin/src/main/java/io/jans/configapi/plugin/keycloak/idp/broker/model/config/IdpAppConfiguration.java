@@ -11,12 +11,16 @@ public class IdpAppConfiguration implements Configuration {
     private String applicationName;
     private String trustedIdpDn;
     private boolean idpEnabled;
-    private String idpServerUrl;
     private String idpRootDir;
 	private String idpTempDir;
     private String spMetadataFilePattern;
 	private String spMetadataFile;
+    private String serverUrl;
+    private String realm;
     private String clientId;
-    private String clientPassword;
+    private String clientSecret;
+    private String grantType;
+    private String username;
+    private String password;
      
 }

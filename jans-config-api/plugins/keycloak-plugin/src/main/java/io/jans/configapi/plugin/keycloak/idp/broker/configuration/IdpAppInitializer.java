@@ -25,8 +25,8 @@ import jakarta.servlet.ServletContext;
 import org.slf4j.Logger;
 
 @ApplicationScoped
-@Named("keycloakAppInitializer")
-public class KeycloakAppInitializer {
+@Named("idpAppInitializer")
+public class IdpAppInitializer {
 
     @Inject
     Logger log;

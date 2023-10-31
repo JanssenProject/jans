@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.saml.service;
+package io.jans.configapi.plugin.keycloak.idp.broker.service;
 
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.plugin.saml.model.config.KeycloakConfig;
@@ -31,7 +31,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 
 @ApplicationScoped
-public class SamlKeycloakService {
+public class KeycloakService {
 
     @Inject
     Logger logger;

@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 @Named
-public class MetadataValidationTimer {
+public class SPMetadataValidationTimer {
 
     private final static int DEFAULT_INTERVAL = 60; // 60 seconds
 
