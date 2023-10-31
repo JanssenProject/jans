@@ -1076,6 +1076,16 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/v1.0.20.nightly/admin/lock/</loc>
+         <lastmod>2023-10-31</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/v1.0.20.nightly/admin/lock/design/</loc>
+         <lastmod>2023-10-31</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/v1.0.20.nightly/admin/planning/</loc>
          <lastmod>2023-10-31</lastmod>
          <changefreq>daily</changefreq>
