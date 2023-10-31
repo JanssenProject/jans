@@ -168,9 +168,9 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_SAML_PORT=8083 \
     CN_SAML_HOST=0.0.0.0 \
-    CN_SAML_JAVA_OPTIONS="" \
-    KC_HEALTH_ENABLED=true \
-    KC_METRICS_ENABLED=true
+    CN_SAML_JAVA_OPTIONS=""
+    # KC_HEALTH_ENABLED=true \
+    # KC_METRICS_ENABLED=true
 
 # ==========
 # misc stuff
@@ -206,7 +206,8 @@ RUN chmod -R g=u /etc/certs \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 /opt/idp \
     && chown -R 1000:0 /usr/share/java \
-    && chown -R 1000:0 /opt/keycloak/logs
+    && chown -R 1000:0 /opt/keycloak/logs \
+    && chown -R 1000:0 /opt/keycloak/conf
 
 USER 1000
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging.config
+import os
 import typing as _t
 from functools import cached_property
 from string import Template
@@ -38,7 +39,25 @@ def render_keycloak_storage_api_props(ctx):
         f.write(tmpl.safe_substitute(ctx))
 
 
+def render_keycloak_conf(manager):
+    with open("/app/templates/jans-saml/keycloak.conf") as f:
+        tmpl = Template(f.read())
+
+    with open("/opt/keycloak/conf/keycloak.conf", "w") as f:
+        ctx = {
+            "http_host": os.environ.get("CN_SAML_HOST", "0.0.0.0"),
+            "http_port": os.environ.get("CN_SAML_PORT", "8083"),
+            # @TODO: change it once we have stable upstream implementation
+            "hostname": "localhost",
+            # "hostname": manager.config.get("hostname"),
+            "log_level": "INFO",
+        }
+        f.write(tmpl.safe_substitute(ctx))
+
+
 def main():
+    render_keycloak_conf(manager)
+
     with manager.lock.create_lock("jans-saml-setup"):
         persistence_setup = PersistenceSetup(manager)
         persistence_setup.import_ldif_files()
