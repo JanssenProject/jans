@@ -3,8 +3,8 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.jans</groupId>
-  <artifactId>kc-jans-authn-plugin</artifactId>
-  <name>kc-jans-authn-plugin</name>
+  <artifactId>kc-jans-scheduler</artifactId>
+  <name>kc-jans-scheduler</name>
   <packaging>jar</packaging>
 
   <parent>
@@ -41,12 +41,7 @@
     </dependency>
     <!-- end keycloak dependencies-->
 
-    <!-- nimbus dependencies -->
-    <dependency>
-        <groupId>com.nimbusds</groupId>
-        <artifactId>oauth2-oidc-sdk</artifactId>
-    </dependency>
-    <!-- end nimbus dependencies -->
+    
   </dependencies>
 
   <build>
@@ -56,6 +51,21 @@
      <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-dependency-plugin</artifactId>
+      <version>${maven-deps-plugin.version}</version>
+      <executions>
+        <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+                <outputDirectory>${project.build.directory}/deps</outputDirectory>
+                <includeScope>runtime</includeScope>
+                <excludeTransitive>false</excludeTransitive>
+            </configuration>
+        </execution>
+      </executions>
      </plugin>
      <!-- end maven deps plugin -->
 
@@ -63,6 +73,22 @@
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
+        <version>${maven-assembly-plugin.version}</version>
+        <configuration>
+            <descriptors>
+                <descriptor>src/assembly/dependencies.xml</descriptor>
+            </descriptors>
+            <finalName>${project.artifactId}-${project.version}</finalName>
+        </configuration>
+        <executions>
+            <execution>
+                <id>zip-dependencies</id>
+                <phase>package</phase>
+                <goals>
+                    <goal>single</goal>
+                </goals>
+            </execution>
+        </executions>
      </plugin>
      <!-- end maven assembly plugin -->
 
@@ -70,9 +96,13 @@
      <plugin>
        <groupId>org.apache.maven.plugins</groupId>
        <artifactId>maven-compiler-plugin</artifactId>
+       <version>${maven-compiler-plugin.version}</version>
+       <configuration>
+        <source>${maven.compiler.source}</source>
+        <target>${maven.compiler.target}</target>
+       </configuration>
      </plugin>
      <!-- end maven compiler plugin -->
-     
     </plugins>
   </build>
 </project>
