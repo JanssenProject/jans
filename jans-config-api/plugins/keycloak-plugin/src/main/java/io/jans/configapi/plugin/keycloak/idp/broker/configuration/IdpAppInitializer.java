@@ -7,7 +7,7 @@
 package io.jans.configapi.plugin.keycloak.idp.broker.configuration;
 
 import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.configapi.plugin.keycloak.idp.broker.timer.MetadataValidationTimer;
+import io.jans.configapi.plugin.keycloak.idp.broker.timer.SpMetadataValidationTimer;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 
@@ -39,14 +39,14 @@ public class IdpAppInitializer {
     BeanManager beanManager;
 
     @Inject
-    SamlConfigurationFactory  ConfigurationFactory;
+    IdpConfigurationFactory  idpConfigurationFactory;
 
 
     @Inject
     QuartzSchedulerManager quartzSchedulerManager;
     
     @Inject
-    MetadataValidationTimer metadataValidationTimer;
+    SpMetadataValidationTimer spMetadataValidationTimer;
 
 
     public void onAppStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
@@ -54,7 +54,7 @@ public class IdpAppInitializer {
         log.debug("init:{}", init);
 
         // configuration
-        this.keycloakConfigurationFactory.create();
+        this.idpConfigurationFactory.create();
         initSchedulerService();
         metadataValidationTimer.initTimer();
 
@@ -82,8 +82,8 @@ public class IdpAppInitializer {
 
     @Produces
     @ApplicationScoped
-    public SamlConfigurationFactory getSamlConfigurationFactory() {
-        return keycloakConfigurationFactory;
+    public IdpConfigurationFactory getIdpConfigurationFactory() {
+        return idpConfigurationFactory;
     }
 
    

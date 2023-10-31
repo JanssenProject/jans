@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.keycloak.idp.broker.model.rest;
+package io.jans.configapi.plugin.keycloak.idp.broker.rest;
 
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -12,10 +12,8 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
-import io.jans.configapi.plugin.saml.model.config.SamlAppConfiguration;
-import io.jans.configapi.plugin.saml.model.config.SamlConf;
-import io.jans.configapi.plugin.saml.service.SamlConfigService;
-import io.jans.configapi.plugin.saml.util.Constants;
+
+import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
 import io.jans.configapi.util.ApiAccessConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,7 +39,7 @@ import org.slf4j.Logger;
 
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 
-@Path(Constants.KEYCLOAK + Constants.SAML_CONFIG)
+@Path(Constants.KEYCLOAK + Constants.SAML_PATH)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class IdpResource extends BaseResource {

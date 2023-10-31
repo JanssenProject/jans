@@ -28,7 +28,7 @@ public class BrokerIdentityProviderForm implements Serializable {
 	@Valid
 	@FormParam("identityProvider")
 	@PartType(MediaType.APPLICATION_JSON)
-    private IdentityProvider IdentityProvider;
+    private IdentityProvider identityProvider;
 
     @NotNull
 	@FormParam("metaDataFile")

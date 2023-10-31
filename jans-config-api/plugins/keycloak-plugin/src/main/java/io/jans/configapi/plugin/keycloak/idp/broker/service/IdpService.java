@@ -10,9 +10,12 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
+import io.jans.configapi.core.service.SamlIdpService;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.plugin.keycloak.idp.broker.timer.SpMetadataValidationTimer;
 import io.jans.configapi.plugin.keycloak.idp.broker.model.IdentityProvider;
+import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpConfigService;
+
 
 import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
@@ -59,30 +62,30 @@ public class IdpService {
     private InumService inumService;
 
     @Inject
-    SamlConfigService samlConfigService;
-
+    SpMetadataValidationTimer spMetadataValidationTimer;
+    
     @Inject
     SamlIdpService samlIdpService;
-
+    
     @Inject
-    MetadataValidationTimer metadataValidationTimer;
+    IdpConfigService idpConfigService;
 
-    public String getTrustRelationshipDn() {
-        return samlConfigService.getTrustRelationshipDn();
+    public String getIdentityProviderDn() {
+        return idpConfigService.getTrustedIdpDn();
     }
 
     public String getSpMetadataFilePattern() {
-        return samlConfigService.getSpMetadataFilePattern();
+        return idpConfigService.getSpMetadataFilePattern();
     }
 
     public boolean containsRelationship(String dn) {
-        return persistenceEntryManager.contains(dn, TrustRelationship.class);
+        return persistenceEntryManager.contains(dn, IdentityProvider.class);
     }
 
-    public TrustRelationship getRelationshipByDn(String dn) {
+    public IdentityProvider getRelationshipByDn(String dn) {
         if (StringHelper.isNotEmpty(dn)) {
             try {
-                return persistenceEntryManager.find(TrustRelationship.class, dn);
+                return persistenceEntryManager.find(IdentityProvider.class, dn);
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
@@ -91,57 +94,57 @@ public class IdpService {
         return null;
     }
 
-    public TrustRelationship getTrustRelationshipByInum(String inum) {
-        TrustRelationship result = null;
+    public IdentityProvider getIdentityProviderByInum(String inum) {
+        IdentityProvider result = null;
         try {
-            result = persistenceEntryManager.find(TrustRelationship.class, getDnForTrustRelationship(inum));
+            result = persistenceEntryManager.find(IdentityProvider.class, getDnForIdentityProvider(inum));
         } catch (Exception ex) {
-            log.error("Failed to load TrustRelationship entry", ex);
+            log.error("Failed to load IdentityProvider entry", ex);
         }
         return result;
     }
 
-    public List<TrustRelationship> getAllTrustRelationships() {
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, null);
+    public List<IdentityProvider> getAllIdentityProviders() {
+        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, null);
     }
 
-    public List<TrustRelationship> getAllActiveTrustRelationships() {
-        TrustRelationship trustRelationship = new TrustRelationship();
-        trustRelationship.setBaseDn(getDnForTrustRelationship(null));
-        trustRelationship.setStatus(GluuStatus.ACTIVE);
+    public List<IdentityProvider> getAllActiveIdentityProviders() {
+        IdentityProvider identityProvider = new IdentityProvider();
+        identityProvider.setBaseDn(getDnForIdentityProvider(null));
+        identityProvider.setStatus(GluuStatus.ACTIVE);
 
-        return persistenceEntryManager.findEntries(trustRelationship);
+        return persistenceEntryManager.findEntries(identityProvider);
     }
 
-    public List<TrustRelationship> getAllTrustRelationshipByInum(String inum) {
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(inum), TrustRelationship.class, null);
+    public List<IdentityProvider> getAllIdentityProviderByInum(String inum) {
+        return persistenceEntryManager.findEntries(getDnForIdentityProvider(inum), IdentityProvider.class, null);
     }
 
-    public List<TrustRelationship> getAllTrustRelationshipByName(String name) {
-        log.info("Search TrustRelationship with name:{}", name);
+    public List<IdentityProvider> getAllIdentityProviderByName(String name) {
+        log.info("Search IdentityProvider with name:{}", name);
 
         String[] targetArray = new String[] { name };
         Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, targetArray);
-        log.debug("Search TrustRelationship with displayNameFilter:{}", displayNameFilter);
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
+        log.debug("Search IdentityProvider with displayNameFilter:{}", displayNameFilter);
+        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class,
                 displayNameFilter);
     }
 
-    public TrustRelationship getTrustContainerFederation(TrustRelationship trustRelationship) {
-        return getRelationshipByDn(trustRelationship.getDn());
+    public IdentityProvider getTrustContainerFederation(IdentityProvider IdentityProvider) {
+        return getRelationshipByDn(IdentityProvider.getDn());
     }
 
-    public TrustRelationship getTrustContainerFederation(String dn) {
+    public IdentityProvider getTrustContainerFederation(String dn) {
         return getRelationshipByDn(dn);
     }
 
-    public List<TrustRelationship> getAllTrustRelationships(int sizeLimit) {
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, null,
+    public List<IdentityProvider> getAllIdentityProviders(int sizeLimit) {
+        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, null,
                 sizeLimit);
     }
 
-    public TrustRelationship getTrustByUnpunctuatedInum(String unpunctuated) {
-        for (TrustRelationship trust : getAllTrustRelationships()) {
+    public IdentityProvider getTrustByUnpunctuatedInum(String unpunctuated) {
+        for (IdentityProvider trust : getAllIdentityProviders()) {
             if (StringHelper.removePunctuation(trust.getInum()).equals(unpunctuated)) {
                 return trust;
             }
@@ -149,9 +152,9 @@ public class IdpService {
         return null;
     }
 
-    public List<TrustRelationship> searchTrustRelationship(String pattern, int sizeLimit) {
+    public List<IdentityProvider> searchIdentityProvider(String pattern, int sizeLimit) {
 
-        log.info("Search TrustRelationship with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
+        log.info("Search IdentityProvider with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
 
         String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
@@ -161,18 +164,18 @@ public class IdpService {
         Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
 
-        log.info("Search TrustRelationship with searchFilter:{}", searchFilter);
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
+        log.info("Search IdentityProvider with searchFilter:{}", searchFilter);
+        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class,
                 searchFilter, sizeLimit);
     }
 
-    public List<TrustRelationship> getAllTrustRelationship(int sizeLimit) {
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, null,
+    public List<IdentityProvider> getAllIdentityProvider(int sizeLimit) {
+        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, null,
                 sizeLimit);
     }
 
-    public PagedResult<Client> getTrustRelationship(SearchRequest searchRequest) {
-        log.info("Search TrustRelationship with searchRequest:{}", searchRequest);
+    public PagedResult<Client> getIdentityProvider(SearchRequest searchRequest) {
+        log.info("Search IdentityProvider with searchRequest:{}", searchRequest);
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
@@ -190,76 +193,76 @@ public class IdpService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        log.debug("TrustRelationship pattern searchFilter:{}", searchFilter);
+        log.debug("IdentityProvider pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
                 Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                log.trace("TrustRelationship dataFilter:{}", dataFilter);
+                log.trace("IdentityProvider dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        log.info("TrustRelationship searchFilter:{}", searchFilter);
+        log.info("IdentityProvider searchFilter:{}", searchFilter);
 
-        return persistenceEntryManager.findPagedEntries(getDnForTrustRelationship(null), Client.class, searchFilter,
+        return persistenceEntryManager.findPagedEntries(getDnForIdentityProvider(null), Client.class, searchFilter,
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) throws IOException {
-        return addTrustRelationship(trustRelationship, null);
+    public IdentityProvider addIdentityProvider(IdentityProvider IdentityProvider) throws IOException {
+        return addIdentityProvider(IdentityProvider, null);
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, InputStream file)
+    public IdentityProvider addIdentityProvider(IdentityProvider IdentityProvider, InputStream file)
             throws IOException {
-        log.info("Add new trustRelationship:{}, file:{}", trustRelationship, file);
+        log.info("Add new IdentityProvider:{}, file:{}", IdentityProvider, file);
 
-        setTrustRelationshipDefaultValue(trustRelationship, false);
-        persistenceEntryManager.persist(trustRelationship);
+        setIdentityProviderDefaultValue(IdentityProvider, false);
+        persistenceEntryManager.persist(IdentityProvider);
 
         if (file != null && file.available() > 0) {
-            saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
+            saveSpMetaDataFileSourceTypeFile(IdentityProvider, file);
         }
 
-        return getTrustRelationshipByInum(trustRelationship.getInum());
+        return getIdentityProviderByInum(IdentityProvider.getInum());
     }
 
-    public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship) throws IOException {
-        return updateTrustRelationship(trustRelationship, null);
+    public IdentityProvider updateIdentityProvider(IdentityProvider IdentityProvider) throws IOException {
+        return updateIdentityProvider(IdentityProvider, null);
     }
 
-    public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship, InputStream file)
+    public IdentityProvider updateIdentityProvider(IdentityProvider IdentityProvider, InputStream file)
             throws IOException {
-        setTrustRelationshipDefaultValue(trustRelationship, true);
-        persistenceEntryManager.merge(trustRelationship);
+        setIdentityProviderDefaultValue(IdentityProvider, true);
+        persistenceEntryManager.merge(IdentityProvider);
 
         if (file != null && file.available() > 0) {
-            saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
+            saveSpMetaDataFileSourceTypeFile(IdentityProvider, file);
         }
 
-        return getTrustRelationshipByInum(trustRelationship.getInum());
+        return getIdentityProviderByInum(IdentityProvider.getInum());
 
     }
 
-    public void removeTrustRelationship(TrustRelationship trustRelationship) {
-        persistenceEntryManager.removeRecursively(trustRelationship.getDn(), TrustRelationship.class);
+    public void removeIdentityProvider(IdentityProvider IdentityProvider) {
+        persistenceEntryManager.removeRecursively(IdentityProvider.getDn(), IdentityProvider.class);
 
     }
 
-    private TrustRelationship setTrustRelationshipDefaultValue(TrustRelationship trustRelationship, boolean update) {
-        return trustRelationship;
+    private IdentityProvider setIdentityProviderDefaultValue(IdentityProvider IdentityProvider, boolean update) {
+        return IdentityProvider;
     }
 
-    public String getDnForTrustRelationship(String inum) {
+    public String getDnForIdentityProvider(String inum) {
         String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(inum)) {
-            return String.format("ou=trustRelationships,%s", orgDn);
+            return String.format("ou=IdentityProviders,%s", orgDn);
         }
-        return String.format("inum=%s,ou=trustRelationships,%s", inum, orgDn);
+        return String.format("inum=%s,ou=IdentityProviders,%s", inum, orgDn);
     }
 
     public String generateInumForNewRelationship() {
@@ -267,22 +270,22 @@ public class IdpService {
         String newDn = null;
         do {
             newInum = UUID.randomUUID().toString();
-            newDn = getDnForTrustRelationship(newInum);
+            newDn = getDnForIdentityProvider(newInum);
         } while (containsRelationship(newDn));
 
         return newInum;
     }
 
-    private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship, InputStream file) {
-        log.info("trustRelationship:{}, file:{}", trustRelationship, file);
+    private boolean saveSpMetaDataFileSourceTypeFile(IdentityProvider identityProvider, InputStream file) {
+        log.info("identityProvider:{}, file:{}", identityProvider, file);
 
-        String spMetadataFileName = trustRelationship.getSpMetaDataFN();
+        String spMetadataFileName = identityProvider.getSpMetaDataFN();
         boolean emptySpMetadataFileName = StringHelper.isEmpty(spMetadataFileName);
         log.debug("emptySpMetadataFileName:{}", emptySpMetadataFileName);
         if ((file == null)) {
             log.trace("File is null");
             if (emptySpMetadataFileName) {
-                log.debug("The trust relationship {} has an empty Metadata filename", trustRelationship.getInum());
+                log.debug("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
                 return false;
             }
             String filePath = samlIdpService.getSpMetadataFilePath(spMetadataFileName);
@@ -290,7 +293,7 @@ public class IdpService {
 
             if (filePath == null) {
                 log.debug("The trust relationship {} has an invalid Metadata file storage path",
-                        trustRelationship.getInum());
+                        identityProvider.getInum());
                 return false;
             }
 
@@ -302,7 +305,7 @@ public class IdpService {
                 if (!newFile.exists()) {
                     log.debug(
                             "The trust relationship {} metadata used local storage but the SP metadata file `{}` was not found",
-                            trustRelationship.getInum(), filePath);
+                            identityProvider.getInum(), filePath);
                     return false;
                 }
             }
@@ -310,9 +313,9 @@ public class IdpService {
         }
         if (emptySpMetadataFileName) {
             log.debug("emptySpMetadataFileName:{}", emptySpMetadataFileName);
-            spMetadataFileName = samlIdpService.getSpNewMetadataFileName(trustRelationship);
+            spMetadataFileName = samlIdpService.getSpNewMetadataFileName(identityProvider);
             log.debug("spMetadataFileName:{}", spMetadataFileName);
-            trustRelationship.setSpMetaDataFN(spMetadataFileName);
+            identityProvider.setSpMetaDataFN(spMetadataFileName);
 
         }
         InputStream targetStream = file;
@@ -321,7 +324,7 @@ public class IdpService {
         String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
         log.debug("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
         if (StringHelper.isNotEmpty(result)) {
-            metadataValidationTimer.queue(result);
+            spMetadataValidationTimer.queue(result);
             //process files in temp that were not processed earlier
             processUnprocessedMetadataFiles();
         } else {
@@ -346,7 +349,7 @@ public class IdpService {
 
                 for (File file : files) {
                     log.debug("file:{}, file.getName():{}", file, file.getName());
-                    metadataValidationTimer.queue(file.getName());
+                    spMetadataValidationTimer.queue(file.getName());
                 }
             }
 

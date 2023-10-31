@@ -52,12 +52,12 @@ public class IdpConfigService {
         persistenceManager.merge(IdpConf);
     }
 
-    public IdpAppConfiguration find() {
+    public IdpAppConfiguration getIdpAppConfiguration() {
         return getIdpConf().getDynamicConf();
     }
 
     public boolean isIdpEnabled() {
-        IdpAppConfiguration idpAppConfiguration = find();
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         boolean idpEnabled = false;
         if (idpAppConfiguration != null) {
@@ -67,7 +67,7 @@ public class IdpConfigService {
     }
 
     public String getTrustedIdpDn() {
-        IdpAppConfiguration idpAppConfiguration = find();
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         String trustRelationshipDn = null;
         if (idpAppConfiguration != null) {
@@ -77,7 +77,7 @@ public class IdpConfigService {
     }
 
     public String getIdpRootDir() {
-        IdpAppConfiguration idpAppConfiguration = find();
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         String idpRootDir = null;
         if (idpAppConfiguration != null) {
@@ -87,7 +87,7 @@ public class IdpConfigService {
     }
 
     public String getIdpTempDir() {
-        IdpAppConfiguration idpAppConfiguration = find();
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         String idpTempDir = null;
         if (idpAppConfiguration != null) {
@@ -97,7 +97,7 @@ public class IdpConfigService {
     }
 
     public String getSpMetadataFilePattern() {
-        IdpAppConfiguration idpAppConfiguration = find();
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         String spMetadataFilePattern = null;
         if (idpAppConfiguration != null) {
@@ -107,7 +107,7 @@ public class IdpConfigService {
     }
 
     public String getSpMetadataFile() {
-        IdpAppConfiguration idpAppConfiguration = find();
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         String spMetadataFile = null;
         if (idpAppConfiguration != null) {

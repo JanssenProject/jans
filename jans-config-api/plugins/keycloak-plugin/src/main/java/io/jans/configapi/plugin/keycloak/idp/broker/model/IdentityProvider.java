@@ -60,6 +60,16 @@ public class IdentityProvider extends Entry implements Serializable {
 
     @AttributeName
     private String internalId;
+    
+    /**
+     * SP metadata file location
+     */
+    @AttributeName(name = "jansSAMLspMetaDataFN")
+    @Hidden
+    private String spMetaDataFN;
+
+    @AttributeName(name = "jansSAMLspMetaDataURL")
+    private String spMetaDataURL;
 
     @AttributeName(name = "jansEnabled")
     private boolean enabled;
@@ -130,6 +140,22 @@ public class IdentityProvider extends Entry implements Serializable {
         this.internalId = internalId;
     }
 
+    public String getSpMetaDataFN() {
+        return spMetaDataFN;
+    }
+
+    public void setSpMetaDataFN(String spMetaDataFN) {
+        this.spMetaDataFN = spMetaDataFN;
+    }
+
+    public String getSpMetaDataURL() {
+        return spMetaDataURL;
+    }
+
+    public void setSpMetaDataURL(String spMetaDataURL) {
+        this.spMetaDataURL = spMetaDataURL;
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -166,7 +192,8 @@ public class IdentityProvider extends Entry implements Serializable {
     public String toString() {
         return "IdentityProvider [inum=" + inum + ", owner=" + owner + ", name=" + name + ", displayName=" + displayName
                 + ", description=" + description + ", providerId=" + providerId + ", internalId=" + internalId
-                + ", enabled=" + enabled + ", status=" + status + ", validationLog=" + validationLog + "]";
-    }
-    
+                + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL + ", enabled=" + enabled
+                + ", status=" + status + ", validationStatus=" + validationStatus + ", validationLog=" + validationLog
+                + "]";
+    }    
 }
