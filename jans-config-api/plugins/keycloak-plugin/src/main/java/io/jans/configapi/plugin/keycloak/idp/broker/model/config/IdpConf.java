@@ -13,7 +13,6 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 
-
 @DataEntry
 @ObjectClass(value = "jansAppConf")
 public class IdpConf {
@@ -22,7 +21,7 @@ public class IdpConf {
 
     @JsonObject
     @AttributeName(name = "jansConfDyn")
-    private SamlAppConfiguration dynamicConf;
+    private IdpAppConfiguration dynamicConf;
 
     @JsonObject
     @AttributeName(name = "jansConfStatic")
@@ -39,11 +38,11 @@ public class IdpConf {
         this.dn = dn;
     }
 
-    public SamlAppConfiguration getDynamicConf() {
+    public IdpAppConfiguration getDynamicConf() {
         return dynamicConf;
     }
 
-    public void setDynamicConf(SamlAppConfiguration dynamicConf) {
+    public void setDynamicConf(IdpAppConfiguration dynamicConf) {
         this.dynamicConf = dynamicConf;
     }
 
@@ -68,5 +67,4 @@ public class IdpConf {
         return "IdpConf [dn=" + dn + ", dynamicConf=" + dynamicConf + ", staticsConf=" + staticsConf + ", revision="
                 + revision + "]";
     }
-  
 }

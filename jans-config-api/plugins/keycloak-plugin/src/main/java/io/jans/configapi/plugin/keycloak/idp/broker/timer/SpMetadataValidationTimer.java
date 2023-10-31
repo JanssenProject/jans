@@ -4,14 +4,15 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.saml.timer;
+package io.jans.configapi.plugin.keycloak.idp.broker.timer;
 
-import io.jans.configapi.plugin.saml.event.MetadataValidationEvent;
-import io.jans.configapi.plugin.saml.model.config.SamlAppConfiguration;
-import io.jans.configapi.plugin.saml.model.TrustRelationship;
-import io.jans.configapi.plugin.saml.model.ValidationStatus;
-import io.jans.configapi.plugin.saml.service.SamlService;
-import io.jans.configapi.plugin.saml.service.SamlIdpService;
+import io.jans.configapi.core.model.ValidationStatus;
+import io.jans.configapi.plugin.keycloak.idp.broker.event.SpMetadataValidationEvent;
+import io.jans.configapi.plugin.keycloak.idp.broker.model.IdentityProvider;
+import io.jans.configapi.plugin.keycloak.idp.broker.model.config.IdpAppConfiguration;
+import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpConfigService;
+import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpService;
+
 import io.jans.model.GluuStatus;
 import io.jans.saml.metadata.SAMLMetadataParser;
 import io.jans.service.cdi.async.Asynchronous;
@@ -43,7 +44,7 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 @Named
-public class SPMetadataValidationTimer {
+public class SpMetadataValidationTimer {
 
     private final static int DEFAULT_INTERVAL = 60; // 60 seconds
 
@@ -54,17 +55,14 @@ public class SPMetadataValidationTimer {
     private Event<TimerEvent> timerEvent;
 
     @Inject
-    private SamlAppConfiguration samlAppConfiguration;
-
-    @Inject
-    private SamlService samlService;
-
-    @Inject
     private SAMLMetadataParser samlMetadataParser;
-
+    
     @Inject
-    private SamlIdpService samlIdpService;
-
+    private IdpAppConfiguration idpAppConfiguration;
+    
+    @Inject 
+    private IdpService idpService;
+    
     private AtomicBoolean isActive;
 
     private LinkedBlockingQueue<String> metadataUpdates;
@@ -85,13 +83,13 @@ public class SPMetadataValidationTimer {
         final int delay = 30;
         final int interval = DEFAULT_INTERVAL;
 
-        timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new MetadataValidationEvent(),
+        timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new SpMetadataValidationEvent(),
                 Scheduled.Literal.INSTANCE));
     }
 
     @Asynchronous
     public void processMetadataValidationTimerEvent(
-            @Observes @Scheduled MetadataValidationEvent metadataValidationEvent) {
+            @Observes @Scheduled SpMetadataValidationEvent SpMetadataValidationEvent) {
         if (this.isActive.get()) {
             return;
         }
@@ -111,7 +109,7 @@ public class SPMetadataValidationTimer {
 
     private void procesMetadataValidation() throws Exception {
         log.debug("Starting metadata validation");
-        boolean result = validateMetadata(samlIdpService.getIdpMetadataTempDir(), samlIdpService.getIdpMetadataDir());
+        boolean result = validateMetadata(idpAppConfiguration.getIdpTempDir(), idpAppConfiguration.getIdpRootDir());
         log.debug("Metadata validation finished with result: '{}'", result);
 
     }
@@ -137,17 +135,17 @@ public class SPMetadataValidationTimer {
         }
     }
 
-    public String getValidationStatus(String samlspMetaDataFN, TrustRelationship trust) {
-        if (trust.getValidationStatus() == null) {
+    public String getValidationStatus(String spMetaDataFN, IdentityProvider trustedIdp) {
+        if (trustedIdp.getValidationStatus() == null) {
             return ValidationStatus.SUCCESS.getDisplayName();
         }
-        if (trust.getValidationStatus() == null) {
+        if (trustedIdp.getValidationStatus() == null) {
             return ValidationStatus.PENDING.getDisplayName();
         }
         synchronized (metadataUpdates) {
             boolean result = false;
             for (String filename : metadataUpdates) {
-                if (filename.contains(samlspMetaDataFN)) {
+                if (filename.contains(spMetaDataFN)) {
                     result = true;
                     break;
                 }
@@ -155,7 +153,7 @@ public class SPMetadataValidationTimer {
             if (result) {
                 return ValidationStatus.SCHEDULED.getDisplayName();
             } else {
-                return trust.getValidationStatus().getDisplayName();
+                return trustedIdp.getValidationStatus().getDisplayName();
             }
         }
     }
@@ -184,52 +182,65 @@ public class SPMetadataValidationTimer {
                 String destinationMetadataPath = metadataFolder + destinationMetadataName;
                 log.debug("metadataFN:{}, metadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}",
                         metadataFN, metadataPath, destinationMetadataName, destinationMetadataPath);
-                TrustRelationship tr = samlService
-                        .getTrustByUnpunctuatedInum(metadataFN.split("-" + samlIdpService.getSpMetadataFile())[0]);
-                log.debug("TrustRelationship found with name:{} is:{}",metadataFN, tr);
+                
+                //To-do - start
+                IdentityProvider idp = null; 
+                
+                
+                //IdentityProvider idp = idpService
+                  //      .getIdpByUnpunctuatedInum(metadataFN.split("-" + samlIdpService.getSpMetadataFile())[0]);
+                
+                //To-do - end
+                
+                log.debug("TrustRelationship found with name:{} is:{}",metadataFN, idp);
                 if (tr == null) {
                     log.debug("No TrustRelationship found with name:{}",metadataFN);
                     metadataUpdates.add(metadataFN);
                     return false;
                 }
-                tr.setValidationStatus(ValidationStatus.PENDING);
-                samlService.updateTrustRelationship(tr);
+                idp.setValidationStatus(ValidationStatus.PENDING);
+                
+                //to-do
+                //idpService.updateIdp(idp);
 
                 log.debug("metadataFN:{}, metadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}",
                         metadataFN, metadataPath, destinationMetadataName, destinationMetadataPath);
 
                 GluuErrorHandler errorHandler = null;
                 List<String> validationLog = null;
-                try {
-                    errorHandler = samlIdpService.validateMetadata(metadataPath);
+                try {//to-do
+                    //errorHandler = idpService.validateMetadata(metadataPath);
                     log.debug("validateMetadata result errorHandler:{}", errorHandler);
                 } catch (Exception e) {
-                    tr.setValidationStatus(ValidationStatus.FAILED);
-                    tr.setStatus(GluuStatus.INACTIVE);
+                    idp.setValidationStatus(ValidationStatus.FAILED);
+                    idp.setStatus(GluuStatus.INACTIVE);
                     validationLog = this.getValidationLog(validationLog);
                     validationLog.add(e.getMessage());
-                    log.debug("Validation of " + tr.getInum() + " failed: " + e.getMessage());
-                    tr.setValidationLog(validationLog);
-                    samlService.updateTrustRelationship(tr);
+                    log.debug("Validation of " + idp.getInum() + " failed: " + e.getMessage());
+                    idp.setValidationLog(validationLog);
+                  //to-do
+                    //idpService.updateTrustRelationship(idp);
                     return false;
                 }
 
                 if (errorHandler == null) {
                     return false;
                 }
+
                 log.debug(
                         "validateMetadata result errorHandler.isValid():{}, errorHandler.getLog():{}, errorHandler.toString():{}",
                         errorHandler.isValid(), errorHandler.getLog(), errorHandler.toString());
                 log.debug("samlAppConfiguration.isIgnoreValidation():{} errorHandler.isInternalError():{}",
-                        samlAppConfiguration.isIgnoreValidation(), errorHandler.isInternalError());
+                        idpAppConfiguration.isIgnoreValidation(), errorHandler.isInternalError());
+                
 
                 if (errorHandler.isValid()) {
                     log.debug("validate Metadata file processing");
-                    tr.setValidationLog(errorHandler.getLog());
-                    tr.setValidationStatus(ValidationStatus.SUCCESS);
+                    idp.setValidationLog(errorHandler.getLog());
+                    idp.setValidationStatus(ValidationStatus.SUCCESS);
 
                     log.debug("Move metadata file:{} to location:{}", metadataPath, destinationMetadataPath);
-                    boolean renamed = samlIdpService.renameMetadata(metadataPath, destinationMetadataPath);
+                    boolean renamed = idpService.renameMetadata(metadataPath, destinationMetadataPath);
 
                     log.debug("Staus of moving file:{} to location:{} is :{}", metadataPath, destinationMetadataPath,
                             renamed);
@@ -237,12 +248,12 @@ public class SPMetadataValidationTimer {
                     if (renamed) {
                         log.debug("Failed to move metadata file:{} to location:{}", metadataPath,
                                 destinationMetadataPath);
-                        tr.setStatus(GluuStatus.INACTIVE);
+                        idp.setStatus(GluuStatus.INACTIVE);
                     } else {
-                        tr.setSpMetaDataFN(destinationMetadataName);
+                        idp.setSpMetaDataFN(destinationMetadataName);
                     }
 
-                    String metadataFile = samlIdpService.getIdpMetadataDir() + tr.getSpMetaDataFN();
+                    String metadataFile = idpConfigService.getIdpMetadataDir() + idp.getSpMetaDataFN();
                     log.debug("After successfully moving metadataFile :{}", metadataFile);
                     List<String> entityIdList = samlMetadataParser.getEntityIdFromMetadataFile(metadataFile);
                     log.debug("Success entityIdList :{}", entityIdList);
@@ -272,7 +283,7 @@ public class SPMetadataValidationTimer {
 
                     samlService.updateTrustRelationship(tr);
                     result = true;
-                } else if (samlAppConfiguration.isIgnoreValidation() || errorHandler.isInternalError()) {
+                } else if (IdentityProvider.isIgnoreValidation() || errorHandler.isInternalError()) {
                     tr.setValidationLog(new ArrayList<String>(new HashSet<String>(errorHandler.getLog())));
                     tr.setValidationStatus(ValidationStatus.FAILED);
                     boolean fileRenamed = samlIdpService.renameMetadata(metadataPath, destinationMetadataPath);
@@ -282,14 +293,14 @@ public class SPMetadataValidationTimer {
                         log.debug(
                                 "Updating trustRelationship status to Inactive as metadata:{} could not be copied to:{}",
                                 metadataPath, destinationMetadataPath);
-                        tr.setStatus(GluuStatus.INACTIVE);
+                        idp.setStatus(GluuStatus.INACTIVE);
                     } else {
-                        tr.setSpMetaDataFN(destinationMetadataName);
+                        idp.setSpMetaDataFN(destinationMetadataName);
                         log.debug("Validation error for metadata file ignored as isIgnoreValidation:{}"
-                                + samlAppConfiguration.isIgnoreValidation());
+                                + idp.isIgnoreValidation());
                     }
 
-                    String metadataFile = samlIdpService.getIdpMetadataDir() + tr.getSpMetaDataFN();
+                    String metadataFile = samlIdpService.getIdpRootDir() + tr.getSpMetaDataFN();
                     log.debug("metadataFile:{}", metadataFile);
 
                     List<String> entityIdList = samlMetadataParser.getEntityIdFromMetadataFile(metadataFile);
@@ -306,7 +317,7 @@ public class SPMetadataValidationTimer {
                     }
 
                     tr.setStatus(GluuStatus.ACTIVE);
-                    validationLog = tr.getValidationLog();
+                    validationLog = idp.getValidationLog();
                     log.debug("duplicatesSet:{}", duplicatesSet);
                     if (!duplicatesSet.isEmpty()) {
                         validationLog = this.getValidationLog(validationLog);
@@ -315,7 +326,7 @@ public class SPMetadataValidationTimer {
                     }
                     log.debug("errorHandler.isInternalError():{}", errorHandler.isInternalError());
                     if (errorHandler.isInternalError()) {
-                        validationLog = tr.getValidationLog();
+                        validationLog = idp.getValidationLog();
                         validationLog = this.getValidationLog(validationLog);
                         validationLog.add(
                                 "Warning: cannot validate metadata. Check internet connetion ans www.w3.org availability.");
@@ -327,7 +338,8 @@ public class SPMetadataValidationTimer {
                         }
                     }
                     log.debug("Updating TrustRelationship:{} , validationLog :{}", tr, validationLog);
-                    samlService.updateTrustRelationship(tr);
+                    //to-do
+                    //idpService.updateIdp(idp);
                     result = true;
                 } else {
                     log.debug("Unhandled  metadataFN:{}", metadataFN);

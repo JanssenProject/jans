@@ -68,13 +68,14 @@ public class IdpConfigSource implements ConfigSource {
     private Properties loadProperties() {
         // Load the properties file
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        try ( InputStream inputStream = loader.getResourceAsStream(FILE_CONFIG)) { 
+        try (InputStream inputStream = loader.getResourceAsStream(FILE_CONFIG)) {
             properties = new Properties();
             properties.load(inputStream);
-            properties.stringPropertyNames().stream().forEach(key -> propertiesMap.put(key, properties.getProperty(key)));
+            properties.stringPropertyNames().stream()
+                    .forEach(key -> propertiesMap.put(key, properties.getProperty(key)));
             return properties;
         } catch (Exception e) {
-            throw new ConfigurationException("Failed to load configuration from "+ FILE_CONFIG, e);
+            throw new ConfigurationException("Failed to load configuration from " + FILE_CONFIG, e);
         }
     }
 

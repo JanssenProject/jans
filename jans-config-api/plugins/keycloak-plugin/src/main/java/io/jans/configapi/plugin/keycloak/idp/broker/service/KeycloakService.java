@@ -7,7 +7,7 @@
 package io.jans.configapi.plugin.keycloak.idp.broker.service;
 
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.saml.model.config.KeycloakConfig;
+import io.jans.configapi.plugin.keycloak.idp.broker.configuration.KeycloakConfig;
 import io.jans.orm.PersistenceEntryManager;
 
 import jakarta.enterprise.context.ApplicationScoped;

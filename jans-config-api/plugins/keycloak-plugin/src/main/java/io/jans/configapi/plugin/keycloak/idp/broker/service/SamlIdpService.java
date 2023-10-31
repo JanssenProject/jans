@@ -4,9 +4,8 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.saml.service;
+package io.jans.configapi.plugin.keycloak.idp.broker.service;
 
-import io.jans.configapi.plugin.saml.model.TrustRelationship;
 import io.jans.service.document.store.service.DocumentStoreService;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.service.LocalDocumentStoreService;
@@ -43,9 +42,6 @@ public class SamlIdpService {
     Logger logger;
 
     @Inject
-    SamlConfigService samlConfigService;
-
-    @Inject
     private DocumentStoreService documentStoreService;
 
     @Inject
@@ -58,7 +54,7 @@ public class SamlIdpService {
         SAMLSchemaBuilder samlSchemaBuilder = new SAMLSchemaBuilder(SAML1Version.SAML_11);
         try {
             this.samlSchema = samlSchemaBuilder.getSAMLSchema();
-            logger.debug("samlSchema", samlSchema);
+            logger.debug("samlSchema:{}", samlSchema);
         } catch (Exception ex) {
             logger.error("Failed to load SAMLSchema - ", ex);
         }
@@ -68,44 +64,53 @@ public class SamlIdpService {
         return documentStoreService.getProviderType() == DocumentStoreType.LOCAL;
     }
 
-    public String getSpMetadataFilePath(String spMetaDataFN) {
-        if (StringUtils.isBlank(getIdpMetadataDir())) {
+    public String getSpMetadataFilePath(String metadataDir, String spMetaDataFN) {
+        logger.debug("metadataDir:{}, spMetaDataFN:{}", metadataDir, spMetaDataFN);
+        if (StringUtils.isBlank(getIdpMetadataDir(metadataDir))) {
             throw new InvalidConfigurationException("Failed to return IDP metadata file path as undefined!");
         }
 
-        String idpMetadataFolder = getIdpMetadataDir();
+        String idpMetadataFolder = getIdpMetadataDir(metadataDir);
         return idpMetadataFolder + spMetaDataFN;
     }
 
-    public String getIdpMetadataDir() {
-        if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataDir())) {
+    public String getIdpMetadataDir(String metadataDir) {
+        logger.debug("metadataDir:{}", metadataDir);
+        if (StringUtils.isBlank(metadataDir)) {
             throw new InvalidConfigurationException("Failed to return IDP metadata file path as undefined!");
         }
-        return samlConfigService.getSelectedIdpConfigMetadataDir() + File.separator;
+        return metadataDir + File.separator;
     }
 
-    public String getSpMetadataFile() {
-        if (StringUtils.isBlank(samlConfigService.getSpMetadataFile())) {
+    public String getMetadataFile(String metadataFile) {
+        logger.debug("metadataFile:{}", metadataFile);
+        if (StringUtils.isBlank(metadataFile)) {
             throw new InvalidConfigurationException("Failed to return IDP SP metadata file name as undefined!");
         }
-        return samlConfigService.getSpMetadataFile();
-    }
-
-    public String getSpNewMetadataFileName(TrustRelationship trustRel) {
-        return getSpNewMetadataFileName(trustRel.getInum());
+        return metadataFile;
     }
 
     public String getSpNewMetadataFileName(String inum) {
-        String relationshipInum = StringHelper.removePunctuation(inum);
-        return String.format(samlConfigService.getSpMetadataFilePattern(), relationshipInum);
+        logger.debug("inum:{}", inum);
+        return getSpNewMetadataFileName(inum);
     }
 
-    public String getIdpMetadataTempDir() {
-        if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataTempDir())) {
+    public String getSpNewMetadataFileName(String inum, String metadataFilePattern) {
+        logger.debug("inum:{}, metadataFilePattern:{}", inum, metadataFilePattern);
+        if (StringUtils.isBlank(inum) || StringUtils.isBlank(metadataFilePattern)) {
+            throw new InvalidConfigurationException("Metadata file num or metadataFilePattern are undefined!");
+        }
+        String relationshipInum = StringHelper.removePunctuation(inum);
+        return String.format(metadataFilePattern, relationshipInum);
+    }
+
+    public String getIdpMetadataTempDir(String metadataTempDir) {
+        logger.debug("metadataTempDir:{}", metadataTempDir);
+        if (StringUtils.isBlank(metadataTempDir)) {
             throw new InvalidConfigurationException("Failed to return IDP metadata Temp directory as undefined!");
         }
 
-        return samlConfigService.getSelectedIdpConfigMetadataTempDir() + File.separator;
+        return (metadataTempDir + File.separator);
     }
 
     private String getTempMetadataFilename(String idpMetadataFolder, String fileName) {
@@ -121,14 +126,14 @@ public class SamlIdpService {
         }
     }
 
-    public String saveSpMetadataFile(String spMetadataFileName, InputStream stream) {
-        logger.info("spMetadataFileName:{}, stream:{}", spMetadataFileName, stream);
+    public String saveSpMetadataFile(String rootDir, String metadataTempDir, String spMetadataFileName, InputStream stream) {
+        logger.info("rootDir:{}, spMetadataFileName:{}, stream:{}", rootDir, spMetadataFileName, stream);
 
-        if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir())) {
+        if (StringUtils.isBlank(rootDir)) {
             throw new InvalidConfigurationException("Failed to save SP metadata file due to undefined!");
         }
 
-        String idpMetadataTempFolder = getIdpMetadataTempDir();
+        String idpMetadataTempFolder = getIdpMetadataTempDir(metadataTempDir);
         logger.debug("idpMetadataTempFolder:{}", idpMetadataTempFolder);
 
         String tempFileName = getTempMetadataFilename(idpMetadataTempFolder, spMetadataFileName);
@@ -139,7 +144,7 @@ public class SamlIdpService {
                 spMetadataFile, localDocumentStoreService);
         try {
             boolean result = documentStoreService.saveDocumentStream(spMetadataFile, stream,
-                    List.of("jans-server", samlConfigService.getSelectedIdpConfigID()));
+                    List.of("jans-server", "KC-IDP"));
             logger.debug("SP File saving result:{}", result);
 
             InputStream newFile = documentStoreService.readDocumentAsStream(spMetadataFile);

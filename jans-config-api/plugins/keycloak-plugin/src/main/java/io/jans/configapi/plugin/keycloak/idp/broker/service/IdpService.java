@@ -4,15 +4,15 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.saml.service;
+package io.jans.configapi.plugin.keycloak.idp.broker.service;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
-import io.jans.configapi.plugin.saml.model.TrustRelationship;
+import io.jans.configapi.plugin.keycloak.idp.broker.timer.SpMetadataValidationTimer;
+import io.jans.configapi.plugin.keycloak.idp.broker.model.IdentityProvider;
 
 import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
@@ -41,7 +41,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
 
 @ApplicationScoped
-public class SamlService {
+public class IdpService {
 
     @Inject
     Logger log;
