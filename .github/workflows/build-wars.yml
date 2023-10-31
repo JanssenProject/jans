@@ -77,7 +77,7 @@ jobs:
     - uses: actions/setup-java@v3
       if: contains(env.DIRECTORIES_CHANGED, matrix.fldrpath)
       with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'zulu'
 
     - name: Publish package
