@@ -71,7 +71,7 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
             code: authorizationCode,
             grantType: "authorization_code",
             redirectUri: opConfiguration.issuer,
-            scope: oidcClient.scope, // "openId",
+            scope: oidcClient.scope,
             authHeader: "Basic \(authHeaderEncodedString)",
             dpopJwt: DPoPProofFactory.shared.issueDPoPJWTToken(httpMethod: "POST", requestUrl: opConfiguration.issuer),
             url: opConfiguration.tokenEndpoint)
@@ -87,7 +87,7 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
                 }
             case .failure(let error):
                 print("error: \(error)")
-                self?.presenter.onError(message: "Error in generating authorization token. Erorr: \(error.localizedDescription)")
+                self?.presenter.onError(message: "Error in generating authorization token. Error: \(error.localizedDescription)")
             }
         }
         .store(in: &cancellableSet)
@@ -103,6 +103,7 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
                 switch result {
                 case .success(let userInfo):
                     print("userInfo: \(userInfo)")
+                    self?.presenter.onViewStateChanged(viewState: .afterLogin(userInfo))
                 case .failure(let error):
                     print("error: \(error)")
                     self?.presenter.onError(message: "Error in getting user info. Erorr: \(error.localizedDescription)")

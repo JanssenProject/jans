@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftJWT
+import JOSESwift
 
 struct JansClaims: Claims {
     let jti: String
@@ -36,26 +37,27 @@ final class DPoPProofFactory {
         // The "alg" header will be set to the algorithm name when you sign the JWT
         
         var tokenJWT = ""
-        guard let localHeimdall = Heimdall(tagPrefix: "com.jans.chip.ios") else {
-            return tokenJWT
-        }
         
-        let header = Header(typ: "dpop+jwt", jwk: localHeimdall.publicKeyData()?.base64EncodedString() ?? "")
-        let claims = JansClaims(
-            jti: UUID().uuidString,
-            htm: httpMethod,
-            htu: requestUrl,
-            iat: Date()
-        )
-        
-        var objectJWT = JWT(header: header, claims: claims)
-        
-        guard let privateKeyData = localHeimdall.privateKeyData() else {
-            return tokenJWT
-        }
-        
-        let jwtSigner = JWTSigner.rs256(privateKey: privateKeyData)
         do {
+            let (privateKey, publicKey) = try SecKey.generateKeyPair(ofSize: 3072)
+            let jwk = try RSAPublicKey(publicKey: publicKey)
+            
+            let header = Header(typ: "dpop+jwt", jwk: jwk.jsonString() ?? "")
+            let claims = JansClaims(
+                jti: UUID().uuidString,
+                htm: httpMethod,
+                htu: requestUrl,
+                iat: Date()
+            )
+            
+            var objectJWT = JWT(header: header, claims: claims)
+            
+            guard let privateKeyData = privateKey.keyData else { //} localHeimdall.privateKeyData() else {
+                return tokenJWT
+            }
+            
+            let jwtSigner = JWTSigner.rs256(privateKey: Data(privateKeyData))
+            
             tokenJWT = try objectJWT.sign(using: jwtSigner)
         } catch(let error) {
             print("Error generating JWT, reason: \(error.localizedDescription)")

@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum ViewState {
-    case initial, register, login, afterLogin
+    case initial, register, login, afterLogin(UserInfo)
 }
 
 final class MainViewState: ObservableObject {

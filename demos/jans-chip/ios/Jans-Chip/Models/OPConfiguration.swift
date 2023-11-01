@@ -48,6 +48,7 @@ struct OPConfiguration: Codable {
         opConfigurationObject.tokenEndpoint = tokenEndpoint
         opConfigurationObject.userinfoEndpoint = userinfoEndpoint
         opConfigurationObject.authorizationChallengeEndpoint = authorizationChallengeEndpoint
+        opConfigurationObject.revocationEndpoint = revocationEndpoint
         
         return opConfigurationObject
     }

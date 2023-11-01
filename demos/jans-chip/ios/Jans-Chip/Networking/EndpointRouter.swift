@@ -15,7 +15,7 @@ public enum EndpointRouter: EndpointConfiguration {
     case getAuthorizationChallenge(String, String, String, String, String, String)
     case getToken(String, String, String, String, String, String, String, String)
     case getUserInfo(String, String, String)
-    case logout(String, String, String)
+    case logout(String, String, String, String)
     case verifyIntegrityTokenOnAppServer(String)
     
     // MARK: - HTTPMethod
@@ -32,7 +32,7 @@ public enum EndpointRouter: EndpointConfiguration {
     // MARK: - BaseURL
     public var baseURL: String {
         switch self {
-        case .doDCR, .getAuthorizationChallenge, .getToken, .getUserInfo:
+        case .doDCR, .getAuthorizationChallenge, .getToken, .getUserInfo, .logout:
             return ""
         default:
             return "https://duttarnab-coherent-imp.gluu.info/"
@@ -44,7 +44,7 @@ public enum EndpointRouter: EndpointConfiguration {
         switch self {
         case .getOPConfiguration:
             return ".well-known/openid-configuration"
-        case .doDCR(_, let url), .getAuthorizationChallenge(_, _, _, _, _, let url), .getToken(_, _, _, _, _, _, _, let url), .getUserInfo(_, _, let url):
+        case .doDCR(_, let url), .getAuthorizationChallenge(_, _, _, _, _, let url), .getToken(_, _, _, _, _, _, _, let url), .getUserInfo(_, _, let url), .logout(_, _, _, let url):
             return url
         default:
             return ""
@@ -54,13 +54,8 @@ public enum EndpointRouter: EndpointConfiguration {
     // MARK: - Parameters
     public var parameters: Parameters? {
         switch self {
-        case .doDCR, .getOPConfiguration, .getAuthorizationChallenge, .getToken, .getUserInfo, .verifyIntegrityTokenOnAppServer:
+        case .doDCR, .getOPConfiguration, .getAuthorizationChallenge, .getToken, .getUserInfo, .logout, .verifyIntegrityTokenOnAppServer:
             return nil
-        case let .logout(token, tokenTypeHint, _):
-            return [
-                "token": token,
-                "token_type_hint": tokenTypeHint
-            ]
         }
     }
     
@@ -79,12 +74,9 @@ public enum EndpointRouter: EndpointConfiguration {
                 HTTPHeader(name: "Authorization", value: authHeader),
                 HTTPHeader(name: "DPoP", value: dpoP)
             ]
-        case .getUserInfo(_, let authHeader, _):
+        case .getUserInfo(_, let authHeader, _), .logout(_, _, let authHeader, _):
             return [
-                HTTPHeader(name: "Authorization", value: authHeader)
-            ]
-        case .logout(_, _, let authHeader):
-            return [
+                HTTPHeader(name: "Content-Type", value: "application/x-www-form-urlencoded"),
                 HTTPHeader(name: "Authorization", value: authHeader)
             ]
         case .getOPConfiguration, .doDCR, .verifyIntegrityTokenOnAppServer:
@@ -127,13 +119,16 @@ public enum EndpointRouter: EndpointConfiguration {
                 urlRequest.httpBody = data
             }
         case let .getAuthorizationChallenge(clientId, username, password, state, nonce, _):
-            let data : Data = "client_id=\("3d734c73-88ae-4191-90bf-08e97ba5cb5e")&username=\(username)&password=\(password)&state=\(state)&nonce=\(nonce)".data(using: .utf8) ?? Data()
+            let data : Data = "client_id=\(clientId)&username=\(username)&password=\(password)&state=\(state)&nonce=\(nonce)".data(using: .utf8) ?? Data()
             urlRequest.httpBody = data
         case let .getToken(clientId, code, grantType, redirectUri, scope, _, _, _):
             let data : Data = "client_id=\(clientId)&code=\(code)&grant_type=\(grantType)&redirect_uri=\(redirectUri)&scope=\(scope)".data(using: .utf8) ?? Data()
             urlRequest.httpBody = data
         case .getUserInfo(let accessToken, _, _):
             let data : Data = "access_token=\(accessToken)".data(using: .utf8) ?? Data()
+            urlRequest.httpBody = data
+        case .logout(let token, let tokenTypeHint, _, _):
+            let data : Data = "token=\(token)&token_type_hint=\(tokenTypeHint)".data(using: .utf8) ?? Data()
             urlRequest.httpBody = data
         default:
             break

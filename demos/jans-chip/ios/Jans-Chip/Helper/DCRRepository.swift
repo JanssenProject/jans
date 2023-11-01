@@ -24,18 +24,12 @@ final class DCRRepository {
         let issuer = configuration.issuer
         let registrationUrl = configuration.registrationEndpoint
         
-        let scopes = scopeText.split(separator: ",")
-        var scopeValues: [String] = []
-        
-        scopes.forEach { scope in
-            let formattedScope = scope.replacingOccurrences(of: " ", with: "")
-            scopeValues.append(formattedScope)
-        }
+        let scopes = scopeText.split(separator: ",").joined(separator: " ")
         
         let dcRequest = DCRequest(
             issuer: issuer,
             redirectUris: [issuer],
-            scope: scopeValues,
+            scope: scopes,
             responseTypes: ["code"],
             postLogoutRedirectUris: [issuer],
             grantTypes: ["authorization_code", "client_credentials"],
@@ -64,7 +58,7 @@ final class DCRRepository {
                     oidcClient.clientName = dcResponse.clientName
                     oidcClient.clientId = dcResponse.clientId
                     oidcClient.clientSecret = dcResponse.clientSecret
-                    oidcClient.scope = scopeText
+                    oidcClient.scope = scopes
                     
                     RealmManager.shared.save(object: oidcClient)
                     

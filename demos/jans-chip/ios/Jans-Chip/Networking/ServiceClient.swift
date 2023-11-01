@@ -16,6 +16,7 @@ protocol ServiceClientProtocol: AnyObject {
     func getAuthorizationChallenge(clientId: String, username: String, password: String, authorizationChallengeEndpoint: String, url: String) -> AnyPublisher<Result<LoginResponse, AFError>, Never>
     func getToken(clientId: String, code: String, grantType: String, redirectUri: String, scope: String, authHeader: String, dpopJwt: String, url: String) -> AnyPublisher<Result<TokenResponse, AFError>, Never>
     func getUserInfo(accessToken: String, authHeader: String, url: String) -> AnyPublisher<Result<UserInfo, AFError>, Never>
+    func logout(token: String, tokenTypeHint: String, authHeader: String, url: String) -> AnyPublisher<Result<String, AFError>, Never>
 }
 
 public final class ServiceClient {
@@ -28,7 +29,7 @@ public final class ServiceClient {
     }
     
     private func performRequest<T: Decodable>(route: EndpointRouter, decoder: JSONDecoder = JSONDecoder()) -> AnyPublisher<Result<T, AFError>, Never> {
-        return AF.request(route).publishDecodable(type: T.self, decoder: decoder).result()
+        return AF.request(route).publishDecodable(type: T.self, decoder: decoder, emptyResponseCodes: [200, 204, 205]).result()
     }
 }
 
@@ -67,6 +68,12 @@ extension ServiceClient: ServiceClientProtocol {
     func getUserInfo(accessToken: String, authHeader: String, url: String) -> AnyPublisher<Result<UserInfo, AFError>, Never> {
         let jsonDecoder = JSONDecoder()
         let publisher: AnyPublisher<Result<UserInfo, AFError>, Never> = performRequest(route: .getUserInfo(accessToken, authHeader, url), decoder: jsonDecoder)
+        return publisher
+    }
+    
+    func logout(token: String, tokenTypeHint: String, authHeader: String, url: String) -> AnyPublisher<Result<String, AFError>, Never> {
+        let jsonDecoder = JSONDecoder()
+        let publisher: AnyPublisher<Result<String, AFError>, Never> = performRequest(route: .logout(token, tokenTypeHint, authHeader, url), decoder: jsonDecoder)
         return publisher
     }
 }

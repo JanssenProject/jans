@@ -25,7 +25,7 @@ public struct DCRequest: Codable {
     
     var issuer: String
     var redirectUris: [String]
-    var scope: [String]
+    var scope: String
     var responseTypes: [String]
     var postLogoutRedirectUris: [String]
     var grantTypes: [String]

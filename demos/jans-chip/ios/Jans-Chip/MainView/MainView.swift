@@ -32,8 +32,8 @@ struct MainView: View {
                 RegisterViewAssembler.assembleNavigationWrapped(mainViewState: state)
             case .login:
                 LoginViewAssembler.assembleNavigationWrapped(mainViewState: state)
-            case .afterLogin:
-                Text("No developed yet")
+            case .afterLogin(let userInfo):
+                AfterLoginViewAssembler.assembleNavigationWrapped(mainViewState: state, userInfo: userInfo)
             }
         }
         .onAppear {

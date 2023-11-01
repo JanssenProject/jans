@@ -15,10 +15,6 @@ struct MainViewAssembler {
         let presenter = MainViewPresenterImpl(state: state)
         let interactor = MainViewInteractorImpl(presenter: presenter)
         let view = MainView(state: state, interactor: interactor)
-//        let hosting = UIHostingController(rootView: view)
-//        hosting.hidesBottomBarWhenPushed = true
-//
-//        return hosting
         
         return view
     }
