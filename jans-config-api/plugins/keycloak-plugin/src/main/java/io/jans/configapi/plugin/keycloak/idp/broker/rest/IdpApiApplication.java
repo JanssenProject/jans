@@ -1,6 +1,6 @@
 package io.jans.configapi.plugin.keycloak.idp.broker.model.rest;
 
-import io.jans.configapi.plugin.saml.util.Constants;
+import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.*;

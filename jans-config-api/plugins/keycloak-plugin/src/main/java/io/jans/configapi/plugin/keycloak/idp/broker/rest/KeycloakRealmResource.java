@@ -1,13 +1,12 @@
-package io.jans.configapi.plugin.keycloak.idp.broker.model.rest;
+package io.jans.configapi.plugin.keycloak.idp.broker.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
-import io.jans.configapi.plugin.saml.model.TrustRelationship;
-import io.jans.configapi.plugin.saml.form.TrustRelationshipForm;
+
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.plugin.saml.util.Constants;
+import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
 import io.jans.configapi.util.AttributeNames;
-import io.jans.configapi.plugin.saml.service.SamlService;
+import io.jans.configapi.plugin.keycloak.idp.broker.service.KeycloakService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,7 +45,7 @@ public class KeycloakRealmResource extends BaseResource {
     Logger logger;
 
     @Inject
-    KeycloakRealmService keycloakRealmService;
+    KeycloakService keycloakService;
 
     @Operation(summary = "Get all Keycloak realm", description = "Get all Keycloak realm.", operationId = "get-keycloak-realm", tags = {
             "Jans - Keycloak Realm" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -58,7 +57,7 @@ public class KeycloakRealmResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { Constants.KC_REALM_READ_ACCESS })
     public Response getAllKeycloakRealms() {
-        List<RealmRepresentation> realms = keycloakRealmService.getAllRealmRepresentation();
+        List<RealmRepresentation> realms = keycloakService.getAllRealmRepresentation();
         logger.info("All realms:{}", realms);
         return Response.ok(realms).build();
     }
@@ -77,7 +76,7 @@ public class KeycloakRealmResource extends BaseResource {
             @Parameter(description = "name") @PathParam(Constants.NAME) @NotNull String name) {
         logger.info("Searching Keycloak Realm by name: {}", escapeLog(name));
 
-        RealmRepresentation realmRepresentation = keycloakRealmService.getKeycloakRealmByName(name);
+        RealmRepresentation realmRepresentation = keycloakService.getKeycloakRealmByName(name);
 
         logger.info("Keycloak realm found by name:{}, realmRepresentation:{}", name, realmRepresentation);
 
@@ -104,7 +103,7 @@ public class KeycloakRealmResource extends BaseResource {
 
     
 
-        trustRelationship = keycloakRealmService.addTrustRelationship(trustRelationship, metaDataFile);
+        trustRelationship = keycloakService.addTrustRelationship(trustRelationship, metaDataFile);
 
         logger.info("Create created by TrustRelationship:{}", trustRelationship);
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
@@ -125,7 +124,7 @@ public class KeycloakRealmResource extends BaseResource {
         logger.info("Update trustRelationship:{}", trustRelationship);
 
         // TO-DO validation of TrustRelationship
-        trustRelationship = keycloakRealmService.updateTrustRelationship(trustRelationship);
+        trustRelationship = keycloakService.updateTrustRelationship(trustRelationship);
 
         logger.info("Post update trustRelationship:{}", trustRelationship);
 
@@ -146,7 +145,7 @@ public class KeycloakRealmResource extends BaseResource {
 
         logger.info("Delete client identified by id:{}", escapeLog(id));
 
-        TrustRelationship trustRelationship = samlService.getTrustRelationshipByInum(id);
+        TrustRelationship trustRelationship = keycloakService.getTrustRelationshipByInum(id);
         if (trustRelationship == null) {
             checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
         }

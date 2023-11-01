@@ -12,8 +12,9 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
-
+import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpService;
 import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
+
 import io.jans.configapi.util.ApiAccessConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,7 +49,7 @@ public class IdpResource extends BaseResource {
     Logger log;
 
     @Inject
-    JansKeycloakService jansKeycloakService;
+    IdpService idpService;
 
     @Operation(summary = "Retrieves KC SAML Identity Provider", description = "Retrieves SAML Identity Provider", operationId = "get-saml-identity-provider", tags = {
             "Jans - Keycloak Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -76,7 +77,7 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { Constants.KC_SAML_IDP_WRITE_ACCESS })
-    public Response createKcSamlIdentityProvider(@NotNull IdentityProviderRepresentation identityProviderRepresentation)
+    public Response createKcSamlIdentityProvider(@Valid IdentityProviderRepresentation identityProviderRepresentation)
             throws IOException, JsonPatchException {
         log.debug("Create identityProviderRepresentation:{}", identityProviderRepresentation);
        

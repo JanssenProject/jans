@@ -115,5 +115,16 @@ public class IdpConfigService {
         }
         return spMetadataFile;
     }
+    
+    public String getSpMetadataFilePath(String metadataDir, String spMetaDataFN) {
+        logger.debug("metadataDir:{}, spMetaDataFN:{}", metadataDir, spMetaDataFN);
+        if (StringUtils.isBlank(getIdpMetadataDir(metadataDir))) {
+            throw new InvalidConfigurationException("Failed to return IDP metadata file path as undefined!");
+        }
+
+        String idpMetadataFolder = getIdpMetadataDir(metadataDir);
+        return idpMetadataFolder + spMetaDataFN;
+    }
+
 
 }

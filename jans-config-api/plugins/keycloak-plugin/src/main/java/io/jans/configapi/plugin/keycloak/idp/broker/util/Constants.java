@@ -13,7 +13,9 @@ public class Constants {
     public static final String JANS_IDP_CONFIG_PROP_PATH = "jans.idp.prop.path";
     public static final String KEYCLOAK_USER = "/keycloak-user";
     public static final String BASE_URL = "https://localhost";
+    public static final String REALM_MASTER = "master";
     
+
 	public static final String IDENTITY_PROVIDER = "/idp";
     public static final String KEYCLOAK= "/kc";
     public static final String SAML_PATH = "/saml";
@@ -25,6 +27,7 @@ public class Constants {
 
 	public static final String IDP = "idp";
     public static final String SAML = "saml";
+    public static final String OIDC = "oidc";
     public static final String ID = "id";
 	public static final String NAME = "name";
 

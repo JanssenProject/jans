@@ -44,7 +44,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
 
 @ApplicationScoped
-public class IdpService {
+public class IdentityProviderService {
 
     @Inject
     Logger log;
@@ -63,12 +63,12 @@ public class IdpService {
 
     @Inject
     SpMetadataValidationTimer spMetadataValidationTimer;
-    
-    @Inject
-    SamlIdpService samlIdpService;
-    
+
     @Inject
     IdpConfigService idpConfigService;
+    
+    @Inject
+    KeycloakService keycloakService;
 
     public String getIdentityProviderDn() {
         return idpConfigService.getTrustedIdpDn();
@@ -77,6 +77,7 @@ public class IdpService {
     public String getSpMetadataFilePattern() {
         return idpConfigService.getSpMetadataFilePattern();
     }
+
 
     public boolean containsRelationship(String dn) {
         return persistenceEntryManager.contains(dn, IdentityProvider.class);
@@ -288,7 +289,7 @@ public class IdpService {
                 log.debug("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
                 return false;
             }
-            String filePath = samlIdpService.getSpMetadataFilePath(spMetadataFileName);
+            String filePath = idpConfigService.getSpMetadataFilePath(spMetadataFileName);
             log.debug("filePath:{}", filePath);
 
             if (filePath == null) {
@@ -357,3 +358,4 @@ public class IdpService {
     }
 
 }
+

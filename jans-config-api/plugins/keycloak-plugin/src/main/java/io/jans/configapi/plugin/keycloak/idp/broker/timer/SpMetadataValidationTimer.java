@@ -12,7 +12,7 @@ import io.jans.configapi.plugin.keycloak.idp.broker.model.IdentityProvider;
 import io.jans.configapi.plugin.keycloak.idp.broker.model.config.IdpAppConfiguration;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpConfigService;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpService;
-import io.jans.configapi.core.service.SamlIdpService;
+import io.jans.configapi.plugin.keycloak.idp.broker.service.SamlIdpService;
 
 import io.jans.model.GluuStatus;
 import io.jans.saml.metadata.SAMLMetadataParser;
