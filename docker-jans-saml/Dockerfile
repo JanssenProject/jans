@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:22.0.3 as kc-src
+FROM quay.io/keycloak/keycloak:22.0.5 as kc-src
 
 FROM bellsoft/liberica-openjre-alpine:17.0.8
 
@@ -26,11 +26,13 @@ RUN mkdir -p /opt/keycloak/logs \
 ENV CN_VERSION=1.0.20-SNAPSHOT
 ENV CN_BUILD_DATE='2023-10-27 08:54'
 
-RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
-    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
-    && unzip /tmp/kc-storage-deps.zip -d /opt/keycloak/providers \
-    && rm -rf /tmp/kc-storage-deps.zip \
-    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERSION}/kc-jans-authn-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
+# @TODO: add kc-jans-storage-plugin after issue with Cookie resolved
+# RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
+#     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
+#     && unzip /tmp/kc-storage-deps.zip -d /opt/keycloak/providers \
+#     && rm -rf /tmp/kc-storage-deps.zip
+    # \
+RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERSION}/kc-jans-authn-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERSION}/kc-jans-authn-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-authn-deps.zip \
     && unzip /tmp/kc-authn-deps.zip -d /opt/keycloak/providers \
     && rm -rf /tmp/kc-authn-deps.zip
