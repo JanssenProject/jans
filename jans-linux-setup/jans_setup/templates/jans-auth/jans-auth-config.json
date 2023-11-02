@@ -486,7 +486,7 @@
     "redirectUrisRegexEnabled": true,
     "useHighestLevelScriptIfAcrScriptNotFound": false,
     "agamaConfiguration": {
-        "enabled": false,
+        "enabled": true,
         "rootDir": "/opt/jans/jetty/jans-auth/agama",
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
