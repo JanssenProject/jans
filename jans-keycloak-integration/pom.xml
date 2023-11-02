@@ -1,136 +1,284 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>io.jans</groupId>
-	<artifactId>jans-keycloak-integration-parent</artifactId>
-	<packaging>pom</packaging>
-	<version>1.0.20-SNAPSHOT</version>
-	<name>jans-keycloak-integration-parent</name>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>io.jans</groupId>
+    <artifactId>jans-kc-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.20-SNAPSHOT</version>
+    <name>keycloak-integration-parent</name>
 
-	<distributionManagement>
-		<repository>
-			<id>github</id>
-			<name>Github Packages</name>
-			<url>https://maven.pkg.github.com/JanssenProject/jans</url>
-		</repository>
-	</distributionManagement>
+    <distributionManagement>
+      <repository>
+        <id>github</id>
+        <name>Github Packages</name>
+        <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
 
-	<properties>
-		<maven.min-version>3.3.9</maven.min-version>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-		<maven-compiler.version>3.10.1</maven-compiler.version>
-		<jans.version>${project.version}</jans.version>
-		<keycloak-server-spi.version>21.1.1</keycloak-server-spi.version>
-		<nimbus.oauth-sdk.version>10.11</nimbus.oauth-sdk.version>
-		<maven-deps-plugin.version>3.6.0</maven-deps-plugin.version>
-		<maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
-		<nimbus.oauth2-oidc-sdk.version>10.11</nimbus.oauth2-oidc-sdk.version>
-		<sonar.projectKey>JanssenProject_keycloak-integ</sonar.projectKey>
-		<sonar.moduleKey>${project.groupId}:${project
-			.artifactId}</sonar.moduleKey>
-		<sonar.organization>janssenproject</sonar.organization>
-		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
-	</properties>
+    <properties>
+      <maven.min-version>3.3.9</maven.min-version>
+      <maven.compiler.source>11</maven.compiler.source>
+      <maven.compiler.target>11</maven.compiler.target>
+      <keycloak-server-spi.version>21.1.1</keycloak-server-spi.version>
+      <nimbus.oauth-sdk.version>10.11</nimbus.oauth-sdk.version>
+      <nimbus.oauth2-oidc-sdk.version>10.11</nimbus.oauth2-oidc-sdk.version>
+      <jackson.coreutils.version>1.8</jackson.coreutils.version>
+      <jans.version>${project.version}</jans.version>
+      <jakarta.ws-rs-api.version>3.0.0</jakarta.ws-rs-api.version>
+      <jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
+      <smallrye-config.version>3.0.0-RC1</smallrye-config.version>
+      <log4j.version>2.19.0</log4j.version>
+      <slf4j.version>1.7.36</slf4j.version>
+      <fasterxml-jackson.version>2.12.6</fasterxml-jackson.version>
+      <commons-lang.version>3.13.0</commons-lang.version>
+      <commons-collection.version>4.1</commons-collection.version>
+      <swagger.version>2.2.7</swagger.version>
+      <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
+      <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+      <maven-deps-plugin.version>3.6.0</maven-deps-plugin.version>
+      <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
+      <sonar.projectKey>JanssenProject_keycloak-integ</sonar.projectKey>
+      <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+      <sonar.organization>janssenproject</sonar.organization>
+      <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    </properties>
 
-	<prerequisites>
-		<maven>${maven.min-version}</maven>
-	</prerequisites>
+    <prerequisites>
+      <maven>${maven.min-version}</maven>
+    </prerequisites>
 
-	<modules>
-		<module>authenticator</module>
-		<module>storage-api</module>
-		<module>idp-broker-api</module>
-	</modules>
+    <modules>
+      <module>authenticator</module>
+      <module>storage-spi</module>
+      <module>task-scheduling</module>
+    </modules>
 
-	<repositories>
-		<repository>
-			<id>jans</id>
-			<name>Janssen project repository</name>
-			<url>https://maven.jans.io/maven</url>
-		</repository>
-		<repository>
-			<id>jans.io</id>
-			<name>Janssen project repository</name>
-			<url>https://jenkins.jans.io/maven/</url>
-		</repository>
-	</repositories>
+    <repositories>
+      <repository>
+        <id>jans.io</id>
+        <name>Janssen project repository</name>
+        <url>https://jenkins.jans.io/maven/</url>
+      </repository>
 
-	<scm>
-		<url>https://github.com/JanssenProject/jans</url>
-		<connection>scm:git:git://github.com/JanssenProject/jans.git</connection>
-		<developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
-	</scm>
+      <repository>
+        <id>mavencentral</id>
+        <name>maven central</name>
+        <url>https://repo1.maven.org/maven2</url>
+      </repository>
+    </repositories>
 
-	<dependencyManagement>
-		<dependencies>
-			<!-- jans dependencies -->
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-bom</artifactId>
-				<version>${jans.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
+    <scm>
+      <url>https://github.com/JanssenProject/keycloak-integration-jans</url>
+      <connection>scm:git:git://github.com/JanssenProject/keycloak-integration-jans</connection>
+      <developerConnection>scm:git:git@github.com:v/keycloak-integration-jans.git</developerConnection>
+    </scm>
 
-			<!-- keycloak dependencies -->
-			<dependency>
-				<groupId>org.keycloak</groupId>
-				<artifactId>
-					keycloak-admin-client-jakarta</artifactId>
-				<scope>provided</scope>
-				<version>
-					${keycloak-server-spi.version}</version>
-			</dependency>
-			
-			<dependency>
-				<groupId>org.keycloak</groupId>
-				<artifactId>
-					keycloak-core</artifactId>
-				<scope>provided</scope>
-				<version>
-					${keycloak-server-spi.version}</version>
-			</dependency>
+    <dependencyManagement>
+      <dependencies>
+        <!-- keycloak dependencies -->
+        <dependency>
+          <groupId>org.keycloak</groupId>
+          <artifactId>keycloak-core</artifactId>
+          <scope>provided</scope>
+          <version>${keycloak-server-spi.version}</version>
+        </dependency>
 
-			<dependency>
-				<groupId>
-					org.keycloak</groupId>
-				<artifactId>keycloak-server-spi</artifactId>
-				<scope>
-					provided</scope>
-				<version>${keycloak-server-spi.version}</version>
-			</dependency>
+        <dependency>
+          <groupId>org.keycloak</groupId>
+          <artifactId>keycloak-server-spi</artifactId>
+          <scope>provided</scope>
+          <version>${keycloak-server-spi.version}</version>
+        </dependency>
 
-			<dependency>
-				<groupId>
-					org.keycloak</groupId>
-				<artifactId>keycloak-server-spi-private</artifactId>
-				<scope>
-					provided</scope>
-				<version>${keycloak-server-spi.version}</version>
-			</dependency>
+        <dependency>
+          <groupId>org.keycloak</groupId>
+          <artifactId>keycloak-server-spi-private</artifactId>
+          <scope>provided</scope>
+          <version>${keycloak-server-spi.version}</version>
+        </dependency>
 
-			<dependency>
-				<groupId>
-					org.keycloak</groupId>
-				<artifactId>keycloak-services</artifactId>
-				<scope>provided</scope>
-				<version>
-					${keycloak-server-spi.version}</version>
-			</dependency>
-			<!-- end keycloak dependencies-->
+        <dependency>
+          <groupId>org.keycloak</groupId>
+          <artifactId>keycloak-services</artifactId>
+          <scope>provided</scope>
+          <version>${keycloak-server-spi.version}</version>
+        </dependency>
 
-			<!-- nimbus dependencies -->
-			<dependency>
-				<groupId>
-					com.nimbusds</groupId>
-				<artifactId>oauth2-oidc-sdk</artifactId>
-				<version>
-					${nimbus.oauth2-oidc-sdk.version}</version>
-			</dependency>
-			<!-- end nimbus dependencies-->
-		</dependencies>
-	</dependencyManagement>
+        <dependency>
+          <groupId>org.keycloak</groupId>
+          <artifactId>keycloak-model-legacy</artifactId>
+          <scope>provided</scope>
+          <version>${keycloak-server-spi.version}</version>
+        </dependency>
+
+        <!-- end keycloak dependencies-->
+
+        <!-- nimbus dependencies -->
+        <dependency>
+          <groupId>com.nimbusds</groupId>
+          <artifactId>oauth2-oidc-sdk</artifactId>
+          <version>${nimbus.oauth2-oidc-sdk.version}</version>
+        </dependency>
+        <!-- end nimbus dependencies-->
+
+        <!-- janssen dependencies -->
+        <dependency>
+          <groupId>io.jans</groupId>
+          <artifactId>jans-scim-model</artifactId>
+          <version>${jans.version}</version>
+        </dependency>
+        <!-- end janssen dependencies-->
+
+        <!-- jakarta dependencies -->
+        <dependency>
+          <groupId>jakarta.ws.rs</groupId>
+          <artifactId>jakarta.ws.rs-api</artifactId>
+          <version>${jakarta.ws-rs-api.version}</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
+          <version>${jakarta.servlet-api.version}</version>
+          <scope></scope>
+        </dependency>
+        <!-- end jakarta dependencies -->
+
+        <!-- smallrye dependencies -->
+        <dependency>
+          <groupId>io.smallrye.config</groupId>
+          <artifactId>smallrye-config</artifactId>
+          <version>${smallrye-config.version}</version>
+        </dependency>
+        <!-- end smallrye dependencies-->
+
+        <!--apache log4j dependencies-->
+        <dependency>
+			    <groupId>org.apache.logging.log4j</groupId>
+			    <artifactId>log4j-api</artifactId>
+          <version>${log4j.version}</version>
+		    </dependency>
+		    <dependency>
+			    <groupId>org.apache.logging.log4j</groupId>
+			    <artifactId>log4j-core</artifactId>
+          <version>${log4j.version}</version>
+		    </dependency>
+		    <dependency>
+			    <groupId>org.slf4j</groupId>
+			    <artifactId>slf4j-log4j12</artifactId>
+          <version>${slf4j.version}</version>
+		    </dependency>
+        <!-- end apache log4j dependencies-->
+
+        <!-- apache commons dependencies -->
+        <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-lang3</artifactId>
+          <version>${commons-lang.version}</version>
+        </dependency>
+        <dependency>
+			    <groupId>org.apache.commons</groupId>
+			    <artifactId>commons-collections4</artifactId>
+          <version>${commons-collection.version}</version>
+		    </dependency>
+        <!-- end apache commons dependencies-->
+
+        <!-- fasterxml dependencies -->
+        <dependency>
+		      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+		      <artifactId>jackson-jaxrs-base</artifactId>
+		      <version>${fasterxml-jackson.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+		      <artifactId>jackson-jaxrs-json-provider</artifactId>
+		      <version>${fasterxml-jackson.version}</version>
+		    </dependency>
+        <!-- end fasterxml dependencies-->
+
+        <!-- swagger dependencies -->
+        <dependency>
+			    <groupId>io.swagger.core.v3</groupId>
+			    <artifactId>swagger-core-jakarta</artifactId>
+          <version>${swagger.version}</version>
+		    </dependency>
+        <!-- end swagger dependencies -->
+
+      </dependencies>
+    </dependencyManagement>
+
+    <build>
+     <pluginManagement>
+      <plugins>
+        
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${maven-clean-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-compiler-plugin</artifactId>
+         <version>${maven-compiler-plugin.version}</version>
+         <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+         </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${maven-deps-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>copy</id>
+              <phase>package</phase>
+              <goals>
+               <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}/deps/</outputDirectory>
+                <includeScope>runtime</includeScope>
+                <excludeTransitive>false</excludeTransitive>
+                <excludeGroupIds>
+                  com.sun.activation,
+                  jakarta.activation,
+                  jakarta.annotation,
+                  jakarta.servlet,
+                  jakarta.validation,
+                  jakarta.xml.bind,
+                  org.jboss.resteasy
+                </excludeGroupIds>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.version}</version>
+          <configuration>
+            <descriptors>
+              <descriptor>src/assembly/dependencies.xml</descriptor>
+            </descriptors>
+            <finalName>${project.artifactId}-${project.version}</finalName>
+          </configuration>
+          <executions>
+            <execution>
+              <id>zip-dependencies</id>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+      </plugins>
+     </pluginManagement>
+    </build>
 </project>
