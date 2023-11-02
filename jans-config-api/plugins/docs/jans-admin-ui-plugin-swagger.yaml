@@ -869,6 +869,8 @@ components:
     AdminPermission:
       type: object
       properties:
+        tag:
+          type: string
         permission:
           type: string
         description:
