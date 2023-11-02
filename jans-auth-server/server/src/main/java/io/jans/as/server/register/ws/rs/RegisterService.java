@@ -299,6 +299,15 @@ public class RegisterService {
         if (requestObject.getUserInfoEncryptedResponseEnc() != null) {
             client.setUserInfoEncryptedResponseEnc(requestObject.getUserInfoEncryptedResponseEnc().toString());
         }
+        if (requestObject.getIntrospectionSignedResponseAlg() != null) {
+            client.getAttributes().setIntrospectionSignedResponseAlg(requestObject.getIntrospectionSignedResponseAlg().toString());
+        }
+        if (requestObject.getIntrospectionEncryptedResponseAlg() != null) {
+            client.getAttributes().setIntrospectionEncryptedResponseAlg(requestObject.getIntrospectionEncryptedResponseAlg().toString());
+        }
+        if (requestObject.getIntrospectionEncryptedResponseEnc() != null) {
+            client.getAttributes().setIntrospectionEncryptedResponseEnc(requestObject.getIntrospectionEncryptedResponseEnc().toString());
+        }
         if (requestObject.getRequestObjectSigningAlg() != null) {
             client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());
         }
