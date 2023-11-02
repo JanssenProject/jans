@@ -5,6 +5,7 @@
 # the repo. Unless a later match takes precedence
 
 /jans-keycloak-integration/ @uprightech
+/jans-keycloak-link/ @shekhar16
 /docker-jans-*/ @moabu @iromli
 /automation/ @moabu
 /charts/ @moabu
