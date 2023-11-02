@@ -1,4 +1,4 @@
-package io.jans.configapi.plugin.keycloak.idp.broker.model.rest;
+package io.jans.configapi.plugin.keycloak.idp.broker.rest;
 
 import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -23,8 +23,13 @@ tags = { @Tag(name = "Jans - Keycloak SAML Identity Broker"), @Tag(name = "Jans 
 servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
-@OAuthScope(name = Constants.KC_SAML_IDP_READ_ACCESS, description = "View Jans Keycloak SAML Identity Broker related information"),
-@OAuthcope(name = Constants.KC_SAML_IDP_WRITE_ACCESS, description = "Manage Jans Keycloak SAML Identity Broker related information")}
+@OAuthScope(name = Constants.JANS_KC_CONFIG_READ_ACCESS, description = "View Jans Keycloak config related information"),
+@OAuthScope(name = Constants.JANS_KC_CONFIG_WRITE_ACCESS, description = "Manage Jans Keycloak config related information"),
+@OAuthScope(name = Constants.KC_REALM_READ_ACCESS, description = "View Keycloak realm related information"),
+@OAuthScope(name = Constants.KC_REALM_WRITE_ACCESS, description = "Manage Keycloak realm related information"),
+@OAuthScope(name = Constants.KC_SAML_IDP_WRITE_ACCESS, description = "View Keycloak SAML Identity Broker related information"),
+@OAuthScope(name = Constants.KC_SAML_IDP_WRITE_ACCESS, description = "Manage Keycloak SAML Identity Broker related information")
+}
 )))
 public class IdpApiApplication extends Application { 
 

@@ -10,12 +10,12 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
-import io.jans.configapi.plugin.keycloak.idp.broker.service.SamlIdpService;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.plugin.keycloak.idp.broker.service.SamlService;
 import io.jans.configapi.plugin.keycloak.idp.broker.timer.SpMetadataValidationTimer;
 import io.jans.configapi.plugin.keycloak.idp.broker.model.IdentityProvider;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpConfigService;
-
+import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
 
 import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AgeFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -62,13 +63,13 @@ public class IdpService {
     private InumService inumService;
 
     @Inject
-    SpMetadataValidationTimer spMetadataValidationTimer;
-    
-    @Inject
-    SamlIdpService samlIdpService;
-    
-    @Inject
     IdpConfigService idpConfigService;
+
+    @Inject
+    SamlService samlService;
+
+    @Inject
+    SpMetadataValidationTimer spMetadataValidationTimer;
 
     public String getIdentityProviderDn() {
         return idpConfigService.getTrustedIdpDn();
@@ -165,8 +166,8 @@ public class IdpService {
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
 
         log.info("Search IdentityProvider with searchFilter:{}", searchFilter);
-        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class,
-                searchFilter, sizeLimit);
+        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, searchFilter,
+                sizeLimit);
     }
 
     public List<IdentityProvider> getAllIdentityProvider(int sizeLimit) {
@@ -288,7 +289,7 @@ public class IdpService {
                 log.debug("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
                 return false;
             }
-            String filePath = samlIdpService.getSpMetadataFilePath(spMetadataFileName);
+            String filePath = idpConfigService.getSpMetadataTempDirFilePath(spMetadataFileName);
             log.debug("filePath:{}", filePath);
 
             if (filePath == null) {
@@ -297,7 +298,7 @@ public class IdpService {
                 return false;
             }
 
-            if (samlIdpService.isLocalDocumentStoreType()) {
+            if (samlService.isLocalDocumentStoreType()) {
 
                 File newFile = new File(filePath);
                 log.debug("newFile:{}", newFile);
@@ -313,7 +314,7 @@ public class IdpService {
         }
         if (emptySpMetadataFileName) {
             log.debug("emptySpMetadataFileName:{}", emptySpMetadataFileName);
-            spMetadataFileName = samlIdpService.getSpNewMetadataFileName(identityProvider);
+            spMetadataFileName = getSpNewMetadataFileName(identityProvider);
             log.debug("spMetadataFileName:{}", spMetadataFileName);
             identityProvider.setSpMetaDataFN(spMetadataFileName);
 
@@ -321,12 +322,13 @@ public class IdpService {
         InputStream targetStream = file;
         log.debug("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
 
-        String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
+        String result = samlService.saveMetadataFile(Constants.IDP_MODULE, idpConfigService.getSpMetadataTempDir(),
+                spMetadataFileName, targetStream);
         log.debug("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
         if (StringHelper.isNotEmpty(result)) {
             spMetadataValidationTimer.queue(result);
-            //process files in temp that were not processed earlier
-            processUnprocessedMetadataFiles();
+            // process files in temp that were not processed earlier
+            processUnprocessedSpMetadataFiles();
         } else {
             log.error("Failed to save SP meta-data file. Please check if you provide correct file");
         }
@@ -335,9 +337,17 @@ public class IdpService {
 
     }
 
-    public void processUnprocessedMetadataFiles() {
+    private String getSpNewMetadataFileName(IdentityProvider identityProvider) {
+        String spMetadataFileName = null;
+        if (identityProvider == null || StringUtils.isBlank(identityProvider.getSpMetaDataFN())) {
+            return spMetadataFileName;
+        }
+        return idpConfigService.getSpNewMetadataFileName(identityProvider.getInum());
+    }
+
+    public void processUnprocessedSpMetadataFiles() {
         log.debug("processing unprocessed metadata files ");
-        String directory = samlIdpService.getIdpMetadataTempDir();
+        String directory = idpConfigService.getSpMetadataTempDir();
         log.debug("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
 
         if (Files.exists(Paths.get(directory))) {

@@ -10,6 +10,7 @@ public class Constants {
 
     private Constants() {}
 
+    public static final String IDP_MODULE = "idp-module";
     public static final String JANS_IDP_CONFIG_PROP_PATH = "jans.idp.prop.path";
     public static final String KEYCLOAK_USER = "/keycloak-user";
     public static final String BASE_URL = "https://localhost";
@@ -22,8 +23,9 @@ public class Constants {
     public static final String REALM_PATH = "/realm";
 	public static final String NAME_PATH = "/name";
 
-    public static final String INUM_PARAM_PATH = "/{inum}";
-    public static final String NAME_PARAM_PATH = "/{name}";
+    public static final String ID_PATH_PARAM = "/{id}";
+    public static final String INUM_PATH_PARAM = "/{inum}";
+    public static final String NAME_PATH_PARAM = "/{name}";
 
 	public static final String IDP = "idp";
     public static final String SAML = "saml";
@@ -39,6 +41,8 @@ public class Constants {
     
     
 	//Scope
+    public static final String JANS_KC_CONFIG_READ_ACCESS = "https://jans.io/keycloak/config.readonly";
+    public static final String JANS_KC_CONFIG_WRITE_ACCESS = "https://jans.io/keycloak/config.write";
 	public static final String KC_REALM_READ_ACCESS = "https://jans.io/keycloak/realm.readonly";
     public static final String KC_REALM_WRITE_ACCESS = "https://jans.io/keycloak/realm.write";
     public static final String KC_SAML_IDP_READ_ACCESS = "https://jans.io/keycloak/saml/idp.readonly";

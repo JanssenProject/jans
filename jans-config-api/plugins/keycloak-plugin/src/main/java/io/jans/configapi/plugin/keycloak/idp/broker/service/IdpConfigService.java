@@ -5,10 +5,14 @@ import io.jans.configapi.plugin.keycloak.idp.broker.configuration.IdpConfigurati
 import io.jans.configapi.plugin.keycloak.idp.broker.model.config.IdpAppConfiguration;
 import io.jans.configapi.plugin.keycloak.idp.broker.model.config.IdpConf;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.util.StringHelper;
 import io.jans.util.exception.InvalidConfigurationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+
+import java.io.File;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -61,7 +65,7 @@ public class IdpConfigService {
         logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         boolean idpEnabled = false;
         if (idpAppConfiguration != null) {
-            idpEnabled = idpAppConfiguration.isIdpEnabled();
+            idpEnabled = idpAppConfiguration.isEnabled();
         }
         return idpEnabled;
     }
@@ -86,16 +90,79 @@ public class IdpConfigService {
         return idpRootDir;
     }
 
-    public String getIdpTempDir() {
+    public String getIdpMetadataRootDir() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
-        String idpTempDir = null;
+        String idpMetadataRootDir = null;
         if (idpAppConfiguration != null) {
-            idpTempDir = idpAppConfiguration.getTrustedIdpDn();
+            idpMetadataRootDir = idpAppConfiguration.getIdpMetadataRootDir();
         }
-        return idpTempDir;
+        return idpMetadataRootDir;
+    }
+    
+    public String getIdpMetadataTempDir() {
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
+        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
+        String idpMetadataTempDir = null;
+        if (idpAppConfiguration != null) {
+            idpMetadataTempDir = idpAppConfiguration.getIdpMetadataTempDir();
+        }
+        return idpMetadataTempDir;
+    }
+    
+    public String getIdpMetadataFilePattern() {
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
+        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
+        String idpMetadataFilePattern = null;
+        if (idpAppConfiguration != null) {
+            idpMetadataFilePattern = idpAppConfiguration.getIdpMetadataFilePattern();
+        }
+        return idpMetadataFilePattern;
+    }
+    
+    public String getIdpMetadataFile() {
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
+        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
+        String idpMetadataFile = null;
+        if (idpAppConfiguration != null) {
+            idpMetadataFile = idpAppConfiguration.getIdpMetadataFile();
+        }
+        return idpMetadataFile;
+    }
+    
+    public String getIdpMetadataTempDirFilePath(String idpMetaDataFN) {
+        logger.debug("idpMetaDataFN:{}, getIdpMetadataTempDirFilePath():{}", idpMetaDataFN, getIdpMetadataTempDirFilePath());
+        if (StringUtils.isBlank(getSpMetadataTempDirFilePath())) {
+            throw new InvalidConfigurationException("Failed to return IDP metadata file path as undefined!");
+        }
+
+        return getIdpMetadataTempDirFilePath() + idpMetaDataFN;
+    }
+    
+    public String getIdpMetadataTempDirFilePath() {
+        return getIdpMetadataTempDir() + File.separator;
     }
 
+    public String getSpMetadataRootDir() {
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
+        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
+        String spMetadataRootDir = null;
+        if (idpAppConfiguration != null) {
+            spMetadataRootDir = idpAppConfiguration.getSpMetadataRootDir();
+        }
+        return spMetadataRootDir;
+    }
+    
+    public String getSpMetadataTempDir() {
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
+        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
+        String spMetadataTempDir = null;
+        if (idpAppConfiguration != null) {
+            spMetadataTempDir = idpAppConfiguration.getSpMetadataTempDir();
+        }
+        return spMetadataTempDir;
+    }
+    
     public String getSpMetadataFilePattern() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
@@ -105,7 +172,7 @@ public class IdpConfigService {
         }
         return spMetadataFilePattern;
     }
-
+    
     public String getSpMetadataFile() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
@@ -116,15 +183,40 @@ public class IdpConfigService {
         return spMetadataFile;
     }
     
-    public String getSpMetadataFilePath(String metadataDir, String spMetaDataFN) {
-        logger.debug("metadataDir:{}, spMetaDataFN:{}", metadataDir, spMetaDataFN);
-        if (StringUtils.isBlank(getIdpMetadataDir(metadataDir))) {
-            throw new InvalidConfigurationException("Failed to return IDP metadata file path as undefined!");
+    public boolean isIgnoreValidation() {
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
+        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
+        return idpAppConfiguration.isIgnoreValidation();
+    }
+    
+    public String getSpMetadataTempDirFilePath(String spMetaDataFN) {
+        logger.debug("spMetaDataFN:{}, getSpMetadataTempDirFilePath():{}", spMetaDataFN, getSpMetadataTempDirFilePath());
+        if (StringUtils.isBlank(getSpMetadataTempDirFilePath())) {
+            throw new InvalidConfigurationException("Failed to return SP metadata file path as undefined!");
         }
 
-        String idpMetadataFolder = getIdpMetadataDir(metadataDir);
-        return idpMetadataFolder + spMetaDataFN;
+        return getSpMetadataTempDir() + spMetaDataFN;
+    }
+    
+    public String getSpMetadataTempDirFilePath() {
+        return getSpMetadataTempDir() + File.separator;
+    }
+    
+    public String getMetadataFileName(String inum, String metadataFilePattern) {
+        logger.debug("inum:{}, metadataFilePattern:{}", inum, metadataFilePattern);
+        if (StringUtils.isBlank(inum) || StringUtils.isBlank(metadataFilePattern)) {
+            throw new InvalidConfigurationException("Metadata file num or metadataFilePattern are undefined!");
+        }
+        String relationshipInum = StringHelper.removePunctuation(inum);
+        return String.format(metadataFilePattern, relationshipInum);
+    }
+    
+
+    public String getSpNewMetadataFileName(String inum) {
+        String id = StringHelper.removePunctuation(inum);
+        return String.format(getSpMetadataFilePattern(), id);
     }
 
+    
 
 }

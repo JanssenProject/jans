@@ -7588,19 +7588,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        whitePagesCanView:
+          type: boolean
         adminCanAccess:
+          type: boolean
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
         userCanEdit:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -7687,6 +7687,8 @@ components:
         requirePkce:
           type: boolean
         allowAllValueForRevokeEndpoint:
+          type: boolean
+        allowRevokeForOtherClients:
           type: boolean
         sectorIdentifierCacheLifetimeInMinutes:
           type: integer
@@ -8360,8 +8362,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8371,6 +8371,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9353,14 +9355,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

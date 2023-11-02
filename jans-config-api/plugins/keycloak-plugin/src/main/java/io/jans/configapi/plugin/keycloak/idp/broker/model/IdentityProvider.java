@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.keycloak.idp.broker.model;
 
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.jans.model.GluuStatus;
@@ -28,20 +27,18 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansTrustedIdp")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IdentityProvider extends Entry implements Serializable {
 
-
     @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
     @AttributeName
-    private String owner;
+    private String creator;
 
-	@NotNull
+    @NotNull
     @AttributeName(name = "name")
     private String name;
 
@@ -54,16 +51,46 @@ public class IdentityProvider extends Entry implements Serializable {
     @Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
     @AttributeName
     private String description;
-	
-    @AttributeName
-    private String providerId;
 
     @AttributeName
     private String internalId;
-    
-    /**
-     * SP metadata file location
-     */
+
+    @AttributeName
+    private String providerId;
+
+    @AttributeName(name = "jansEnabled")
+    private boolean enabled;
+
+    @AttributeName
+    private String UPFLM_ON = "on";
+
+    @AttributeName
+    private String UPFLM_MISSING = "missing";
+
+    @AttributeName
+    public final String UPFLM_OFF = "off";
+
+    @AttributeName
+    protected boolean trustEmail;
+
+    @AttributeName
+    protected boolean storeToken;
+
+    @AttributeName
+    protected boolean addReadTokenRoleOnCreate;
+
+    @AttributeName
+    protected boolean authenticateByDefault;
+
+    @AttributeName
+    protected boolean linkOnly;
+
+    @AttributeName
+    protected String firstBrokerLoginFlowAlias;
+
+    @AttributeName
+    protected String postBrokerLoginFlowAlias;
+
     @AttributeName(name = "jansSAMLspMetaDataFN")
     @Hidden
     private String spMetaDataFN;
@@ -71,10 +98,13 @@ public class IdentityProvider extends Entry implements Serializable {
     @AttributeName(name = "jansSAMLspMetaDataURL")
     private String spMetaDataURL;
 
-    @AttributeName(name = "jansEnabled")
-    private boolean enabled;
-    
-    
+    @AttributeName(name = "jansSAMLidpMetaDataFN")
+    @Hidden
+    private String idpMetaDataFN;
+
+    @AttributeName(name = "jansSAMLidpMetaDataURL")
+    private String idpMetaDataURL;
+
     @AttributeName(name = "jansStatus")
     private GluuStatus status;
 
@@ -92,12 +122,12 @@ public class IdentityProvider extends Entry implements Serializable {
         this.inum = inum;
     }
 
-    public String getOwner() {
-        return owner;
+    public String getCreator() {
+        return creator;
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 
     public String getName() {
@@ -124,6 +154,14 @@ public class IdentityProvider extends Entry implements Serializable {
         this.description = description;
     }
 
+    public String getInternalId() {
+        return internalId;
+    }
+
+    public void setInternalId(String internalId) {
+        this.internalId = internalId;
+    }
+
     public String getProviderId() {
         return providerId;
     }
@@ -132,12 +170,84 @@ public class IdentityProvider extends Entry implements Serializable {
         this.providerId = providerId;
     }
 
-    public String getInternalId() {
-        return internalId;
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public void setInternalId(String internalId) {
-        this.internalId = internalId;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getUPFLM_ON() {
+        return UPFLM_ON;
+    }
+
+    public void setUPFLM_ON(String uPFLM_ON) {
+        UPFLM_ON = uPFLM_ON;
+    }
+
+    public String getUPFLM_MISSING() {
+        return UPFLM_MISSING;
+    }
+
+    public void setUPFLM_MISSING(String uPFLM_MISSING) {
+        UPFLM_MISSING = uPFLM_MISSING;
+    }
+
+    public boolean isTrustEmail() {
+        return trustEmail;
+    }
+
+    public void setTrustEmail(boolean trustEmail) {
+        this.trustEmail = trustEmail;
+    }
+
+    public boolean isStoreToken() {
+        return storeToken;
+    }
+
+    public void setStoreToken(boolean storeToken) {
+        this.storeToken = storeToken;
+    }
+
+    public boolean isAddReadTokenRoleOnCreate() {
+        return addReadTokenRoleOnCreate;
+    }
+
+    public void setAddReadTokenRoleOnCreate(boolean addReadTokenRoleOnCreate) {
+        this.addReadTokenRoleOnCreate = addReadTokenRoleOnCreate;
+    }
+
+    public boolean isAuthenticateByDefault() {
+        return authenticateByDefault;
+    }
+
+    public void setAuthenticateByDefault(boolean authenticateByDefault) {
+        this.authenticateByDefault = authenticateByDefault;
+    }
+
+    public boolean isLinkOnly() {
+        return linkOnly;
+    }
+
+    public void setLinkOnly(boolean linkOnly) {
+        this.linkOnly = linkOnly;
+    }
+
+    public String getFirstBrokerLoginFlowAlias() {
+        return firstBrokerLoginFlowAlias;
+    }
+
+    public void setFirstBrokerLoginFlowAlias(String firstBrokerLoginFlowAlias) {
+        this.firstBrokerLoginFlowAlias = firstBrokerLoginFlowAlias;
+    }
+
+    public String getPostBrokerLoginFlowAlias() {
+        return postBrokerLoginFlowAlias;
+    }
+
+    public void setPostBrokerLoginFlowAlias(String postBrokerLoginFlowAlias) {
+        this.postBrokerLoginFlowAlias = postBrokerLoginFlowAlias;
     }
 
     public String getSpMetaDataFN() {
@@ -156,12 +266,20 @@ public class IdentityProvider extends Entry implements Serializable {
         this.spMetaDataURL = spMetaDataURL;
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public String getIdpMetaDataFN() {
+        return idpMetaDataFN;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setIdpMetaDataFN(String idpMetaDataFN) {
+        this.idpMetaDataFN = idpMetaDataFN;
+    }
+
+    public String getIdpMetaDataURL() {
+        return idpMetaDataURL;
+    }
+
+    public void setIdpMetaDataURL(String idpMetaDataURL) {
+        this.idpMetaDataURL = idpMetaDataURL;
     }
 
     public GluuStatus getStatus() {
@@ -188,12 +306,21 @@ public class IdentityProvider extends Entry implements Serializable {
         this.validationLog = validationLog;
     }
 
+    public String getUPFLM_OFF() {
+        return UPFLM_OFF;
+    }
+
     @Override
     public String toString() {
-        return "IdentityProvider [inum=" + inum + ", owner=" + owner + ", name=" + name + ", displayName=" + displayName
-                + ", description=" + description + ", providerId=" + providerId + ", internalId=" + internalId
-                + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL + ", enabled=" + enabled
-                + ", status=" + status + ", validationStatus=" + validationStatus + ", validationLog=" + validationLog
-                + "]";
-    }    
+        return "IdentityProvider [inum=" + inum + ", creator=" + creator + ", name=" + name + ", displayName="
+                + displayName + ", description=" + description + ", internalId=" + internalId + ", providerId="
+                + providerId + ", enabled=" + enabled + ", UPFLM_ON=" + UPFLM_ON + ", UPFLM_MISSING=" + UPFLM_MISSING
+                + ", UPFLM_OFF=" + UPFLM_OFF + ", trustEmail=" + trustEmail + ", storeToken=" + storeToken
+                + ", addReadTokenRoleOnCreate=" + addReadTokenRoleOnCreate + ", authenticateByDefault="
+                + authenticateByDefault + ", linkOnly=" + linkOnly + ", firstBrokerLoginFlowAlias="
+                + firstBrokerLoginFlowAlias + ", postBrokerLoginFlowAlias=" + postBrokerLoginFlowAlias
+                + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL + ", idpMetaDataFN="
+                + idpMetaDataFN + ", idpMetaDataURL=" + idpMetaDataURL + ", status=" + status + ", validationStatus="
+                + validationStatus + ", validationLog=" + validationLog + "]";
+    }
 }

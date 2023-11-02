@@ -39,15 +39,13 @@ public class IdpAppInitializer {
     BeanManager beanManager;
 
     @Inject
-    IdpConfigurationFactory  idpConfigurationFactory;
-
+    IdpConfigurationFactory idpConfigurationFactory;
 
     @Inject
     QuartzSchedulerManager quartzSchedulerManager;
-    
+
     @Inject
     SpMetadataValidationTimer spMetadataValidationTimer;
-
 
     public void onAppStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.info("=============  Initializing Keycloak Plugin ========================");
@@ -56,11 +54,10 @@ public class IdpAppInitializer {
         // configuration
         this.idpConfigurationFactory.create();
         initSchedulerService();
-        metadataValidationTimer.initTimer();
+        spMetadataValidationTimer.initTimer();
 
         log.info("==============  Keycloak Plugin IS UP AND RUNNING ===================");
     }
-    
 
     protected void initSchedulerService() {
         log.debug("Initializing Scheduler Service");
@@ -86,5 +83,4 @@ public class IdpAppInitializer {
         return idpConfigurationFactory;
     }
 
-   
 }

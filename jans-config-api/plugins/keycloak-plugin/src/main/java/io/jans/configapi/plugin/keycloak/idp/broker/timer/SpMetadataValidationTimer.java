@@ -12,7 +12,7 @@ import io.jans.configapi.plugin.keycloak.idp.broker.model.IdentityProvider;
 import io.jans.configapi.plugin.keycloak.idp.broker.model.config.IdpAppConfiguration;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpConfigService;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpService;
-import io.jans.configapi.plugin.keycloak.idp.broker.service.SamlIdpService;
+import io.jans.configapi.plugin.keycloak.idp.broker.service.SamlService;
 
 import io.jans.model.GluuStatus;
 import io.jans.saml.metadata.SAMLMetadataParser;
@@ -59,7 +59,7 @@ public class SpMetadataValidationTimer {
     private SAMLMetadataParser samlMetadataParser;
     
     @Inject 
-    SamlIdpService samlIdpService;
+    SamlService samlService;
     
     @Inject
     private IdpConfigService idpConfigService;
@@ -115,7 +115,7 @@ public class SpMetadataValidationTimer {
 
     private void procesMetadataValidation() throws Exception {
         log.debug("Starting metadata validation");
-        boolean result = validateMetadata(getIdpAppConfiguration().getIdpTempDir(), getIdpAppConfiguration().getSpMetadataRootDir());
+        boolean result = validateMetadata(getIdpAppConfiguration().getIdpMetadataTempDir(), getIdpAppConfiguration().getSpMetadataRootDir());
         log.debug("Metadata validation finished with result: '{}'", result);
 
     }
@@ -246,7 +246,7 @@ public class SpMetadataValidationTimer {
                     idp.setValidationStatus(ValidationStatus.SUCCESS);
 
                     log.debug("Move metadata file:{} to location:{}", metadataPath, destinationMetadataPath);
-                    boolean renamed = samlIdpService.renameMetadata(metadataPath, destinationMetadataPath);
+                    boolean renamed = samlService.renameMetadata(metadataPath, destinationMetadataPath);
 
                     log.debug("Staus of moving file:{} to location:{} is :{}", metadataPath, destinationMetadataPath,
                             renamed);
@@ -292,7 +292,7 @@ public class SpMetadataValidationTimer {
                 } else if (getIdpAppConfiguration().isIgnoreValidation() || errorHandler.isInternalError()) {
                     idp.setValidationLog(new ArrayList<String>(new HashSet<String>(errorHandler.getLog())));
                     idp.setValidationStatus(ValidationStatus.FAILED);
-                    boolean fileRenamed = samlIdpService.renameMetadata(metadataPath, destinationMetadataPath);
+                    boolean fileRenamed = samlService.renameMetadata(metadataPath, destinationMetadataPath);
                     log.debug("Status of IdentityProvider updated to Failed, File copy from:{} to:{}, status:()",
                             metadataPath, destinationMetadataPath, fileRenamed);
                     
@@ -344,7 +344,7 @@ public class SpMetadataValidationTimer {
                             validationLog.add("Warning: " + warningLogMessage);
                         }
                     }
-                    log.debug("Updating IdentityProvider:{} , validationLog :{}", tr, validationLog);
+                    log.debug("Updating IdentityProvider:{} , validationLog :{}", idp, validationLog);
                 
                     idpService.updateIdentityProvider(idp);
                     result = true;
@@ -370,6 +370,6 @@ public class SpMetadataValidationTimer {
     }
     
    private IdpAppConfiguration getIdpAppConfiguration() {
-       this.idpConfigService.getIdpAppConfiguration();
+      return this.idpConfigService.getIdpAppConfiguration();
    }
 }

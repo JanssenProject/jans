@@ -50,7 +50,7 @@ public class KeycloakService {
     @Inject
     KeycloakConfig keycloakConfig;
 
-    public RealmResource getRealmResource(String realm) {
+    private RealmResource getRealmResource(String realm) {
         logger.info("Get RealmResource for realm:{})", realm);
         if (StringUtils.isBlank(realm)) {
             realm = Constants.REALM_MASTER;
@@ -60,7 +60,7 @@ public class KeycloakService {
         return realmResource;
     }
 
-    public List<RealmRepresentation> getAllRealmResource() {
+    public List<RealmRepresentation> getAllRealms() {
         logger.info("Get All KC Realms");
         List<RealmRepresentation> realmRepresentation = keycloakConfig.getInstance().realms().findAll();
 
@@ -71,7 +71,7 @@ public class KeycloakService {
     public RealmRepresentation getRealmByName(String realmName) {
         logger.info("Get RealmResource for realmName:{})", realmName);
 
-        List<RealmRepresentation> realms = getAllRealmResource();
+        List<RealmRepresentation> realms = getAllRealms();
         RealmRepresentation realmRepresentation = null;
         if (realms == null || realms.isEmpty()) {
             return realmRepresentation;
@@ -94,6 +94,19 @@ public class KeycloakService {
         keycloakConfig.getInstance().realms().create(realmRepresentation);
 
         realmRepresentation = getRealmByName(realmRepresentation.getDisplayName());
+        logger.info("realmRepresentation:{})", realmRepresentation);
+        return realmRepresentation;
+    }
+
+    public RealmRepresentation updateRealm(RealmRepresentation realmRepresentation) {
+        logger.info("Updade realmRepresentation:{})", realmRepresentation);
+        if (realmRepresentation == null) {
+            new InvalidAttributeException("RealmRepresentation is null");
+        }
+        RealmResource realmResource = this.getRealmResource(realmRepresentation.getRealm());
+        logger.info("realmResource:{})", realmResource);
+        realmResource.update(realmRepresentation);
+        realmRepresentation = realmResource.toRepresentation();
         logger.info("realmRepresentation:{})", realmRepresentation);
         return realmRepresentation;
     }

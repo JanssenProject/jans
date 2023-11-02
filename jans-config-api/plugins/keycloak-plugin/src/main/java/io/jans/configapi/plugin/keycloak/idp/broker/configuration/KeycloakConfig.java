@@ -15,7 +15,7 @@ import org.keycloak.admin.client.Keycloak;
 public class KeycloakConfig {
 
     private static Logger log = LoggerFactory.getLogger(KeycloakConfig.class);
-        
+
     @Inject
     IdpConfigService idpConfigService;
 
@@ -24,20 +24,25 @@ public class KeycloakConfig {
     }
 
     public Keycloak getInstance() {
-        log.info("Keycloak instance entry - idpConfigService:{}, getIdpAppConfiguration()", idpConfigService, getIdpAppConfiguration());
+        log.info("Keycloak instance entry - idpConfigService:{}, getIdpAppConfiguration()", idpConfigService,
+                getIdpAppConfiguration());
         IdpAppConfiguration idpAppConfiguration = this.getIdpAppConfiguration();
-        
+
         log.trace("Keycloak instance entry - idpAppConfiguration:{}", idpAppConfiguration);
-      
-        return getInstance(idpAppConfiguration.getServerUrl(), idpAppConfiguration.getRealm(), idpAppConfiguration.getUsername(), idpAppConfiguration.getPassword(), idpAppConfiguration.getClientId(), idpAppConfiguration.getClientSecret());
-      }
-    
-    public Keycloak getInstance(String serverUrl, String realm, String username, String password, String clientId, String clientSecret) {
-        log.info("Keycloak instance param serverUrl:{}, realm:{}, username:{}, password:{}, clientId:{}, clientSecret:{} ",serverUrl, realm, username, password, clientId, clientSecret);
-        Keycloak keycloak = Keycloak.getInstance(serverUrl,  realm,  username,  password,  clientId, clientSecret);
-        log.info("keycloak:{} ", keycloak);       
+
+        return getInstance(idpAppConfiguration.getServerUrl(), idpAppConfiguration.getRealm(),
+                idpAppConfiguration.getUsername(), idpAppConfiguration.getPassword(), idpAppConfiguration.getClientId(),
+                idpAppConfiguration.getClientSecret());
+    }
+
+    public Keycloak getInstance(String serverUrl, String realm, String username, String password, String clientId,
+            String clientSecret) {
+        log.info(
+                "Keycloak instance param serverUrl:{}, realm:{}, username:{}, password:{}, clientId:{}, clientSecret:{} ",
+                serverUrl, realm, username, password, clientId, clientSecret);
+        Keycloak keycloak = Keycloak.getInstance(serverUrl, realm, username, password, clientId, clientSecret);
+        log.info("keycloak:{} ", keycloak);
         return keycloak;
-      }
-    
-    
+    }
+
 }

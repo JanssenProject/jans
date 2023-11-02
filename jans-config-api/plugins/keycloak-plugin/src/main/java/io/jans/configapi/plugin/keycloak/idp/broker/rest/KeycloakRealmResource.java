@@ -5,8 +5,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
-import io.jans.configapi.util.AttributeNames;
-import io.jans.configapi.plugin.keycloak.idp.broker.service.KeycloakService;
+import io.jans.configapi.plugin.keycloak.idp.broker.service.RealmService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,7 +19,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -30,7 +28,6 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.*;
 
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.slf4j.Logger;
 
 import org.keycloak.representations.idm.RealmRepresentation;
@@ -40,12 +37,13 @@ import org.keycloak.representations.idm.RealmRepresentation;
 @Produces(MediaType.APPLICATION_JSON)
 public class KeycloakRealmResource extends BaseResource {
 
+    private static final String KC_REALM_DETAILS = "KC Realm Details";
 
     @Inject
     Logger logger;
 
     @Inject
-    KeycloakService keycloakService;
+    RealmService realmService;
 
     @Operation(summary = "Get all Keycloak realm", description = "Get all Keycloak realm.", operationId = "get-keycloak-realm", tags = {
             "Jans - Keycloak Realm" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -57,7 +55,7 @@ public class KeycloakRealmResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { Constants.KC_REALM_READ_ACCESS })
     public Response getAllKeycloakRealms() {
-        List<RealmRepresentation> realms = keycloakService.getAllRealmRepresentation();
+        List<RealmRepresentation> realms = realmService.getAllRealmDetails();
         logger.info("All realms:{}", realms);
         return Response.ok(realms).build();
     }
@@ -71,12 +69,12 @@ public class KeycloakRealmResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.KC_REALM_READ_ACCESS })
-    @Path(Constants.NAME_PATH + Constants.NAME_PARAM_PATH)
+    @Path(Constants.NAME_PATH + Constants.NAME_PATH_PARAM)
     public Response getKeycloakRealmByName(
             @Parameter(description = "name") @PathParam(Constants.NAME) @NotNull String name) {
         logger.info("Searching Keycloak Realm by name: {}", escapeLog(name));
 
-        RealmRepresentation realmRepresentation = keycloakService.getKeycloakRealmByName(name);
+        RealmRepresentation realmRepresentation = realmService.getRealmByName(name);
 
         logger.info("Keycloak realm found by name:{}, realmRepresentation:{}", name, realmRepresentation);
 
@@ -85,75 +83,65 @@ public class KeycloakRealmResource extends BaseResource {
 
     @Operation(summary = "Create Keycloak realm", description = "Create Keycloak realm", operationId = "post-keycloak-realm", tags = {
             "Jans - Keycloak Realm" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_WRITE_ACCESS }))
+                    Constants.KC_REALM_WRITE_ACCESS }))
     @RequestBody(description = "Keycloak realm", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RealmRepresentation.class), examples = @ExampleObject(name = "Request example", value = "example/keycloak/keycloak-realm-post.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Newly created TrustKeycloak realm", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationshipForm.class))),
+            @ApiResponse(responseCode = "201", description = "Newly created Keycloak realm", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RealmRepresentation.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Path("/upload")
-    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            Constants.SAML_WRITE_ACCESS })
+    @ProtectedApi(scopes = { Constants.KC_REALM_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.KC_REALM_WRITE_ACCESS })
     @POST
-    public Response createTrustRelationshipWithFile(@NotNull RealmRepresentation realmRepresentation,
-            InputStream metadatafile) throws IOException {
-        logger.info(" Create trustRelationshipForm:{} ", trustRelationshipForm);
-        checkResourceNotNull(trustRelationshipForm, SAML_TRUST_RELATIONSHIP_FORM);
-
-    
-
-        trustRelationship = keycloakService.addTrustRelationship(trustRelationship, metaDataFile);
-
-        logger.info("Create created by TrustRelationship:{}", trustRelationship);
-        return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
+    public Response createNewKCRealm(@NotNull RealmRepresentation realmRepresentation, InputStream metadatafile)
+            throws IOException {
+        logger.info(" Create new KC realm - realmRepresentation:{} ", realmRepresentation);
+        checkResourceNotNull(realmRepresentation, KC_REALM_DETAILS);
+        realmRepresentation = this.realmService.createNewRealm(realmRepresentation);
+        logger.info("Created new KC realm - realmRepresentation:{}", realmRepresentation);
+        return Response.status(Response.Status.CREATED).entity(realmRepresentation).build();
     }
 
-    @Operation(summary = "Update TrustRelationship", description = "Update TrustRelationship", operationId = "put-trust-relationship", tags = {
+    @Operation(summary = "Update Keycloak realm", description = "Update Keycloak realm", operationId = "put-keycloak-realm", tags = {
             "Jans - Keycloak Realm" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_WRITE_ACCESS }))
-    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-put.json")))
+                    Constants.KC_REALM_WRITE_ACCESS }))
+    @RequestBody(description = "Keycloak realm", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RealmRepresentation.class), examples = @ExampleObject(name = "Request example", value = "example/keycloak/keycloak-realm-put.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
+            @ApiResponse(responseCode = "200", description = "Updated Keycloak realm object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RealmRepresentation.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    @PUT
-    public Response updateTrustRelationship(@Valid TrustRelationship trustRelationship) throws IOException {
-
-        logger.info("Update trustRelationship:{}", trustRelationship);
-
-        // TO-DO validation of TrustRelationship
-        trustRelationship = keycloakService.updateTrustRelationship(trustRelationship);
-
-        logger.info("Post update trustRelationship:{}", trustRelationship);
-
-        return Response.ok(trustRelationship).build();
+    @ProtectedApi(scopes = { Constants.KC_REALM_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.KC_REALM_WRITE_ACCESS })
+    @POST
+    public Response updateNewKCRealm(@NotNull RealmRepresentation realmRepresentation, InputStream metadatafile)
+            throws IOException {
+        logger.info(" Update KC realm - realmRepresentation:{} ", realmRepresentation);
+        checkResourceNotNull(realmRepresentation, KC_REALM_DETAILS);
+        realmRepresentation = this.realmService.updateRealm(realmRepresentation);
+        logger.info("Updated KC realm - realmRepresentation:{}", realmRepresentation);
+        return Response.status(Response.Status.OK).entity(realmRepresentation).build();
     }
 
-    @Operation(summary = "Delete TrustRelationship", description = "Delete TrustRelationship", operationId = "put-trust-relationship", tags = {
+    @Operation(summary = "Delete KC realm ", description = "Delete KC realm", operationId = "delete-keycloak-realm", tags = {
             "Jans - Keycloak Realm" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_WRITE_ACCESS }))
+                    Constants.KC_REALM_WRITE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @Path(Constants.ID_PATH_PARAM)
-    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
+    @Path(Constants.NAME_PATH_PARAM)
+    @ProtectedApi(scopes = { Constants.KC_REALM_WRITE_ACCESS })
     @DELETE
-    public Response deleteTrustRelationship(
-            @Parameter(description = "Unique Id of Trust Relationship") @PathParam(Constants.ID) @NotNull String id) {
+    public Response deleteRealm(
+            @Parameter(description = "Unique name of KC realm") @PathParam(Constants.NAME) @NotNull String name) {
 
-        logger.info("Delete client identified by id:{}", escapeLog(id));
+        logger.info("Delete KC realm by name:{}", escapeLog(name));
 
-        TrustRelationship trustRelationship = keycloakService.getTrustRelationshipByInum(id);
-        if (trustRelationship == null) {
-            checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
+        RealmRepresentation realmRepresentation = realmService.getRealmByName(name);
+        if (realmRepresentation == null) {
+            checkResourceNotNull(realmRepresentation, "KC relam does not exists by name - " + name);
         }
-        keycloakRealmService.removeTrustRelationship(trustRelationship);
+        realmService.deleteRealm(name);
 
         return Response.noContent().build();
     }
-
-   
 
 }

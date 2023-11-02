@@ -9,7 +9,7 @@ public class IdpAppConfiguration implements Configuration {
     private String applicationName;
     private String trustedIdpDn;
     private boolean enabled;
-    
+
     private String serverUrl;
     private String realm;
     private String clientId;
@@ -17,9 +17,13 @@ public class IdpAppConfiguration implements Configuration {
     private String grantType;
     private String username;
     private String password;
-    
-    
+
     private String idpRootDir;
+    private String idpMetadataRootDir;
+    private String idpMetadataTempDir;
+    private String idpMetadataFilePattern;
+    private String idpMetadataFile;
+
     private String spMetadataRootDir;
     private String spMetadataTempDir;
     private String spMetadataFilePattern;
@@ -115,6 +119,38 @@ public class IdpAppConfiguration implements Configuration {
         this.idpRootDir = idpRootDir;
     }
 
+    public String getIdpMetadataRootDir() {
+        return idpMetadataRootDir;
+    }
+
+    public void setIdpMetadataRootDir(String idpMetadataRootDir) {
+        this.idpMetadataRootDir = idpMetadataRootDir;
+    }
+
+    public String getIdpMetadataTempDir() {
+        return idpMetadataTempDir;
+    }
+
+    public void setIdpMetadataTempDir(String idpMetadataTempDir) {
+        this.idpMetadataTempDir = idpMetadataTempDir;
+    }
+
+    public String getIdpMetadataFilePattern() {
+        return idpMetadataFilePattern;
+    }
+
+    public void setIdpMetadataFilePattern(String idpMetadataFilePattern) {
+        this.idpMetadataFilePattern = idpMetadataFilePattern;
+    }
+
+    public String getIdpMetadataFile() {
+        return idpMetadataFile;
+    }
+
+    public void setIdpMetadataFile(String idpMetadataFile) {
+        this.idpMetadataFile = idpMetadataFile;
+    }
+
     public String getSpMetadataRootDir() {
         return spMetadataRootDir;
     }
@@ -160,8 +196,11 @@ public class IdpAppConfiguration implements Configuration {
         return "IdpAppConfiguration [applicationName=" + applicationName + ", trustedIdpDn=" + trustedIdpDn
                 + ", enabled=" + enabled + ", serverUrl=" + serverUrl + ", realm=" + realm + ", clientId=" + clientId
                 + ", clientSecret=" + clientSecret + ", grantType=" + grantType + ", username=" + username
-                + ", password=" + password + ", idpRootDir=" + idpRootDir + ", spMetadataRootDir=" + spMetadataRootDir
+                + ", password=" + password + ", idpRootDir=" + idpRootDir + ", idpMetadataRootDir=" + idpMetadataRootDir
+                + ", idpMetadataTempDir=" + idpMetadataTempDir + ", idpMetadataFilePattern=" + idpMetadataFilePattern
+                + ", idpMetadataFile=" + idpMetadataFile + ", spMetadataRootDir=" + spMetadataRootDir
                 + ", spMetadataTempDir=" + spMetadataTempDir + ", spMetadataFilePattern=" + spMetadataFilePattern
                 + ", spMetadataFile=" + spMetadataFile + ", ignoreValidation=" + ignoreValidation + "]";
     }
+
 }

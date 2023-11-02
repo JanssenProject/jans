@@ -100,11 +100,11 @@ public class IdpConfigurationFactory {
     private boolean idpConfigLoaded = false;
     private long idpLoadedRevision = -1;
     private FileConfiguration baseConfiguration;
-    
+
     public String getIdpConfigurationDn() {
         return this.baseConfiguration.getString(IDP_CONFIGURATION_ENTRY_DN);
     }
-    
+
     public FileConfiguration getBaseConfiguration() {
         return baseConfiguration;
     }
@@ -114,21 +114,20 @@ public class IdpConfigurationFactory {
         log.info("Initializing IdpConfigurationFactory ");
         this.isActive = new AtomicBoolean(true);
         try {
-            
+
             loadBaseConfiguration();
 
         } finally {
             this.isActive.set(false);
         }
     }
-    
+
     @Produces
     @ApplicationScoped
     public IdpAppConfiguration getIdpAppConfiguration() {
         return idpAppConfiguration;
     }
 
-    
     public void create() {
         log.info("Loading IDP Configuration");
 
@@ -141,13 +140,12 @@ public class IdpConfigurationFactory {
                     this.idpLoadedRevision, getIdpAppConfiguration());
         }
 
-       
     }
 
     public String getIdpAppConfigurationDn() {
         return this.baseConfiguration.getString(IDP_CONFIGURATION_ENTRY_DN);
     }
-    
+
     public String getConfigurationDn(String key) {
         return this.baseConfiguration.getString(key);
     }
@@ -205,19 +203,17 @@ public class IdpConfigurationFactory {
             throw new ConfigurationException("Failed to load IDP Configuration From DB " + idpConf);
         }
 
-        log.info("idpAppConfigurationFromDb:{}",idpConf);
+        log.info("idpAppConfigurationFromDb:{}", idpConf);
         if (idpConf.getDynamicConf() != null) {
             this.idpAppConfiguration = idpConf.getDynamicConf();
         }
 
         this.idpLoadedRevision = idpConf.getRevision();
 
-        log.debug("*** idpAppConfiguration:{}, idpLoadedRevision:{} ",
-                this.idpAppConfiguration, idpLoadedRevision);
+        log.debug("*** idpAppConfiguration:{}, idpLoadedRevision:{} ", this.idpAppConfiguration, idpLoadedRevision);
 
     }
 
-   
     private <T> T loadConfigurationFromDb(String dn, T obj, String... returnAttributes) {
         log.debug("Load IDP configuration from DB -  dn:{}, clazz:{}, returnAttributes:{}", dn, obj, returnAttributes);
         final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
@@ -230,8 +226,8 @@ public class IdpConfigurationFactory {
     }
 
     private boolean isIdpRevisionIncreased() {
-        final IdpConf idpConf = loadConfigurationFromDb(getConfigurationDn(IDP_CONFIGURATION_ENTRY_DN_DN),
-                new IdpConf(), "jansRevision");
+        final IdpConf idpConf = loadConfigurationFromDb(getConfigurationDn(IDP_CONFIGURATION_ENTRY_DN), new IdpConf(),
+                "jansRevision");
         if (idpConf == null) {
             return false;
         }
@@ -274,7 +270,7 @@ public class IdpConfigurationFactory {
             if (lastModified > baseConfigurationFileLastModifiedTime) {
                 // Reload configuration only if it was modified
                 loadBaseConfiguration();
-                event.select(BaseConfigurationReload.Literal.INSTANCE).fire(SAML_BASE_CONFIGURATION_RELOAD_EVENT_TYPE);
+                event.select(BaseConfigurationReload.Literal.INSTANCE).fire(IDP_BASE_CONFIGURATION_RELOAD_EVENT_TYPE);
             }
         }
 
