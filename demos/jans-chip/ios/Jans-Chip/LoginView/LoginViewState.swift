@@ -11,5 +11,5 @@ final class LoginViewState: ObservableObject {
     
     @State var userName = "admin"
     @State var password = "Gluu1234."
-    @State var loadingVisible = false
+    @Published var loadingVisible = false
 }

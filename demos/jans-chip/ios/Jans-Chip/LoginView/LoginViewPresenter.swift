@@ -11,6 +11,7 @@ protocol LoginViewPresenter: AnyObject {
     
     func onViewStateChanged(viewState: ViewState)
     func onError(message: String)
+    func onLoading(visible: Bool)
 }
 
 final class LoginViewPresenterImpl: LoginViewPresenter {
@@ -29,5 +30,9 @@ final class LoginViewPresenterImpl: LoginViewPresenter {
     
     func onError(message: String) {
         UIApplication.showAlert(message: message)
+    }
+    
+    func onLoading(visible: Bool) {
+        state.loadingVisible = visible
     }
 }

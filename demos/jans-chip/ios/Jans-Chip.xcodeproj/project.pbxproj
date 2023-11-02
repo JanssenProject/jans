@@ -57,6 +57,7 @@
 		306EA0DD2AF0F27400167E4C /* AfterLoginViewAssembler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 306EA0D82AF0F27400167E4C /* AfterLoginViewAssembler.swift */; };
 		306EA0DE2AF0F27400167E4C /* AfterLoginViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 306EA0D92AF0F27400167E4C /* AfterLoginViewState.swift */; };
 		3079EC482AE1532600ECA57C /* LoginResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3079EC472AE1532600ECA57C /* LoginResponse.swift */; };
+		30D0B7A52AF2793800322E90 /* CheckListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30D0B7A42AF2793800322E90 /* CheckListView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -107,6 +108,7 @@
 		306EA0D82AF0F27400167E4C /* AfterLoginViewAssembler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AfterLoginViewAssembler.swift; sourceTree = "<group>"; };
 		306EA0D92AF0F27400167E4C /* AfterLoginViewState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AfterLoginViewState.swift; sourceTree = "<group>"; };
 		3079EC472AE1532600ECA57C /* LoginResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginResponse.swift; sourceTree = "<group>"; };
+		30D0B7A42AF2793800322E90 /* CheckListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -242,6 +244,7 @@
 			children = (
 				3063E5AC2AD6BDED002B4879 /* Extension */,
 				3063E5962AD051D7002B4879 /* JansButton.swift */,
+				30D0B7A42AF2793800322E90 /* CheckListView.swift */,
 			);
 			path = UIComponents;
 			sourceTree = "<group>";
@@ -400,6 +403,7 @@
 				3063E56E2ACC0BFE002B4879 /* MainViewAssembler.swift in Sources */,
 				3004AA0A2AEC59C8000CDB62 /* SecKey+KeyData.swift in Sources */,
 				3003B0632AE69A7F0068F411 /* UserInfo.swift in Sources */,
+				30D0B7A52AF2793800322E90 /* CheckListView.swift in Sources */,
 				306EA0DB2AF0F27400167E4C /* AfterLoginView.swift in Sources */,
 				306EA0DA2AF0F27400167E4C /* AfterLoginViewInteractor.swift in Sources */,
 				3049C2142AD80D2F00164883 /* AppIntegrityEntity.swift in Sources */,

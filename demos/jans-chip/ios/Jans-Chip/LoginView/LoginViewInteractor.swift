@@ -42,7 +42,7 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
         guard let oidcClient: OIDCClient = RealmManager.shared.getObject(), let opConfiguration: OPConfigurationObject = RealmManager.shared.getObject() else {
             return
         }
-        
+        presenter.onLoading(visible: true)
         // Create a call to request an authorization challenge
         
         serviceClient.getAuthorizationChallenge(clientId: oidcClient.clientId, username: username, password: password, authorizationChallengeEndpoint: opConfiguration.authorizationChallengeEndpoint, url: opConfiguration.issuer)
@@ -54,6 +54,7 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
                 case .failure(let error):
                     print("error: \(error)")
                     self?.presenter.onError(message: "Error in generating authorization code. Erorr: \(error.localizedDescription)")
+                    self?.presenter.onLoading(visible: false)
                 }
             }
             .store(in: &cancellableSet)
@@ -62,6 +63,7 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
     func getToken(authorizationCode: String, usernameText: String, passwordText: String) {
         // Get OPConfiguration and OIDCClient
         guard let oidcClient: OIDCClient = RealmManager.shared.getObject(), let opConfiguration: OPConfigurationObject = RealmManager.shared.getObject() else {
+            presenter.onLoading(visible: false)
             return
         }
         
@@ -84,10 +86,13 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
                 if !accessToken.isEmpty {
                     RealmManager.shared.updateOIDCClient(oidcCClient: oidcClient, with: accessToken, and: idToken)
                     self?.getUserInfo(accessToken: accessToken)
+                } else {
+                    self?.presenter.onLoading(visible: false)
                 }
             case .failure(let error):
                 print("error: \(error)")
                 self?.presenter.onError(message: "Error in generating authorization token. Error: \(error.localizedDescription)")
+                self?.presenter.onLoading(visible: false)
             }
         }
         .store(in: &cancellableSet)
@@ -95,6 +100,7 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
     
     private func getUserInfo(accessToken: String) {
         guard let opConfiguration: OPConfigurationObject = RealmManager.shared.getObject() else {
+            presenter.onLoading(visible: false)
             return
         }
         
@@ -104,9 +110,11 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
                 case .success(let userInfo):
                     print("userInfo: \(userInfo)")
                     self?.presenter.onViewStateChanged(viewState: .afterLogin(userInfo))
+                    self?.presenter.onLoading(visible: false)
                 case .failure(let error):
                     print("error: \(error)")
                     self?.presenter.onError(message: "Error in getting user info. Erorr: \(error.localizedDescription)")
+                    self?.presenter.onLoading(visible: false)
                 }
             }
             .store(in: &cancellableSet)

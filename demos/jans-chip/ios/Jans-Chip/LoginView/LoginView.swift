@@ -31,10 +31,11 @@ struct LoginView: View {
             SecureField("Password", text: $state.password)
                 .textFieldStyle(.roundedBorder)
             JansButton(title: "Login",
+                       disabled: state.loadingVisible,
                        backgroundColor: Color.cyan) {
                 interactor.onLoginClick(username: state.userName, password: state.password)
             }.padding(.top)
-            if $state.loadingVisible.wrappedValue {
+            if state.loadingVisible {
                 ProgressView()
             }
             Spacer()

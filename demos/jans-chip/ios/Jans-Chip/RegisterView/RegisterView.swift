@@ -25,22 +25,38 @@ struct RegisterView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 250, height: 100)
-            Text("Register OIDC Client")
-            TextField("Configuration Endpoint", text: $state.issuer)
-                .textFieldStyle(.roundedBorder)
-            TextField("Scopes", text: $state.scopes)
-                .textFieldStyle(.roundedBorder)
+            VStack(spacing: 16) {
+                Text("Register OIDC Client")
+                VStack(alignment: .leading) {
+                    Text("Configuration Endpoint:")
+                    TextField("Configuration Endpoint", text: $state.issuer)
+                        .textFieldStyle(.roundedBorder)
+                }
+                VStack(alignment: .leading) {
+                    Text("Scopes:")
+                    CheckListView(
+                        checkListData: state.checkListData,
+                        onSelection: { value, selected in
+                            state.scopesChanged(scope: value.title, insert: selected)
+                        })
+                    .padding([.leading, .trailing], 0)
+                    .border(.gray, width: 2)
+                    .cornerRadius(4)
+                    .frame(height: 200)
+                }
+            }
             JansButton(title: "Register",
                        disabled: state.loadingVisible,
                        backgroundColor: Color.cyan) {
                 interactor.onRegisterClick(issuer: state.issuer, scope: state.scopes)
             }.padding(.top)
-            if $state.loadingVisible.wrappedValue {
+            if state.loadingVisible {
                 ProgressView()
             }
             Spacer()
         }
-        .frame(width: 250, height: 500)
+        .frame(maxWidth: .infinity)
+        .padding()
     }
 }
 

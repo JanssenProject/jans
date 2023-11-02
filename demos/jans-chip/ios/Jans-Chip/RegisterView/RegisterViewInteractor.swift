@@ -62,7 +62,7 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
                 case .failure(let error):
                     print("error: \(error)")
                     self?.presenter.onError(message: error.localizedDescription)
-                    self?.presenter.onLoading(visible: true)
+                    self?.presenter.onLoading(visible: false)
                 }
             }
             .store(in: &cancellableSet)
@@ -76,12 +76,13 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
             doDCR(scopeText: scopeText)
         } else {
             presenter.onError(message: "Error with fetching OPConfiguration")
-            presenter.onLoading(visible: true)
+            presenter.onLoading(visible: false)
         }
     }
     
     private func doDCR(scopeText: String) {
         dcrRepository.doDCR(scopeText: scopeText) { [weak self] result, error in
+            self?.presenter.onLoading(visible: false)
             guard let error = error else {
                 if result {
                     self?.presenter.onMainStateChanged(viewState: .login)
@@ -90,7 +91,7 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
             }
             
             self?.presenter.onError(message: error.localizedDescription)
-            self?.presenter.onLoading(visible: true)
+            self?.presenter.onLoading(visible: false)
         }
     }
 }
