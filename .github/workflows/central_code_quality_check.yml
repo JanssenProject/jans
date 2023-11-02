@@ -10,7 +10,7 @@ on:
       - '!update-pycloud-in-**'
     paths:
       - 'jans-link/**'
-      - 'keycloak-integration/**'
+      - 'jans-keycloak-integration/**'
       - 'jans-auth-server/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
@@ -36,7 +36,7 @@ on:
       - synchronize
     paths:
       - 'jans-link/**'
-      - 'keycloak-integration/**'
+      - 'jans-keycloak-integration/**'
       - 'jans-auth-server/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
@@ -61,10 +61,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, jans-link, jans-casa]
+        module: [jans-keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, jans-link, jans-casa]
     env:
       JVM_PROJECTS: |
-        keycloak-integration
+        jans-keycloak-integration
         jans-link
         jans-auth-server
         jans-orm
