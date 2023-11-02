@@ -987,7 +987,7 @@ class Plugin(DialogUtils):
                      ], style=cli_style.container, width=D())
 
     def save_logging(self) -> None:
-        """This method to Save the Auth Login to server
+        """This method to Save the Auth Loggin to server
         """
         mod_data = self.make_data_from_dialog({'logging':self.oauth_data_container['logging']})
         pathches = []
@@ -1003,7 +1003,8 @@ class Plugin(DialogUtils):
                 data_fn=None,
                 data=pathches
                 )
-            self.schema = response
+            self.app.app_configuration = response
+
             body = HSplit([Label(_("Jans authorization server application configuration logging properties were saved."))])
 
             buttons = [Button(_("Ok"))]
