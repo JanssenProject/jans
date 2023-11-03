@@ -31,6 +31,8 @@ import io.jans.model.custom.script.type.idp.DummyIdpType;
 import io.jans.model.custom.script.type.idp.IdpType;
 import io.jans.model.custom.script.type.introspection.DummyIntrospectionType;
 import io.jans.model.custom.script.type.introspection.IntrospectionType;
+import io.jans.model.custom.script.type.lock.DummyLockExtensionType;
+import io.jans.model.custom.script.type.lock.LockExtensionType;
 import io.jans.model.custom.script.type.logout.DummyEndSessionType;
 import io.jans.model.custom.script.type.logout.EndSessionType;
 import io.jans.model.custom.script.type.owner.DummyResourceOwnerPasswordCredentialsType;
@@ -107,6 +109,7 @@ public enum CustomScriptType implements AttributeEnum {
     CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType()),
     MODIFY_SSA_RESPONSE("modify_ssa_response", "Modify SSA Response", ModifySsaResponseType.class, CustomScript.class, "ModifySsaResponse", new DummyModifySsaResponseType()),
     FIDO2_EXTENSION("fido2_extension", "Fido2 Extension", Fido2ExtensionType.class, CustomScript.class, "Fido2Extension", new DummyFido2ExtensionType()),
+    LOCK_EXTENSION("lock_extension", "Lock Extension", LockExtensionType.class, CustomScript.class, "LockExtension", new DummyLockExtensionType()),
     ;
 
     private String value;
