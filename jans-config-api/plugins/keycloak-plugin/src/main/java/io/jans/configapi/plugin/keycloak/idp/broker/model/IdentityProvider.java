@@ -35,8 +35,9 @@ public class IdentityProvider extends Entry implements Serializable {
     @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
+    @NotNull
     @AttributeName
-    private String creator;
+    private String creatorId;
 
     @NotNull
     @AttributeName(name = "name")
@@ -48,29 +49,21 @@ public class IdentityProvider extends Entry implements Serializable {
     private String displayName;
 
     @NotNull
-    @Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
+    @Size(min = 0, max = 500, message = "Length of the Description should not exceed 500")
     @AttributeName
     private String description;
-
-    @AttributeName
-    private String internalId;
-
-    @AttributeName
-    private String providerId;
+        
+    @NotNull
+    @AttributeName(name = "realm")
+    private String realm;
 
     @AttributeName(name = "jansEnabled")
     private boolean enabled;
 
     @AttributeName
-    private String UPFLM_ON = "on";
+    private String providerId;
 
-    @AttributeName
-    private String UPFLM_MISSING = "missing";
-
-    @AttributeName
-    public final String UPFLM_OFF = "off";
-
-    @AttributeName
+   @AttributeName
     protected boolean trustEmail;
 
     @AttributeName
@@ -97,6 +90,9 @@ public class IdentityProvider extends Entry implements Serializable {
 
     @AttributeName(name = "jansSAMLspMetaDataURL")
     private String spMetaDataURL;
+    
+    @AttributeName(name = "jansSAMLspMetaLocation")
+    private String spMetaDataLocation;
 
     @AttributeName(name = "jansSAMLidpMetaDataFN")
     @Hidden
@@ -104,6 +100,9 @@ public class IdentityProvider extends Entry implements Serializable {
 
     @AttributeName(name = "jansSAMLidpMetaDataURL")
     private String idpMetaDataURL;
+    
+    @AttributeName(name = "jansSAMLidpMetaLocation")
+    private String idpMetaDataLocation;
 
     @AttributeName(name = "jansStatus")
     private GluuStatus status;
@@ -113,6 +112,9 @@ public class IdentityProvider extends Entry implements Serializable {
 
     @AttributeName(name = "jansValidationLog")
     private List<String> validationLog;
+    
+    @AttributeName(name = "jansSAMLidpConfDyn")
+    Map<String, String> config = new HashMap<>();
 
     public String getInum() {
         return inum;
@@ -122,12 +124,12 @@ public class IdentityProvider extends Entry implements Serializable {
         this.inum = inum;
     }
 
-    public String getCreator() {
-        return creator;
+    public String getCreatorId() {
+        return creatorId;
     }
 
-    public void setCreator(String creator) {
-        this.creator = creator;
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
     }
 
     public String getName() {
@@ -154,20 +156,12 @@ public class IdentityProvider extends Entry implements Serializable {
         this.description = description;
     }
 
-    public String getInternalId() {
-        return internalId;
+    public String getRealm() {
+        return realm;
     }
 
-    public void setInternalId(String internalId) {
-        this.internalId = internalId;
-    }
-
-    public String getProviderId() {
-        return providerId;
-    }
-
-    public void setProviderId(String providerId) {
-        this.providerId = providerId;
+    public void setRealm(String realm) {
+        this.realm = realm;
     }
 
     public boolean isEnabled() {
@@ -178,20 +172,12 @@ public class IdentityProvider extends Entry implements Serializable {
         this.enabled = enabled;
     }
 
-    public String getUPFLM_ON() {
-        return UPFLM_ON;
+    public String getProviderId() {
+        return providerId;
     }
 
-    public void setUPFLM_ON(String uPFLM_ON) {
-        UPFLM_ON = uPFLM_ON;
-    }
-
-    public String getUPFLM_MISSING() {
-        return UPFLM_MISSING;
-    }
-
-    public void setUPFLM_MISSING(String uPFLM_MISSING) {
-        UPFLM_MISSING = uPFLM_MISSING;
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
     }
 
     public boolean isTrustEmail() {
@@ -266,6 +252,14 @@ public class IdentityProvider extends Entry implements Serializable {
         this.spMetaDataURL = spMetaDataURL;
     }
 
+    public String getSpMetaDataLocation() {
+        return spMetaDataLocation;
+    }
+
+    public void setSpMetaDataLocation(String spMetaDataLocation) {
+        this.spMetaDataLocation = spMetaDataLocation;
+    }
+
     public String getIdpMetaDataFN() {
         return idpMetaDataFN;
     }
@@ -280,6 +274,14 @@ public class IdentityProvider extends Entry implements Serializable {
 
     public void setIdpMetaDataURL(String idpMetaDataURL) {
         this.idpMetaDataURL = idpMetaDataURL;
+    }
+
+    public String getIdpMetaDataLocation() {
+        return idpMetaDataLocation;
+    }
+
+    public void setIdpMetaDataLocation(String idpMetaDataLocation) {
+        this.idpMetaDataLocation = idpMetaDataLocation;
     }
 
     public GluuStatus getStatus() {
@@ -306,21 +308,27 @@ public class IdentityProvider extends Entry implements Serializable {
         this.validationLog = validationLog;
     }
 
-    public String getUPFLM_OFF() {
-        return UPFLM_OFF;
+    public Map<String, String> getConfig() {
+        return config;
+    }
+
+    public void setConfig(Map<String, String> config) {
+        this.config = config;
     }
 
     @Override
     public String toString() {
-        return "IdentityProvider [inum=" + inum + ", creator=" + creator + ", name=" + name + ", displayName="
-                + displayName + ", description=" + description + ", internalId=" + internalId + ", providerId="
-                + providerId + ", enabled=" + enabled + ", UPFLM_ON=" + UPFLM_ON + ", UPFLM_MISSING=" + UPFLM_MISSING
-                + ", UPFLM_OFF=" + UPFLM_OFF + ", trustEmail=" + trustEmail + ", storeToken=" + storeToken
+        return "IdentityProvider [inum=" + inum + ", creatorId=" + creatorId + ", name=" + name + ", displayName="
+                + displayName + ", description=" + description + ", realm=" + realm + ", enabled=" + enabled
+                + ", providerId=" + providerId + ", trustEmail=" + trustEmail + ", storeToken=" + storeToken
                 + ", addReadTokenRoleOnCreate=" + addReadTokenRoleOnCreate + ", authenticateByDefault="
                 + authenticateByDefault + ", linkOnly=" + linkOnly + ", firstBrokerLoginFlowAlias="
                 + firstBrokerLoginFlowAlias + ", postBrokerLoginFlowAlias=" + postBrokerLoginFlowAlias
-                + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL + ", idpMetaDataFN="
-                + idpMetaDataFN + ", idpMetaDataURL=" + idpMetaDataURL + ", status=" + status + ", validationStatus="
-                + validationStatus + ", validationLog=" + validationLog + "]";
+                + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL + ", spMetaDataLocation="
+                + spMetaDataLocation + ", idpMetaDataFN=" + idpMetaDataFN + ", idpMetaDataURL=" + idpMetaDataURL
+                + ", idpMetaDataLocation=" + idpMetaDataLocation + ", status=" + status + ", validationStatus="
+                + validationStatus + ", validationLog=" + validationLog + ", config=" + config + "]";
     }
+
+      
 }

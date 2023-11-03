@@ -35,7 +35,31 @@ public class BrokerIdentityProviderForm implements Serializable {
 	@PartType(MediaType.APPLICATION_OCTET_STREAM)
     private transient InputStream  metaDataFile;
 
-    
+    public IdentityProvider getIdentityProvider() {
+        return identityProvider;
+    }
+
+    public void setIdentityProvider(IdentityProvider identityProvider) {
+        this.identityProvider = identityProvider;
+    }
+
+    public InputStream getMetaDataFile() {
+        return metaDataFile;
+    }
+
+    public void setMetaDataFile(InputStream metaDataFile) {
+        this.metaDataFile = metaDataFile;
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
+
+    @Override
+    public String toString() {
+        return "BrokerIdentityProviderForm [identityProvider=" + identityProvider + "]";
+    }
+
   
     
 }

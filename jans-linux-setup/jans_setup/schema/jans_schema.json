@@ -3480,7 +3480,155 @@
 		"substr": "caseIgnoreSubstringsMatch",
 		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
 		"x_origin": "Jans created attribute"
-	}
+	},
+	{
+      "desc": "Provider Id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "providerId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+	{
+      "desc": "Realm Name",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "realm"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "If enabled, email provided by this provider is not verified even if verification is enabled for the realm.",
+      "equality": "booleanMatch",
+      "names": [
+        "trustEmail"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Enable or disable if tokens must be stored after authenticating users.",
+      "equality": "booleanMatch",
+      "names": [
+        "storeToken"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Enable and disable if new users can read any stored tokens.",
+      "equality": "booleanMatch",
+      "names": [
+        "addReadTokenRoleOnCreate"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Authenticate enabled",
+      "equality": "booleanMatch",
+      "names": [
+        "authenticateByDefault"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "If true, users cannot log in through this provider. They can only link to this provider. This is useful if you don't want to allow login from the provider, but want to integrate with a provider",
+      "equality": "booleanMatch",
+      "names": [
+        "linkOnly"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+	{
+      "desc": "Alias of authentication flow, which is triggered after first login with this identity provider. Term 'First Login' means that no Keycloak account is currently linked to the authenticated identity provider account.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "realm"
+      ],
+      "oid": "firstBrokerLoginFlowAlias",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+	{
+      "desc": "Alias of authentication flow, which is triggered after each login with this identity provider. Useful if you want additional verification of each user authenticated with this identity provider (for example OTP). Leave this to "None" if you need no any additional authenticators to be triggered after login with this identity provider. Also note that authenticator implementations must assume that user is already set in ClientSession as identity provider already set it.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "realm"
+      ],
+      "oid": "postBrokerLoginFlowAlias",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+		"desc": "SAML Trusted IDP file location of metadata",
+		"equality": "caseIgnoreMatch",
+		"names": [
+			"jansSAMLidpMetaDataFN"
+		],
+		"oid": "jansAttr",
+		"substr": "caseIgnoreSubstringsMatch",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+		"x_origin": "Jans created attribute"
+	},
+    {
+      "desc": "SAML Trusted IDP URI location of metadata",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLidpMetaDataURL"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLspMetaLocation"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLidpMetaLocation"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "SAML IDP dynamic attribute map with key and value",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLidpConfDyn"
+      ],
+      "json": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    }
   ],
   "objectClasses": [
     {
@@ -4718,8 +4866,49 @@
         "top"
       ],
       "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+		"creatorId",
+		"name",
+        "displayName",
+        "description",
+		"realm",
+		"jansEnabled",
+		"providerId",
+		"trustEmail",
+		"storeToken",		
+        "addReadTokenRoleOnCreate",
+        "authenticateByDefault",
+        "linkOnly",
+        "firstBrokerLoginFlowAlias",
+        "postBrokerLoginFlowAlias",
+		"jansSAMLspMetaDataFN",
+		"jansSAMLspMetaDataURL",
+        "jansSAMLspMetaLocation",
+        "jansSAMLidpMetaDataFN",
+        "jansSAMLidpMetaDataURL",
+        "jansSAMLidpMetaLocation",
+        "jansStatus",
+        "jansValidationStatus",
+        "jansValidationLog",
+		"jansSAMLidpConfDyn"		
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansTrustedIdp"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
     }
-  ],
+  ]
   "oidMacros": {
     "jansAttr": "jansPublished:3",
     "jansMatchRules": "jansPublished:2",

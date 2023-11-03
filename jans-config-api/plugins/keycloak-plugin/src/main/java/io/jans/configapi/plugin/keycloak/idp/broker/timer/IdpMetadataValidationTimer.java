@@ -7,11 +7,11 @@
 package io.jans.configapi.plugin.keycloak.idp.broker.timer;
 
 import io.jans.configapi.core.model.ValidationStatus;
-import io.jans.configapi.plugin.keycloak.idp.broker.event.SpMetadataValidationEvent;
+import io.jans.configapi.plugin.keycloak.idp.broker.event.IdpMetadataValidationEvent;
 import io.jans.configapi.plugin.keycloak.idp.broker.model.IdentityProvider;
 import io.jans.configapi.plugin.keycloak.idp.broker.model.config.IdpAppConfiguration;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpConfigService;
-import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpService;
+import io.jans.configapi.plugin.keycloak.idp.broker.service.IdentityProviderService;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.SamlService;
 
 import io.jans.model.GluuStatus;
@@ -45,7 +45,7 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 @Named
-public class SpMetadataValidationTimer {
+public class IdpMetadataValidationTimer {
 
     private final static int DEFAULT_INTERVAL = 60; // 60 seconds
 
@@ -65,7 +65,7 @@ public class SpMetadataValidationTimer {
     private IdpConfigService idpConfigService;
     
     @Inject 
-    private IdpService idpService;
+    private IdentityProviderService identityProviderService;
     
     private AtomicBoolean isActive;
 
@@ -89,13 +89,13 @@ public class SpMetadataValidationTimer {
         final int delay = 30;
         final int interval = DEFAULT_INTERVAL;
 
-        timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new SpMetadataValidationEvent(),
+        timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new IdpMetadataValidationEvent(),
                 Scheduled.Literal.INSTANCE));
     }
 
     @Asynchronous
     public void processMetadataValidationTimerEvent(
-            @Observes @Scheduled SpMetadataValidationEvent SpMetadataValidationEvent) {
+            @Observes @Scheduled IdpMetadataValidationEvent IdpMetadataValidationEvent) {
         if (this.isActive.get()) {
             return;
         }
@@ -189,15 +189,8 @@ public class SpMetadataValidationTimer {
                 log.debug("metadataFN:{}, metadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}",
                         metadataFN, metadataPath, destinationMetadataName, destinationMetadataPath);
                 
-                //To-do - start
-                IdentityProvider idp = null; 
-                
-                
-                //IdentityProvider idp = idpService
-                  //      .getIdpByUnpunctuatedInum(metadataFN.split("-" + samlIdpService.getSpMetadataFile())[0]);
-                
-                //To-do - end
-                
+                IdentityProvider idp = identityProviderService.getIdentityProviderByUnpunctuatedInum(metadataFN.split("-" + identityProviderService.getIdpMetadataFilePattern())[0]);
+                 
                 log.debug("IdentityProvider found with name:{} is:{}",metadataFN, idp);
                 if (idp == null) {
                     log.debug("No IdentityProvider found with name:{}",metadataFN);
@@ -206,16 +199,15 @@ public class SpMetadataValidationTimer {
                 }
                 idp.setValidationStatus(ValidationStatus.PENDING);
                 
-                //to-do
-                //idpService.updateIdp(idp);
+                identityProviderService.updateIdentityProvider(idp);
 
                 log.debug("metadataFN:{}, metadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}",
                         metadataFN, metadataPath, destinationMetadataName, destinationMetadataPath);
 
                 GluuErrorHandler errorHandler = null;
                 List<String> validationLog = null;
-                try {//to-do
-                    //errorHandler = idpService.validateMetadata(metadataPath);
+                try {
+                    errorHandler = samlService.validateMetadata(metadataPath);
                     log.debug("validateMetadata result errorHandler:{}", errorHandler);
                 } catch (Exception e) {
                     idp.setValidationStatus(ValidationStatus.FAILED);
@@ -224,8 +216,7 @@ public class SpMetadataValidationTimer {
                     validationLog.add(e.getMessage());
                     log.debug("Validation of " + idp.getInum() + " failed: " + e.getMessage());
                     idp.setValidationLog(validationLog);
-                  //to-do
-                    //idpService.updateIdentityProvider(idp);
+                    identityProviderService.updateIdentityProvider(idp);
                     return false;
                 }
 
@@ -287,7 +278,7 @@ public class SpMetadataValidationTimer {
                     idp.setValidationLog(validationLog);
                     idp.setStatus(GluuStatus.ACTIVE);
 
-                    idpService.updateIdentityProvider(idp);
+                    identityProviderService.updateIdentityProvider(idp);
                     result = true;
                 } else if (getIdpAppConfiguration().isIgnoreValidation() || errorHandler.isInternalError()) {
                     idp.setValidationLog(new ArrayList<String>(new HashSet<String>(errorHandler.getLog())));
@@ -346,14 +337,14 @@ public class SpMetadataValidationTimer {
                     }
                     log.debug("Updating IdentityProvider:{} , validationLog :{}", idp, validationLog);
                 
-                    idpService.updateIdentityProvider(idp);
+                    identityProviderService.updateIdentityProvider(idp);
                     result = true;
                 } else {
                     log.debug("Unhandled  metadataFN:{}", metadataFN);
                     idp.setValidationLog(new ArrayList<String>(new HashSet<String>(errorHandler.getLog())));
                     idp.setValidationStatus(ValidationStatus.FAILED);
                     idp.setStatus(GluuStatus.INACTIVE);
-                    idpService.updateIdentityProvider(idp);
+                    identityProviderService.updateIdentityProvider(idp);
                 }
             }
         }

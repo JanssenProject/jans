@@ -10,20 +10,38 @@ import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.plugin.keycloak.idp.broker.configuration.KeycloakConfig;
 import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.util.exception.ConfigurationException;
 import io.jans.util.exception.InvalidAttributeException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.*;
 
-import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.Response.StatusType;
+import jakarta.ws.rs.WebApplicationException;
+
+import java.io.File;
+import java.io.InputStream;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
 import org.keycloak.admin.client.resource.IdentityProviderResource;
 import org.keycloak.admin.client.resource.IdentityProvidersResource;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -191,7 +209,7 @@ public class KeycloakService {
         return identityProvider;
     }
 
-    public IdentityProviderRepresentation createNewIdentityProvider(String realmName,
+    public IdentityProviderRepresentation createIdentityProvider(String realmName,
             IdentityProviderRepresentation identityProviderRepresentation) {
         logger.info("Create new IdentityProvider under realmName:{}, identityProviderRepresentation:{})", realmName,
                 identityProviderRepresentation);
@@ -234,6 +252,81 @@ public class KeycloakService {
                 }
             }
 
+        }
+
+        return identityProviderRepresentation;
+    }
+
+    public IdentityProviderRepresentation createIdentityProvider(String realmName,
+            IdentityProviderRepresentation identityProviderRepresentation, InputStream idpMetadataStream) {
+
+        try {
+            logger.info(
+                    "Create new IdentityProvider under realmName:{}, identityProviderRepresentation:{}, idpMetadataStream:{})",
+                    realmName, identityProviderRepresentation, idpMetadataStream);
+
+            if (StringUtils.isBlank(realmName)) {
+                new InvalidAttributeException("Realm name is null!!!");
+            }
+
+            if (identityProviderRepresentation == null) {
+                new InvalidAttributeException("IdentityProviderRepresentation is null!!!");
+            }
+
+            if (idpMetadataStream == null) {
+                new InvalidAttributeException("Idp Metedata file is null!!!");
+            }
+
+            MultipartFormDataOutput form = new MultipartFormDataOutput();
+            form.addFormData("providerId", "saml", MediaType.TEXT_PLAIN_TYPE);
+
+            byte[] content = idpMetadataStream.readAllBytes();
+            String body = new String(content, Charset.forName("utf-8"));
+            form.addFormData("file", body, MediaType.APPLICATION_XML_TYPE, "saml-idp-metadata.xml");
+
+            IdentityProvidersResource identityProvidersResource = getRealmResource(realmName).identityProviders();
+            logger.info("identityProvidersResource:{})", identityProvidersResource);
+
+            Map<String, String> result = identityProvidersResource.importFrom(form);
+            boolean valid = verifySamlIdpConfig(result);
+            logger.info("Is IDP metadata file valid:{})", valid);
+            if (!valid) {
+                new InvalidAttributeException("Idp Metedata file is not valid !!!");
+            }
+
+            // Create new SAML identity provider using configuration retrieved from
+            // import-config
+            Response response = identityProvidersResource.create(identityProviderRepresentation);
+
+            logger.info("IdentityProvider creation response:{}", response);
+            if (response == null) {
+                logger.info("IdentityProvider creation response.getStatusInfo():{}, response.getEntity():{}",
+                        response.getStatusInfo(), response.getEntity());
+                String id = getCreatedId(response);
+                logger.info("IdentityProvider creation id():{}", id);
+                identityProviderRepresentation = (IdentityProviderRepresentation) response.getEntity();
+                logger.info("IdentityProvider creation identityProviderRepresentation():{}",
+                        identityProviderRepresentation);
+                List<IdentityProviderRepresentation> identityProvider = findAllIdentityProviders(realmName);
+                if (identityProvider != null && !identityProvider.isEmpty()) {
+                    identityProvider.stream()
+                            .forEach(e -> System.out.println(e.getInternalId() + "::" + e.getDisplayName()));
+                }
+
+                response = identityProvidersResource.getIdentityProviders(Constants.SAML);
+                if (response == null) {
+
+                    logger.info("SAML IdentityProvider response.getStatusInfo():{}, response.getEntity():{}",
+                            response.getStatusInfo(), response.getEntity());
+
+                    if (response.getEntity() != null) {
+                        logger.info("response.getEntity().getClass():{}", response.getEntity().getClass());
+                    }
+                }
+
+            }
+        } catch (Exception ex) {
+            throw new ConfigurationException("Error while configuring SAML IDP ", ex);
         }
 
         return identityProviderRepresentation;
@@ -293,114 +386,17 @@ public class KeycloakService {
         String path = location.getPath();
         return path.substring(path.lastIndexOf('/') + 1);
     }
-    /*
-     * 
-     * public ClientRepresentation createClient(ClientRepresentation
-     * clientRepresentation) {
-     * logger.info(" createClient() - clientRepresentation:{}",
-     * clientRepresentation);
-     * 
-     * ClientsResource clientsResource = getClientsResource(null);
-     * 
-     * // Create client (requires manage-users role) Response response =
-     * clientsResource.create(clientRepresentation);
-     * logger.info(" createClient() - response:{}", response);
-     * 
-     * logger.info(
-     * " createClient() - response.getStatus():{}, response.getStatusInfo():{}, response.getLocation():{}"
-     * , response.getStatus(), response.getStatusInfo(), response.getLocation());
-     * logger.info("response.getLocation():{}", response.getLocation()); String id =
-     * CreatedResponseUtil.getCreatedId(response);
-     * 
-     * logger.info("New client created with id:{}", id);
-     * 
-     * ClientResource clientResource = clientsResource.get(id); ClientRepresentation
-     * client = clientResource.toRepresentation();
-     * logger.info("New client created with client:{}", client);
-     * 
-     * return client; }
-     * 
-     * public ClientRepresentation updateClient(ClientRepresentation
-     * clientRepresentation) {
-     * logger.info(" updateClient() - clientRepresentation:{}",
-     * clientRepresentation);
-     * 
-     * ClientsResource clientsResource = getClientsResource(null);
-     * 
-     * ClientResource clientResource =
-     * clientsResource.get(clientRepresentation.getId());
-     * clientResource.update(clientRepresentation);
-     * 
-     * ClientRepresentation client = clientResource.toRepresentation();
-     * logger.info("Updated client:{}", client); return client; }
-     * 
-     * public void deleteClient(String id) { logger.info(" deleteClient() - id:{}",
-     * id);
-     * 
-     * ClientsResource clientsResource = getClientsResource(null);
-     * logger.info("clientsResource:{})", clientsResource);
-     * 
-     * ClientResource clientResource = clientsResource.get(id);
-     * logger.info("client resource to delete:{})", clientResource);
-     * clientResource.remove();
-     * logger.info("afrer deleting client identified by id:{})", id);
-     * 
-     * }
-     * 
-     * public ProtocolMappersResource getClientProtocolMappersResource(String
-     * clientId) {
-     * logger.info(" Get Client ProtocolMappersResource for client - clientId:{}",
-     * clientId); ProtocolMappersResource protocolMappersResource = null;
-     * List<ClientRepresentation> clients = this.getClientByClientId(clientId);
-     * logger.info("clients:{}", clients);
-     * 
-     * if (clients != null && !clients.isEmpty()) { ClientResource clientResource =
-     * getClientsResource(null).get(clients.get(0).getId());
-     * logger.info(" clientResource:{}", clientResource);
-     * 
-     * protocolMappersResource = clientResource.getProtocolMappers();
-     * 
-     * logger.info(" protocolMappersResource:{} for client:{}",
-     * protocolMappersResource, clientId); }
-     * 
-     * return protocolMappersResource; }
-     * 
-     * public List<ProtocolMapperRepresentation>
-     * getClientProtocolMapperRepresentation(String clientId) {
-     * logger.info(" Get Client ProtocolMapper for client - clientId:{}", clientId);
-     * List<ProtocolMapperRepresentation> protocolMapperRepresentationList = null;
-     * ProtocolMappersResource protocolMappersResource =
-     * this.getClientProtocolMappersResource(clientId);
-     * logger.info("clientId:{} -> protocolMappersResource:{}", clientId,
-     * protocolMappersResource);
-     * 
-     * if (protocolMappersResource != null ) { protocolMapperRepresentationList =
-     * protocolMappersResource.getMappers();
-     * logger.info(" protocolMappers:{} for client:{}",
-     * protocolMapperRepresentationList, clientId); }
-     * 
-     * return protocolMapperRepresentationList; }
-     * 
-     * public List<ProtocolMapperRepresentation>
-     * addClientProtocolMappersResource(String clientId,
-     * ProtocolMapperRepresentation protocolMapperRepresentation) { logger.
-     * info(" Add ProtocolMapper for client - clientId:{} with protocolMapperRepresentation:{}"
-     * , clientId, protocolMapperRepresentation); List<ProtocolMapperRepresentation>
-     * protocolMappers = null; List<ClientRepresentation> clients =
-     * this.getClientByClientId(clientId); logger.info("clients:{}", clients);
-     * 
-     * if (clients != null && !clients.isEmpty()) { ClientResource clientResource =
-     * getClientsResource(null).get(clients.get(0).getId());
-     * logger.info(" clientResource:{}", clientResource);
-     * 
-     * ProtocolMappersResource protocolMappersResource =
-     * clientResource.getProtocolMappers(); protocolMappers =
-     * protocolMappersResource.getMappers();
-     * 
-     * logger.info(" protocolMappers:{} for client:{}", protocolMappers, clientId);
-     * }
-     * 
-     * return protocolMappers; }
-     */
+
+    private boolean verifySamlIdpConfig(Map<String, String> config) {
+        // import endpoint simply converts IDPSSODescriptor into key value pairs.
+        // check that saml-idp-metadata.xml was properly converted into key value pairs
+        logger.info("verifySamlConfig - config:{}", config);
+        if (config == null || config.isEmpty()) {
+            return false;
+        }
+        logger.info("config.keySet().containsAll(Constants.SAML_IDP_CONFIG):{}",
+                config.keySet().containsAll(Constants.SAML_IDP_CONFIG));
+        return config.keySet().containsAll(Constants.SAML_IDP_CONFIG);
+    }
 
 }

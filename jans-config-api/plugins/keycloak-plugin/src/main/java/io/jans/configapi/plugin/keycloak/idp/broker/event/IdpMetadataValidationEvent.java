@@ -6,6 +6,6 @@
 package io.jans.configapi.plugin.keycloak.idp.broker.event;
 
 
-public class SpMetadataValidationEvent {
+public class IdpMetadataValidationEvent {
 
 }

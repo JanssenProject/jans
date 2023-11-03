@@ -7,7 +7,7 @@
 package io.jans.configapi.plugin.keycloak.idp.broker.configuration;
 
 import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.configapi.plugin.keycloak.idp.broker.timer.SpMetadataValidationTimer;
+import io.jans.configapi.plugin.keycloak.idp.broker.timer.IdpMetadataValidationTimer;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 
@@ -45,7 +45,7 @@ public class IdpAppInitializer {
     QuartzSchedulerManager quartzSchedulerManager;
 
     @Inject
-    SpMetadataValidationTimer spMetadataValidationTimer;
+    IdpMetadataValidationTimer idpMetadataValidationTimer;
 
     public void onAppStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.info("=============  Initializing Keycloak Plugin ========================");
@@ -54,7 +54,7 @@ public class IdpAppInitializer {
         // configuration
         this.idpConfigurationFactory.create();
         initSchedulerService();
-        spMetadataValidationTimer.initTimer();
+        idpMetadataValidationTimer.initTimer();
 
         log.info("==============  Keycloak Plugin IS UP AND RUNNING ===================");
     }

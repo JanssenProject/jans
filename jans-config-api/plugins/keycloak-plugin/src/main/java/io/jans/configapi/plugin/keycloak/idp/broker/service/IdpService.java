@@ -12,10 +12,11 @@ import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.SamlService;
-import io.jans.configapi.plugin.keycloak.idp.broker.timer.SpMetadataValidationTimer;
+import io.jans.configapi.plugin.keycloak.idp.broker.timer.IdpMetadataValidationTimer;
 import io.jans.configapi.plugin.keycloak.idp.broker.model.IdentityProvider;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpConfigService;
 import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
+import io.jans.configapi.plugin.keycloak.idp.broker.mapper.IdentityProviderMapper;
 
 import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
@@ -37,12 +38,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AgeFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
+
+import org.keycloak.representations.idm.IdentityProviderRepresentation;
 
 @ApplicationScoped
 public class IdpService {
@@ -60,310 +64,148 @@ public class IdpService {
     OrganizationService organizationService;
 
     @Inject
-    private InumService inumService;
+    IdentityProviderService identityProviderService;
 
     @Inject
-    IdpConfigService idpConfigService;
+    KeycloakService keycloakService;
+    
+    @Inject 
+    IdentityProviderMapper identityProviderMapper;
 
-    @Inject
-    SamlService samlService;
-
-    @Inject
-    SpMetadataValidationTimer spMetadataValidationTimer;
-
-    public String getIdentityProviderDn() {
-        return idpConfigService.getTrustedIdpDn();
-    }
-
-    public String getSpMetadataFilePattern() {
-        return idpConfigService.getSpMetadataFilePattern();
-    }
-
-    public boolean containsRelationship(String dn) {
-        return persistenceEntryManager.contains(dn, IdentityProvider.class);
-    }
-
-    public IdentityProvider getRelationshipByDn(String dn) {
-        if (StringHelper.isNotEmpty(dn)) {
-            try {
-                return persistenceEntryManager.find(IdentityProvider.class, dn);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
-
-        }
-        return null;
-    }
-
-    public IdentityProvider getIdentityProviderByInum(String inum) {
-        IdentityProvider result = null;
+    
+    public IdentityProvider getIdentityProviderByInum(String realmName, String inum) {
+        IdentityProvider idp = null;
         try {
-            result = persistenceEntryManager.find(IdentityProvider.class, getDnForIdentityProvider(inum));
+            log.error("IDP to be fetched from realmName:{}, inum:{}", realmName, inum);
+            IdentityProviderRepresentation kcIdp = keycloakService.getIdentityProviderById(realmName, inum);
+            idp = this.convertToIdentityProvider(kcIdp);
         } catch (Exception ex) {
-            log.error("Failed to load IdentityProvider entry", ex);
+            log.error("Failed to fetch IdentityProvider entry", ex);
         }
-        return result;
+        return idp;
     }
 
-    public List<IdentityProvider> getAllIdentityProviders() {
-        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, null);
+    public List<IdentityProvider> getAllIdentityProviders(String realmName) {
+        log.error("All IDP to be fetched from realmName:{}", realmName);
+        List<IdentityProviderRepresentation> kcIdpList = keycloakService.findAllIdentityProviders(realmName);
+        log.error("kcIdpList:{}", kcIdpList);
+        
+        return this.convertToIdentityProviderList(kcIdpList);
     }
+    
+    public IdentityProvider getIdentityProviderByName(String realmName, String alias) {
+        log.info("Get IdentityProvider by name realmName:{}, alias:{}", realmName, alias);
+        IdentityProviderRepresentation kcIdp = keycloakService.getIdentityProviderByName(realmName,alias);
+        log.error("kcIdp:{}", kcIdp);
 
-    public List<IdentityProvider> getAllActiveIdentityProviders() {
-        IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setBaseDn(getDnForIdentityProvider(null));
-        identityProvider.setStatus(GluuStatus.ACTIVE);
-
-        return persistenceEntryManager.findEntries(identityProvider);
+        return this.convertToIdentityProvider(kcIdp);
     }
-
-    public List<IdentityProvider> getAllIdentityProviderByInum(String inum) {
-        return persistenceEntryManager.findEntries(getDnForIdentityProvider(inum), IdentityProvider.class, null);
+    
+    public IdentityProvider createIdentityProvider(String realmName, IdentityProvider identityProvider) throws IOException{
+        log.info("Create IdentityProvider in realmName:{}, identityProvider:{}", realmName, identityProvider);
+        
+        //Create IDP in Jans DB
+        identityProviderService.addSamlIdentityProvider(identityProvider);
+        log.info("Created IdentityProvider in Jans DB -  identityProvider:{}", identityProvider);
+        
+        // Create IDP in KC
+        IdentityProviderRepresentation kcIdp = this.convertToIdentityProviderRepresentation(identityProvider);
+        log.error("converted kcIdp:{}", kcIdp);
+        
+        kcIdp = keycloakService.createIdentityProvider(realmName,kcIdp);
+        log.error("kcIdp:{}", kcIdp);
+     
+        return this.convertToIdentityProvider(kcIdp);
     }
+    
+    public IdentityProvider createIdentityProvider(IdentityProvider identityProvider, InputStream idpMetadataStream) throws IOException{
+        log.info("Create IdentityProvider with IDP metadata file in identityProvider:{}, idpMetadataStream:{}", identityProvider, idpMetadataStream);
+        
+        //Create IDP in Jans DB
+        identityProviderService.addSamlIdentityProvider(identityProvider, idpMetadataStream);
+        log.info("Create IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
+        
+        // Create IDP in KC
+        IdentityProviderRepresentation kcIdp = this.convertToIdentityProviderRepresentation(identityProvider);
+        log.error("converted kcIdp:{}", kcIdp);
+        
+        kcIdp = keycloakService.createIdentityProvider(identityProvider.getRealm(),kcIdp, idpMetadataStream);
+        log.error("kcIdp:{}", kcIdp);
 
-    public List<IdentityProvider> getAllIdentityProviderByName(String name) {
-        log.info("Search IdentityProvider with name:{}", name);
-
-        String[] targetArray = new String[] { name };
-        Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, targetArray);
-        log.debug("Search IdentityProvider with displayNameFilter:{}", displayNameFilter);
-        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class,
-                displayNameFilter);
+        return this.convertToIdentityProvider(kcIdp);
     }
+    
+    
+    public IdentityProvider createIdentityProvider(String realmName, IdentityProvider identityProvider, InputStream idpMetadataStream) throws IOException{
+        log.info("Create IdentityProvider with IDP metadata file in realmName:{}, identityProvider:{}, idpMetadataStream:{}", realmName, identityProvider, idpMetadataStream);
+        
+        //Create IDP in Jans DB
+        identityProviderService.addSamlIdentityProvider(identityProvider, idpMetadataStream);
+        log.info("Create IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
+        
+        // Create IDP in KC
+        IdentityProviderRepresentation kcIdp = this.convertToIdentityProviderRepresentation(identityProvider);
+        log.error("converted kcIdp:{}", kcIdp);
+        
+        kcIdp = keycloakService.createIdentityProvider(realmName,kcIdp,idpMetadataStream);
+        log.error("kcIdp:{}", kcIdp);
 
-    public IdentityProvider getTrustContainerFederation(IdentityProvider IdentityProvider) {
-        return getRelationshipByDn(IdentityProvider.getDn());
+        return this.convertToIdentityProvider(kcIdp);
     }
+    
+    public IdentityProvider updateProvider(IdentityProvider identityProvider, InputStream idpMetadataStream) throws IOException{
+        log.info("Update IdentityProvider with IDP metadata file in identityProvider:{}, idpMetadataStream:{}", identityProvider, idpMetadataStream);
+        
+        //Create IDP in Jans DB
+        identityProviderService.addSamlIdentityProvider(identityProvider, idpMetadataStream);
+        log.info("Update IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
+        
+        // Create IDP in KC
+        IdentityProviderRepresentation kcIdp = this.convertToIdentityProviderRepresentation(identityProvider);
+        log.error("converted kcIdp:{}", kcIdp);
+        
+        kcIdp = keycloakService.createIdentityProvider(identityProvider.getRealm(),kcIdp, idpMetadataStream);
+        log.error("kcIdp:{}", kcIdp);
 
-    public IdentityProvider getTrustContainerFederation(String dn) {
-        return getRelationshipByDn(dn);
+        return this.convertToIdentityProvider(kcIdp);
     }
-
-    public List<IdentityProvider> getAllIdentityProviders(int sizeLimit) {
-        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, null,
-                sizeLimit);
-    }
-
-    public IdentityProvider getTrustByUnpunctuatedInum(String unpunctuated) {
-        for (IdentityProvider trust : getAllIdentityProviders()) {
-            if (StringHelper.removePunctuation(trust.getInum()).equals(unpunctuated)) {
-                return trust;
-            }
+    
+    private List<IdentityProvider> convertToIdentityProviderList(List<IdentityProviderRepresentation> kcIdpList){
+        log.error("kcIdpList:{}", kcIdpList);
+        List<IdentityProvider> idpList = null;
+        if(kcIdpList==null || kcIdpList.isEmpty()) {
+            return idpList;
         }
-        return null;
+        idpList = kcIdpList.stream().map(element -> identityProviderMapper.kcIdentityProviderToIdentityProvider(element)).collect(Collectors.toList());
+        log.error("idpList:{}", idpList);
+        
+        return idpList;
     }
-
-    public List<IdentityProvider> searchIdentityProvider(String pattern, int sizeLimit) {
-
-        log.info("Search IdentityProvider with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
-
-        String[] targetArray = new String[] { pattern };
-        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
-                null);
-        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
-                null);
-        Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-        Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
-
-        log.info("Search IdentityProvider with searchFilter:{}", searchFilter);
-        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, searchFilter,
-                sizeLimit);
-    }
-
-    public List<IdentityProvider> getAllIdentityProvider(int sizeLimit) {
-        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, null,
-                sizeLimit);
-    }
-
-    public PagedResult<Client> getIdentityProvider(SearchRequest searchRequest) {
-        log.info("Search IdentityProvider with searchRequest:{}", searchRequest);
-
-        Filter searchFilter = null;
-        List<Filter> filters = new ArrayList<>();
-        if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
-
-            for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                String[] targetArray = new String[] { assertionValue };
-                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
-                        targetArray, null);
-                Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
-                        targetArray, null);
-                Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter));
-            }
-            searchFilter = Filter.createORFilter(filters);
+    
+    private IdentityProvider convertToIdentityProvider(IdentityProviderRepresentation kcIdp){
+        log.error("kcIdp:{}", kcIdp);
+        IdentityProvider idp = null;
+        if(kcIdp==null) {
+            return idp;
         }
-
-        log.debug("IdentityProvider pattern searchFilter:{}", searchFilter);
-        List<Filter> fieldValueFilters = new ArrayList<>();
-        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
-            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
-                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                log.trace("IdentityProvider dataFilter:{}", dataFilter);
-                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
-            }
-            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
-                    Filter.createANDFilter(fieldValueFilters));
+        idp = identityProviderMapper.kcIdentityProviderToIdentityProvider(kcIdp);
+        log.error("idpList:{}", idp);
+        
+        return idp;
+    }
+    
+    private IdentityProviderRepresentation convertToIdentityProviderRepresentation(IdentityProvider idp){
+        log.error("idp:{}", idp);
+        IdentityProviderRepresentation kcIdp = null;
+        if(idp==null) {
+            return kcIdp;
         }
-
-        log.info("IdentityProvider searchFilter:{}", searchFilter);
-
-        return persistenceEntryManager.findPagedEntries(getDnForIdentityProvider(null), Client.class, searchFilter,
-                null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
-                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
-
+        kcIdp = identityProviderMapper.identityProviderToKCIdentityProvider(idp);
+        log.error("kcIdp:{}", kcIdp);
+        
+        return kcIdp;
     }
 
-    public IdentityProvider addIdentityProvider(IdentityProvider IdentityProvider) throws IOException {
-        return addIdentityProvider(IdentityProvider, null);
-    }
-
-    public IdentityProvider addIdentityProvider(IdentityProvider IdentityProvider, InputStream file)
-            throws IOException {
-        log.info("Add new IdentityProvider:{}, file:{}", IdentityProvider, file);
-
-        setIdentityProviderDefaultValue(IdentityProvider, false);
-        persistenceEntryManager.persist(IdentityProvider);
-
-        if (file != null && file.available() > 0) {
-            saveSpMetaDataFileSourceTypeFile(IdentityProvider, file);
-        }
-
-        return getIdentityProviderByInum(IdentityProvider.getInum());
-    }
-
-    public IdentityProvider updateIdentityProvider(IdentityProvider IdentityProvider) throws IOException {
-        return updateIdentityProvider(IdentityProvider, null);
-    }
-
-    public IdentityProvider updateIdentityProvider(IdentityProvider IdentityProvider, InputStream file)
-            throws IOException {
-        setIdentityProviderDefaultValue(IdentityProvider, true);
-        persistenceEntryManager.merge(IdentityProvider);
-
-        if (file != null && file.available() > 0) {
-            saveSpMetaDataFileSourceTypeFile(IdentityProvider, file);
-        }
-
-        return getIdentityProviderByInum(IdentityProvider.getInum());
-
-    }
-
-    public void removeIdentityProvider(IdentityProvider IdentityProvider) {
-        persistenceEntryManager.removeRecursively(IdentityProvider.getDn(), IdentityProvider.class);
-
-    }
-
-    private IdentityProvider setIdentityProviderDefaultValue(IdentityProvider IdentityProvider, boolean update) {
-        return IdentityProvider;
-    }
-
-    public String getDnForIdentityProvider(String inum) {
-        String orgDn = organizationService.getDnForOrganization();
-        if (StringHelper.isEmpty(inum)) {
-            return String.format("ou=IdentityProviders,%s", orgDn);
-        }
-        return String.format("inum=%s,ou=IdentityProviders,%s", inum, orgDn);
-    }
-
-    public String generateInumForNewRelationship() {
-        String newInum = null;
-        String newDn = null;
-        do {
-            newInum = UUID.randomUUID().toString();
-            newDn = getDnForIdentityProvider(newInum);
-        } while (containsRelationship(newDn));
-
-        return newInum;
-    }
-
-    private boolean saveSpMetaDataFileSourceTypeFile(IdentityProvider identityProvider, InputStream file) {
-        log.info("identityProvider:{}, file:{}", identityProvider, file);
-
-        String spMetadataFileName = identityProvider.getSpMetaDataFN();
-        boolean emptySpMetadataFileName = StringHelper.isEmpty(spMetadataFileName);
-        log.debug("emptySpMetadataFileName:{}", emptySpMetadataFileName);
-        if ((file == null)) {
-            log.trace("File is null");
-            if (emptySpMetadataFileName) {
-                log.debug("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
-                return false;
-            }
-            String filePath = idpConfigService.getSpMetadataTempDirFilePath(spMetadataFileName);
-            log.debug("filePath:{}", filePath);
-
-            if (filePath == null) {
-                log.debug("The trust relationship {} has an invalid Metadata file storage path",
-                        identityProvider.getInum());
-                return false;
-            }
-
-            if (samlService.isLocalDocumentStoreType()) {
-
-                File newFile = new File(filePath);
-                log.debug("newFile:{}", newFile);
-
-                if (!newFile.exists()) {
-                    log.debug(
-                            "The trust relationship {} metadata used local storage but the SP metadata file `{}` was not found",
-                            identityProvider.getInum(), filePath);
-                    return false;
-                }
-            }
-            return true;
-        }
-        if (emptySpMetadataFileName) {
-            log.debug("emptySpMetadataFileName:{}", emptySpMetadataFileName);
-            spMetadataFileName = getSpNewMetadataFileName(identityProvider);
-            log.debug("spMetadataFileName:{}", spMetadataFileName);
-            identityProvider.setSpMetaDataFN(spMetadataFileName);
-
-        }
-        InputStream targetStream = file;
-        log.debug("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
-
-        String result = samlService.saveMetadataFile(Constants.IDP_MODULE, idpConfigService.getSpMetadataTempDir(),
-                spMetadataFileName, targetStream);
-        log.debug("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
-        if (StringHelper.isNotEmpty(result)) {
-            spMetadataValidationTimer.queue(result);
-            // process files in temp that were not processed earlier
-            processUnprocessedSpMetadataFiles();
-        } else {
-            log.error("Failed to save SP meta-data file. Please check if you provide correct file");
-        }
-
-        return false;
-
-    }
-
-    private String getSpNewMetadataFileName(IdentityProvider identityProvider) {
-        String spMetadataFileName = null;
-        if (identityProvider == null || StringUtils.isBlank(identityProvider.getSpMetaDataFN())) {
-            return spMetadataFileName;
-        }
-        return idpConfigService.getSpNewMetadataFileName(identityProvider.getInum());
-    }
-
-    public void processUnprocessedSpMetadataFiles() {
-        log.debug("processing unprocessed metadata files ");
-        String directory = idpConfigService.getSpMetadataTempDir();
-        log.debug("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
-
-        if (Files.exists(Paths.get(directory))) {
-            log.debug("directory:{} does exists)", directory);
-            File folder = new File(directory);
-            File[] files = folder.listFiles();
-            log.debug("files:{}", files);
-            if (files != null && files.length > 0) {
-
-                for (File file : files) {
-                    log.debug("file:{}, file.getName():{}", file, file.getName());
-                    spMetadataValidationTimer.queue(file.getName());
-                }
-            }
-
-        }
-    }
+  
 
 }

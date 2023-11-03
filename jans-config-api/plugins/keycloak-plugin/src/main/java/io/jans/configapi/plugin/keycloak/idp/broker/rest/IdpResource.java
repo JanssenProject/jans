@@ -12,12 +12,15 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
+import io.jans.configapi.plugin.keycloak.idp.broker.model.IdentityProvider;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpService;
 import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
-
+import io.jans.configapi.plugin.keycloak.idp.broker.form.BrokerIdentityProviderForm;
 import io.jans.configapi.util.ApiAccessConstants;
-
+import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.util.AttributeNames;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -35,15 +38,20 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 import org.slf4j.Logger;
-
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 
 @Path(Constants.KEYCLOAK + Constants.SAML_PATH)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class IdpResource extends BaseResource {
+
+    private static final String SAML_IDP_DATA = "SAML IDP Data";
+    private static final String SAML_IDP_DATA_FORM = "SAML IDP Data From";
 
    @Inject
     Logger log;
@@ -60,10 +68,11 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = {Constants.KC_SAML_IDP_READ_ACCESS})
-    public Response getAllKcSamlIdentityProvider() {
-       
-        
-        return Response.ok("OK").build();
+    public Response getAllKcSamlIdentityProvider(@Parameter(description = "Search size - max size of the results to return") @DefaultValue(Constants.REALM_MASTER) @QueryParam(value = Constants.REALM) String realm) {
+        log.info("Fetch SAML IDP from realm:{}", realm);
+        List<IdentityProvider> idpList = idpService.getAllIdentityProviders(realm);
+        log.info("SAML IDP fetched idpList:{}", idpList);
+        return Response.ok(idpList).build();
     }
 
     @Operation(summary = "Create SAML Identity Provider", description = "Create SAML Identity Provider", operationId = "postt-saml-identity-provider", tags = {
@@ -76,12 +85,30 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
+    @Path(Constants.UPLOAD_PATH)
     @ProtectedApi(scopes = { Constants.KC_SAML_IDP_WRITE_ACCESS })
-    public Response createKcSamlIdentityProvider(@Valid IdentityProviderRepresentation identityProviderRepresentation)
+    public Response createKcSamlIdentityProvider(@Valid BrokerIdentityProviderForm brokerIdentityProviderForm)
             throws IOException, JsonPatchException {
-        log.debug("Create identityProviderRepresentation:{}", identityProviderRepresentation);
-       
-        log.debug("Created identityProviderRepresentation:{}", identityProviderRepresentation);
-        return Response.ok(identityProviderRepresentation).build();
+        log.debug("Create brokerIdentityProviderForm:{}", brokerIdentityProviderForm);
+
+        checkResourceNotNull(brokerIdentityProviderForm, SAML_IDP_DATA_FORM);
+
+        IdentityProvider idp = brokerIdentityProviderForm.getIdentityProvider();
+        log.debug(" Create idp:{} ", idp);
+        
+        //validation
+        checkResourceNotNull(idp, SAML_IDP_DATA);
+        checkNotNull(idp.getDisplayName(), AttributeNames.DISPLAY_NAME);
+
+        InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
+        log.debug(" Create metaDataFile:{} ", metaDataFile);
+        if (metaDataFile != null) {
+            log.debug(" IDP metaDataFile.available():{}", metaDataFile.available());
+        }
+
+        idp = idpService.createIdentityProvider(idp, metaDataFile);
+
+        log.info("Create created by idp:{}", idp);
+        return Response.status(Response.Status.CREATED).entity(idp).build();
     }
 }

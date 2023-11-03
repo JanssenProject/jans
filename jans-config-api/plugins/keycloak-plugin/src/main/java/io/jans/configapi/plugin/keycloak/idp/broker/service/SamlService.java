@@ -10,7 +10,6 @@ import io.jans.service.document.store.service.DocumentStoreService;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.service.LocalDocumentStoreService;
 import io.jans.util.exception.InvalidConfigurationException;
-import io.jans.util.StringHelper;
 import io.jans.util.INumGenerator;
 import io.jans.xml.GluuErrorHandler;
 import io.jans.xml.XMLValidator;
