@@ -105,6 +105,9 @@ public class RegisterRequest extends BaseRequest {
     private SignatureAlgorithm userInfoSignedResponseAlg;
     private KeyEncryptionAlgorithm userInfoEncryptedResponseAlg;
     private BlockEncryptionAlgorithm userInfoEncryptedResponseEnc;
+    private SignatureAlgorithm introspectionSignedResponseAlg;
+    private KeyEncryptionAlgorithm introspectionEncryptedResponseAlg;
+    private BlockEncryptionAlgorithm introspectionEncryptedResponseEnc;
     private SignatureAlgorithm requestObjectSigningAlg;
     private KeyEncryptionAlgorithm requestObjectEncryptionAlg;
     private BlockEncryptionAlgorithm requestObjectEncryptionEnc;
@@ -898,6 +901,60 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Returns the JWS alg algorithm (JWA) required for Introspection responses.
+     *
+     * @return The JWS algorithm (JWA).
+     */
+    public SignatureAlgorithm getIntrospectionSignedResponseAlg() {
+        return introspectionSignedResponseAlg;
+    }
+
+    /**
+     * Sets the JWS alg algorithm (JWA) required for Introspection responses.
+     *
+     * @param introspectionSignedResponseAlg The JWS algorithm (JWA).
+     */
+    public void setIntrospectionSignedResponseAlg(SignatureAlgorithm introspectionSignedResponseAlg) {
+        this.introspectionSignedResponseAlg = introspectionSignedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE alg algorithm (JWA) required for encrypting Introspection responses.
+     *
+     * @return The JWE algorithm (JWA).
+     */
+    public KeyEncryptionAlgorithm getIntrospectionEncryptedResponseAlg() {
+        return introspectionEncryptedResponseAlg;
+    }
+
+    /**
+     * Sets the JWE alg algorithm (JWA) required for encrypting Introspection responses.
+     *
+     * @param introspectionEncryptedResponseAlg The JWE algorithm (JWA).
+     */
+    public void setIntrospectionEncryptedResponseAlg(KeyEncryptionAlgorithm introspectionEncryptedResponseAlg) {
+        this.introspectionEncryptedResponseAlg = introspectionEncryptedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE enc algorithm (JWA) required for symmetric encryption of Introspection responses.
+     *
+     * @return The JWE algorithm (JWA).
+     */
+    public BlockEncryptionAlgorithm getIntrospectionEncryptedResponseEnc() {
+        return introspectionEncryptedResponseEnc;
+    }
+
+    /**
+     * Sets the JWE enc algorithm (JWA) required for symmetric encryption of Introspection responses.
+     *
+     * @param introspectionEncryptedResponseEnc The JWE algorithm (JWA).
+     */
+    public void setIntrospectionEncryptedResponseEnc(BlockEncryptionAlgorithm introspectionEncryptedResponseEnc) {
+        this.introspectionEncryptedResponseEnc = introspectionEncryptedResponseEnc;
+    }
+
+    /**
      * Returns the JWS alg algorithm (JWA) required for UserInfo responses.
      *
      * @return The JWS algorithm (JWA).
@@ -1687,6 +1744,9 @@ public class RegisterRequest extends BaseRequest {
         result.setUserInfoSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(USERINFO_SIGNED_RESPONSE_ALG.toString())));
         result.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())));
         result.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())));
+        result.setIntrospectionSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(INTROSPECTION_SIGNED_RESPONSE_ALG.toString())));
+        result.setIntrospectionEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(INTROSPECTION_ENCRYPTED_RESPONSE_ALG.toString())));
+        result.setIntrospectionEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(INTROSPECTION_ENCRYPTED_RESPONSE_ENC.toString())));
         result.setRequestObjectSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(REQUEST_OBJECT_SIGNING_ALG.toString())));
         result.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
         result.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
@@ -1851,6 +1911,15 @@ public class RegisterRequest extends BaseRequest {
         }
         if (userInfoEncryptedResponseEnc != null) {
             function.apply(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), userInfoEncryptedResponseEnc.getName());
+        }
+        if (introspectionSignedResponseAlg != null) {
+            function.apply(INTROSPECTION_SIGNED_RESPONSE_ALG.toString(), introspectionSignedResponseAlg.getName());
+        }
+        if (introspectionEncryptedResponseAlg != null) {
+            function.apply(INTROSPECTION_ENCRYPTED_RESPONSE_ALG.toString(), introspectionEncryptedResponseAlg.getName());
+        }
+        if (introspectionEncryptedResponseEnc != null) {
+            function.apply(INTROSPECTION_ENCRYPTED_RESPONSE_ENC.toString(), introspectionEncryptedResponseEnc.getName());
         }
         if (requestObjectSigningAlg != null) {
             function.apply(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());

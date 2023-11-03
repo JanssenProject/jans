@@ -1336,6 +1336,15 @@ paths:
                 userinfo_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
+                introspection_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Introspection Responses.
+                introspection_encrypted_response_alg:
+                  type: string
+                  description: JWE alg algorithm (JWA) required for encrypting Introspection Responses.
+                introspection_encrypted_response_enc:
+                  type: string
+                  description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
                 request_object_signing_alg:
                   type: string
                   description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
@@ -1750,6 +1759,15 @@ paths:
                 userinfo_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
+                introspection_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Introspection Responses.
+                introspection_encrypted_response_alg:
+                  type: string
+                  description: JWE alg algorithm (JWA) required for encrypting Introspection Responses.
+                introspection_encrypted_response_enc:
+                  type: string
+                  description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
                 request_object_signing_alg:
                   type: string
                   description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
@@ -2144,6 +2162,15 @@ paths:
                   userinfo_encrypted_response_enc:
                     type: string
                     description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
+                  introspection_signed_response_alg:
+                    type: string
+                    description: JWS alg algorithm (JWA) required for signing Introspection Responses.
+                  introspection_encrypted_response_alg:
+                    type: string
+                    description: JWE alg algorithm (JWA) required for encrypting Introspection Responses.
+                  introspection_encrypted_response_enc:
+                    type: string
+                    description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
                   request_object_signing_alg:
                     type: string
                     description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
