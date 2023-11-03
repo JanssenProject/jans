@@ -4908,7 +4908,7 @@
       ],
       "x_origin": "Jans created objectclass"
     }
-  ]
+  ],
   "oidMacros": {
     "jansAttr": "jansPublished:3",
     "jansMatchRules": "jansPublished:2",
