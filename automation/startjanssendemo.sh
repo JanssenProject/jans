@@ -157,16 +157,13 @@ global:
       casaLogLevel: "$LOG_LEVEL"
       timerLogTarget: "$LOG_TARGET"
       timerLogLevel: "$LOG_LEVEL"
-    enabled: true
     ingress:
       casaEnabled: true     
   config-api:
-    enabled: true
     appLoggers:
       configApiLogTarget: "$LOG_TARGET"
       configApiLogLevel: "$LOG_LEVEL"
   fido2:
-    enabled: true
     ingress:
       fido2ConfigEnabled: true
     appLoggers:
@@ -175,7 +172,6 @@ global:
       persistenceLogTarget: "$LOG_TARGET"
       persistenceLogLevel: "$LOG_LEVEL"
   scim:
-    enabled: true
     ingress:
       scimConfigEnabled: true
       scimEnabled: true
@@ -191,7 +187,6 @@ global:
       scriptLogTarget: "$LOG_TARGET"
       scriptLogLevel: "$LOG_LEVEL"
   fqdn: $JANS_FQDN
-  isFqdnRegistered: false
   lbIp: $EXT_IP
   opendj:
     # -- Boolean flag to enable/disable the OpenDJ  chart.
@@ -199,16 +194,6 @@ global:
 # -- Nginx ingress definitions chart
 nginx-ingress:
   ingress:
-    openidConfigEnabled: true
-    uma2ConfigEnabled: true
-    webfingerEnabled: true
-    webdiscoveryEnabled: true
-    scimConfigEnabled: true
-    scimEnabled: true
-    configApiEnabled: true
-    u2fConfigEnabled: true
-    fido2ConfigEnabled: true
-    authServerEnabled: true
     path: /
     hosts:
     - $JANS_FQDN
@@ -219,28 +204,9 @@ nginx-ingress:
       - $JANS_FQDN
 auth-server:
   livenessProbe:
-    # https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py
-    exec:
-      command:
-        - python3
-        - /app/scripts/healthcheck.py
-    # Setting for testing purposes only. Under optimal resources the app should be up in 30-60 secs
     initialDelaySeconds: 300
-    periodSeconds: 30
-    timeoutSeconds: 5
   readinessProbe:
-    exec:
-      command:
-        - python3
-        - /app/scripts/healthcheck.py
-    # Setting for testing purposes only. Under optimal resources the app should be up in 30-60 secs
     initialDelaySeconds: 300
-    periodSeconds: 25
-    timeoutSeconds: 5
-opendj:
-  image:
-    repository: gluufederation/opendj
-    tag: 5.0.0_dev
 EOF
 sudo helm repo add janssen https://docs.jans.io/charts
 sudo helm repo update
