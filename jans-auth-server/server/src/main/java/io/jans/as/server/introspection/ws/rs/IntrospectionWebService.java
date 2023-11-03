@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaScopeType;
@@ -173,8 +174,17 @@ public class IntrospectionWebService {
                 String scopes = StringUtils.join(response.getScope().toArray(), " ");
                 responseAsJsonObject.put("scope", scopes);
             }
+
+            // Response as JWT
             if (introspectionService.isJwtResponse(responseAsJwt, accept)) {
-                return Response.status(Response.Status.OK).entity(introspectionService.createResponseAsJwt(responseAsJsonObject, grantOfIntrospectionToken)).build();
+                String responseAsJwtEntity = introspectionService.createResponseAsJwt(responseAsJsonObject, grantOfIntrospectionToken);
+                if (log.isTraceEnabled()) {
+                    log.trace("Response jwt entity: {}", responseAsJwtEntity);
+                }
+                return Response.status(Response.Status.OK)
+                        .entity(responseAsJwtEntity)
+                        .type(Constants.APPLICATION_TOKEN_INTROSPECTION_JWT)
+                        .build();
             }
 
             final String entity = responseAsJsonObject.toString();
