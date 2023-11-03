@@ -187,6 +187,21 @@ public enum RegisterRequestParam {
     USERINFO_ENCRYPTED_RESPONSE_ENC("userinfo_encrypted_response_enc"),
 
     /**
+     * JWS alg algorithm (JWA) required for Introspection Responses.
+     */
+    INTROSPECTION_SIGNED_RESPONSE_ALG("introspection_signed_response_alg"),
+
+    /**
+     * JWE alg algorithm (JWA) required for encrypting Introspection Responses.
+     */
+    INTROSPECTION_ENCRYPTED_RESPONSE_ALG("introspection_encrypted_response_alg"),
+
+    /**
+     * JWE enc algorithm (JWA) required for symmetric encryption of Introspection Responses.
+     */
+    INTROSPECTION_ENCRYPTED_RESPONSE_ENC("introspection_encrypted_response_enc"),
+
+    /**
      * JWS alg algorithm (JWA) that must be required by the Authorization Server.
      */
     REQUEST_OBJECT_SIGNING_ALG("request_object_signing_alg"),
