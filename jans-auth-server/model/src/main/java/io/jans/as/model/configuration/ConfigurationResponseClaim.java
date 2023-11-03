@@ -45,6 +45,9 @@ public final class ConfigurationResponseClaim {
     public static final String USER_INFO_SIGNING_ALG_VALUES_SUPPORTED = "userinfo_signing_alg_values_supported";
     public static final String USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED = "userinfo_encryption_alg_values_supported";
     public static final String USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED = "userinfo_encryption_enc_values_supported";
+    public static final String INTROSPECTION_SIGNING_ALG_VALUES_SUPPORTED = "introspection_signing_alg_values_supported";
+    public static final String INTROSPECTION_ENCRYPTION_ALG_VALUES_SUPPORTED = "introspection_encryption_alg_values_supported";
+    public static final String INTROSPECTION_ENCRYPTION_ENC_VALUES_SUPPORTED = "introspection_encryption_enc_values_supported";
     public static final String ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED = "id_token_signing_alg_values_supported";
     public static final String ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED = "id_token_encryption_alg_values_supported";
     public static final String ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED = "id_token_encryption_enc_values_supported";

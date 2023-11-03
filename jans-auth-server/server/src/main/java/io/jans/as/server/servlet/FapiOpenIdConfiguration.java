@@ -17,6 +17,7 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.util.CertUtils;
+import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.persistence.model.ScopeAttributes;
 import io.jans.as.server.ciba.CIBAConfigurationService;
@@ -28,27 +29,23 @@ import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.JansAttribute;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
 import static io.jans.as.model.util.StringUtils.implode;
@@ -255,6 +252,10 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             if (subjectTypesSupported.length() > 0) {
                 jsonObj.put(SUBJECT_TYPES_SUPPORTED, subjectTypesSupported);
             }
+
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionSigningAlgValuesSupported(), INTROSPECTION_SIGNING_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionAlgValuesSupported(), INTROSPECTION_ENCRYPTION_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionEncValuesSupported(), INTROSPECTION_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
             JSONArray userInfoSigningAlgValuesSupported = new JSONArray();
             for (String userInfoSigningAlg : appConfiguration.getUserInfoSigningAlgValuesSupported()) {

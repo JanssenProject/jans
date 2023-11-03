@@ -233,6 +233,15 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoEncryptionEncValuesSupported;
 
+    @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    private List<String> introspectionSigningAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    private List<String> introspectionEncryptionAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    private List<String> introspectionEncryptionEncValuesSupported;
+
     @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT")
     private List<String> idTokenSigningAlgValuesSupported;
 
@@ -1906,6 +1915,30 @@ public class AppConfiguration implements Configuration {
 
     public void setAuthorizationEncryptionEncValuesSupported(List<String> authorizationEncryptionEncValuesSupported) {
         this.authorizationEncryptionEncValuesSupported = authorizationEncryptionEncValuesSupported;
+    }
+
+    public List<String> getIntrospectionSigningAlgValuesSupported() {
+        return introspectionSigningAlgValuesSupported;
+    }
+
+    public void setIntrospectionSigningAlgValuesSupported(List<String> introspectionSigningAlgValuesSupported) {
+        this.introspectionSigningAlgValuesSupported = introspectionSigningAlgValuesSupported;
+    }
+
+    public List<String> getIntrospectionEncryptionAlgValuesSupported() {
+        return introspectionEncryptionAlgValuesSupported;
+    }
+
+    public void setIntrospectionEncryptionAlgValuesSupported(List<String> introspectionEncryptionAlgValuesSupported) {
+        this.introspectionEncryptionAlgValuesSupported = introspectionEncryptionAlgValuesSupported;
+    }
+
+    public List<String> getIntrospectionEncryptionEncValuesSupported() {
+        return introspectionEncryptionEncValuesSupported;
+    }
+
+    public void setIntrospectionEncryptionEncValuesSupported(List<String> introspectionEncryptionEncValuesSupported) {
+        this.introspectionEncryptionEncValuesSupported = introspectionEncryptionEncValuesSupported;
     }
 
     public List<String> getUserInfoSigningAlgValuesSupported() {
