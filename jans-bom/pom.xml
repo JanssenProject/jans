@@ -833,6 +833,19 @@
 			<artifactId>keycloak-services</artifactId>
 			<version>${keycloak.version}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-server-spi</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>		
+		
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-server-spi-private</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
+		
 		<!-- end keycloak dependencies-->
 
 			<!-- Other -->

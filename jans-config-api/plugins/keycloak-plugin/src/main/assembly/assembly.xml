@@ -22,7 +22,13 @@
 				<include>org.opensaml:xmltooling</include>
 				<include>org.opensaml:opensaml-xmlsec-api</include>
 				<include>org.opensaml:opensaml-core</include>
-				<include>net.shibboleth.utilities:java-support</include>
+				<include>keycloak-services:mapstruct</include>
+				<include>org.keycloak:keycloak-admin-client-jakarta</include>
+				<include>org.keycloak:keycloak-core</include>
+				<include>org.keycloak:keycloak-services</include>
+				<include>org.keycloak:keycloak-server-spi</include>
+				<include>org.keycloak:keycloak-server-spi-private</include>
+								
 			</includes>
 			<scope>runtime</scope>
 		</dependencySet>
