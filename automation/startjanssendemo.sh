@@ -127,6 +127,8 @@ fi
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 cat << EOF >> override.yaml
 global:
+  cloud:
+    testEnviroment: true
   istio:
     enable: $INSTALL_ISTIO
   cnPersistenceType: $PERSISTENCE_TYPE
@@ -148,6 +150,16 @@ global:
       scriptLogLevel: "$LOG_LEVEL"
       auditStatsLogTarget: "$LOG_TARGET"
       auditStatsLogLevel: "$LOG_LEVEL"
+  casa:
+    # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
+    appLoggers:
+      casaLogTarget: "$LOG_TARGET"
+      casaLogLevel: "$LOG_LEVEL"
+      timerLogTarget: "$LOG_TARGET"
+      timerLogLevel: "$LOG_LEVEL"
+    enabled: true
+    ingress:
+      casaEnabled: true     
   config-api:
     enabled: true
     appLoggers:
@@ -155,6 +167,8 @@ global:
       configApiLogLevel: "$LOG_LEVEL"
   fido2:
     enabled: true
+    ingress:
+      fido2ConfigEnabled: true
     appLoggers:
       fido2LogTarget: "$LOG_TARGET"
       fido2LogLevel: "$LOG_LEVEL"
@@ -162,6 +176,9 @@ global:
       persistenceLogLevel: "$LOG_LEVEL"
   scim:
     enabled: true
+    ingress:
+      scimConfigEnabled: true
+      scimEnabled: true
     appLoggers:
       scimLogTarget: "$LOG_TARGET"
       scimLogLevel: "$LOG_LEVEL"
@@ -227,8 +244,7 @@ opendj:
 EOF
 sudo helm repo add janssen https://docs.jans.io/charts
 sudo helm repo update
-# remove --devel once we issue the first prod chart
-sudo helm install janssen janssen/janssen --devel -n jans -f override.yaml --kubeconfig="$KUBECONFIG"
+sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG"
 echo "Waiting for auth-server to come up. This may take 5-10 mins....Please do not cancel out...This will wait for the auth-server to be ready.."
 sleep 300
 cat << EOF > testendpoints.sh
