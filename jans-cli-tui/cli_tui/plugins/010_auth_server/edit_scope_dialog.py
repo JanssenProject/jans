@@ -251,8 +251,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
             if result.lower() == 'yes':
                 self.data['claims'].remove(kwargs['selected'][0])
-                self.claims_container.data.remove(kwargs['selected'])
-
+                self.claims_container.remove_item(kwargs['selected'])
 
         ensure_future(coroutine())
 
