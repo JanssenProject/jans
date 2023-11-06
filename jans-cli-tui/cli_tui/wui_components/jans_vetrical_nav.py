@@ -300,6 +300,7 @@ class JansVerticalNav():
         if self.max_height:
             self.container_content[-1].height = self.max_height if self.max_height else len(
                 self.data)
+        self.selectes = 0
 
     def add_item(
         self,
@@ -309,6 +310,7 @@ class JansVerticalNav():
         self.handle_header_spaces()
         self.container_content[-1].height = self.max_height if self.max_height else len(
             self.data)
+        self.selectes = 0
 
     def replace_item(
         self,
