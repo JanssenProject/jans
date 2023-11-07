@@ -9,13 +9,14 @@ tags:
   - PEP
 ---
 
-## Jans Lock Overview
+# Jans Lock Overview
 
 Jans Lock enables domains to enforce policies based on real time OAuth data.  
 The Lock Client pushes token data from Auth Server to
 [OPA](https://openpolicyagent.org), enabling authorization based on real time
 information from the OAuth infrastructure. In order to use Jans Lock, admins
 will have to do a few things:
+
   * [Enable the Lock Token Stream in Auth Server](./lock_token_stream.md)
   * [Configure a Lock Client](./lock_client.md)
   * [Author Rego policies based on OAuth token data](./lock_opa_policies.md)
@@ -49,4 +50,4 @@ The diagram below illustrates a Jans Lock topology where OPA is used to
 control course grain authorization in an API gateway, fine grain authorization
 in First Party API code, and the issuance of access token scopes.
 
-![Jans Lock Design Overview Diagram][../../../assets/lock-design-diagram-00.png]
+![Jans Lock Design Overview Diagram](../../assets/lock-design-diagram-00.png)
