@@ -62,7 +62,8 @@ public class UserManagementService {
             List<AdminRole> roles = adminConf.getDynamic().getRoles();
 
             if (roles.contains(roleArg)) {
-                return adminConf.getDynamic().getRoles();
+                log.error(ErrorResponse.ADMIUI_ROLE_ALREADY_PRESENT.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ADMIUI_ROLE_ALREADY_PRESENT.getDescription());
             }
             roles.add(roleArg);
             adminConf.getDynamic().setRoles(roles);
@@ -177,7 +178,8 @@ public class UserManagementService {
             List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
 
             if (permissions.contains(permissionArg)) {
-                return adminConf.getDynamic().getPermissions();
+                log.error(ErrorResponse.ADMIUI_PERMISSIONS_ALREADY_PRESENT.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ADMIUI_PERMISSIONS_ALREADY_PRESENT.getDescription());
             }
             permissions.add(permissionArg);
             adminConf.getDynamic().setPermissions(permissions);
