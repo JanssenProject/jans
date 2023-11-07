@@ -519,7 +519,32 @@ class EditClientDialog(JansGDialog, DialogUtils):
         ], width=D(), style=cli_style.tabs
         )
 
-        self.tabs['SoftwareInfo'] = HSplit([
+        self.tabs['Software Info'] = HSplit([
+
+
+            self.myparent.getTitledText(
+                _("Client URI"),
+                name='clientUri',
+                value=self.data.get('clientUri', ''),
+                jans_help=self.myparent.get_help_from_schema(
+                    schema, 'redirectUris'),
+                style=cli_style.titled_text),
+
+            self.myparent.getTitledText(
+                _("Policiy URI"),
+                name='policyUri',
+                value=self.data.get('policyUri', ''),
+                jans_help=self.myparent.get_help_from_schema(
+                    schema, 'policyUri'),
+                style=cli_style.titled_text),
+
+            self.myparent.getTitledText(
+                _("Logo URI"),
+                name='logoUri',
+                value=self.data.get('logoUri', ''),
+                jans_help=self.myparent.get_help_from_schema(
+                    schema, 'logoUri'),
+                style=cli_style.titled_text),
 
             self.myparent.getTitledText(_("Contacts"),  # height =3 insted of the <+> button
                                         name='contacts',
