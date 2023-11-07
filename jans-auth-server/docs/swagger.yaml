@@ -6,15 +6,15 @@ info:
   title: Janssen Authorization Server
   description: Janssen Authorization Server - OAuth 2.0 server; OpenID Connect Provider (OP) & UMA Authorization Server (AS)
   contact:
-    email: yuriyz@gluu.org
+    name: Contact
+    url: https://github.com/JanssenProject/jans/discussions
   license:
     name: License
-    url: https://github.com/JanssenProject/jans/jans-auth-server/blob/master/LICENSE
-  version: "5.0"
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
 servers:
   - url: https://jans.local.io/jans-auth
 tags:
-  - name: developers
+  - name: About
     description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint. Server is tightly coupled with Gluu Admin UI.
 
 paths:
@@ -2902,7 +2902,7 @@ paths:
                     example: https://sample.com
                   authorization_endpoint:
                     type: string
-                    description: "URL of the authorization server's authorization endpoint.
+                    description: "URL of the authorization server's authorization endpoint."
                     example: https://sample.com/jans-auth/restv1/authorize
                   token_endpoint:
                     type: string
