@@ -15,7 +15,7 @@ servers:
   - url: https://jans.local.io/jans-auth
 tags:
   - name: About
-    description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint. Server is tightly coupled with Gluu Admin UI.
+    description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint.
 
 paths:
   /authorization_challenge:
@@ -906,12 +906,12 @@ paths:
                     type: string
                   details:
                     type: string
-  /.well-known/gluu-configuration:
+  /.well-known/openid-configuration:
     post:
       tags:
         - Server Configuration
-      summary:  Gets GluuServer configuration data that contains non-standard OpenID Connect discovery metadata.
-      description: Gets GluuServer configuration data that contains non-standard OpenID Connect discovery metadata.
+      summary:  Gets Janssen Server configuration data that contains non-standard OpenID Connect discovery metadata.
+      description: Gets Janssen Server configuration data that contains non-standard OpenID Connect discovery metadata.
       operationId: well-known-gluu-configuration
       responses:
         200:
