@@ -131,7 +131,7 @@ const RegisterForm = (data) => {
             }
         } catch (err) {
             console.error(err)
-            return { result: "error", message: REGISTRATION_ERROR + err.message}
+            return { result: "error", message: REGISTRATION_ERROR + err.message }
         }
     }
 
@@ -315,6 +315,10 @@ const RegisterForm = (data) => {
         }
     }
 
+    function handleChange(event) {
+        setSsaJwt(event.target.value)
+      }
+
     return (
         <div className="box">
             <legend><span className="number">O</span> Register OIDC Client</legend>
@@ -323,7 +327,9 @@ const RegisterForm = (data) => {
             <label><input type="checkbox" onChange={() => setUploadSsa(!uploadSsa)} /><b>Register using SSA</b></label>
             {uploadSsa ?
                 <>
+                    <label><b>Type or Upload SSA</b></label>
                     <StyledDropzone submitFile={readJWTFile} />
+                    <textarea value={ssaJwt} className="inputText" rows={5} onChange={handleChange}/>
                 </>
                 :
                 <>
