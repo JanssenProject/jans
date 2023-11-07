@@ -7588,19 +7588,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
         userCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
+        adminCanAccess:
+          type: boolean
         userCanAccess:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -7803,6 +7803,18 @@ components:
           items:
             type: string
         userInfoEncryptionEncValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionSigningAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionEncryptionAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionEncryptionEncValuesSupported:
           type: array
           items:
             type: string
@@ -8987,8 +8999,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
         authenticationMethod:
           type: string
           enum:
@@ -9000,6 +9010,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        displayName:
+          type: string
         baseDn:
           type: string
         inum:
@@ -9103,6 +9115,12 @@ components:
           format: int32
         evidence:
           type: string
+        introspectionSignedResponseAlg:
+          type: string
+        introspectionEncryptedResponseAlg:
+          type: string
+        introspectionEncryptedResponseEnc:
+          type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -9114,10 +9132,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:

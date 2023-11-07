@@ -27,7 +27,6 @@
 				<include>org.keycloak:keycloak-core</include>
 				<include>org.keycloak:keycloak-services</include>
 				<include>org.keycloak:keycloak-server-spi</include>
-				<include>org.keycloak:keycloak-server-spi-private</include>
 								
 			</includes>
 			<scope>runtime</scope>
