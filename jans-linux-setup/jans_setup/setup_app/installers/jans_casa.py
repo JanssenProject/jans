@@ -26,7 +26,7 @@ class CasaInstaller(JettyInstaller):
     source_files = [
             (os.path.join(casa_dist_dir, 'jans-casa.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/casa/{0}/casa-{0}.war').format(base.current_app.app_info['jans_version'])),
             (os.path.join(casa_dist_dir, 'jans-casa-config.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/casa-config/{0}/casa-config-{0}.jar').format(base.current_app.app_info['jans_version'])),
-            (os.path.join(casa_dist_dir, 'twillo.jar'), os.path.join(base.current_app.app_info['TWILIO_MAVEN'], '{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION']))),
+            (os.path.join(casa_dist_dir, 'twilio.jar'), os.path.join(base.current_app.app_info['TWILIO_MAVEN'], '{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION']))),
             (os.path.join(casa_dist_dir, 'jans-fido2-client.jar'), (os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['jans_version'])))),
             ]
 
@@ -65,11 +65,13 @@ class CasaInstaller(JettyInstaller):
         for plugin,_ in self.source_files[1:4]:
             plugin_name = os.path.basename(plugin)
             if plugin_name not in jans_auth_web_app_xml:
-                self.logIt("Adding plugin {} to jans-auth".format(plugin_name))
-                self.copyFile(plugin, base.current_app.JansAuthInstaller.custom_lib_dir)
                 plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
-                base.current_app.JansAuthInstaller.add_extra_class(plugin_class_path)
-                self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
+                if not os.path.exists(plugin_class_path):
+                    self.logIt("Adding plugin {} to jans-auth".format(plugin_name))
+                    self.copyFile(plugin, base.current_app.JansAuthInstaller.custom_lib_dir)
+                    base.current_app.JansAuthInstaller.add_extra_class(plugin_class_path)
+                    self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
+
 
 
     def generate_configuration(self):
