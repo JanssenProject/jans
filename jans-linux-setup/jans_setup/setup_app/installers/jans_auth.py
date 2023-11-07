@@ -200,6 +200,7 @@ class JansAuthInstaller(JettyInstaller):
             self.copyFile(extra_lib, self.custom_lib_dir)
             extra_lib_path = os.path.join(self.custom_lib_dir, os.path.basename(extra_lib))
             extra_libs.append(extra_lib_path)
+            self.chown(extra_lib_path, Config.jetty_user, Config.jetty_group)
 
         self.add_extra_class(','.join(extra_libs))
 
