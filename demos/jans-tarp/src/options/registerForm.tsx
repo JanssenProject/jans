@@ -70,9 +70,7 @@ const RegisterForm = (data) => {
 
     async function processForClientRegiWithSSA() {
         try {
-
             const ssaJson = jwtDecode(ssaJwt)
-
             if (ssaJson.iss == null) {
                 setError('Issuer not found in SSA.')
             }
@@ -317,7 +315,7 @@ const RegisterForm = (data) => {
 
     function handleChange(event) {
         setSsaJwt(event.target.value)
-      }
+    }
 
     return (
         <div className="box">
@@ -329,7 +327,7 @@ const RegisterForm = (data) => {
                 <>
                     <label><b>Type or Upload SSA</b></label>
                     <StyledDropzone submitFile={readJWTFile} />
-                    <textarea value={ssaJwt} className="inputText" rows={5} onChange={handleChange}/>
+                    <textarea value={ssaJwt} className="inputText" rows={5} onChange={handleChange} />
                 </>
                 :
                 <>
