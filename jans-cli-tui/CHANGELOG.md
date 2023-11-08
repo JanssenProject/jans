@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.19...jans-cli-tui-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* **jans-cli-tui:** obtain script types from config-api ([#6314](https://github.com/JanssenProject/jans/issues/6314)) ([5d4e588](https://github.com/JanssenProject/jans/commit/5d4e5885489babaadd59c5aedf2208e94f564512))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** client uri, policy uri, logo uri proerties are missing for clients ([#6460](https://github.com/JanssenProject/jans/issues/6460)) ([908fcce](https://github.com/JanssenProject/jans/commit/908fcced38bc6c821beaae118286245498bb1ac0))
+* **jans-cli-tui:** hide client scret ([#6372](https://github.com/JanssenProject/jans/issues/6372)) ([ac49f6c](https://github.com/JanssenProject/jans/commit/ac49f6caa0b40e81bc808c37663ccfb54f5a35d5))
+* **jans-cli-tui:** remove claim from scope ([#6461](https://github.com/JanssenProject/jans/issues/6461)) ([42791ec](https://github.com/JanssenProject/jans/commit/42791ece6a0acad37660b852fc3c7bf73988082b))
+* **jans-cli-tui:** ruamel.yaml&lt;0.18.0 ([#6411](https://github.com/JanssenProject/jans/issues/6411)) ([9da0502](https://github.com/JanssenProject/jans/commit/9da0502da45c8f5d05ad631e609dfda1b77a169c))
+* **jans-cli-tui:** save changes before testing STMP config ([#6378](https://github.com/JanssenProject/jans/issues/6378)) ([1429b0b](https://github.com/JanssenProject/jans/commit/1429b0b83c5a715812eaffe700f8253f3c4f6e56))
+* **jans-cli-tui:** save logging response is app properties not schema ([#6452](https://github.com/JanssenProject/jans/issues/6452)) ([f1a9950](https://github.com/JanssenProject/jans/commit/f1a9950e2caffd1bcf841fc9f02755ef84e13fa2))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.18...jans-cli-tui-v1.0.19) (2023-10-11)
 
 
