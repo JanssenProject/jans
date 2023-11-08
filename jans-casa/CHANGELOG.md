@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-casa-v1.0.19...jans-casa-v1.0.20) (2023-11-08)
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## 1.0.19 (2023-10-11)
 
 
