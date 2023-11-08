@@ -95,7 +95,7 @@ fieldset {
 
 legend {
   font-size: 1.4em;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 label {
@@ -142,7 +142,7 @@ label.light {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: left;
   min-width: 600px;
   font-size: 15px;
   padding: 2rem;
