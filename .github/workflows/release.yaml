@@ -67,7 +67,7 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        maven: [ "jans-scim", "jans-orm", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama", "jans-link", "keycloak-integration", 'jans-casa' ]
+        maven: [ "jans-scim", "jans-orm", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama", "jans-link", "jans-keycloak-link", "jans-keycloak-integration", "jans-casa" ]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
