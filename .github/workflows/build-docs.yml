@@ -70,6 +70,7 @@ jobs:
       - name: Copy generated chart from main
         run: |
           helm package charts/janssen/
+          helm package charts/janssen-all-in-one/
           cp janssen-*.tgz ../
 
       - name: Import GPG key
