@@ -110,6 +110,7 @@ public class CustomScriptService extends AbstractCustomScriptService {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
                 Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
                 log.trace("CustomScript dataFilter:{}", dataFilter);
+                log.trace("CustomScript entry.getKey():{}, entry.getValue():{}, entry.getValue().getClass():{}", entry.getKey(),entry.getValue(), (entry.getValue()!=null? entry.getValue().getClass():" "));
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
@@ -124,7 +125,15 @@ public class CustomScriptService extends AbstractCustomScriptService {
             Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
             filter = Filter.createANDFilter(searchFilter, typeFilter);
         }
-
+        
+       
+        Filter[] allFilters = filter.getFilters();
+        log.info("\n allFilters():{}", allFilters);
+        if(allFilters!=null && allFilters.length>0) {
+            for(Filter fil : allFilters) {
+                log.info("fil.getType():{}, fil.getAttributeName():{}, fil.getAssertionValue():{}, fil.getAssertionValue().getClass():{}", fil.getType(), fil.getAttributeName(), fil.getAssertionValue(),(fil.getAssertionValue()!=null? fil.getAssertionValue().getClass():" "));
+            }
+        }
         log.info("Searching CustomScript Flow with filter:{}", filter);
         return persistenceEntryManager.findPagedEntries(baseDn(), CustomScript.class, filter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
