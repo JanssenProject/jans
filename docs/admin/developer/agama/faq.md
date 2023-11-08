@@ -32,7 +32,15 @@ To fix a serialization problem, try some of the following:
 - Find a replacement for the problematic class
 - As a last resort, set `serializerType` property of the [engine](./engine-bridge-config.md#engine-configuration) to `null`. Note this will switch to standard Java serialization. This setting applies globally for all your flows
 
-## Classes added on the fly
+## Libraries and classes added on the fly
+
+### What Groovy and Java versions are supported?
+
+Groovy 4.0 and Java 11. The runtime is Amazon Corretto 17.
+
+### How to add third party libraries?
+
+You can include jar files in the `lib` directory of a [project](../../../agama/gama-format.md#anatomy-of-a-project). This applies only for VM-based installation of Janssen. Onboarding the jar files require a restart of the authentication server. Additionally, a prior update to file `/opt/jans/jetty/jans-auth/webapps/jans-auth.xml` may be required.
 
 <!--
 ### A class does not "see" other classes in its own package
@@ -46,10 +54,6 @@ This is because the JVM does not support unloading: even if a given source file 
 ### How to append data to a flow's log directly?
 
 Call method `log` of class `io.jans.agama.engine.script.LogUtils`. This method receives a variable number of arguments as DSL's `Log` does. Thus you can do `LogUtils.log("@w Today is Friday %th", 13)`, as in the logging [examples](../../../agama/language-reference.md#logging).
-
-### What Groovy and Java versions are supported?
-
-Groovy 4.0 and Java 11. The runtime is Amazon Corretto 11.
 
 ## Templates
 
