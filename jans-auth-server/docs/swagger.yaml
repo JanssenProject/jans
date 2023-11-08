@@ -1227,6 +1227,51 @@ paths:
                       $ref: '#/components/schemas/JsonWebKey'
         500:
           $ref: '#/components/responses/InternalServerError'
+  /jwks/archived:
+    get:
+      tags:
+        - Archived JWK - Archived JSON Web Key (JWK)
+      summary: An archived JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].
+      description: Provides archived JWK used by server.
+      operationId: archived-jwk
+      parameters:
+        - name: kid
+          in: query
+          description: Key ID.
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: JsonWebKey
+                type: object
+                description: JSON Web Key (JWK) - A JSON object that represents a JWK.
+                $ref: '#/components/schemas/JsonWebKey'
+        400:
+          description: Error codes for archived jwk endpoint.
+          content:
+            application/json:
+              schema:
+                title: Error
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - invalid_request
+                  error_description:
+                    type: string
+                  details:
+                    type: string
+        500:
+          $ref: '#/components/responses/InternalServerError'
   /register:
     post:
       tags:
