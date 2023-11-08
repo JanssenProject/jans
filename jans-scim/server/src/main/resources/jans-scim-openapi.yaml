@@ -11,7 +11,7 @@ info:
     name: License
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
 servers:
-- url: https://jenkins-ldap.jans.io/jans-scim/restv1/v2
+- url: https://jans.local.io/jans-scim/restv1/v2
 tags:
 - name: user
   description: Endpoints for management of User resources
