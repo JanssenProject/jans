@@ -16,6 +16,9 @@
 		<httpclient.version>4.5.13</httpclient.version>
 		<jans.version>${project.version}</jans.version>
 	    <saml.version>3.4.6</saml.version>
+	    <keycloak.version>21.1.1</keycloak.version>
+		<keycloak.spi.version>22.0.5</keycloak.spi.version>
+		
 	</properties>
 
 	<dependencies>
@@ -70,32 +73,34 @@
 		
 		<!-- keycloak dependencies -->
 		<dependency>
-			<groupId>
-				org.keycloak</groupId>
+			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-admin-client-jakarta</artifactId>
+			<version>${keycloak.version}</version>
 		</dependency>
 		
 		<dependency>
-			<groupId>
-				org.keycloak</groupId>
+			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-core</artifactId>
+			<version>${keycloak.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>
-				org.keycloak</groupId>
+<!--		<dependency>
+			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-services</artifactId>
+			<version>${keycloak.version}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-server-spi</artifactId>
+			<version>${keycloak.spi.version}</version>
 		</dependency>		
 		
-		<dependency>
+         <dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-server-spi-private</artifactId>
-		</dependency>
+			<version>${keycloak.spi.version}</version>
+		</dependency>-->
 			<!-- end keycloak dependencies-->
 
 		<!-- opensaml -->
