@@ -54,24 +54,18 @@ class JansSamlInstaller(JettyInstaller):
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
         self.config_json_fn = os.path.join(self.templates_folder, 'jans-saml-config.json')
-        self.idp_config_providers_fn = os.path.join(self.templates_folder, 'jans-keycloak-storage-api.properties')
+        self.idp_config_fn = os.path.join(self.templates_folder, 'keycloak.conf')
         self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
 
         # change this when we figure out this
         Config.keycloack_hostname = 'localhost'
 
-        if not base.argsp.shell:
-            self.extract_files()
 
     def install(self):
         """installation steps"""
         self.create_scim_client()
         self.copy_files()
         self.install_keycloack()
-
-    def extract_files(self):
-        base.extract_file(base.current_app.jans_zip, 'jans-keycloak-integration/storage-api/src/main/resources/jans-keycloak-storage-api.properties', self.templates_folder)
-
 
     def render_import_templates(self):
         self.logIt("Preparing base64 encodings configuration files")
@@ -120,7 +114,6 @@ class JansSamlInstaller(JettyInstaller):
 
             self.dbUtils.import_ldif([self.clients_ldif_fn])
 
-        self.renderTemplateInOut(self.idp_config_providers_fn, self.templates_folder, self.idp_config_providers_dir, pystring=True)
 
     def copy_files(self):
         self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
@@ -135,4 +128,5 @@ class JansSamlInstaller(JettyInstaller):
         base.unpack_zip(self.source_files[5][0], self.idp_config_providers_dir)
         self.update_rendering_dict()
         self.render_unit_file()
+        self.renderTemplateInOut(self.idp_config_fn, self.templates_folder, os.path.join(self.idp_config_data_dir, 'conf'))
         self.chown(self.idp_config_data_dir, Config.jetty_user, Config.jetty_group, recursive=True)
