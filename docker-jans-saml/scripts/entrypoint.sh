@@ -28,7 +28,18 @@ export JAVA_OPTS_APPEND="$java_opts"
 
 # shellcheck disable=SC2046
 exec bash /opt/keycloak/bin/kc.sh start \
-    --db=dev-mem \
     -Dlog.base=/opt/keycloak/logs/ \
-    -Djans.config.prop.path=/opt/keycloak/providers
+    -Djans.config.prop.path=/opt/keycloak/providers \
+    --db=dev-mem \
+    --health-enabled=true \
+    --metrics-enabled=true \
+    --http-host="${CN_SAML_HOST}" \
+    --http-port="${CN_SAML_PORT}" \
+    --http-enabled=true \
+    --hostname="localhost" \
+    --hostname-strict-https=false \
+    --log=console \
+    --log-console-format="'jans-saml - %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n'" \
+    --log-file=/opt/keycloak/logs/keycloak.log \
+    --log-level=INFO
     # --optimized

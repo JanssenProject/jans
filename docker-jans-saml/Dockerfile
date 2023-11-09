@@ -43,9 +43,9 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=7b602628ccf96e8b7fd080a6e08ade15daa33a05
+ENV JANS_SOURCE_VERSION=cc9d64f830ac3a07c7dbcbaafe920386e6fdcb7f
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
-ARG JANS_KC_INTEGRATION_RESOURCES_DIR=jans-keycloak-integration/storage-api/src/main/resources
+# ARG JANS_KC_INTEGRATION_RESOURCES_DIR=jans-keycloak-integration/storage-api/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
@@ -53,8 +53,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout add ${JANS_SETUP_DIR} \
-    && git sparse-checkout add ${JANS_KC_INTEGRATION_RESOURCES_DIR}
+    && git sparse-checkout add ${JANS_SETUP_DIR}
 
 RUN mkdir -p /app/static/rdbm \
     /app/schema \
@@ -71,7 +70,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/configuration.ldif /app/templates/jans-saml/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/jans-saml-config.json /app/templates/jans-saml/ \
-    && cp ${JANS_KC_INTEGRATION_RESOURCES_DIR}/jans-keycloak-storage-api.properties /app/templates/jans-saml/
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/keycloak.conf /app/templates/jans-saml/
 
 # ======
 # Python
