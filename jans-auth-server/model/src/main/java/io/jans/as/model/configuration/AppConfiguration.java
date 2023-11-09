@@ -152,6 +152,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Sector Identifier cache lifetime in minutes", defaultValue = "1440")
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
 
+    @DocProperty(description = "Archived JWK lifetime in seconds")
+    private int archivedJwkLifetimeInSeconds;
+
     @DocProperty(description = "UMA Configuration endpoint URL")
     private String umaConfigurationEndpoint;
 
@@ -887,6 +890,14 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
+
+    public int getArchivedJwkLifetimeInSeconds() {
+        return archivedJwkLifetimeInSeconds;
+    }
+
+    public void setArchivedJwkLifetimeInSeconds(int archivedJwkLifetimeInSeconds) {
+        this.archivedJwkLifetimeInSeconds = archivedJwkLifetimeInSeconds;
+    }
 
     public Boolean getDpopJktForceForAuthorizationCode() {
         return dpopJktForceForAuthorizationCode;
