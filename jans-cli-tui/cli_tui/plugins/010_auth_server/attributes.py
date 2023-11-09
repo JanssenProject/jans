@@ -261,7 +261,14 @@ class Attributes(DialogUtils):
             pattern (str, optional): an optional argument for searching attribute.
         """
 
-        async def coroutine():
+        asyncio.ensure_future(self.get_attributes_coroutine(update_container=True))
+
+
+
+    async def get_attributes_coroutine(self,
+            start_index: Optional[int]= 0,
+            pattern: Optional[str]= '',
+            ) -> None:
 
             endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
             if pattern:
@@ -280,11 +287,9 @@ class Attributes(DialogUtils):
             if not 'entriesCount' in data:
                 self.app.show_message(_(common_strings.error), HTML(_("Server reterned unexpected data <i>{}</i>").format(data)), tobefocused=self.app.center_container)
                 return
-
             self.working_container.all_data = data.get('entries', [])
             self.update_working_container(pattern=pattern, data=data)
 
-        asyncio.ensure_future(coroutine())
 
     def search_attributes(self, tbuffer:Buffer) -> None:
         """This method handel the search for Attributes

@@ -79,6 +79,8 @@ class Plugin(DialogUtils):
         """
 
         self.app.create_background_task(self.get_appconfiguration())
+        self.app.create_background_task(self.attributes.get_attributes_coroutine())
+
         self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
 
         if not hasattr(common_data, 'scopes'):

@@ -20,8 +20,6 @@ from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
 from utils.static import DialogResult, cli_style, common_strings
 
-common_data.users = SimpleNamespace()
-
 class Plugin(DialogUtils):
     """This is a general class for plugins 
     """
@@ -43,12 +41,6 @@ class Plugin(DialogUtils):
 
     def process(self) -> None:
         pass
-
-    def on_page_enter(self) -> None:
-        """Function to perform preliminary tasks before this page entered.
-        """
-        # we need claims everywhere
-        self.get_claims()
 
     def set_center_frame(self) -> None:
         """center frame content
@@ -315,21 +307,6 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
-    def get_claims(self) -> None:
-        """This method for getting claims
-        """
-        if hasattr(common_data.users, 'claims') and getattr(common_data, 'claims_retreived', False):
-            return
-        async def coroutine():
-            cli_args = {'operation_id': 'get-attributes', 'endpoint_args':'limit:200,status:active'}
-            self.app.start_progressing(_("Retreiving claims"))
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-            result = response.json()
-            common_data.users.claims = result['entries']
-            common_data.claims_retreived = True
-
-        asyncio.ensure_future(coroutine())
 
     def search_user(self, tbuffer:Buffer) -> None:
         """This method handel the search for Users
