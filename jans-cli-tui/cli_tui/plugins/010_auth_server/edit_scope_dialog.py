@@ -398,7 +398,6 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         def on_text_changed(event):
             search_text = event.text
             matching_items = []
-            search_text = event.text
             for item in attribute_list:
                 if search_text.lower() in item[1].lower():
                     matching_items.append(item)
