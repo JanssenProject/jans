@@ -112,7 +112,7 @@ type OidcClient struct {
 	BackchannelTokenDeliveryMode               string               `schema:"backchannel_token_delivery_mode" json:"backchannelTokenDeliveryMode,omitempty"`
 	BackchannelClientNotificationEndpoint      string               `schema:"backchannel_client_notification_endpoint" json:"backchannelClientNotificationEndpoint,omitempty"`
 	BackchannelAuthenticationRequestSigningAlg string               `schema:"backchannel_authentication_request_signing_alg" json:"backchannelAuthenticationRequestSigningAlg,omitempty"`
-	BackchannelUserCodeParameter               string               `schema:"backchannel_user_code_parameter" json:"backchannelUserCodeParameter,omitempty"`
+	BackchannelUserCodeParameter               bool                 `schema:"backchannel_user_code_parameter" json:"backchannelUserCodeParameter,omitempty"`
 	Description                                string               `schema:"description" json:"description,omitempty"`
 	Organization                               string               `schema:"organization" json:"organization,omitempty"`
 	Groups                                     []string             `schema:"groups" json:"groups,omitempty"`
