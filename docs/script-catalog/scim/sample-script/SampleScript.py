@@ -1,7 +1,15 @@
-# Visit https://www.gluu.org/docs/gluu-server/user-management/scim-scripting/ to learn more
+# Copyright (c) 2022, Janssen Project
+#
+# Author: Gluu
+#    1. Modifying Search Results
+#    2. Segmenting the user base
+#    3. Allow/Deny resource operations
+#    4. Allow/Deny searches
+#
 from io.jans.model.custom.script.type.scim import ScimType
+from io.jans.scim.ws.rs.scim2 import BaseScimWebService
 
-import java
+import json
 
 class ScimEventHandler(ScimType):
 
@@ -9,11 +17,11 @@ class ScimEventHandler(ScimType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, configurationAttributes):
-        print "ScimEventHandler (init): Initialized successfully"
-        return True   
+        print "Custom ScimEventHandler (init): Initialized successfully"
+        return True
 
     def destroy(self, configurationAttributes):
-        print "ScimEventHandler (destroy): Destroyed successfully"
+        print "Custom ScimEventHandler (destroy): Destroyed successfully"
         return True   
 
     def getApiVersion(self):
@@ -22,7 +30,7 @@ class ScimEventHandler(ScimType):
     def createUser(self, user, configurationAttributes):
         return True
 
-    def updateUser(self, user, configurationAttributes):
+    def updateUser(self, user, configur ationAttributes):
         return True
 
     def deleteUser(self, user, configurationAttributes):
@@ -62,19 +70,24 @@ class ScimEventHandler(ScimType):
         return True
         
     def postSearchUsers(self, results, configurationAttributes):
+        
+        print "%d entries returned of %d" % (results.getEntriesCount(), results.getTotalEntriesCount())
+        for user in results.getEntries():
+            print "Flushing addresses for user %s" % user.getUid() 
+            user.setAttribute("jansAddres", None)
+        
         return True
 
     def postSearchGroups(self, results, configurationAttributes):
         return True
-        
-    def allowResourceOperation(self, context, entity, configurationAttributes):
-        return True 
-    
-    def allowSearchOperation(self, context, configurationAttributes):
-        return ""
-    
-    def rejectedResourceOperationResponse(self, context, entity, configurationAttributes):
-        return None       
-    
-    def rejectedSearchOperationResponse(self, context, configurationAttributes):
+
+    def manageResourceOperation(self, context, entity, payload, configurationAttributes):
+        print "manageResourceOperation. SCIM endpoint invoked is %s (HTTP %s)" % (context.getPath(), context.getMethod()) 
         return None
+
+    def manageSearchOperation(self, context, searchRequest, configurationAttributes):
+        print "manageSearchOperation. SCIM endpoint invoked is %s (HTTP %s)" % (context.getPath(), context.getMethod())
+
+        return None
+
+    
