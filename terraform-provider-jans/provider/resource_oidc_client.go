@@ -732,7 +732,7 @@ func resourceOidcClient() *schema.Resource {
 				},
 			},
 			"backchannel_user_code_parameter": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.",
 			},

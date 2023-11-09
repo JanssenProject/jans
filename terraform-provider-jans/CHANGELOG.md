@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.8.1...v0.8.2) (2023-11-09)
+
+
+### Bug Fixes
+
+* oidc backchannel_user_code_parameter schema type 
+
 ## [0.8.1](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.8.0...v0.8.1) (2023-10-26)
 
 
