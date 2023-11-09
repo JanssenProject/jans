@@ -413,13 +413,13 @@ class JansCliApp(Application):
             else:
                 self.cli_object_ok = True
                 self.check_available_plugins()
-                self.create_background_task(background_tasks.get_attributes_coroutine(self))
 
 
     def check_available_plugins(self) -> None:
         """Disables plugins when cli object is ready"""
 
         if self.cli_object_ok:
+            self.create_background_task(background_tasks.get_attributes_coroutine(self))
             response = self.cli_requests({'operation_id': 'get-plugins'})
             if response.ok:
                 plugins = response.json()

@@ -261,7 +261,7 @@ class Attributes(DialogUtils):
             pattern (str, optional): an optional argument for searching attribute.
         """
 
-        asyncio.ensure_future(self.get_attributes_coroutine(update_container=True))
+        asyncio.ensure_future(self.get_attributes_coroutine())
 
 
 
