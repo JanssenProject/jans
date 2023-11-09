@@ -134,9 +134,9 @@ public class IdpConfigurationFactory {
         // load IDP config from DB
         if (!loadIdpConfigFromDb()) {
             log.error("Failed to load IDP configuration from persistence. Please fix it!!!.");
-            throw new ConfigurationException("Failed to load SAML configuration from persistence.");
+            throw new ConfigurationException("Failed to load IDP configuration from persistence.");
         } else {
-            log.error("SAML Configuration loaded successfully - idpLoadedRevision:{}, idpAppConfiguration:{}",
+            log.error("IDP Configuration loaded successfully - idpLoadedRevision:{}, idpAppConfiguration:{}",
                     this.idpLoadedRevision, getIdpAppConfiguration());
         }
 
@@ -232,7 +232,7 @@ public class IdpConfigurationFactory {
             return false;
         }
 
-        log.debug("Saml Config - DB revision: {}, server revision: {}", idpConf.getRevision(), idpLoadedRevision);
+        log.debug("IDP Config - DB revision: {}, server revision: {}", idpConf.getRevision(), idpLoadedRevision);
         return idpConf.getRevision() > this.idpLoadedRevision;
     }
 

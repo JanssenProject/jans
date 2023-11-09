@@ -1,6 +1,6 @@
 {
   "applicationName":"idp",
-  "trustedIdpDn":"ou=trustedIdp,o=jans",
+  "trustedIdpDn":"ou=trusted-idp,o=jans",
   "enabled": "${idp_enabled}",
   "serverUrl":"https://%(server_url)",
   "realm": "${realm}",

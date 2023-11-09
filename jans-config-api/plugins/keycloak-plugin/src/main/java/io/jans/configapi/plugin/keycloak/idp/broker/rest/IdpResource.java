@@ -84,17 +84,18 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "201", description = "Newly created TrustKeycloak realm", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = IdentityProviderRepresentation.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @POST
     @Path(Constants.UPLOAD_PATH)
     @ProtectedApi(scopes = { Constants.KC_SAML_IDP_WRITE_ACCESS })
-    public Response createKcSamlIdentityProvider(@Valid BrokerIdentityProviderForm brokerIdentityProviderForm)
-            throws IOException, JsonPatchException {
-        log.debug("Create brokerIdentityProviderForm:{}", brokerIdentityProviderForm);
+    public Response createKcSamlIdentityProvider(@MultipartForm BrokerIdentityProviderForm brokerIdentityProviderForm)
+            throws IOException {
+        log.info("Create brokerIdentityProviderForm:{}", brokerIdentityProviderForm);
 
         checkResourceNotNull(brokerIdentityProviderForm, SAML_IDP_DATA_FORM);
 
         IdentityProvider idp = brokerIdentityProviderForm.getIdentityProvider();
-        log.debug(" Create idp:{} ", idp);
+        log.info(" Create idp:{} ", idp);
         
         //validation
         checkResourceNotNull(idp, SAML_IDP_DATA);
@@ -103,7 +104,7 @@ public class IdpResource extends BaseResource {
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
         log.debug(" Create metaDataFile:{} ", metaDataFile);
         if (metaDataFile != null) {
-            log.debug(" IDP metaDataFile.available():{}", metaDataFile.available());
+            log.info(" IDP metaDataFile.available():{}", metaDataFile.available());
         }
 
         idp = idpService.createIdentityProvider(idp, metaDataFile);

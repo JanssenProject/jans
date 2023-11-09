@@ -11,10 +11,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.model.GluuStatus;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 import io.jans.configapi.core.model.ValidationStatus;
 import io.swagger.v3.oas.annotations.Hidden;
+
 
 import java.util.Collections;
 import java.util.List;
@@ -113,6 +115,7 @@ public class IdentityProvider extends Entry implements Serializable {
     @AttributeName(name = "jansValidationLog")
     private List<String> validationLog;
     
+    @JsonObject
     @AttributeName(name = "jansSAMLidpConfDyn")
     Map<String, String> config = new HashMap<>();
 

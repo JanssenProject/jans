@@ -47,9 +47,6 @@
 		<jackson.version>2.13.4</jackson.version>
 		<jackson.databind.version>2.13.4.2</jackson.databind.version>
 		<json.version>20230227</json.version>
-		
-		<keycloak.version>21.1.1</keycloak.version>
-		<mapstruct.version>1.5.3.Final</mapstruct.version>
 
 		<log4j.version>2.19.0</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
@@ -814,39 +811,6 @@
 				<artifactId>aws-java-sdk-sns</artifactId>
 				<version>${aws.sns.version}</version>
 			</dependency>
-			
-		   <!-- keycloak dependencies -->
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-core</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-admin-client-jakarta</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-services</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-server-spi</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>		
-		
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-server-spi-private</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-		
-		<!-- end keycloak dependencies-->
 
 			<!-- Other -->
 			<dependency>
@@ -957,13 +921,6 @@
 				<version>9.4.49.v20220914</version>
 				<scope>provided</scope>
 			</dependency>
-			
-			<!-- mapstruct-->
-			<dependency>
-                <groupId>org.mapstruct</groupId>
-                <artifactId>mapstruct</artifactId>
-                <version>${mapstruct.version}</version>
-            </dependency>
 
 			<!--Can be removed once TestNG dependency contains JCommander 1.74 or 
 				newer -->
