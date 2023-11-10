@@ -16,6 +16,8 @@ orgName: Janssen
 state: TX
 # -- Persistence backend to run Janssen with couchbase|hybrid|sql|spanner.
 cnPersistenceType: sql
+# -- Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value.
+salt: ""
 configmap:
   # -- Jetty header size in bytes in the auth server
   cnJettyRequestHeaderSize: 8192

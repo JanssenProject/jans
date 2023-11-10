@@ -96,6 +96,7 @@ Kubernetes: `>=v1.22.0-0`
 | resources.limits.memory | string | `"300Mi"` | Memory limit. |
 | resources.requests.cpu | string | `"300m"` | CPU request. |
 | resources.requests.memory | string | `"300Mi"` | Memory request. |
+| salt | string | `""` | Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value. |
 | state | string | `"TX"` | State code. Used for certificate creation. |
 | usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service. |
 | usrEnvs.normal | object | `{}` | Add custom normal envs to the service. variable1: value1 |
