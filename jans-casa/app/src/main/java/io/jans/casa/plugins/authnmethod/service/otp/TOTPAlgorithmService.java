@@ -50,7 +50,7 @@ public class TOTPAlgorithmService implements IOTPAlgorithm {
         String secretKeyBase32 = BaseEncoding.base32().omitPadding().encode(secretKey);
         OTPKey otpKey = new OTPKey(secretKeyBase32, OTPType.TOTP);
 
-        OTPAuthURIBuilder uribe = OTPAuthURIBuilder.fromKey(otpKey).label(displayName);
+        OTPAuthURIBuilder uribe = OTPAuthURIBuilder.fromKey(otpKey).label(displayName.replace(':', ' '));
         uribe = uribe.issuer(issuer).digits(conf.getDigits());
         uribe = uribe.timeStep(TimeUnit.SECONDS.toMillis(conf.getTimeStep()));
 
