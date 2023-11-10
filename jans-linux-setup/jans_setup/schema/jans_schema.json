@@ -3471,17 +3471,17 @@
       "x_origin": "Jans created attribute"
     },
     {
-		"desc": "SAML Trust Relationship file location of metadata",
-		"equality": "caseIgnoreMatch",
-		"names": [
-			"jansSAMLspMetaDataFN"
-		],
-		"oid": "jansAttr",
-		"substr": "caseIgnoreSubstringsMatch",
-		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-		"x_origin": "Jans created attribute"
-	},
-	{
+        "desc": "SAML Trust Relationship file location of metadata",
+        "equality": "caseIgnoreMatch",
+        "names": [
+            "jansSAMLspMetaDataFN"
+        ],
+        "oid": "jansAttr",
+        "substr": "caseIgnoreSubstringsMatch",
+        "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+        "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "Provider Id",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3492,7 +3492,7 @@
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
-	{
+    {
       "desc": "Realm Name",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3544,7 +3544,7 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "If true, users cannot log in through this provider. They can only link to this provider. This is useful if you don't want to allow login from the provider, but want to integrate with a provider",
+      "desc": "If true, users cannot log in through this provider. They can only link to this provider. This is useful if you don´t want to allow login from the provider, but want to integrate with a provider",
       "equality": "booleanMatch",
       "names": [
         "linkOnly"
@@ -3553,8 +3553,8 @@
       "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
       "x_origin": "Jans created attribute"
     },
-	{
-      "desc": "Alias of authentication flow, which is triggered after first login with this identity provider. Term 'First Login' means that no Keycloak account is currently linked to the authenticated identity provider account.",
+    {
+      "desc": "Alias of authentication flow, which is triggered after first login with this identity provider. Term ´First Login´ means that no Keycloak account is currently linked to the authenticated identity provider account.",
       "equality": "caseIgnoreMatch",
       "names": [
         "firstBrokerLoginFlowAlias"
@@ -3564,7 +3564,7 @@
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
-	{
+    {
       "desc": "Alias of authentication flow, which is triggered after each login with this identity provider. Useful if you want additional verification of each user authenticated with this identity provider (for example OTP). Leave this to None if you need no any additional authenticators to be triggered after login with this identity provider. Also note that authenticator implementations must assume that user is already set in ClientSession as identity provider already set it.",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3576,16 +3576,16 @@
       "x_origin": "Jans created attribute"
     },
     {
-		"desc": "SAML Trusted IDP file location of metadata",
-		"equality": "caseIgnoreMatch",
-		"names": [
-			"jansSAMLidpMetaDataFN"
-		],
-		"oid": "jansAttr",
-		"substr": "caseIgnoreSubstringsMatch",
-		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-		"x_origin": "Jans created attribute"
-	},
+        "desc": "SAML Trusted IDP file location of metadata",
+        "equality": "caseIgnoreMatch",
+        "names": [
+            "jansSAMLidpMetaDataFN"
+        ],
+        "oid": "jansAttr",
+        "substr": "caseIgnoreSubstringsMatch",
+        "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+        "x_origin": "Jans created attribute"
+    },
     {
       "desc": "SAML Trusted IDP URI location of metadata",
       "equality": "caseIgnoreMatch",
@@ -4822,7 +4822,7 @@
       "kind": "STRUCTURAL",
       "may": [
         "inum",
-		"owner",
+        "owner",
         "jansClntId",
         "displayName",
         "description",
@@ -4838,10 +4838,10 @@
         "jansRedirectURI",
         "jansWebOrigins",
         "consentRequired",
-		"jansSAMLMetaDataFilter",
+        "jansSAMLMetaDataFilter",
         "jansSAMLspMetaDataSourceTyp",
-		"jansSAMLspMetaDataFN",
-		"jansSAMLspMetaDataURL",
+        "jansSAMLspMetaDataFN",
+        "jansSAMLspMetaDataURL",
         "jansMetaLocation",
         "jansIsFed",
         "jansEntityId",
@@ -4850,10 +4850,10 @@
         "jansReleasedAttr",
         "url",
         "jansPostLogoutRedirectURI",
-        "protocol",		
+        "protocol",        
         "jansStatus",
         "jansValidationStatus",
-		"jansValidationLog"
+        "jansValidationLog"
       ],
       "must": [
         "objectclass"
@@ -4871,22 +4871,22 @@
       "kind": "STRUCTURAL",
       "may": [
         "inum",
-		"creatorId",
-		"name",
+        "creatorId",
+        "name",
         "displayName",
         "description",
-		"realm",
-		"jansEnabled",
-		"providerId",
-		"trustEmail",
-		"storeToken",		
+        "realm",
+        "jansEnabled",
+        "providerId",
+        "trustEmail",
+        "storeToken",
         "addReadTokenRoleOnCreate",
         "authenticateByDefault",
         "linkOnly",
         "firstBrokerLoginFlowAlias",
         "postBrokerLoginFlowAlias",
-		"jansSAMLspMetaDataFN",
-		"jansSAMLspMetaDataURL",
+        "jansSAMLspMetaDataFN",
+        "jansSAMLspMetaDataURL",
         "jansSAMLspMetaLocation",
         "jansSAMLidpMetaDataFN",
         "jansSAMLidpMetaDataURL",
@@ -4894,7 +4894,7 @@
         "jansStatus",
         "jansValidationStatus",
         "jansValidationLog",
-		"jansSAMLidpConfDyn"		
+        "jansSAMLidpConfDyn"
       ],
       "must": [
         "objectclass"
