@@ -29,7 +29,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # Casa
 # ====
 
-ENV CN_VERSION=1.0.20
+ENV CN_VERSION=1.0.21-SNAPSHOT
 ENV CN_BUILD_DATE='2023-10-11 10:33'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
@@ -211,7 +211,7 @@ EXPOSE $CN_CASA_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/casa" \
     org.opencontainers.image.authors="Gluu Inc. <support@gluu.org>" \
     org.opencontainers.image.vendor="Gluu Federation" \
-    org.opencontainers.image.version="1.0.20" \
+    org.opencontainers.image.version="1.0.21" \
     org.opencontainers.image.title="Janssen Casa" \
     org.opencontainers.image.description="Self-service portal for people to manage their account security preferences in the Janssen, like 2FA"
 
