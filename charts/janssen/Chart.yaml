@@ -1,7 +1,7 @@
 kubeVersion: ">=v1.22.0-0"
 annotations:
   artifacthub.io/changes: |
-    - 1.0.20 official chart release
+    - 1.0.21 dev chart release
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: auth-server
