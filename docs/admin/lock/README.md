@@ -51,3 +51,10 @@ control course grain authorization in an API gateway, fine grain authorization
 in First Party API code, and the issuance of access token scopes.
 
 ![Jans Lock sample toplogy](../../assets/lock-design-diagram-00.png)
+
+This authorization model is also useful for East-West service mesh authorization
+because it avoids the "hairpin" inefficiency of routing all traffic through
+and API gateway (which is better for North-South web ingress). TLS is required
+to protect the bearer token. MTLS is even better.
+
+![Jans Lock sample toplogy](../../assets/lock-east-west-service-mesh-diagram.png)
