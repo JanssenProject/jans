@@ -4,17 +4,17 @@
 
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
-ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:1.0.20_dev
-ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:1.0.20_dev
-ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:1.0.20_dev
-ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:1.0.20_dev
-ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:1.0.20_dev
-ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:1.0.20_dev
-ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:1.0.20_dev
-ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:1.0.20_dev
+ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:1.0.21-SNAPSHOT_dev
+ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:1.0.21-SNAPSHOT_dev
+ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:1.0.21-SNAPSHOT_dev
+ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:1.0.21-SNAPSHOT_dev
+ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:1.0.21-SNAPSHOT_dev
+ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:1.0.21-SNAPSHOT_dev
+ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:1.0.21-SNAPSHOT_dev
+ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:1.0.21-SNAPSHOT_dev
 
 # original Janssen version
-ARG CN_VERSION=1.0.20
+ARG CN_VERSION=1.0.21-SNAPSHOT
 
 # -----------
 # base images
@@ -181,7 +181,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.20" \
+    org.opencontainers.image.version="1.0.21" \
     org.opencontainers.image.title="Janssen All-in-One" \
     org.opencontainers.image.description=""
 
