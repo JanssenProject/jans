@@ -109,6 +109,7 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(AUTHORIZATION_CHALLENGE_ENDPOINT, appConfiguration.getAuthorizationChallengeEndpoint());
             jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
             jsonObj.put(JWKS_URI, appConfiguration.getJwksUri());
+            jsonObj.put(ARCHIVED_JWKS_URI, appConfiguration.getArchivedJwksUri());
             jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
 
             if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN))

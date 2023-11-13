@@ -6,26 +6,17 @@
 
 package io.jans.as.server.service;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.slf4j.Logger;
-
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
-
+import io.jans.as.common.model.common.ArchivedJwk;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
+import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.persistence.model.Scope;
-import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.as.server.uma.service.UmaPctService;
@@ -46,6 +37,14 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.slf4j.Logger;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -193,6 +192,7 @@ public class CleanerTimer {
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getScopes(), Scope.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getSessions(), SessionId.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPar(), Par.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getArchivedJwks(), ArchivedJwk.class);
 
         return cleanServiceBaseDns;
     }

@@ -4012,6 +4012,28 @@
     {
       "kind": "STRUCTURAL",
       "may": [
+        "jansId",
+        "creationDate",
+        "exp",
+        "del",
+        "jansData",
+        "attr"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansArchJwk"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
         "displayName",
         "inum",
         "owner",
