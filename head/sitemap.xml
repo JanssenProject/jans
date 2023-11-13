@@ -96,6 +96,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/auth-server/endpoints/archived-jwks-uri/</loc>
+         <lastmod>2023-11-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/authorization-challenge/</loc>
          <lastmod>2023-11-13</lastmod>
          <changefreq>daily</changefreq>
