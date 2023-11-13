@@ -499,7 +499,7 @@ public class SqlFilterConverter {
 					String columnType = attributeType.getType();
 					java.sql.JDBCType jdbcType = java.sql.JDBCType.valueOf(StringHelper.toUpperCase(columnType));
 	
-					if (jdbcType == java.sql.JDBCType.SMALLINT) {
+					if ((jdbcType == java.sql.JDBCType.SMALLINT) || (jdbcType == java.sql.JDBCType.BOOLEAN)) {
 						if (StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1")) {
 							assertionValue = 1;
 						}
