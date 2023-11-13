@@ -82,6 +82,7 @@ from cli_style import style
 from utils.multi_lang import _
 from utils.static import cli_style, common_strings
 from utils.validators import IntegerValidator
+from utils import background_tasks
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
@@ -418,6 +419,7 @@ class JansCliApp(Application):
         """Disables plugins when cli object is ready"""
 
         if self.cli_object_ok:
+            self.create_background_task(background_tasks.get_attributes_coroutine(self))
             response = self.cli_requests({'operation_id': 'get-plugins'})
             if response.ok:
                 plugins = response.json()
