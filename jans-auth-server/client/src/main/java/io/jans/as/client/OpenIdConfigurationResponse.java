@@ -36,6 +36,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String checkSessionIFrame;
     private String endSessionEndpoint;
     private String jwksUri;
+    private String archivedJwksUri;
     private String registrationEndpoint;
     private String introspectionEndpoint;
     private String parEndpoint;
@@ -375,6 +376,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setJwksUri(String jwksUri) {
         this.jwksUri = jwksUri;
+    }
+
+    /**
+     * Gets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @return The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public String getArchivedJwksUri() {
+        return archivedJwksUri;
+    }
+
+    /**
+     * Sets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @param archivedJwksUri The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public void setArchivedJwksUri(String archivedJwksUri) {
+        this.archivedJwksUri = archivedJwksUri;
     }
 
     /**
@@ -1229,6 +1248,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", checkSessionIFrame='" + checkSessionIFrame + '\'' +
                 ", endSessionEndpoint='" + endSessionEndpoint + '\'' +
                 ", jwksUri='" + jwksUri + '\'' +
+                ", archivedJwksUri='" + archivedJwksUri + '\'' +
                 ", registrationEndpoint='" + registrationEndpoint + '\'' +
                 ", introspectionEndpoint='" + introspectionEndpoint + '\'' +
                 ", deviceAuthzEndpoint='" + deviceAuthzEndpoint + '\'' +

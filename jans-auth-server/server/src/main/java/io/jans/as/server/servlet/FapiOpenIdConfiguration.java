@@ -206,6 +206,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
             jsonObj.put(END_SESSION_ENDPOINT, appConfiguration.getEndSessionEndpoint());
             jsonObj.put(JWKS_URI, appConfiguration.getJwksUri());
+            jsonObj.put(ARCHIVED_JWKS_URI, appConfiguration.getArchivedJwksUri());
             jsonObj.put(REGISTRATION_ENDPOINT, appConfiguration.getRegistrationEndpoint());
             jsonObj.put(ID_GENERATION_ENDPOINT, appConfiguration.getIdGenerationEndpoint());
             jsonObj.put(INTROSPECTION_ENDPOINT, appConfiguration.getIntrospectionEndpoint());

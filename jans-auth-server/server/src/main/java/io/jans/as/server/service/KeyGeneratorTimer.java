@@ -12,6 +12,7 @@ import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.server.jwk.ws.rs.ArchivedJwksService;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.service.cdi.event.KeyGenerationEvent;
 import io.jans.as.server.util.ServerUtil;
@@ -20,23 +21,21 @@ import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static io.jans.as.model.jwk.JWKParameter.EXPIRATION_TIME;
-import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
-import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
+import static io.jans.as.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
@@ -65,6 +64,9 @@ public class KeyGeneratorTimer {
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
+
+    @Inject
+    private ArchivedJwksService archivedJwksService;
 
     private AtomicBoolean isActive;
     private long lastFinishedTime;
@@ -135,6 +137,7 @@ public class KeyGeneratorTimer {
 
         JSONObject jwks = conf.getWebKeys().toJSONObject();
         JSONObject updatedJwks = updateKeys(jwks);
+        archivedJwksService.archiveRemovedKeys(jwks, updatedJwks);
 
         conf.setWebKeys(ServerUtil.createJsonMapper().readValue(updatedJwks.toString(), WebKeysConfiguration.class));
 
@@ -143,8 +146,8 @@ public class KeyGeneratorTimer {
         ldapEntryManager.merge(conf);
 
         log.info("Updated JWKS successfully");
-        log.trace("JWKS keys: " + conf.getWebKeys().getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
-        log.trace("KeyStore keys: " + cryptoProvider.getKeys());
+        log.trace("JWKS keys: {}", conf.getWebKeys().getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
+        log.trace("KeyStore keys: {}", cryptoProvider.getKeys());
     }
 
     private JSONObject updateKeys(JSONObject jwks) throws Exception {
@@ -182,5 +185,4 @@ public class KeyGeneratorTimer {
 
         return jsonObject;
     }
-
 }

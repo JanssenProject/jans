@@ -68,6 +68,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP")
     private String jwksUri;
 
+    @DocProperty(description = "URL of the OP's Archived JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP")
+    private String archivedJwksUri;
+
     @DocProperty(description = "Registration endpoint URL")
     private String registrationEndpoint;
 
@@ -148,6 +151,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Sector Identifier cache lifetime in minutes", defaultValue = "1440")
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
+
+    @DocProperty(description = "Archived JWK lifetime in seconds")
+    private int archivedJwkLifetimeInSeconds;
 
     @DocProperty(description = "UMA Configuration endpoint URL")
     private String umaConfigurationEndpoint;
@@ -884,6 +890,14 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
+
+    public int getArchivedJwkLifetimeInSeconds() {
+        return archivedJwkLifetimeInSeconds;
+    }
+
+    public void setArchivedJwkLifetimeInSeconds(int archivedJwkLifetimeInSeconds) {
+        this.archivedJwkLifetimeInSeconds = archivedJwkLifetimeInSeconds;
+    }
 
     public Boolean getDpopJktForceForAuthorizationCode() {
         return dpopJktForceForAuthorizationCode;
@@ -1734,6 +1748,24 @@ public class AppConfiguration implements Configuration {
      */
     public void setJwksUri(String jwksUri) {
         this.jwksUri = jwksUri;
+    }
+
+    /**
+     * Gets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @return The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public String getArchivedJwksUri() {
+        return archivedJwksUri;
+    }
+
+    /**
+     * Sets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @param archivedJwksUri The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public void setArchivedJwksUri(String archivedJwksUri) {
+        this.archivedJwksUri = archivedJwksUri;
     }
 
     /**
