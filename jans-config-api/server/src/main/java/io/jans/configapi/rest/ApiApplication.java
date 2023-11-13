@@ -28,9 +28,10 @@ import jakarta.ws.rs.core.Application;
  *
  */
 @ApplicationPath("/api/v1")
-@OpenAPIDefinition(info = @Info(title = "Jans Config API", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
+@OpenAPIDefinition(info = @Info(title = "Jans Config API", contact =
+@Contact(name = "Contact", url = "https://github.com/JanssenProject/jans/discussions"),
 
-        license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
+        license = @License(name = "License", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
 
         tags = { @Tag(name = "Attribute"), @Tag(name = "Default Authentication Method"),
                 @Tag(name = "Cache Configuration"), @Tag(name = "Cache Configuration – Memcached"),
@@ -46,7 +47,7 @@ import jakarta.ws.rs.core.Application;
                 @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins"),
                 @Tag(name = "Configuration – Config API"), @Tag(name = "Client Authorization")},
 
-        servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
+        servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
         @OAuthScope(name = ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS, description = "View Auth Server properties related information"),
