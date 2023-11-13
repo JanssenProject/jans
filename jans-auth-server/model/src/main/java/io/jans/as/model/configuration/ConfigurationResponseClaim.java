@@ -26,6 +26,7 @@ public final class ConfigurationResponseClaim {
     public static final String CHECK_SESSION_IFRAME = "check_session_iframe";
     public static final String END_SESSION_ENDPOINT = "end_session_endpoint";
     public static final String JWKS_URI = "jwks_uri";
+    public static final String ARCHIVED_JWKS_URI = "archived_jwks_uri";
     public static final String REGISTRATION_ENDPOINT = "registration_endpoint";
     public static final String ID_GENERATION_ENDPOINT = "id_generation_endpoint";
     public static final String INTROSPECTION_ENDPOINT = "introspection_endpoint";
