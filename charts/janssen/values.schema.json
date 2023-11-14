@@ -32,6 +32,11 @@
           "type": "string",
           "pattern": "^[a-zA-Z]+$"
         },
+        "salt": {
+          "description": "Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value.",
+          "type": "string",
+          "pattern": "^(?:[a-zA-Z0-9]{24})?$"
+        },
         "configmap": {
           "description": "Configuration parameters mapped to envs in a ConfigMap",
           "type": "object",

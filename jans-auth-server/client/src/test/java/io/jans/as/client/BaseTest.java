@@ -99,6 +99,7 @@ public abstract class BaseTest {
     protected String checkSessionIFrame;
     protected String endSessionEndpoint;
     protected String jwksUri;
+    protected String archivedJwksUri;
     protected String registrationEndpoint;
     protected String configurationEndpoint;
     protected String introspectionEndpoint;
@@ -356,6 +357,14 @@ public abstract class BaseTest {
 
     public void setJwksUri(String jwksUri) {
         this.jwksUri = jwksUri;
+    }
+
+    public String getArchivedJwksUri() {
+        return archivedJwksUri;
+    }
+
+    public void setArchivedJwksUri(String archivedJwksUri) {
+        this.archivedJwksUri = archivedJwksUri;
     }
 
     public String getRegistrationEndpoint() {
@@ -988,6 +997,7 @@ public abstract class BaseTest {
             checkSessionIFrame = response.getCheckSessionIFrame();
             endSessionEndpoint = response.getEndSessionEndpoint();
             jwksUri = response.getJwksUri();
+            archivedJwksUri = response.getArchivedJwksUri();
             registrationEndpoint = response.getRegistrationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
             parEndpoint = response.getParEndpoint();
@@ -1010,6 +1020,7 @@ public abstract class BaseTest {
             checkSessionIFrame = context.getCurrentXmlTest().getParameter("checkSessionIFrame");
             endSessionEndpoint = context.getCurrentXmlTest().getParameter("endSessionEndpoint");
             jwksUri = context.getCurrentXmlTest().getParameter("jwksUri");
+            archivedJwksUri = context.getCurrentXmlTest().getParameter("archivedJwksUri");
             registrationEndpoint = context.getCurrentXmlTest().getParameter("registrationEndpoint");
             configurationEndpoint = context.getCurrentXmlTest().getParameter("configurationEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");

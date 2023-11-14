@@ -16,6 +16,8 @@ orgName: Janssen
 state: TX
 # -- Persistence backend to run Janssen with couchbase|hybrid|sql|spanner.
 cnPersistenceType: sql
+# -- Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value.
+salt: ""
 configmap:
   # -- Jetty header size in bytes in the auth server
   cnJettyRequestHeaderSize: 8192
@@ -208,7 +210,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.20-1
+    tag: 1.0.21_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -592,7 +594,7 @@ image:
   # -- Image  to use for deploying.
   repository: ghcr.io/janssenproject/jans/all-in-one
   # -- Image  tag to use for deploying.
-  tag: 1.0.20-1
+  tag: 1.0.21_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.

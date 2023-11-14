@@ -6,16 +6,16 @@ info:
   title: Janssen Authorization Server
   description: Janssen Authorization Server - OAuth 2.0 server; OpenID Connect Provider (OP) & UMA Authorization Server (AS)
   contact:
-    email: yuriyz@gluu.org
+    name: Contact
+    url: https://github.com/JanssenProject/jans/discussions
   license:
     name: License
-    url: https://github.com/JanssenProject/jans/jans-auth-server/blob/master/LICENSE
-  version: "5.0"
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
 servers:
   - url: https://jans.local.io/jans-auth
 tags:
-  - name: developers
-    description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint. Server is tightly coupled with Gluu Admin UI.
+  - name: About
+    description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint.
 
 paths:
   /authorization_challenge:
@@ -906,12 +906,12 @@ paths:
                     type: string
                   details:
                     type: string
-  /.well-known/gluu-configuration:
+  /.well-known/openid-configuration:
     post:
       tags:
         - Server Configuration
-      summary:  Gets GluuServer configuration data that contains non-standard OpenID Connect discovery metadata.
-      description: Gets GluuServer configuration data that contains non-standard OpenID Connect discovery metadata.
+      summary:  Gets Janssen Server configuration data that contains non-standard OpenID Connect discovery metadata.
+      description: Gets Janssen Server configuration data that contains non-standard OpenID Connect discovery metadata.
       operationId: well-known-gluu-configuration
       responses:
         200:
@@ -1225,6 +1225,51 @@ paths:
                     description: List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.
                     items:
                       $ref: '#/components/schemas/JsonWebKey'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jwks/archived:
+    get:
+      tags:
+        - Archived JWK - Archived JSON Web Key (JWK)
+      summary: An archived JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].
+      description: Provides archived JWK used by server.
+      operationId: archived-jwk
+      parameters:
+        - name: kid
+          in: query
+          description: Key ID.
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: JsonWebKey
+                type: object
+                description: JSON Web Key (JWK) - A JSON object that represents a JWK.
+                $ref: '#/components/schemas/JsonWebKey'
+        400:
+          description: Error codes for archived jwk endpoint.
+          content:
+            application/json:
+              schema:
+                title: Error
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - invalid_request
+                  error_description:
+                    type: string
+                  details:
+                    type: string
         500:
           $ref: '#/components/responses/InternalServerError'
   /register:
@@ -2902,7 +2947,7 @@ paths:
                     example: https://sample.com
                   authorization_endpoint:
                     type: string
-                    description: "URL of the authorization server's authorization endpoint.
+                    description: "URL of the authorization server's authorization endpoint."
                     example: https://sample.com/jans-auth/restv1/authorize
                   token_endpoint:
                     type: string
