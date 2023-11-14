@@ -2,15 +2,13 @@ openapi: 3.0.1
 info:
   title: Jans Config API
   contact:
-    name: Gluu Support
-    url: https://support.gluu.org
-    email: xxx@gluu.org
+    name: Contact
+    url: https://github.com/JanssenProject/jans/discussions
   license:
-    name: Apache 2.0
+    name: License
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
-  version: 1.0.0
 servers:
-- url: https://jans.io/
+- url: https://jans.local.io
   description: The Jans server
   variables: {}
 tags:
@@ -7588,19 +7586,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
         userCanView:
-          type: boolean
-        adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
         userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
