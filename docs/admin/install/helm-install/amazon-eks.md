@@ -52,9 +52,11 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
     ```
     You can adjust `node-type` and `nodes` number as per your desired cluster size
 
-6.  Install [Helm3](https://helm.sh/docs/intro/install/)
+6. To be able to attach volumes to your pod, you need to install the Amazon [EBS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html)
 
-7.  Create `jans` namespace where our resources will reside
+7.  Install [Helm3](https://helm.sh/docs/intro/install/)
+
+8.  Create `jans` namespace where our resources will reside
     ```
     kubectl create namespace jans
     ```
@@ -98,7 +100,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
         ```yaml
         global:
             isFqdnRegistered: true
-            fqdn: demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+            fqdn: demoexample.jans.io #CHANGE-THIS to the FQDN used for Jans
         config:
             configmap:
                 lbAddr: http:// #Add LB address from previous command
@@ -107,11 +109,11 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
               enabled: true
               path: /
               hosts:
-              - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+              - demoexample.jans.io #CHANGE-THIS to the FQDN used for Jans
               tls:
               - secretName: tls-certificate
                 hosts:
-                - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+                - demoexample.jans.io #CHANGE-THIS to the FQDN used for Jans
         ```
 
 
@@ -121,6 +123,18 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
     -  LDAP/Opendj for persistence storage
 
+          Prepare cert and key for OpenDJ, for example:
+
+          ```
+          openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes -keyout opendj.key -out opendj.crt -subj '/CN=demoexample.jans.io' -addext 'subjectAltName=DNS:ldap,DNS:opendj'
+          ```
+
+          Extract the contents of OpenDJ cert and key files as base64 string:
+
+          ```
+          OPENDJ_CERT_B64=$(base64 opendj.crt -w0)
+          OPENDJ_KEY_B64=$(base64 opendj.key -w0)
+          ```
 
           Add the following yaml snippet to your `override.yaml` file:
           ```yaml
@@ -130,6 +144,12 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
               provisioner: kubernetes.io/aws-ebs
             opendj:
               enabled: true
+          config:
+            configmap:
+              # -- contents of OpenDJ cert file in base64-string
+              cnLdapCrt: <OPENDJ_CERT_B64>
+              # -- contents of OpenDJ key file in base64-string
+              cnLdapKey: <OPENDJ_KEY_B64>
           ```
 
           So if your desired configuration has no-FQDN and LDAP, the final `override.yaml` file will look something like that:
@@ -143,17 +163,21 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
              opendj:
                enabled: true
            config:
-            configmap:
-                lbAddr: http:// #Add LB address from previous command
+             configmap:
+               lbAddr: http:// #Add LB address from previous command
+               # -- contents of OpenDJ cert file in base64-string
+               cnLdapCrt: <OPENDJ_CERT_B64>
+               # -- contents of OpenDJ key file in base64-string
+               cnLdapKey: <OPENDJ_KEY_B64>
            nginx-ingress:
-            ingress:
-                path: /
-                hosts:
-                - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
-                tls:
-                - secretName: tls-certificate
-                  hosts:
-                  - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans          
+             ingress:
+               path: /
+               hosts:
+               - demoexample.jans.io #CHANGE-THIS to the FQDN used for Jans
+               tls:
+               - secretName: tls-certificate
+                 hosts:
+                 - demoexample.jans.io #CHANGE-THIS to the FQDN used for Jans          
           ```
 
 
@@ -186,7 +210,32 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
             cnCouchbaseUser: janssen
         ```
 
+      - PostgreSQL for persistence storage
 
+        In a production environment, a production grade PostgreSQL server should be used such as `Amazon RDS`
+
+        For testing purposes, you can deploy it on the EKS cluster using the following command:
+
+        ```
+        helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/postgresql
+        ```
+
+        Add the following yaml snippet to your `override.yaml` file:
+        
+        ```yaml
+        
+        global:
+          cnPersistenceType: sql
+        config:
+          configmap:
+            cnSqlDbName: jans
+            cnSqlDbPort: 5432
+            cnSqlDbDialect: pgsql
+            cnSqlDbHost: my-release-mysql.jans.svc
+            cnSqlDbUser: postgres
+            cnSqlDbTimezone: UTC
+            cnSqldbUserPassword: Test1234#
+        ```
 
     - MySQL for persistence storage
 
@@ -195,8 +244,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
         For testing purposes, you can deploy it on the EKS cluster using the following commands:
 
         ```
-        helm repo add bitnami https://charts.bitnami.com/bitnami
-        helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans
+        helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/mysql        
         ```
 
         Add the following yaml snippet to your `override.yaml` file:
@@ -222,16 +270,16 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
         global:
           cnPersistenceType: sql
           isFqdnRegistered: true
-          fqdn: demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+          fqdn: demoexample.jans.io #CHANGE-THIS to the FQDN used for Jans
         nginx-ingress:
           ingress:
               path: /
               hosts:
-              - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+              - demoexample.jans.io #CHANGE-THIS to the FQDN used for Jans
               tls:
               - secretName: tls-certificate
                 hosts:
-                - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans  
+                - demoexample.jans.io #CHANGE-THIS to the FQDN used for Jans  
         config:
           configmap:
             lbAddr: http:// #Add LB address from previous command
@@ -255,3 +303,6 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
       helm repo update
       helm install janssen janssen/janssen -n jans -f override.yaml
       ```
+
+## Configure Janssen
+  You can use the [TUI](../../kubernetes-ops/tui-k8s.md) to configure Janssen components. The TUI calls the Config API to perform ad hoc configuration.

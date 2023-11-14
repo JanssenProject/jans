@@ -83,6 +83,7 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_URI.toString(), client.getClientUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, POLICY_URI.toString(), client.getPolicyUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TOS_URI.toString(), client.getTosUri());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, ORG_ID.toString(), client.getOrganization());
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_NAME.toString(), client.getClientNameLocalized());
         Util.addToJSONObjectIfNotNull(responseJsonObject, LOGO_URI.toString(), client.getLogoUriLocalized());
@@ -108,6 +109,9 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_SIGNED_RESPONSE_ALG.toString(), client.getUserInfoSignedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), client.getUserInfoEncryptedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), client.getUserInfoEncryptedResponseEnc());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, INTROSPECTION_SIGNED_RESPONSE_ALG.toString(), client.getAttributes().getIntrospectionSignedResponseAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, INTROSPECTION_ENCRYPTED_RESPONSE_ALG.toString(), client.getAttributes().getIntrospectionEncryptedResponseAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, INTROSPECTION_ENCRYPTED_RESPONSE_ENC.toString(), client.getAttributes().getIntrospectionEncryptedResponseEnc());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_SIGNING_ALG.toString(), client.getRequestObjectSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ALG.toString(), client.getRequestObjectEncryptionAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ENC.toString(), client.getRequestObjectEncryptionEnc());

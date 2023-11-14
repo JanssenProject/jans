@@ -1,0 +1,23 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns="native" if="${sessionContext.user ne null}">
+
+    <z:div viewModel="@('io.jans.casa.plugins.strongauthn.vm.FragmentViewModel')">
+
+        <z:div visible="@load(vm.customPolicy)">            
+            <a class="underline dark-blue2" href="${zkService.contextPath}${base}/policy.zul" target="_blank">
+                ${labels.policy.go_manage}
+                <i class="fas fa-external-link-alt" />
+            </a>
+        </z:div>
+
+        <z:div visible="@load(not vm.customPolicy)">
+            <p class="mb2">${labels.policy.when_prompted}</p>
+            <h:ul class="mb0" children="@load(vm.policies)">
+                <zk:template name="children">
+                    <li class="f7">${c:l(c:cat('policy.', each))}</li>
+                </zk:template>
+            </h:ul>
+        </z:div>
+
+    </z:div>
+
+</z:zk>

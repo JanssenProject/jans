@@ -843,17 +843,25 @@ def _transform_auth_errors_config(conf):
         })
         should_update = True
 
+    if "invalid_ssa_metadata" not in ssa_errors:
+        conf["ssa"].append({
+            "id": "invalid_ssa_metadata",
+            "description": "The value of one of the SSA Metadata fields is invalid and the server has rejected this request. Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter of a SSA's Metadata.",
+            "uri": None,
+        })
+        should_update = True
+
     # dpop as part of token errors
     dpop_errors = [
         {
-             "id":"use_dpop_nonce",
-             "description":"Authorization server requires nonce in DPoP proof.",
-             "uri": None
+            "id": "use_dpop_nonce",
+            "description": "Authorization server requires nonce in DPoP proof.",
+            "uri": None
         },
         {
-             "id":"use_new_dpop_nonce",
-             "description":"Authorization server requires new nonce in DPoP proof.",
-             "uri": None
+            "id": "use_new_dpop_nonce",
+            "description": "Authorization server requires new nonce in DPoP proof.",
+            "uri": None
         },
     ]
     token_err_ids = [err["id"] for err in conf["token"]]
@@ -862,6 +870,16 @@ def _transform_auth_errors_config(conf):
         if err["id"] in token_err_ids:
             continue
         conf["token"].append(err)
+        should_update = True
+
+    # add stale_evidence on register
+    reg_errors = [err["id"] for err in conf["register"]]
+    if "stale_evidence" not in reg_errors:
+        conf["register"].append({
+            "id": "stale_evidence",
+            "description": "The provided evidence is not current. Resend fresh evidence.",
+            "uri": None,
+        })
         should_update = True
 
     return conf, should_update

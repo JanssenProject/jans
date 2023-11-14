@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:11.0.16
+FROM bellsoft/liberica-openjre-alpine:17.0.8
 
 # ===============
 # Alpine packages
@@ -7,15 +7,13 @@ FROM bellsoft/liberica-openjre-alpine:11.0.16
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache openssl python3 tini curl py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps wget git zip \
-    && mkdir -p /usr/java/latest \
-    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
+    && apk add --no-cache --virtual .build-deps wget git zip
 
 # =====
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.15
+ARG JETTY_VERSION=11.0.16
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -26,9 +24,6 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
     && tar -xzf /tmp/jetty.tar.gz -C /opt \
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
     && rm -rf /tmp/jetty.tar.gz
-
-# Ports required by jetty
-EXPOSE 8080
 
 # ======
 # Jython
@@ -45,13 +40,12 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # FIDO2
 # =====
 
-ENV CN_VERSION=1.0.17-SNAPSHOT
-ENV CN_BUILD_DATE='2023-08-02 10:10'
+ENV CN_VERSION=1.0.21-SNAPSHOT
+ENV CN_BUILD_DATE='2023-10-11 10:22'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
-
-COPY jetty/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
+COPY static/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
 RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
     && wget -q ${CN_SOURCE_URL} -O /tmp/jans-fido2.war \
     && cd /tmp \
@@ -65,7 +59,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=9a29ec194b80ecbd06a5a9f4ea34434492bb5cd1
+ENV JANS_SOURCE_VERSION=a3026d7957a1aaefa30269904744975352ae4642
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -96,10 +90,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-fido2/fido2.ldif /app/templates/jans-fido2/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-fido2/dynamic-conf.json /app/templates/jans-fido2/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/static-conf.json /app/templates/jans-fido2/
-
-# cleanup
-RUN rm -rf /tmp/jans
+    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/static-conf.json /app/templates/jans-fido2/ \
+    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/jans-fido2-errors.json /app/templates/jans-fido2/
 
 # download external files
 ARG MDS_DOWNLOAD_DATE='2022-10-03'
@@ -121,14 +113,14 @@ RUN python3 -m ensurepip \
 # Prometheus
 # ==========
 
-COPY conf/prometheus-config.yaml /opt/prometheus/
+COPY static/prometheus-config.yaml /opt/prometheus/
 
 # =======
 # Cleanup
 # =======
 
 RUN apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* /tmp/jans
 
 # =======
 # License
@@ -201,7 +193,7 @@ ENV CN_PERSISTENCE_TYPE=ldap \
 ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
-    CN_JAVA_OPTIONS="" \
+    CN_FIDO2_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
@@ -209,16 +201,20 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
-    CN_AWS_SECRETS_REPLICA_FILE=""
+    CN_AWS_SECRETS_REPLICA_FILE="" \
+    CN_FIDO2_JETTY_PORT=8080 \
+    CN_FIDO2_JETTY_HOST=0.0.0.0
 
 # ==========
 # misc stuff
 # ==========
 
+EXPOSE $CN_FIDO2_JETTY_PORT
+
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.17" \
+    org.opencontainers.image.version="1.0.21" \
     org.opencontainers.image.title="Janssen FIDO2" \
     org.opencontainers.image.description="FIDO2 server"
 
@@ -227,31 +223,33 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-fido2/custom/libs \
     ${JETTY_BASE}/common/libs/spanner \
     ${JETTY_BASE}/common/libs/couchbase \
+    ${JETTY_HOME}/temp \
     /usr/share/java
 
-COPY jetty/log4j2.xml /app/templates/
-COPY conf/*.tmpl /app/templates/
-
+COPY templates /app/templates/
+RUN cp /app/templates/jans-fido2/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
 RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
 
+RUN ln -sf /usr/lib/jvm/jre /opt/java
+
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
-
-COPY --chown=1000:0 jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
 
 # adjust ownership and permission
 RUN chmod 664 ${JETTY_BASE}/jans-fido2/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-fido2/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
-    && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
+    && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 /etc/jans/conf/fido2/mds/toc \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
-    && chown -R 1000:0 /opt/prometheus
+    && chown -R 1000:0 /opt/prometheus \
+    && chown 1000:0 ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.xml \
+    && chown -R 1000:0 ${JETTY_HOME}/temp
 
 USER 1000
 

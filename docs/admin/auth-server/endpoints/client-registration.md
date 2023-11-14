@@ -199,7 +199,6 @@ DCR payload. This SSA can contain the software_statement inside it which is also
 outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and 
 OBIE respectively.
 
-
 ### Security Pointers
 
 If `dynamicRegistrationEnabled` is enabled in the Authorization Server, assess the following points to minimize 
@@ -560,6 +559,83 @@ SSA is validated based on `softwareStatementValidationType` which is enum.
 Janssen's allows developers to register a client with the Authorization Server (AS) without any intervention by the administrator. By default, all clients are given the same default scopes and attributes. Through the use of an interception script, this behavior can be modified. These scripts can be used to analyze the registration request and apply customizations to the registered client. For example, a client can be given specific scopes by analyzing the [Software Statement](https://www.rfc-editor.org/rfc/rfc7591.html#section-2.3) that is sent with the registration request.
 
 Further reading [here](../../developer/scripts/client-registration.md)
+
+### The Use of Attestation in Dynamic Client Registration
+
+AS supports "The Use of Attestation in OAuth 2.0 Dynamic Client Registration" [specification draft](https://www.ietf.org/id/draft-tschofenig-oauth-attested-dclient-reg-00.html).
+
+Specification draft does not define exact attestation request/response formats. 
+Thus AS supports Attestation calls to Verifier via `ClientRegistrationType` custom script type.
+
+Use `createClient` method of `ClientRegistrationType` to prevent client creation if attestation result does not satisfy expectation.
+
+```python
+    def createClient(self, context):
+        print "Client registration. CreateClient method"
+        registerRequest = context.getRegisterRequest()
+        configurationAttributes = context.getConfigurationAttibutes()
+        client = context.getClient()
+        
+        # getting evidence as string or as JWT
+        evidenceAsString = registerRequest.getEvidence()
+        evidenceAsJwt = context.getEvidence()
+
+        # following code depends on attestation client used to make calls to Verifier
+        attestationResult = attestationClient.attestation(evidence)
+        if attestationResult.isFail:
+            print "Attestation result forbids client creation"
+            return False
+            
+        print "Attestation result is OK"
+        return True            
+```  
+
+**Configuration options**
+- `dcrAttestationEvidenceRequired` - Boolean value indicating if DCR attestation evidence is required. Default value is `false`.
+
+If `evidence` request parameter is not present and `dcrAttestationEvidenceRequired` is `true` AS returns `stale_evidence` error:
+
+```
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Cache-Control: no-store
+Pragma: no-cache
+
+{
+  "error": "stale_evidence",
+  "error_description": "The provided evidence is not current.",
+  "nonce": "lBjvTtuPbpzIaqyiAOOkrIol3WmflPUUepzUXNDFuUgMKUL"
+}
+```
+
+It is common to get `nonce` value from Attestation Server. In this case set `dcrAttestationEvidenceRequired=false`
+and throw error from custom script.
+
+```python
+    def createClient(self, context):
+        evidenceAsString = registerRequest.getEvidence()
+        
+        if StringHelper.isEmpty(evidenceAsString)
+            nonceFromVerifier = attestationClient.requestNonce()
+            context.createStaleEvidenceWebApplicationException(nonceFromVerifier)
+            return False
+
+        ...
+            
+        print "Attestation result is OK"
+        return True            
+```  
+
+`context.createStaleEvidenceWebApplicationException(nonceFromVerifier)` leads to `stale_evidence` error creation, 
+see example above (`nonceFromVerifier` must be string value).
+
+In case goal is to create own custom error, please use standard `context.createWebApplicationException` methods and return `False` from script to prevent client creation.
+
+Example
+```python
+    entity = <construct error message>
+    context.createWebApplicationException(400, entity)
+```
 
 ### Dynamic registration custom attributes
 

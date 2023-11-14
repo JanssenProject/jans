@@ -1,5 +1,6 @@
 import os
 import glob
+import shutil
 
 from setup_app import paths
 from setup_app.utils import base
@@ -38,13 +39,10 @@ class NodeInstaller(BaseInstaller, SetupUtils):
             self.createUser('node', self.node_user_home)
             self.addUserToGroup('jans', 'node')
 
-        nodeArchive = max(node_archieve_list)
+        node_archive = max(node_archieve_list)
 
-        try:
-            self.logIt("Extracting %s into /opt" % nodeArchive)
-            self.run([paths.cmd_tar, '-xJf', nodeArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
-        except Exception as e:
-            self.logIt("Error encountered while extracting archive {}: {}".format(nodeArchive, e))
+        self.logIt(f"Extracting {node_archive} into {Config.opt_dir}")
+        shutil.unpack_archive(node_archive, format='gztar', extract_dir=Config.opt_dir)
 
         nodeDestinationPath = max(glob.glob('/opt/node-*-linux-x64'))
 

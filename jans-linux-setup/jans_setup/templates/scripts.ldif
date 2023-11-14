@@ -283,7 +283,7 @@ dn: inum=8BAF-80D7,ou=scripts,o=jans
 description: Fido2 authentication module
 displayName: fido2
 inum: 8BAF-80D7
-jansConfProperty: {"value1":"fido2_server_uri","value2":"https://%(hostname)s","hide":false,"description":""}
+jansConfProperty: {"value1":"fido2_server_uri","value2":"https://%(hostname)s","description":""}
 jansLevel: 70
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
@@ -299,13 +299,13 @@ dn: inum=92F0-BF9E,ou=scripts,o=jans
 description: Super Gluu authentication module
 displayName: super_gluu
 inum: 92F0-BF9E
-jansConfProperty: {"value1":"AS_ENDPOINT","value2":"https://account.gluu.org","hide":false,"description":""}
-jansConfProperty: {"value1":"AS_SSA","value2":"","hide":false,"description":""}
-jansConfProperty: {"value1":"AS_CLIENT_ID","value2":"","hide":false,"description":""}
-jansConfProperty: {"value1":"AS_CLIENT_SECRET","value2":"","hide":false,"description":""}
+jansConfProperty: {"value1":"AS_ENDPOINT","value2":"https://account.gluu.org","description":""}
+jansConfProperty: {"value1":"AS_SSA","value2":"","description":""}
+jansConfProperty: {"value1":"AS_CLIENT_ID","value2":"","description":""}
+jansConfProperty: {"value1":"AS_CLIENT_SECRET","value2":"","description":""}
 jansConfProperty: {"value1":"qr_options","value2":"{ size: 500, mSize: 0.05 }","description":""}
 jansConfProperty: {"value1":"label","value2":"Super Gluu","description":""}
-jansConfProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
+jansConfProperty: {"value1":"registration_uri","value2":"","description":""}
 jansConfProperty: {"value1":"authentication_mode","value2":"two_step","description":""}
 jansConfProperty: {"value1":"notification_service_mode","value2":"jans","description":""}
 jansConfProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
@@ -512,8 +512,8 @@ description: Jans Config Api authorization script
 displayName: config_api_authorization
 inum: A110-88AB
 jansEnabled: false
-jansConfProperty: {"value1":"testProp1","value2":"Test value 1","hide":false,"description":""}
-jansConfProperty: {"value1":"testProp2","value2":"Test value 2","hide":false,"description":""}
+jansConfProperty: {"value1":"testProp1","value2":"Test value 1","description":""}
+jansConfProperty: {"value1":"testProp2","value2":"Test value 2","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansLevel: 100
 jansRevision: 1
@@ -535,15 +535,29 @@ jansRevision: 11
 jansScr::%(discovery_discovery)s
 jansScrTyp: discovery
 
+dn: inum=0300-BA99,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Default Authorization Challenge Java Script
+displayName: default_challenge
+inum: 0300-BA99
+jansEnabled: true
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansProgLng: java
+jansRevision: 11
+jansScr::%(authorization_challenge_authorizationchallenge)s
+jansScrTyp: authorization_challenge
+
 dn: inum=BADA-BADA,ou=scripts,o=jans
 objectClass: jansCustomScr
 objectClass: top
 description: Agama Script
 displayName: agama
 inum: BADA-BADA
-jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","hide":false,"description":""}
-jansConfProperty: {"value1":"default_flow_name","value2":"","hide":false,"description":""}
-jansConfProperty: {"value1":"finish_userid_db_attribute","value2":"uid","hide":false,"description":""}
+jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","description":""}
+jansConfProperty: {"value1":"default_flow_name","value2":"","description":""}
+jansConfProperty: {"value1":"finish_userid_db_attribute","value2":"uid","description":""}
 jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
@@ -574,9 +588,9 @@ objectClass: jansCustomScr
 description: GitHub Inbound Authentication script
 displayName: github
 inum: E706-F8A8
-jansConfProperty: {"value1":"hide","value2":"true","hide":false,"description":""}
-jansConfProperty: {"value1":"github_creds_file","value2":"/etc/jans/conf/github.json","hide":false,"description":""}
-jansConfProperty: {"value1":"description","value2":"GitHub Login","hide":false,"description":""}
+jansConfProperty: {"value1":"hide","value2":"true","description":""}
+jansConfProperty: {"value1":"github_creds_file","value2":"/etc/jans/conf/github.json","description":""}
+jansConfProperty: {"value1":"description","value2":"GitHub Login","description":""}
 jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}

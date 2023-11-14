@@ -223,6 +223,10 @@ paths:
         required: true
         schema:
           type: string
+      - name: autoconfigure
+        in: query
+        schema:
+          type: string
       requestBody:
         content:
           application/zip:
@@ -4036,6 +4040,136 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/scripts.readonly
+  /api/v1/config/scripts/types:
+    get:
+      tags:
+      - Custom Scripts
+      summary: Fetch custom script types
+      description: Fetch custom script types
+      operationId: get-custom-script-type
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  enum:
+                  - person_authentication
+                  - authorization_challenge
+                  - introspection
+                  - resource_owner_password_credentials
+                  - application_session
+                  - cache_refresh
+                  - client_registration
+                  - id_generator
+                  - uma_rpt_policy
+                  - uma_rpt_claims
+                  - uma_claims_gathering
+                  - consent_gathering
+                  - dynamic_scope
+                  - spontaneous_scope
+                  - end_session
+                  - post_authn
+                  - select_account
+                  - scim
+                  - ciba_end_user_notification
+                  - revoke_token
+                  - persistence_extension
+                  - idp
+                  - discovery
+                  - update_token
+                  - config_api_auth
+                  - modify_ssa_response
+                  - fido2_extension
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    [
+                        "discovery",
+                        "consent_gathering",
+                        "ciba_end_user_notification",
+                        "id_generator",
+                        "idp",
+                        "introspection",
+                        "persistence_extension",
+                        "cache_refresh",
+                        "uma_rpt_policy",
+                        "update_token",
+                        "scim",
+                        "end_session",
+                        "config_api_auth",
+                        "uma_claims_gathering",
+                        "person_authentication",
+                        "resource_owner_password_credentials",
+                        "authorization_challenge",
+                        "client_registration",
+                        "dynamic_scope",
+                        "application_session"
+                    ]
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/scripts.readonly
+  /api/v1/config/scripts/script-types:
+    get:
+      tags:
+      - Custom Scripts
+      summary: Fetch custom script types
+      description: Fetch custom script types
+      operationId: get-custom-script-types
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    [
+                        "discovery",
+                        "consent_gathering",
+                        "ciba_end_user_notification",
+                        "id_generator",
+                        "idp",
+                        "introspection",
+                        "persistence_extension",
+                        "cache_refresh",
+                        "uma_rpt_policy",
+                        "update_token",
+                        "scim",
+                        "end_session",
+                        "config_api_auth",
+                        "uma_claims_gathering",
+                        "person_authentication",
+                        "resource_owner_password_credentials",
+                        "authorization_challenge",
+                        "client_registration",
+                        "dynamic_scope",
+                        "application_session"
+                    ]
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/scripts.readonly
   /api/v1/config/scripts/type/{type}:
     get:
       tags:
@@ -7294,6 +7428,8 @@ components:
             type: string
         error:
           type: string
+        autoconfigure:
+          type: boolean
         flowsError:
           type: object
           additionalProperties:
@@ -7317,6 +7453,8 @@ components:
           type: object
           additionalProperties:
             type: object
+            additionalProperties:
+              type: object
         noDirectLaunch:
           type: array
           items:
@@ -7450,9 +7588,7 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
@@ -7462,7 +7598,9 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
+        userCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -7483,6 +7621,8 @@ components:
         baseEndpoint:
           type: string
         authorizationEndpoint:
+          type: string
+        authorizationChallengeEndpoint:
           type: string
         tokenEndpoint:
           type: string
@@ -7515,6 +7655,8 @@ components:
         deviceAuthzEndpoint:
           type: string
         mtlsAuthorizationEndpoint:
+          type: string
+        mtlsAuthorizationChallengeEndpoint:
           type: string
         mtlsTokenEndpoint:
           type: string
@@ -8044,6 +8186,8 @@ components:
           type: boolean
         dcrAuthorizationWithMTLS:
           type: boolean
+        dcrAttestationEvidenceRequired:
+          type: boolean
         trustedSsaIssuers:
           type: object
           additionalProperties:
@@ -8162,7 +8306,11 @@ components:
         dpopNonceCacheTime:
           type: integer
           format: int32
+        dpopJktForceForAuthorizationCode:
+          type: boolean
         allowIdTokenWithoutImplicitGrantType:
+          type: boolean
+        forceRopcInAuthorizationEndpoint:
           type: boolean
         discoveryCacheLifetimeInMinutes:
           type: integer
@@ -8198,6 +8346,10 @@ components:
           $ref: '#/components/schemas/SsaConfiguration'
         blockWebviewAuthorizationEnabled:
           type: boolean
+        authorizationChallengeDefaultAcr:
+          type: string
+        authorizationChallengeShouldGenerateSession:
+          type: boolean
         dateFormatterPatterns:
           type: object
           additionalProperties:
@@ -8205,6 +8357,8 @@ components:
         httpLoggingResponseBodyContent:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
+          type: boolean
+        fapi:
           type: boolean
         allResponseTypesSupported:
           uniqueItems: true
@@ -8215,8 +8369,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8945,6 +9097,8 @@ components:
         requestedLifetime:
           type: integer
           format: int32
+        evidence:
+          type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -9144,6 +9298,7 @@ components:
           type: string
           enum:
           - person_authentication
+          - authorization_challenge
           - introspection
           - resource_owner_password_credentials
           - application_session

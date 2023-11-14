@@ -3,33 +3,35 @@ package io.jans.ca.plugin.adminui.model.config;
 public class AUIConfiguration {
 
     private String appType;
-    //auth server
-    private String authServerHost;
-    private String authServerClientId;
-    private String authServerClientSecret;
-    private String authServerScope;
-    private String authServerAcrValues;
-    private String authServerRedirectUrl;
-    private String authServerFrontChannelLogoutUrl;
-    private String authServerPostLogoutRedirectUri;
-    private String authServerAuthzBaseUrl;
-    private String authServerTokenEndpoint;
-    private String authServerIntrospectionEndpoint;
-    private String authServerUserInfoEndpoint;
-    private String authServerEndSessionEndpoint;
-    //token server
-    private String tokenServerClientId;
-    private String tokenServerClientSecret;
-    private String tokenServerScope;
-    private String tokenServerAcrValues;
-    private String tokenServerRedirectUrl;
-    private String tokenServerFrontChannelLogoutUrl;
-    private String tokenServerPostLogoutRedirectUri;
-    private String tokenServerAuthzBaseUrl;
-    private String tokenServerTokenEndpoint;
-    private String tokenServerIntrospectionEndpoint;
-    private String tokenServerUserInfoEndpoint;
-    private String tokenServerEndSessionEndpoint;
+    //Admin UI Web
+    private String auiWebServerHost;
+    private String auiWebServerClientId;
+    private String auiWebServerClientSecret;
+    private String auiWebServerScope;
+    private String auiWebServerAcrValues;
+    private String auiWebServerRedirectUrl;
+    private String auiWebServerFrontChannelLogoutUrl;
+    private String auiWebServerPostLogoutRedirectUri;
+    private String auiWebServerAuthzBaseUrl;
+    private String auiWebServerTokenEndpoint;
+    private String auiWebServerIntrospectionEndpoint;
+    private String auiWebServerUserInfoEndpoint;
+    private String auiWebServerEndSessionEndpoint;
+    //Admin UI Backend API
+    private String auiBackendApiServerClientId;
+    private String auiBackendApiServerClientSecret;
+    private String auiBackendApiServerScope;
+    private String auiBackendApiServerAcrValues;
+    private String auiBackendApiServerRedirectUrl;
+    private String auiBackendApiServerFrontChannelLogoutUrl;
+    private String auiBackendApiServerPostLogoutRedirectUri;
+    private String auiBackendApiServerAuthzBaseUrl;
+    private String auiBackendApiServerTokenEndpoint;
+    private String auiBackendApiServerIntrospectionEndpoint;
+    private String auiBackendApiServerUserInfoEndpoint;
+    private String auiBackendApiServerEndSessionEndpoint;
+    // LicenseSpring
+    private LicenseConfiguration licenseConfiguration;
 
     public String getAppType() {
         return appType;
@@ -38,191 +40,205 @@ public class AUIConfiguration {
     public void setAppType(String appType) {
         this.appType = appType;
     }
-    // LicenseSpring
-    private LicenseConfiguration licenseConfiguration;
 
-    public String getAuthServerHost() {
-        return authServerHost;
+    public String getAuiWebServerHost() {
+        return auiWebServerHost;
     }
 
-    public void setAuthServerHost(String authServerHost) {
-        this.authServerHost = authServerHost;
+    public void setAuiWebServerHost(String auiWebServerHost) {
+        this.auiWebServerHost = auiWebServerHost;
     }
 
-    public String getAuthServerClientId() {
-        return authServerClientId;
+    public String getAuiWebServerClientId() {
+        return auiWebServerClientId;
     }
 
-    public void setAuthServerClientId(String authServerClientId) {
-        this.authServerClientId = authServerClientId;
+    public void setAuiWebServerClientId(String auiWebServerClientId) {
+        this.auiWebServerClientId = auiWebServerClientId;
     }
 
-    public String getAuthServerClientSecret() {
-        return authServerClientSecret;
+    public String getAuiWebServerClientSecret() {
+        return auiWebServerClientSecret;
     }
 
-    public void setAuthServerClientSecret(String authServerClientSecret) {
-        this.authServerClientSecret = authServerClientSecret;
+    public void setAuiWebServerClientSecret(String auiWebServerClientSecret) {
+        this.auiWebServerClientSecret = auiWebServerClientSecret;
     }
 
-    public String getAuthServerScope() {
-        return authServerScope;
+    public String getAuiWebServerScope() {
+        return auiWebServerScope;
     }
 
-    public void setAuthServerScope(String authServerScope) {
-        this.authServerScope = authServerScope;
+    public void setAuiWebServerScope(String auiWebServerScope) {
+        this.auiWebServerScope = auiWebServerScope;
     }
 
-    public String getAuthServerRedirectUrl() {
-        return authServerRedirectUrl;
+    public String getAuiWebServerAcrValues() {
+        return auiWebServerAcrValues;
     }
 
-    public void setAuthServerRedirectUrl(String authServerRedirectUrl) {
-        this.authServerRedirectUrl = authServerRedirectUrl;
+    public void setAuiWebServerAcrValues(String auiWebServerAcrValues) {
+        this.auiWebServerAcrValues = auiWebServerAcrValues;
     }
 
-    public String getAuthServerFrontChannelLogoutUrl() {
-        return authServerFrontChannelLogoutUrl;
+    public String getAuiWebServerRedirectUrl() {
+        return auiWebServerRedirectUrl;
     }
 
-    public void setAuthServerFrontChannelLogoutUrl(String authServerFrontChannelLogoutUrl) {
-        this.authServerFrontChannelLogoutUrl = authServerFrontChannelLogoutUrl;
+    public void setAuiWebServerRedirectUrl(String auiWebServerRedirectUrl) {
+        this.auiWebServerRedirectUrl = auiWebServerRedirectUrl;
     }
 
-    public String getAuthServerPostLogoutRedirectUri() {
-        return authServerPostLogoutRedirectUri;
+    public String getAuiWebServerFrontChannelLogoutUrl() {
+        return auiWebServerFrontChannelLogoutUrl;
     }
 
-    public void setAuthServerPostLogoutRedirectUri(String authServerPostLogoutRedirectUri) {
-        this.authServerPostLogoutRedirectUri = authServerPostLogoutRedirectUri;
+    public void setAuiWebServerFrontChannelLogoutUrl(String auiWebServerFrontChannelLogoutUrl) {
+        this.auiWebServerFrontChannelLogoutUrl = auiWebServerFrontChannelLogoutUrl;
     }
 
-    public String getAuthServerAuthzBaseUrl() {
-        return authServerAuthzBaseUrl;
+    public String getAuiWebServerPostLogoutRedirectUri() {
+        return auiWebServerPostLogoutRedirectUri;
     }
 
-    public void setAuthServerAuthzBaseUrl(String authServerAuthzBaseUrl) {
-        this.authServerAuthzBaseUrl = authServerAuthzBaseUrl;
+    public void setAuiWebServerPostLogoutRedirectUri(String auiWebServerPostLogoutRedirectUri) {
+        this.auiWebServerPostLogoutRedirectUri = auiWebServerPostLogoutRedirectUri;
     }
 
-    public String getAuthServerTokenEndpoint() {
-        return authServerTokenEndpoint;
+    public String getAuiWebServerAuthzBaseUrl() {
+        return auiWebServerAuthzBaseUrl;
     }
 
-    public void setAuthServerTokenEndpoint(String authServerTokenEndpoint) {
-        this.authServerTokenEndpoint = authServerTokenEndpoint;
+    public void setAuiWebServerAuthzBaseUrl(String auiWebServerAuthzBaseUrl) {
+        this.auiWebServerAuthzBaseUrl = auiWebServerAuthzBaseUrl;
     }
 
-    public String getAuthServerIntrospectionEndpoint() {
-        return authServerIntrospectionEndpoint;
+    public String getAuiWebServerTokenEndpoint() {
+        return auiWebServerTokenEndpoint;
     }
 
-    public void setAuthServerIntrospectionEndpoint(String authServerIntrospectionEndpoint) {
-        this.authServerIntrospectionEndpoint = authServerIntrospectionEndpoint;
+    public void setAuiWebServerTokenEndpoint(String auiWebServerTokenEndpoint) {
+        this.auiWebServerTokenEndpoint = auiWebServerTokenEndpoint;
     }
 
-    public String getAuthServerUserInfoEndpoint() {
-        return authServerUserInfoEndpoint;
+    public String getAuiWebServerIntrospectionEndpoint() {
+        return auiWebServerIntrospectionEndpoint;
     }
 
-    public void setAuthServerUserInfoEndpoint(String authServerUserInfoEndpoint) {
-        this.authServerUserInfoEndpoint = authServerUserInfoEndpoint;
+    public void setAuiWebServerIntrospectionEndpoint(String auiWebServerIntrospectionEndpoint) {
+        this.auiWebServerIntrospectionEndpoint = auiWebServerIntrospectionEndpoint;
     }
 
-    public String getAuthServerEndSessionEndpoint() {
-        return authServerEndSessionEndpoint;
+    public String getAuiWebServerUserInfoEndpoint() {
+        return auiWebServerUserInfoEndpoint;
     }
 
-    public void setAuthServerEndSessionEndpoint(String authServerEndSessionEndpoint) {
-        this.authServerEndSessionEndpoint = authServerEndSessionEndpoint;
+    public void setAuiWebServerUserInfoEndpoint(String auiWebServerUserInfoEndpoint) {
+        this.auiWebServerUserInfoEndpoint = auiWebServerUserInfoEndpoint;
     }
 
-    public String getTokenServerClientId() {
-        return tokenServerClientId;
+    public String getAuiWebServerEndSessionEndpoint() {
+        return auiWebServerEndSessionEndpoint;
     }
 
-    public void setTokenServerClientId(String tokenServerClientId) {
-        this.tokenServerClientId = tokenServerClientId;
+    public void setAuiWebServerEndSessionEndpoint(String auiWebServerEndSessionEndpoint) {
+        this.auiWebServerEndSessionEndpoint = auiWebServerEndSessionEndpoint;
     }
 
-    public String getTokenServerClientSecret() {
-        return tokenServerClientSecret;
+    public String getAuiBackendApiServerClientId() {
+        return auiBackendApiServerClientId;
     }
 
-    public void setTokenServerClientSecret(String tokenServerClientSecret) {
-        this.tokenServerClientSecret = tokenServerClientSecret;
+    public void setAuiBackendApiServerClientId(String auiBackendApiServerClientId) {
+        this.auiBackendApiServerClientId = auiBackendApiServerClientId;
     }
 
-    public String getTokenServerScope() {
-        return tokenServerScope;
+    public String getAuiBackendApiServerClientSecret() {
+        return auiBackendApiServerClientSecret;
     }
 
-    public void setTokenServerScope(String tokenServerScope) {
-        this.tokenServerScope = tokenServerScope;
+    public void setAuiBackendApiServerClientSecret(String auiBackendApiServerClientSecret) {
+        this.auiBackendApiServerClientSecret = auiBackendApiServerClientSecret;
     }
 
-    public String getTokenServerRedirectUrl() {
-        return tokenServerRedirectUrl;
+    public String getAuiBackendApiServerScope() {
+        return auiBackendApiServerScope;
     }
 
-    public void setTokenServerRedirectUrl(String tokenServerRedirectUrl) {
-        this.tokenServerRedirectUrl = tokenServerRedirectUrl;
+    public void setAuiBackendApiServerScope(String auiBackendApiServerScope) {
+        this.auiBackendApiServerScope = auiBackendApiServerScope;
     }
 
-    public String getTokenServerFrontChannelLogoutUrl() {
-        return tokenServerFrontChannelLogoutUrl;
+    public String getAuiBackendApiServerAcrValues() {
+        return auiBackendApiServerAcrValues;
     }
 
-    public void setTokenServerFrontChannelLogoutUrl(String tokenServerFrontChannelLogoutUrl) {
-        this.tokenServerFrontChannelLogoutUrl = tokenServerFrontChannelLogoutUrl;
+    public void setAuiBackendApiServerAcrValues(String auiBackendApiServerAcrValues) {
+        this.auiBackendApiServerAcrValues = auiBackendApiServerAcrValues;
     }
 
-    public String getTokenServerPostLogoutRedirectUri() {
-        return tokenServerPostLogoutRedirectUri;
+    public String getAuiBackendApiServerRedirectUrl() {
+        return auiBackendApiServerRedirectUrl;
     }
 
-    public void setTokenServerPostLogoutRedirectUri(String tokenServerPostLogoutRedirectUri) {
-        this.tokenServerPostLogoutRedirectUri = tokenServerPostLogoutRedirectUri;
+    public void setAuiBackendApiServerRedirectUrl(String auiBackendApiServerRedirectUrl) {
+        this.auiBackendApiServerRedirectUrl = auiBackendApiServerRedirectUrl;
     }
 
-    public String getTokenServerAuthzBaseUrl() {
-        return tokenServerAuthzBaseUrl;
+    public String getAuiBackendApiServerFrontChannelLogoutUrl() {
+        return auiBackendApiServerFrontChannelLogoutUrl;
     }
 
-    public void setTokenServerAuthzBaseUrl(String tokenServerAuthzBaseUrl) {
-        this.tokenServerAuthzBaseUrl = tokenServerAuthzBaseUrl;
+    public void setAuiBackendApiServerFrontChannelLogoutUrl(String auiBackendApiServerFrontChannelLogoutUrl) {
+        this.auiBackendApiServerFrontChannelLogoutUrl = auiBackendApiServerFrontChannelLogoutUrl;
     }
 
-    public String getTokenServerTokenEndpoint() {
-        return tokenServerTokenEndpoint;
+    public String getAuiBackendApiServerPostLogoutRedirectUri() {
+        return auiBackendApiServerPostLogoutRedirectUri;
     }
 
-    public void setTokenServerTokenEndpoint(String tokenServerTokenEndpoint) {
-        this.tokenServerTokenEndpoint = tokenServerTokenEndpoint;
+    public void setAuiBackendApiServerPostLogoutRedirectUri(String auiBackendApiServerPostLogoutRedirectUri) {
+        this.auiBackendApiServerPostLogoutRedirectUri = auiBackendApiServerPostLogoutRedirectUri;
     }
 
-    public String getTokenServerIntrospectionEndpoint() {
-        return tokenServerIntrospectionEndpoint;
+    public String getAuiBackendApiServerAuthzBaseUrl() {
+        return auiBackendApiServerAuthzBaseUrl;
     }
 
-    public void setTokenServerIntrospectionEndpoint(String tokenServerIntrospectionEndpoint) {
-        this.tokenServerIntrospectionEndpoint = tokenServerIntrospectionEndpoint;
+    public void setAuiBackendApiServerAuthzBaseUrl(String auiBackendApiServerAuthzBaseUrl) {
+        this.auiBackendApiServerAuthzBaseUrl = auiBackendApiServerAuthzBaseUrl;
     }
 
-    public String getTokenServerUserInfoEndpoint() {
-        return tokenServerUserInfoEndpoint;
+    public String getAuiBackendApiServerTokenEndpoint() {
+        return auiBackendApiServerTokenEndpoint;
     }
 
-    public void setTokenServerUserInfoEndpoint(String tokenServerUserInfoEndpoint) {
-        this.tokenServerUserInfoEndpoint = tokenServerUserInfoEndpoint;
+    public void setAuiBackendApiServerTokenEndpoint(String auiBackendApiServerTokenEndpoint) {
+        this.auiBackendApiServerTokenEndpoint = auiBackendApiServerTokenEndpoint;
     }
 
-    public String getTokenServerEndSessionEndpoint() {
-        return tokenServerEndSessionEndpoint;
+    public String getAuiBackendApiServerIntrospectionEndpoint() {
+        return auiBackendApiServerIntrospectionEndpoint;
     }
 
-    public void setTokenServerEndSessionEndpoint(String tokenServerEndSessionEndpoint) {
-        this.tokenServerEndSessionEndpoint = tokenServerEndSessionEndpoint;
+    public void setAuiBackendApiServerIntrospectionEndpoint(String auiBackendApiServerIntrospectionEndpoint) {
+        this.auiBackendApiServerIntrospectionEndpoint = auiBackendApiServerIntrospectionEndpoint;
+    }
+
+    public String getAuiBackendApiServerUserInfoEndpoint() {
+        return auiBackendApiServerUserInfoEndpoint;
+    }
+
+    public void setAuiBackendApiServerUserInfoEndpoint(String auiBackendApiServerUserInfoEndpoint) {
+        this.auiBackendApiServerUserInfoEndpoint = auiBackendApiServerUserInfoEndpoint;
+    }
+
+    public String getAuiBackendApiServerEndSessionEndpoint() {
+        return auiBackendApiServerEndSessionEndpoint;
+    }
+
+    public void setAuiBackendApiServerEndSessionEndpoint(String auiBackendApiServerEndSessionEndpoint) {
+        this.auiBackendApiServerEndSessionEndpoint = auiBackendApiServerEndSessionEndpoint;
     }
 
     public LicenseConfiguration getLicenseConfiguration() {
@@ -231,21 +247,5 @@ public class AUIConfiguration {
 
     public void setLicenseConfiguration(LicenseConfiguration licenseConfiguration) {
         this.licenseConfiguration = licenseConfiguration;
-    }
-
-    public String getAuthServerAcrValues() {
-        return authServerAcrValues;
-    }
-
-    public void setAuthServerAcrValues(String authServerAcrValues) {
-        this.authServerAcrValues = authServerAcrValues;
-    }
-
-    public String getTokenServerAcrValues() {
-        return tokenServerAcrValues;
-    }
-
-    public void setTokenServerAcrValues(String tokenServerAcrValues) {
-        this.tokenServerAcrValues = tokenServerAcrValues;
     }
 }

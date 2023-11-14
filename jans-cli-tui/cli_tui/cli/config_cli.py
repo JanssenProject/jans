@@ -209,13 +209,13 @@ if not(host and (client_id and client_secret or access_token)):
 
     if config_ini_fn.exists():
         config.read_string(config_ini_fn.read_text())
-        host = config['DEFAULT']['jans_host']
+        host = config['DEFAULT'].get('jans_host')
 
         if 'jca_test_client_id' in config['DEFAULT'] and test_client:
             client_id = config['DEFAULT']['jca_test_client_id']
             secret_key_str = 'jca_test_client_secret'
         else:
-            client_id = config['DEFAULT']['jca_client_id']
+            client_id = config['DEFAULT'].get('jca_client_id')
             secret_key_str = 'jca_client_secret'
 
         secret_enc_key_str = secret_key_str + '_enc'
@@ -1113,7 +1113,7 @@ class JCA_CLI:
             schema_path_string = '{}{}'.format(mode_suffix, os.path.basename(schema_path))
             if ' ' in schema_path_string:
                 schema_path_string = '\"{}\"'.format(schema_path_string)
-            print("To get sample schema type {0}{2} --schema <schma>, for example {0}{2} --schema {1}".format(sys.argv[0], schema_path_string, scim_arg))
+            print("To get sample schema type {0}{2} --schema <schema>, for example {0}{2} --schema {1}".format(sys.argv[0], schema_path_string, scim_arg))
 
     def render_json_entry(self, val):
         if isinstance(val, str) and val.startswith('_file '):
@@ -1320,6 +1320,11 @@ class JCA_CLI:
 
         if call_method in ('post', 'put', 'patch'):
             self.log_cmd(operation_id, url_suffix, endpoint_args, cmd_data)
+
+        if path['__path__'] == '/admin-ui/adminUIPermissions' and 'permission' in data:
+            tag, _ = os.path.splitext(os.path.basename(data['permission']))
+            if tag:
+                data['tag'] = tag
 
         return caller_function(path, suffix_param, endpoint_params, data_fn, data=data)
 

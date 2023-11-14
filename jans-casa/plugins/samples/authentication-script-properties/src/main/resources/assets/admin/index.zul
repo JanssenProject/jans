@@ -1,0 +1,55 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns="native">
+
+	<h:title self="@define(title)">
+		${zkService.appName} - ${labels.hello.title}
+	</h:title>
+
+	<z:div if="${empty pageScope.error}"
+		viewModel="@('io.jans.casa.plugins.sample.SampleVM')"
+		self="@define(maincontent)">
+
+        <z:include src="/back-home.zul"/>
+
+		<div class="${css['sectionsWrapper']} pt3">
+			<section class="${css.section}">
+                <z:div sclass="${css.panel}" unless="${empty vm.map}">
+                    <h2 class="f4 dark-blue2">${labels.sample.title} : ${vm.acr}</h2>
+					<div class="pt3 pb2">
+						<table class="table table-hover table-sm">
+							<thead>
+								<tr>
+
+									<th scope="col">
+										${labels.sample.property.name}
+									</th>
+									<th scope="col">
+										${labels.sample.property.value}
+									</th>
+								</tr>
+							</thead>
+							<h:tbody children="@load(vm.map)"
+								sclass="f7">
+								<zk:template name="children">
+									<tr>
+
+										<td>
+											<z:label value="${each.key}" />
+										</td>
+										<td>
+											<z:label value="${each.value}" />
+										</td>
+
+									</tr>
+								</zk:template>
+							</h:tbody>
+						</table>
+					</div>
+                </z:div>
+			</section>
+		</div>
+	</z:div>
+
+</zk:zk>

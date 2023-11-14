@@ -7,15 +7,14 @@ import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
+import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.orm.PersistenceEntryManager;
-import jakarta.validation.constraints.NotNull;
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -63,7 +62,8 @@ public class UserManagementService {
             List<AdminRole> roles = adminConf.getDynamic().getRoles();
 
             if (roles.contains(roleArg)) {
-                return adminConf.getDynamic().getRoles();
+                log.error(ErrorResponse.ADMIUI_ROLE_ALREADY_PRESENT.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ADMIUI_ROLE_ALREADY_PRESENT.getDescription());
             }
             roles.add(roleArg);
             adminConf.getDynamic().setRoles(roles);
@@ -178,7 +178,8 @@ public class UserManagementService {
             List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
 
             if (permissions.contains(permissionArg)) {
-                return adminConf.getDynamic().getPermissions();
+                log.error(ErrorResponse.ADMIUI_PERMISSIONS_ALREADY_PRESENT.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ADMIUI_PERMISSIONS_ALREADY_PRESENT.getDescription());
             }
             permissions.add(permissionArg);
             adminConf.getDynamic().setPermissions(permissions);
@@ -218,10 +219,11 @@ public class UserManagementService {
 
     public List<AdminPermission> deletePermission(String permission) throws ApplicationException {
         try {
+            String decodedPermission = CommonUtils.decode(permission);
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
 
             boolean anyPermissionMapped = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().anyMatch(ele -> ele.getPermissions().contains(permission));
+                    .stream().anyMatch(ele -> ele.getPermissions().contains(decodedPermission));
 
             if (anyPermissionMapped) {
                 log.error(ErrorResponse.UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE.getDescription());
@@ -229,7 +231,7 @@ public class UserManagementService {
             }
 
             List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
-            permissions.removeIf(ele -> ele.getPermission().equals(permission));
+            permissions.removeIf(ele -> ele.getPermission().equals(decodedPermission));
 
             adminConf.getDynamic().setPermissions(permissions);
             entryManager.merge(adminConf);

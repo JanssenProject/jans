@@ -6,6 +6,7 @@ from com.fasterxml.jackson.databind import ObjectMapper
 
 from io.jans.agama import NativeJansFlowBridge
 from io.jans.agama.engine.misc import FlowUtils
+from io.jans.as.common.service.common import EncryptionService
 from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService, UserService
 from io.jans.jsf2.service import FacesService
@@ -114,6 +115,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "Agama. Unable to authenticate %s" % inum
                         return False
                     
+                    data.put("_encInum", CdiUtil.bean(EncryptionService).encrypt(inum))                    
                     jsonData = CdiUtil.bean(ObjectMapper).writeValueAsString(data) 
                     CdiUtil.bean(Identity).setWorkingParameter(self.resultParam, jsonData)
             except:

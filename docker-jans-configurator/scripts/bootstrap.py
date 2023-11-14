@@ -35,9 +35,9 @@ DB_DIR = os.environ.get("CN_CONFIGURATOR_DB_DIR", f"{CONFIGURATOR_DIR}/db")
 CERTS_DIR = os.environ.get("CN_CONFIGURATOR_CERTS_DIR", f"{CONFIGURATOR_DIR}/certs")
 JAVALIBS_DIR = f"{CONFIGURATOR_DIR}/javalibs"
 
-DEFAULT_CONFIG_FILE = f"{DB_DIR}/config.json"
-DEFAULT_SECRET_FILE = f"{DB_DIR}/secret.json"
-DEFAULT_GENERATE_FILE = f"{DB_DIR}/generate.json"
+DEFAULT_CONFIG_FILE = os.environ.get("CN_CONFIGURATOR_CONFIG_FILE", f"{DB_DIR}/config.json")
+DEFAULT_SECRET_FILE = os.environ.get("CN_CONFIGURATOR_SECRET_FILE", f"{DB_DIR}/secret.json")
+DEFAULT_GENERATE_FILE = os.environ.get("CN_CONFIGURATOR_GENERATE_FILE", f"{DB_DIR}/generate.json")
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("configurator")
@@ -295,8 +295,8 @@ class CtxGenerator:
         enc_keys = " ".join(enc_keys)
         self.set_config("auth_enc_keys", enc_keys)
 
-        # default exp = 2 hours + token lifetime (in hour)
-        exp = int(2 + (3600 / 3600))
+        # default exp = 48 hours + token lifetime (in hour)
+        exp = int(48 + (3600 / 3600))
 
         _, err, retcode = generate_openid_keys_hourly(
             self.get_secret("auth_openid_jks_pass"),
@@ -444,17 +444,17 @@ class CtxGenerator:
         self.auth_ctx()
         self.web_ctx()
 
-        if "ldap" in opt_scopes:
-            self.ldap_ctx()
+        # if "ldap" in opt_scopes:
+        #     self.ldap_ctx()
 
         if "redis" in opt_scopes:
             self.redis_ctx()
 
-        if "couchbase" in opt_scopes:
-            self.couchbase_ctx()
+        # if "couchbase" in opt_scopes:
+        #     self.couchbase_ctx()
 
-        if "sql" in opt_scopes:
-            self.sql_ctx()
+        # if "sql" in opt_scopes:
+        #     self.sql_ctx()
 
         # populated config
         return self.ctx
@@ -554,32 +554,33 @@ def load(generate_file, config_file, secret_file):
         logger.info("Config and secret have been initialized")
         return
 
-    # there's no config and secret in backend, check whether to load from files
-    if os.path.isfile(config_file) and os.path.isfile(secret_file):
-        # load from existing files
-        logger.info(f"Re-using config and secret from {config_file} and {secret_file}")
-        _load_from_file(manager, config_file, "config")
-        _load_from_file(manager, secret_file, "secret")
-        return
+    with manager.lock.create_lock("configurator-load"):
+        # there's no config and secret in backend, check whether to load from files
+        if os.path.isfile(config_file) and os.path.isfile(secret_file):
+            # load from existing files
+            logger.info(f"Re-using config and secret from {config_file} and {secret_file}")
+            _load_from_file(manager, config_file, "config")
+            _load_from_file(manager, secret_file, "secret")
+            return
 
-    # no existing files, hence generate new config and secret from parameters
-    logger.info(f"Loading parameters from {generate_file}")
-    params, err, code = params_from_file(generate_file)
-    if code != 0:
-        logger.error(f"Unable to load parameters; reason={err}")
-        raise click.Abort()
+        # no existing files, hence generate new config and secret from parameters
+        logger.info(f"Loading parameters from {generate_file}")
+        params, err, code = params_from_file(generate_file)
+        if code != 0:
+            logger.error(f"Unable to load parameters; reason={err}")
+            raise click.Abort()
 
-    logger.info("Generating new config and secret")
-    ctx_generator = CtxGenerator(manager, params)
-    ctx = ctx_generator.generate()
+        logger.info("Generating new config and secret")
+        ctx_generator = CtxGenerator(manager, params)
+        ctx = ctx_generator.generate()
 
-    # save config to its backend and file
-    _save_generated_ctx(manager, ctx["config"], "config")
-    _dump_to_file(manager, config_file, "config")
+        # save config to its backend and file
+        _save_generated_ctx(manager, ctx["config"], "config")
+        _dump_to_file(manager, config_file, "config")
 
-    # save secret to its backend and file
-    _save_generated_ctx(manager, ctx["secret"], "secret")
-    _dump_to_file(manager, secret_file, "secret")
+        # save secret to its backend and file
+        _save_generated_ctx(manager, ctx["secret"], "secret")
+        _dump_to_file(manager, secret_file, "secret")
 
 
 @cli.command()

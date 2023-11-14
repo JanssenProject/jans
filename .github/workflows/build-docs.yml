@@ -22,8 +22,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g."v1.0.5")'
-        default: "v1.0.5"
+        description: 'Version tag (e.g."v1.0.21")'
+        default: "v1.0.21"
         required: false
 concurrency:
   group: run-once
@@ -70,6 +70,7 @@ jobs:
       - name: Copy generated chart from main
         run: |
           helm package charts/janssen/
+          helm package charts/janssen-all-in-one/
           cp janssen-*.tgz ../
 
       - name: Import GPG key
@@ -90,6 +91,11 @@ jobs:
 
       - name: Generate docs
         continue-on-error: true
+        if: >-
+          github.event_name == 'release' &&
+          github.event.action == 'published' &&
+          startsWith(github.event.release.name, 'v') &&
+          !github.event.release.draft
         env:
           VERSION: ${{ github.event.release.tag_name }}
         run: |
@@ -119,16 +125,18 @@ jobs:
           
          echo "Generating javadocs"
          sudo bash ./automation/docs/generate-javadocs.sh . || echo "something went wrong with generating the java docs"
-         cd docs
-         git add . || echo "Nothing to add"
-         git commit -a -S -m "docs: generate and add javadocs" || echo "Nothing to commit"
-         cd ..
+         cp -r docs/admin/reference/javadocs/* ../../docs/admin/reference/javadocs/
+         #cd docs
+         #git add . || echo "Nothing to add"
+         #git commit -a -S -m "docs: generate and add javadocs" || echo "Nothing to commit"
+         #cd ..
          
          # update mkdocs.yml
          sudo python3 -m pip install --upgrade pip
          sudo pip3 install pyyaml
          sudo python3 automation/docs/add-javadocs-to-mkdocs.py || echo "something went wrong with adding javadocs to mkdocs.yml"
-          
+         rm -rf docs/admin/reference/javadocs
+
          git push --set-upstream origin cn-jans-update-auto-generated-docs
          MESSAGE="fix(docs): autogenerate docs"
          PR=$(gh pr create --body "Auto generated docs" --title "${MESSAGE}")
@@ -205,7 +213,11 @@ jobs:
           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/${LATEST:1}/g"
           git add . && git update-index --refresh
           cd ..
-
+          for folder in */; do
+            if [[ $folder != "${STABLE}/" ]]; then
+              git rm -r $folder/admin/reference/javadocs || echo "Nothing to remove"
+            fi
+          done          
           echo "${STABLE}" > stable.txt
           git add stable.txt && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"

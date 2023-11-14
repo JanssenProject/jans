@@ -12,18 +12,11 @@ public class DeploymentDetails {
     private List<String> folders;
     private List<String> libs;
     private String error;
+    private boolean autoconfigure;
     private ProjectMetadata metadata = new ProjectMetadata();
     
     @JsonInclude(JsonInclude.Include.ALWAYS)
     private Map<String, String> flowsError;
-    
-    public ProjectMetadata getProjectMetadata() {
-        return metadata;
-    }
-
-    public void setProjectMetadata(ProjectMetadata metadata) {
-        this.metadata = metadata;
-    }
 
     public List<String> getFolders() {
         return folders;
@@ -55,6 +48,22 @@ public class DeploymentDetails {
 
     public void setFlowsError(Map<String, String> flowsError) {
         this.flowsError = flowsError;
+    }
+
+    public boolean isAutoconfigure() {
+        return autoconfigure;
+    }
+
+    public void setAutoconfigure(boolean autoconfigure) {
+        this.autoconfigure = autoconfigure;
+    }
+
+    public ProjectMetadata getProjectMetadata() {
+        return metadata;
+    }
+
+    public void setProjectMetadata(ProjectMetadata metadata) {
+        this.metadata = metadata;
     }
 
 }

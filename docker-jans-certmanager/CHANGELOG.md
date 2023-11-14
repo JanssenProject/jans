@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.19-1...docker-jans-certmanager-v1.0.20-1) (2023-11-08)
+
+
+### Features
+
+* **jans-pycloudlib:** add lock to prevent race condition ([#6329](https://github.com/JanssenProject/jans/issues/6329)) ([9dd82da](https://github.com/JanssenProject/jans/commit/9dd82da5c87ee829c73a1135ce8740b8353f8ab5))
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+## [1.0.19-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.18-1...docker-jans-certmanager-v1.0.19-1) (2023-10-11)
+
+
+### Features
+
+* **docker-jans:** upgrade base image to Java 17 ([#6231](https://github.com/JanssenProject/jans/issues/6231)) ([8ed40e9](https://github.com/JanssenProject/jans/commit/8ed40e91a56c256cb34262659b6e0657571f8c97))
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+## [1.0.18-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.17-1...docker-jans-certmanager-v1.0.18-1) (2023-09-23)
+
+
+### Bug Fixes
+
+* jar dep ([66c4c15](https://github.com/JanssenProject/jans/commit/66c4c1534a153f3bed4b0bab568e7f43591ccbdd))
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
+## [1.0.17-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.16-1...docker-jans-certmanager-v1.0.17-1) (2023-09-17)
+
+
+### Bug Fixes
+
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
 ## [1.0.16-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.15-1...docker-jans-certmanager-v1.0.16-1) (2023-08-02)
 
 

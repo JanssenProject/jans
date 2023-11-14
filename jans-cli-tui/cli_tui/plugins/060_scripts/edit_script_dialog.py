@@ -15,8 +15,8 @@ from prompt_toolkit.widgets import Button, Label, TextArea, RadioList,\
     Button, Dialog, Frame
 
 from utils.multi_lang import _
-from utils.utils import DialogUtils
 from utils.static import DialogResult
+from utils.utils import DialogUtils, common_data
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
@@ -80,8 +80,6 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                         prop = {'value1': key_}
                         if val_:
                             prop['value2'] = val_
-                        if len(prop_) > 2:
-                            prop['hide'] = prop_[2]
                         data[prop_container.jans_name].append(prop)
 
         data['locationType'] = data.get('locationType')
@@ -124,35 +122,12 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
         schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/CustomScript')
 
-        script_types = [
-                        ['person_authentication', 'Person Authentication'],
-                        ['consent_gathering', 'Consent Gathering'],
-                        ['post_authn', 'Post Authentication'],
-                        ['id_token', 'id_token'],
-                        ['password_grant', 'Password Grant'],
-                        ['ciba_end_user_notification', 'CIBA End User Notification'],
-                        #['OpenID Configuration', 'OpenID Configuration'],
-                        ['dynamic_scope', 'Dynamic Scope', ],
-                        ['spontaneous_scope', 'Spontaneous Scope',],
-                        ['application_session', 'Application Session'],
-                        ['end_session', 'End Session'],
-                        ['client_registration', 'Client Registration'],
-                        ['introspection', 'Introspection'],
-                        ['update_token', 'Update Token'],
-                        ['config_api', 'Config API'],
-                        ['idp', 'IDP'],
-                        ['resource_owner_password_credentials', 'Resource Owner Password Credentials'],
-                        ['cache_refresh', 'Cache Refresh'],
-                        ['id_generator', 'Id Generator'],
-                        ['uma_rpt_policy', 'Uma Rpt Policy'],
-                        ['uma_rpt_claims', 'Uma Rpt Claims'],
-                        ['uma_claims_gathering', 'Uma Claims Gathering'],
-                        ['scim', 'SCIM'],
-                        ['revoke_token', 'Revoke Token'],
-                        ['persistence_extension', 'Persistence Extension'],
-                        ['discovery', 'Discovery'],
-                        ['fido2_extension', 'Fido2 Extension'],
-                        ]
+
+        script_types = []
+        for scr_type in common_data.script_types:
+            scr_name = ' '.join([w.title() for w in scr_type.split('_')])
+            script_types.append((scr_type, scr_name))
+        script_types.sort()
 
         self.location_widget = self.myparent.getTitledText(
             _("          Path"), 
@@ -164,20 +139,20 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
         self.set_location_widget_state(self.data.get('locationType') == 'file')
 
-        config_properties_title = _("Conf. Properties: ")
+        config_properties_title = _("Config Properties: ")
         add_property_title = _("Add Property")
         module_properties_title = _("Module Properties: ")
 
         config_properties_data = []
         for prop in self.data.get('configurationProperties', []):
-            config_properties_data.append([prop['value1'], prop.get('value2', ''), prop.get('hide', False)])
+            config_properties_data.append([prop['value1'], prop.get('value2', '')])
 
         config_prop_data_lenght = len(config_properties_data)
         config_prop_max_height = config_prop_data_lenght if config_prop_data_lenght > 2 else 3
 
         self.config_properties_container = JansVerticalNav(
                 myparent=self.myparent,
-                headers=['Key', 'Value', 'Hide'],
+                headers=['Key', 'Value'],
                 preferred_size=[15, 15, 5],
                 data=config_properties_data,
                 on_enter=self.edit_property,
@@ -189,7 +164,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 entriesColor='class:outh-client-navbar-entriescolor',
                 all_data=config_properties_data,
                 underline_headings=False,
-                max_width=52,
+                max_width=44,
                 jans_name='configurationProperties',
                 max_height=config_prop_max_height
                 )
@@ -368,35 +343,27 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         """
 
         if kwargs['jans_name'] == 'moduleProperties':
-            key, val = kwargs.get('data', ('',''))
             title = _("Enter Module Properties")
         else:
-            key, val, hide = kwargs.get('data', ('','', False))
-            hide_widget = self.myparent.getTitledCheckBox(_("Hide"), name='property_hide', checked=hide, style='class:script-titledtext', jans_help=_("Hide script property?"))
             title = _("Enter Configuration Properties")
 
-        key_widget = self.myparent.getTitledText(_("Key"), name='property_key', value=key, style='class:script-titledtext', jans_help=_("Script propery Key"))
-        val_widget = self.myparent.getTitledText(_("Value"), name='property_val', value=val, style='class:script-titledtext', jans_help=_("Script property Value"))
+        prop_data = kwargs.get('data', ('',''))
+        key_widget = self.myparent.getTitledText(_("Key"), name='property_key', value=prop_data[0], style='class:script-titledtext', jans_help=_("Script propery Key"))
+        val_widget = self.myparent.getTitledText(_("Value"), name='property_val', value=prop_data[1], style='class:script-titledtext', jans_help=_("Script property Value"))
 
         def add_property(dialog: Dialog) -> None:
             key_ = key_widget.me.text
             val_ = val_widget.me.text
             cur_data = [key_, val_]
 
-            if kwargs['jans_name'] == 'configurationProperties':
-                hide_ = hide_widget.me.checked
-                cur_data.append(hide_)
-                container = self.config_properties_container
-            else:
-                container = self.module_properties_container
+            container = self.config_properties_container if kwargs['jans_name'] == 'configurationProperties' else self.module_properties_container
+
             if not kwargs.get('data'):
                 container.add_item(cur_data)
             else:
                 container.replace_item(kwargs['selected'], cur_data)
 
         body_widgets = [key_widget, val_widget]
-        if kwargs['jans_name'] == 'configurationProperties':
-            body_widgets.append(hide_widget)
 
         body = HSplit(body_widgets)
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_property)]

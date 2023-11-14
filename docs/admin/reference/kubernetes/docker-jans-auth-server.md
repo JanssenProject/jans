@@ -63,7 +63,7 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_TRUSTSTORE_ENABLE`: Enable truststore for encrypted Couchbase connection (default to `true`).
 - `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
 - `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
-- `CN_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
+- `CN_AUTH_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
 - `CN_DOCUMENT_STORE_TYPE`: Document store type (one of `LOCAL` or `JCA`; default to `LOCAL`).
 - `CN_JACKRABBIT_URL`: URL to remote repository (default to `http://localhost:8080`).
 - `CN_JACKRABBIT_SYNC_INTERVAL`: Interval between files sync (default to `300` seconds).
@@ -177,9 +177,8 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
 
 As per v1.0.1, certain metrics can be exposed via Prometheus JMX exporter.
 To expose the metrics, set the `CN_PROMETHEUS_PORT` environment variable, i.e. `CN_PROMETHEUS_PORT=9093`.
-Afterwards, metrics can be scraped by Prometheus or accessed manually by making request to `/metrics` URL,
+Afterward, metrics can be scraped by Prometheus or accessed manually by making request to `/metrics` URL,
 i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
-

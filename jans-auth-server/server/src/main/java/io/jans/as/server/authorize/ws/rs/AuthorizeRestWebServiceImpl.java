@@ -25,6 +25,7 @@ import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.server.audit.ApplicationAuditLogger;
+import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushTokenDeliveryService;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
@@ -40,9 +41,11 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
+import io.jans.as.server.service.external.ExternalResourceOwnerPasswordCredentialsService;
 import io.jans.as.server.service.external.ExternalSelectAccountService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
+import io.jans.as.server.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.as.server.service.external.session.SessionEventType;
@@ -65,6 +68,7 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.spi.NoLogWebApplicationException;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -72,7 +76,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import static io.jans.as.model.util.StringUtils.implode;
+import static io.jans.as.server.authorize.ws.rs.AuthzRequestService.canLogWebApplicationException;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.BooleanUtils.toBoolean;
 
@@ -162,6 +166,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     @Inject
     private ExternalSelectAccountService externalSelectAccountService;
 
+    @Inject
+    private ExternalResourceOwnerPasswordCredentialsService externalResourceOwnerPasswordCredentialsService;
+
+    @Inject
+    private DpopService dpopService;
+
     @Context
     private HttpServletRequest servletRequest;
 
@@ -172,9 +182,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
+            String dpopJkt,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
-
-        authorizeRestWebServiceValidator.validateNotWebView(httpRequest);
 
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setHttpMethod(HttpMethod.GET);
@@ -193,6 +202,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setLoginHint(loginHint);
         authzRequest.setAcrValues(acrValues);
         authzRequest.setAmrValues(amrValues);
+        authzRequest.setDpopJkt(dpopJkt);
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
         authzRequest.setSessionId(sessionId);
@@ -216,9 +226,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
+            String dpopJkt,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
-
-        authorizeRestWebServiceValidator.validateNotWebView(httpRequest);
 
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setHttpMethod(HttpMethod.POST);
@@ -239,6 +248,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setAmrValues(amrValues);
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
+        authzRequest.setDpopJkt(dpopJkt);
         authzRequest.setSessionId(sessionId);
         authzRequest.setOriginHeaders(originHeaders);
         authzRequest.setCodeChallenge(codeChallenge);
@@ -254,6 +264,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private Response requestAuthorization(AuthzRequest authzRequest) {
+        authorizeRestWebServiceValidator.validateNotWebView(authzRequest.getHttpRequest());
+
         authzRequest.setScope(ServerUtil.urlDecode(authzRequest.getScope())); // it may be encoded -> decode
 
         authzRequestService.createOauth2AuditLog(authzRequest);
@@ -262,7 +274,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         ResponseBuilder builder;
 
-        authzRequest.setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(authzRequest.getHttpRequest().getQueryString())));
+        authzRequestService.setCustomParameters(authzRequest);
+
 
         try {
             builder = authorize(authzRequest);
@@ -302,19 +315,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder.build();
     }
 
-    private static boolean canLogWebApplicationException(WebApplicationException e) {
-        if (e == null || e.getResponse() == null) {
-            return false;
-        }
-        final int status = e.getResponse().getStatus();
-        return status != 302;
-    }
-
     private ResponseBuilder authorize(AuthzRequest authzRequest) throws AcrChangedException, SearchException, TokenBindingParseException {
         String tokenBindingHeader = authzRequest.getHttpRequest().getHeader("Sec-Token-Binding");
         boolean isPar = authzRequestService.processPar(authzRequest);
 
-        List<Prompt> prompts = Prompt.fromString(authzRequest.getPrompt(), " ");
         final List<ResponseType> responseTypes = authzRequest.getResponseTypeList();
 
         SessionId sessionUser = identity.getSessionId();
@@ -334,17 +338,25 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         authorizeRestWebServiceValidator.checkSignedRequestRequired(authzRequest);
 
-        authzRequestService.processRequestObject(authzRequest, client, scopes, user, prompts);
+        authzRequestService.processRequestObject(authzRequest, client, scopes, user);
 
         validateRequestJwt(authzRequest, isPar, client);
 
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
         authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getRedirectUriResponse());
 
+        dpopService.validateDpopThumprintIsPresent(authzRequest.getDpopJkt(), authzRequest.getState());
+
         authzRequestService.setAcrsIfNeeded(authzRequest);
 
-        checkOfflineAccessScopes(responseTypes, prompts, client, scopes);
+        checkOfflineAccessScopes(responseTypes, authzRequest.getPromptList(), client, scopes);
         checkResponseType(authzRequest, responseTypes, client);
+
+        User ropcUser = executeRopcIfRequired(user, new ExecutionContext(authzRequest.getHttpRequest(), authzRequest.getHttpResponse()));
+        if (ropcUser != null) {
+            user = ropcUser;
+            sessionUser = generatedAuthenticatedSessionForRopc(authzRequest, sessionUser, user);
+        }
 
         AuthorizationGrant authorizationGrant = null;
 
@@ -354,13 +366,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             sessionUser = pair.getSecond();
         }
 
-        validateMaxAge(authzRequest, prompts, sessionUser, client);
+        validateMaxAge(authzRequest, sessionUser, client);
 
         authzRequest.getAuditLog().setUsername(user.getUserId());
 
-        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest, prompts);
-        checkForceReAuthentication(authzRequest, prompts, client, postAuthnContext);
-        checkForceAuthorization(authzRequest, prompts, client, postAuthnContext);
+        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest, authzRequest.getPromptList());
+        checkForceReAuthentication(authzRequest, client, postAuthnContext);
+        checkForceAuthorization(authzRequest, client, postAuthnContext);
 
         ClientAuthorization clientAuthorization = null;
         boolean clientAuthorizationFetched = false;
@@ -370,11 +382,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             clientAuthorizationFetched = pair.getSecond();
         }
 
-        addPromptLoginIfNeeded(prompts, client);
-        checkPromptLogin(authzRequest, prompts);
-        checkPromptConsent(authzRequest, prompts, sessionUser, user, clientAuthorization, clientAuthorizationFetched);
+        addPromptLoginIfNeeded(authzRequest, client);
+        checkPromptLogin(authzRequest);
+        checkPromptConsent(authzRequest, sessionUser, user, clientAuthorization, clientAuthorizationFetched);
 
-        checkPromptSelectAccount(authzRequest, prompts);
+        checkPromptSelectAccount(authzRequest);
 
         AuthorizationCode authorizationCode = null;
         if (responseTypes.contains(ResponseType.CODE)) {
@@ -387,6 +399,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             authorizationGrant.setCodeChallenge(authzRequest.getCodeChallenge());
             authorizationGrant.setCodeChallengeMethod(authzRequest.getCodeChallengeMethod());
             authorizationGrant.setClaims(authzRequest.getClaims());
+            authorizationGrant.setDpopJkt(authzRequest.getDpopJkt());
 
             // Store acr_values
             authorizationGrant.setAcrValues(getAcrForGrant(authzRequest.getAcrValues(), sessionUser));
@@ -490,6 +503,23 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder;
     }
 
+    @NotNull
+    private SessionId generatedAuthenticatedSessionForRopc(AuthzRequest authzRequest, SessionId sessionUser, User user) {
+        if (sessionUser == null) {
+            log.trace("Generating authenticated session.");
+            Map<String, String> genericRequestMap = getGenericRequestMap(authzRequest.getHttpRequest());
+
+            Map<String, String> parameterMap = Maps.newHashMap(genericRequestMap);
+            Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+            sessionUser = sessionIdService.generateAuthenticatedSessionId(authzRequest.getHttpRequest(), user.getDn(), authzRequest.getPrompt());
+            sessionUser.setSessionAttributes(requestParameterMap);
+
+            cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
+            sessionIdService.updateSessionId(sessionUser);
+        }
+        return sessionUser;
+    }
+
     private void addCustomHeaders(ResponseBuilder builder, AuthzRequest authzRequest) {
         if (isTrue(appConfiguration.getCustomHeadersWithAuthorizationResponse())) {
 
@@ -532,62 +562,59 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private void checkPromptSelectAccount(AuthzRequest authzRequest, List<Prompt> prompts) {
-        if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
+    private void checkPromptSelectAccount(AuthzRequest authzRequest) {
+        if (authzRequest.getPromptList().contains(Prompt.SELECT_ACCOUNT)) {
             log.debug("Redirecting to Select Account");
-            throw new NoLogWebApplicationException(redirectToSelectAccountPage(authzRequest, prompts));
+            throw new NoLogWebApplicationException(redirectToSelectAccountPage(authzRequest));
         }
     }
 
-    private void checkPromptConsent(AuthzRequest authzRequest, List<Prompt> prompts, SessionId sessionUser, User user, ClientAuthorization clientAuthorization, boolean clientAuthorizationFetched) {
+    private void checkPromptConsent(AuthzRequest authzRequest, SessionId sessionUser, User user, ClientAuthorization clientAuthorization, boolean clientAuthorizationFetched) {
         if (isTrue(appConfiguration.getDisablePromptConsent())) {
             log.trace("Disabled prompt=consent (because disablePromptConsent=true).");
-            prompts.remove(Prompt.CONSENT);
+            authzRequest.removePrompt(Prompt.CONSENT);
             return;
         }
 
-        if (prompts.contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
+        if (authzRequest.getPromptList().contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
             if (!clientAuthorizationFetched) {
                 clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), authzRequest.getClient().getClientId());
             }
             clientAuthorizationsService.clearAuthorizations(clientAuthorization, authzRequest.getClient().getPersistClientAuthorizations());
 
-            prompts.remove(Prompt.CONSENT);
+            authzRequest.removePrompt(Prompt.CONSENT);
             log.debug("Redirect to authorization page on prompt=consent, request {}", authzRequest);
 
-            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
 
-    public void checkPromptLogin(AuthzRequest authzRequest, List<Prompt> prompts) {
+    public void checkPromptLogin(AuthzRequest authzRequest) {
         if (isTrue(appConfiguration.getDisablePromptLogin())) {
             log.trace("Disabled prompt=login (because disablePromptLogin=true).");
-            prompts.remove(Prompt.LOGIN);
+            authzRequest.removePrompt(Prompt.LOGIN);
             return;
         }
-        if (prompts.contains(Prompt.LOGIN)) {
-            boolean sessionUnauthenticated = false;
+        if (authzRequest.getPromptList().contains(Prompt.LOGIN)) {
 
             //  workaround for #1030 - remove only authenticated session, for set up acr we set it unauthenticated and then drop in AuthorizeAction
             if (identity.getSessionId().getState() == SessionIdState.AUTHENTICATED) {
-                sessionUnauthenticated = unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest(), authzRequest.isPromptFromJwt());
+                unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest(), authzRequest.isPromptFromJwt());
             }
             authzRequest.setSessionId(null);
-            prompts.remove(Prompt.LOGIN);
+            authzRequest.removePrompt(Prompt.LOGIN);
 
-            if (sessionUnauthenticated) {
-                log.debug("Redirect to authorization page, request {}", authzRequest);
-                throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
-            }
+            log.debug("Redirect to authorization page, request {}", authzRequest);
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
 
-    private void addPromptLoginIfNeeded(List<Prompt> prompts, Client client) {
+    private void addPromptLoginIfNeeded(AuthzRequest authzRequest, Client client) {
         if (identity != null && identity.getSessionId() != null && identity.getSessionId().getState() == SessionIdState.AUTHENTICATED
                 && Boolean.TRUE.equals(client.getAttributes().getDefaultPromptLogin())
                 && identity.getSessionId().getAuthenticationTime() != null
                 && new Date().getTime() - identity.getSessionId().getAuthenticationTime().getTime() > 500) {
-            prompts.add(Prompt.LOGIN);
+            authzRequest.addPrompt(Prompt.LOGIN);
         }
     }
 
@@ -599,7 +626,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         if (prompts.contains(Prompt.CONSENT)) {
             log.debug("Redirect to authorization page, request {}", authzRequest);
-            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
 
         // There is no need to present the consent page:
@@ -621,7 +648,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             if (clientAuthorization == null || clientAuthorization.getScopes() == null || clientAuthorization.getScopes().length == 0) {
                 log.trace("Redirect to authorization page, no appropriate clientAuthorization, clientId: {}", client.getClientId());
-                throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+                throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
             }
 
             if (log.isTraceEnabled())
@@ -633,7 +660,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 sessionIdService.updateSessionId(sessionUser);
             } else {
                 log.debug("Redirect to authorization page, request {}", authzRequest);
-                throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+                throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
             }
         }
         return new Pair<>(clientAuthorization, clientAuthorizationFetched);
@@ -668,33 +695,33 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private void checkForceAuthorization(AuthzRequest authzRequest, List<Prompt> prompts, Client client, ExternalPostAuthnContext postAuthnContext) {
+    private void checkForceAuthorization(AuthzRequest authzRequest, Client client, ExternalPostAuthnContext postAuthnContext) {
         final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
         if (forceAuthorization) {
             log.debug("Redirect to authorization page, request {}", authzRequest);
-            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
 
-    private void checkForceReAuthentication(AuthzRequest authzRequest, List<Prompt> prompts, Client client, ExternalPostAuthnContext postAuthnContext) {
+    private void checkForceReAuthentication(AuthzRequest authzRequest, Client client, ExternalPostAuthnContext postAuthnContext) {
         final boolean forceReAuthentication = externalPostAuthnService.externalForceReAuthentication(client, postAuthnContext);
         if (forceReAuthentication) {
             unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
             authzRequest.setSessionId(null);
 
             log.debug("Redirect to authorization page, request {}", authzRequest);
-            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
 
-    private void validateMaxAge(AuthzRequest authzRequest, List<Prompt> prompts, SessionId sessionUser, Client client) {
+    private void validateMaxAge(AuthzRequest authzRequest, SessionId sessionUser, Client client) {
         boolean validAuthenticationMaxAge = authorizeRestWebServiceValidator.isAuthnMaxAgeValid(authzRequest.getMaxAge(), sessionUser, client);
         if (!validAuthenticationMaxAge) {
             unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
             authzRequest.setSessionId(null);
 
             log.debug("Redirect to authorization page, request {}", authzRequest);
-            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
 
@@ -716,8 +743,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     private Pair<User, SessionId> ifUserIsNull(AuthzRequest authzRequest) throws SearchException {
         identity.logout();
-        final List<Prompt> prompts = authzRequest.getPromptList();
-        if (prompts.contains(Prompt.NONE)) {
+        if (authzRequest.getPromptList().contains(Prompt.NONE)) {
             if (authenticationFilterService.isEnabled()) {
                 final Map<String, String> params;
                 if (authzRequest.getHttpMethod().equals(HttpMethod.GET)) {
@@ -748,15 +774,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 throw new WebApplicationException(authzRequest.getRedirectUriResponse().createErrorBuilder(AuthorizeErrorResponseType.LOGIN_REQUIRED).build());
             }
         } else {
-            if (prompts.contains(Prompt.LOGIN)) {
+            if (authzRequest.getPromptList().contains(Prompt.LOGIN)) {
                 unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest(), authzRequest.isPromptFromJwt());
                 authzRequest.setSessionId(null);
-                prompts.remove(Prompt.LOGIN);
-                authzRequest.setPrompt(implode(prompts, " "));
+                authzRequest.removePrompt(Prompt.LOGIN);
             }
 
             log.debug("Redirect to authorization page, request {}", authzRequest);
-            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
 
@@ -857,7 +882,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private Map<String, String> getGenericRequestMap(HttpServletRequest httpRequest) {
+    public static Map<String, String> getGenericRequestMap(HttpServletRequest httpRequest) {
         Map<String, String> result = new HashMap<>();
         for (Entry<String, String[]> entry : httpRequest.getParameterMap().entrySet()) {
             result.put(entry.getKey(), entry.getValue()[0]);
@@ -866,11 +891,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return result;
     }
 
-    private Response redirectToAuthorizationPage(AuthzRequest authzRequest, List<Prompt> prompts) {
-        return redirectTo("/authorize", authzRequest, prompts);
+    private Response redirectToAuthorizationPage(AuthzRequest authzRequest) {
+        return redirectTo("/authorize", authzRequest);
     }
 
-    private Response redirectToSelectAccountPage(AuthzRequest authzRequest, List<Prompt> prompts) {
+    private Response redirectToSelectAccountPage(AuthzRequest authzRequest) {
         ExecutionContext executionContext = ExecutionContext.of(authzRequest);
         executionContext.setAppConfiguration(appConfiguration);
         executionContext.setAttributeService(attributeService);
@@ -885,10 +910,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             page = selectAccountPageFromScript;
         }
 
-        return redirectTo(page, authzRequest, prompts);
+        return redirectTo(page, authzRequest);
     }
 
-    private Response redirectTo(String pathToRedirect, AuthzRequest authzRequest, List<Prompt> prompts) {
+    private Response redirectTo(String pathToRedirect, AuthzRequest authzRequest) {
 
         final URI contextUri = URI.create(appConfiguration.getIssuer()).resolve(servletRequest.getContextPath() + pathToRedirect + configurationFactory.getFacesMapping());
 
@@ -909,7 +934,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         // OIC parameters
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.NONCE, authzRequest.getNonce());
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.DISPLAY, authzRequest.getDisplay());
-        redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.PROMPT, implode(prompts, " "));
+        redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.PROMPT, authzRequest.getPrompt());
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.MAX_AGE, authzRequest.getMaxAge() != null ? authzRequest.getMaxAge().toString() : null);
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.UI_LOCALES, authzRequest.getUiLocales());
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.ID_TOKEN_HINT, authzRequest.getIdTokenHint());
@@ -1015,5 +1040,35 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         DeviceCodeGrant deviceCodeGrant = authorizationGrantList.createDeviceGrant(cacheData, user);
 
         log.info("Granted device authorization request, user_code: {}, device_code: {}, grant_id: {}", userCode, cacheData.getDeviceCode(), deviceCodeGrant.getGrantId());
+    }
+
+    private User executeRopcIfRequired(User user, ExecutionContext executionContext) {
+        if (!appConfiguration.getForceRopcInAuthorizationEndpoint()) {
+            return null;
+        }
+
+        log.trace("Triggering ROPC at Authorization Endpoint (forced by 'forceRopcInAuthorizationEndpoint' configuration property)");
+
+        if (!externalResourceOwnerPasswordCredentialsService.isEnabled()) {
+            log.trace("Skip ROPC because no ROPC script found.");
+            return null;
+        }
+
+        final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(executionContext);
+        context.setUser(user);
+
+        if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
+            user = context.getUser();
+            if (user != null) {
+                log.trace("ROPC - User {} is authenticated successfully by external script.", user.getUserId());
+                return user;
+            } else {
+                log.trace("ROPC returned True but user is not set (set valid user in context.setUser(<user>))");
+            }
+        } else {
+            log.trace("ROPC script returned False.");
+        }
+
+        return null;
     }
 }

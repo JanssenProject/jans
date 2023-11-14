@@ -9,6 +9,9 @@ on:
       - main
       - '!update-pycloud-in-**'
     paths:
+      - 'jans-link/**'
+      - 'jans-keycloak-integration/**'
+      - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
@@ -20,6 +23,7 @@ on:
       - 'jans-linux-setup/**'
       - 'jans-cli-tui/**'
       - 'jans-pycloudlib/**'
+      - 'jans-casa/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
 
@@ -32,6 +36,9 @@ on:
       - opened
       - synchronize
     paths:
+      - 'jans-link/**'
+      - 'jans-keycloak-integration/**'
+      - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
@@ -43,6 +50,7 @@ on:
       - 'jans-linux-setup/**'
       - 'jans-cli-tui/**'
       - 'jans-pycloudlib/**'
+      - 'jans-casa/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
 
@@ -55,9 +63,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib]
+        module: [jans-keycloak-link, jans-keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, jans-link, jans-casa]
     env:
       JVM_PROJECTS: |
+        jans-keycloak-integration
+        jans-keycloak-link
+        jans-link
         jans-auth-server
         jans-orm
         jans-config-api
@@ -65,6 +76,7 @@ jobs:
         jans-core
         jans-fido2
         jans-eleven
+        jans-casa
         agama
       NON_JVM_PROJECTS: |
         jans-linux-setup
@@ -109,12 +121,12 @@ jobs:
           echo event before: ${{ github.event.before }}
           echo GH sha: $GITHUB_SHA
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'adopt'
           
       - name: Cache SonarCloud packages for JVM based project

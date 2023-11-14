@@ -31,7 +31,7 @@ public class BaseService {
     Logger log;
 
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) {
-        return getToken(tokenRequest, tokenEndpoint, null);
+        return getToken(tokenRequest, tokenEndpoint, null, null);
     }
 
     /**
@@ -42,7 +42,7 @@ public class BaseService {
      * @param userInfoJwt   This is the JWT that is returned from the userinfo endpoint.
      * @return A TokenResponse object
      */
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) {
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt, List<String> permissionTags) {
 
         try {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
@@ -56,6 +56,10 @@ public class BaseService {
 
             if (!Strings.isNullOrEmpty(userInfoJwt)) {
                 body.putSingle("ujwt", userInfoJwt);
+            }
+
+            if (permissionTags != null && !permissionTags.isEmpty()) {
+                body.put("permission_tag", Collections.singletonList(String.join(" ", permissionTags)));
             }
 
             if (!Strings.isNullOrEmpty(tokenRequest.getCodeVerifier())) {
@@ -111,6 +115,7 @@ public class BaseService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ISS_CLAIM_NOT_FOUND.getDescription());
             }
             String issuer = StringUtils.removeEnd(claims.get("iss").toString(), "/");
+            String hardwareId = claims.get("org_id").toString();
             //claims.get("iss").toString();
             Map<String, String> body = new HashMap<>();
             body.put("software_statement", ssaJwt);
@@ -131,6 +136,7 @@ public class BaseService {
                 dcrResponse.setClientId(entity.getString("client_id"));
                 dcrResponse.setClientSecret(entity.getString("client_secret"));
                 dcrResponse.setOpHost(issuer);
+                dcrResponse.setHardwareId(hardwareId);
                 if (issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)) {
                     dcrResponse.setScanHostname(AppConstants.SCAN_DEV_SERVER);
                 }

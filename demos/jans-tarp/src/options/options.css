@@ -62,6 +62,9 @@ input:disabled {
 input[type="radio"],
 input[type="checkbox"] {
   margin: 0 4px 8px 0;
+  padding: 15px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03) inset;
+  margin-bottom: 30px;
 }
 
 select {
@@ -92,7 +95,7 @@ fieldset {
 
 legend {
   font-size: 1.4em;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 label {
@@ -119,7 +122,7 @@ label.light {
   border-radius: 100%;
 }
 
-.error {
+.redFont {
   color: #ff0000;
   font-size: 15px;
   text-align: center;
@@ -139,7 +142,7 @@ label.light {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: left;
   min-width: 600px;
   font-size: 15px;
   padding: 2rem;

@@ -99,7 +99,7 @@ Optional:
 							of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a 
 							request to the token endpoint to obtain the tokens.
 - `backchannel_token_delivery_mode` (String) specifies how backchannel token will be delivered.
-- `backchannel_user_code_parameter` (String) Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.
+- `backchannel_user_code_parameter` (Boolean) Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.
 - `claim_redirect_uris` (List of String) Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the 
 						requesting party's user agent after completing its interaction.
 - `claims` (List of String) Provide list of claims granted to the client.
@@ -199,6 +199,7 @@ Optional:
 - `backchannel_logout_uri` (List of String) List of RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
 - `consent_gathering_scripts` (List of String) List of consent gathering scripts.
 - `dpop_bound_access_token` (Boolean) boolean value to indicate if DPoP bound access token is required.
+- `evidence` (String) Specifies the evidence that the client presents to the authorization server.
 - `id_token_lifetime` (Number) Specifies the Client-specific ID Token expiration.
 - `introspection_scripts` (List of String) List of introspection scripts.
 - `jans_auth_enc_resp_alg` (String) JWE alg algorithm JWA required for encrypting authorization responses.

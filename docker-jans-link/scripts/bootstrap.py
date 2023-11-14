@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging.config
 import os
-import re
 import typing as _t
 from functools import cached_property
 from string import Template
@@ -24,10 +23,9 @@ from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
-from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import generate_base64_contents
-from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import encode_text
 
 from settings import LOGGING_CONFIG
 
@@ -38,7 +36,7 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("link")
 
 manager = get_manager()
 
@@ -46,8 +44,8 @@ manager = get_manager()
 def main():
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
 
-    render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
-    render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
+    render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
+    render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
 
     mapper = PersistenceMapper()
     persistence_groups = mapper.groups()
@@ -60,7 +58,7 @@ def main():
     if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
-            "/app/templates/jans-ldap.properties.tmpl",
+            "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
         sync_ldap_truststore(manager)
@@ -68,7 +66,7 @@ def main():
     if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
-            "/app/templates/jans-couchbase.properties.tmpl",
+            "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
         sync_couchbase_truststore(manager)
@@ -78,14 +76,14 @@ def main():
 
         render_sql_properties(
             manager,
-            f"/app/templates/jans-{db_dialect}.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties",
             "/etc/jans/conf/jans-sql.properties",
         )
 
     if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
-            "/app/templates/jans-spanner.properties.tmpl",
+            "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
 
@@ -95,14 +93,15 @@ def main():
     cert_to_truststore(
         "web_https",
         "/etc/certs/web_https.crt",
-        "/usr/java/latest/jre/lib/security/cacerts",
+        "/opt/java/lib/security/cacerts",
         "changeit",
     )
 
     configure_logging()
 
-    persistence_setup = PersistenceSetup(manager)
-    persistence_setup.import_ldif_files()
+    with manager.lock.create_lock("link-setup"):
+        persistence_setup = PersistenceSetup(manager)
+        persistence_setup.import_ldif_files()
 
 
 def configure_logging():
@@ -157,10 +156,10 @@ def configure_logging():
     # mapping between the ``log_target`` value and their appenders
     file_aliases = {
         "link_log_target": "FILE",
-        "persistence_log_target": "JANS_CACHEREFRESH_PERSISTENCE_FILE",
-        "persistence_duration_log_target": "JANS_CACHEREFRESH_PERSISTENCE_DURATION_FILE",
-        "ldap_stats_log_target": "JANS_CACHEREFRESH_PERSISTENCE_LDAP_STATISTICS_FILE",
-        "script_log_target": "JANS_CACHEREFRESH_SCRIPT_LOG_FILE",
+        "persistence_log_target": "JANS_LINK_PERSISTENCE_FILE",
+        "persistence_duration_log_target": "JANS_LINK_PERSISTENCE_DURATION_FILE",
+        "ldap_stats_log_target": "JANS_LINK_PERSISTENCE_LDAP_STATISTICS_FILE",
+        "script_log_target": "JANS_LINK_SCRIPT_LOG_FILE",
     }
     for key, value in file_aliases.items():
         if config[key] == "FILE":
@@ -172,7 +171,7 @@ def configure_logging():
     ]):
         config["log_prefix"] = "${sys:link.log.console.prefix}%X{link.log.console.group} - "
 
-    with open("/app/templates/log4j2.xml") as f:
+    with open("/app/templates/jans-link/log4j2.xml") as f:
         txt = f.read()
 
     logfile = "/opt/jans/jetty/jans-link/resources/log4j2.xml"
@@ -202,19 +201,29 @@ class PersistenceSetup:
 
     @cached_property
     def ctx(self) -> dict[str, _t.Any]:
+        host, port = os.environ.get("CN_LDAP_URL", "localhost:1636").split(":")
+
+        password = self.manager.secret.get("encoded_ox_ldap_pw")
+        salt = self.manager.secret.get("encoded_salt")
+        password_file = os.environ.get("CN_LDAP_PASSWORD_FILE", "/etc/jans/conf/ldap_password")
+
+        if not password and os.path.isfile(password_file):
+            with open(password_file) as f:
+                password = encode_text(f.read().strip(), salt).decode()
+
         ctx = {
-            "ldap_binddn": self.manager.config.get("ldap_binddn"),
-            "ldap_hostname": self.manager.config.get("ldap_init_host"),
-            "ldaps_port": self.manager.config.get("ldap_init_port"),
-            "encoded_ox_ldap_pw": self.manager.secret.get("encoded_ox_ldap_pw"),
-            "snapshots_dir": "/var/jans/cr-snapshots",
+            "ldap_binddn": self.manager.config.get("ldap_binddn") or "cn=Directory Manager",
+            "ldap_hostname": self.manager.config.get("ldap_init_host") or host,
+            "ldaps_port": self.manager.config.get("ldap_init_port") or port,
+            "ldap_bind_encoded_pw": password,
+            "snapshots_dir": "/var/jans/link-snapshots",
         }
 
-        # pre-populate jans_cacherefresh_config_base64
+        # pre-populate jans_link_config_base64
         with open("/app/templates/jans-link/jans-link-config.json") as f:
             ctx["jans_link_config_base64"] = generate_base64_contents(f.read() % ctx)
 
-        # pre-populate jans_cacherefresh_static_conf_base64
+        # pre-populate jans_link_static_conf_base64
         with open("/app/templates/jans-link/jans-link-static-config.json") as f:
             ctx["jans_link_static_conf_base64"] = generate_base64_contents(f.read())
 
@@ -222,11 +231,10 @@ class PersistenceSetup:
 
     @cached_property
     def ldif_files(self) -> list[str]:
-        files = [
+        return [
             f"/app/templates/jans-link/{file_}"
             for file_ in ["configuration.ldif"]
         ]
-        return files
 
     def import_ldif_files(self) -> None:
         for file_ in self.ldif_files:

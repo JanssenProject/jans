@@ -1,5 +1,58 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/v1.0.20...v1.0.20) (2023-11-08)
+
+
+### Features
+
+* **jans-tarp:** user should be allowed to paste an SSA (or specify a file from disk) in DCR form [#6161](https://github.com/JanssenProject/jans/issues/6161) ([#6467](https://github.com/JanssenProject/jans/issues/6467)) ([9b1f694](https://github.com/JanssenProject/jans/commit/9b1f69442003289aa2f92686c49d6e98e4e0e2c0))
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+## [1.0.19](https://github.com/JanssenProject/jans/compare/v1.0.19...v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **docker-jans:** upgrade base image to Java 17 ([#6231](https://github.com/JanssenProject/jans/issues/6231)) ([8ed40e9](https://github.com/JanssenProject/jans/commit/8ed40e91a56c256cb34262659b6e0657571f8c97))
+* keycloak refactoring referred to Issue [#5330](https://github.com/JanssenProject/jans/issues/5330) review ([#6157](https://github.com/JanssenProject/jans/issues/6157)) ([7319120](https://github.com/JanssenProject/jans/commit/73191202f2e39bf040749b69a31d01bdfbcec8eb))
+
+
+### Bug Fixes
+
+* **charts:** use interval-based cronjob schedule syntax ([#6089](https://github.com/JanssenProject/jans/issues/6089)) ([2c0fc97](https://github.com/JanssenProject/jans/commit/2c0fc97dccc938f641596e85c96d1ed4523f8f63))
+* **docs:** autogenerate docs ([#6261](https://github.com/JanssenProject/jans/issues/6261)) ([57137e4](https://github.com/JanssenProject/jans/commit/57137e446774f0769e54969b4edbc5d03b715298))
+* **docs:** scripts should be shown alphabetically ([#6222](https://github.com/JanssenProject/jans/issues/6222)) ([f60010c](https://github.com/JanssenProject/jans/commit/f60010c8180e3da8f49450233e551cfefe51dd00))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+## [1.0.18](https://github.com/JanssenProject/jans/compare/v1.0.17...v1.0.18) (2023-09-23)
+
+
+### Features
+
+* **jans-auth-server:** included org_id in the response of DCR [#5787](https://github.com/JanssenProject/jans/issues/5787) ([#6095](https://github.com/JanssenProject/jans/issues/6095)) ([34a5f8f](https://github.com/JanssenProject/jans/commit/34a5f8f43aefaa7403cd52d84e0b732f9e1d396e))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** redirect when session does not exist but client_id parameter is present ([#6104](https://github.com/JanssenProject/jans/issues/6104)) ([f8f9591](https://github.com/JanssenProject/jans/commit/f8f959144b527148f3b586088ae9dd6fcf1158cf))
+* **jans-auth-server:** swagger is malformed due to typo [#6085](https://github.com/JanssenProject/jans/issues/6085) ([#6086](https://github.com/JanssenProject/jans/issues/6086)) ([e1ae899](https://github.com/JanssenProject/jans/commit/e1ae899ac4b1d82cd428276e5f00065b0b5a633e))
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+* remove content-type in header from /retrieve GET request [#6096](https://github.com/JanssenProject/jans/issues/6096) ([#6099](https://github.com/JanssenProject/jans/issues/6099)) ([a85d867](https://github.com/JanssenProject/jans/commit/a85d86743da62c10fef83f2b181d1a992210534f))
+
+## [1.0.17](https://github.com/JanssenProject/jans/compare/v1.0.17...v1.0.17) (2023-09-17)
+
+
+### Bug Fixes
+
+* **docker-jans-fido2:** search cache for session instead of persistence ([#6040](https://github.com/JanssenProject/jans/issues/6040)) ([d8d4073](https://github.com/JanssenProject/jans/commit/d8d40731d935782dc3a8639d055a2440dbdcb3ec))
+* **docker-jans-persistence-loader:** search session by deviceSecret ([#6038](https://github.com/JanssenProject/jans/issues/6038)) ([d299d7f](https://github.com/JanssenProject/jans/commit/d299d7f926e07c7e0af04d5069d51ba9b000393f))
+* **docs:** autogenerate docs ([#6065](https://github.com/JanssenProject/jans/issues/6065)) ([0f3cf5d](https://github.com/JanssenProject/jans/commit/0f3cf5d6c679f02b5a385b72003de2669f2bfb66))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
 ## [1.0.16](https://github.com/JanssenProject/jans/compare/v1.0.16...v1.0.16) (2023-08-02)
 
 

@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.17-SNAPSHOT</version>
+		<version>1.0.21-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -89,7 +89,6 @@
 				<version>3.4.1</version>
 				<configuration>
 					<shadedArtifactAttached>true</shadedArtifactAttached>
-					<shadedClassifierName>external</shadedClassifierName>
 					<createDependencyReducedPom>false</createDependencyReducedPom>
 					<createSourcesJar>false</createSourcesJar>
 				</configuration>
@@ -101,6 +100,7 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+                            <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
 							<finalName>jans-auth-client-jar-with-dependencies</finalName>
 							<shadedArtifactId>jans-auth-client-jar-with-dependencies</shadedArtifactId>
 							<transformers>
@@ -130,6 +130,7 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+                            <shadedClassifierName>jar-without-crypto-provider</shadedClassifierName>
 							<finalName>jans-auth-client-jar-without-provider-dependencies</finalName>
 							<shadedArtifactId>jans-auth-client-jar-without-provider-dependencies</shadedArtifactId>
 							<artifactSet>

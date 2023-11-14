@@ -17,6 +17,7 @@ public final class ConfigurationResponseClaim {
 
     public static final String ISSUER = "issuer";
     public static final String AUTHORIZATION_ENDPOINT = "authorization_endpoint";
+    public static final String AUTHORIZATION_CHALLENGE_ENDPOINT = "authorization_challenge_endpoint";
     public static final String TOKEN_ENDPOINT = "token_endpoint";
     public static final String REVOCATION_ENDPOINT = "revocation_endpoint";
     public static final String SESSION_REVOCATION_ENDPOINT = "session_revocation_endpoint";
@@ -25,6 +26,7 @@ public final class ConfigurationResponseClaim {
     public static final String CHECK_SESSION_IFRAME = "check_session_iframe";
     public static final String END_SESSION_ENDPOINT = "end_session_endpoint";
     public static final String JWKS_URI = "jwks_uri";
+    public static final String ARCHIVED_JWKS_URI = "archived_jwks_uri";
     public static final String REGISTRATION_ENDPOINT = "registration_endpoint";
     public static final String ID_GENERATION_ENDPOINT = "id_generation_endpoint";
     public static final String INTROSPECTION_ENDPOINT = "introspection_endpoint";
@@ -44,6 +46,9 @@ public final class ConfigurationResponseClaim {
     public static final String USER_INFO_SIGNING_ALG_VALUES_SUPPORTED = "userinfo_signing_alg_values_supported";
     public static final String USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED = "userinfo_encryption_alg_values_supported";
     public static final String USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED = "userinfo_encryption_enc_values_supported";
+    public static final String INTROSPECTION_SIGNING_ALG_VALUES_SUPPORTED = "introspection_signing_alg_values_supported";
+    public static final String INTROSPECTION_ENCRYPTION_ALG_VALUES_SUPPORTED = "introspection_encryption_alg_values_supported";
+    public static final String INTROSPECTION_ENCRYPTION_ENC_VALUES_SUPPORTED = "introspection_encryption_enc_values_supported";
     public static final String ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED = "id_token_signing_alg_values_supported";
     public static final String ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED = "id_token_encryption_alg_values_supported";
     public static final String ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED = "id_token_encryption_enc_values_supported";

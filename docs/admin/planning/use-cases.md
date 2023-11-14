@@ -23,7 +23,7 @@ To switch sessions, an RP can redirect to the Jans Auth Server OpenID Connect Pr
 
 ## Native Single Sign-On (N-SS0)
 
-On most mobile platforms, mobile apps signed by the same vendor certs can share information via the system "keychain" (Account Manager on Android). [OpenID Mobile SSO](https://openid.net/specs/openid-connect-native-sso-1_0.html) specifies a new scope, extends the token endpoint and profiles the [OAuth2 Token Exchange](https://www.rfc-editor.org/rfc/rfc8693.html) spec allowing mobile apps to share identity between apps produced and signed by the same vendor (i.e. signed with the same vendor certificate).
+On most mobile platforms, mobile apps signed by the same vendor certs can share information via the system "keychain" (Account Manager on Android). [OpenID Mobile SSO](https://openid.net/specs/openid-connect-native-sso-1_0.html) specifies a new scope, extends the token endpoint, and profiles the [OAuth2 Token Exchange](https://www.rfc-editor.org/rfc/rfc8693.html) spec allowing mobile apps to share identity between apps produced and signed by the same vendor (i.e. signed with the same vendor certificate).
 
 ## Single Logout (SLO)
 
@@ -41,13 +41,13 @@ receive a notification, some of those notifications may fail. Ideally, you'd
 replay messages that aren't received. But end users want a fast logout response,
 and don't want to wait for all the applications to confirm they received and
 acted on the notification. So making logout synchronous is a round-hole /
-square peg situation. But with that said, Auth Server supports it.
+square-peg situation. But with that said, Auth Server supports it.
 
 ## API Access Management
 
 Janssen Auth Server is frequently used to issue access tokens to authenticate
 software clients that needs to call an API. The [OAuth WG](https://datatracker.ietf.org/group/oauth/documents/) has published many useful
-specifications about how to do this securely, and Janssen implements [many](.) of
+specifications about how to do this securely, and Janssen implements [many](../auth-server/README.md#supported-standards) of
 these RFCs and drafts. In OAuth parlance, Jans Auth Server is the Authorization
 Server; and Jans Client API is a service that helps clients with advanced
 features like MTLS and private key authentication. As OAuth scopes are frequently
@@ -68,17 +68,17 @@ OpenID Connect is a web identity layer. Auth Server displays and processes a
 series of web pages to authenticate a person, and then shares user claims
 with the applications that requested them. Out of the box, Auth Server supports
 many MFA workflows, including FIDO, passkeys, OATH OTP (HOTP, TOTP), SMS (via
-Twilio or SMPP) and many more. But you're not limited to the MFA that comes
+Twilio or SMPP), and many more. But you're not limited to the MFA that comes
 out of the box. Using Person Authentication Scripts, you can implement any
 authentication workflow which you can imagine. You can also use the Janssen
-Project's Agama programming language to implement multi-step authenticaiton
+Project's Agama programming language to implement multi-step authentication
 workflows.
 
 ## Mobile Authentication
 
 One of the initial requirements for OpenID was to support mobile apps (because
 SAML is terrible for mobile apps). OpenID and OAuth have developed several
-mitigations that make mobile authentication more secure, which are desribed
+mitigations that make mobile authentication more secure, which are described
 in [RFC 8252](https://datatracker.ietf.org/doc/rfc8252/). However, due to
 the complexity of cookie sharing between the mobile phone browser SDK, and
 the mobile browser (assuming you are using the system browser), your results
@@ -86,8 +86,8 @@ may vary if you actually want SSO.  Recently, OpenID has published a new
 specification draft for [Native SSO for Mobile Apps](https://openid.net/specs/openid-connect-native-sso-1_0.html),
 which is on the [roadmap](https://github.com/JanssenProject/jans/issues/2518).
 There are some other hacky ways you can implement mobile authentication, for
-example, using the OAuth `password` grant--but this is possible only for first
-party applications, and is generally discouraged, because there is no way to
+example, using the OAuth `password` grant--but this is possible only for first-party 
+applications, and is generally discouraged, because there is no way to
 securely store a client secret in the mobile application, which hackers can
 easily decompile.
 
@@ -95,8 +95,8 @@ easily decompile.
 
 You'll notice that the [Gluu Open Banking Identity Platform](https://openid.net/certification/#FAPI_OPs)
 is certified for Financial-grade API (FAPI) 1.0 Final--this is Gluu's distribution
-of Janssen Auth Server profiled for banking. If you want to implement an OP for
-open banking, Jans Auth Server is one of the few comprehensive open source
+of the Janssen Auth Server profiled for banking. If you want to implement an OP for
+open banking, Jans Auth Server is one of the few comprehensive open-source
 platforms that will enable you to do so.
 
 ## Social Sign-in
@@ -105,8 +105,8 @@ This could really be covered under the MFA section. But it's not uncommon that
 as part of an authentication workflow, Auth Server may redirect you to an
 external identity provider, which then sends you back to Auth Server with
 some kind of reference id or assertion. Out of the box, Jans supports the top
-three social sites: Google, Apple, Facebook (which account for 80% of social
-login). But of course you can implement any social login using an Agama project.
+three social sites: Google, Apple, and Facebook (which account for 80% of social
+login). But of course, you can implement any social login using an Agama project.
 
 ## Registration
 
@@ -116,16 +116,16 @@ the OpenID working group recently created a spec to standardize a parameter
 in the authentication request to signal to the OpenID Provider that this is
 what's happening: [prompt=create](https://github.com/JanssenProject/jans/issues/2616).
 As we're just displaying a series of web pages, we can display a registration
-form, process the form (with some kind of remote identity proofing?), send email,
-SMS, Telegram messages or whatever. Also, frequently social login is tied to
+form, process the form (with some kind of remote identity proofing?), send an email,
+SMS, Telegram messages, or whatever. Also, frequently social login is tied to
 registration--the first time you login with an external IDP, Auth Server creates
-an account of the fly with the user claims sent by the remote IDP.
+an account on the fly with the user claims sent by the remote IDP.
 
 ## Authorization
 
 Frequently people conflate the identity layer with the authorization layer. RBAC
 is still an important security paradigm. So it makes sense to people that the
-place where you store information about a person's roles, is where you define
+place where you store information about a person's roles is where you define
 policies about what resources a role can access (i.e. policies). Recently,
 centralized authorization has had an active resurgence. Companies like
 [Styra](https://www.styra.com/), [Oso](https://www.osohq.com/), and
@@ -134,10 +134,10 @@ centralized authorization software. These systems, acting as a "policy decision
 point", enable you to define policies, and can evaluate these policies at
 runtime. Note: they rely on "policy enforcement points" to call their endpoints,
 supplying the data which is input to policies. With that said, there are places
-in Auth Server that you can define or impact authorization (besides user claims).
+in Auth Server where you can define or impact authorization (besides user claims).
 In particular, [OAuth scopes](https://www.rfc-editor.org/rfc/rfc6749#section-3.3)
 are used to convey the extent of access in an access token, that when presented
-to an API by a software client, enables access control. However, scope is still
+to an API by a software client, enables access control. However, the scope is still
 input to policy, and may in fact be just one more piece of data considered by
 a policy decision point. And one more caveat... the "authorization" in an OAuth
 "authorization server", was originally meant to convey the authorization of the

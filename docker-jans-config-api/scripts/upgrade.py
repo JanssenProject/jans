@@ -12,13 +12,12 @@ from jans.pycloudlib.persistence import SqlClient
 from jans.pycloudlib.persistence import PersistenceMapper
 from jans.pycloudlib.persistence import doc_id_from_dn
 from jans.pycloudlib.persistence import id_from_dn
-from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("config-api")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
@@ -191,10 +190,10 @@ class CouchbaseBackend:
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
         bucket = kwargs.get("bucket")
         req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec: B608
         )
         if not req.ok:
-            return
+            return None
 
         try:
             _attrs = req.json()["results"][0]
@@ -234,7 +233,7 @@ class CouchbaseBackend:
     def search_entries(self, key, filter_="", attrs=None, **kwargs):
         bucket = kwargs.get("bucket")
         req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} {filter_}"
+            f"SELECT META().id, {bucket}.* FROM {bucket} {filter_}"  # nosec: B608
         )
         if not req.ok:
             return []
@@ -297,7 +296,6 @@ class Upgrade:
         self.update_api_dynamic_config()
 
         # add missing scopes into internal config-api client (if enabled)
-        # if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
         self.update_client_scopes()
         self.update_test_client_scopes()
 
@@ -456,8 +454,10 @@ class Upgrade:
 
 def main():
     manager = get_manager()
-    upgrade = Upgrade(manager)
-    upgrade.invoke()
+
+    with manager.lock.create_lock("config-api-upgrade"):
+        upgrade = Upgrade(manager)
+        upgrade.invoke()
 
 
 if __name__ == "__main__":

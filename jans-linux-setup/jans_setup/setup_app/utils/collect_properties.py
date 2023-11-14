@@ -20,7 +20,7 @@ from setup_app.utils.properties_utils import propertiesUtils
 from setup_app.pylib.jproperties import Properties
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.base import BaseInstaller
-from setup_app.installers.casa import CasaInstaller
+from setup_app.installers.jans_casa import CasaInstaller
 
 class CollectProperties(SetupUtils, BaseInstaller):
 
@@ -64,7 +64,8 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if not Config.persistence_type in ('couchbase', 'sql') and os.path.exists(Config.ox_ldap_properties):
             jans_ldap_prop = base.read_properties_file(Config.ox_ldap_properties)
             Config.ldap_binddn = jans_ldap_prop['bindDN']
-            Config.ldapPass = self.unobscure(jans_ldap_prop['bindPassword'])
+            Config.ldap_bind_encoded_pw = jans_ldap_prop['bindPassword']
+            Config.ldapPass = self.unobscure(Config.ldap_bind_encoded_pw)
             Config.opendj_p12_pass = self.unobscure(jans_ldap_prop['ssl.trustStorePin'])
             Config.ldap_hostname, Config.ldaps_port = jans_ldap_prop['servers'].split(',')[0].split(':')
 
@@ -155,6 +156,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('scim_client_id', '1201.', {'pw': 'scim_client_pw', 'encoded':'scim_client_encoded_pw'}),
                     ('admin_ui_client_id', '1901.', {'pw': 'admin_ui_client_pw', 'encoded': 'admin_ui_client_encoded_pw'}),
                     ('casa_client_id', CasaInstaller.client_id_prefix),
+                    ('saml_scim_client_id', '2100.'),
                     ]
         self.check_clients(client_var_id_list, create=False)
 
@@ -242,6 +244,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
         Config.install_jans_link = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-link'))
         Config.install_casa = os.path.exists(os.path.join(Config.jetty_base, 'casa/start.d'))
+        Config.install_jans_keycloak_link = os.path.exists(os.path.join(Config.jetty_base, 'jans-keycloak-link/start.d'))
 
     def save(self):
         if os.path.exists(Config.setup_properties_fn):

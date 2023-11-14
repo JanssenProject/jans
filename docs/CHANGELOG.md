@@ -1,5 +1,79 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/docs-v1.0.19...docs-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* **jans-auth-server:** added PKCE support to authz challenge endpoint [#6180](https://github.com/JanssenProject/jans/issues/6180) ([#6339](https://github.com/JanssenProject/jans/issues/6339)) ([d9a24bc](https://github.com/JanssenProject/jans/commit/d9a24bc4399f656915923395858ea085ca3dccfa))
+* **jans-auth-server:** allow revoke any token - explicitly allow by config and scope [#6381](https://github.com/JanssenProject/jans/issues/6381) ([#6412](https://github.com/JanssenProject/jans/issues/6412)) ([47cbee9](https://github.com/JanssenProject/jans/commit/47cbee9cf917f0f79c53e9e0cfe1e2beab3108bc))
+* **jans-auth-server:** multi-step authn challenge flow custom script ([#6275](https://github.com/JanssenProject/jans/issues/6275)) ([b28f1c8](https://github.com/JanssenProject/jans/commit/b28f1c8078a7a8a3358d6d589ba7e7c4585bf15c))
+* **jans-pycloudlib:** add lock to prevent race condition ([#6329](https://github.com/JanssenProject/jans/issues/6329)) ([9dd82da](https://github.com/JanssenProject/jans/commit/9dd82da5c87ee829c73a1135ce8740b8353f8ab5))
+
+
+### Bug Fixes
+
+* **docs:** minor fixes in DPOP document ([#6374](https://github.com/JanssenProject/jans/issues/6374)) ([3431b85](https://github.com/JanssenProject/jans/commit/3431b85b922e7fa985c8201a13b990b3d99f7749))
+* **docs:** remove additional Agama title ([#6361](https://github.com/JanssenProject/jans/issues/6361)) ([c2ab212](https://github.com/JanssenProject/jans/commit/c2ab212b78e0fa73bde2d9b694fa44b22675b4ca))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+* registration_uri for super gluu script defaults to an /identity ([#6369](https://github.com/JanssenProject/jans/issues/6369)) ([28c4714](https://github.com/JanssenProject/jans/commit/28c47141a22a1139762655e3ccab6cc34cf7798f)), closes [#6183](https://github.com/JanssenProject/jans/issues/6183)
+
+## [1.0.19](https://github.com/JanssenProject/jans/compare/docs-v1.0.18...docs-v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **agama:** add support for autoconfiguration  ([#6210](https://github.com/JanssenProject/jans/issues/6210)) ([18f15da](https://github.com/JanssenProject/jans/commit/18f15da64ec4ccf453b03ada92727ef1114a2043))
+* **jans-auth-server:** added "authorization_challenge" scope enforcement [#5856](https://github.com/JanssenProject/jans/issues/5856) ([#6216](https://github.com/JanssenProject/jans/issues/6216)) ([b3db5c8](https://github.com/JanssenProject/jans/commit/b3db5c8cba829fc3e6aec350af7c0b4e5cf068c6))
+* **jans-auth-server:** added DPoP to authorization code and PAR ([#6196](https://github.com/JanssenProject/jans/issues/6196)) ([be559bf](https://github.com/JanssenProject/jans/commit/be559bfebdf61068a296a05334e731a78a2cc91a))
+* **jans-auth-server:** passing custom parameters in the body of POST authorization request and ROPC [#6141](https://github.com/JanssenProject/jans/issues/6141) ([#6148](https://github.com/JanssenProject/jans/issues/6148)) ([00673ae](https://github.com/JanssenProject/jans/commit/00673aea847eb5405d07ef0fbfb341eb0d6cc497))
+* **jans-auth:** new lifetime attribute in ssa ([#6214](https://github.com/JanssenProject/jans/issues/6214)) ([b049e33](https://github.com/JanssenProject/jans/commit/b049e334bbe9d0c3b0214694e9fd6501019b8530))
+
+
+### Bug Fixes
+
+* **docs:** autogenerate docs ([#6261](https://github.com/JanssenProject/jans/issues/6261)) ([57137e4](https://github.com/JanssenProject/jans/commit/57137e446774f0769e54969b4edbc5d03b715298))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+## [1.0.18](https://github.com/JanssenProject/jans/compare/docs-v1.0.17...docs-v1.0.18) (2023-09-23)
+
+
+### Bug Fixes
+
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
+## [1.0.17](https://github.com/JanssenProject/jans/compare/docs-v1.0.16...docs-v1.0.17) (2023-09-17)
+
+
+### Features
+
+* add encrypted inum to session params [#6018](https://github.com/JanssenProject/jans/issues/6018) ([#6019](https://github.com/JanssenProject/jans/issues/6019)) ([aabc8a1](https://github.com/JanssenProject/jans/commit/aabc8a14e05004a94443f21714a135fe71658fbd))
+* fido2 needs to search cache for session instead of persistent ([#6011](https://github.com/JanssenProject/jans/issues/6011)) ([0cc0c19](https://github.com/JanssenProject/jans/commit/0cc0c192735c0537c28bb7cc96a9db509d9628e0))
+* **jans-auth-server:** add client_id parameter support to /end_session [#5942](https://github.com/JanssenProject/jans/issues/5942) ([#6032](https://github.com/JanssenProject/jans/issues/6032)) ([09ee345](https://github.com/JanssenProject/jans/commit/09ee345ae7ed1fd7fc19260e3533e7c2c652b9f1))
+* **jans-auth-server:** added "The Use of Attestation in OAuth 2.0 Dynamic Client Registration" spec support [#5562](https://github.com/JanssenProject/jans/issues/5562) ([#5868](https://github.com/JanssenProject/jans/issues/5868)) ([38653c9](https://github.com/JanssenProject/jans/commit/38653c9cb9eb992213c5f230a5f36ce1187d0197))
+* **jans-auth-server:** OAuth 2.0 for First-Party Native Applications ([#5654](https://github.com/JanssenProject/jans/issues/5654)) ([9d90e28](https://github.com/JanssenProject/jans/commit/9d90e28791c49bc86771623601c654f2c662b7a1))
+* **jans-fido2:** mds optional ([#5409](https://github.com/JanssenProject/jans/issues/5409)) ([fad9961](https://github.com/JanssenProject/jans/commit/fad9961fbeeffb315d6ca495c43f8a4f000eac86))
+* **jans-linux-setup:** salt with argument ([#5786](https://github.com/JanssenProject/jans/issues/5786)) ([d433827](https://github.com/JanssenProject/jans/commit/d4338271d910ec66e2788e77049c111046193a95))
+
+
+### Bug Fixes
+
+* **docs:** add missing interception scripts to the listing ([#5923](https://github.com/JanssenProject/jans/issues/5923)) ([84e39e9](https://github.com/JanssenProject/jans/commit/84e39e913a5fdd2ceb57a531025af9ad9a894bbd))
+* **docs:** Adding custom attribute - mysql-ops.md ([#5849](https://github.com/JanssenProject/jans/issues/5849)) ([1b7152a](https://github.com/JanssenProject/jans/commit/1b7152a4fa2421cc6a02cba825bca3b330379ad4))
+* **docs:** autogenerate docs ([#6065](https://github.com/JanssenProject/jans/issues/6065)) ([0f3cf5d](https://github.com/JanssenProject/jans/commit/0f3cf5d6c679f02b5a385b72003de2669f2bfb66))
+* **docs:** Corrected path [#5810](https://github.com/JanssenProject/jans/issues/5810) ([#5811](https://github.com/JanssenProject/jans/issues/5811)) ([26a4671](https://github.com/JanssenProject/jans/commit/26a46713e4f8f9e2a6a478321d0105bdb65b8137))
+* **docs:** initial commit - Update pgsql-ops.md ([#5850](https://github.com/JanssenProject/jans/issues/5850)) ([bd40c5b](https://github.com/JanssenProject/jans/commit/bd40c5b3ed82373225790e3d66ed7f7cd3e04ccb))
+* **docs:** mysql operation for custom attr TUI ([#5848](https://github.com/JanssenProject/jans/issues/5848)) ([d1468a1](https://github.com/JanssenProject/jans/commit/d1468a19227aace3090f64ba9e48de6adc5df835))
+* **docs:** mysql-operation-1 ([#5846](https://github.com/JanssenProject/jans/issues/5846)) ([f57cdb3](https://github.com/JanssenProject/jans/commit/f57cdb3058fa26fc6fef43a01c2438914d2a4b54))
+* **docs:** remove selinux disabling instruction for RHEL Setup ([#5795](https://github.com/JanssenProject/jans/issues/5795)) ([546f0bd](https://github.com/JanssenProject/jans/commit/546f0bd80958ece93be48abad16b2ec9898d8934))
+* **docs:** remove tmp file ([#5788](https://github.com/JanssenProject/jans/issues/5788)) ([20fe34b](https://github.com/JanssenProject/jans/commit/20fe34b706cb50f77c080c241b9721fd7d132cea))
+* **docs:** removed Agama Developer Studio reference ([#5874](https://github.com/JanssenProject/jans/issues/5874)) ([676a647](https://github.com/JanssenProject/jans/commit/676a6479419a68a8f5a7a043810142553ac3c893))
+* **docs:** Update mysql-ops.md ([#5847](https://github.com/JanssenProject/jans/issues/5847)) ([ec3faf6](https://github.com/JanssenProject/jans/commit/ec3faf6c6a7d751a9d0b74f5df5db0bf1dfb64c1))
+* **docs:** Update pgsql-ops.md ([#5866](https://github.com/JanssenProject/jans/issues/5866)) ([9d4483c](https://github.com/JanssenProject/jans/commit/9d4483c1172d9a607465b4cdbbebdcfceaf954a7))
+* fix typo in SG script ([#5936](https://github.com/JanssenProject/jans/issues/5936)) ([f06b6ca](https://github.com/JanssenProject/jans/commit/f06b6ca458305a47e5aa8f8821fad1d8335f5a20))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+* remove pending deployments when exceeding 5 minutes [#5636](https://github.com/JanssenProject/jans/issues/5636) ([#5762](https://github.com/JanssenProject/jans/issues/5762)) ([64ded2c](https://github.com/JanssenProject/jans/commit/64ded2ccccd78fc146f326ab85ba08e5a555a756))
+
 ## [1.0.16](https://github.com/JanssenProject/jans/compare/docs-v1.0.15...docs-v1.0.16) (2023-08-02)
 
 

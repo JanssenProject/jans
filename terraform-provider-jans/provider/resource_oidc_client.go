@@ -692,6 +692,11 @@ func resourceOidcClient() *schema.Resource {
 							Optional:    true,
 							Description: "List of requested lifetime.",
 						},
+						"evidence": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Specifies the evidence that the client presents to the authorization server.",
+						},
 					},
 				},
 			},
@@ -727,7 +732,7 @@ func resourceOidcClient() *schema.Resource {
 				},
 			},
 			"backchannel_user_code_parameter": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.",
 			},

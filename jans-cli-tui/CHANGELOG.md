@@ -1,5 +1,50 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.19...jans-cli-tui-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* **jans-cli-tui:** obtain script types from config-api ([#6314](https://github.com/JanssenProject/jans/issues/6314)) ([5d4e588](https://github.com/JanssenProject/jans/commit/5d4e5885489babaadd59c5aedf2208e94f564512))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** client uri, policy uri, logo uri proerties are missing for clients ([#6460](https://github.com/JanssenProject/jans/issues/6460)) ([908fcce](https://github.com/JanssenProject/jans/commit/908fcced38bc6c821beaae118286245498bb1ac0))
+* **jans-cli-tui:** hide client scret ([#6372](https://github.com/JanssenProject/jans/issues/6372)) ([ac49f6c](https://github.com/JanssenProject/jans/commit/ac49f6caa0b40e81bc808c37663ccfb54f5a35d5))
+* **jans-cli-tui:** remove claim from scope ([#6461](https://github.com/JanssenProject/jans/issues/6461)) ([42791ec](https://github.com/JanssenProject/jans/commit/42791ece6a0acad37660b852fc3c7bf73988082b))
+* **jans-cli-tui:** ruamel.yaml&lt;0.18.0 ([#6411](https://github.com/JanssenProject/jans/issues/6411)) ([9da0502](https://github.com/JanssenProject/jans/commit/9da0502da45c8f5d05ad631e609dfda1b77a169c))
+* **jans-cli-tui:** save changes before testing STMP config ([#6378](https://github.com/JanssenProject/jans/issues/6378)) ([1429b0b](https://github.com/JanssenProject/jans/commit/1429b0b83c5a715812eaffe700f8253f3c4f6e56))
+* **jans-cli-tui:** save logging response is app properties not schema ([#6452](https://github.com/JanssenProject/jans/issues/6452)) ([f1a9950](https://github.com/JanssenProject/jans/commit/f1a9950e2caffd1bcf841fc9f02755ef84e13fa2))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.18...jans-cli-tui-v1.0.19) (2023-10-11)
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** mail validation and link log level ([#6140](https://github.com/JanssenProject/jans/issues/6140)) ([f0a8a9a](https://github.com/JanssenProject/jans/commit/f0a8a9a5c389dc9a914aba46c92c63dab4c824e0))
+* **jans-linux-setup:** script hide attribute ([#6181](https://github.com/JanssenProject/jans/issues/6181)) ([b4711cd](https://github.com/JanssenProject/jans/commit/b4711cd1074dccc0b8aad81fc4e4bd238c8a516f))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.17...jans-cli-tui-v1.0.18) (2023-09-23)
+
+
+### Bug Fixes
+
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.16...jans-cli-tui-v1.0.17) (2023-09-17)
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** check if host in config ([#5836](https://github.com/JanssenProject/jans/issues/5836)) ([04265de](https://github.com/JanssenProject/jans/commit/04265de820bccfc89ce2c9108f41669a605cf03c))
+* **jans-cli-tui:** move agama archiever to jans-cli directory ([#5721](https://github.com/JanssenProject/jans/issues/5721)) ([61053f0](https://github.com/JanssenProject/jans/commit/61053f0a9cee48415b57289b8236733dcd725199))
+* **jans-cli-tui:** table rows fith dialog ([#6028](https://github.com/JanssenProject/jans/issues/6028)) ([dbbced4](https://github.com/JanssenProject/jans/commit/dbbced44f95050684f18990f28cedf9c7d71923a))
+* **jans-cli-tui:** table widget size for agama details dialog ([#6021](https://github.com/JanssenProject/jans/issues/6021)) ([d2a0b56](https://github.com/JanssenProject/jans/commit/d2a0b567f08fb5f33b3363583c28e2901be96674))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
 ## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.15...jans-cli-tui-v1.0.16) (2023-08-02)
 
 

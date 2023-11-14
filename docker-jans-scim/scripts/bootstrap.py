@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging.config
 import os
-import re
 import typing as _t
 from functools import cached_property
 from string import Template
@@ -42,7 +41,7 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("scim")
 
 manager = get_manager()
 
@@ -50,8 +49,8 @@ manager = get_manager()
 def main():
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
 
-    render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
-    render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
+    render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
+    render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
 
     mapper = PersistenceMapper()
     persistence_groups = mapper.groups()
@@ -64,7 +63,7 @@ def main():
     if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
-            "/app/templates/jans-ldap.properties.tmpl",
+            "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
         sync_ldap_truststore(manager)
@@ -72,7 +71,7 @@ def main():
     if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
-            "/app/templates/jans-couchbase.properties.tmpl",
+            "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
         sync_couchbase_truststore(manager)
@@ -82,14 +81,14 @@ def main():
 
         render_sql_properties(
             manager,
-            f"/app/templates/jans-{db_dialect}.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties",
             "/etc/jans/conf/jans-sql.properties",
         )
 
     if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
-            "/app/templates/jans-spanner.properties.tmpl",
+            "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
 
@@ -99,14 +98,15 @@ def main():
     cert_to_truststore(
         "web_https",
         "/etc/certs/web_https.crt",
-        "/usr/java/latest/jre/lib/security/cacerts",
+        "/opt/java/lib/security/cacerts",
         "changeit",
     )
 
     configure_logging()
 
-    persistence_setup = PersistenceSetup(manager)
-    persistence_setup.import_ldif_files()
+    with manager.lock.create_lock("scim-setup"):
+        persistence_setup = PersistenceSetup(manager)
+        persistence_setup.import_ldif_files()
 
 
 def configure_logging():
@@ -176,7 +176,7 @@ def configure_logging():
     ]):
         config["log_prefix"] = "${sys:scim.log.console.prefix}%X{scim.log.console.group} - "
 
-    with open("/app/templates/log4j2.xml") as f:
+    with open("/app/templates/jans-scim/log4j2.xml") as f:
         txt = f.read()
 
     logfile = "/opt/jans/jetty/jans-scim/resources/log4j2.xml"
@@ -243,11 +243,10 @@ class PersistenceSetup:
 
     @cached_property
     def ldif_files(self) -> list[str]:
-        files = [
+        return [
             f"/app/templates/jans-scim/{file_}"
             for file_ in ["configuration.ldif", "scopes.ldif", "clients.ldif"]
         ]
-        return files
 
     def import_ldif_files(self) -> None:
         # temporarily disable dynamic scopes creation

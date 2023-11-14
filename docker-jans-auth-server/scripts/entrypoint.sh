@@ -1,9 +1,9 @@
 #!/bin/sh
+
 set -e
 
-# =========
-# FUNCTIONS
-# =========
+# get script directory
+basedir=$(dirname "$(readlink -f -- "$0")")
 
 get_debug_opt() {
     debug_opt=""
@@ -16,8 +16,8 @@ get_debug_opt() {
 }
 
 move_builtin_jars() {
-    #twilio, jsmpp, casa-config, jans-fido2-client
-    for src in /usr/share/java/*.jar; do
+    # twilio, jsmpp, casa-config, jans-fido2-client
+    for src in /opt/jans/jetty/jans-auth/_libs/*.jar; do
         fname=$(basename "$src")
         cp "$src" "/opt/jans/jetty/jans-auth/custom/libs/$fname"
     done
@@ -44,35 +44,48 @@ get_prometheus_lib() {
     fi
 }
 
-# ==========
-# ENTRYPOINT
-# ==========
+get_java_options() {
+    if [ -n "${CN_AUTH_JAVA_OPTIONS}" ]; then
+        echo " ${CN_AUTH_JAVA_OPTIONS} "
+    else
+        # backward-compat
+        echo " ${CN_JAVA_OPTIONS} "
+    fi
+}
+
+get_max_ram_percentage() {
+    if [ -n "${CN_MAX_RAM_PERCENTAGE}" ]; then
+        echo " -XX:MaxRAMPercentage=$CN_MAX_RAM_PERCENTAGE "
+    fi
+}
 
 move_builtin_jars
 get_prometheus_lib
-python3 /app/scripts/wait.py
-python3 /app/scripts/bootstrap.py
-python3 /app/scripts/jks_sync.py &
-python3 /app/scripts/mod_context.py jans-auth
-python3 /app/scripts/auth_conf.py
+python3 "$basedir/wait.py"
+python3 "$basedir/bootstrap.py"
+python3 "$basedir/jks_sync.py" &
+python3 "$basedir/mod_context.py" jans-auth
+python3 "$basedir/auth_conf.py"
 
-# run auth-server
 cd /opt/jans/jetty/jans-auth
+# shellcheck disable=SC2046
 exec java \
     -server \
     -XX:+DisableExplicitGC \
     -XX:+UseContainerSupport \
-    -XX:MaxRAMPercentage=$CN_MAX_RAM_PERCENTAGE \
     -Djans.base=/etc/jans \
     -Dserver.base=/opt/jans/jetty/jans-auth \
     -Dlog.base=/opt/jans/jetty/jans-auth \
-    -Dpython.home=/opt/jython \
-    -Djava.io.tmpdir=/tmp \
+    -Djava.io.tmpdir=/opt/jetty/temp \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
+    -Dpython.home=/opt/jython \
     $(get_debug_opt) \
+    $(get_max_ram_percentage) \
     $(get_prometheus_opt) \
-    ${CN_JAVA_OPTIONS} \
+    $(get_java_options) \
     -jar /opt/jetty/start.jar \
+        jetty.http.host="${CN_AUTH_JETTY_HOST}" \
+        jetty.http.port="${CN_AUTH_JETTY_PORT}" \
         jetty.deploy.scanInterval=0 \
         jetty.httpConfig.sendServerVersion=false \
         jetty.httpConfig.requestHeaderSize=$CN_JETTY_REQUEST_HEADER_SIZE

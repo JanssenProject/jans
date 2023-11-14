@@ -61,6 +61,9 @@ public class Jwt extends JsonWebResponse {
     }
 
     public static Jwt parseSilently(String encodedJwt) {
+        if (StringUtils.isBlank(encodedJwt)) {
+            return null;
+        }
         try {
             return parse(encodedJwt);
         } catch (Exception e) {

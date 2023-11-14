@@ -17,6 +17,7 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.util.CertUtils;
+import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.persistence.model.ScopeAttributes;
 import io.jans.as.server.ciba.CIBAConfigurationService;
@@ -28,27 +29,23 @@ import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.JansAttribute;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
 import static io.jans.as.model.util.StringUtils.implode;
@@ -200,6 +197,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
 
             jsonObj.put(ISSUER, appConfiguration.getIssuer());
             jsonObj.put(AUTHORIZATION_ENDPOINT, appConfiguration.getAuthorizationEndpoint());
+            jsonObj.put(AUTHORIZATION_CHALLENGE_ENDPOINT, appConfiguration.getAuthorizationChallengeEndpoint());
             jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
             jsonObj.put(REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
             jsonObj.put(SESSION_REVOCATION_ENDPOINT, endpointUrl("/revoke_session"));
@@ -208,6 +206,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
             jsonObj.put(END_SESSION_ENDPOINT, appConfiguration.getEndSessionEndpoint());
             jsonObj.put(JWKS_URI, appConfiguration.getJwksUri());
+            jsonObj.put(ARCHIVED_JWKS_URI, appConfiguration.getArchivedJwksUri());
             jsonObj.put(REGISTRATION_ENDPOINT, appConfiguration.getRegistrationEndpoint());
             jsonObj.put(ID_GENERATION_ENDPOINT, appConfiguration.getIdGenerationEndpoint());
             jsonObj.put(INTROSPECTION_ENDPOINT, appConfiguration.getIntrospectionEndpoint());
@@ -254,6 +253,10 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             if (subjectTypesSupported.length() > 0) {
                 jsonObj.put(SUBJECT_TYPES_SUPPORTED, subjectTypesSupported);
             }
+
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionSigningAlgValuesSupported(), INTROSPECTION_SIGNING_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionAlgValuesSupported(), INTROSPECTION_ENCRYPTION_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionEncValuesSupported(), INTROSPECTION_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
             JSONArray userInfoSigningAlgValuesSupported = new JSONArray();
             for (String userInfoSigningAlg : appConfiguration.getUserInfoSigningAlgValuesSupported()) {

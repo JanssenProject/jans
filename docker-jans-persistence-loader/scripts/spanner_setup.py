@@ -347,6 +347,7 @@ class SpannerBackend:
             ("jansClnt", "jansReqURI"),
             ("jansClnt", "jansClaimRedirectURI"),
             ("jansClnt", "jansAuthorizedOrigins"),
+            ("jansSessId", "deviceSecret"),
         ]:
             column_to_array(mod[0], mod[1])
 
@@ -428,6 +429,10 @@ class SpannerBackend:
             ("jansFido2AuthnEntry", "jansApp"),
             ("jansFido2RegistrationEntry", "jansApp"),
             ("adsPrjDeployment", "adsPrjDeplDetails"),
+            ("jansFido2RegistrationEntry", "jansDeviceData"),
+            ("jansDeviceRegistration", "jansDeviceData"),
+            ("jansFido2RegistrationEntry", "jansDeviceNotificationConf"),
+            ("jansDeviceRegistration", "jansDeviceNotificationConf"),
         ]:
             change_column_type(mod[0], mod[1])
 

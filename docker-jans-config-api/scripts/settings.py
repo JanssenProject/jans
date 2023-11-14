@@ -17,17 +17,7 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "wait": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "entrypoint": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "plugins": {
+        "config-api": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,

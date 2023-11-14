@@ -1,0 +1,14 @@
+dn: o=site
+objectClass: top
+objectClass: organization
+o: site
+
+dn: ou=link,o=site
+objectClass: top
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=keycloak-link,o=site
+objectClass: top
+objectClass: organizationalUnit
+ou: people

@@ -4,6 +4,7 @@
   "umaConfigurationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/uma2-configuration",
   "clientInfoEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/clientinfo",
   "authorizationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/authorize",
+  "authorizationChallengeEndpoint":"https://pujavs3.infinity.com/jans-auth/restv1/authorization_challenge",
   "backchannelAuthenticationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/bc-authorize",
   "baseEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1",
   "tokenEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/token",

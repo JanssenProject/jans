@@ -8,7 +8,6 @@ import Select from 'react-select';
 import { IOption } from './IOption';
 import { ILooseObject } from './ILooseObject';
 import moment from 'moment';
-
 const components = {
     DropdownIndicator: null,
 };
@@ -20,8 +19,9 @@ const createOption = (label: string) => ({
 
 const OIDCClientDetails = (data) => {
     const [additionalParam, setAdditionalParam] = useState("");
-    const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
+    const [displayToken, setDisplayToken] = useState(false);
     const [acrValueOption, setAcrValueOption] = useState<IOption | null>();
     const [acrValueOptions, setAcrValueOptions] = useState<readonly IOption[]>([]);
 
@@ -42,13 +42,16 @@ const OIDCClientDetails = (data) => {
                     resolve(JSON.stringify(result));
                 });
             });
-            const expireAt = JSON.parse(oidcClient)?.oidcClient?.expire_at;
+            const showClientExpiry = JSON.parse(oidcClient)?.oidcClient?.showClientExpiry;
+            if (showClientExpiry) {
+                const expireAt = JSON.parse(oidcClient)?.oidcClient?.expire_at;
 
-            const lifetime = Math.floor((expireAt - moment().toDate().getTime()) / 1000);
-            if (lifetime <= 0) {
-                setError('This client is expired. Please reset and register a new client.')
-            } else {
-                setError('The client will expire in ' + secondsToDhms(lifetime) )
+                const lifetime = Math.floor((expireAt - moment().toDate().getTime()) / 1000);
+                if (lifetime <= 0) {
+                    setMessage('This client is expired. Please reset and register a new client.')
+                } else {
+                    setMessage('The client will expire in ' + secondsToDhms(lifetime))
+                }
             }
 
         })();
@@ -107,7 +110,6 @@ const OIDCClientDetails = (data) => {
                     client_id: result?.oidcClient?.client_id,
                     code_challenge_method: 'S256',
                     code_challenge: hashed,
-                    state: uuidv4(),
                     nonce: uuidv4(),
                 };
 
@@ -155,7 +157,7 @@ const OIDCClientDetails = (data) => {
                             resolve(JSON.stringify(result));
                         });
                     });
-                    
+
                     const tokenReqData = qs.stringify({
                         redirect_uri: redirectUrl,
                         grant_type: 'authorization_code',
@@ -180,13 +182,10 @@ const OIDCClientDetails = (data) => {
                         tokenResponse.data.access_token
                     ) {
                         console.log('tokenResponse:' + JSON.stringify(tokenResponse))
-                        const userInfoData = qs.stringify({
-                            access_token: tokenResponse.data.access_token
-                        })
+
                         const userInfoOptions = {
-                            method: 'POST',
-                            headers: { 'content-type': 'application/x-www-form-urlencoded', 'Authorization': `Bearer ${tokenResponse.data.access_token}` },
-                            data: userInfoData,
+                            method: 'GET',
+                            headers: { 'Authorization': `Bearer ${tokenResponse.data.access_token}` },
                             url: JSON.parse(opConfig).opConfiguration.userinfo_endpoint,
                         };
 
@@ -197,6 +196,7 @@ const OIDCClientDetails = (data) => {
                                 'access_token': tokenResponse.data.access_token,
                                 'userDetails': userInfoResponse.data,
                                 'id_token': tokenResponse.data.id_token,
+                                'displayToken': displayToken,
                             }
                         }).then(async () => {
                             console.log("userDetails: " + JSON.stringify(userInfoResponse.data));
@@ -320,7 +320,8 @@ const OIDCClientDetails = (data) => {
         <div className="box">
             <>
                 <legend><span className="number">O</span> Registered Client</legend>
-                <legend><span className="error">{error}</span></legend>
+                {message.length > 0 ? <legend><span className="redFont">{message}</span></legend> : ""}
+
                 <WindmillSpinner loading={loading} color="#00ced1" />
                 <label><b>OP Host:</b></label>
                 <input type="text" id="opHost" name="opHost" value={data.data.op_host} disabled />
@@ -347,10 +348,12 @@ const OIDCClientDetails = (data) => {
                     options={acrValueOptions}
                 />
 
+                <label><input type="checkbox" onChange={() => setDisplayToken(!displayToken)} /><b>Display Access Token and ID Token after authentication</b></label>
+
                 <button id="trigCodeFlowButton" onClick={triggerCodeFlowButton}>Trigger Auth Code Flow</button>
                 <button id="resetButton" onClick={resetClient}>Reset</button>
             </>
-        </div>
+        </div >
     )
 };
 

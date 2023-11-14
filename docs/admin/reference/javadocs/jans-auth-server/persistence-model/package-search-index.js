@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.as.persistence.model"},{"l":"io.jans.as.persistence.model.base"},{"l":"io.jans.as.persistence.model.configuration"}]

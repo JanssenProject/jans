@@ -39,6 +39,9 @@ resource "jans_app_configuration" "global" {
 - `authentication_filters` (Block List) List of authentication filters. (see [below for nested schema](#nestedblock--authentication_filters))
 - `authentication_filters_enabled` (Boolean) Boolean value specifying whether to enable user authentication filters.
 - `authentication_protection_configuration` (Block List, Max: 1) Authentication Brute Force Protection Configuration. (see [below for nested schema](#nestedblock--authentication_protection_configuration))
+- `authorization_challenge_default_acr` (String) Default ACR for authorization challenge.
+- `authorization_challenge_endpoint` (String) The authorization challenge endpoint URL.
+- `authorization_challenge_should_generate_session` (Boolean) Boolean value specifying whether to generate session for authorization challenge.
 - `authorization_code_lifetime` (Number) The lifetime of the Authorization Code.
 - `authorization_encryption_alg_values_supported` (List of String) A list of the authorization encryption algorithms supported.
 - `authorization_encryption_enc_values_supported` (List of String) A list of the authorization encryption algorithms supported.
@@ -84,8 +87,10 @@ resource "jans_app_configuration" "global" {
 - `css_location` (String) The location for CSS files.
 - `custom_headers_with_authorization_response` (Boolean) Boolean value specifying whether to enable Custom Response Header parameter to return custom headers with the Authorization Response.
 - `date_formatter_patterns` (Map of String) Data formatter patterns.
+- `dcr_attestation_evidence_required` (Boolean) Boolean value indicating if DCR attestation evidence is required.
 - `dcr_authorization_with_client_credentials` (Boolean) Boolean value indicating if DCR authorization to be performed using client credentials.
 - `dcr_authorization_with_mtls` (Boolean) Boolean value indicating if DCR authorization allowed with MTLS.
+- `dcr_forbid_expiration_time_in_request` (Boolean) Boolean value to specify if the expiration time should be forbidden in DCR request.
 - `dcr_signature_validation_enabled` (Boolean) Boolean value enables DCR signature validation. Default is false.
 - `dcr_signature_validation_jwks` (String) Specifies JWKS for all DCR's validations.
 - `dcr_signature_validation_jwks_uri` (String) Specifies JWKS URI for all DCR's validations.
@@ -113,6 +118,7 @@ resource "jans_app_configuration" "global" {
 								Example: id_generation_endpoint, auth_level_mapping, etc.
 - `display_values_supported` (List of String) A list of the display parameter values that the OpenID Provider supports. One of 'page', 'popup'.
 - `dn_name` (String) DN of certificate issuer.
+- `dpop_jkt_force_for_authorization_code` (Boolean) Demonstration of Proof-of-Possession (DPoP) JWK Thumbprint force for authorization code.
 - `dpop_jti_cache_time` (Number) Demonstration of Proof-of-Possession (DPoP) cache time.
 - `dpop_nonce_cache_time` (Number) Demonstration of Proof-of-Possession (DPoP) nonce cache time.
 - `dpop_signing_alg_values_supported` (List of String) Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported.
@@ -145,6 +151,7 @@ resource "jans_app_configuration" "global" {
 - `feature_flags` (List of String) List of feature flags.
 - `force_id_token_hint_precense` (Boolean) Boolean value specifying whether force id_token_hint parameter presence.
 - `force_offline_access_scope_to_enable_refresh_token` (Boolean) Boolean value specifying whether force offline_access scope to enable refresh_token grant type.
+- `force_ropc_in_authorization_endpoint` (Boolean) Specifies if ROPC is forced in authorization endpoint.
 - `force_signed_request_object` (Boolean) Boolean value true indicates that signed request object is mandatory.
 - `front_channel_logout_session_supported` (Boolean) Boolean value to specify support for front channel logout session.
 - `grant_types_and_response_types_autofix_enabled` (Boolean) Boolean value specifying whether to Grant types and Response types can be auto fixed.
@@ -208,6 +215,7 @@ resource "jans_app_configuration" "global" {
 - `logging_level` (String) Logging level for jans-auth logger.
 - `metric_reporter_interval` (Number) The interval for metric reporter in seconds.
 - `metric_reporter_keep_data_days` (Number) The days to keep metric reported data.
+- `mtls_authorization_challenge_endpoint` (String) URL for Mutual TLS Client Authentication and Certificate-Bound Access Tokens (MTLS) Challenge Endpoint.
 - `mtls_authorization_endpoint` (String) URL for Mutual TLS Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint.
 							Example: 'https://server.example.com/jans-auth/restv1/mtls'
 - `mtls_check_session_iframe` (String) URL for MTLS IFrame that supports cross-origin communications for session state information with the RP 

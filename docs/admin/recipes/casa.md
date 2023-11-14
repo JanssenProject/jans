@@ -1,9 +1,8 @@
-
 ---
 tags:
-- administration
-- recipe 
-- casa
+  - administration
+  - recipe 
+  - casa
 ---
 
 # Casa - Self-service MFA portal
@@ -76,19 +75,21 @@ casa_client_pw=MyCasaClientSecret
 
 ## Enabling Authentication methods
 
-1. Go to `/opt/jans/jetty/casa` folder and execute `touch .administrable`. [Further reading]()
-2. [Enable authentication mechanisms](../../admin/developer/scripts/person-authentication/#enabling-an-authentication-mechanism) in Jan-auth server like `otp`, `fido2`, `email_otp`.
-3. launch jans-cli-tui to enable scripts in Jans-auth server
-4. search for script, open script and navigate to enable section and press enter at enable then press save.
+1. [Enable authentication mechanisms](../..
+   /admin/developer/scripts/person-authentication#enabling-an-authentication-mechanism) in Jan-auth server like `otp`, `fido2`, `email_otp`.
+2. launch jans-cli-tui to enable scripts in Jans-auth server
+3. search for script, open script and navigate to enable section and press 
+   enter at enable then press save.
 ![image](https://user-images.githubusercontent.com/5729240/219859903-97e863d6-3e49-40ff-92e4-3f95d1d56018.png)
 
-5. Login to the Casa portal as an administrator
+4. Login to the Casa portal as an administrator
 
-6. Enable authentication methods by navigating to `Administration console` -> `Enabled Authentication methods`. Details about enabling authentication methods are available in [Casa documentation](https://gluu.org/docs/casa/4.4/administration/admin-console/#configure-casa)
+5. Enable authentication methods by navigating to `Administration console` 
+   -> `Enabled Authentication methods`. Details about enabling authentication methods are available in [Casa documentation](https://gluu.org/docs/casa/4.4/administration/admin-console/#configure-casa)
 
 ## Configuring authentication methods
 
-At this point, users ([How to create users](../../admin/jans-cli/cli-user.md#creating-an-user-resources)) can log in to the Casa portal and [enable/configure one or more authentication methods](https://gluu.org/docs/casa/4.4/user-guide/) for their account.
+At this point, users ([How to create users](../../admin/config-guide/user-config.md#creating-an-user-resources) can log in to the Casa portal and [enable/configure one or more authentication methods](https://gluu.org/docs/casa/4.4/user-guide/) for their account.
 
 ## Uninstalling Casa from Janssen Server
 

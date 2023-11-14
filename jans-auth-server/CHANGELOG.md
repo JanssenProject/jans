@@ -1,5 +1,78 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.19...jans-auth-server-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* adding scopes in config-api endpoint access token based on tags (admin-ui) [#6413](https://github.com/JanssenProject/jans/issues/6413) ([#6414](https://github.com/JanssenProject/jans/issues/6414)) ([643ba07](https://github.com/JanssenProject/jans/commit/643ba0780b5bf9f7383357075adb505774a39a27))
+* changing names of clients used in admin-ui [#1375](https://github.com/JanssenProject/jans/issues/1375) ([#6326](https://github.com/JanssenProject/jans/issues/6326)) ([9e63acb](https://github.com/JanssenProject/jans/commit/9e63acb28ee4354e361b6b8d3d7aabe0f5f94610))
+* **jans-auth-server:** add configuration property to AS which will allow to bypass basic client authentication restriction to query only own tokens [#6307](https://github.com/JanssenProject/jans/issues/6307) ([#6317](https://github.com/JanssenProject/jans/issues/6317)) ([d44a820](https://github.com/JanssenProject/jans/commit/d44a8206f7bd75ed659b1832f0a67d30ec43076c))
+* **jans-auth-server:** added PKCE support to authz challenge endpoint [#6180](https://github.com/JanssenProject/jans/issues/6180) ([#6339](https://github.com/JanssenProject/jans/issues/6339)) ([d9a24bc](https://github.com/JanssenProject/jans/commit/d9a24bc4399f656915923395858ea085ca3dccfa))
+* **jans-auth-server:** allow revoke any token - explicitly allow by config and scope [#6381](https://github.com/JanssenProject/jans/issues/6381) ([#6412](https://github.com/JanssenProject/jans/issues/6412)) ([47cbee9](https://github.com/JanssenProject/jans/commit/47cbee9cf917f0f79c53e9e0cfe1e2beab3108bc))
+* **jans-auth-server:** enabled JWT response at introspection endpoint configured by AS and client config ([#6433](https://github.com/JanssenProject/jans/issues/6433)) ([06210a9](https://github.com/JanssenProject/jans/commit/06210a9b6e916fd5c06cc463949be9855f4d2909))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** cnf introspection response is null even when valid cert is send during MTLS [#6343](https://github.com/JanssenProject/jans/issues/6343) ([#6363](https://github.com/JanssenProject/jans/issues/6363)) ([6fb2a34](https://github.com/JanssenProject/jans/commit/6fb2a342d61d5e293a44dc7e385e072d3beefecb))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.18...jans-auth-server-v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **agama:** add support for autoconfiguration  ([#6210](https://github.com/JanssenProject/jans/issues/6210)) ([18f15da](https://github.com/JanssenProject/jans/commit/18f15da64ec4ccf453b03ada92727ef1114a2043))
+* **jans-auth-server:** added "authorization_challenge" scope enforcement [#5856](https://github.com/JanssenProject/jans/issues/5856) ([#6216](https://github.com/JanssenProject/jans/issues/6216)) ([b3db5c8](https://github.com/JanssenProject/jans/commit/b3db5c8cba829fc3e6aec350af7c0b4e5cf068c6))
+* **jans-auth-server:** added DPoP to authorization code and PAR ([#6196](https://github.com/JanssenProject/jans/issues/6196)) ([be559bf](https://github.com/JanssenProject/jans/commit/be559bfebdf61068a296a05334e731a78a2cc91a))
+* **jans-auth-server:** passing custom parameters in the body of POST authorization request and ROPC [#6141](https://github.com/JanssenProject/jans/issues/6141) ([#6148](https://github.com/JanssenProject/jans/issues/6148)) ([00673ae](https://github.com/JanssenProject/jans/commit/00673aea847eb5405d07ef0fbfb341eb0d6cc497))
+* **jans-auth:** new lifetime attribute in ssa ([#6214](https://github.com/JanssenProject/jans/issues/6214)) ([b049e33](https://github.com/JanssenProject/jans/commit/b049e334bbe9d0c3b0214694e9fd6501019b8530))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** apply clientWhiteList when session is valid (allowPostLogoutRedirectWithoutValidation=true ) ([#6162](https://github.com/JanssenProject/jans/issues/6162)) ([d10dee5](https://github.com/JanssenProject/jans/commit/d10dee59b2786599bc709010423c0f64c8618a32))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.17...jans-auth-server-v1.0.18) (2023-09-23)
+
+
+### Features
+
+* **jans-auth-server:** included org_id in the response of DCR [#5787](https://github.com/JanssenProject/jans/issues/5787) ([#6095](https://github.com/JanssenProject/jans/issues/6095)) ([34a5f8f](https://github.com/JanssenProject/jans/commit/34a5f8f43aefaa7403cd52d84e0b732f9e1d396e))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** corrected client's jar-with-dependencies built ([#6080](https://github.com/JanssenProject/jans/issues/6080)) ([099d552](https://github.com/JanssenProject/jans/commit/099d5524ac516c16e0740cfad8e380ba9be01ceb))
+* **jans-auth-server:** redirect when session does not exist but client_id parameter is present ([#6104](https://github.com/JanssenProject/jans/issues/6104)) ([f8f9591](https://github.com/JanssenProject/jans/commit/f8f959144b527148f3b586088ae9dd6fcf1158cf))
+* **jans-auth-server:** swagger is malformed due to typo [#6085](https://github.com/JanssenProject/jans/issues/6085) ([#6086](https://github.com/JanssenProject/jans/issues/6086)) ([e1ae899](https://github.com/JanssenProject/jans/commit/e1ae899ac4b1d82cd428276e5f00065b0b5a633e))
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.16...jans-auth-server-v1.0.17) (2023-09-17)
+
+
+### Features
+
+* BCFIPS support (sub-part 01) ([#5767](https://github.com/JanssenProject/jans/issues/5767)) ([d8cea00](https://github.com/JanssenProject/jans/commit/d8cea008a73ccecb1b734a010b9e9bdd363c8432))
+* BCFIPS support (sub-part 02) ([#5779](https://github.com/JanssenProject/jans/issues/5779)) ([bdc2dc5](https://github.com/JanssenProject/jans/commit/bdc2dc59cdd90b857c52b1adc1929cc3b3cb60d4))
+* BCFIPS support (sub-part 03) ([#5852](https://github.com/JanssenProject/jans/issues/5852)) ([8b0d12b](https://github.com/JanssenProject/jans/commit/8b0d12b96f7ea9f82f322c536e0deec03f63edbd))
+* **jans-auth-server:** add client_id parameter support to /end_session [#5942](https://github.com/JanssenProject/jans/issues/5942) ([#6032](https://github.com/JanssenProject/jans/issues/6032)) ([09ee345](https://github.com/JanssenProject/jans/commit/09ee345ae7ed1fd7fc19260e3533e7c2c652b9f1))
+* **jans-auth-server:** added "The Use of Attestation in OAuth 2.0 Dynamic Client Registration" spec support [#5562](https://github.com/JanssenProject/jans/issues/5562) ([#5868](https://github.com/JanssenProject/jans/issues/5868)) ([38653c9](https://github.com/JanssenProject/jans/commit/38653c9cb9eb992213c5f230a5f36ce1187d0197))
+* **jans-auth-server:** OAuth 2.0 for First-Party Native Applications ([#5654](https://github.com/JanssenProject/jans/issues/5654)) ([9d90e28](https://github.com/JanssenProject/jans/commit/9d90e28791c49bc86771623601c654f2c662b7a1))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** fixed prompts handling when acr is changed [#5930](https://github.com/JanssenProject/jans/issues/5930) ([#5931](https://github.com/JanssenProject/jans/issues/5931)) ([98fd86f](https://github.com/JanssenProject/jans/commit/98fd86f3d644631887cccecd3e0f1ca1f5a3025c))
+* **jans-auth-server:** ignore custom OC for non-LDAP during client merge ([#5979](https://github.com/JanssenProject/jans/issues/5979)) ([b52afe6](https://github.com/JanssenProject/jans/commit/b52afe62551685cea8d4d46dead685429ac2f336))
+* **jans-auth-server:** server can handle prompts incorrectly when acr is changed [#5930](https://github.com/JanssenProject/jans/issues/5930) ([#6002](https://github.com/JanssenProject/jans/issues/6002)) ([949a8dc](https://github.com/JanssenProject/jans/commit/949a8dc0b48496138b999b0c6355e69a879e59ea))
+* **jans-auth-server:** server-fips module cause FullRebuild failure ([#6029](https://github.com/JanssenProject/jans/issues/6029)) ([7589bca](https://github.com/JanssenProject/jans/commit/7589bca87d5bcae3ebbe9f7d67ee12ad1e1cf6a1))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+* remove pending deployments when exceeding 5 minutes [#5636](https://github.com/JanssenProject/jans/issues/5636) ([#5762](https://github.com/JanssenProject/jans/issues/5762)) ([64ded2c](https://github.com/JanssenProject/jans/commit/64ded2ccccd78fc146f326ab85ba08e5a555a756))
+* version reference ([432a904](https://github.com/JanssenProject/jans/commit/432a9048fd104e6d8ddeb50684bf5df23f0722cf))
+
 ## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.15...jans-auth-server-v1.0.16) (2023-08-02)
 
 

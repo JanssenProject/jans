@@ -3,6 +3,7 @@ package io.jans.as.model.config.adminui;
 import java.util.Objects;
 
 public class AdminPermission {
+    private String tag;
     private String permission;
     private String description;
     private Boolean defaultPermissionInToken;
@@ -31,25 +32,34 @@ public class AdminPermission {
         this.defaultPermissionInToken = defaultPermissionInToken;
     }
 
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AdminPermission that = (AdminPermission) o;
-        return permission.equals(that.permission);
+        return tag.equals(that.tag) && permission.equals(that.permission);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(permission);
+        return Objects.hash(tag, permission);
     }
 
     @Override
     public String toString() {
         return "AdminPermission{" +
-                "permission='" + permission + '\'' +
+                "tag='" + tag + '\'' +
+                ", permission='" + permission + '\'' +
                 ", description='" + description + '\'' +
-                ", defaultPermissionInToken='" + defaultPermissionInToken + '\'' +
+                ", defaultPermissionInToken=" + defaultPermissionInToken +
                 '}';
     }
 }

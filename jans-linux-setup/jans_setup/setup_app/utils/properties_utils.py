@@ -611,19 +611,60 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_jans_link')
 
 
+    def prompt_for_jans_keycloak_link(self):
+        if Config.installed_instance and Config.install_jans_keycloak_link:
+            return
+
+        prompt_to_install = self.getPrompt("Install Jans Keycloak Link Server?",
+                                            self.getDefaultOption(Config.install_jans_keycloak_link)
+                                            )[0].lower()
+
+        Config.install_jans_keycloak_link = prompt_to_install == 'y'
+
+        if Config.installed_instance and Config.install_jans_keycloak_link:
+            Config.addPostSetupService.append('install_jans_keycloak_link')
+
     def prompt_for_casa(self):
         if Config.installed_instance and Config.install_casa:
             return
 
-        prompt = self.getPrompt("Install Gluu/Flex Casa?",
+        prompt = self.getPrompt("Install Jans Casa?",
                                 self.getDefaultOption(Config.install_casa)
                             )[0].lower()
 
         Config.install_casa = prompt == 'y'
 
         if Config.installed_instance and Config.install_casa:
-            Config.addPostSetupService.append(Config.install_casa)
+            Config.addPostSetupService.append('install_casa')
 
+
+    def prompt_to_install(self, install_var):
+        if Config.installed_instance and Config.get(install_var):
+            return False
+
+        if not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
+            return False
+
+        return True
+
+    def prompt_for_jans_saml(self):
+        if not self.prompt_to_install('install_jans_saml'):
+            return
+
+        prompt = self.getPrompt("Install Jans SAML?",
+                                            self.getDefaultOption(Config.install_jans_saml)
+                                            )[0].lower()
+
+        Config.install_jans_saml = prompt == 'y'
+        if Config.installed_instance:
+            if Config.install_jans_saml:
+                Config.addPostSetupService.append('install_jans_saml')
+                if Config.install_config_api and not Config.install_scim_server:
+                    Config.addPostSetupService.append('install_scim_server')
+                    Config.install_scim_server = True
+        else:
+            if Config.install_jans_saml and Config.install_config_api:
+                Config.install_scim_server = True
 
     def promptForConfigApi(self):
         if Config.installed_instance and Config.install_config_api:
@@ -634,9 +675,11 @@ class PropertiesUtils(SetupUtils):
                             )[0].lower()
 
         Config.install_config_api = prompt_for_config_api == 'y'
+        Config.install_jans_cli = Config.install_config_api
 
         if Config.installed_instance and Config.install_config_api:
             Config.addPostSetupService.append('install_config_api')
+            Config.addPostSetupService.append('install_jans_cli')
 
 
     def prompt_for_rdbm(self):
@@ -971,8 +1014,10 @@ class PropertiesUtils(SetupUtils):
             self.promptForScimServer()
             self.promptForFido2Server()
             self.prompt_for_jans_link()
+            self.prompt_for_jans_keycloak_link()
             self.prompt_for_casa()
 
+            self.prompt_for_jans_saml()
             #self.promptForEleven()
             #if (not Config.installOxd) and Config.oxd_package:
             #    self.promptForOxd()

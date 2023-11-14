@@ -412,6 +412,7 @@ class Agama(DialogUtils):
 
                 flow_errors = result['details'].get('flowsError', {})
 
+
                 if flow_errors:
                     jans_table = JansTableWidget(
                         app=self.app,

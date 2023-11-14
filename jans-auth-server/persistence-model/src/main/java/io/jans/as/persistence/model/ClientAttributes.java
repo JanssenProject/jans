@@ -125,6 +125,50 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("requestedLifetime")
     private Integer requestedLifetime; // in seconds
 
+    @JsonProperty("evidence")
+    private String evidence;
+
+    @JsonProperty("introspectionSignedResponseAlg")
+    private String introspectionSignedResponseAlg;
+
+    @JsonProperty("introspectionEncryptedResponseAlg")
+    private String introspectionEncryptedResponseAlg;
+
+    @JsonProperty("introspectionEncryptedResponseEnc")
+    private String introspectionEncryptedResponseEnc;
+
+    public String getIntrospectionSignedResponseAlg() {
+        return introspectionSignedResponseAlg;
+    }
+
+    public void setIntrospectionSignedResponseAlg(String introspectionSignedResponseAlg) {
+        this.introspectionSignedResponseAlg = introspectionSignedResponseAlg;
+    }
+
+    public String getIntrospectionEncryptedResponseAlg() {
+        return introspectionEncryptedResponseAlg;
+    }
+
+    public void setIntrospectionEncryptedResponseAlg(String introspectionEncryptedResponseAlg) {
+        this.introspectionEncryptedResponseAlg = introspectionEncryptedResponseAlg;
+    }
+
+    public String getIntrospectionEncryptedResponseEnc() {
+        return introspectionEncryptedResponseEnc;
+    }
+
+    public void setIntrospectionEncryptedResponseEnc(String introspectionEncryptedResponseEnc) {
+        this.introspectionEncryptedResponseEnc = introspectionEncryptedResponseEnc;
+    }
+
+    public String getEvidence() {
+        return evidence;
+    }
+
+    public void setEvidence(String evidence) {
+        this.evidence = evidence;
+    }
+
     public Boolean getDpopBoundAccessToken() {
         if (dpopBoundAccessToken == null) dpopBoundAccessToken = false;
         return dpopBoundAccessToken;
@@ -455,7 +499,11 @@ public class ClientAttributes implements Serializable {
                 ", defaultPromptLogin=" + defaultPromptLogin +
                 ", requestedLifetime=" + requestedLifetime +
                 ", requirePar=" + requirePar +
+                ", evidence=" + evidence +
                 ", dpopBoundAccessToken=" + dpopBoundAccessToken +
+                ", introspectionSignedResponseAlg=" + introspectionSignedResponseAlg +
+                ", introspectionEncryptedResponseAlg=" + introspectionEncryptedResponseAlg +
+                ", introspectionEncryptedResponseEnc=" + introspectionEncryptedResponseEnc +
                 '}';
     }
 }

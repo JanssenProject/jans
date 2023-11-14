@@ -9,7 +9,7 @@
 	<parent>
 		<artifactId>jans-link-server-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.0.17-SNAPSHOT</version>
+		<version>1.0.21-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -56,12 +56,12 @@
 						<phase>process-sources</phase>
 						<configuration>
 							<target>
-								<property name="server.webapp.dir" value="${project.basedir}/../server/target/jans-link-server-${project.version}" />
-								<property name="dest.webapp.dir" value="${project.build.directory}/${project.artifactId}" />
-								<delete dir="${dest.webapp.dir}" />
-								<mkdir dir="${dest.webapp.dir}" />
+								<property name="server.webapp.dir" value="${project.basedir}/../server/target/jans-link-server-${project.version}"/>
+								<property name="dest.webapp.dir" value="${project.build.directory}/${project.artifactId}"/>
+								<delete dir="${dest.webapp.dir}"/>
+								<mkdir dir="${dest.webapp.dir}"/>
 								<copy todir="${dest.webapp.dir}" preservelastmodified="true" overwrite="true">
-									<fileset dir="${server.webapp.dir}" includes="**/*" />
+									<fileset dir="${server.webapp.dir}" includes="**/*"/>
 								</copy>
 							</target>
 						</configuration>

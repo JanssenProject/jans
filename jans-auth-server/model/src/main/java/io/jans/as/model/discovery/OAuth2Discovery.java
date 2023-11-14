@@ -57,6 +57,10 @@ public class OAuth2Discovery {
     @XmlElement(name = "authorization_endpoint")
     private String authorizationEndpoint;
 
+    @JsonProperty(value = "authorization_challenge_endpoint")
+    @XmlElement(name = "authorization_challenge_endpoint")
+    private String authorizationChallengeEndpoint;
+
     @JsonProperty(value = "token_endpoint")
     @XmlElement(name = "token_endpoint")
     private String tokenEndpoint;
@@ -123,6 +127,14 @@ public class OAuth2Discovery {
 
     public void setAuthorizationEndpoint(String authorizationEndpoint) {
         this.authorizationEndpoint = authorizationEndpoint;
+    }
+
+    public String getAuthorizationChallengeEndpoint() {
+        return authorizationChallengeEndpoint;
+    }
+
+    public void setAuthorizationChallengeEndpoint(String authorizationChallengeEndpoint) {
+        this.authorizationChallengeEndpoint = authorizationChallengeEndpoint;
     }
 
     public String getTokenEndpoint() {
@@ -234,6 +246,7 @@ public class OAuth2Discovery {
         return "OAuth2Discovery{" +
                 "issuer='" + issuer + '\'' +
                 ", authorizationEndpoint='" + authorizationEndpoint + '\'' +
+                ", authorizationChallengeEndpoint='" + authorizationChallengeEndpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
                 ", jwksUri='" + jwksUri + '\'' +
                 ", registrationEndpoint='" + registrationEndpoint + '\'' +

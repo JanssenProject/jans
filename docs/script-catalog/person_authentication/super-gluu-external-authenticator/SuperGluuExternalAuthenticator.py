@@ -62,7 +62,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.registrationUri = None
         if configurationAttributes.containsKey("registration_uri"):
-            self.registrationUri = configurationAttributes.get("registration_uri").getValue2()
+            registrationUriValue = configurationAttributes.get("registration_uri").getValue2()
+            if StringHelper.isNotEmptyString(registrationUriValue):
+                self.registrationUri = registrationUriValue
 
         authentication_mode = configurationAttributes.get("authentication_mode").getValue2()
         if StringHelper.isEmpty(authentication_mode):
@@ -149,7 +151,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 self.AS_CLIENT_ID = clientRegistrationResponse['client_id']
                 self.AS_CLIENT_SECRET = clientRegistrationResponse['client_secret']
 
-        if StringHelper.isNotEmptyString(self.AS_CLIENT_ID) and StringHelper.isNotEmptyString(self.self.AS_CLIENT_SECRET):
+        if StringHelper.isNotEmptyString(self.AS_CLIENT_ID) and StringHelper.isNotEmptyString(self.AS_CLIENT_SECRET):
             self.enabledPushNotifications = self.initPushNotificationService(configurationAttributes)
         else:
             self.enabledPushNotifications = False

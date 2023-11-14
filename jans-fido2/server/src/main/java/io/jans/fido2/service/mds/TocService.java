@@ -97,11 +97,14 @@ public class TocService {
 		loadMetadataServiceExternalProvider();
     }
 
-    public void refresh()
-    {
-    	this.tocEntries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
-        tocEntries.putAll(parseTOCs());
-    }
+    public void refresh() {
+		this.tocEntries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
+		if (appConfiguration.getFido2Configuration().isSkipDownloadMdsEnabled()) {
+			log.debug("SkipDownloadMds is enabled");
+		}  else {
+			tocEntries.putAll(parseTOCs());
+		}
+	}
     
 	private Map<String, JsonNode> parseTOCs() {
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();

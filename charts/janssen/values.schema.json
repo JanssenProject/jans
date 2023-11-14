@@ -2,6 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema#",
   "type": "object",
   "properties": {
+    "casa":{
+         "description":"Janssen Casa (\"Casa\") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Gluu Server.",
+         "type":"object",
+         "properties":{
+
+         }
+      },
     "auth-server": {
       "description": "OAuth Authorization Server, the OpenID Connect Provider, the UMA Authorization Server--this is the main Internet facing component of Janssen. It's the service that returns tokens, JWT's and identity assertions. This service must be Internet facing.",
       "type": "object",
@@ -24,6 +31,11 @@
           "description": "City of the company or individual. Used in generating the self-signed certificate",
           "type": "string",
           "pattern": "^[a-zA-Z]+$"
+        },
+        "salt": {
+          "description": "Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value.",
+          "type": "string",
+          "pattern": "^(?:[a-zA-Z0-9]{24})?$"
         },
         "configmap": {
           "description": "Configuration parameters mapped to envs in a ConfigMap",
@@ -201,6 +213,16 @@
             "lbAddr": {
               "description": "Loadbalancer address for AWS if the FQDN is not registered.",
               "$ref": "#/definitions/url-pattern"
+            },
+            "cnLdapCrt": {
+              "description": "OpenDJ certificate string. This must be encoded using base64.",
+              "type": "string",
+              "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+            },
+            "cnLdapKey": {
+              "description": "OpenDJ key string. This must be encoded using base64.",
+              "type": "string",
+              "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
             }
           }
         },
@@ -462,6 +484,30 @@
           "type": "string",
           "pattern": ".*google-credentials.json\\b.*"
         },
+        "casa":{
+               "type":"object",
+               "properties":{
+                  "casaServiceName":{
+                     "description":"Name of the casa service. Please keep it as default.",
+                     "type":"string",
+                     "pattern":"^[a-z0-9-]+$"
+                  },
+                  "enabled":{
+                     "description":"Boolean flag to enable/disable the casa chart.",
+                     "type":"boolean"
+                  },
+                  "ingress":{
+                     "description":"Endpoint control",
+                     "type":"object",
+                     "properties": {
+                           "casaEnabled":{
+                              "description":" Enable casa endpoints /casa",
+                              "type":"boolean"
+                           }
+                     }
+                           }
+               }
+            },
         "config-api": {
           "type": "object",
           "properties": {
@@ -775,6 +821,51 @@
               }
             }
           }
+        },
+        "cnSqlPasswordFile": {
+          "description": "The location of file contains password for the SQL user config.configmap.cnSqlDbUser. The file path must end with sql_password.",
+          "type": "string",
+          "pattern": ".*sql_password\\b.*"
+        },
+        "cnCouchbasePasswordFile": {
+          "description": "The location of the Couchbase user config.configmap.cnCouchbaseUser password. The file path must end with couchbase_password.",
+          "type": "string",
+          "pattern": ".*couchbase_password\\b.*"
+        },
+        "cnCouchbaseSuperuserPasswordFile": {
+          "description": "The location of the Couchbase restricted user config.configmap.cnCouchbaseSuperUser password. The file path must end with couchbase_superuser_password.",
+          "type": "string",
+          "pattern": ".*couchbase_superuser_password\\b.*"
+        },
+        "cnLdapPasswordFile": {
+          "description": "The location of the OpenDJ user password. The file path must end with ldap_password.",
+          "type": "string",
+          "pattern": ".*ldap_password\\b.*"
+        },
+        "cnLdapTruststorePasswordFile": {
+          "description": "The location of the OpenDJ truststore password file. The file path must end with ldap_truststore_password.",
+          "type": "string",
+          "pattern": ".*ldap_truststore_password\\b.*"
+        },
+        "cnLdapCertFile": {
+          "description": "The location of the OpenDJ certificate file. The file path must end with opendj.crt.",
+          "type": "string",
+          "pattern": ".*opendj.crt\\b.*"
+        },
+        "cnLdapKeyFile": {
+          "description": "The location of the OpenDJ certificate file. The file path must end with opendj.key.",
+          "type": "string",
+          "pattern": ".*opendj.key\\b.*"
+        },
+        "cnLdapCacertFile": {
+          "description": "The location of the OpenDJ certificate file. The file path must end with opendj.pem.",
+          "type": "string",
+          "pattern": ".*opendj.pem\\b.*"
+        },
+        "cnLdapTruststoreFile": {
+          "description": "The location of the OpenDJ truststore file. The file path must end with opendj.pkcs12.",
+          "type": "string",
+          "pattern": ".*opendj.pkcs12\\b.*"
         }
       }
     },
@@ -808,6 +899,9 @@
     },
     {
       "$ref": "#/definitions/config-api-enabled"
+    },
+    {
+       "$ref":"#/definitions/casa-enabled"
     },
     {
       "$ref": "#/definitions/fido2-enabled"
@@ -1165,6 +1259,145 @@
       },
       "else": true
     },
+    "casa-enabled":{
+         "if":{
+            "properties":{
+               "global":{
+                  "properties":{
+                     "casa":{
+                        "properties":{
+                           "enabled":{
+                              "const":"true"
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         },
+         "then":{
+            "properties":{
+               "casa":{
+                  "required":[
+                     "image",
+                     "replicas",
+                     "resources"
+                  ],
+                  "properties":{
+                     "hpa":{
+                        "description":"Configure the HorizontalPodAutoscaler",
+                        "type":"object",
+                        "properties":{
+                           "enabled":{
+                              "type":"boolean"
+                           },
+                           "minReplicas":{
+                              "type":"integer"
+                           },
+                           "maxReplicas":{
+                              "type":"integer"
+                           },
+                           "targetCPUUtilizationPercentage":{
+                              "type":"integer"
+                           },
+                           "metrics":{
+                              "description":"metrics if targetCPUUtilizationPercentage is not set",
+                              "type":"array"
+                           },
+                           "behavior":{
+                              "description":"Scaling Policies",
+                              "type":"object"
+                           }
+                        }
+                     },
+                     "usrEnvs":{
+                        "description":"Add custom normal and secret envs to the service",
+                        "type":"object",
+                        "properties":{
+                           "normal":{
+                              "description":"Add custom normal envs to the service",
+                              "type":"object"
+                           },
+                           "secret":{
+                              "description":"Add custom secret envs to the service",
+                              "type":"object"
+                           }
+                        }
+                     },
+                     "dnsPolicy":{
+                        "description":"Add custom dns policy",
+                        "type":"string",
+                        "pattern":"^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+                     },
+                     "dnsConfig":{
+                        "description":"Add custom dns config",
+                        "type":"object"
+                     },
+                     "image":{
+                        "type":"object",
+                        "properties":{
+                           "pullPolicy":{
+                              "description":"Image pullPolicy to use for deploying.",
+                              "type":"string",
+                              "pattern":"^(Always|Never|IfNotPresent)$"
+                           },
+                           "repository":{
+                              "description":"Image  to use for deploying",
+                              "type":"string"
+                           },
+                           "tag":{
+                              "description":"Image  tag to use for deploying.",
+                              "type":"string",
+                              "pattern":"^[a-z0-9-_.]+$"
+                           }
+                        }
+                     },
+                     "replicas":{
+                        "description":"Service replica number.",
+                        "type":"integer"
+                     },
+                     "resources":{
+                        "description":"Resource specs.",
+                        "type":"object",
+                        "properties":{
+                           "limits":{
+                              "type":"object",
+                              "properties":{
+                                 "cpu":{
+                                    "description":"CPU limit.",
+                                    "type":"string",
+                                    "pattern":"^[0-9m]+$"
+                                 },
+                                 "memory":{
+                                    "description":"Memory limit.",
+                                    "type":"string",
+                                    "pattern":"^[0-9Mi]+$"
+                                 }
+                              }
+                           },
+                           "requests":{
+                              "type":"object",
+                              "properties":{
+                                 "cpu":{
+                                    "description":"CPU request.",
+                                    "type":"string",
+                                    "pattern":"^[0-9m]+$"
+                                 },
+                                 "memory":{
+                                    "description":"Memory request.",
+                                    "type":"string",
+                                    "pattern":"^[0-9Mi]+$"
+                                 }
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         },
+         "else":true
+      },
     "config-api-enabled": {
       "if": {
         "properties": {

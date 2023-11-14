@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:11.0.16
+FROM bellsoft/liberica-openjre-alpine:17.0.8
 
 # ===============
 # Alpine packages
@@ -7,17 +7,15 @@ FROM bellsoft/liberica-openjre-alpine:11.0.16
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache openssl python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps wget git \
-    && mkdir -p /usr/java/latest \
-    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
+    && apk add --no-cache --virtual .build-deps wget git
 
 # ===========
 # Auth client
 # ===========
 
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=1.0.17-SNAPSHOT
-ENV CN_BUILD_DATE='2023-08-02 10:03'
+ENV CN_VERSION=1.0.21-SNAPSHOT
+ENV CN_BUILD_DATE='2023-10-11 10:14'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN mkdir -p /opt/jans/configurator/javalibs \
@@ -108,7 +106,7 @@ ENV CN_WAIT_MAX_TIME=300 \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/configurator" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.17" \
+    org.opencontainers.image.version="1.0.21" \
     org.opencontainers.image.title="Janssen Configuration Manager" \
     org.opencontainers.image.description="Manage config and secret"
 
@@ -119,6 +117,8 @@ RUN mkdir -p /etc/certs \
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
+RUN ln -sf /usr/lib/jvm/jre /opt/java
+
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 
@@ -126,7 +126,7 @@ RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 RUN chmod -R g=u /app/db \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
-    && chmod 664 /usr/java/latest/jre/lib/security/cacerts
+    && chmod 664 /opt/java/lib/security/cacerts
 
 USER 1000
 

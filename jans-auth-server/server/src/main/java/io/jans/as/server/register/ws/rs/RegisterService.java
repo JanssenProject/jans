@@ -20,6 +20,7 @@ import io.jans.as.model.json.JsonApplier;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.ciba.CIBARegisterClientMetadataService;
 import io.jans.as.server.service.ScopeService;
@@ -298,6 +299,15 @@ public class RegisterService {
         if (requestObject.getUserInfoEncryptedResponseEnc() != null) {
             client.setUserInfoEncryptedResponseEnc(requestObject.getUserInfoEncryptedResponseEnc().toString());
         }
+        if (requestObject.getIntrospectionSignedResponseAlg() != null) {
+            client.getAttributes().setIntrospectionSignedResponseAlg(requestObject.getIntrospectionSignedResponseAlg().toString());
+        }
+        if (requestObject.getIntrospectionEncryptedResponseAlg() != null) {
+            client.getAttributes().setIntrospectionEncryptedResponseAlg(requestObject.getIntrospectionEncryptedResponseAlg().toString());
+        }
+        if (requestObject.getIntrospectionEncryptedResponseEnc() != null) {
+            client.getAttributes().setIntrospectionEncryptedResponseEnc(requestObject.getIntrospectionEncryptedResponseEnc().toString());
+        }
         if (requestObject.getRequestObjectSigningAlg() != null) {
             client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());
         }
@@ -388,7 +398,7 @@ public class RegisterService {
         }
 
         if (requestObject.getJsonObject() != null) {
-            final String orgId = requestObject.getJsonObject().optString("org_id");
+            final String orgId = requestObject.getJsonObject().optString(RegisterRequestParam.ORG_ID.getName());
             if (StringUtils.isNotBlank(orgId)) {
                 client.setOrganization(orgId);
             }
@@ -418,6 +428,9 @@ public class RegisterService {
         }
         if (StringUtils.isNotBlank(requestObject.getSoftwareStatement())) {
             client.setSoftwareStatement(requestObject.getSoftwareStatement());
+        }
+        if (StringUtils.isNotBlank(requestObject.getEvidence())) {
+            client.getAttributes().setEvidence(requestObject.getEvidence());
         }
 
         if (StringUtils.isNotBlank(requestObject.getSubjectIdentifierAttribute())) {

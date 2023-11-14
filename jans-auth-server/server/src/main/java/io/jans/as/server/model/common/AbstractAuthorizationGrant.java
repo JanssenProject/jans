@@ -64,11 +64,12 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private IdToken idToken;
     private AuthorizationCode authorizationCode;
     private String tokenBindingHash;
-    private String x5cs256;
+    private String x5ts256;
     private String nonce;
     private String codeChallenge;
     private String codeChallengeMethod;
     private String claims;
+    private String dpopJkt;
 
     private String acrValues;
     private String sessionDn;
@@ -92,6 +93,14 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         this.client = client;
         this.scopes = new CopyOnWriteArraySet<>();
         this.grantId = UUID.randomUUID().toString();
+    }
+
+    public String getDpopJkt() {
+        return dpopJkt;
+    }
+
+    public void setDpopJkt(String dpopJkt) {
+        this.dpopJkt = dpopJkt;
     }
 
     @Override
@@ -132,12 +141,12 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         this.tokenBindingHash = tokenBindingHash;
     }
 
-    public String getX5cs256() {
-        return x5cs256;
+    public String getX5ts256() {
+        return x5ts256;
     }
 
-    public void setX5cs256(String x5cs256) {
-        this.x5cs256 = x5cs256;
+    public void setX5ts256(String x5ts256) {
+        this.x5ts256 = x5ts256;
     }
 
     @Override
@@ -516,6 +525,6 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
                 + '\'' + ", sessionDn='" + sessionDn + '\'' + ", codeChallenge='" + codeChallenge + '\''
                 + ", codeChallengeMethod='" + codeChallengeMethod + '\'' + ", authenticationTime=" + authenticationTime
                 + ", scopes=" + scopes + ", authorizationGrantType=" + authorizationGrantType + ", tokenBindingHash=" + tokenBindingHash
-                + ", x5cs256=" + x5cs256 + ", claims=" + claims + '}';
+                + ", x5ts256=" + x5ts256 + ", claims=" + claims + '}';
     }
 }

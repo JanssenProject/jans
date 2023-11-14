@@ -1,5 +1,5 @@
 config.ldap.bindDN=%(ldap_binddn)s
-config.ldap.bindPassword=%(encoded_ox_ldap_pw)s
+config.ldap.bindPassword=%(ldap_bind_encoded_pw)s
 config.ldap.servers=%(hostname)s:%(ldaps_port)s
 config.ldap.maxConnections=3
 config.ldap.useSSL=true

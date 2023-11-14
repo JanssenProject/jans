@@ -39,6 +39,7 @@ type OidcClientAttribute struct {
 	AdditionalTokenEndpointAuthMethods      []string `schema:"additional_token_endpoint_auth_methods" json:"additionalTokenEndpointAuthMethods,omitempty"`
 	MinimumAcrPriorityList                  []string `schema:"minimum_acr_priority_list" json:"minimumAcrPriorityList,omitempty"`
 	RequestedLifetime                       int      `schema:"requested_lifetime" json:"requestedLifetime,omitempty"`
+	Evidence                                string   `schema:"evidence" json:"evidence,omitempty"`
 }
 
 // OidcClient is the definition of an OpenId Connect Client.
@@ -111,7 +112,7 @@ type OidcClient struct {
 	BackchannelTokenDeliveryMode               string               `schema:"backchannel_token_delivery_mode" json:"backchannelTokenDeliveryMode,omitempty"`
 	BackchannelClientNotificationEndpoint      string               `schema:"backchannel_client_notification_endpoint" json:"backchannelClientNotificationEndpoint,omitempty"`
 	BackchannelAuthenticationRequestSigningAlg string               `schema:"backchannel_authentication_request_signing_alg" json:"backchannelAuthenticationRequestSigningAlg,omitempty"`
-	BackchannelUserCodeParameter               string               `schema:"backchannel_user_code_parameter" json:"backchannelUserCodeParameter,omitempty"`
+	BackchannelUserCodeParameter               bool                 `schema:"backchannel_user_code_parameter" json:"backchannelUserCodeParameter,omitempty"`
 	Description                                string               `schema:"description" json:"description,omitempty"`
 	Organization                               string               `schema:"organization" json:"organization,omitempty"`
 	Groups                                     []string             `schema:"groups" json:"groups,omitempty"`

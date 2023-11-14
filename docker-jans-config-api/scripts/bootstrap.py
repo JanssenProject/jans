@@ -1,7 +1,6 @@
 import json
 import logging.config
 import os
-import re
 import typing as _t
 from functools import cached_property
 from string import Template
@@ -39,15 +38,15 @@ from plugins import discover_plugins
 from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("config-api")
 
 
 def main():
     manager = get_manager()
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
 
-    render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
-    render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
+    render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
+    render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
 
     mapper = PersistenceMapper()
     persistence_groups = mapper.groups().keys()
@@ -60,7 +59,7 @@ def main():
     if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
-            "/app/templates/jans-ldap.properties.tmpl",
+            "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
         sync_ldap_truststore(manager)
@@ -68,7 +67,7 @@ def main():
     if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
-            "/app/templates/jans-couchbase.properties.tmpl",
+            "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
         # need to resolve whether we're using default or user-defined couchbase cert
@@ -79,14 +78,14 @@ def main():
 
         render_sql_properties(
             manager,
-            f"/app/templates/jans-{db_dialect}.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties",
             "/etc/jans/conf/jans-sql.properties",
         )
 
     if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
-            "/app/templates/jans-spanner.properties.tmpl",
+            "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
 
@@ -100,14 +99,15 @@ def main():
     cert_to_truststore(
         "web_https",
         "/etc/certs/web_https.crt",
-        "/usr/java/latest/jre/lib/security/cacerts",
+        "/opt/java/lib/security/cacerts",
         "changeit",
     )
 
     configure_logging()
 
-    persistence_setup = PersistenceSetup(manager)
-    persistence_setup.import_ldif_files()
+    with manager.lock.create_lock("config-api-setup"):
+        persistence_setup = PersistenceSetup(manager)
+        persistence_setup.import_ldif_files()
 
     plugins = discover_plugins()
     logger.info(f"Loaded config-api plugins: {plugins}")
@@ -205,7 +205,7 @@ def configure_logging():
     ]):
         config["log_prefix"] = "${sys:config_api.log.console.prefix}%X{config_api.log.console.group} - "
 
-    with open("/app/templates/log4j2.xml") as f:
+    with open("/app/templates/jans-config-api/log4j2.xml") as f:
         txt = f.read()
 
     logfile = "/opt/jans/jetty/jans-config-api/resources/log4j2.xml"
@@ -278,7 +278,7 @@ def configure_admin_ui_logging():
     ]):
         config["log_prefix"] = "${sys:admin_ui.log.console.prefix}%X{admin_ui.log.console.group} - "
 
-    with open("/app/plugins/admin-ui/log4j2-adminui.xml") as f:
+    with open("/app/templates/jans-config-api/log4j2-adminui.xml") as f:
         txt = f.read()
 
     tmpl = Template(txt)
@@ -314,19 +314,18 @@ class PersistenceSetup:
             return json.loads(entry["jansConfDyn"])
 
         # couchbase
-        elif self.persistence_type == "couchbase":
+        if self.persistence_type == "couchbase":
             key = id_from_dn(dn)
             bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
             req = self.client.exec_query(
-                f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+                f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec:  608
             )
             attrs = req.json()["results"][0]
             return attrs["jansConfDyn"]
 
         # ldap
-        else:
-            entry = self.client.get(dn, attributes=["jansConfDyn"])
-            return json.loads(entry.entry_attributes_as_dict["jansConfDyn"][0])
+        entry = self.client.get(dn, attributes=["jansConfDyn"])
+        return json.loads(entry.entry_attributes_as_dict["jansConfDyn"][0])
 
     def transform_url(self, url):
         auth_server_url = os.environ.get("CN_AUTH_SERVER_URL", "")
@@ -339,8 +338,7 @@ class PersistenceSetup:
             path = f"/jans-auth{parse_result.path}"
         else:
             path = parse_result.path
-        url = f"http://{auth_server_url}{path}"
-        return url
+        return f"http://{auth_server_url}{path}"
 
     def get_injected_urls(self):
         auth_config = self.get_auth_config()
@@ -446,9 +444,8 @@ class PersistenceSetup:
 
     def import_ldif_files(self) -> None:
         # create missing scopes, saved as scopes.ldif (if enabled)
-        if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
-            logger.info("Missing scopes creation is enabled!")
-            self.generate_scopes_ldif()
+        logger.info("Missing scopes creation is enabled!")
+        self.generate_scopes_ldif()
 
         files = ["config.ldif", "scopes.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]

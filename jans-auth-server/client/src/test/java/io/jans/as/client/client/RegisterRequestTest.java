@@ -24,6 +24,16 @@ import static org.testng.Assert.assertEquals;
 public class RegisterRequestTest {
 
     @Test
+    public void fromJson_forEvidence_ShouldReturnCorrectValue() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("evidence", "{\"data\":\"somevalue\"}");
+
+        final RegisterRequest registerRequest = RegisterRequest.fromJson(jsonObject.toString());
+
+        assertEquals(registerRequest.getEvidence(), "{\"data\":\"somevalue\"}");
+    }
+
+    @Test
     public void getParametersForAdditionalAudienceShouldReturnCorrectValue() {
         RegisterRequest request = new RegisterRequest();
         request.setAdditionalAudience(Lists.newArrayList("aud1", "aud2"));

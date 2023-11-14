@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-config-api-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.17-SNAPSHOT</version>
+	<version>1.0.21-SNAPSHOT</version>
 	<name>jans-config-api-parent</name>
 
 	<distributionManagement>
@@ -27,6 +27,7 @@
 
 		<jans.version>${project.version}</jans.version>
 
+		<resteasy.version>6.0.3.Final</resteasy.version>
 		<jackson.version>2.13.2</jackson.version>
 		<jetty.version>11.0.15</jetty.version>
 		<weld.version>4.0.3.Final</weld.version>	
@@ -55,6 +56,8 @@
 
 		<swagger-maven-plugin-jakarta>2.2.7</swagger-maven-plugin-jakarta>
 		<swagger-models-jakarta>2.2.7</swagger-models-jakarta>
+		
+        <apache.james.version>0.8.3</apache.james.version>
 	</properties>
 
 	<prerequisites>
@@ -243,12 +246,12 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.69</version>
+				<version>1.70</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.69</version>
+				<version>1.70</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
@@ -382,11 +385,6 @@
 			</dependency>
 
 			<!-- Others -->
-			<!--<dependency>
-				<groupId>com.github.fge</groupId>
-				<artifactId>json-patch</artifactId>
-				<version>1.9</version>
-			</dependency>-->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
@@ -396,6 +394,23 @@
 				<groupId>org.json</groupId>
 				<artifactId>json</artifactId>
 			</dependency>
+			
+            <!-- apache james -->
+            <dependency>
+            	<groupId>org.apache.james</groupId>
+            	<artifactId>apache-mime4j-dom</artifactId>
+            	<version>${apache.james.version}</version>
+            </dependency>
+            <dependency>
+            	<groupId>org.apache.james</groupId>
+            	<artifactId>apache-mime4j-storage</artifactId>
+            	<version>${apache.james.version}</version>
+            </dependency>
+            <dependency>
+            	<groupId>org.apache.james</groupId>
+            	<artifactId>apache-mime4j-core</artifactId>
+            	<version>${apache.james.version}</version>
+            </dependency>      			
 
 			<!-- Swagger -->
 			<dependency>

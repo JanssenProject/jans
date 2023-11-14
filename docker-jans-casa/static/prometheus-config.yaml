@@ -1,0 +1,10 @@
+---
+startDelaySeconds: 0
+ssl: false
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+whitelistObjectNames: ["org.eclipse.jetty.server.handler:*"]
+rules:
+  - pattern: ".*xx"
+  - pattern: ".*requests"
+  - pattern: ".*requestTimeTotal"

@@ -81,14 +81,7 @@ class ParamSchema(Schema):
 
     auth_enc_keys = Str(missing="")
 
-    salt = Str(
-        validate=[
-            Length(equal=24),
-            Predicate("isalnum", error="Only alphanumeric characters are allowed"),
-        ],
-        missing="",
-        default="",
-    )
+    salt = Str(missing="", default="")
 
     @validates("hostname")
     def validate_fqdn(self, value):
@@ -130,6 +123,14 @@ class ParamSchema(Schema):
 
         if err:
             raise ValidationError(err)
+
+    @validates("salt")
+    def validate_salt(self, value):
+        if value and len(value) != 24:
+            raise ValidationError("Length must be 24.")
+
+        if value and not value.isalnum():
+            raise ValidationError("Only alphanumeric characters are allowed")
 
 
 def params_from_file(path):
