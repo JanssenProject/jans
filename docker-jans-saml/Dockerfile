@@ -23,21 +23,19 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.0.20-SNAPSHOT
-ENV CN_BUILD_DATE='2023-10-27 08:54'
+ENV CN_VERSION=1.0.21-SNAPSHOT
+ENV CN_BUILD_DATE='2023-11-14 08:13'
 
-# @TODO: add kc-jans-storage-plugin after issue with Cookie resolved
-# RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
-#     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
-#     && unzip /tmp/kc-storage-deps.zip -d /opt/keycloak/providers \
-#     && rm -rf /tmp/kc-storage-deps.zip
-    # \
+# @FIXME: kc-jans-storage-plugin raises error about Cookie
+RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
+    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
+    && unzip /tmp/kc-storage-deps.zip -d /opt/keycloak/providers \
+    && rm -rf /tmp/kc-storage-deps.zip
+
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERSION}/kc-jans-authn-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERSION}/kc-jans-authn-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-authn-deps.zip \
     && unzip /tmp/kc-authn-deps.zip -d /opt/keycloak/providers \
     && rm -rf /tmp/kc-authn-deps.zip
-    # \
-    # && wget -q https://jenkins.jans.io/maven/io/jans/jans-scim-model/${CN_VERSION}/jans-scim-model-${CN_VERSION}.jar -P /tmp
 
 # =====================
 # jans-linux-setup sync
@@ -45,7 +43,6 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 
 ENV JANS_SOURCE_VERSION=cc9d64f830ac3a07c7dbcbaafe920386e6fdcb7f
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
-# ARG JANS_KC_INTEGRATION_RESOURCES_DIR=jans-keycloak-integration/storage-api/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
@@ -182,7 +179,7 @@ EXPOSE $CN_SAML_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.20" \
+    org.opencontainers.image.version="1.0.21" \
     org.opencontainers.image.title="Janssen SAML" \
     org.opencontainers.image.description=""
 

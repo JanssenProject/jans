@@ -30,7 +30,6 @@ export JAVA_OPTS_APPEND="$java_opts"
 exec bash /opt/keycloak/bin/kc.sh start \
     -Dlog.base=/opt/keycloak/logs/ \
     -Djans.config.prop.path=/opt/keycloak/providers \
-    --db=dev-mem \
     --health-enabled=true \
     --metrics-enabled=true \
     --http-host="${CN_SAML_HOST}" \
@@ -42,4 +41,5 @@ exec bash /opt/keycloak/bin/kc.sh start \
     --log-console-format="'jans-saml - %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n'" \
     --log-file=/opt/keycloak/logs/keycloak.log \
     --log-level=INFO
+    # --db=dev-mem \
     # --optimized
