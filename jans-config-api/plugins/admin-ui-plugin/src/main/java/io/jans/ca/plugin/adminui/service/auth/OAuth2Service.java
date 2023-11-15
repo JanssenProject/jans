@@ -64,7 +64,7 @@ public class OAuth2Service extends BaseService {
                 tokenResponse = getToken(tokenRequest, auiConfiguration.getAuiBackendApiServerTokenEndpoint(), apiTokenRequest.getUjwt(), apiTokenRequest.getPermissionTag());
             }
 
-            Map<String, Object>  introspectionResponse = introspectToken(tokenResponse.getAccessToken(), auiConfiguration.getAuiWebServerIntrospectionEndpoint());
+            Map<String, Object>  introspectionResponse = introspectToken(tokenResponse.getAccessToken(), auiConfiguration.getAuiBackendApiServerIntrospectionEndpoint());
 
             TokenResponse tokenResp = new TokenResponse();
             tokenResp.setAccessToken(tokenResponse.getAccessToken());
