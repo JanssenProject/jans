@@ -64,27 +64,31 @@ public class OAuth2Service extends BaseService {
                 tokenResponse = getToken(tokenRequest, auiConfiguration.getAuiBackendApiServerTokenEndpoint(), apiTokenRequest.getUjwt(), apiTokenRequest.getPermissionTag());
             }
 
-            final Jwt tokenJwt = Jwt.parse(tokenResponse.getAccessToken());
-            Map<String, Object> claims = getClaims(tokenJwt);
+            Map<String, Object>  introspectionResponse = introspectToken(tokenResponse.getAccessToken(), auiConfiguration.getAuiWebServerIntrospectionEndpoint());
+
             TokenResponse tokenResp = new TokenResponse();
             tokenResp.setAccessToken(tokenResponse.getAccessToken());
             tokenResp.setIdToken(tokenResponse.getIdToken());
             tokenResp.setRefreshToken(tokenResponse.getRefreshToken());
             final String SCOPE = "scope";
-            if (claims.get(SCOPE) instanceof List) {
-                tokenResp.setScopes((List) claims.get(SCOPE));
+            if (introspectionResponse.get(SCOPE) != null) {
+                if (introspectionResponse.get(SCOPE) instanceof List) {
+                    tokenResp.setScopes((List) introspectionResponse.get(SCOPE));
+                }
+                if (introspectionResponse.get(SCOPE) instanceof String) {
+                    tokenResp.setScopes(Arrays.asList(((String) introspectionResponse.get(SCOPE)).split(" ")));
+                }
+            }
+            if (introspectionResponse.get("iat") != null) {
+                tokenResp.setIat(Long.valueOf(introspectionResponse.get("iat").toString()));
             }
 
-            if (claims.get("iat") != null) {
-                tokenResp.setIat(Long.valueOf(claims.get("iat").toString()));
+            if (introspectionResponse.get("exp") != null) {
+                tokenResp.setExp(Long.valueOf(introspectionResponse.get("exp").toString()));
             }
 
-            if (claims.get("exp") != null) {
-                tokenResp.setExp(Long.valueOf(claims.get("exp").toString()));
-            }
-
-            if (claims.get("iss") != null) {
-                tokenResp.setIssuer(claims.get("iss").toString());
+            if (introspectionResponse.get("iss") != null) {
+                tokenResp.setIssuer(introspectionResponse.get("iss").toString());
             }
 
             return tokenResp;

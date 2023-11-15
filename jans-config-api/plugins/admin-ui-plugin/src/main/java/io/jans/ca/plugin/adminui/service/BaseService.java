@@ -186,4 +186,24 @@ public class BaseService {
         });
         return claims;
     }
+
+    public Map<String, Object> introspectToken(String accessToken, String introspectionEndpoint) {
+        log.info("Token introspection from auth-server.");
+        Invocation.Builder request = ClientFactory.instance().getClientBuilder(introspectionEndpoint);
+        request.header("Authorization", "Bearer " + accessToken);
+
+        MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
+        body.putSingle("token", accessToken);
+
+        Response response = request.post(Entity.form(body));
+
+        log.info("Introspection response status code: {}", response.getStatus());
+
+        if (response.getStatus() == 200) {
+            Map<String, Object> entity = response.readEntity(Map.class);
+            log.info("Introspection response entity: {}", entity);
+            return entity;
+        }
+        return null;
+    }
 }
