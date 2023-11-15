@@ -187,7 +187,7 @@ public class BaseService {
         return claims;
     }
 
-    public Map<String, Object> introspectToken(String accessToken, String introspectionEndpoint) {
+    public Optional<Map<String, Object>> introspectToken(String accessToken, String introspectionEndpoint) {
         log.info("Token introspection from auth-server.");
         Invocation.Builder request = ClientFactory.instance().getClientBuilder(introspectionEndpoint);
         request.header("Authorization", "Bearer " + accessToken);
@@ -200,10 +200,10 @@ public class BaseService {
         log.info("Introspection response status code: {}", response.getStatus());
 
         if (response.getStatus() == 200) {
-            Map<String, Object> entity = response.readEntity(Map.class);
-            log.info("Introspection response entity: {}", entity);
+            Optional<Map<String, Object>> entity = Optional.of(response.readEntity(Map.class));
+            log.info("Introspection response entity: {}", entity.get().toString());
             return entity;
         }
-        return null;
+        return Optional.empty();
     }
 }
