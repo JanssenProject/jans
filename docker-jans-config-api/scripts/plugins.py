@@ -15,6 +15,7 @@ SUPPORTED_PLUGINS = (
     "fido2",
     "user-mgt",
     "jans-link",
+    "saml",
 )
 
 
