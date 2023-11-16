@@ -121,7 +121,7 @@ public class ScriptUtils {
         try {
             return CdiUtil.bean(ActionService.class).callAction(instance, actionClassName, methodName, params);
         } catch (Exception e) {
-            LOG.warn("Exception raised when executing Call (method {}).", methodName);                
+            LOG.warn("Exception raised when executing Call - method {}", methodName);                
             throw e;
         }
 
