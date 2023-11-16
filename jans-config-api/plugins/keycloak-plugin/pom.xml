@@ -110,25 +110,32 @@
 		</dependency>-->
 			<!-- end keycloak dependencies-->
 
+		
 		<!-- opensaml -->
 		<dependency>
-			<groupId>
-				org.opensaml</groupId>
-			<artifactId>opensaml-saml-api</artifactId>
-			<version>
-				${saml.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.opensaml</groupId>
-			<artifactId>
-				opensaml-xmlsec-api</artifactId>
+			<artifactId>opensaml-saml-api</artifactId>
 			<version>${saml.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>
-				org.opensaml</groupId>
+			<groupId>org.opensaml</groupId>
+			<artifactId>opensaml-xmlsec-api</artifactId>
+			<version>${saml.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-core</artifactId>
 			<version>4.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.opensaml</groupId>
+			<artifactId>opensaml-security-api</artifactId>
+			<version>${saml.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.shibboleth.utilities</groupId>
+			<artifactId>java-support</artifactId>
+			<version>7.5.2</version>
 		</dependency>
 		
 		<!-- Others -->

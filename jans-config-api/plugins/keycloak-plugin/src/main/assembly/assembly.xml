@@ -14,7 +14,7 @@
 			<useProjectArtifact>false</useProjectArtifact>
 			<includes>
 			    <include>io.jans:jans-core-saml</include>
-				<include>org.jboss.resteasy:resteasy-multipart-provider</include>
+					<include>org.jboss.resteasy:resteasy-multipart-provider</include>
 				<include>org.apache.james:apache-mime4j-dom</include>
 				<include>org.apache.james:apache-mime4j-storage</include>
 				<include>org.apache.james:apache-mime4j-core</include>
@@ -22,6 +22,7 @@
 				<include>org.opensaml:xmltooling</include>
 				<include>org.opensaml:opensaml-xmlsec-api</include>
 				<include>org.opensaml:opensaml-core</include>
+				<include>net.shibboleth.utilities:java-support</include>
 				<include>keycloak-services:mapstruct</include>
 				<include>org.keycloak:keycloak-admin-client-jakarta</include>
 				<include>org.keycloak:keycloak-core</include>

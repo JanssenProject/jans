@@ -391,14 +391,6 @@
 				<artifactId>commons-collections4</artifactId>
 				<version>4.1</version>
 			</dependency>
-<<<<<<< HEAD
-	
-=======
-			<dependency>
-				<groupId>org.json</groupId>
-				<artifactId>json</artifactId>
-			</dependency>
->>>>>>> 3ca1b24ecca8dacc2b9a53e862c49291c5c20c2c
 			
             <!-- apache james -->
             <dependency>
