@@ -22,7 +22,8 @@
 		<module>user-mgt-plugin</module>
 		<module>fido2-plugin</module>
 		<module>saml-plugin</module>
-		<module>keycloak-plugin</module>
+		<module>keycloak-plugin</module>		
+		<module>idp-plugin</module>
 	</modules>
 
 	<dependencies>
