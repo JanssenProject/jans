@@ -8,6 +8,7 @@ package io.jans.link.util;
 
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
@@ -25,7 +26,6 @@ import jakarta.inject.Inject;
  * 
  * @author Yuriy Movchan Date: 08.02.2011
  */
-
 public class PropertyUtil {
 
 	private static final Logger log = Logger.getLogger(PropertyUtil.class);
