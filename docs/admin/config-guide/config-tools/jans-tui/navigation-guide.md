@@ -5,6 +5,7 @@ tags:
 - tools
 - tui
 - text base UI
+- navigation
 ---
 
 ## General Structure:
