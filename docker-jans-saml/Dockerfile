@@ -1,0 +1,215 @@
+FROM quay.io/keycloak/keycloak:22.0.5 as kc-src
+
+FROM bellsoft/liberica-openjre-alpine:17.0.8
+
+# ===============
+# Alpine packages
+# ===============
+
+RUN apk update \
+    && apk upgrade --available \
+    && apk add --no-cache openssl python3 tini curl py3-cryptography py3-psycopg2 py3-grpcio bash \
+    && apk add --no-cache --virtual .build-deps wget git zip
+
+# ========
+# Keycloak
+# ========
+
+COPY --from=kc-src /opt/keycloak /opt/keycloak
+RUN mkdir -p /opt/keycloak/logs \
+    /opt/keycloak/providers
+
+# ==============
+# KC integration
+# ==============
+
+ENV CN_VERSION=1.0.21-SNAPSHOT
+ENV CN_BUILD_DATE='2023-11-14 08:13'
+
+# @FIXME: kc-jans-storage-plugin raises error about Cookie
+RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
+    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
+    && unzip /tmp/kc-storage-deps.zip -d /opt/keycloak/providers \
+    && rm -rf /tmp/kc-storage-deps.zip
+
+RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERSION}/kc-jans-authn-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
+    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERSION}/kc-jans-authn-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-authn-deps.zip \
+    && unzip /tmp/kc-authn-deps.zip -d /opt/keycloak/providers \
+    && rm -rf /tmp/kc-authn-deps.zip
+
+# =====================
+# jans-linux-setup sync
+# =====================
+
+ENV JANS_SOURCE_VERSION=cc9d64f830ac3a07c7dbcbaafe920386e6fdcb7f
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
+RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_SOURCE_VERSION} \
+    && git sparse-checkout add ${JANS_SETUP_DIR}
+
+RUN mkdir -p /app/static/rdbm \
+    /app/schema \
+    /app/templates/jans-saml
+
+# sync static files from linux-setup
+RUN cd /tmp/jans \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sub_tables.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/configuration.ldif /app/templates/jans-saml/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/jans-saml-config.json /app/templates/jans-saml/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/keycloak.conf /app/templates/jans-saml/
+
+# ======
+# Python
+# ======
+
+COPY requirements.txt /app/requirements.txt
+RUN python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel setuptools \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
+
+# =======
+# Cleanup
+# =======
+
+RUN apk del .build-deps \
+    && rm -rf /var/cache/apk/* /tmp/jans
+
+# =======
+# License
+# =======
+
+COPY LICENSE /licenses/LICENSE
+
+# ==========
+# Config ENV
+# ==========
+
+ENV CN_CONFIG_ADAPTER=consul \
+    CN_CONFIG_CONSUL_HOST=localhost \
+    CN_CONFIG_CONSUL_PORT=8500 \
+    CN_CONFIG_CONSUL_CONSISTENCY=stale \
+    CN_CONFIG_CONSUL_SCHEME=http \
+    CN_CONFIG_CONSUL_VERIFY=false \
+    CN_CONFIG_CONSUL_CACERT_FILE=/etc/certs/consul_ca.crt \
+    CN_CONFIG_CONSUL_CERT_FILE=/etc/certs/consul_client.crt \
+    CN_CONFIG_CONSUL_KEY_FILE=/etc/certs/consul_client.key \
+    CN_CONFIG_CONSUL_TOKEN_FILE=/etc/certs/consul_token \
+    CN_CONFIG_CONSUL_NAMESPACE=jans \
+    CN_CONFIG_KUBERNETES_NAMESPACE=default \
+    CN_CONFIG_KUBERNETES_CONFIGMAP=jans \
+    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false
+
+# ==========
+# Secret ENV
+# ==========
+
+ENV CN_SECRET_ADAPTER=vault \
+    CN_SECRET_VAULT_SCHEME=http \
+    CN_SECRET_VAULT_HOST=localhost \
+    CN_SECRET_VAULT_PORT=8200 \
+    CN_SECRET_VAULT_VERIFY=false \
+    CN_SECRET_VAULT_ROLE_ID_FILE=/etc/certs/vault_role_id \
+    CN_SECRET_VAULT_SECRET_ID_FILE=/etc/certs/vault_secret_id \
+    CN_SECRET_VAULT_CERT_FILE=/etc/certs/vault_client.crt \
+    CN_SECRET_VAULT_KEY_FILE=/etc/certs/vault_client.key \
+    CN_SECRET_VAULT_CACERT_FILE=/etc/certs/vault_ca.crt \
+    CN_SECRET_VAULT_NAMESPACE=jans \
+    CN_SECRET_KUBERNETES_NAMESPACE=default \
+    CN_SECRET_KUBERNETES_SECRET=jans \
+    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
+
+# ===============
+# Persistence ENV
+# ===============
+
+ENV CN_PERSISTENCE_TYPE=ldap \
+    CN_HYBRID_MAPPING="{}" \
+    CN_LDAP_URL=localhost:1636 \
+    CN_LDAP_USE_SSL=true \
+    CN_COUCHBASE_URL=localhost \
+    CN_COUCHBASE_USER=admin \
+    CN_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \
+    CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
+    CN_COUCHBASE_CONN_TIMEOUT=10000 \
+    CN_COUCHBASE_CONN_MAX_WAIT=20000 \
+    CN_COUCHBASE_SCAN_CONSISTENCY=not_bounded \
+    CN_COUCHBASE_BUCKET_PREFIX=jans \
+    CN_COUCHBASE_TRUSTSTORE_ENABLE=true \
+    CN_COUCHBASE_KEEPALIVE_INTERVAL=30000 \
+    CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500
+
+# ===========
+# Generic ENV
+# ===========
+
+ENV CN_MAX_RAM_PERCENTAGE=75.0 \
+    CN_WAIT_MAX_TIME=300 \
+    CN_WAIT_SLEEP_DURATION=10 \
+    GOOGLE_PROJECT_ID="" \
+    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
+    CN_GOOGLE_SECRET_VERSION_ID=latest \
+    CN_GOOGLE_SECRET_NAME_PREFIX=jans \
+    CN_AWS_SECRETS_ENDPOINT_URL="" \
+    CN_AWS_SECRETS_PREFIX=jans \
+    CN_AWS_SECRETS_REPLICA_FILE="" \
+    CN_SAML_PORT=8083 \
+    CN_SAML_HOST=0.0.0.0 \
+    CN_SAML_JAVA_OPTIONS=""
+    # KC_HEALTH_ENABLED=true \
+    # KC_METRICS_ENABLED=true
+
+# ==========
+# misc stuff
+# ==========
+
+EXPOSE $CN_SAML_PORT
+
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.title="Janssen SAML" \
+    org.opencontainers.image.description=""
+
+RUN mkdir -p /etc/certs \
+    /etc/jans/conf \
+    /opt/idp/configs/keycloak/metadata \
+    /opt/idp/configs/keycloak/temp_metadata \
+    /usr/share/java
+
+COPY templates /app/templates/
+COPY scripts /app/scripts
+RUN chmod +x /app/scripts/entrypoint.sh
+
+RUN ln -sf /usr/lib/jvm/jre /opt/java
+
+# create non-root user
+RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jans
+
+# adjust ownership and permission
+RUN chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans \
+    && chmod 664 /opt/java/lib/security/cacerts \
+    && chown -R 1000:0 /opt/idp \
+    && chown -R 1000:0 /usr/share/java \
+    && chown -R 1000:0 /opt/keycloak/logs \
+    && chown -R 1000:0 /opt/keycloak/conf
+
+USER 1000
+
+RUN mkdir -p $HOME/.config/gcloud
+
+ENTRYPOINT ["tini", "-e", "143", "-g", "--"]
+CMD ["sh", "/app/scripts/entrypoint.sh"]
