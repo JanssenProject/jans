@@ -11,10 +11,9 @@ tags:
 
 The engine and the bridge are two of the components part of the Agama Framework implementation in Janssen. The [engine](./jans-agama-engine.md) is a piece of software in charge of parsing flows written in Agama DSL and put them into action. The "bridge" is a regular jython script that temporarily hands control to the engine when an Agama flow is started, and receives control back once the flow has finished. This script is in charge of completing the authentication process for the user.
 
-By default, both components are disabled. To activate them do the following:
+By default, the bridge is disabled. To activate it do the following:
 
 - Open [TUI](../../config-guide/config-tools/jans-tui/README.md)
-- Navigate to `Auth Server` > `properties` > `agamaConfiguration` > check `enabled` > `save`
 - Navigate to `Scripts` > Search 'agama' > Select the script and hit enter > check `enabled` > `save` 
 
 ## Engine configuration
@@ -23,7 +22,7 @@ Some aspects of the engine are configurable and they are integral part of the Ja
 
 The properties of Agama engine configuration are described in the following:
 
-- `enabled`: A boolean value that specifies if the engine is enabled. Read more about [engine availability](#availability) above 
+- `enabled`: A boolean value that specifies if the engine is enabled. To disable the engine, open [TUI](../../config-guide/config-tools/jans-tui/README.md) and navigate to `Auth Server` > `properties` > `agamaConfiguration`. Then uncheck `enabled` and hit `save`
 
 - `templatesPath`: A path relative to `/opt/jans/jetty/jans-auth/server/agama` that serves as the root of Agama flow pages. Default value is `/ftl`
 
