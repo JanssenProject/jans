@@ -109,6 +109,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     private IdToken createIdTokenInternal(AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken, ExecutionContext executionContext) throws Exception {
+        executionContext.initFromGrantIfNeeded(this);
+
         JsonWebResponse jwr = idTokenFactory.createJwr(this, authorizationCode, accessToken, refreshToken, executionContext);
         final IdToken idToken = new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
@@ -189,6 +191,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Override
     public AccessToken createAccessToken(ExecutionContext context) {
         try {
+            context.initFromGrantIfNeeded(this);
+
             final AccessToken accessToken = super.createAccessToken(context);
             if (accessToken.getExpiresIn() < 0) {
                 log.trace("Failed to create access token with negative expiration time");
@@ -237,6 +241,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         final User user = getUser();
         final Client client = getClient();
 
+        context.initFromGrantIfNeeded(this);
+
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
                 .fromString(appConfiguration.getDefaultSignatureAlgorithm());
         if (client.getAccessTokenSigningAlg() != null
@@ -278,6 +284,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     private void runIntrospectionScriptAndInjectValuesIntoJwt(Jwt jwt, ExecutionContext executionContext) {
+        executionContext.initFromGrantIfNeeded(this);
+
         JSONObject responseAsJsonObject = new JSONObject();
 
         ExternalIntrospectionContext context = new ExternalIntrospectionContext(this, executionContext.getHttpRequest(), executionContext.getHttpResponse(), appConfiguration, attributeService);
@@ -295,6 +303,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private RefreshToken saveRefreshToken(RefreshToken refreshToken, ExecutionContext executionContext) {
         try {
+            executionContext.initFromGrantIfNeeded(this);
+
             if (refreshToken.getExpiresIn() > 0) {
                 final TokenEntity entity = asToken(refreshToken);
                 executionContext.setRefreshTokenEntity(entity);
@@ -339,11 +349,13 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Override
     public RefreshToken createRefreshToken(ExecutionContext context) {
+        context.initFromGrantIfNeeded(this);
         return saveRefreshToken(() -> super.createRefreshToken(context), context);
     }
 
     @Override
     public RefreshToken createRefreshToken(ExecutionContext context, int lifetime) {
+        context.initFromGrantIfNeeded(this);
         return saveRefreshToken(() -> super.createRefreshToken(context, lifetime), context);
     }
 
@@ -361,6 +373,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
             String state, ExecutionContext executionContext) {
         try {
+            executionContext.initFromGrantIfNeeded(this);
             executionContext.setScopes(getScopes());
             executionContext.setClaimsAsString(getClaims());
             executionContext.setNonce(nonce);
