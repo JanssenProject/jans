@@ -127,6 +127,8 @@ fi
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 cat << EOF >> override.yaml
 global:
+  cloud:
+    testEnviroment: true
   istio:
     enable: $INSTALL_ISTIO
   cnPersistenceType: $PERSISTENCE_TYPE
@@ -148,20 +150,31 @@ global:
       scriptLogLevel: "$LOG_LEVEL"
       auditStatsLogTarget: "$LOG_TARGET"
       auditStatsLogLevel: "$LOG_LEVEL"
+  casa:
+    # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
+    appLoggers:
+      casaLogTarget: "$LOG_TARGET"
+      casaLogLevel: "$LOG_LEVEL"
+      timerLogTarget: "$LOG_TARGET"
+      timerLogLevel: "$LOG_LEVEL"
+    ingress:
+      casaEnabled: true     
   config-api:
-    enabled: true
     appLoggers:
       configApiLogTarget: "$LOG_TARGET"
       configApiLogLevel: "$LOG_LEVEL"
   fido2:
-    enabled: true
+    ingress:
+      fido2ConfigEnabled: true
     appLoggers:
       fido2LogTarget: "$LOG_TARGET"
       fido2LogLevel: "$LOG_LEVEL"
       persistenceLogTarget: "$LOG_TARGET"
       persistenceLogLevel: "$LOG_LEVEL"
   scim:
-    enabled: true
+    ingress:
+      scimConfigEnabled: true
+      scimEnabled: true
     appLoggers:
       scimLogTarget: "$LOG_TARGET"
       scimLogLevel: "$LOG_LEVEL"
@@ -174,7 +187,6 @@ global:
       scriptLogTarget: "$LOG_TARGET"
       scriptLogLevel: "$LOG_LEVEL"
   fqdn: $JANS_FQDN
-  isFqdnRegistered: false
   lbIp: $EXT_IP
   opendj:
     # -- Boolean flag to enable/disable the OpenDJ  chart.
@@ -182,16 +194,6 @@ global:
 # -- Nginx ingress definitions chart
 nginx-ingress:
   ingress:
-    openidConfigEnabled: true
-    uma2ConfigEnabled: true
-    webfingerEnabled: true
-    webdiscoveryEnabled: true
-    scimConfigEnabled: true
-    scimEnabled: true
-    configApiEnabled: true
-    u2fConfigEnabled: true
-    fido2ConfigEnabled: true
-    authServerEnabled: true
     path: /
     hosts:
     - $JANS_FQDN
@@ -202,33 +204,13 @@ nginx-ingress:
       - $JANS_FQDN
 auth-server:
   livenessProbe:
-    # https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py
-    exec:
-      command:
-        - python3
-        - /app/scripts/healthcheck.py
-    # Setting for testing purposes only. Under optimal resources the app should be up in 30-60 secs
     initialDelaySeconds: 300
-    periodSeconds: 30
-    timeoutSeconds: 5
   readinessProbe:
-    exec:
-      command:
-        - python3
-        - /app/scripts/healthcheck.py
-    # Setting for testing purposes only. Under optimal resources the app should be up in 30-60 secs
     initialDelaySeconds: 300
-    periodSeconds: 25
-    timeoutSeconds: 5
-opendj:
-  image:
-    repository: gluufederation/opendj
-    tag: 5.0.0_dev
 EOF
 sudo helm repo add janssen https://docs.jans.io/charts
 sudo helm repo update
-# remove --devel once we issue the first prod chart
-sudo helm install janssen janssen/janssen --devel -n jans -f override.yaml --kubeconfig="$KUBECONFIG"
+sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG"
 echo "Waiting for auth-server to come up. This may take 5-10 mins....Please do not cancel out...This will wait for the auth-server to be ready.."
 sleep 300
 cat << EOF > testendpoints.sh
