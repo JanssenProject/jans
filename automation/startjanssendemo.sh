@@ -14,10 +14,10 @@ if ! [[ $JANS_FQDN == *"."*"."* ]]; then
   exit 1
 fi
 if [[ ! "$JANS_PERSISTENCE" ]]; then
-  read -rp "Enter persistence type [LDAP|MYSQL]:                            " JANS_PERSISTENCE
+  read -rp "Enter persistence type [LDAP|MYSQL|PGSQL]:                            " JANS_PERSISTENCE
 fi
-if [[ $JANS_PERSISTENCE != "LDAP" ]] && [[ $JANS_PERSISTENCE != "MYSQL" ]]; then
-  echo "[E] Incorrect entry. Please enter either LDAP or MYSQL"
+if [[ $JANS_PERSISTENCE != "LDAP" ]] && [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[ $JANS_PERSISTENCE != "PGSQL" ]]; then
+  echo "[E] Incorrect entry. Please enter either LDAP, MYSQL or PGSQL"
   exit 1
 fi
 
@@ -72,9 +72,8 @@ fi
 
 PERSISTENCE_TYPE="sql"
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
-  sudo helm repo add bitnami https://charts.bitnami.com/bitnami
   sudo microk8s.kubectl get po --kubeconfig="$KUBECONFIG"
-  sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans --kubeconfig="$KUBECONFIG"
+  sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/mysql --kubeconfig="$KUBECONFIG"
   cat << EOF > override.yaml
 config:
   countryCode: US
@@ -87,6 +86,26 @@ config:
     cnSqlDbDialect: mysql
     cnSqlDbHost: my-release-mysql.jans.svc
     cnSqlDbUser: root
+    cnSqlDbTimezone: UTC
+    cnSqldbUserPassword: Test1234#
+EOF
+fi
+
+if [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
+  sudo microk8s.kubectl get po --kubeconfig="$KUBECONFIG"
+  sudo helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/postgresql --kubeconfig="$KUBECONFIG"
+  cat << EOF > override.yaml
+config:
+  countryCode: US
+  email: support@gluu.org
+  orgName: Gluu
+  city: Austin
+  configmap:
+    cnSqlDbName: jans
+    cnSqlDbPort: 5432
+    cnSqlDbDialect: pgsql
+    cnSqlDbHost: my-release-postgresql.jans.svc
+    cnSqlDbUser: postgres
     cnSqlDbTimezone: UTC
     cnSqldbUserPassword: Test1234#
 EOF

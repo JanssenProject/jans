@@ -44,7 +44,7 @@
             "cnSqlDbDialect": {
               "description": "SQL dialect",
               "type": "string",
-              "pattern": "^(mysql)$"
+              "pattern": "^(mysql|pgsql)$"
             },
             "cnSqlDbHost": {
               "description": "SQL server address or ip",
