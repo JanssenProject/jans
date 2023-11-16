@@ -334,4 +334,13 @@ public class ExecutionContext {
     public void setResponseBuilder(Response.ResponseBuilder responseBuilder) {
         this.responseBuilder = responseBuilder;
     }
+
+    public void initFromGrantIfNeeded(AuthorizationGrant authorizationGrant) {
+        if (client == null) {
+            client = authorizationGrant.getClient();
+        }
+        if (grant == null) {
+            grant = authorizationGrant;
+        }
+    }
 }
