@@ -121,9 +121,7 @@ public class ScriptUtils {
         try {
             return CdiUtil.bean(ActionService.class).callAction(instance, actionClassName, methodName, params);
         } catch (Exception e) {
-            LOG.warn("Exception raised when executing Call (method {}): {}. " +
-                "You can catch it in your Agama code and use the Log directive to print a stacktrace",
-                methodName, e.getMessage());                
+            LOG.warn("Exception raised when executing Call (method {}).", methodName);                
             throw e;
         }
 
