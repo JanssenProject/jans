@@ -888,9 +888,13 @@ def _transform_auth_errors_config(conf):
 def _transform_auth_static_config(conf):
     should_update = False
 
-    if "ssa" not in conf["baseDn"]:
-        conf["baseDn"]["ssa"] = "ou=ssa,o=jans"
-        should_update = True
+    for key, dn in [
+        ("ssa", "ou=ssa,o=jans"),
+        ("archivedJwks", "ou=archived_jwks,o=jans"),
+    ]:
+        if key not in conf["baseDn"]:
+            conf["baseDn"][key] = dn
+            should_update = True
     return conf, should_update
 
 

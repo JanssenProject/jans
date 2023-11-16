@@ -21,12 +21,10 @@ def transform_auth_dynamic_config_hook(conf, manager):
     should_update = False
     hostname = manager.config.get("hostname")
 
-    if "redirectUrisRegexEnabled" not in conf:
-        conf["redirectUrisRegexEnabled"] = True
-        should_update = True
-
-    if "accessTokenSigningAlgValuesSupported" not in conf:
-        conf["accessTokenSigningAlgValuesSupported"] = [
+    # add missing top-level keys
+    for missing_key, value in [
+        ("redirectUrisRegexEnabled", True),
+        ("accessTokenSigningAlgValuesSupported", [
             "none",
             "HS256",
             "HS384",
@@ -40,17 +38,40 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "ES512",
             "PS256",
             "PS384",
-            "PS512"
-        ]
-        should_update = True
-
-    if "forceSignedRequestObject" not in conf:
-        conf["forceSignedRequestObject"] = False
-        should_update = True
-
-    if "grantTypesAndResponseTypesAutofixEnabled" not in conf:
-        conf["grantTypesAndResponseTypesAutofixEnabled"] = False
-        should_update = True
+            "PS512",
+        ]),
+        ("forceSignedRequestObject", False),
+        ("grantTypesAndResponseTypesAutofixEnabled", False),
+        ("useHighestLevelScriptIfAcrScriptNotFound", False),
+        ("requestUriBlockList", ["localhost", "127.0.0.1"]),
+        ("ssaConfiguration", {
+            "ssaEndpoint": f"https://{hostname}/jans-auth/restv1/ssa",
+            "ssaSigningAlg": "RS256",
+            "ssaExpirationInDays": 30,
+        }),
+        ("blockWebviewAuthorizationEnabled", False),
+        ("subjectIdentifiersPerClientSupported", ["mail", "uid"]),
+        ("agamaConfiguration", {
+            "enabled": True,
+            "templatesPath": "/ftl",
+            "scriptsPath": "/scripts",
+            "serializerType": "KRYO",
+            "maxItemsLoggedInCollections": 9,
+            "pageMismatchErrorPage": "mismatch.ftl",
+            "interruptionErrorPage": "timeout.ftl",
+            "crashErrorPage": "crash.ftl",
+            "finishedFlowPage": "finished.ftl",
+            "bridgeScriptPage": "agama.xhtml",
+            "defaultResponseHeaders": {
+                "Cache-Control": "max-age=0, no-store",
+            },
+        }),
+        ("authorizationChallengeEndpoint", f"https://{hostname}/jans-auth/restv1/authorization_challenge"),
+        ("archivedJwksUri", f"https://{hostname}/jans-auth/restv1/jwks/archived"),
+    ]:
+        if missing_key not in conf:
+            conf[missing_key] = value
+            should_update = True
 
     if "sessionIdEnabled" in conf:
         conf.pop("sessionIdEnabled")
@@ -73,27 +94,8 @@ def transform_auth_dynamic_config_hook(conf, manager):
         ]
         should_update = True
 
-    if "useHighestLevelScriptIfAcrScriptNotFound" not in conf:
-        conf["useHighestLevelScriptIfAcrScriptNotFound"] = False
-        should_update = True
-
     if "httpLoggingExcludePaths" not in conf:
         conf["httpLoggingExcludePaths"] = conf.pop("httpLoggingExludePaths", [])
-        should_update = True
-
-    if "requestUriBlockList" not in conf:
-        conf["requestUriBlockList"] = [
-            "localhost",
-            "127.0.0.1",
-        ]
-        should_update = True
-
-    if "ssaConfiguration" not in conf:
-        conf["ssaConfiguration"] = {
-            "ssaEndpoint": f"https://{hostname}/jans-auth/restv1/ssa",
-            "ssaSigningAlg": "RS256",
-            "ssaExpirationInDays": 30
-        }
         should_update = True
 
     if "ssaCustomAttributes" not in conf["ssaConfiguration"]:
@@ -122,10 +124,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
             conf[new_attr] = conf.pop(old_attr, None)
             should_update = True
 
-    if "blockWebviewAuthorizationEnabled" not in conf:
-        conf["blockWebviewAuthorizationEnabled"] = False
-        should_update = True
-
     if "dateFormatterPatterns" not in conf:
         # remove old config
         conf.pop("userInfoConfiguration", None)
@@ -147,28 +145,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
         conf["personCustomObjectClassList"]
     ]):
         conf["personCustomObjectClassList"] = []
-        should_update = True
-
-    if "subjectIdentifiersPerClientSupported" not in conf:
-        conf["subjectIdentifiersPerClientSupported"] = ["mail", "uid"]
-        should_update = True
-
-    if "agamaConfiguration" not in conf:
-        conf["agamaConfiguration"] = {
-            "enabled": False,
-            "templatesPath": "/ftl",
-            "scriptsPath": "/scripts",
-            "serializerType": "KRYO",
-            "maxItemsLoggedInCollections": 9,
-            "pageMismatchErrorPage": "mismatch.ftl",
-            "interruptionErrorPage": "timeout.ftl",
-            "crashErrorPage": "crash.ftl",
-            "finishedFlowPage": "finished.ftl",
-            "bridgeScriptPage": "agama.xhtml",
-            "defaultResponseHeaders": {
-                "Cache-Control": "max-age=0, no-store",
-            },
-        }
         should_update = True
 
     if "interruptionTime" in conf["agamaConfiguration"]:
@@ -202,11 +178,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
     # avoid setting agama configuration root dir based on java system variable
     if "rootDir" not in conf["agamaConfiguration"]:
         conf["agamaConfiguration"]["rootDir"] = "/opt/jans/jetty/jans-auth/agama"
-        should_update = True
-
-    # add authorizationChallengeEndpoint if missing
-    if "authorizationChallengeEndpoint" not in conf:
-        conf["authorizationChallengeEndpoint"] = f"https://{hostname}/jans-auth/restv1/authorization_challenge"
         should_update = True
 
     # return the conf and flag to determine whether it needs update or not
