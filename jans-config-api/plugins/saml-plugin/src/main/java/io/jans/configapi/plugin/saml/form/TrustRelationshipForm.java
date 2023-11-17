@@ -19,6 +19,7 @@ import java.io.InputStream;
 import org.jboss.resteasy.annotations.providers.multipart.PartType;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.core.MediaType;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class TrustRelationshipForm implements Serializable {
 
@@ -33,6 +34,7 @@ public class TrustRelationshipForm implements Serializable {
     @NotNull
 	@FormParam("metaDataFile")
 	@PartType(MediaType.APPLICATION_OCTET_STREAM)
+    @Schema(implementation = String.class, format="binary")
     private transient InputStream  metaDataFile;
 
     public TrustRelationship getTrustRelationship() {
