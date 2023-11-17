@@ -57,7 +57,7 @@
 		<swagger-maven-plugin-jakarta>2.2.7</swagger-maven-plugin-jakarta>
 		<swagger-models-jakarta>2.2.7</swagger-models-jakarta>
 		
-        <apache.james.version>0.8.3</apache.james.version>
+        <apache.james.version>0.8.9</apache.james.version>
 	</properties>
 
 	<prerequisites>
@@ -389,6 +389,10 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
 				<version>4.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.json</groupId>
+				<artifactId>json</artifactId>
 			</dependency>
 			
             <!-- apache james -->
