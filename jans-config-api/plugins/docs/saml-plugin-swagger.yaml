@@ -147,9 +147,9 @@ paths:
       requestBody:
         description: Trust Relationship object
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TrustRelationship'
+              $ref: '#/components/schemas/TrustRelationshipForm'
             examples:
               Request example:
                 description: Request example
@@ -158,9 +158,9 @@ paths:
         "201":
           description: Newly created Trust Relationship
           content:
-            multipart/form-data:
+            application/json:
               schema:
-                $ref: '#/components/schemas/TrustRelationshipForm'
+                $ref: '#/components/schemas/TrustRelationship'
         "401":
           description: Unauthorized
         "500":
@@ -445,7 +445,8 @@ components:
         trustRelationship:
           $ref: '#/components/schemas/TrustRelationship'
         metaDataFile:
-          type: object
+          type: string
+          format: binary
   securitySchemes:
     oauth2:
       type: oauth2
