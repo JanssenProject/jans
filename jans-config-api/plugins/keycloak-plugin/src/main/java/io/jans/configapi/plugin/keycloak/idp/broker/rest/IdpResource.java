@@ -69,19 +69,19 @@ public class IdpResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = {Constants.KC_SAML_IDP_READ_ACCESS})
     public Response getAllKcSamlIdentityProvider(@Parameter(description = "Search size - max size of the results to return") @DefaultValue(Constants.REALM_MASTER) @QueryParam(value = Constants.REALM) String realm) {
-        log.info("Fetch SAML IDP from realm:{}", realm);
+        log.error("Fetch SAML IDP from realm:{}", realm);
         List<IdentityProvider> idpList = idpService.getAllIdentityProviders(realm);
-        log.info("SAML IDP fetched idpList:{}", idpList);
+        log.error("SAML IDP fetched idpList:{}", idpList);
         return Response.ok(idpList).build();
     }
 
     @Operation(summary = "Create SAML Identity Provider", description = "Create SAML Identity Provider", operationId = "postt-saml-identity-provider", tags = {
             "Jans - Keycloak Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.KC_SAML_IDP_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProviderRepresentation.class), examples = {
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = BrokerIdentityProviderForm.class), examples = {
             @ExampleObject(value = "") }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Newly created TrustKeycloak realm", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = IdentityProviderRepresentation.class))),
+            @ApiResponse(responseCode = "201", description = "Newly created TrustKeycloak realm", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProviderRepresentation.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -90,26 +90,26 @@ public class IdpResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.KC_SAML_IDP_WRITE_ACCESS })
     public Response createKcSamlIdentityProvider(@MultipartForm BrokerIdentityProviderForm brokerIdentityProviderForm)
             throws IOException {
-        log.info("Create brokerIdentityProviderForm:{}", brokerIdentityProviderForm);
+        log.error("Create brokerIdentityProviderForm:{}", brokerIdentityProviderForm);
 
         checkResourceNotNull(brokerIdentityProviderForm, SAML_IDP_DATA_FORM);
 
         IdentityProvider idp = brokerIdentityProviderForm.getIdentityProvider();
-        log.info(" Create idp:{} ", idp);
+        log.error(" Create idp:{} ", idp);
         
         //validation
         checkResourceNotNull(idp, SAML_IDP_DATA);
         checkNotNull(idp.getDisplayName(), AttributeNames.DISPLAY_NAME);
 
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
-        log.debug(" Create metaDataFile:{} ", metaDataFile);
+        log.error(" Create metaDataFile:{} ", metaDataFile);
         if (metaDataFile != null) {
-            log.info(" IDP metaDataFile.available():{}", metaDataFile.available());
+            log.error(" IDP metaDataFile.available():{}", metaDataFile.available());
         }
 
         idp = idpService.createIdentityProvider(idp, metaDataFile);
 
-        log.info("Create created by idp:{}", idp);
+        log.error("Create created by idp:{}", idp);
         return Response.status(Response.Status.CREATED).entity(idp).build();
     }
 }

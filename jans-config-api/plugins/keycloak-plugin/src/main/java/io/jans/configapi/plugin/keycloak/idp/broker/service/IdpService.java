@@ -102,7 +102,7 @@ public class IdpService {
     }
 
     public IdentityProvider getIdentityProviderByName(String realmName, String alias) {
-        log.info("Get IdentityProvider by name realmName:{}, alias:{}, idpConfigService.isIdpEnabled():{}", realmName,
+        log.error("Get IdentityProvider by name realmName:{}, alias:{}, idpConfigService.isIdpEnabled():{}", realmName,
                 alias, idpConfigService.isIdpEnabled());
         if (idpConfigService.isIdpEnabled()) {
             IdentityProviderRepresentation kcIdp = keycloakService.getIdentityProviderByName(realmName, alias);
@@ -115,12 +115,12 @@ public class IdpService {
 
     public IdentityProvider createIdentityProvider(String realmName, IdentityProvider identityProvider)
             throws IOException {
-        log.info("Create IdentityProvider in realmName:{}, identityProvider:{}, idpConfigService.isIdpEnabled():{}",
+        log.error("Create IdentityProvider in realmName:{}, identityProvider:{}, idpConfigService.isIdpEnabled():{}",
                 realmName, identityProvider, idpConfigService.isIdpEnabled());
 
         // Create IDP in Jans DB
         identityProviderService.addSamlIdentityProvider(identityProvider);
-        log.info("Created IdentityProvider in Jans DB -  identityProvider:{}", identityProvider);
+        log.error("Created IdentityProvider in Jans DB -  identityProvider:{}", identityProvider);
 
         // Create IDP in KC if enabled
         if (idpConfigService.isIdpEnabled()) {
@@ -130,21 +130,21 @@ public class IdpService {
             kcIdp = keycloakService.createIdentityProvider(realmName, kcIdp);
             log.error("kcIdp:{}", kcIdp);
             identityProvider = this.convertToIdentityProvider(kcIdp);
-            log.info("Created IdentityProvider in KC  -  identityProvider:{}", identityProvider);
+            log.error("Created IdentityProvider in KC  -  identityProvider:{}", identityProvider);
         }
-        log.info("Final identityProvider:{}", identityProvider);
+        log.error("Final identityProvider:{}", identityProvider);
         return identityProvider;
     }
 
     public IdentityProvider createIdentityProvider(IdentityProvider identityProvider, InputStream idpMetadataStream)
             throws IOException {
-        log.info(
+        log.error(
                 "Create IdentityProvider with IDP metadata file in identityProvider:{}, idpMetadataStream:{}, idpConfigService.isIdpEnabled():{}",
                 identityProvider, idpMetadataStream, idpConfigService.isIdpEnabled());
 
         // Create IDP in Jans DB
         identityProviderService.addSamlIdentityProvider(identityProvider, idpMetadataStream);
-        log.info("Create IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
+        log.error("Create IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
 
         if (idpConfigService.isIdpEnabled()) {
             // Create IDP in KC
@@ -155,20 +155,20 @@ public class IdpService {
             log.error("kcIdp:{}", kcIdp);
 
             identityProvider = this.convertToIdentityProvider(kcIdp);
-            log.info("Final identityProvider:{}", identityProvider);
+            log.error("Final identityProvider:{}", identityProvider);
         }
         return identityProvider;
     }
 
     public IdentityProvider createIdentityProvider(String realmName, IdentityProvider identityProvider,
             InputStream idpMetadataStream) throws IOException {
-        log.info(
+        log.error(
                 "Create IdentityProvider with IDP metadata file in realmName:{}, identityProvider:{}, idpMetadataStream:{}, idpConfigService.isIdpEnabled():{}",
                 realmName, identityProvider, idpMetadataStream, idpConfigService.isIdpEnabled());
 
         // Create IDP in Jans DB
         identityProviderService.addSamlIdentityProvider(identityProvider, idpMetadataStream);
-        log.info("Create IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
+        log.error("Create IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
 
         if (idpConfigService.isIdpEnabled()) {
             // Create IDP in KC
@@ -178,20 +178,20 @@ public class IdpService {
             kcIdp = keycloakService.createIdentityProvider(realmName, kcIdp, idpMetadataStream);
             log.error("kcIdp:{}", kcIdp);
             identityProvider = this.convertToIdentityProvider(kcIdp);
-            log.info("Final identityProvider:{}", identityProvider);
+            log.error("Final identityProvider:{}", identityProvider);
         }
         return identityProvider;
     }
 
     public IdentityProvider updateProvider(IdentityProvider identityProvider, InputStream idpMetadataStream)
             throws IOException {
-        log.info(
+        log.error(
                 "Update IdentityProvider with IDP metadata file in identityProvider:{}, idpMetadataStream:{}, idpConfigService.isIdpEnabled():{}",
                 identityProvider, idpMetadataStream, idpConfigService.isIdpEnabled());
 
         // Create IDP in Jans DB
         identityProviderService.addSamlIdentityProvider(identityProvider, idpMetadataStream);
-        log.info("Update IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
+        log.error("Update IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
 
         if (idpConfigService.isIdpEnabled()) {
             // Create IDP in KC
@@ -226,7 +226,7 @@ public class IdpService {
             return idp;
         }
         idp = identityProviderMapper.kcIdentityProviderToIdentityProvider(kcIdp);
-        log.error("idpList:{}", idp);
+        log.error("convertToIdentityProvider - idp:{}", idp);
 
         return idp;
     }
@@ -238,7 +238,7 @@ public class IdpService {
             return kcIdp;
         }
         kcIdp = identityProviderMapper.identityProviderToKCIdentityProvider(idp);
-        log.error("kcIdp:{}", kcIdp);
+        log.error("convertToIdentityProviderRepresentation() - kcIdp:{}", kcIdp);
 
         return kcIdp;
     }

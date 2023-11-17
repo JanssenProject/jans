@@ -69,25 +69,25 @@ public class KeycloakService {
     KeycloakConfig keycloakConfig;
 
     private RealmResource getRealmResource(String realm) {
-        logger.info("Get RealmResource for realm:{})", realm);
+        logger.error("Get RealmResource for realm:{})", realm);
         if (StringUtils.isBlank(realm)) {
             realm = Constants.REALM_MASTER;
         }
         RealmResource realmResource = keycloakConfig.getInstance().realm(realm);
-        logger.info("realmResource:{})", realmResource);
+        logger.error("realmResource:{})", realmResource);
         return realmResource;
     }
 
     public List<RealmRepresentation> getAllRealms() {
-        logger.info("Get All KC Realms");
+        logger.error("Get All KC Realms");
         List<RealmRepresentation> realmRepresentation = keycloakConfig.getInstance().realms().findAll();
 
-        logger.info("realmRepresentation:{})", realmRepresentation);
+        logger.error("realmRepresentation:{})", realmRepresentation);
         return realmRepresentation;
     }
 
     public RealmRepresentation getRealmByName(String realmName) {
-        logger.info("Get RealmResource for realmName:{})", realmName);
+        logger.error("Get RealmResource for realmName:{})", realmName);
 
         List<RealmRepresentation> realms = getAllRealms();
         RealmRepresentation realmRepresentation = null;
@@ -100,37 +100,37 @@ public class KeycloakService {
                 break;
             }
         }
-        logger.info("realmRepresentation:{})", realmRepresentation);
+        logger.error("realmRepresentation:{})", realmRepresentation);
         return realmRepresentation;
     }
 
     public RealmRepresentation createNewRealm(RealmRepresentation realmRepresentation) {
-        logger.info("Create realmRepresentation:{})", realmRepresentation);
+        logger.error("Create realmRepresentation:{})", realmRepresentation);
         if (realmRepresentation == null) {
             new InvalidAttributeException("RealmRepresentation is null");
         }
         keycloakConfig.getInstance().realms().create(realmRepresentation);
 
         realmRepresentation = getRealmByName(realmRepresentation.getDisplayName());
-        logger.info("realmRepresentation:{})", realmRepresentation);
+        logger.error("realmRepresentation:{})", realmRepresentation);
         return realmRepresentation;
     }
 
     public RealmRepresentation updateRealm(RealmRepresentation realmRepresentation) {
-        logger.info("Updade realmRepresentation:{})", realmRepresentation);
+        logger.error("Updade realmRepresentation:{})", realmRepresentation);
         if (realmRepresentation == null) {
             new InvalidAttributeException("RealmRepresentation is null");
         }
         RealmResource realmResource = this.getRealmResource(realmRepresentation.getRealm());
-        logger.info("realmResource:{})", realmResource);
+        logger.error("realmResource:{})", realmResource);
         realmResource.update(realmRepresentation);
         realmRepresentation = realmResource.toRepresentation();
-        logger.info("realmRepresentation:{})", realmRepresentation);
+        logger.error("realmRepresentation:{})", realmRepresentation);
         return realmRepresentation;
     }
 
     public void deleteRealm(String realmName) {
-        logger.info("Delete Realm by name realmName:{})", realmName);
+        logger.error("Delete Realm by name realmName:{})", realmName);
 
         if (StringUtils.isBlank(realmName)) {
             new InvalidAttributeException("Realm name is null!!!");
@@ -140,30 +140,30 @@ public class KeycloakService {
     }
 
     public List<IdentityProviderRepresentation> findAllIdentityProviders(String realmName) {
-        logger.info("Fetch all IdentityProvider for realmName:{})", realmName);
+        logger.error("Fetch all IdentityProvider for realmName:{})", realmName);
 
         if (StringUtils.isBlank(realmName)) {
             new InvalidAttributeException("Realm name is null!!!");
         }
 
         IdentityProvidersResource identityProvidersResource = getRealmResource(realmName).identityProviders();
-        logger.info("identityProvidersResource:{})", identityProvidersResource);
+        logger.error("identityProvidersResource:{})", identityProvidersResource);
         List<IdentityProviderRepresentation> identityProviders = identityProvidersResource.findAll();
 
-        logger.info("identityProviders:{}", identityProviders);
+        logger.error("identityProviders:{}", identityProviders);
 
         return identityProviders;
     }
 
     public IdentityProviderRepresentation getIdentityProviderById(String realmName, String internalId) {
-        logger.info("Fetch IdentityProvider by id realmName:{}, internalId:{})", realmName, internalId);
+        logger.error("Fetch IdentityProvider by id realmName:{}, internalId:{})", realmName, internalId);
 
         if (StringUtils.isBlank(realmName) || StringUtils.isBlank(internalId)) {
             new InvalidAttributeException("Realm name or IdentityProvider internalId is null!!!");
         }
 
         List<IdentityProviderRepresentation> identityProviders = findAllIdentityProviders(realmName);
-        logger.info("identityProviders:{}", identityProviders);
+        logger.error("identityProviders:{}", identityProviders);
         IdentityProviderRepresentation identityProvider = null;
         if (identityProviders == null || identityProviders.isEmpty()) {
             return identityProvider;
@@ -175,25 +175,25 @@ public class KeycloakService {
                 break;
             }
         }
-        logger.info("IdentityProvider fetched by id realmName:{}, internalId:{}, identityProvider:{})", realmName,
+        logger.error("IdentityProvider fetched by id realmName:{}, internalId:{}, identityProvider:{})", realmName,
                 internalId, identityProvider);
         return identityProvider;
     }
 
     public IdentityProviderResource getIdentityProviderResource(String realmName, String alias) {
-        logger.info("Get IdentityProviderResource by name realmName:{}, alias:{})", realmName, alias);
+        logger.error("Get IdentityProviderResource by name realmName:{}, alias:{})", realmName, alias);
 
         if (StringUtils.isBlank(realmName) || StringUtils.isBlank(alias)) {
             new InvalidAttributeException("Realm name or IdentityProvider alias is null!!!");
         }
         IdentityProviderResource identityProviderResource = this.getIdentityProviderResource(realmName, alias);
-        logger.info("IdentityProviderResource fetched by name realmName:{}, alias:{}, identityProviderResource:{})",
+        logger.error("IdentityProviderResource fetched by name realmName:{}, alias:{}, identityProviderResource:{})",
                 realmName, alias, identityProviderResource);
         return identityProviderResource;
     }
 
     public IdentityProviderRepresentation getIdentityProviderByName(String realmName, String alias) {
-        logger.info("Get IdentityProvider by name realmName:{}, alias:{})", realmName, alias);
+        logger.error("Get IdentityProvider by name realmName:{}, alias:{})", realmName, alias);
 
         if (StringUtils.isBlank(realmName) || StringUtils.isBlank(alias)) {
             new InvalidAttributeException("Realm name or IdentityProvider alias is null!!!");
@@ -201,17 +201,17 @@ public class KeycloakService {
 
         IdentityProviderResource identityProviderResource = this.getIdentityProviderResource(realmName, alias);
 
-        logger.info("identityProviderResource:{})", identityProviderResource);
+        logger.error("identityProviderResource:{})", identityProviderResource);
         IdentityProviderRepresentation identityProvider = identityProviderResource.toRepresentation();
 
-        logger.info("IdentityProvider fetched by name realmName:{}, alias:{}, identityProvider:{})", realmName, alias,
+        logger.error("IdentityProvider fetched by name realmName:{}, alias:{}, identityProvider:{})", realmName, alias,
                 identityProvider);
         return identityProvider;
     }
 
     public IdentityProviderRepresentation createIdentityProvider(String realmName,
             IdentityProviderRepresentation identityProviderRepresentation) {
-        logger.info("Create new IdentityProvider under realmName:{}, identityProviderRepresentation:{})", realmName,
+        logger.error("Create new IdentityProvider under realmName:{}, identityProviderRepresentation:{})", realmName,
                 identityProviderRepresentation);
 
         if (StringUtils.isBlank(realmName)) {
@@ -223,17 +223,17 @@ public class KeycloakService {
         }
 
         IdentityProvidersResource identityProvidersResource = getRealmResource(realmName).identityProviders();
-        logger.info("identityProvidersResource:{})", identityProvidersResource);
+        logger.error("identityProvidersResource:{})", identityProvidersResource);
         Response response = identityProvidersResource.create(identityProviderRepresentation);
 
-        logger.info("IdentityProvider creation response:{}", response);
+        logger.error("IdentityProvider creation response:{}", response);
         if (response == null) {
-            logger.info("IdentityProvider creation response.getStatusInfo():{}, response.getEntity():{}",
+            logger.error("IdentityProvider creation response.getStatusInfo():{}, response.getEntity():{}",
                     response.getStatusInfo(), response.getEntity());
             String id = getCreatedId(response);
-            logger.info("IdentityProvider creation id():{}", id);
+            logger.error("IdentityProvider creation id():{}", id);
             identityProviderRepresentation = (IdentityProviderRepresentation) response.getEntity();
-            logger.info("IdentityProvider creation identityProviderRepresentation():{}",
+            logger.error("IdentityProvider creation identityProviderRepresentation():{}",
                     identityProviderRepresentation);
             List<IdentityProviderRepresentation> identityProvider = findAllIdentityProviders(realmName);
             if (identityProvider != null && !identityProvider.isEmpty()) {
@@ -244,11 +244,11 @@ public class KeycloakService {
             response = identityProvidersResource.getIdentityProviders(Constants.SAML);
             if (response == null) {
 
-                logger.info("SAML IdentityProvider response.getStatusInfo():{}, response.getEntity():{}",
+                logger.error("SAML IdentityProvider response.getStatusInfo():{}, response.getEntity():{}",
                         response.getStatusInfo(), response.getEntity());
 
                 if (response.getEntity() != null) {
-                    logger.info("response.getEntity().getClass():{}", response.getEntity().getClass());
+                    logger.error("response.getEntity().getClass():{}", response.getEntity().getClass());
                 }
             }
 
@@ -261,7 +261,7 @@ public class KeycloakService {
             IdentityProviderRepresentation identityProviderRepresentation, InputStream idpMetadataStream) {
 
         try {
-            logger.info(
+            logger.error(
                     "Create new IdentityProvider under realmName:{}, identityProviderRepresentation:{}, idpMetadataStream:{})",
                     realmName, identityProviderRepresentation, idpMetadataStream);
 
@@ -285,11 +285,12 @@ public class KeycloakService {
             form.addFormData("file", body, MediaType.APPLICATION_XML_TYPE, "saml-idp-metadata.xml");
 
             IdentityProvidersResource identityProvidersResource = getRealmResource(realmName).identityProviders();
-            logger.info("identityProvidersResource:{})", identityProvidersResource);
+            logger.error("identityProvidersResource:{})", identityProvidersResource);
 
             Map<String, String> result = identityProvidersResource.importFrom(form);
+            logger.error("IDP metadata importConfig result:{})", result);
             boolean valid = verifySamlIdpConfig(result);
-            logger.info("Is IDP metadata file valid:{})", valid);
+            logger.error("Is IDP metadata file valid:{})", valid);
             if (!valid) {
                 new InvalidAttributeException("Idp Metedata file is not valid !!!");
             }
@@ -298,14 +299,14 @@ public class KeycloakService {
             // import-config
             Response response = identityProvidersResource.create(identityProviderRepresentation);
 
-            logger.info("IdentityProvider creation response:{}", response);
+            logger.error("IdentityProvider creation response:{}", response);
             if (response == null) {
-                logger.info("IdentityProvider creation response.getStatusInfo():{}, response.getEntity():{}",
+                logger.error("IdentityProvider creation response.getStatusInfo():{}, response.getEntity():{}",
                         response.getStatusInfo(), response.getEntity());
                 String id = getCreatedId(response);
-                logger.info("IdentityProvider creation id():{}", id);
+                logger.error("IdentityProvider creation id():{}", id);
                 identityProviderRepresentation = (IdentityProviderRepresentation) response.getEntity();
-                logger.info("IdentityProvider creation identityProviderRepresentation():{}",
+                logger.error("IdentityProvider creation identityProviderRepresentation():{}",
                         identityProviderRepresentation);
                 List<IdentityProviderRepresentation> identityProvider = findAllIdentityProviders(realmName);
                 if (identityProvider != null && !identityProvider.isEmpty()) {
@@ -316,11 +317,11 @@ public class KeycloakService {
                 response = identityProvidersResource.getIdentityProviders(Constants.SAML);
                 if (response == null) {
 
-                    logger.info("SAML IdentityProvider response.getStatusInfo():{}, response.getEntity():{}",
+                    logger.error("SAML IdentityProvider response.getStatusInfo():{}, response.getEntity():{}",
                             response.getStatusInfo(), response.getEntity());
 
                     if (response.getEntity() != null) {
-                        logger.info("response.getEntity().getClass():{}", response.getEntity().getClass());
+                        logger.error("response.getEntity().getClass():{}", response.getEntity().getClass());
                     }
                 }
 
@@ -334,7 +335,7 @@ public class KeycloakService {
 
     public IdentityProviderRepresentation updateNewIdentityProvider(String realmName,
             IdentityProviderRepresentation identityProviderRepresentation) {
-        logger.info("Update IdentityProvider under realmName:{}, identityProviderRepresentation:{})", realmName,
+        logger.error("Update IdentityProvider under realmName:{}, identityProviderRepresentation:{})", realmName,
                 identityProviderRepresentation);
 
         if (StringUtils.isBlank(realmName)) {
@@ -348,27 +349,27 @@ public class KeycloakService {
         IdentityProviderResource identityProviderResource = this.getIdentityProviderResource(realmName,
                 identityProviderRepresentation.getAlias());
 
-        logger.info("identityProviderResource for update is:{})", identityProviderRepresentation);
+        logger.error("identityProviderResource for update is:{})", identityProviderRepresentation);
         identityProviderResource.update(identityProviderRepresentation);
         identityProviderRepresentation = identityProviderResource.toRepresentation();
 
-        logger.info("Updated IdentityProvider under realmName:{}, identityProviderRepresentation:{})", realmName,
+        logger.error("Updated IdentityProvider under realmName:{}, identityProviderRepresentation:{})", realmName,
                 identityProviderRepresentation);
 
         return identityProviderRepresentation;
     }
 
     public void deleteIdentityProvider(String realmName, String alias) {
-        logger.info("IdentityProvider to delete realmName:{}, alias:{})", realmName, alias);
+        logger.error("IdentityProvider to delete realmName:{}, alias:{})", realmName, alias);
         if (StringUtils.isBlank(realmName) || StringUtils.isBlank(alias)) {
             new InvalidAttributeException("Realm name or IdentityProvider alias is null!!!");
         }
         IdentityProviderResource identityProviderResource = this.getIdentityProviderResource(realmName, alias);
-        logger.info("IdentityProviderResource fetched for delete realmName:{}, alias:{}, identityProviderResource:{})",
+        logger.error("IdentityProviderResource fetched for delete realmName:{}, alias:{}, identityProviderResource:{})",
                 realmName, alias, identityProviderResource);
 
         identityProviderResource.remove();
-        logger.info("Deleted IdentityProvider under realmName:{}, alias:{})", realmName, alias);
+        logger.error("Deleted IdentityProvider under realmName:{}, alias:{})", realmName, alias);
 
         return;
     }
@@ -390,11 +391,11 @@ public class KeycloakService {
     private boolean verifySamlIdpConfig(Map<String, String> config) {
         // import endpoint simply converts IDPSSODescriptor into key value pairs.
         // check that saml-idp-metadata.xml was properly converted into key value pairs
-        logger.info("verifySamlConfig - config:{}", config);
+        logger.error("verifySamlConfig - config:{}", config);
         if (config == null || config.isEmpty()) {
             return false;
         }
-        logger.info("config.keySet().containsAll(Constants.SAML_IDP_CONFIG):{}",
+        logger.error("config.keySet().containsAll(Constants.SAML_IDP_CONFIG):{}",
                 config.keySet().containsAll(Constants.SAML_IDP_CONFIG));
         return config.keySet().containsAll(Constants.SAML_IDP_CONFIG);
     }

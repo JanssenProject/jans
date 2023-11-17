@@ -117,11 +117,11 @@ public class IdentityProviderService {
     }
 
     public List<IdentityProvider> getAllIdentityProviderByName(String name) {
-        log.info("Search IdentityProvider with name:{}", name);
+        log.error("Search IdentityProvider with name:{}", name);
 
         String[] targetArray = new String[] { name };
         Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, targetArray);
-        log.debug("Search IdentityProvider with displayNameFilter:{}", displayNameFilter);
+        log.error("Search IdentityProvider with displayNameFilter:{}", displayNameFilter);
         return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class,
                 displayNameFilter);
     }
@@ -150,7 +150,7 @@ public class IdentityProviderService {
 
     public List<IdentityProvider> searchIdentityProvider(String pattern, int sizeLimit) {
 
-        log.info("Search IdentityProvider with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
+        log.error("Search IdentityProvider with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
 
         String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
@@ -160,7 +160,7 @@ public class IdentityProviderService {
         Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
 
-        log.info("Search IdentityProvider with searchFilter:{}", searchFilter);
+        log.error("Search IdentityProvider with searchFilter:{}", searchFilter);
         return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, searchFilter,
                 sizeLimit);
     }
@@ -171,7 +171,7 @@ public class IdentityProviderService {
     }
 
     public PagedResult<IdentityProvider> getIdentityProvider(SearchRequest searchRequest) {
-        log.info("Search IdentityProvider with searchRequest:{}", searchRequest);
+        log.error("Search IdentityProvider with searchRequest:{}", searchRequest);
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
@@ -189,19 +189,19 @@ public class IdentityProviderService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        log.debug("IdentityProvider pattern searchFilter:{}", searchFilter);
+        log.error("IdentityProvider pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
                 Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                log.trace("IdentityProvider dataFilter:{}", dataFilter);
+                log.error("IdentityProvider dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        log.info("IdentityProvider searchFilter:{}", searchFilter);
+        log.error("IdentityProvider searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForIdentityProvider(null), IdentityProvider.class,
                 searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
@@ -215,7 +215,7 @@ public class IdentityProviderService {
 
     public IdentityProvider addSamlIdentityProvider(IdentityProvider identityProvider, InputStream file)
             throws IOException {
-        log.info("Add new identityProvider:{}, file:{}", identityProvider, file);
+        log.error("Add new identityProvider:{}, file:{}", identityProvider, file);
 
         String inum = generateInumForIdentityProvider();
         identityProvider.setInum(inum);
@@ -253,7 +253,7 @@ public class IdentityProviderService {
     }
 
     private IdentityProvider setSamlIdentityProviderDefaultValue(IdentityProvider identityProvider, boolean update) {
-        log.info("setting default value for identityProvider:{}, update:{}", identityProvider, update);
+        log.error("setting default value for identityProvider:{}, update:{}", identityProvider, update);
         if (!update) {
             identityProvider.setProviderId(Constants.SAML);
         }
@@ -296,22 +296,24 @@ public class IdentityProviderService {
     }
 
     private boolean saveIdpMetaDataFileSourceTypeFile(IdentityProvider identityProvider, InputStream file) {
-        log.info("identityProvider:{}, file:{}", identityProvider, file);
+        log.error("identityProvider:{}, file:{}", identityProvider, file);
 
         String idpMetaDataFN = identityProvider.getIdpMetaDataFN();
-        boolean emptyidpMetaDataFN = StringHelper.isEmpty(idpMetaDataFN);
-        log.debug("emptyidpMetaDataFN:{}", emptyidpMetaDataFN);
+        log.error("idpMetaDataFN:{}", idpMetaDataFN);
+        
+        boolean emptyidpMetaDataFN = StringHelper.isEmpty(idpMetaDataFN);        
+        log.error("emptyidpMetaDataFN:{}", emptyidpMetaDataFN);
         if ((file == null)) {
-            log.trace("File is null");
+            log.error("File is null");
             if (emptyidpMetaDataFN) {
-                log.debug("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
+                log.error("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
                 return false;
             }
             String filePath = idpConfigService.getSpMetadataTempDirFilePath(idpMetaDataFN);
-            log.debug("filePath:{}", filePath);
+            log.error("filePath:{}", filePath);
 
             if (filePath == null) {
-                log.debug("The trust relationship {} has an invalid Metadata file storage path",
+                log.error("The trust relationship {} has an invalid Metadata file storage path",
                         identityProvider.getInum());
                 return false;
             }
@@ -319,10 +321,10 @@ public class IdentityProviderService {
             if (samlService.isLocalDocumentStoreType()) {
 
                 File newFile = new File(filePath);
-                log.debug("newFile:{}", newFile);
+                log.error("newFile:{}", newFile);
 
                 if (!newFile.exists()) {
-                    log.debug(
+                    log.error(
                             "The trust relationship {} metadata used local storage but the SP metadata file `{}` was not found",
                             identityProvider.getInum(), filePath);
                     return false;
@@ -331,18 +333,18 @@ public class IdentityProviderService {
             return true;
         }
         if (emptyidpMetaDataFN) {
-            log.debug("emptyidpMetaDataFN:{}", emptyidpMetaDataFN);
+            log.error("File name is blank emptyidpMetaDataFN:{}", emptyidpMetaDataFN);
             idpMetaDataFN = getIdpNewMetadataFileName(identityProvider);
-            log.debug("idpMetaDataFN:{}", idpMetaDataFN);
-            identityProvider.setSpMetaDataFN(idpMetaDataFN);
+            log.error("Final idpMetaDataFN:{}", idpMetaDataFN);
+            identityProvider.setIdpMetaDataFN(idpMetaDataFN);
 
         }
         InputStream targetStream = file;
-        log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
+        log.error("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
 
         String result = samlService.saveMetadataFile(Constants.IDP_MODULE, idpConfigService.getSpMetadataTempDir(),
                 idpMetaDataFN, targetStream);
-        log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
+        log.error("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
         if (StringHelper.isNotEmpty(result)) {
             idpMetadataValidationTimer.queue(result);
             // process files in temp that were not processed earlier
@@ -357,26 +359,27 @@ public class IdentityProviderService {
 
     private String getIdpNewMetadataFileName(IdentityProvider identityProvider) {
         String idpMetaDataFN = null;
-        if (identityProvider == null || StringUtils.isBlank(identityProvider.getIdpMetaDataFN())) {
+        if (identityProvider == null) {
             return idpMetaDataFN;
         }
+        log.error("idpConfigService.getSpNewMetadataFileName(identityProvider.getInum():{}", idpConfigService.getSpNewMetadataFileName(identityProvider.getInum()));
         return idpConfigService.getSpNewMetadataFileName(identityProvider.getInum());
     }
 
     public void processUnprocessedSpMetadataFiles() {
-        log.debug("processing unprocessed IDP metadata files ");
+        log.error("processing unprocessed IDP metadata files ");
         String directory = idpConfigService.getIdpMetadataTempDir();
-        log.debug("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
+        log.error("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
 
         if (Files.exists(Paths.get(directory))) {
-            log.debug("directory:{} does exists)", directory);
+            log.error("directory:{} does exists)", directory);
             File folder = new File(directory);
             File[] files = folder.listFiles();
-            log.debug("files:{}", files);
+            log.error("files:{}", files);
             if (files != null && files.length > 0) {
 
                 for (File file : files) {
-                    log.debug("file:{}, file.getName():{}", file, file.getName());
+                    log.error("file:{}, file.getName():{}", file, file.getName());
                     idpMetadataValidationTimer.queue(file.getName());
                 }
             }
