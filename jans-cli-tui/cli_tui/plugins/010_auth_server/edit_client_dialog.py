@@ -47,7 +47,7 @@ import json
 ERROR_GETTING_CLIENTS = _("Error getting clients")
 ATTRIBUTE_SCHEMA_PATH = '#/components/schemas/ClientAttributes'
 URL_SUFFIX_FORMATTER = 'inum:{}'
-
+INTROSPECTION_ALG_PROPERTIES = ('introspectionSignedResponseAlg', 'introspectionEncryptedResponseAlg', 'introspectionEncryptedResponseEnc')
 
 class EditClientDialog(JansGDialog, DialogUtils):
     """The Main Client Dialog that contain every thing related to The Client
@@ -156,6 +156,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.data['displayName'] = self.data['clientName']
         self.data['attributes']['jansAuthorizedAcr'] = self.data.pop('jansAuthorizedAcr')
+
+        for intro_attr in INTROSPECTION_ALG_PROPERTIES:
+            if intro_attr in self.data:
+                self.data['attributes'][intro_attr] = self.data.pop(intro_attr)
 
         cfr = self.check_required_fields()
 
@@ -748,6 +752,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                  'request_object_encryption_alg_values_supported'),
                 (_("Request Object Enc for Encryption"), 'requestObjectEncryptionEnc',
                  'request_object_encryption_enc_values_supported'),
+
+                 (_("Introspection Signed Response Alg "), 'introspectionSignedResponseAlg',
+                 'id_token_signing_alg_values_supported'),
+                (_("Introspection Encrypted Response Alg"), 'introspectionEncryptedResponseAlg',
+                 'id_token_encryption_alg_values_supported'),
+                (_("Introspection Encrypted Response Enc"), 'introspectionEncryptedResponseEnc',
+                 'id_token_encryption_enc_values_supported'),
+
         ):
 
             self.drop_down_select_first.append(swagger_key)
@@ -755,12 +767,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
             values = [(alg, alg) for alg in self.myparent.cli_object.openid_configuration.get(
                 openid_key, [])]
 
+            value = self.data.get('attributes', {}).get(swagger_key) if swagger_key in INTROSPECTION_ALG_PROPERTIES else self.data.get(swagger_key)
+
             encryption_signing.append(self.myparent.getTitledWidget(
                 title,
                 name=swagger_key,
                 widget=DropDownWidget(
                     values=values,
-                    value=self.data.get(swagger_key)
+                    value=value
                 ),
                 jans_help=self.myparent.get_help_from_schema(
                     schema, swagger_key),
