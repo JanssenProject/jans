@@ -9,6 +9,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OIDCClientSettings {
 
+    private String introspectionEndpoint;
     private String tokenEndpoint;
     private String redirectUri;
     private String postLogoutUri;
@@ -30,12 +31,13 @@ public class OIDCClientSettings {
         this.clientSecret = clientSecret;
     }
 
-    public OIDCClientSettings(String opHost, String clientId, String clientSecret, String tokenEndpoint) {
+    public OIDCClientSettings(String opHost, String clientId, String clientSecret, String tokenEndpoint, String introspectionEndpoint) {
 
         this.opHost = opHost;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.tokenEndpoint = tokenEndpoint;
+        this.introspectionEndpoint = introspectionEndpoint;
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -97,18 +99,27 @@ public class OIDCClientSettings {
         this.frontchannelLogoutUri = frontchannelLogoutUri;
     }
 
+    public String getIntrospectionEndpoint() {
+        return introspectionEndpoint;
+    }
+
+    public void setIntrospectionEndpoint(String introspectionEndpoint) {
+        this.introspectionEndpoint = introspectionEndpoint;
+    }
+
     @Override
     public String toString() {
         return "OIDCClientSettings{" +
-                "opHost='" + opHost + '\'' +
-                ", clientId='" + clientId + '\'' +
-                ", clientSecret='" + clientSecret + '\'' +
+                "introspectionEndpoint='" + introspectionEndpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
                 ", redirectUri='" + redirectUri + '\'' +
                 ", postLogoutUri='" + postLogoutUri + '\'' +
                 ", frontchannelLogoutUri='" + frontchannelLogoutUri + '\'' +
                 ", scopes=" + scopes +
                 ", acrValues=" + acrValues +
+                ", opHost='" + opHost + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", clientSecret='" + clientSecret + '\'' +
                 '}';
     }
 }
