@@ -477,6 +477,21 @@ jansScr::%(update_token_sample_script)s
 jansScrTyp: update_token
 jansProgLng: python
 
+version: 1
+dn: inum=2D3E.5A04,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Role Based Scopes Update Script
+displayName: role_based_scopes_update_token
+inum: 2D3E.5A04
+jansEnabled: TRUE
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansProgLng: python
+jansRevision: 12
+jansScr::%(introspection_role_based_scopes_update_token_role_based_scopes_update_token)s
+jansScrTyp: update_token
+
 dn: inum=C1BA-C1BA,ou=scripts,o=jans
 description: Firebase notification sender
 displayName: firebase_ciba_end_user_notification
@@ -490,20 +505,6 @@ objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
-
-dn: inum=A44E-4F3D,ou=scripts,o=jans
-objectClass: top
-objectClass: jansCustomScr
-description: Role Based Scopes
-displayName: role_based_scopes
-inum: A44E-4F3D
-jansEnabled: true
-jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
-jansProgLng: python
-jansRevision: 1
-jansScr::%(introspection_introspection_role_based_scope_introspection_role_based_scope)s
-jansScrTyp: introspection
 
 dn: inum=A110-88AB,ou=scripts,o=jans
 objectClass: top
