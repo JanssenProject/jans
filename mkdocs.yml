@@ -121,6 +121,7 @@ nav:
       - Text-Based User Interface (TUI):
         - admin/config-guide/config-tools/jans-tui/README.md
         - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
+        - Using Logs: admin/config-guide/config-tools/jans-tui/using-command-line-log.md
       - Command Line Interface (CLI):
         - admin/config-guide/config-tools/jans-cli/README.md
       - CLI For Agama: admin/config-guide/agama-configuration.md
