@@ -7594,9 +7594,9 @@ components:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanAccess:
-          type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8346,6 +8346,28 @@ components:
           type: array
           items:
             type: string
+            enum:
+            - UNKNOWN
+            - HEALTH_CHECK
+            - USERINFO
+            - CLIENTINFO
+            - ID_GENERATION
+            - REGISTRATION
+            - INTROSPECTION
+            - REVOKE_TOKEN
+            - REVOKE_SESSION
+            - ACTIVE_SESSION
+            - END_SESSION
+            - STATUS_SESSION
+            - JANS_CONFIGURATION
+            - CIBA
+            - UMA
+            - U2F
+            - DEVICE_AUTHZ
+            - METRIC
+            - STAT
+            - PAR
+            - SSA
         httpLoggingEnabled:
           type: boolean
         httpLoggingExcludePaths:
@@ -9002,6 +9024,8 @@ components:
         ttl:
           type: integer
           format: int32
+        displayName:
+          type: string
         authenticationMethod:
           type: string
           enum:
@@ -9013,8 +9037,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        displayName:
-          type: string
         baseDn:
           type: string
         inum:
@@ -9376,14 +9398,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
