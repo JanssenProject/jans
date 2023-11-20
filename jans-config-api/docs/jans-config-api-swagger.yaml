@@ -7586,19 +7586,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8346,6 +8346,28 @@ components:
           type: array
           items:
             type: string
+            enum:
+            - UNKNOWN
+            - HEALTH_CHECK
+            - USERINFO
+            - CLIENTINFO
+            - ID_GENERATION
+            - REGISTRATION
+            - INTROSPECTION
+            - REVOKE_TOKEN
+            - REVOKE_SESSION
+            - ACTIVE_SESSION
+            - END_SESSION
+            - STATUS_SESSION
+            - JANS_CONFIGURATION
+            - CIBA
+            - UMA
+            - U2F
+            - DEVICE_AUTHZ
+            - METRIC
+            - STAT
+            - PAR
+            - SSA
         httpLoggingEnabled:
           type: boolean
         httpLoggingExcludePaths:
@@ -8377,8 +8399,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8388,6 +8408,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9135,10 +9157,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
