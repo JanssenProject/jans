@@ -144,6 +144,11 @@ public class MailService {
         String from = smtpConfiguration.getFromEmailAddress();
         return sendMail(from, from, to, to, subject, body, "");
     }
+    
+    public boolean sendMail(String to, String subject, String message, String htmlMessage) {
+        String from = smtpConfiguration.getFromEmailAddress();
+        return sendMail(from, from, to, to, subject, message, htmlMessage);
+    }
 
     public boolean sendMail(String from, String fromDisplayName, String to, String toDisplayName, String subject, String message, String htmlMessage) {
         return sendMail(from, fromDisplayName, to, null, subject, message, htmlMessage, false);
