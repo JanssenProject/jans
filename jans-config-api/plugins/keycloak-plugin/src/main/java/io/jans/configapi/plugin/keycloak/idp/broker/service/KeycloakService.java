@@ -7,6 +7,7 @@
 package io.jans.configapi.plugin.keycloak.idp.broker.service;
 
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.plugin.keycloak.idp.broker.client.IdpClientFactory;
 import io.jans.configapi.plugin.keycloak.idp.broker.configuration.KeycloakConfig;
 import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
 import io.jans.orm.PersistenceEntryManager;
@@ -25,6 +26,7 @@ import jakarta.ws.rs.core.Response.StatusType;
 import jakarta.ws.rs.WebApplicationException;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -64,6 +66,9 @@ public class KeycloakService {
 
     @Inject
     ConfigurationFactory configurationFactory;
+    
+    @Inject
+    IdpClientFactory idpClientFactory;
 
     @Inject
     KeycloakConfig keycloakConfig;
@@ -180,16 +185,17 @@ public class KeycloakService {
         return identityProvider;
     }
 
-    public IdentityProviderResource getIdentityProviderResource(String realmName, String alias) {
-        logger.error("Get IdentityProviderResource by name realmName:{}, alias:{})", realmName, alias);
+    public IdentityProvidersResource getIdentityProviderResource(String realmName) {
+        logger.error("Get IdentityProviderResource by name realmName:{}", realmName);
 
-        if (StringUtils.isBlank(realmName) || StringUtils.isBlank(alias)) {
-            new InvalidAttributeException("Realm name or IdentityProvider alias is null!!!");
+        if (StringUtils.isBlank(realmName)) {
+            new InvalidAttributeException("Realm name is null!!!");
         }
-        IdentityProviderResource identityProviderResource = this.getIdentityProviderResource(realmName, alias);
-        logger.error("IdentityProviderResource fetched by name realmName:{}, alias:{}, identityProviderResource:{})",
-                realmName, alias, identityProviderResource);
-        return identityProviderResource;
+               
+        IdentityProvidersResource identityProvidersResource = getRealmResource(realmName).identityProviders();    
+        logger.error("IdentityProviderResource fetched by name realmName:{}, identityProvidersResource:{})",
+                realmName,identityProvidersResource);
+        return identityProvidersResource;
     }
 
     public IdentityProviderRepresentation getIdentityProviderByName(String realmName, String alias) {
@@ -199,10 +205,19 @@ public class KeycloakService {
             new InvalidAttributeException("Realm name or IdentityProvider alias is null!!!");
         }
 
-        IdentityProviderResource identityProviderResource = this.getIdentityProviderResource(realmName, alias);
+        List<IdentityProviderRepresentation> identityProviders = findAllIdentityProviders(realmName);
+        logger.error("identityProviders:{}", identityProviders);
+        IdentityProviderRepresentation identityProvider = null;
+        if (identityProviders == null || identityProviders.isEmpty()) {
+            return identityProvider;
+        }
 
-        logger.error("identityProviderResource:{})", identityProviderResource);
-        IdentityProviderRepresentation identityProvider = identityProviderResource.toRepresentation();
+        for (IdentityProviderRepresentation data : identityProviders) {
+            if (alias.equals(data.getAlias())) {
+                identityProvider = data;
+                break;
+            }
+        }
 
         logger.error("IdentityProvider fetched by name realmName:{}, alias:{}, identityProvider:{})", realmName, alias,
                 identityProvider);
@@ -262,8 +277,11 @@ public class KeycloakService {
 
         try {
             logger.error(
-                    "Create new IdentityProvider under realmName:{}, identityProviderRepresentation:{}, idpMetadataStream:{})",
-                    realmName, identityProviderRepresentation, idpMetadataStream);
+                    "Create new IdentityProvider under idpClientFactory:{}, realmName:{}, identityProviderRepresentation:{}, idpMetadataStream:{})",
+                    idpClientFactory, realmName, identityProviderRepresentation, idpMetadataStream);
+            
+            //Response tokenResponse = idpClientFactory.requestAccessToken(null, null, null, null);
+            //logger.error("tokenResponse:{}", tokenResponse);
 
             if (StringUtils.isBlank(realmName)) {
                 new InvalidAttributeException("Realm name is null!!!");
@@ -276,57 +294,75 @@ public class KeycloakService {
             if (idpMetadataStream == null) {
                 new InvalidAttributeException("Idp Metedata file is null!!!");
             }
-
+            
             MultipartFormDataOutput form = new MultipartFormDataOutput();
             form.addFormData("providerId", "saml", MediaType.TEXT_PLAIN_TYPE);
 
+            
+            logger.error("KC Service idpMetadataStream.available():{}", idpMetadataStream.available());            
+            //File metaFile = new FileInputStream(idpMetadataStream);
+            //logger.error("metaFile:{}", metaFile);
+            //logger.error("metaFile.canRead():{},  metaFile.length():{}", metaFile.canRead(), metaFile.length());
+            // byte[] content = metaFile.readAllBytes();
             byte[] content = idpMetadataStream.readAllBytes();
+            logger.error("content:{}", content);
             String body = new String(content, Charset.forName("utf-8"));
             form.addFormData("file", body, MediaType.APPLICATION_XML_TYPE, "saml-idp-metadata.xml");
 
             IdentityProvidersResource identityProvidersResource = getRealmResource(realmName).identityProviders();
             logger.error("identityProvidersResource:{})", identityProvidersResource);
 
-            Map<String, String> result = identityProvidersResource.importFrom(form);
-            logger.error("IDP metadata importConfig result:{})", result);
-            boolean valid = verifySamlIdpConfig(result);
-            logger.error("Is IDP metadata file valid:{})", valid);
+            Map<String, String> config = identityProvidersResource.importFrom(form);
+            logger.error("IDP metadata importConfig config:{})", config);
+            boolean valid = verifySamlIdpConfig(config);
+            logger.error("Is IDP metadata config valid:{})", valid);
             if (!valid) {
                 new InvalidAttributeException("Idp Metedata file is not valid !!!");
             }
 
             // Create new SAML identity provider using configuration retrieved from
-            // import-config
+            identityProviderRepresentation.setProviderId("saml");
+            logger.error("IDP data identityProviderRepresentation.getAlias():{}", identityProviderRepresentation.getAlias());
+            if (config != null) {
+                identityProviderRepresentation.setConfig(config);
+                
+            }
+            logger.error("IDP data identityProviderRepresentation.getAlias():{}, identityProviderRepresentation.getInternalId():{}, identityProviderRepresentation.getProviderId():{}, identityProviderRepresentation.getConfig():{}, identityProviderRepresentation.isEnabled():{}, identityProviderRepresentation.isLinkOnly():{}, identityProviderRepresentation.isStoreToken():{},identityProviderRepresentation.getFirstBrokerLoginFlowAlias():{}, identityProviderRepresentation.getPostBrokerLoginFlowAlias():{},identityProviderRepresentation.isTrustEmail():{}", identityProviderRepresentation.getAlias(),identityProviderRepresentation.getInternalId(), identityProviderRepresentation.getProviderId(), identityProviderRepresentation.getConfig(),identityProviderRepresentation.isEnabled(), identityProviderRepresentation.isLinkOnly(), identityProviderRepresentation.isStoreToken(), identityProviderRepresentation.getFirstBrokerLoginFlowAlias(), identityProviderRepresentation.getPostBrokerLoginFlowAlias(), identityProviderRepresentation.isTrustEmail() );
             Response response = identityProvidersResource.create(identityProviderRepresentation);
 
             logger.error("IdentityProvider creation response:{}", response);
-            if (response == null) {
+            if (response != null) {
                 logger.error("IdentityProvider creation response.getStatusInfo():{}, response.getEntity():{}",
                         response.getStatusInfo(), response.getEntity());
                 String id = getCreatedId(response);
                 logger.error("IdentityProvider creation id():{}", id);
-                identityProviderRepresentation = (IdentityProviderRepresentation) response.getEntity();
-                logger.error("IdentityProvider creation identityProviderRepresentation():{}",
-                        identityProviderRepresentation);
+               
                 List<IdentityProviderRepresentation> identityProvider = findAllIdentityProviders(realmName);
                 if (identityProvider != null && !identityProvider.isEmpty()) {
                     identityProvider.stream()
                             .forEach(e -> System.out.println(e.getInternalId() + "::" + e.getDisplayName()));
                 }
-
-                response = identityProvidersResource.getIdentityProviders(Constants.SAML);
-                if (response == null) {
-
-                    logger.error("SAML IdentityProvider response.getStatusInfo():{}, response.getEntity():{}",
-                            response.getStatusInfo(), response.getEntity());
-
-                    if (response.getEntity() != null) {
-                        logger.error("response.getEntity().getClass():{}", response.getEntity().getClass());
-                    }
-                }
+                
+                
+                identityProviderRepresentation = getIdentityProviderByName(realmName,identityProviderRepresentation.getAlias());
+                logger.error("Final identityProviderRepresentation:{}", identityProviderRepresentation);
+                /*
+                 * response = identityProvidersResource.getIdentityProviders(Constants.SAML); if
+                 * (response == null) {
+                 * 
+                 * logger.
+                 * error("SAML IdentityProvider response.getStatusInfo():{}, response.getEntity():{}"
+                 * , response.getStatusInfo(), response.getEntity());
+                 * 
+                 * if (response.getEntity() != null) {
+                 * logger.error("response.getEntity().getClass():{}",
+                 * response.getEntity().getClass()); } }
+                 */
+                response.close();
 
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
             throw new ConfigurationException("Error while configuring SAML IDP ", ex);
         }
 
@@ -346,13 +382,25 @@ public class KeycloakService {
             new InvalidAttributeException("IdentityProviderRepresentation for updation is null!!!");
         }
 
-        IdentityProviderResource identityProviderResource = this.getIdentityProviderResource(realmName,
-                identityProviderRepresentation.getAlias());
+        IdentityProvidersResource identityProvidersResource = getRealmResource(realmName).identityProviders();
+        logger.error("IdentityProviderResource fetched for update realmName:{}, identityProviderRepresentation.getAlias():{}, identityProvidersResource:{})",
+                realmName, identityProviderRepresentation.getAlias(), identityProvidersResource);
 
-        logger.error("identityProviderResource for update is:{})", identityProviderRepresentation);
+        if(identityProvidersResource==null) {
+            new InvalidAttributeException("IdentityProvidersResource not found!!!");
+        }
+        
+        IdentityProviderResource identityProviderResource =  identityProvidersResource.get(identityProviderRepresentation.getAlias());
+
+        logger.error("identityProviderResource for update identityProviderResource:{}, identityProviderRepresentation:{}",identityProviderResource, identityProviderRepresentation);
+        if(identityProviderResource==null) {
+            new InvalidAttributeException("IdentityProvidersResource not found to update!!!");
+        }
+        
         identityProviderResource.update(identityProviderRepresentation);
         identityProviderRepresentation = identityProviderResource.toRepresentation();
 
+        
         logger.error("Updated IdentityProvider under realmName:{}, identityProviderRepresentation:{})", realmName,
                 identityProviderRepresentation);
 
@@ -364,13 +412,29 @@ public class KeycloakService {
         if (StringUtils.isBlank(realmName) || StringUtils.isBlank(alias)) {
             new InvalidAttributeException("Realm name or IdentityProvider alias is null!!!");
         }
-        IdentityProviderResource identityProviderResource = this.getIdentityProviderResource(realmName, alias);
-        logger.error("IdentityProviderResource fetched for delete realmName:{}, alias:{}, identityProviderResource:{})",
-                realmName, alias, identityProviderResource);
+        IdentityProvidersResource identityProvidersResource = getRealmResource(realmName).identityProviders();
+        logger.error("IdentityProviderResource fetched for delete realmName:{}, alias:{}, identityProvidersResource:{} ",
+                realmName, alias, identityProvidersResource);
 
+        if(identityProvidersResource==null) {
+            new InvalidAttributeException("IdentityProvidersResource not found !!!");
+        }
+        
+        IdentityProviderResource identityProviderResource =  identityProvidersResource.get(alias);
+        
+        if(identityProviderResource==null) {
+            new InvalidAttributeException("IdentityProvidersResource not found to delete!!!");
+        }
         identityProviderResource.remove();
         logger.error("Deleted IdentityProvider under realmName:{}, alias:{})", realmName, alias);
-
+        
+        IdentityProviderRepresentation identityProviderRepresentation = getIdentityProviderByName(realmName,alias);
+        logger.error("Checking identityProvider is deleted - identityProviderRepresentation:{}", identityProviderRepresentation);
+        
+        if(identityProviderResource!=null) {
+            new InvalidAttributeException("IdentityProviders could not be deleted!!!");
+        }
+        
         return;
     }
 

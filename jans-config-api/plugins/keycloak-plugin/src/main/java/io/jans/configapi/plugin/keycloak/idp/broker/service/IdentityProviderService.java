@@ -224,7 +224,7 @@ public class IdentityProviderService {
         persistenceEntryManager.persist(identityProvider);
 
         if (file != null && file.available() > 0) {
-            saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
+            //saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
         }
 
         return getIdentityProviderByInum(identityProvider.getInum());

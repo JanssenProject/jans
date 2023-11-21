@@ -23,8 +23,10 @@ public interface IdentityProviderMapper {
   IdentityProviderMapper INSTANCE = Mappers.getMapper(IdentityProviderMapper.class);  
   
   @Mapping(target = "inum", source = "kcIdentityProviderRepresentation.internalId")
+  @Mapping(target = "name", source = "kcIdentityProviderRepresentation.alias")
   IdentityProvider kcIdentityProviderToIdentityProvider(IdentityProviderRepresentation kcIdentityProviderRepresentation);  
 
   @Mapping(target = "internalId", source = "identityProvider.inum")
+  @Mapping(target = "alias", source = "identityProvider.name")
   IdentityProviderRepresentation identityProviderToKCIdentityProvider(IdentityProvider identityProvider);
 }
