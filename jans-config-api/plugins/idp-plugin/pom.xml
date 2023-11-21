@@ -9,7 +9,7 @@
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>keycloak-plugin</artifactId>
+	<artifactId>idp-plugin</artifactId>
 
 	<properties>
 		<httpcore.version>4.4.14</httpcore.version>
