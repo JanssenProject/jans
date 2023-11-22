@@ -72,9 +72,6 @@ nav:
       - RHEL: admin/install/vm-install/rhel.md
       - Suse: admin/install/vm-install/suse.md
       - Dynamic Download: admin/install/vm-install/dynamic-download.md
-    - Docker Installation:
-      - Quick Start: admin/install/docker-install/quick-start.md
-      - Docker compose: admin/install/docker-install/compose.md
     - Helm Deployments:
       - admin/install/helm-install/README.md
       - Local Kubernetes Cluster: admin/install/helm-install/local.md
@@ -82,6 +79,9 @@ nav:
       - Google GKE: admin/install/helm-install/google-gke.md
       - Microsoft Azure AKS: admin/install/helm-install/microsoft-azure.md
       - Using Rancher Marketplace: admin/install/helm-install/rancher.md
+    - Docker Deployments:
+      - Quick Start: admin/install/docker-install/quick-start.md
+      - Docker compose: admin/install/docker-install/compose.md  
     - Setup Instructions: admin/install/setup.md
     - FAQ: admin/install/install-faq.md
   - Kubernetes Operation Guide:
