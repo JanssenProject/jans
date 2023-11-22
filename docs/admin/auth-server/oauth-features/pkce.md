@@ -9,19 +9,19 @@ tags:
 
 # PKCE (Proof Key for Code Exchange)
 
-PKCE(Proof Key for Code Exchange) is an extension to the Authorization on Code 
+PKCE(Proof Key for Code Exchange) is an extension to the Authorization on Code
 flow to prevent `CSRF` and authorization code injection attacks. Authorization
 code flow with PKCE is defined in [this](https://datatracker.ietf.org/doc/html/rfc7636) specification.
 
-Public clients (**Single Page Apps (SPA)** or **Mobile Apps**), have a serious 
-problem obtaining access tokens. In the case of `SPA` you cannot securely store 
+Public clients (**Single Page Apps (SPA)** or **Mobile Apps**), have a serious
+problem obtaining access tokens. In the case of `SPA` you cannot securely store
 a secret key, because its source is available in the browser. The same
-will happen with **Mobile Apps**, since decompiling the application will reveal 
+will happen with **Mobile Apps**, since decompiling the application will reveal
 the secret keys.
 
 This is where `PKCE` comes in to solve the problem.
 
-The authorization code flow with PKCE is considered as best practice when 
+The authorization code flow with PKCE is considered as best practice when
 using **Single Page Apps (SPA)** or **Mobile Apps**.
 
 Let's see in the following diagram how it works:
@@ -32,12 +32,12 @@ Let's see in the following diagram how it works:
 
 ## PKCE Configuration
 
-For this flow to work, we must make the following configuration in 
+For this flow to work, we must make the following configuration in
 Janssen Server.
 
-We need to set the `clientAuthenticationFiltersEnabled` property to `false`, it 
-defaults to `true`. We can use 
-[TUI](../../config-guide/config-tools/jans-tui/README.md) to change this 
+We need to set the `clientAuthenticationFiltersEnabled` property to `false`, it
+defaults to `true`. We can use
+[TUI](../../config-guide/config-tools/jans-tui/README.md) to change this
 configuration as shown below:
 
 ![pkce3.png](../../../assets/pkce3.png)
@@ -53,14 +53,14 @@ In this flow, we will execute the following steps:
 
 ### 1. Generate Code Verifier and Code Challenge
 
-It is necessary to generate these codes for this flow, since this data will be 
+It is necessary to generate these codes for this flow, since this data will be
 sent in the `authorize` and `token` endpoints.
 
 #### Code Verifier
 
-It is a random string of length `N`.
+The It is a random string of length `N`, and is denoted by the field `code_verifier`.
 
-The following command generates a `code verifier` of length `128`.
+The following command generates a `code_verifier` of length `128`.
 
 ```bash
 tr -dc 'A-Za-z0-9-._' </dev/urandom | head -c 128; echo
@@ -75,16 +75,20 @@ MW54l5Ma7i8n6QsetI_dnJhfMQ6gIfBNJiWFINu6rtD0zvZUXG3STWoolT5HFatjWu2Vj1L-Au4PtRzk
 
 #### Code Challenge
 
-Janssen Server supports two methods of code challenge (`codeChallengeMethod`):
+To generate the `code_challenge` we need to know what type of method we will be using, so this field is accompanied by
+the `code_challenge_method` field.
 
-- `plain`: if you use this method, then this field is the same as the `codeVerifier`.
-- `s256`: if you use this method, you must encode the `codeVerifier` with `sha256` and `base64Url`.
+Janssen Server supports two methods of `code_challenge_method`:
 
-The following command generates the `codeChallenge` with `s256`.
+- `plain`: When using this method, the `code_challenge` is the same as the `code_verifier`.
+- `s256`: When using this method, `code_challenge` must be encoded using the `code_verifier` with **sha256** and *
+  *base64Url**.
+
+The following command generates the `code_challenge` using `s256`.
 
 !!! Note
-    To execute command the command below, you need to have `openssl`, `basenc` 
-    and `tr` installed.
+To execute command the command below, you need to have `openssl`, `basenc`
+and `tr` installed.
 
 ```bash
 echo -n "MW54l5Ma7i8n6QsetI_dnJhfMQ6gIfBNJiWFINu6rtD0zvZUXG3STWoolT5HFatjWu2Vj1L-Au4PtRzkear088FJLzq.6tAg10wikJrIqn75HCJ7V1b_p8io_ugkPkkr" | openssl dgst -binary -sha256 | basenc --base64url | tr -d '='
@@ -127,7 +131,7 @@ Content-Type: application/json
 ```
 
 !!! Note
-    Notee that the `token_endpoint_auth_method` field is `none`.
+Notee that the `token_endpoint_auth_method` field is `none`.
 
 ```text title="Response"
 HTTP/1.1 201 Created
@@ -202,12 +206,12 @@ redirect_uri=https://<YOUR_DOMAIN>/jans-auth-rp/home.htm&
 state=bf1af4a1-8713-49c6-b229-537bf4cf712d&
 nonce=f2265e46-6d93-4d36-850b-8fd990cccd04&
 code_challenge=<YOUR_CODE_CHALLENGE>&
-code_challenge_method=s256
+code_challenge_method=<YOUR_CODE_CHALLENGE_METHOD>
 ```
 
-!!! Note 
-    Remember that this **endpoint** is where you must send the `code_challenge` and `code_challenge_method`
-    parameters.
+!!! Note
+Remember that this **endpoint** is where you must send the `code_challenge` and `code_challenge_method`
+parameters.
 
 The field we need to obtain is the `code`.
 
