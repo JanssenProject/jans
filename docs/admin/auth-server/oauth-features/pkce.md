@@ -9,15 +9,20 @@ tags:
 
 # PKCE (Proof Key for Code Exchange)
 
-Public clients (**Single Page Apps (SPA)** or **Mobile Apps**), have a serious problem obtaining access tokens.
-In the case of `SPA` you cannot securely store a secret key, because its source is available in the browser. The same
-will happen with **Mobile Apps**, since decompiling the application will reveal the secret keys.
+PKCE(Proof Key for Code Exchange) is an extension to the Authorization on Code 
+flow to prevent `CSRF` and authorization code injection attacks. Authorization
+code flow with PKCE is defined in [this](https://datatracker.ietf.org/doc/html/rfc7636) specification.
 
-This is where `PKCE` comes in to solve this problem.
+Public clients (**Single Page Apps (SPA)** or **Mobile Apps**), have a serious 
+problem obtaining access tokens. In the case of `SPA` you cannot securely store 
+a secret key, because its source is available in the browser. The same
+will happen with **Mobile Apps**, since decompiling the application will reveal 
+the secret keys.
 
-`PKCE` is an extension to the Authorization on Code flow to prevent `CSRF` and authorization code injection attacks.
+This is where `PKCE` comes in to solve the problem.
 
-This flow is considered best practice when using **Single Page Apps (SPA)** or **Mobile Apps**.
+The authorization code flow with PKCE is considered as best practice when 
+using **Single Page Apps (SPA)** or **Mobile Apps**.
 
 Let's see in the following diagram how it works:
 
@@ -27,10 +32,13 @@ Let's see in the following diagram how it works:
 
 ## PKCE Configuration
 
-For this flow to work, we must make the following configuration in `Jans Auth`.
+For this flow to work, we must make the following configuration in 
+Janssen Server.
 
-We need to set the `clientAuthenticationFiltersEnabled` field to `false`, it defaults to `true`.
-We can use `TUI` to make this configuration:
+We need to set the `clientAuthenticationFiltersEnabled` property to `false`, it 
+defaults to `true`. We can use 
+[TUI](../../config-guide/config-tools/jans-tui/README.md) to change this 
+configuration as shown below:
 
 ![pkce3.png](../../../assets/pkce3.png)
 
@@ -45,8 +53,8 @@ In this flow, we will execute the following steps:
 
 ### 1. Generate Code Verifier and Code Challenge
 
-It is necessary to generate these codes for this flow, since this data will be sent in the `authorize` and `token`
-endpoints.
+It is necessary to generate these codes for this flow, since this data will be 
+sent in the `authorize` and `token` endpoints.
 
 #### Code Verifier
 
@@ -67,18 +75,20 @@ MW54l5Ma7i8n6QsetI_dnJhfMQ6gIfBNJiWFINu6rtD0zvZUXG3STWoolT5HFatjWu2Vj1L-Au4PtRzk
 
 #### Code Challenge
 
-`Jans Auth` supports 2 methods (`codeChallengeMethod`):
+Janssen Server supports two methods of code challenge (`codeChallengeMethod`):
 
 - `plain`: if you use this method, then this field is the same as the `codeVerifier`.
 - `s256`: if you use this method, you must encode the `codeVerifier` with `sha256` and `base64Url`.
 
 The following command generates the `codeChallenge` with `s256`.
 
+!!! Note
+    To execute command the command below, you need to have `openssl`, `basenc` 
+    and `tr` installed.
+
 ```bash
 echo -n "MW54l5Ma7i8n6QsetI_dnJhfMQ6gIfBNJiWFINu6rtD0zvZUXG3STWoolT5HFatjWu2Vj1L-Au4PtRzkear088FJLzq.6tAg10wikJrIqn75HCJ7V1b_p8io_ugkPkkr" | openssl dgst -binary -sha256 | basenc --base64url | tr -d '='
 ```
-
-> **NOTE:** To execute this command, you need to have `openssl`, `basenc` and `tr` installed.
 
 Output example:
 
@@ -89,9 +99,7 @@ zyI60XbvMetJJuAzyRR_jnxoJkyfxXSqY-mTG4FtBtg
 
 ### 2. Register new client
 
-**Request:**
-
-```
+``` text title="Request"
 POST <YOUR_DOMAIN>/jans-auth/restv1/register HTTP/1.1
 Content-Type: application/json
 
@@ -118,11 +126,10 @@ Content-Type: application/json
 }
 ```
 
-> **NOTE:** Note that the `token_endpoint_auth_method` field is `none`.
+!!! Note
+    Notee that the `token_endpoint_auth_method` field is `none`.
 
-**Response:**
-
-```
+```text title="Response"
 HTTP/1.1 201 Created
 Date: Fri, 17 Nov 2023 22:51:13 GMT
 Server: Apache/2.4.41 (Ubuntu)
@@ -186,7 +193,7 @@ Connection: close
 
 From your browser of choice call the following url:
 
-```
+``` text title="Request"
 https://<YOUR_DOMAIN>/jans-auth/restv1/authorize?
 response_type=code&
 client_id=f48fbdfa-4c07-49e5-938b-10463980e145&
@@ -198,8 +205,9 @@ code_challenge=<YOUR_CODE_CHALLENGE>&
 code_challenge_method=s256
 ```
 
-> **NOTE:** Remember that this **endpoint** is where you must send the `code_challenge` and `code_challenge_method`
-> fields.
+!!! Note 
+    Remember that this **endpoint** is where you must send the `code_challenge` and `code_challenge_method`
+    parameters.
 
 The field we need to obtain is the `code`.
 
@@ -209,7 +217,7 @@ The field we need to obtain is the `code`.
 
 Previously we have obtained the `code` field, we will use this value to call the endpoint `token`.
 
-```
+```text title="Request"
 POST <YOUR_DOMAIN>/jans-auth/restv1/token HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
@@ -220,9 +228,7 @@ code_verifier=<YOUR_CODE_VERIFIER>&
 code=<YOUR_CODE>
 ```
 
-**Response:**
-
-```json
+```json title="Response"
 {
   "access_token": "38abc903-9a68-48f9-9ccc-bf1b50fe8152",
   "refresh_token": "e945e8ab-19c1-4073-b3c1-913bb090459a",
@@ -232,7 +238,4 @@ code=<YOUR_CODE>
 }
 ```
 
-## Specification document
 
-For more details of the specification, you can have a look at the following
-link [Proof Key for Code Exchange by OAuth Public Clients](https://datatracker.ietf.org/doc/html/rfc7636)
