@@ -220,13 +220,15 @@ public class IdentityProviderService {
         String inum = generateInumForIdentityProvider();
         identityProvider.setInum(inum);
         identityProvider.setDn(getDnForIdentityProvider(inum));
+        
+        if (file != null) {
+            log.error("Save IDP metadatfile on server");
+            saveIdpMetaDataFileSourceTypeFile(identityProvider, file);            
+        }
+        
         //Set default Value for SAML IDP
         setSamlIdentityProviderDefaultValue(identityProvider, false);
         persistenceEntryManager.persist(identityProvider);
-
-        if (file != null && file.available() > 0) {
-            saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
-        }
 
         return getIdentityProviderByInum(identityProvider.getInum());
     }
@@ -238,13 +240,13 @@ public class IdentityProviderService {
     public IdentityProvider updateIdentityProvider(IdentityProvider identityProvider, InputStream file)
             throws IOException {
         
-       //Set default Value for SAML IDP
-        setSamlIdentityProviderDefaultValue(identityProvider, true);
-        persistenceEntryManager.merge(identityProvider);
-
         if (file != null && file.available() > 0) {
             saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
         }
+        
+       //Set default Value for SAML IDP
+        setSamlIdentityProviderDefaultValue(identityProvider, true);
+        persistenceEntryManager.merge(identityProvider);
 
         return getIdentityProviderByInum(identityProvider.getInum());
 
@@ -302,7 +304,7 @@ public class IdentityProviderService {
     }
 
     private boolean saveIdpMetaDataFileSourceTypeFile(IdentityProvider identityProvider, InputStream file) {
-        log.error("identityProvider:{}, file:{}", identityProvider, file);
+        log.error("Saving file identityProvider:{}, file:{}", identityProvider, file);
 
         String idpMetaDataFN = identityProvider.getIdpMetaDataFN();
         log.error("idpMetaDataFN:{}", idpMetaDataFN);
