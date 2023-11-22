@@ -27,7 +27,6 @@
 
 		<jans.version>${project.version}</jans.version>
 		
-		<mapstruct.version>1.5.3.Final</mapstruct.version>
 		<resteasy.version>6.0.3.Final</resteasy.version>
 		<jackson.version>2.13.2</jackson.version>
 		<jetty.version>11.0.15</jetty.version>

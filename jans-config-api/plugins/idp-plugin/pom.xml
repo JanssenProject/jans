@@ -18,7 +18,7 @@
 	    <saml.version>3.4.6</saml.version>
 	    <keycloak.version>21.1.1</keycloak.version>
 		<keycloak.spi.version>22.0.5</keycloak.spi.version>
-
+		<mapstruct.version>1.5.3.Final</mapstruct.version>
 	</properties>
 
 	<dependencies>
