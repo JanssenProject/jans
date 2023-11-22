@@ -174,7 +174,7 @@ paths:
       - SAML - Trust Relationship
       summary: Delete TrustRelationship
       description: Delete TrustRelationship
-      operationId: put-trust-relationship
+      operationId: delete-trust-relationship
       parameters:
       - name: id
         in: path
@@ -220,7 +220,7 @@ paths:
       - SAML - Trust Relationship
       summary: Update TrustRelationship
       description: Update TrustRelationship
-      operationId: put-trust-relationship_1
+      operationId: put-trust-relationship
       requestBody:
         description: Trust Relationship object
         content:
