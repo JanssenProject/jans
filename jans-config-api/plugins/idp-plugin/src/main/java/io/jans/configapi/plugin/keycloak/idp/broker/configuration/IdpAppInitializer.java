@@ -48,7 +48,7 @@ public class IdpAppInitializer {
     IdpMetadataValidationTimer idpMetadataValidationTimer;
 
     public void onAppStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
-        log.info("=============  Initializing Keycloak Plugin ========================");
+        log.info("=============  Initializing IDP Plugin ========================");
         log.debug("init:{}", init);
 
         // configuration
@@ -56,7 +56,7 @@ public class IdpAppInitializer {
         initSchedulerService();
         idpMetadataValidationTimer.initTimer();
 
-        log.info("==============  Keycloak Plugin IS UP AND RUNNING ===================");
+        log.info("==============  IDP Plugin IS UP AND RUNNING ===================");
     }
 
     protected void initSchedulerService() {
@@ -72,7 +72,7 @@ public class IdpAppInitializer {
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("================================================================");
-        log.info("===========  Keycloak Plugin STOPPED  ==========================");
+        log.info("===========  IDP Plugin STOPPED  ==========================");
         log.info("init:{}", init);
         log.info("================================================================");
     }

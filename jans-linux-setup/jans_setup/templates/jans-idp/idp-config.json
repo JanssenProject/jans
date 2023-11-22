@@ -14,6 +14,7 @@
   "idpMetadataTempDir": "${idp_metadata-temp_dir}",
   "idpMetadataFilePattern": "${idp_metadata_file_pattern}",
   "idpMetadataFile": "${idp_metadata_file}",
+  "spMetadataUrl":"/endpoint/descriptor",
   "spMetadataRootDir": "${sp_metadata_root_dir}",
   "spMetadataTempDir": "${sp_metadata_temp_dir}",
   "spMetadataFilePattern":"%s-sp-metadata.xml",

@@ -24,6 +24,7 @@ public class IdpAppConfiguration implements Configuration {
     private String idpMetadataFilePattern;
     private String idpMetadataFile;
 
+    private String spMetadataUrl;
     private String spMetadataRootDir;
     private String spMetadataTempDir;
     private String spMetadataFilePattern;
@@ -150,6 +151,14 @@ public class IdpAppConfiguration implements Configuration {
     public void setIdpMetadataFile(String idpMetadataFile) {
         this.idpMetadataFile = idpMetadataFile;
     }
+    
+    public String getSpMetadataUrl() {
+        return spMetadataUrl;
+    }
+
+    public void setSpMetadataUrl(String spMetadataUrl) {
+        this.spMetadataUrl = spMetadataUrl;
+    }
 
     public String getSpMetadataRootDir() {
         return spMetadataRootDir;
@@ -198,9 +207,10 @@ public class IdpAppConfiguration implements Configuration {
                 + ", clientSecret=" + clientSecret + ", grantType=" + grantType + ", username=" + username
                 + ", password=" + password + ", idpRootDir=" + idpRootDir + ", idpMetadataRootDir=" + idpMetadataRootDir
                 + ", idpMetadataTempDir=" + idpMetadataTempDir + ", idpMetadataFilePattern=" + idpMetadataFilePattern
-                + ", idpMetadataFile=" + idpMetadataFile + ", spMetadataRootDir=" + spMetadataRootDir
-                + ", spMetadataTempDir=" + spMetadataTempDir + ", spMetadataFilePattern=" + spMetadataFilePattern
-                + ", spMetadataFile=" + spMetadataFile + ", ignoreValidation=" + ignoreValidation + "]";
+                + ", idpMetadataFile=" + idpMetadataFile + ", spMetadataUrl=" + spMetadataUrl + ", spMetadataRootDir="
+                + spMetadataRootDir + ", spMetadataTempDir=" + spMetadataTempDir + ", spMetadataFilePattern="
+                + spMetadataFilePattern + ", spMetadataFile=" + spMetadataFile + ", ignoreValidation="
+                + ignoreValidation + "]";
     }
 
 }

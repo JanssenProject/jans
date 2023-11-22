@@ -51,18 +51,18 @@ public class Constants {
 	          "addExtensionsElementWithKeyInfo"));
 
     //properties
-    public static final String KEYCLOAK_SERVER_URL = "keycloak.server.url";
+    public static final String IDP_SERVER_URL = "idp.server.url";
     public static final String AUTH_TOKEN_ENDPOINT = "auth.token.endpoint";
-    public static final String KEYCLOAK_SCIM_CLIENT_ID = "keycloak.scim.client.id";
-    public static final String KEYCLOAK_SCIM_CLIENT_PASSWORD = "keycloak.scim.client.password";
+    public static final String IDP_CLIENT_ID = "idp.client.id";
+    public static final String IDP_CLIENT_PASSWORD = "idp.client.password";
     
     
 	//Scope
-    public static final String JANS_KC_CONFIG_READ_ACCESS = "https://jans.io/keycloak/config.readonly";
-    public static final String JANS_KC_CONFIG_WRITE_ACCESS = "https://jans.io/keycloak/config.write";
-	public static final String KC_REALM_READ_ACCESS = "https://jans.io/keycloak/realm.readonly";
-    public static final String KC_REALM_WRITE_ACCESS = "https://jans.io/keycloak/realm.write";
-    public static final String KC_SAML_IDP_READ_ACCESS = "https://jans.io/keycloak/saml/idp.readonly";
-    public static final String KC_SAML_IDP_WRITE_ACCESS = "https://jans.io/keycloak/saml/idp.write";
+    public static final String JANS_IDP_CONFIG_READ_ACCESS = "https://jans.io/idp/config.readonly";
+    public static final String JANS_IDP_CONFIG_WRITE_ACCESS = "https://jans.io/idp/config.write";
+	public static final String JANS_IDP_REALM_READ_ACCESS = "https://jans.io/idp/realm.readonly";
+    public static final String JANS_IDP_REALM_WRITE_ACCESS = "https://jans.io/idp/realm.write";
+    public static final String JANS_IDP_SAML_READ_ACCESS = "https://jans.io/idp/saml.readonly";
+    public static final String JANS_IDP_SAML_WRITE_ACCESS = "https://jans.io/idp/saml.write";
     
 }

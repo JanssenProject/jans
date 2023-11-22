@@ -7586,19 +7586,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanView:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9398,14 +9398,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:

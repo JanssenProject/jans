@@ -132,7 +132,7 @@ public class IdpConfigService {
     
     public String getIdpMetadataTempDirFilePath(String idpMetaDataFN) {
         logger.debug("idpMetaDataFN:{}, getIdpMetadataTempDirFilePath():{}", idpMetaDataFN, getIdpMetadataTempDirFilePath());
-        if (StringUtils.isBlank(getSpMetadataTempDirFilePath())) {
+        if (StringUtils.isBlank(getIdpMetadataTempDirFilePath())) {
             throw new InvalidConfigurationException("Failed to return IDP metadata file path as undefined!");
         }
 
@@ -142,7 +142,13 @@ public class IdpConfigService {
     public String getIdpMetadataTempDirFilePath() {
         return getIdpMetadataTempDir() + File.separator;
     }
+    
+    public String getIdpMetadataFileName(String inum) {
+        String id = StringHelper.removePunctuation(inum);
+        return String.format(getIdpMetadataFilePattern(), id);
+    }
 
+    /*
     public String getSpMetadataRootDir() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
@@ -212,11 +218,8 @@ public class IdpConfigService {
     }
     
 
-    public String getSpNewMetadataFileName(String inum) {
-        String id = StringHelper.removePunctuation(inum);
-        return String.format(getSpMetadataFilePattern(), id);
-    }
 
+    */
     
 
 }
