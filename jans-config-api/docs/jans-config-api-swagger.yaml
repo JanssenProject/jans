@@ -7586,17 +7586,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanView:
+        userCanView:
           type: boolean
-        adminCanEdit:
+        adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanAccess:
+        adminCanEdit:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean

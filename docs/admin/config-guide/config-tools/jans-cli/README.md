@@ -353,3 +353,10 @@ Please press «Enter» when ready
 }
 ```
 
+## CLI Tool Configuration
+
+Janssen CLI tool stores its configuration under `<install-path>/.config` 
+directory. Various settings for CLI tool can be found under this directory, 
+for example [logging levels](../../../../contribute/developer-faq.md#how-to-enable-debug-logs-for-jans-cli-and-tui-configuration-tools).
+
+This directory also contains SALT used by Janssen CLI tool. 
