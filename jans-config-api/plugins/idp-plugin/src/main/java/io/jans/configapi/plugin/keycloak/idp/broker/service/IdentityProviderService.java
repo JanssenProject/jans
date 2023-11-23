@@ -90,18 +90,22 @@ public class IdentityProviderService {
         return null;
     }
 
-    public IdentityProvider getIdentityProviderByInum(String inum) {
-        IdentityProvider result = null;
-        try {
-            result = persistenceEntryManager.find(IdentityProvider.class, getDnForIdentityProvider(inum));
-        } catch (Exception ex) {
-            log.error("Failed to load IdentityProvider entry", ex);
-        }
-        return result;
-    }
-
     public List<IdentityProvider> getAllIdentityProviders() {
         return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, null);
+    }
+
+    public List<IdentityProvider> getAllIdentityProviders(int sizeLimit) {
+        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, null,
+                sizeLimit);
+    }
+
+    public IdentityProvider getIdentityProviderByUnpunctuatedInum(String unpunctuated) {
+        for (IdentityProvider idp : getAllIdentityProviders()) {
+            if (StringHelper.removePunctuation(idp.getInum()).equals(unpunctuated)) {
+                return idp;
+            }
+        }
+        return null;
     }
 
     public List<IdentityProvider> getAllActiveIdentityProviders() {
@@ -112,11 +116,17 @@ public class IdentityProviderService {
         return persistenceEntryManager.findEntries(identityProvider);
     }
 
-    public List<IdentityProvider> getAllIdentityProviderByInum(String inum) {
-        return persistenceEntryManager.findEntries(getDnForIdentityProvider(inum), IdentityProvider.class, null);
+    public IdentityProvider getIdentityProviderByInum(String inum) {
+        IdentityProvider result = null;
+        try {
+            result = persistenceEntryManager.find(IdentityProvider.class, getDnForIdentityProvider(inum));
+        } catch (Exception ex) {
+            log.error("Failed to load IdentityProvider entry", ex);
+        }
+        return result;
     }
 
-    public List<IdentityProvider> getAllIdentityProviderByName(String name) {
+    public List<IdentityProvider> getIdentityProviderByName(String name) {
         log.error("Search IdentityProvider with name:{}", name);
 
         String[] targetArray = new String[] { name };
@@ -132,20 +142,6 @@ public class IdentityProviderService {
 
     public IdentityProvider getIdentityProvider(String dn) {
         return getIdentityProviderByDn(dn);
-    }
-
-    public List<IdentityProvider> getAllIdentityProviders(int sizeLimit) {
-        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, null,
-                sizeLimit);
-    }
-
-    public IdentityProvider getIdentityProviderByUnpunctuatedInum(String unpunctuated) {
-        for (IdentityProvider idp : getAllIdentityProviders()) {
-            if (StringHelper.removePunctuation(idp.getInum()).equals(unpunctuated)) {
-                return idp;
-            }
-        }
-        return null;
     }
 
     public List<IdentityProvider> searchIdentityProvider(String pattern, int sizeLimit) {
@@ -209,10 +205,6 @@ public class IdentityProviderService {
 
     }
 
-    public IdentityProvider addSamlIdentityProvider(IdentityProvider identityProvider) throws IOException {
-        return addSamlIdentityProvider(identityProvider, null);
-    }
-
     public IdentityProvider addSamlIdentityProvider(IdentityProvider identityProvider, InputStream file)
             throws IOException {
         log.error("Add new identityProvider:{}, file:{}", identityProvider, file);
@@ -220,13 +212,13 @@ public class IdentityProviderService {
         String inum = generateInumForIdentityProvider();
         identityProvider.setInum(inum);
         identityProvider.setDn(getDnForIdentityProvider(inum));
-        
+
         if (file != null) {
             log.error("Save IDP metadatfile on server");
-            saveIdpMetaDataFileSourceTypeFile(identityProvider, file);            
+            saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
         }
-        
-        //Set default Value for SAML IDP
+
+        // Set default Value for SAML IDP
         setSamlIdentityProviderDefaultValue(identityProvider, false);
         persistenceEntryManager.persist(identityProvider);
 
@@ -239,12 +231,12 @@ public class IdentityProviderService {
 
     public IdentityProvider updateIdentityProvider(IdentityProvider identityProvider, InputStream file)
             throws IOException {
-        
+
         if (file != null && file.available() > 0) {
             saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
         }
-        
-       //Set default Value for SAML IDP
+
+        // Set default Value for SAML IDP
         setSamlIdentityProviderDefaultValue(identityProvider, true);
         persistenceEntryManager.merge(identityProvider);
 
@@ -256,7 +248,7 @@ public class IdentityProviderService {
         persistenceEntryManager.removeRecursively(identityProvider.getDn(), IdentityProvider.class);
 
     }
-	
+
     public String getDnForIdentityProvider(String inum) {
         String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(inum)) {
@@ -291,10 +283,10 @@ public class IdentityProviderService {
         } while (persistenceEntryManager.contains(newDn, Client.class));
         return newInum;
     }
-    
+
     private IdentityProvider setSamlIdentityProviderDefaultValue(IdentityProvider identityProvider, boolean update) {
         log.error("setting default value for identityProvider:{}, update:{}", identityProvider, update);
-        if(identityProvider==null) {
+        if (identityProvider == null) {
             return identityProvider;
         }
         if (!update) {
@@ -308,8 +300,8 @@ public class IdentityProviderService {
 
         String idpMetaDataFN = identityProvider.getIdpMetaDataFN();
         log.error("idpMetaDataFN:{}", idpMetaDataFN);
-        
-        boolean emptyidpMetaDataFN = StringHelper.isEmpty(idpMetaDataFN);        
+
+        boolean emptyidpMetaDataFN = StringHelper.isEmpty(idpMetaDataFN);
         log.error("emptyidpMetaDataFN:{}", emptyidpMetaDataFN);
         if ((file == null)) {
             log.error("File is null");
@@ -370,7 +362,8 @@ public class IdentityProviderService {
         if (identityProvider == null) {
             return idpMetaDataFN;
         }
-        log.error("idpConfigService.getIdpMetadataFileName(identityProvider.getInum()):{}", idpConfigService.getIdpMetadataFileName(identityProvider.getInum()));
+        log.error("idpConfigService.getIdpMetadataFileName(identityProvider.getInum()):{}",
+                idpConfigService.getIdpMetadataFileName(identityProvider.getInum()));
         return idpConfigService.getIdpMetadataFileName(identityProvider.getInum());
     }
 

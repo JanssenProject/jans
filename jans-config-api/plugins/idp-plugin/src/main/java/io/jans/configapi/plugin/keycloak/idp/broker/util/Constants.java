@@ -62,7 +62,9 @@ public class Constants {
     public static final String JANS_IDP_CONFIG_WRITE_ACCESS = "https://jans.io/idp/config.write";
 	public static final String JANS_IDP_REALM_READ_ACCESS = "https://jans.io/idp/realm.readonly";
     public static final String JANS_IDP_REALM_WRITE_ACCESS = "https://jans.io/idp/realm.write";
+    public static final String JANS_IDP_REALM_DELETE_ACCESS = "https://jans.io/idp/realm.delete";
     public static final String JANS_IDP_SAML_READ_ACCESS = "https://jans.io/idp/saml.readonly";
     public static final String JANS_IDP_SAML_WRITE_ACCESS = "https://jans.io/idp/saml.write";
+    public static final String JANS_IDP_SAML_DELETE_ACCESS = "https://jans.io/idp/saml.delete";
     
 }
