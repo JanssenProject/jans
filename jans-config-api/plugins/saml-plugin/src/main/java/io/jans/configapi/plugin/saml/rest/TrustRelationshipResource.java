@@ -6,7 +6,6 @@ import io.jans.configapi.plugin.saml.form.TrustRelationshipForm;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.saml.util.Constants;
-import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.plugin.saml.service.SamlService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -75,7 +74,9 @@ public class TrustRelationshipResource extends BaseResource {
     @Path(Constants.ID_PATH + Constants.ID_PATH_PARAM)
     public Response getTrustRelationshipById(
             @Parameter(description = "Unique identifier - Id") @PathParam(Constants.ID) @NotNull String id) {
-        logger.info("Searching TrustRelationship by id: {}", escapeLog(id));
+        if (logger.isInfoEnabled()) {
+            logger.info("Searching TrustRelationship by id: {}", escapeLog(id));
+        }
 
         TrustRelationship trustRelationship = samlService.getTrustRelationshipByInum(id);
 
@@ -105,8 +106,7 @@ public class TrustRelationshipResource extends BaseResource {
         TrustRelationship trustRelationship = trustRelationshipForm.getTrustRelationship();
         logger.debug(" Create trustRelationship:{} ", trustRelationship);
         checkResourceNotNull(trustRelationshipForm.getTrustRelationship(), SAML_TRUST_RELATIONSHIP);
-        checkNotNull(trustRelationshipForm.getTrustRelationship().getClientId(), AttributeNames.NAME);
-
+        
         InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
         logger.debug(" Create metaDataFile:{} ", metaDataFile);
         if (metaDataFile != null) {
@@ -158,7 +158,9 @@ public class TrustRelationshipResource extends BaseResource {
     public Response deleteTrustRelationship(
             @Parameter(description = "Unique Id of Trust Relationship") @PathParam(Constants.ID) @NotNull String id) {
 
-        logger.info("Delete client identified by id:{}", escapeLog(id));
+        if (logger.isInfoEnabled()) {
+            logger.info("Delete client identified by id:{}", escapeLog(id));
+        }
 
         TrustRelationship trustRelationship = samlService.getTrustRelationshipByInum(id);
         if (trustRelationship == null) {
