@@ -15,6 +15,7 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -140,8 +141,12 @@ public class ActionService {
         }
         Object[] args = getArgsForCall(javaMethod, arity, rhinoArgs);
 
-        logger.debug("Performing method call");
-        return javaMethod.invoke(instance, args);
+        try {
+            logger.debug("Performing method call");
+            return javaMethod.invoke(instance, args);
+        } catch (InvocationTargetException e) {
+            throw (Exception) e.getCause();     //return the "real" exception, e is just a wrapper here
+        }
 
     }
     

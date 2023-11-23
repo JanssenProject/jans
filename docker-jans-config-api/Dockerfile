@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.0.21-SNAPSHOT
-ENV CN_BUILD_DATE='2023-10-14 09:54'
+ENV CN_BUILD_DATE='2023-11-21 10:01'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -94,7 +94,7 @@ RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=c86ae0a5a703ff96fd1e69fddcc110b5b754ad71
+ENV JANS_SOURCE_VERSION=2918c11a25b50a395c71ad5dc252cf49d319a407
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -254,7 +254,8 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/spanner \
     ${JETTY_BASE}/common/libs/couchbase \
     ${JETTY_HOME}/temp \
-    /usr/share/java
+    /usr/share/java \
+    /var/log
 
 RUN touch /etc/hosts.back
 COPY templates /app/templates/
@@ -266,6 +267,8 @@ RUN chmod +x /app/scripts/entrypoint.sh
 RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans-config-api/dynamic-conf.json
 
 RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
+
+RUN sed -i 's/\${sys:log.base}\/logs/\/var\/log/g' /app/templates/jans-config-api/log4j2-adminui.xml
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
 
@@ -286,7 +289,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chown -R 1000:0 /opt/prometheus \
     && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/_plugins \
     && chown 1000:0 ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.xml \
-    && chown -R 1000:0 ${JETTY_HOME}/temp
+    && chown -R 1000:0 ${JETTY_HOME}/temp \
+    && chown -R 1000:0 /var/log
 
 USER 1000
 

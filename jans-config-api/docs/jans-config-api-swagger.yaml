@@ -7586,7 +7586,7 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
@@ -7594,11 +7594,11 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8399,6 +8399,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8408,8 +8410,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9024,6 +9024,8 @@ components:
         ttl:
           type: integer
           format: int32
+        displayName:
+          type: string
         authenticationMethod:
           type: string
           enum:
@@ -9035,8 +9037,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        displayName:
-          type: string
         baseDn:
           type: string
         inum:
@@ -9157,10 +9157,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
