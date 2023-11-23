@@ -19,7 +19,7 @@ move_builtin_jars() {
     # twilio, jsmpp, casa-config, jans-fido2-client
     for src in /opt/jans/jetty/jans-auth/_libs/*.jar; do
         fname=$(basename "$src")
-        cp "$src" "/opt/jans/jetty/jans-auth/custom/libs/$fname"
+        mv "$src" "/opt/jans/jetty/jans-auth/custom/libs/$fname"
     done
 }
 
@@ -70,6 +70,7 @@ python3 "$basedir/auth_conf.py"
 cd /opt/jans/jetty/jans-auth
 # shellcheck disable=SC2046
 exec java \
+    --add-opens java.base/java.lang=ALL-UNNAMED \
     -server \
     -XX:+DisableExplicitGC \
     -XX:+UseContainerSupport \
