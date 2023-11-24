@@ -30,6 +30,7 @@ public class Constants {
 	public static final String NAME_PATH = "/name";
 	public static final String UPLOAD_PATH = "/upload";
 	public static final String SP_METADATA_PATH  = "/sp-metadata";
+	public static final String SP_METADATA_FILE_PATH  = "/sp-metadata-file";
 
     public static final String ID_PATH_PARAM = "/{id}";
     public static final String INUM_PATH_PARAM = "/{inum}";

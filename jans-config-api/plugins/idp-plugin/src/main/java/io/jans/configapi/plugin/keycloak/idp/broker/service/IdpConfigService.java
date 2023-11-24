@@ -36,10 +36,10 @@ public class IdpConfigService {
         }
 
         logger.info(" dn:{}", dn);
-        IdpConf IdpConf = persistenceManager.find(dn, IdpConf.class, null);
-        logger.info(" IdpConf:{}", IdpConf);
+        IdpConf idpConf = persistenceManager.find(dn, IdpConf.class, null);
+        logger.info(" idpConf:{}", idpConf);
 
-        return IdpConf;
+        return idpConf;
     }
 
     public IdpConf getIdpConf() {
@@ -51,9 +51,9 @@ public class IdpConfigService {
         return idpConf;
     }
 
-    public void mergeIdpConfig(IdpConf IdpConf) {
-        IdpConf.setRevision(IdpConf.getRevision() + 1);
-        persistenceManager.merge(IdpConf);
+    public void mergeIdpConfig(IdpConf idpConf) {
+        idpConf.setRevision(idpConf.getRevision() + 1);
+        persistenceManager.merge(idpConf);
     }
 
     public IdpAppConfiguration getIdpAppConfiguration() {
@@ -62,7 +62,6 @@ public class IdpConfigService {
 
     public boolean isIdpEnabled() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
-        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         boolean idpEnabled = false;
         if (idpAppConfiguration != null) {
             idpEnabled = idpAppConfiguration.isEnabled();
@@ -72,7 +71,6 @@ public class IdpConfigService {
 
     public String getTrustedIdpDn() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
-        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         String trustRelationshipDn = null;
         if (idpAppConfiguration != null) {
             trustRelationshipDn = idpAppConfiguration.getTrustedIdpDn();
@@ -82,7 +80,6 @@ public class IdpConfigService {
 
     public String getIdpRootDir() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
-        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         String idpRootDir = null;
         if (idpAppConfiguration != null) {
             idpRootDir = idpAppConfiguration.getIdpRootDir();
@@ -92,7 +89,6 @@ public class IdpConfigService {
 
     public String getIdpMetadataRootDir() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
-        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         String idpMetadataRootDir = null;
         if (idpAppConfiguration != null) {
             idpMetadataRootDir = idpAppConfiguration.getIdpMetadataRootDir();
@@ -102,7 +98,6 @@ public class IdpConfigService {
     
     public String getIdpMetadataTempDir() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
-        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         String idpMetadataTempDir = null;
         if (idpAppConfiguration != null) {
             idpMetadataTempDir = idpAppConfiguration.getIdpMetadataTempDir();
@@ -112,7 +107,6 @@ public class IdpConfigService {
     
     public String getIdpMetadataFilePattern() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
-        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         String idpMetadataFilePattern = null;
         if (idpAppConfiguration != null) {
             idpMetadataFilePattern = idpAppConfiguration.getIdpMetadataFilePattern();
@@ -122,7 +116,6 @@ public class IdpConfigService {
     
     public String getIdpMetadataFile() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
-        logger.debug("idpAppConfiguration:{}", idpAppConfiguration);
         String idpMetadataFile = null;
         if (idpAppConfiguration != null) {
             idpMetadataFile = idpAppConfiguration.getIdpMetadataFile();
@@ -148,6 +141,17 @@ public class IdpConfigService {
         return String.format(getIdpMetadataFilePattern(), id);
     }
 
-      
+    public String getSpMetadataUrl(String realm, String name) {
+        logger.error("Get SP Metadata Url - realm:{}, name:{}", realm, name);
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
+        String metadataURL = null;
+        if (idpAppConfiguration != null) {
+            String spMetadataUrl = idpAppConfiguration.getSpMetadataUrl();
+            logger.debug("spMetadataUrl:{}", spMetadataUrl);
+            metadataURL = String.format(spMetadataUrl, realm, name);
+            logger.error("Get SP Metadata Url - metadataURL:{}", metadataURL);
+        }
+        return metadataURL;
+    }
 
 }

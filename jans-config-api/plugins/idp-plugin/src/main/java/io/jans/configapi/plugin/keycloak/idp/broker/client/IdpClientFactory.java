@@ -12,8 +12,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.configapi.core.util.Jackson;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -23,44 +21,34 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class IdpClientFactory {
 
+    private static Logger log = LoggerFactory.getLogger(IdpClientFactory.class);
     private static final String CONTENT_TYPE = "Content-Type";
 
-    private static final String KEYCLOAK_URL = "http://localhost:8180/";
-    private static final String KEYCLOAK_REALM = "master";
-    private static final String KEYCLOAK_CLIENT_ID = "my-client-1";
-    private static final String KEYCLOAK_CLIENT_SECRET = "aqOMI7DhNxCFbW0IieBHSrdA6HMTwxiQ";
-    private static final String USER_ID = "admin1";
-    private static final String KEYCLOAK_USER_PWD = "admin123"; 
-    private static final String KEYCLOAK_TOKEN_URL = "http://localhost:8180/realms/master/protocol/openid-connect/token";
-    private static final String KEYCLOAK_SP_METADATA_URL = "/realms/%s/broker/%s/endpoint/descriptor";
-//http://localhost:8180/realms/keycloak-internal-identity/broker/SAML_IDP_104/endpoint/descriptor
-    private static Logger log = LoggerFactory.getLogger(IdpClientFactory.class);
-
-  
-    public static Response requestAccessToken(final String tokenUrl, final String clientId,
+      public static Response requestAccessToken(final String idpServerUrl, final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
-        log.error("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
+        log.error("Request for Access Token -  idpServerUrl:{}, tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", idpServerUrl, tokenUrl,
                 clientId, clientSecret, scope);
         Response response = null;
         try {
-            Builder request = getClientBuilder(KEYCLOAK_TOKEN_URL);
-            request.header("Authorization", "Basic " + "abc");
+            Builder request = getClientBuilder(tokenUrl);
+            request.header("Authorization", "Basic " + clientId+":"+clientSecret);
             request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
             final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>();
             multivaluedHashMap.add( "client_id", clientId);
             multivaluedHashMap.add( "client_secret", clientSecret);
-            //multivaluedHashMap.add( "grant_type", GrantType.CLIENT_CREDENTIALS);
             multivaluedHashMap.add( "grant_type", "client_credentials");
-            multivaluedHashMap.add( "redirect_uri", KEYCLOAK_URL);
+            multivaluedHashMap.add( "redirect_uri", idpServerUrl);
             log.error("Request for Access Token -  multivaluedHashMap:{}", multivaluedHashMap);
             
             response = request.post(Entity.form(multivaluedHashMap));
@@ -83,9 +71,7 @@ public class IdpClientFactory {
         return response;
     }
 
-    public  Response getSpMetadata(String realm, String name) {
-        log.error(" SP Metadata - realm:{}, name:{}", realm, name);
-        String metadataEndpoint = getSpMetadataUrl(realm, name);
+    public  Response getSpMetadata(String metadataEndpoint) {
         log.error(" SP Metadata - metadataEndpoint:{}", metadataEndpoint);
         Builder metadataClient = getClientBuilder(metadataEndpoint);
         metadataClient.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -103,15 +89,6 @@ public class IdpClientFactory {
    
     private static Builder getClientBuilder(String url) {
         return ClientBuilder.newClient().target(url).request();
-    }
-    
-    private String getSpMetadataUrl(String realm, String name) {
-        log.error("Get SP Metadata Url - realm:{}, name:{}", realm, name);
-        StringBuilder sb = new StringBuilder();
-        sb.append(KEYCLOAK_URL).append(KEYCLOAK_SP_METADATA_URL);
-        String metadataURL = String.format(sb.toString(), realm, name);
-        log.error("Get SP Metadata Url - metadataURL:{}", metadataURL);
-        return metadataURL;
-    }
+    }    
 
 }

@@ -233,6 +233,9 @@ public class IdentityProviderService {
     public IdentityProvider updateIdentityProvider(IdentityProvider identityProvider, InputStream file)
             throws IOException {
 
+        if(identityProvider==null) {
+            return identityProvider;
+        }
         if (file != null && file.available() > 0) {
             saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
         }

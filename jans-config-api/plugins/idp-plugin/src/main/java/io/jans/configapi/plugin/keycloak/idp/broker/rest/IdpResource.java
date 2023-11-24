@@ -6,6 +6,7 @@
 
 package io.jans.configapi.plugin.keycloak.idp.broker.rest;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
@@ -59,9 +60,9 @@ public class IdpResource extends BaseResource {
 
     private static final String SAML_IDP_DATA = "SAML IDP Data";
     private static final String SAML_IDP_DATA_FORM = "SAML IDP Data From";
+    private static final String SAML_IDP_CHECK_STR = "IdentityProvider identified by '";
 
-    private class IdentityProviderPagedResult extends PagedResult<IdentityProvider> {
-    };
+    private class IdentityProviderPagedResult extends PagedResult<IdentityProvider> {};
 
     @Inject
     Logger log;
@@ -117,7 +118,29 @@ public class IdpResource extends BaseResource {
         return Response.ok(idp).build();
     }
 
-    @Operation(summary = "Get SAML SP Metadata", description = "Get SAML SP Metadata", operationId = "get-saml-sp-metadata", tags = {
+    @Operation(summary = "Get SAML SP Metadata as Json", description = "Get SAML SP Metadata as Json", operationId = "get-saml-sp-metadata-json", tags = {
+            "Jans - SAML Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.JANS_IDP_SAML_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @Path(Constants.SP_METADATA_PATH + Constants.INUM_PATH_PARAM)
+    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS })
+    public Response getSamlSPMetadataJson(
+            @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+        log.error("Fetch SAML SP Metadata for IDP by inum:{}", inum);
+        IdentityProvider identityProvider = idpService.getIdentityProviderByInum(inum);
+        log.error(" identityProvider:{} ", identityProvider);
+        checkResourceNotNull(identityProvider, SAML_IDP_CHECK_STR + inum + "'");
+        Response response = idpService.getSpMetadata(identityProvider);
+        log.error(" response:{} ", response);
+
+        return Response.ok(response.getEntity()).build();
+    }
+
+    @Operation(summary = "Get SAML SP Metadata Endpoint URL", description = "Get SAML SP Metadata Endpoint URL", operationId = "get-saml-sp-metadata-url", tags = {
             "Jans - SAML Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_SAML_READ_ACCESS }))
     @ApiResponses(value = {
@@ -125,18 +148,18 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @Path(Constants.SP_METADATA_PATH + Constants.INUM_PATH_PARAM)
+    @Path(Constants.SP_METADATA_FILE_PATH + Constants.INUM_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS })
-    public Response getSamlSPMetadata(
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response getSamlSPMetadataFile(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.error("Fetch SAML SP Metadata for IDP by inum:{}", inum);
+        log.error("Fetch SAML SP Metadata URL IDP by inum:{}", inum);
         IdentityProvider identityProvider = idpService.getIdentityProviderByInum(inum);
         log.error(" identityProvider:{} ", identityProvider);
-        checkResourceNotNull(identityProvider, "IdentityProvider identified by '" + inum + "'");
-        Response response = idpService.getSpMetadata(identityProvider);
-        log.error(" response:{} ", response);
-
-        return Response.ok(response.getEntity()).build();
+        checkResourceNotNull(identityProvider, SAML_IDP_CHECK_STR + inum + "'");
+        String spMetadataUrl = idpService.getSpMetadataUrl(identityProvider.getRealm(), identityProvider.getName());
+        log.error(" spMetadataUrl:{} ", spMetadataUrl);
+        return Response.ok(spMetadataUrl).build();
     }
 
     @Operation(summary = "Create SAML Identity Provider", description = "Create SAML Identity Provider", operationId = "post-saml-identity-provider", tags = {
@@ -213,7 +236,7 @@ public class IdpResource extends BaseResource {
         checkNotNull(idp.getRealm(), Constants.REALM);
         IdentityProvider existingIdentityProvider = idpService.getIdentityProviderByInum(idp.getInum());
         log.error(" existingIdentityProvider:{} ", existingIdentityProvider);
-        checkResourceNotNull(existingIdentityProvider, "IdentityProvider identified by '" + idp.getInum() + "'");
+        checkResourceNotNull(existingIdentityProvider, SAML_IDP_CHECK_STR + idp.getInum() + "'");
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
         log.error(" Update metaDataFile:{} ", metaDataFile);
         if (metaDataFile != null) {
@@ -245,7 +268,7 @@ public class IdpResource extends BaseResource {
         }
         IdentityProvider existingIdentityProvider = idpService.getIdentityProviderByInum(inum);
         log.error(" existingIdentityProvider:{} ", existingIdentityProvider);
-        checkResourceNotNull(existingIdentityProvider, "IdentityProvider identified by '" + inum + "'");
+        checkResourceNotNull(existingIdentityProvider, SAML_IDP_CHECK_STR + inum + "'");
 
         idpService.deleteIdentityProvider(existingIdentityProvider);
         return Response.noContent().build();
@@ -275,6 +298,5 @@ public class IdpResource extends BaseResource {
         log.info("pagedIdentityProvider:{}", pagedIdentityProvider);
         return pagedIdentityProvider;
     }
-
 
 }

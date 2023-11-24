@@ -11,13 +11,13 @@ import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.keycloak.idp.broker.service.SamlService;
-import io.jans.configapi.plugin.keycloak.idp.broker.timer.IdpMetadataValidationTimer;
+import io.jans.configapi.plugin.keycloak.idp.broker.client.IdpClientFactory;
+import io.jans.configapi.plugin.keycloak.idp.broker.mapper.IdentityProviderMapper;
 import io.jans.configapi.plugin.keycloak.idp.broker.model.IdentityProvider;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpConfigService;
+import io.jans.configapi.plugin.keycloak.idp.broker.service.SamlService;
+import io.jans.configapi.plugin.keycloak.idp.broker.timer.IdpMetadataValidationTimer;
 import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
-import io.jans.configapi.plugin.keycloak.idp.broker.mapper.IdentityProviderMapper;
-import io.jans.configapi.plugin.keycloak.idp.broker.client.IdpClientFactory;
 
 import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
@@ -83,6 +83,10 @@ public class IdpService {
         return idpConfigService.getTrustedIdpDn();
     }
 
+    public String getSpMetadataUrl(String realm, String name) {
+        return idpConfigService.getSpMetadataUrl(realm, name);
+    }
+
     public List<IdentityProvider> getAllIdentityProviders() {
         return this.identityProviderService.getAllIdentityProvider(0);
     }
@@ -108,11 +112,11 @@ public class IdpService {
 
         // validate
         if (identityProvider == null) {
-            new InvalidAttributeException("IdentityProvider  is null!!!");
+            throw new InvalidAttributeException("IdentityProvider  is null!!!");
         }
 
         if (idpMetadataStream == null) {
-            new InvalidAttributeException("Idp Metedata file is null!!!");
+            throw new InvalidAttributeException("Idp Metedata file is null!!!");
         }
 
         // validate metadata and set in config
@@ -130,10 +134,10 @@ public class IdpService {
             IdentityProviderRepresentation kcIdp = this.convertToIdentityProviderRepresentation(identityProvider);
             log.error("converted kcIdp:{}", kcIdp);
 
-            log.error("IDP Service idpMetadataStream:{}", idpMetadataStream);
-            log.error("IDP Service idpMetadataStream.available():{}", idpMetadataStream.available());
+            log.error("IDP Service idpMetadataStream:{}, idpMetadataStream.available():{}", idpMetadataStream,
+                    idpMetadataStream.available());
             kcIdp = keycloakService.createIdentityProvider(identityProvider.getRealm(), kcIdp);
-            log.error("kcIdp:{}", kcIdp);
+            log.error("Newly created kcIdp:{}", kcIdp);
             identityProvider = this.convertToIdentityProvider(kcIdp);
             log.error("Final created identityProvider:{}", identityProvider);
 
@@ -146,6 +150,15 @@ public class IdpService {
         log.error(
                 "Update IdentityProvider with IDP metadata file in - identityProvider:{}, idpMetadataStream:{}, idpConfigService.isIdpEnabled():{}",
                 identityProvider, idpMetadataStream, idpConfigService.isIdpEnabled());
+
+        // validate
+        if (identityProvider == null) {
+            throw new InvalidAttributeException("IdentityProvider for update is null!!!");
+        }
+
+        if (idpMetadataStream == null) {
+            throw new InvalidAttributeException("Idp Metedata file for update is null!!!");
+        }
 
         // validate metadata and set in config
         Map<String, String> config = validateSamlMetadata(identityProvider.getRealm(), idpMetadataStream);
@@ -162,7 +175,7 @@ public class IdpService {
             log.error("converted kcIdp:{}", kcIdp);
 
             kcIdp = keycloakService.updateIdentityProvider(identityProvider.getRealm(), kcIdp);
-            log.error("kcIdp:{}", kcIdp);
+            log.error("Updated kcIdp:{}", kcIdp);
             identityProvider = this.convertToIdentityProvider(kcIdp);
         }
         return identityProvider;
@@ -183,7 +196,8 @@ public class IdpService {
         if (identityProvider == null) {
             return response;
         }
-        return idpClientFactory.getSpMetadata(identityProvider.getRealm(), identityProvider.getName());
+        return idpClientFactory
+                .getSpMetadata(getSpMetadataUrl(identityProvider.getRealm(), identityProvider.getName()));
 
     }
 
@@ -199,20 +213,6 @@ public class IdpService {
 
     private Map<String, String> validateSamlMetadata(String realmName, InputStream idpMetadataStream) {
         return keycloakService.validateSamlMetadata(realmName, idpMetadataStream);
-    }
-
-    private List<IdentityProvider> convertToIdentityProviderList(List<IdentityProviderRepresentation> kcIdpList) {
-        log.error("kcIdpList:{}", kcIdpList);
-        List<IdentityProvider> idpList = null;
-        if (kcIdpList == null || kcIdpList.isEmpty()) {
-            return idpList;
-        }
-        idpList = kcIdpList.stream()
-                .map(element -> identityProviderMapper.kcIdentityProviderToIdentityProvider(element))
-                .collect(Collectors.toList());
-        log.error("idpList:{}", idpList);
-
-        return idpList;
     }
 
     private IdentityProvider convertToIdentityProvider(IdentityProviderRepresentation kcIdp) {
