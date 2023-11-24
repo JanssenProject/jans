@@ -41,23 +41,11 @@ public class IdpClientFactory {
     private static final String USER_ID = "admin1";
     private static final String KEYCLOAK_USER_PWD = "admin123"; 
     private static final String KEYCLOAK_TOKEN_URL = "http://localhost:8180/realms/master/protocol/openid-connect/token";
-    private static final String KEYCLOAK_IMPORT_CONFIG_URL = "http://localhost:8180/admin/realms/keycloak-internal-identity/identity-provider/import-config";
-
+    private static final String KEYCLOAK_SP_METADATA_URL = "/realms/%s/identity-provider/broker/%s/endpoint/descriptor";
+//http://localhost:8180/realms/keycloak-internal-identity/broker/SAML_IDP_104/endpoint/descriptor
     private static Logger log = LoggerFactory.getLogger(IdpClientFactory.class);
 
-    public static JsonNode getHealthCheckResponse(String url) {
-        log.error("HealthCheck - , url:{} ", url);
-        Builder clientRequest = getClientBuilder(url);
-        clientRequest.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Response healthResponse = clientRequest.get();
-        if (healthResponse.getStatus() == 200) {
-            JsonNode jsonNode = healthResponse.readEntity(JsonNode.class);
-            log.error("Health Check Response is - jsonNode:{}", jsonNode);
-            return jsonNode;
-        }
-        return null;
-    }
-
+  
     public static Response requestAccessToken(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
         log.error("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
@@ -95,47 +83,35 @@ public class IdpClientFactory {
         return response;
     }
 
-    public static Response getClients(String issuer) throws JsonProcessingException {
-        log.error(" Jwks Uri - issuer:{}", issuer);
-        String configurationEndpoint = "http://localhost:8180";
-        Builder jwksUriClient = getClientBuilder(configurationEndpoint);
-        jwksUriClient.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Response response = jwksUriClient.get();
-        log.error("AuthClientFactory::getJwksUri() - response:{}", response);
+    public  Response getSpMetadata(String realm, String name) {
+        log.error(" SP Metadata - realm:{}, name:{}", realm, name);
+        String metadataEndpoint = getSpMetadataUrl(realm, name);
+        log.error(" SP Metadata - metadataEndpoint:{}", metadataEndpoint);
+        Builder metadataClient = getClientBuilder(metadataEndpoint);
+        metadataClient.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Response response = metadataClient.get();
+        log.error("SpMetadata- response:{}", response);
       
-        return response;
-    }
-
-    public static Response getJSONWebKeys(String jwksUri) {
-        log.error("JSONWebKeys - jwksUri:{}", jwksUri);
-        Builder clientBuilder = getClientBuilder(jwksUri);
-        clientBuilder.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Response response = clientBuilder.get();
-        log.error("AuthClientFactory::getJSONWebKeys() - response:{}", response);
+        if (response != null ) {
+            log.error("SP metadata response.getStatusInfo():{}, response.getEntity():{}, response.getEntity().getClass():{}",
+                    response.getStatusInfo(), response.getEntity(),response.getEntity().getClass());
+        }
         
         return response;
     }
 
-    /*
-     * public static Response revokeSession(String url, String token, String userId)
-     * { log.error("Request for Access Token -  url:{}, token:{}, userId:{} ", url,
-     * token, userId); Response response = null; try {
-     * 
-     * Builder request = getClientBuilder(url); request.header("Authorization",
-     * "Basic " + token); request.header(CONTENT_TYPE,
-     * MediaType.APPLICATION_FORM_URLENCODED); final MultivaluedHashMap<String,
-     * String> multivaluedHashMap = new MultivaluedHashMap<>(
-     * "revokeSessionRequest.getParameters()"); response =
-     * request.post(Entity.form(multivaluedHashMap));
-     * log.error("Response for Access Token -  response:{}", response);
-     * 
-     * } finally {
-     * 
-     * if (response != null) { response.close(); } } return response; }
-     */
-
+   
     private static Builder getClientBuilder(String url) {
         return ClientBuilder.newClient().target(url).request();
+    }
+    
+    private String getSpMetadataUrl(String realm, String name) {
+        log.error("Get SP Metadata Url - realm:{}, name:{}", realm, name);
+        StringBuilder sb = new StringBuilder();
+        sb.append(KEYCLOAK_URL).append(KEYCLOAK_SP_METADATA_URL);
+        String metadataURL = String.format(sb.toString(), realm, name);
+        log.error("Get SP Metadata Url - metadataURL:{}", metadataURL);
+        return metadataURL;
     }
 
 }

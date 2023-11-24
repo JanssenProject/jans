@@ -17,6 +17,7 @@ import io.jans.configapi.plugin.keycloak.idp.broker.model.IdentityProvider;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpConfigService;
 import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
 import io.jans.configapi.plugin.keycloak.idp.broker.mapper.IdentityProviderMapper;
+import io.jans.configapi.plugin.keycloak.idp.broker.client.IdpClientFactory;
 
 import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
@@ -40,6 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.FileUtils;
@@ -72,6 +75,9 @@ public class IdpService {
 
     @Inject
     IdentityProviderMapper identityProviderMapper;
+
+    @Inject
+    IdpClientFactory idpClientFactory;
 
     public String getIdentityProviderDn() {
         return idpConfigService.getTrustedIdpDn();
@@ -170,6 +176,15 @@ public class IdpService {
         }
         // Delete in Jans DB
         identityProviderService.removeIdentityProvider(identityProvider);
+    }
+
+    public Response getSpMetadata(IdentityProvider identityProvider) {
+        Response response = null;
+        if (identityProvider == null) {
+            return response;
+        }
+        return idpClientFactory.getSpMetadata(identityProvider.getRealm(), identityProvider.getName());
+
     }
 
     private IdentityProvider updateIdentityProvider(IdentityProvider identityProvider) throws IOException {

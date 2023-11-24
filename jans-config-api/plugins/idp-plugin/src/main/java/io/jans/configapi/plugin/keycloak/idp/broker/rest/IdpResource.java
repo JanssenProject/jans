@@ -79,22 +79,24 @@ public class IdpResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS })
     public Response getAllSamlIdentityProvider(
-        @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-        @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-        @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-        @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-        @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
-        {
-    if (log.isDebugEnabled()) {
-        log.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
-                escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
-                escapeLog(sortOrder));
-    }
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair)
+            throws IllegalAccessException, InvocationTargetException {
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
+                    escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
+                    escapeLog(sortOrder), escapeLog(fieldValuePair));
+        }
 
-    SearchRequest searchReq = createSearchRequest(idpService.getIdentityProviderDn(), pattern, sortBy, sortOrder,
-            startIndex, limit, null, null, ApiConstants.DEFAULT_MAX_COUNT, IdentityProvider.class);
+        SearchRequest searchReq = createSearchRequest(idpService.getIdentityProviderDn(), pattern, sortBy, sortOrder,
+                startIndex, limit, null, null, ApiConstants.DEFAULT_MAX_COUNT, fieldValuePair, IdentityProvider.class);
 
-    return Response.ok(this.doSearch(searchReq)).build();
+        return Response.ok(this.doSearch(searchReq)).build();
     }
 
     @Operation(summary = "Get SAML Identity Provider by Inum", description = "Get SAML Identity Provider by Inum", operationId = "get-saml-identity-provider-by-inum", tags = {
@@ -105,6 +107,7 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
+    @Path(Constants.INUM_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS })
     public Response getSamlIdentityProviderByInum(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
@@ -114,6 +117,28 @@ public class IdpResource extends BaseResource {
         return Response.ok(idp).build();
     }
 
+    @Operation(summary = "Get SAML SP Metadata", description = "Get SAML SP Metadata", operationId = "get-saml-sp-metadata", tags = {
+            "Jans - SAML Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.JANS_IDP_SAML_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @Path(Constants.SP_METADATA_PATH + Constants.INUM_PATH_PARAM)
+    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS })
+    public Response getSamlSPMetadata(
+            @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+        log.error("Fetch SAML SP Metadata for IDP by inum:{}", inum);
+        IdentityProvider identityProvider = idpService.getIdentityProviderByInum(inum);
+        log.error(" identityProvider:{} ", identityProvider);
+        checkResourceNotNull(identityProvider, "IdentityProvider identified by '" + inum + "'");
+        Response response = idpService.getSpMetadata(identityProvider);
+        log.error(" response:{} ", response);
+
+        return Response.ok(response.getEntity()).build();
+    }
+
     @Operation(summary = "Create SAML Identity Provider", description = "Create SAML Identity Provider", operationId = "post-saml-identity-provider", tags = {
             "Jans - SAML Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_SAML_WRITE_ACCESS }))
@@ -121,6 +146,7 @@ public class IdpResource extends BaseResource {
             @ExampleObject(value = "") }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Newly created Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProvider.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -138,6 +164,13 @@ public class IdpResource extends BaseResource {
         checkResourceNotNull(idp, SAML_IDP_DATA);
         checkNotNull(idp.getDisplayName(), AttributeNames.DISPLAY_NAME);
         checkNotNull(idp.getRealm(), Constants.REALM);
+        // check if IDP with same name already exists
+        List<IdentityProvider> existingIdentityProviders = idpService.getIdentityProviderByName(idp.getName());
+        log.error(" existingIdentityProviders:{} ", existingIdentityProviders);
+        if (existingIdentityProviders != null && !existingIdentityProviders.isEmpty()) {
+            throwBadRequestException("SAML IDP with same name '" + idp.getName() + "' already exists!");
+        }
+
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
         log.error(" Create metaDataFile:{} ", metaDataFile);
         if (metaDataFile != null) {
@@ -158,6 +191,7 @@ public class IdpResource extends BaseResource {
             @ExampleObject(value = "") }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProvider.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -240,7 +274,7 @@ public class IdpResource extends BaseResource {
 
         log.info("pagedIdentityProvider:{}", pagedIdentityProvider);
         return pagedIdentityProvider;
-
     }
+
 
 }

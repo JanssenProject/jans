@@ -286,6 +286,7 @@ public class KeycloakService {
             if (response != null) {
                 logger.error("IdentityProvider creation response.getStatusInfo():{}, response.getEntity():{}",
                         response.getStatusInfo(), response.getEntity());
+               
                 String id = getCreatedId(response);
                 logger.error("IdentityProvider creation id():{}", id);
                
@@ -304,7 +305,7 @@ public class KeycloakService {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new ConfigurationException("Error while configuring SAML IDP ", ex);
+            throw new ConfigurationException("Error while creating SAML IDP ", ex);
         }
 
         return identityProviderRepresentation;
