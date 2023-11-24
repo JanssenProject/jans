@@ -18,7 +18,7 @@ import java.util.Set;
 
 license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
 
-tags = { @Tag(name = "Jans - SAML Identity Broker"), @Tag(name = "Jans - SAML Identity Broker Realm")  },
+tags = { @Tag(name = "Jans - SAML IDP Configuration"), @Tag(name = "Jans - SAML Identity Broker"), @Tag(name = "Jans - SAML Identity Broker Realm")  },
 
 servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
@@ -36,7 +36,8 @@ public class IdpApiApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
-
+        
+        classes.add(IdpConfigResource.class); 
         classes.add(IdpResource.class);
         classes.add(IdpRealmResource.class);   
 		

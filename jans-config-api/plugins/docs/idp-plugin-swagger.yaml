@@ -1,0 +1,2353 @@
+openapi: 3.0.1
+info:
+  title: Jans Config API - Identity Broker
+  contact:
+    name: Gluu Support
+    url: https://support.gluu.org
+    email: xxx@gluu.org
+  license:
+    name: Apache 2.0
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: 1.0.0
+servers:
+- url: https://jans.io/
+  description: The Jans server
+  variables: {}
+tags:
+- name: Jans - SAML IDP Configuration
+- name: Jans - SAML Identity Broker
+- name: Jans - SAML Identity Broker Realm
+paths:
+  /idp/idp-config:
+    get:
+      tags:
+      - Jans - SAML IDP Configuration
+      summary: Gets IDP configuration properties
+      description: Gets IDP configuration properties
+      operationId: get-idp-config-properties
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdpAppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/config.readonly
+    put:
+      tags:
+      - Jans - SAML IDP Configuration
+      summary: Update IDP configuration properties
+      description: Update IDP configuration properties
+      operationId: put-idp-properties
+      requestBody:
+        description: GluuAttribute object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdpAppConfiguration'
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdpAppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/config.write
+    patch:
+      tags:
+      - Jans - SAML IDP Configuration
+      summary: Partially modifies IDP configuration properties.
+      description: Partially modifies IDP Configuration properties.
+      operationId: patch-idp-properties
+      requestBody:
+        description: String representing patch-document.
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdpAppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/config.write
+  /idp/realm:
+    get:
+      tags:
+      - Jans - SAML Identity Broker Realm
+      summary: Get all realm
+      description: Get all realm
+      operationId: get-realm
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RealmRepresentation'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/realm.readonly
+    put:
+      tags:
+      - Jans - SAML Identity Broker Realm
+      summary: Update realm
+      description: Update realm
+      operationId: put-realm
+      requestBody:
+        description: Realm details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RealmRepresentation'
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "200":
+          description: Updated Jans realm object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealmRepresentation'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/realm.write
+    post:
+      tags:
+      - Jans - SAML Identity Broker Realm
+      summary: Create realm
+      description: Create realm
+      operationId: post-realm
+      requestBody:
+        description: Realm details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RealmRepresentation'
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "201":
+          description: Newly created realm
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealmRepresentation'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/realm.write
+  /idp/realm/{name}:
+    delete:
+      tags:
+      - Jans - SAML Identity Broker Realm
+      summary: 'Delete realm '
+      description: Delete realm
+      operationId: delete-realm
+      parameters:
+      - name: name
+        in: path
+        description: Unique name of KC realm
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/realm.write
+  /idp/realm/name/{name}:
+    get:
+      tags:
+      - Jans - SAML Identity Broker Realm
+      summary: Get realm by name
+      description: Get realm by name
+      operationId: get-realm-by-name
+      parameters:
+      - name: name
+        in: path
+        description: name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealmRepresentation'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/realm.readonly
+  /idp/kc/saml/upload:
+    put:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Update SAML Identity Provider
+      description: Update SAML Identity Provider
+      operationId: put-saml-identity-provider
+      requestBody:
+        description: String representing patch-document.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BrokerIdentityProviderForm'
+            examples:
+              Response json example:
+                description: Response json example
+                value: |
+                  {
+                      "dn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans",
+                      "inum": "63350037-8ef7-471d-8447-c691063d8c19",
+                      "creatorId": "jans-admin-2",
+                      "name": "SAML_IDP_104",
+                      "displayName": "Updated Test SAML IDP 104",
+                      "description": "SAML IDP 104 created using Rest API Updated",
+                      "realm": "keycloak-internal-identity",
+                      "enabled": true,
+                      "providerId": "saml",
+                      "trustEmail": true,
+                      "storeToken": false,
+                      "addReadTokenRoleOnCreate": false,
+                      "authenticateByDefault": false,
+                      "linkOnly": false,
+                      "idpMetaDataFN": "63350037-8ef7-471d-8447-c691063d8c19-idp-metadata.xml",
+                      "config": {
+                          "validateSignature": "false",
+                          "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                          "postBindingLogout": "true",
+                          "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                          "postBindingResponse": "true",
+                          "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                          "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                          "loginHint": "false",
+                          "enabledFromMetadata": "true",
+                          "postBindingAuthnRequest": "true",
+                          "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                          "wantAuthnRequestsSigned": "false",
+                          "addExtensionsElementWithKeyInfo": "false",
+                          "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                      },
+                      "baseDn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans"
+                  }
+      responses:
+        "200":
+          description: Updated Trust IDP
+          content:
+            application/json-patch+json:
+              schema:
+                $ref: '#/components/schemas/IdentityProvider'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans",
+                        "inum": "63350037-8ef7-471d-8447-c691063d8c19",
+                        "creatorId": "jans-admin-2",
+                        "name": "SAML_IDP_104",
+                        "displayName": "Test SAML IDP 104",
+                        "description": "SAML IDP 104 created using Rest API",
+                        "realm": "keycloak-internal-identity",
+                        "enabled": true,
+                        "providerId": "saml",
+                        "trustEmail": false,
+                        "storeToken": false,
+                        "addReadTokenRoleOnCreate": false,
+                        "authenticateByDefault": false,
+                        "linkOnly": false,
+                        "idpMetaDataFN": "63350037-8ef7-471d-8447-c691063d8c19-idp-metadata.xml",
+                        "config": {
+                            "validateSignature": "false",
+                            "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                            "postBindingLogout": "true",
+                            "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                            "postBindingResponse": "true",
+                            "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                            "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                            "loginHint": "false",
+                            "enabledFromMetadata": "true",
+                            "postBindingAuthnRequest": "true",
+                            "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                            "wantAuthnRequestsSigned": "false",
+                            "addExtensionsElementWithKeyInfo": "false",
+                            "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                        },
+                        "baseDn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans"
+                    }
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.write
+    post:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Create SAML Identity Provider
+      description: Create SAML Identity Provider
+      operationId: post-saml-identity-provider
+      requestBody:
+        description: String representing patch-document.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BrokerIdentityProviderForm'
+            examples:
+              Response json example:
+                description: Response json example
+                value: "{\n\t\"creatorId\": \"jans-admin-2\",\n\t\"name\": \"SAML_IDP_104\"\
+                  ,\n\t\"displayName\": \"Test SAML IDP 104\",\t\"description\": \"\
+                  SAML IDP 104 created using Rest API\",\n\t\"realm\": \"keycloak-internal-identity\"\
+                  ,\n\t\"enabled\": true,\n\t\"providerId\": \"SAML_IDP_104\",\n\t\
+                  \"trustEmail\": false,\n\t\"storeToken\": false,\n\t\"addReadTokenRoleOnCreate\"\
+                  : false,\n\t\"authenticateByDefault\": false,\n\t\"linkOnly\": false,\n\
+                  \t\"firstBrokerLoginFlowAlias\": null,\n\t\"postBrokerLoginFlowAlias\"\
+                  : null\n\t\n}\n"
+      responses:
+        "201":
+          description: Newly created Trust IDP
+          content:
+            application/json-patch+json:
+              schema:
+                $ref: '#/components/schemas/IdentityProvider'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans",
+                        "inum": "63350037-8ef7-471d-8447-c691063d8c19",
+                        "creatorId": "jans-admin-2",
+                        "name": "SAML_IDP_104",
+                        "displayName": "Test SAML IDP 104",
+                        "description": "SAML IDP 104 created using Rest API",
+                        "realm": "keycloak-internal-identity",
+                        "enabled": true,
+                        "providerId": "saml",
+                        "trustEmail": false,
+                        "storeToken": false,
+                        "addReadTokenRoleOnCreate": false,
+                        "authenticateByDefault": false,
+                        "linkOnly": false,
+                        "idpMetaDataFN": "63350037-8ef7-471d-8447-c691063d8c19-idp-metadata.xml",
+                        "config": {
+                            "validateSignature": "false",
+                            "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                            "postBindingLogout": "true",
+                            "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                            "postBindingResponse": "true",
+                            "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                            "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                            "loginHint": "false",
+                            "enabledFromMetadata": "true",
+                            "postBindingAuthnRequest": "true",
+                            "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                            "wantAuthnRequestsSigned": "false",
+                            "addExtensionsElementWithKeyInfo": "false",
+                            "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                        },
+                        "baseDn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans"
+                    }
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.write
+  /idp/kc/saml/{inum}:
+    get:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Get SAML Identity Provider by Inum
+      description: Get SAML Identity Provider by Inum
+      operationId: get-saml-identity-provider-by-inum
+      parameters:
+      - name: inum
+        in: path
+        description: Unique identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProvider'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans",
+                        "inum": "63350037-8ef7-471d-8447-c691063d8c19",
+                        "creatorId": "jans-admin-2",
+                        "name": "SAML_IDP_104",
+                        "displayName": "Test SAML IDP 104",
+                        "description": "SAML IDP 104 created using Rest API",
+                        "realm": "keycloak-internal-identity",
+                        "enabled": true,
+                        "providerId": "saml",
+                        "trustEmail": false,
+                        "storeToken": false,
+                        "addReadTokenRoleOnCreate": false,
+                        "authenticateByDefault": false,
+                        "linkOnly": false,
+                        "idpMetaDataFN": "63350037-8ef7-471d-8447-c691063d8c19-idp-metadata.xml",
+                        "config": {
+                            "validateSignature": "false",
+                            "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                            "postBindingLogout": "true",
+                            "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                            "postBindingResponse": "true",
+                            "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                            "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                            "loginHint": "false",
+                            "enabledFromMetadata": "true",
+                            "postBindingAuthnRequest": "true",
+                            "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                            "wantAuthnRequestsSigned": "false",
+                            "addExtensionsElementWithKeyInfo": "false",
+                            "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                        },
+                        "baseDn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans"
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.readonly
+    delete:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Delete SAML Identity Provider
+      description: Delete SAML Identity Provider
+      operationId: delete-saml-identity-provider
+      parameters:
+      - name: inum
+        in: path
+        description: Unique identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.delete
+  /idp/kc/saml:
+    get:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Retrieves SAML Identity Provider
+      description: Retrieves SAML Identity Provider
+      operationId: get-saml-identity-provider
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: pattern
+        in: query
+        description: Search pattern
+        schema:
+          type: string
+          default: ""
+      - name: startIndex
+        in: query
+        description: The 1-based index of the first query result
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: sortBy
+        in: query
+        description: Attribute whose value will be used to order the returned response
+        schema:
+          type: string
+          default: inum
+      - name: sortOrder
+        in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
+        schema:
+          type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "applicationType=web,persistClientAuthorizations=true"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProviderPagedResult'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "start": 0,
+                        "totalEntriesCount": 3,
+                        "entriesCount": 3,
+                        "entries": [
+                            {
+                                "dn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans",
+                                "inum": "63350037-8ef7-471d-8447-c691063d8c19",
+                                "creatorId": "jans-admin-2",
+                                "name": "SAML_IDP_104",
+                                "displayName": "Test SAML IDP 104",
+                                "description": "SAML IDP 104 created using Rest API",
+                                "realm": "keycloak-internal-identity",
+                                "enabled": true,
+                                "providerId": "saml",
+                                "trustEmail": false,
+                                "storeToken": false,
+                                "addReadTokenRoleOnCreate": false,
+                                "authenticateByDefault": false,
+                                "linkOnly": false,
+                                "idpMetaDataFN": "63350037-8ef7-471d-8447-c691063d8c19-idp-metadata.xml",
+                                "config": {
+                                    "validateSignature": "false",
+                                    "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                                    "postBindingLogout": "true",
+                                    "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                                    "postBindingResponse": "true",
+                                    "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                                    "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                                    "loginHint": "false",
+                                    "enabledFromMetadata": "true",
+                                    "postBindingAuthnRequest": "true",
+                                    "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                                    "wantAuthnRequestsSigned": "false",
+                                    "addExtensionsElementWithKeyInfo": "false",
+                                    "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                                },
+                                "baseDn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans"
+                            },
+                            {
+                                "dn": "inum=8254fc20-5322-41e0-b398-7c8b2f86f5e5,ou=trusted-idp,o=jans",
+                                "inum": "8254fc20-5322-41e0-b398-7c8b2f86f5e5",
+                                "creatorId": "jans-admin-2",
+                                "name": "SAML_IDP_102",
+                                "displayName": "Test SAML IDP 101",
+                                "description": "SAML IDP 101 created using Rest API",
+                                "realm": "keycloak-internal-identity",
+                                "enabled": true,
+                                "providerId": "saml",
+                                "trustEmail": false,
+                                "storeToken": false,
+                                "addReadTokenRoleOnCreate": false,
+                                "authenticateByDefault": false,
+                                "linkOnly": false,
+                                "config": {
+                                    "validateSignature": "false",
+                                    "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                                    "postBindingLogout": "true",
+                                    "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                                    "postBindingResponse": "true",
+                                    "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                                    "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                                    "loginHint": "false",
+                                    "enabledFromMetadata": "true",
+                                    "postBindingAuthnRequest": "true",
+                                    "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                                    "wantAuthnRequestsSigned": "false",
+                                    "addExtensionsElementWithKeyInfo": "false",
+                                    "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                                },
+                                "baseDn": "inum=8254fc20-5322-41e0-b398-7c8b2f86f5e5,ou=trusted-idp,o=jans"
+                            },
+                            {
+                                "dn": "inum=ff28d5af-80a5-4ce2-8157-bd1a37ea4a3c,ou=trusted-idp,o=jans",
+                                "inum": "ff28d5af-80a5-4ce2-8157-bd1a37ea4a3c",
+                                "creatorId": "jans-admin-2",
+                                "name": "SAML_IDP_104",
+                                "displayName": "Test SAML IDP 104",
+                                "description": "SAML IDP 104 created using Rest API",
+                                "realm": "keycloak-internal-identity",
+                                "enabled": true,
+                                "providerId": "saml",
+                                "trustEmail": false,
+                                "storeToken": false,
+                                "addReadTokenRoleOnCreate": false,
+                                "authenticateByDefault": false,
+                                "linkOnly": false,
+                                "idpMetaDataFN": "ff28d5af-80a5-4ce2-8157-bd1a37ea4a3c-idp-metadata.xml",
+                                "config": {
+                                    "validateSignature": "false",
+                                    "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                                    "postBindingLogout": "true",
+                                    "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                                    "postBindingResponse": "true",
+                                    "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                                    "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                                    "loginHint": "false",
+                                    "enabledFromMetadata": "true",
+                                    "postBindingAuthnRequest": "true",
+                                    "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                                    "wantAuthnRequestsSigned": "false",
+                                    "addExtensionsElementWithKeyInfo": "false",
+                                    "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                                },
+                                "baseDn": "inum=ff28d5af-80a5-4ce2-8157-bd1a37ea4a3c,ou=trusted-idp,o=jans"
+                            }
+                        ]
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.readonly
+  /idp/kc/saml/sp-metadata/{inum}:
+    get:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Get SAML SP Metadata
+      description: Get SAML SP Metadata
+      operationId: get-saml-sp-metadata
+      parameters:
+      - name: inum
+        in: path
+        description: Unique identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.readonly
+components:
+  schemas:
+    IdpAppConfiguration:
+      type: object
+      properties:
+        applicationName:
+          type: string
+        trustedIdpDn:
+          type: string
+        enabled:
+          type: boolean
+        serverUrl:
+          type: string
+        realm:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+        grantType:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        idpRootDir:
+          type: string
+        idpMetadataRootDir:
+          type: string
+        idpMetadataTempDir:
+          type: string
+        idpMetadataFilePattern:
+          type: string
+        idpMetadataFile:
+          type: string
+        spMetadataUrl:
+          type: string
+        spMetadataRootDir:
+          type: string
+        spMetadataTempDir:
+          type: string
+        spMetadataFilePattern:
+          type: string
+        spMetadataFile:
+          type: string
+        ignoreValidation:
+          type: boolean
+    JsonPatch:
+      type: object
+    ApplicationRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        rootUrl:
+          type: string
+        adminUrl:
+          type: string
+        baseUrl:
+          type: string
+        surrogateAuthRequired:
+          type: boolean
+        enabled:
+          type: boolean
+        alwaysDisplayInConsole:
+          type: boolean
+        clientAuthenticatorType:
+          type: string
+        secret:
+          type: string
+        registrationAccessToken:
+          type: string
+        defaultRoles:
+          type: array
+          items:
+            type: string
+        redirectUris:
+          type: array
+          items:
+            type: string
+        webOrigins:
+          type: array
+          items:
+            type: string
+        notBefore:
+          type: integer
+          format: int32
+        bearerOnly:
+          type: boolean
+        consentRequired:
+          type: boolean
+        standardFlowEnabled:
+          type: boolean
+        implicitFlowEnabled:
+          type: boolean
+        directAccessGrantsEnabled:
+          type: boolean
+        serviceAccountsEnabled:
+          type: boolean
+        authorizationServicesEnabled:
+          type: boolean
+        directGrantsOnly:
+          type: boolean
+        publicClient:
+          type: boolean
+        frontchannelLogout:
+          type: boolean
+        protocol:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        authenticationFlowBindingOverrides:
+          type: object
+          additionalProperties:
+            type: string
+        fullScopeAllowed:
+          type: boolean
+        nodeReRegistrationTimeout:
+          type: integer
+          format: int32
+        registeredNodes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+        protocolMappers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProtocolMapperRepresentation'
+        clientTemplate:
+          type: string
+        useTemplateConfig:
+          type: boolean
+        useTemplateScope:
+          type: boolean
+        useTemplateMappers:
+          type: boolean
+        defaultClientScopes:
+          type: array
+          items:
+            type: string
+        optionalClientScopes:
+          type: array
+          items:
+            type: string
+        authorizationSettings:
+          $ref: '#/components/schemas/ResourceServerRepresentation'
+        access:
+          type: object
+          additionalProperties:
+            type: boolean
+        origin:
+          type: string
+        claims:
+          $ref: '#/components/schemas/ClaimRepresentation'
+    AuthenticationExecutionExportRepresentation:
+      type: object
+      properties:
+        authenticatorConfig:
+          type: string
+        authenticator:
+          type: string
+        authenticatorFlow:
+          type: boolean
+        requirement:
+          type: string
+        priority:
+          type: integer
+          format: int32
+        autheticatorFlow:
+          type: boolean
+        flowAlias:
+          type: string
+        userSetupAllowed:
+          type: boolean
+    AuthenticationFlowRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        alias:
+          type: string
+        description:
+          type: string
+        providerId:
+          type: string
+        topLevel:
+          type: boolean
+        builtIn:
+          type: boolean
+        authenticationExecutions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticationExecutionExportRepresentation'
+    AuthenticatorConfigRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        alias:
+          type: string
+        config:
+          type: object
+          additionalProperties:
+            type: string
+    ClaimRepresentation:
+      type: object
+      properties:
+        name:
+          type: boolean
+        username:
+          type: boolean
+        profile:
+          type: boolean
+        picture:
+          type: boolean
+        website:
+          type: boolean
+        email:
+          type: boolean
+        gender:
+          type: boolean
+        locale:
+          type: boolean
+        address:
+          type: boolean
+        phone:
+          type: boolean
+    ClientRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        rootUrl:
+          type: string
+        adminUrl:
+          type: string
+        baseUrl:
+          type: string
+        surrogateAuthRequired:
+          type: boolean
+        enabled:
+          type: boolean
+        alwaysDisplayInConsole:
+          type: boolean
+        clientAuthenticatorType:
+          type: string
+        secret:
+          type: string
+        registrationAccessToken:
+          type: string
+        defaultRoles:
+          type: array
+          items:
+            type: string
+        redirectUris:
+          type: array
+          items:
+            type: string
+        webOrigins:
+          type: array
+          items:
+            type: string
+        notBefore:
+          type: integer
+          format: int32
+        bearerOnly:
+          type: boolean
+        consentRequired:
+          type: boolean
+        standardFlowEnabled:
+          type: boolean
+        implicitFlowEnabled:
+          type: boolean
+        directAccessGrantsEnabled:
+          type: boolean
+        serviceAccountsEnabled:
+          type: boolean
+        authorizationServicesEnabled:
+          type: boolean
+        directGrantsOnly:
+          type: boolean
+        publicClient:
+          type: boolean
+        frontchannelLogout:
+          type: boolean
+        protocol:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        authenticationFlowBindingOverrides:
+          type: object
+          additionalProperties:
+            type: string
+        fullScopeAllowed:
+          type: boolean
+        nodeReRegistrationTimeout:
+          type: integer
+          format: int32
+        registeredNodes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+        protocolMappers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProtocolMapperRepresentation'
+        clientTemplate:
+          type: string
+        useTemplateConfig:
+          type: boolean
+        useTemplateScope:
+          type: boolean
+        useTemplateMappers:
+          type: boolean
+        defaultClientScopes:
+          type: array
+          items:
+            type: string
+        optionalClientScopes:
+          type: array
+          items:
+            type: string
+        authorizationSettings:
+          $ref: '#/components/schemas/ResourceServerRepresentation'
+        access:
+          type: object
+          additionalProperties:
+            type: boolean
+        origin:
+          type: string
+    ClientScopeRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        protocol:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        protocolMappers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProtocolMapperRepresentation'
+    ClientTemplateRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        protocol:
+          type: string
+        fullScopeAllowed:
+          type: boolean
+        bearerOnly:
+          type: boolean
+        consentRequired:
+          type: boolean
+        standardFlowEnabled:
+          type: boolean
+        implicitFlowEnabled:
+          type: boolean
+        directAccessGrantsEnabled:
+          type: boolean
+        serviceAccountsEnabled:
+          type: boolean
+        publicClient:
+          type: boolean
+        frontchannelLogout:
+          type: boolean
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        protocolMappers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProtocolMapperRepresentation'
+    ComponentExportRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        providerId:
+          type: string
+        subType:
+          type: string
+        config:
+          $ref: '#/components/schemas/MultivaluedHashMapStringString'
+    Composites:
+      type: object
+      properties:
+        realm:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        client:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        application:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    CredentialRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        userLabel:
+          type: string
+        createdDate:
+          type: integer
+          format: int64
+        secretData:
+          type: string
+        credentialData:
+          type: string
+        priority:
+          type: integer
+          format: int32
+        value:
+          type: string
+        temporary:
+          type: boolean
+        device:
+          type: string
+        hashedSaltedValue:
+          type: string
+        salt:
+          type: string
+        hashIterations:
+          type: integer
+          format: int32
+        counter:
+          type: integer
+          format: int32
+        algorithm:
+          type: string
+        digits:
+          type: integer
+          format: int32
+        period:
+          type: integer
+          format: int32
+        config:
+          type: object
+          properties:
+            empty:
+              type: boolean
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    FederatedIdentityRepresentation:
+      type: object
+      properties:
+        identityProvider:
+          type: string
+        userId:
+          type: string
+        userName:
+          type: string
+    GroupRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        path:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        realmRoles:
+          type: array
+          items:
+            type: string
+        clientRoles:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        access:
+          type: object
+          additionalProperties:
+            type: boolean
+    IdentityProviderMapperRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        identityProviderAlias:
+          type: string
+        identityProviderMapper:
+          type: string
+        config:
+          type: object
+          additionalProperties:
+            type: string
+    IdentityProviderRepresentation:
+      type: object
+      properties:
+        alias:
+          type: string
+        displayName:
+          type: string
+        internalId:
+          type: string
+        providerId:
+          type: string
+        enabled:
+          type: boolean
+        updateProfileFirstLoginMode:
+          type: string
+        trustEmail:
+          type: boolean
+        storeToken:
+          type: boolean
+        addReadTokenRoleOnCreate:
+          type: boolean
+        authenticateByDefault:
+          type: boolean
+        linkOnly:
+          type: boolean
+        firstBrokerLoginFlowAlias:
+          type: string
+        postBrokerLoginFlowAlias:
+          type: string
+        config:
+          type: object
+          additionalProperties:
+            type: string
+        updateProfileFirstLogin:
+          type: boolean
+          writeOnly: true
+    JsonNode:
+      type: object
+    MultivaluedHashMapStringComponentExportRepresentation:
+      type: object
+      properties:
+        empty:
+          type: boolean
+      additionalProperties:
+        type: array
+        items:
+          $ref: '#/components/schemas/ComponentExportRepresentation'
+    MultivaluedHashMapStringString:
+      type: object
+      properties:
+        empty:
+          type: boolean
+      additionalProperties:
+        type: array
+        items:
+          type: string
+    OAuthClientRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        rootUrl:
+          type: string
+        adminUrl:
+          type: string
+        baseUrl:
+          type: string
+        surrogateAuthRequired:
+          type: boolean
+        enabled:
+          type: boolean
+        alwaysDisplayInConsole:
+          type: boolean
+        clientAuthenticatorType:
+          type: string
+        secret:
+          type: string
+        registrationAccessToken:
+          type: string
+        defaultRoles:
+          type: array
+          items:
+            type: string
+        redirectUris:
+          type: array
+          items:
+            type: string
+        webOrigins:
+          type: array
+          items:
+            type: string
+        notBefore:
+          type: integer
+          format: int32
+        bearerOnly:
+          type: boolean
+        consentRequired:
+          type: boolean
+        standardFlowEnabled:
+          type: boolean
+        implicitFlowEnabled:
+          type: boolean
+        directAccessGrantsEnabled:
+          type: boolean
+        serviceAccountsEnabled:
+          type: boolean
+        authorizationServicesEnabled:
+          type: boolean
+        directGrantsOnly:
+          type: boolean
+        publicClient:
+          type: boolean
+        frontchannelLogout:
+          type: boolean
+        protocol:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        authenticationFlowBindingOverrides:
+          type: object
+          additionalProperties:
+            type: string
+        fullScopeAllowed:
+          type: boolean
+        nodeReRegistrationTimeout:
+          type: integer
+          format: int32
+        registeredNodes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+        protocolMappers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProtocolMapperRepresentation'
+        clientTemplate:
+          type: string
+        useTemplateConfig:
+          type: boolean
+        useTemplateScope:
+          type: boolean
+        useTemplateMappers:
+          type: boolean
+        defaultClientScopes:
+          type: array
+          items:
+            type: string
+        optionalClientScopes:
+          type: array
+          items:
+            type: string
+        authorizationSettings:
+          $ref: '#/components/schemas/ResourceServerRepresentation'
+        access:
+          type: object
+          additionalProperties:
+            type: boolean
+        origin:
+          type: string
+        claims:
+          $ref: '#/components/schemas/ClaimRepresentation'
+    PolicyRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        policies:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        resources:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        scopes:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        logic:
+          type: string
+          enum:
+          - POSITIVE
+          - NEGATIVE
+        decisionStrategy:
+          type: string
+          enum:
+          - AFFIRMATIVE
+          - UNANIMOUS
+          - CONSENSUS
+        owner:
+          type: string
+        resourcesData:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceRepresentation'
+        scopesData:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeRepresentation'
+        config:
+          type: object
+          additionalProperties:
+            type: string
+    ProtocolMapperRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        protocol:
+          type: string
+        protocolMapper:
+          type: string
+        consentRequired:
+          type: boolean
+        consentText:
+          type: string
+        config:
+          type: object
+          additionalProperties:
+            type: string
+    RealmRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        realm:
+          type: string
+        displayName:
+          type: string
+        displayNameHtml:
+          type: string
+        notBefore:
+          type: integer
+          format: int32
+        defaultSignatureAlgorithm:
+          type: string
+        revokeRefreshToken:
+          type: boolean
+        refreshTokenMaxReuse:
+          type: integer
+          format: int32
+        accessTokenLifespan:
+          type: integer
+          format: int32
+        accessTokenLifespanForImplicitFlow:
+          type: integer
+          format: int32
+        ssoSessionIdleTimeout:
+          type: integer
+          format: int32
+        ssoSessionMaxLifespan:
+          type: integer
+          format: int32
+        ssoSessionIdleTimeoutRememberMe:
+          type: integer
+          format: int32
+        ssoSessionMaxLifespanRememberMe:
+          type: integer
+          format: int32
+        offlineSessionIdleTimeout:
+          type: integer
+          format: int32
+        offlineSessionMaxLifespanEnabled:
+          type: boolean
+        offlineSessionMaxLifespan:
+          type: integer
+          format: int32
+        clientSessionIdleTimeout:
+          type: integer
+          format: int32
+        clientSessionMaxLifespan:
+          type: integer
+          format: int32
+        clientOfflineSessionIdleTimeout:
+          type: integer
+          format: int32
+        clientOfflineSessionMaxLifespan:
+          type: integer
+          format: int32
+        accessCodeLifespan:
+          type: integer
+          format: int32
+        accessCodeLifespanUserAction:
+          type: integer
+          format: int32
+        accessCodeLifespanLogin:
+          type: integer
+          format: int32
+        actionTokenGeneratedByAdminLifespan:
+          type: integer
+          format: int32
+        actionTokenGeneratedByUserLifespan:
+          type: integer
+          format: int32
+        oauth2DeviceCodeLifespan:
+          type: integer
+          format: int32
+        oauth2DevicePollingInterval:
+          type: integer
+          format: int32
+        enabled:
+          type: boolean
+        sslRequired:
+          type: string
+        passwordCredentialGrantAllowed:
+          type: boolean
+        registrationAllowed:
+          type: boolean
+        registrationEmailAsUsername:
+          type: boolean
+        rememberMe:
+          type: boolean
+        verifyEmail:
+          type: boolean
+        loginWithEmailAllowed:
+          type: boolean
+        duplicateEmailsAllowed:
+          type: boolean
+        resetPasswordAllowed:
+          type: boolean
+        editUsernameAllowed:
+          type: boolean
+        bruteForceProtected:
+          type: boolean
+        permanentLockout:
+          type: boolean
+        maxFailureWaitSeconds:
+          type: integer
+          format: int32
+        minimumQuickLoginWaitSeconds:
+          type: integer
+          format: int32
+        waitIncrementSeconds:
+          type: integer
+          format: int32
+        quickLoginCheckMilliSeconds:
+          type: integer
+          format: int64
+        maxDeltaTimeSeconds:
+          type: integer
+          format: int32
+        failureFactor:
+          type: integer
+          format: int32
+        privateKey:
+          type: string
+        publicKey:
+          type: string
+        certificate:
+          type: string
+        codeSecret:
+          type: string
+        roles:
+          $ref: '#/components/schemas/RolesRepresentation'
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRepresentation'
+        defaultRoles:
+          type: array
+          items:
+            type: string
+        defaultRole:
+          $ref: '#/components/schemas/RoleRepresentation'
+        defaultGroups:
+          type: array
+          items:
+            type: string
+        requiredCredentials:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        passwordPolicy:
+          type: string
+        otpPolicyType:
+          type: string
+        otpPolicyAlgorithm:
+          type: string
+        otpPolicyInitialCounter:
+          type: integer
+          format: int32
+        otpPolicyDigits:
+          type: integer
+          format: int32
+        otpPolicyLookAheadWindow:
+          type: integer
+          format: int32
+        otpPolicyPeriod:
+          type: integer
+          format: int32
+        otpPolicyCodeReusable:
+          type: boolean
+        otpSupportedApplications:
+          type: array
+          items:
+            type: string
+        webAuthnPolicyRpEntityName:
+          type: string
+        webAuthnPolicySignatureAlgorithms:
+          type: array
+          items:
+            type: string
+        webAuthnPolicyRpId:
+          type: string
+        webAuthnPolicyAttestationConveyancePreference:
+          type: string
+        webAuthnPolicyAuthenticatorAttachment:
+          type: string
+        webAuthnPolicyRequireResidentKey:
+          type: string
+        webAuthnPolicyUserVerificationRequirement:
+          type: string
+        webAuthnPolicyCreateTimeout:
+          type: integer
+          format: int32
+        webAuthnPolicyAvoidSameAuthenticatorRegister:
+          type: boolean
+        webAuthnPolicyAcceptableAaguids:
+          type: array
+          items:
+            type: string
+        webAuthnPolicyPasswordlessRpEntityName:
+          type: string
+        webAuthnPolicyPasswordlessSignatureAlgorithms:
+          type: array
+          items:
+            type: string
+        webAuthnPolicyPasswordlessRpId:
+          type: string
+        webAuthnPolicyPasswordlessAttestationConveyancePreference:
+          type: string
+        webAuthnPolicyPasswordlessAuthenticatorAttachment:
+          type: string
+        webAuthnPolicyPasswordlessRequireResidentKey:
+          type: string
+        webAuthnPolicyPasswordlessUserVerificationRequirement:
+          type: string
+        webAuthnPolicyPasswordlessCreateTimeout:
+          type: integer
+          format: int32
+        webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister:
+          type: boolean
+        webAuthnPolicyPasswordlessAcceptableAaguids:
+          type: array
+          items:
+            type: string
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRepresentation'
+        federatedUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRepresentation'
+        scopeMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeMappingRepresentation'
+        clientScopeMappings:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/ScopeMappingRepresentation'
+        clients:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientRepresentation'
+        clientScopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientScopeRepresentation'
+        defaultDefaultClientScopes:
+          type: array
+          items:
+            type: string
+        defaultOptionalClientScopes:
+          type: array
+          items:
+            type: string
+        browserSecurityHeaders:
+          type: object
+          additionalProperties:
+            type: string
+        smtpServer:
+          type: object
+          additionalProperties:
+            type: string
+        userFederationProviders:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserFederationProviderRepresentation'
+        userFederationMappers:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserFederationMapperRepresentation'
+        loginTheme:
+          type: string
+        accountTheme:
+          type: string
+        adminTheme:
+          type: string
+        emailTheme:
+          type: string
+        eventsEnabled:
+          type: boolean
+        eventsExpiration:
+          type: integer
+          format: int64
+        eventsListeners:
+          type: array
+          items:
+            type: string
+        enabledEventTypes:
+          type: array
+          items:
+            type: string
+        adminEventsEnabled:
+          type: boolean
+        adminEventsDetailsEnabled:
+          type: boolean
+        identityProviders:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityProviderRepresentation'
+        identityProviderMappers:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityProviderMapperRepresentation'
+        protocolMappers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProtocolMapperRepresentation'
+        components:
+          type: object
+          properties:
+            empty:
+              type: boolean
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/ComponentExportRepresentation'
+        internationalizationEnabled:
+          type: boolean
+        supportedLocales:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        defaultLocale:
+          type: string
+        authenticationFlows:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticationFlowRepresentation'
+        authenticatorConfig:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticatorConfigRepresentation'
+        requiredActions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RequiredActionProviderRepresentation'
+        browserFlow:
+          type: string
+        registrationFlow:
+          type: string
+        directGrantFlow:
+          type: string
+        resetCredentialsFlow:
+          type: string
+        clientAuthenticationFlow:
+          type: string
+        dockerAuthenticationFlow:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        keycloakVersion:
+          type: string
+        userManagedAccessAllowed:
+          type: boolean
+        social:
+          type: boolean
+        updateProfileOnInitialSocialLogin:
+          type: boolean
+        socialProviders:
+          type: object
+          additionalProperties:
+            type: string
+        applicationScopeMappings:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/ScopeMappingRepresentation'
+        applications:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationRepresentation'
+        oauthClients:
+          type: array
+          items:
+            $ref: '#/components/schemas/OAuthClientRepresentation'
+        clientTemplates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientTemplateRepresentation'
+        clientProfiles:
+          $ref: '#/components/schemas/JsonNode'
+        clientPolicies:
+          $ref: '#/components/schemas/JsonNode'
+    RequiredActionProviderRepresentation:
+      type: object
+      properties:
+        alias:
+          type: string
+        name:
+          type: string
+        providerId:
+          type: string
+        enabled:
+          type: boolean
+        defaultAction:
+          type: boolean
+        priority:
+          type: integer
+          format: int32
+        config:
+          type: object
+          additionalProperties:
+            type: string
+    ResourceOwnerRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    ResourceRepresentation:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        owner:
+          $ref: '#/components/schemas/ResourceOwnerRepresentation'
+        ownerManagedAccess:
+          type: boolean
+        displayName:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        _id:
+          type: string
+        uris:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        scopes:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeRepresentation'
+        icon_uri:
+          type: string
+        uri:
+          type: string
+          writeOnly: true
+        resource_scopes:
+          uniqueItems: true
+          type: array
+          writeOnly: true
+          items:
+            $ref: '#/components/schemas/ScopeRepresentation'
+    ResourceServerRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        name:
+          type: string
+        allowRemoteResourceManagement:
+          type: boolean
+        policyEnforcementMode:
+          type: string
+          enum:
+          - ENFORCING
+          - PERMISSIVE
+          - DISABLED
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceRepresentation'
+        policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyRepresentation'
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeRepresentation'
+        decisionStrategy:
+          type: string
+          enum:
+          - AFFIRMATIVE
+          - UNANIMOUS
+          - CONSENSUS
+    RoleRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        scopeParamRequired:
+          type: boolean
+        composite:
+          type: boolean
+        composites:
+          $ref: '#/components/schemas/Composites'
+        clientRole:
+          type: boolean
+        containerId:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    RolesRepresentation:
+      type: object
+      properties:
+        realm:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleRepresentation'
+        client:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/RoleRepresentation'
+        application:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/RoleRepresentation'
+    ScopeMappingRepresentation:
+      type: object
+      properties:
+        self:
+          type: string
+        client:
+          type: string
+        clientTemplate:
+          type: string
+        clientScope:
+          type: string
+        roles:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+    ScopeRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        iconUri:
+          type: string
+        policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyRepresentation'
+        displayName:
+          type: string
+    SocialLinkRepresentation:
+      type: object
+      properties:
+        socialProvider:
+          type: string
+        socialUserId:
+          type: string
+        socialUsername:
+          type: string
+    UserConsentRepresentation:
+      type: object
+      properties:
+        clientId:
+          type: string
+        grantedClientScopes:
+          type: array
+          items:
+            type: string
+        createdDate:
+          type: integer
+          format: int64
+        lastUpdatedDate:
+          type: integer
+          format: int64
+        grantedRealmRoles:
+          type: array
+          items:
+            type: string
+    UserFederationMapperRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        federationProviderDisplayName:
+          type: string
+        federationMapperType:
+          type: string
+        config:
+          type: object
+          additionalProperties:
+            type: string
+    UserFederationProviderRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        providerName:
+          type: string
+        config:
+          type: object
+          additionalProperties:
+            type: string
+        priority:
+          type: integer
+          format: int32
+        fullSyncPeriod:
+          type: integer
+          format: int32
+        changedSyncPeriod:
+          type: integer
+          format: int32
+        lastSync:
+          type: integer
+          format: int32
+    UserRepresentation:
+      type: object
+      properties:
+        self:
+          type: string
+        id:
+          type: string
+        origin:
+          type: string
+        createdTimestamp:
+          type: integer
+          format: int64
+        username:
+          type: string
+        enabled:
+          type: boolean
+        totp:
+          type: boolean
+        emailVerified:
+          type: boolean
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        federationLink:
+          type: string
+        serviceAccountClientId:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        credentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/CredentialRepresentation'
+        disableableCredentialTypes:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        requiredActions:
+          type: array
+          items:
+            type: string
+        federatedIdentities:
+          type: array
+          items:
+            $ref: '#/components/schemas/FederatedIdentityRepresentation'
+        realmRoles:
+          type: array
+          items:
+            type: string
+        clientRoles:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        clientConsents:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserConsentRepresentation'
+        notBefore:
+          type: integer
+          format: int32
+        applicationRoles:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        socialLinks:
+          type: array
+          items:
+            $ref: '#/components/schemas/SocialLinkRepresentation'
+        groups:
+          type: array
+          items:
+            type: string
+        access:
+          type: object
+          additionalProperties:
+            type: boolean
+    BrokerIdentityProviderForm:
+      required:
+      - identityProvider
+      - metaDataFile
+      type: object
+      properties:
+        identityProvider:
+          $ref: '#/components/schemas/IdentityProvider'
+        metaDataFile:
+          type: object
+    IdentityProvider:
+      required:
+      - creatorId
+      - description
+      - displayName
+      - name
+      - realm
+      type: object
+      properties:
+        dn:
+          type: string
+        inum:
+          type: string
+        creatorId:
+          type: string
+        name:
+          type: string
+        displayName:
+          maxLength: 60
+          minLength: 0
+          type: string
+        description:
+          maxLength: 500
+          minLength: 0
+          type: string
+        realm:
+          type: string
+        enabled:
+          type: boolean
+        providerId:
+          type: string
+        trustEmail:
+          type: boolean
+        storeToken:
+          type: boolean
+        addReadTokenRoleOnCreate:
+          type: boolean
+        authenticateByDefault:
+          type: boolean
+        linkOnly:
+          type: boolean
+        firstBrokerLoginFlowAlias:
+          type: string
+        postBrokerLoginFlowAlias:
+          type: string
+        spMetaDataURL:
+          type: string
+        spMetaDataLocation:
+          type: string
+        idpMetaDataURL:
+          type: string
+        idpMetaDataLocation:
+          type: string
+        status:
+          type: string
+          enum:
+          - active
+          - inactive
+          - expired
+          - register
+        validationStatus:
+          type: string
+          enum:
+          - In Progress
+          - Success
+          - Scheduled
+          - Failed
+        validationLog:
+          type: array
+          items:
+            type: string
+        config:
+          type: object
+          additionalProperties:
+            type: string
+        baseDn:
+          type: string
+    IdentityProviderPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityProvider'
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "https://{op-hostname}/.../token"
+          scopes:
+            https://jans.io/idp/config.readonly: View Jans Identity Broker config
+              related information
+            https://jans.io/idp/config.write: Manage Jans Identity Broker config related
+              information
+            https://jans.io/idp/realm.readonly: View Identity Broker realm related
+              information
+            https://jans.io/idp/realm.write: Manage Identity Broker realm related
+              information
+            https://jans.io/idp/saml.readonly: View Identity Broker SAML Identity
+              Broker related information
+            https://jans.io/idp/saml.write: Manage Identity Broker SAML Identity Broker
+              related information

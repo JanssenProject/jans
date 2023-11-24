@@ -25,6 +25,7 @@ public class Constants {
 	public static final String IDENTITY_PROVIDER = "/idp";
     public static final String KEYCLOAK= "/kc";
     public static final String SAML_PATH = "/saml";
+    public static final String IDP_CONFIG_PATH = "/idp-config";
     public static final String REALM_PATH = "/realm";
 	public static final String NAME_PATH = "/name";
 	public static final String UPLOAD_PATH = "/upload";

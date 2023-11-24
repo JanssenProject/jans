@@ -103,7 +103,7 @@ public class IdpResource extends BaseResource {
             "Jans - SAML Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_SAML_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdentityProvider.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdentityProvider.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/get-saml-identity-provider-by-inum.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -142,10 +142,9 @@ public class IdpResource extends BaseResource {
     @Operation(summary = "Create SAML Identity Provider", description = "Create SAML Identity Provider", operationId = "post-saml-identity-provider", tags = {
             "Jans - SAML Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_SAML_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = BrokerIdentityProviderForm.class), examples = {
-            @ExampleObject(value = "") }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = BrokerIdentityProviderForm.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/post-saml-identity-provider.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Newly created Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProvider.class))),
+            @ApiResponse(responseCode = "201", description = "Newly created Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProvider.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/get-saml-identity-provider-by-inum.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -162,6 +161,7 @@ public class IdpResource extends BaseResource {
         IdentityProvider idp = brokerIdentityProviderForm.getIdentityProvider();
         log.error(" Create idp:{} ", idp);
         checkResourceNotNull(idp, SAML_IDP_DATA);
+        checkNotNull(idp.getName(), "NAME");
         checkNotNull(idp.getDisplayName(), AttributeNames.DISPLAY_NAME);
         checkNotNull(idp.getRealm(), Constants.REALM);
         // check if IDP with same name already exists
@@ -187,10 +187,9 @@ public class IdpResource extends BaseResource {
     @Operation(summary = "Update SAML Identity Provider", description = "Update SAML Identity Provider", operationId = "put-saml-identity-provider", tags = {
             "Jans - SAML Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_SAML_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = BrokerIdentityProviderForm.class), examples = {
-            @ExampleObject(value = "") }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = BrokerIdentityProviderForm.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/put-saml-identity-provider.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProvider.class))),
+            @ApiResponse(responseCode = "200", description = "Updated Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProvider.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/get-saml-identity-provider-by-inum.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
@@ -208,6 +207,7 @@ public class IdpResource extends BaseResource {
         IdentityProvider idp = brokerIdentityProviderForm.getIdentityProvider();
         log.error(" Update idp:{} ", idp);
         checkResourceNotNull(idp, SAML_IDP_DATA);
+        checkNotNull(idp.getName(), AttributeNames.NAME);
         checkNotNull(idp.getDisplayName(), AttributeNames.DISPLAY_NAME);
         checkNotNull(idp.getInum(), AttributeNames.INUM);
         checkNotNull(idp.getRealm(), Constants.REALM);

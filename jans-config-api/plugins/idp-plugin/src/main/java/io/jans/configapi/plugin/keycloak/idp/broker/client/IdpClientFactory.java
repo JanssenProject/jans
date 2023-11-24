@@ -41,7 +41,7 @@ public class IdpClientFactory {
     private static final String USER_ID = "admin1";
     private static final String KEYCLOAK_USER_PWD = "admin123"; 
     private static final String KEYCLOAK_TOKEN_URL = "http://localhost:8180/realms/master/protocol/openid-connect/token";
-    private static final String KEYCLOAK_SP_METADATA_URL = "/realms/%s/identity-provider/broker/%s/endpoint/descriptor";
+    private static final String KEYCLOAK_SP_METADATA_URL = "/realms/%s/broker/%s/endpoint/descriptor";
 //http://localhost:8180/realms/keycloak-internal-identity/broker/SAML_IDP_104/endpoint/descriptor
     private static Logger log = LoggerFactory.getLogger(IdpClientFactory.class);
 

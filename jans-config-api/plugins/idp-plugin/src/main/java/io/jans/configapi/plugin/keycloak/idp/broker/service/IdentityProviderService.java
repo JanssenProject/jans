@@ -129,11 +129,10 @@ public class IdentityProviderService {
     public List<IdentityProvider> getIdentityProviderByName(String name) {
         log.error("Search IdentityProvider with name:{}", name);
 
-        String[] targetArray = new String[] { name };
-        Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, targetArray);
-        log.error("Search IdentityProvider with displayNameFilter:{}", displayNameFilter);
+        Filter nameFilter = Filter.createEqualityFilter("NAME", name);
+        log.error("Search IdentityProvider with displayNameFilter:{}", nameFilter);
         return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class,
-                displayNameFilter);
+                nameFilter);
     }
 
     public IdentityProvider getIdentityProvider(IdentityProvider identityProvider) {
@@ -149,12 +148,14 @@ public class IdentityProviderService {
         log.error("Search IdentityProvider with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
 
         String[] targetArray = new String[] { pattern };
+        Filter nameFilter = Filter.createSubstringFilter("NAME", null, targetArray,
+                null);
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                 null);
         Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
                 null);
         Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-        Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
+        Filter searchFilter = Filter.createORFilter(nameFilter, displayNameFilter, descriptionFilter, inumFilter);
 
         log.error("Search IdentityProvider with searchFilter:{}", searchFilter);
         return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, searchFilter,

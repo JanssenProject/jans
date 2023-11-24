@@ -383,13 +383,13 @@
 						<configuration>
 							<alwaysResolveAppPath>true</alwaysResolveAppPath>
 							<outputFileName>
-								saml-plugin-swagger</outputFileName>
+								idp-plugin-swagger</outputFileName>
 							<contextId>
 								${project.artifactId}</contextId>
 							<prettyPrint>true</prettyPrint>
 							<resourcePackages>
 								<package>
-									io.jans.configapi.plugin.saml.rest</package>
+									io.jans.configapi.plugin.keycloak.idp.broker.rest</package>
 							</resourcePackages>
 						</configuration>
 					</execution>
