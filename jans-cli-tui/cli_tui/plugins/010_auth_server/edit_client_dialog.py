@@ -32,6 +32,9 @@ from wui_components.jans_date_picker import DateSelectWidget
 from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_label_container import JansLabelContainer
+from wui_components.jans_label_widget import JansLabelWidget
+
+
 
 from view_uma_dialog import ViewUMADialog
 import threading
@@ -43,11 +46,11 @@ from prompt_toolkit.eventloop import get_event_loop
 import asyncio
 
 import json
-
 ERROR_GETTING_CLIENTS = _("Error getting clients")
 ATTRIBUTE_SCHEMA_PATH = '#/components/schemas/ClientAttributes'
 URL_SUFFIX_FORMATTER = 'inum:{}'
 INTROSPECTION_ALG_PROPERTIES = ('introspectionSignedResponseAlg', 'introspectionEncryptedResponseAlg', 'introspectionEncryptedResponseEnc')
+APP = get_app()
 
 class EditClientDialog(JansGDialog, DialogUtils):
     """The Main Client Dialog that contain every thing related to The Client
@@ -134,13 +137,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
             'rptClaimsScripts',
             'spontaneousScopeScriptDns',
             'tlsClientAuthSubjectDn',
-            'spontaneousScopes',
-            'updateTokenScriptDns',
-            'postAuthnScripts',
-            'introspectionScripts',
-            'ropcScripts',
-            'consentGatheringScripts',
-
         ):
             if self.data[list_key]:
                 self.data['attributes'][list_key] = self.data[list_key].splitlines()
@@ -153,6 +149,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
         ):
             if self.data[list_key]:
                 self.data['attributes'][list_key] = self.data[list_key]
+
+        for scr_var in self.scripts_widget_dict:
+            values = self.scripts_widget_dict[scr_var].get_values()
+            if values:
+                self.data['attributes'][scr_var] = values
 
         self.data['displayName'] = self.data['clientName']
         self.data['attributes']['jansAuthorizedAcr'] = self.data.pop('jansAuthorizedAcr')
@@ -915,79 +916,44 @@ class EditClientDialog(JansGDialog, DialogUtils):
         ], width=D(), style=cli_style.tabs
         )
 
-        self.tabs['Client Scripts'] = HSplit([
+
+        self.scripts_widget_dict = OrderedDict()
 
 
-            self.myparent.getTitledText(_("Spontaneous Scopes"),
-                                        name='spontaneousScopes',
-                                        value='\n'.join(self.data.get(
-                                            'attributes', {}).get('spontaneousScopes', [])),
-                                        height=3,
-                                        jans_help=self.myparent.get_help_from_schema(
-                self.myparent.cli_object.get_schema_from_reference(
-                    '', ATTRIBUTE_SCHEMA_PATH),
-                'spontaneousScopes'),
-                style=cli_style.check_box),
+        list_of_scripts = (
+                ("Spontaneous Scopes", 'spontaneousScopes', ['spontaneous_scope', 'uma_claims_gathering', 'uma_rpt_policy']),
+                ("Update Token", 'updateTokenScriptDns', ['update_token']),
+                ("Post Authn", 'postAuthnScripts', ['post_authn']),
+                ("Introspection", 'introspectionScripts', ['introspection', 'persistence_extension', 'person_authentication']),
+                ("Password Grant", 'ropcScripts', ['resource_owner_password_credentials', 'scim']),
+                ("OAuth Consent", 'consentGatheringScripts', ['application_session', 'authorization_challenge',  'cache_refresh', 'ciba_end_user_notification', 'client_registration', 'config_api_auth',  'consent_gathering', 'discovery', 'dynamic_scope', 'end_session', 'id_generator', 'idp'])
+                )
 
-            self.myparent.getTitledText(_("Update Token"),
-                                        name='updateTokenScriptDns',
-                                        value='\n'.join(self.data.get('attributes', {}).get(
-                                            'updateTokenScriptDns', [])),
-                                        height=3,
-                                        jans_help=self.myparent.get_help_from_schema(
-                self.myparent.cli_object.get_schema_from_reference(
-                    '', ATTRIBUTE_SCHEMA_PATH),
-                'updateTokenScriptDns'),
-                style=cli_style.check_box),
 
-            self.myparent.getTitledText(_("Post Authn"),
-                                        name='postAuthnScripts',
-                                        value='\n'.join(self.data.get(
-                                            'attributes', {}).get('postAuthnScripts', [])),
-                                        height=3,
-                                        jans_help=self.myparent.get_help_from_schema(
-                self.myparent.cli_object.get_schema_from_reference(
-                    '', ATTRIBUTE_SCHEMA_PATH),
-                'postAuthnScripts'),
-                style=cli_style.check_box),
+        for title, script_var, script_types in list_of_scripts:
+            scripts_data = []
+            for scr in common_data.enabled_scripts:
+                if scr['scriptType'] in script_types:
+                    scripts_data.append((scr['dn'], scr['name']))
 
-            self.myparent.getTitledText(_("Introspection"),
-                                        name='introspectionScripts',
-                                        value='\n'.join(self.data.get('attributes', {}).get(
-                                            'introspectionScripts', [])),
-                                        height=3,
-                                        jans_help=self.myparent.get_help_from_schema(
-                self.myparent.cli_object.get_schema_from_reference(
-                    '', ATTRIBUTE_SCHEMA_PATH),
-                'introspectionScripts'),
-                style=cli_style.check_box),
+            self.scripts_widget_dict[script_var] = JansLabelWidget(
+                        title = _(title), 
+                        values = self.data.get('attributes', {}).get(script_var, []),
+                        data = scripts_data
+                        )
 
-            self.myparent.getTitledText(_("Password Grant"),
-                                        name='ropcScripts',
-                                        value='\n'.join(self.data.get(
-                                            'attributes', {}).get('ropcScripts', [])),
-                                        height=3,
-                                        style=cli_style.check_box,
-                                        jans_help=self.myparent.get_help_from_schema(
-                self.myparent.cli_object.get_schema_from_reference(
-                    '', ATTRIBUTE_SCHEMA_PATH),
-                'ropcScripts'),
-            ),
 
-            self.myparent.getTitledText(_("OAuth Consent"),
-                                        name='consentGatheringScripts',
-                                        value='\n'.join(self.data.get('attributes', {}).get(
-                                            'consentGatheringScripts', [])),
-                                        height=3,
-                                        jans_help=self.myparent.get_help_from_schema(
-                self.myparent.cli_object.get_schema_from_reference(
-                    '', ATTRIBUTE_SCHEMA_PATH),
-                'consentGatheringScripts'),
-                style=cli_style.check_box),
-        ], width=D(), style=cli_style.tabs
-        )
+        self.tabs['Client Scripts'] = HSplit(list(self.scripts_widget_dict.values()), width=D(), style=cli_style.tabs)
 
         self.left_nav = list(self.tabs.keys())[0]
+
+    def add_custom_script(self):
+        pass
+
+
+    def delete_custom_script(self):
+        pass
+
 
     def scope_exists(self, scope_dn: str) -> bool:
         for item_id, item_label in self.client_scopes.entries:
@@ -1241,7 +1207,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 ),
             ])
 
-            get_app().invalidate()
+            APP.invalidate()
             self.myparent.layout.focus(self.uma_resources)
 
         else:
