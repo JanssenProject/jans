@@ -23,6 +23,7 @@ from edit_script_dialog import EditScriptDialog
 from prompt_toolkit.application import Application
 from utils.multi_lang import _
 from utils.static import DialogResult, cli_style, common_strings
+from utils.background_tasks import retrieve_enabled_scripts
 from utils.utils import common_data
 
 class Plugin():
@@ -237,6 +238,7 @@ class Plugin():
             else:
                 dialog.future.set_result(DialogResult.OK)
                 self.get_scripts()
+                await retrieve_enabled_scripts()
 
         asyncio.ensure_future(coroutine())
 
