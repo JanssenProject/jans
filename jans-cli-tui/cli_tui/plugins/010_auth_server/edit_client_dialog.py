@@ -947,13 +947,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.left_nav = list(self.tabs.keys())[0]
 
-    def add_custom_script(self):
-        pass
-
-
-    def delete_custom_script(self):
-        pass
-
 
     def scope_exists(self, scope_dn: str) -> bool:
         for item_id, item_label in self.client_scopes.entries:

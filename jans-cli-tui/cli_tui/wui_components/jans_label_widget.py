@@ -61,7 +61,6 @@ class JansLabelWidget:
             return
 
         def on_text_changed(event):
-            search_text = event.text
             matching_items = []
             search_text = event.text
             for item in value_list:
@@ -95,7 +94,7 @@ class JansLabelWidget:
                           width=len(_("Filter "))),
                     ta
                 ]),
-            Window(height=2, char=' '),
+            Window(height=1, char=' '),
             self.add_frame
 
         ])
