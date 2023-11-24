@@ -25,6 +25,7 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
 
 from utils.static import DialogResult, cli_style, common_strings
+from utils.background_tasks import retrieve_enabled_scripts
 from utils.utils import DialogUtils
 from utils.utils import common_data
 from utils.multi_lang import _
@@ -85,6 +86,8 @@ class Plugin(DialogUtils):
             self.app.create_background_task(self.retrieve_sopes())
 
         self.ssa.init_cli_object()
+        self.app.create_background_task(retrieve_enabled_scripts())
+
 
     async def get_appconfiguration(self) -> None:
         'Coroutine for getting application configuration.'
