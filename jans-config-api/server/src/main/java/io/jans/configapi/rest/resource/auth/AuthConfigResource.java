@@ -10,11 +10,14 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.config.Conf;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.orm.model.PagedResult;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.model.PersistenceConfiguration;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +30,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+import java.util.EnumSet;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
@@ -48,7 +54,11 @@ public class AuthConfigResource extends ConfigBaseResource {
 
     @Inject
     ConfigurationService configurationService;
-
+    
+    private enum NotAllowedValue {
+        UNKNOWN
+    }
+ 
     @Operation(summary = "Gets all Jans authorization server configuration properties.", description = "Gets all Jans authorization server configuration properties.", operationId = "get-properties", tags = {
             "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }))
@@ -119,6 +129,28 @@ public class AuthConfigResource extends ConfigBaseResource {
         log.debug("AuthConfigResource::getPersistenceDetails() - persistenceConfiguration:{}", persistenceConfiguration);
         return Response.ok(persistenceConfiguration).build();
     }
+    
+    
+    @Operation(summary = "Returns feature flags type configured for Jans authorization server.", description = "Returns feature flags type configured for Jans authorization server.", operationId = "get-feature-flag-type", tags = {
+            "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FeatureFlagType.class , not= NotAllowedValue.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.FEATURE_FLAGS)
+    public Response getFeatureFlagType() {
+        EnumSet<FeatureFlagType> set = EnumSet.allOf(FeatureFlagType.class);
+        set.remove(FeatureFlagType.UNKNOWN);
+        log.error("set:{}", set);
+        
+        return Response.ok(set).build();
+    }
+
 
     private void validateAgamaConfiguration(EngineConfig engineConfig) {
         log.debug("engineConfig:{}", engineConfig);
@@ -132,4 +164,13 @@ public class AuthConfigResource extends ConfigBaseResource {
                     + engineConfig.getMaxItemsLoggedInCollections());
         }
     }
+    
+ /*   private static void getFeatureFlags() {
+        EnumSet<FeatureFlagType> featureFlagEnumSet = EnumSet.allOf(FeatureFlagType.class);
+        featureFlagEnumSet.remove(FeatureFlagType.UNKNOWN);
+        System.out.println("featureFlagEnumSet = " + featureFlagEnumSet);
+        
+        featureFlagEnumArray = Stream.of(FeatureFlagType.values()).map(f -> f.toString()).toArray(String[]::new);
+
+    }*/
 }
