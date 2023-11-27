@@ -5,6 +5,7 @@
     {
       "kind": "AUXILIARY",
       "may": [
+        "githubUsername",
         "telephoneNumber",
         "mobile",
         "carLicense",
