@@ -220,7 +220,7 @@ class SQLBackend:
 
         table_mapping = self.client.get_table_mapping()
 
-        def column_to_json(table_name, col_name):
+        def column_to_multivalued(table_name, col_name):
             old_data_type = table_mapping[table_name][col_name]
             data_type = self.get_data_type(col_name, table_name)
 
@@ -245,10 +245,13 @@ class SQLBackend:
             # pre-populate the modified column
             for doc_id, value in values.items():
                 if not value:
-                    value_list = []
+                    new_value = []
                 else:
-                    value_list = [value]
-                self.client.update(table_name, doc_id, {col_name: {"v": value_list}})
+                    new_value = [value]
+
+                if self.client.dialect == "mysql":
+                    new_value = {"v": new_value}
+                self.client.update(table_name, doc_id, {col_name: new_value})
 
         def add_column(table_name, col_name):
             if col_name in table_mapping[table_name]:
@@ -274,7 +277,7 @@ class SQLBackend:
             with self.client.engine.connect() as conn:
                 conn.execute(query)
 
-        def column_from_json(table_name, col_name):
+        def column_from_multivalued(table_name, col_name):
             old_data_type = table_mapping[table_name][col_name]
             data_type = self.get_data_type(col_name, table_name)
 
@@ -346,6 +349,8 @@ class SQLBackend:
                         data_type == old_data_type,
                         # same type (different alias)
                         data_type == "INT" and old_data_type == "INTEGER",
+                        # same type (different alias) in Postgres
+                        data_type == "TIMESTAMP" and old_data_type == "TIMESTAMP WITHOUT TIME ZONE",
                         # builtin columns
                         column in ("doc_id", "objectClass", "dn"),
                     ]):
@@ -359,11 +364,11 @@ class SQLBackend:
                     elif data_type == multivalued_type and old_data_type != multivalued_type:
                         # change type to multivalued (JSON type)
                         logger.info(f"Converting {table_name}.{column} column type from {old_data_type} to multivalued {data_type}")
-                        column_to_json(table_name, column)
+                        column_to_multivalued(table_name, column)
                     elif data_type != multivalued_type and old_data_type == multivalued_type:
                         # change type from multivalued (JSON type)
                         logger.info(f"Converting {table_name}.{column} column type from multivalued {old_data_type} to {data_type}")
-                        column_from_json(table_name, column)
+                        column_from_multivalued(table_name, column)
 
     def import_custom_ldif(self, ctx):
         custom_dir = Path("/app/custom_ldif")
