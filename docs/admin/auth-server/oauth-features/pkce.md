@@ -87,7 +87,7 @@ Janssen Server supports two methods of `code_challenge_method`:
 The following command generates the `code_challenge` using `s256`.
 
 !!! Note
-To execute command the command below, you need to have `openssl`, `basenc`
+    To execute command the command below, you need to have `openssl`, `basenc`
 and `tr` installed.
 
 ```bash
@@ -131,7 +131,7 @@ Content-Type: application/json
 ```
 
 !!! Note
-Notee that the `token_endpoint_auth_method` field is `none`.
+    Notee that the `token_endpoint_auth_method` field is `none`.
 
 ```text title="Response"
 HTTP/1.1 201 Created
@@ -210,7 +210,7 @@ code_challenge_method=<YOUR_CODE_CHALLENGE_METHOD>
 ```
 
 !!! Note
-Remember that this **endpoint** is where you must send the `code_challenge` and `code_challenge_method`
+    Remember that this **endpoint** is where you must send the `code_challenge` and `code_challenge_method`
 parameters.
 
 The field we need to obtain is the `code`.
