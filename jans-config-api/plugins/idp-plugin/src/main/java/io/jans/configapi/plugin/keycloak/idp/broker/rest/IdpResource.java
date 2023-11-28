@@ -74,7 +74,7 @@ public class IdpResource extends BaseResource {
             "Jans - SAML Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_SAML_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdentityProviderPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/get-all-saml-identity-provider.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdentityProviderPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/trust-idp/get-all-saml-identity-provider.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -104,7 +104,7 @@ public class IdpResource extends BaseResource {
             "Jans - SAML Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_SAML_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdentityProvider.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/get-saml-identity-provider-by-inum.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdentityProvider.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/trust-idp/get-saml-identity-provider-by-inum.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -165,9 +165,9 @@ public class IdpResource extends BaseResource {
     @Operation(summary = "Create SAML Identity Provider", description = "Create SAML Identity Provider", operationId = "post-saml-identity-provider", tags = {
             "Jans - SAML Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_SAML_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = BrokerIdentityProviderForm.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/post-saml-identity-provider.json")))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = BrokerIdentityProviderForm.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/trust-idp/post-saml-identity-provider.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Newly created Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProvider.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/get-saml-identity-provider-by-inum.json"))),
+            @ApiResponse(responseCode = "201", description = "Newly created Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProvider.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/trust-idp/get-saml-identity-provider-by-inum.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -210,9 +210,9 @@ public class IdpResource extends BaseResource {
     @Operation(summary = "Update SAML Identity Provider", description = "Update SAML Identity Provider", operationId = "put-saml-identity-provider", tags = {
             "Jans - SAML Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_SAML_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = BrokerIdentityProviderForm.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/put-saml-identity-provider.json")))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = BrokerIdentityProviderForm.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/trust-idp/put-saml-identity-provider.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Updated Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProvider.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/get-saml-identity-provider-by-inum.json"))),
+            @ApiResponse(responseCode = "200", description = "Updated Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = IdentityProvider.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/trust-idp/get-saml-identity-provider-by-inum.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),

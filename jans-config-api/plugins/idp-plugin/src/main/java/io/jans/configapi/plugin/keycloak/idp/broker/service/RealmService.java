@@ -6,11 +6,16 @@
 
 package io.jans.configapi.plugin.keycloak.idp.broker.service;
 
+import io.jans.as.common.service.OrganizationService;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.plugin.keycloak.idp.broker.model.Realm;
 import io.jans.configapi.plugin.keycloak.idp.broker.mapper.RealmMapper;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.IdpConfigService;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.search.filter.Filter;
+import io.jans.util.StringHelper;
+import io.jans.util.StringHelper;
 import io.jans.util.exception.InvalidAttributeException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -27,7 +32,7 @@ public class RealmService {
     Logger logger;
 
     @Inject
-    PersistenceEntryManager persistenceManager;
+    PersistenceEntryManager persistenceEntryManager;
 
     @Inject
     ConfigurationFactory configurationFactory;
@@ -38,6 +43,12 @@ public class RealmService {
     @Inject
     KeycloakService keycloakService;
 
+    @Inject
+    OrganizationService organizationService;
+
+    @Inject
+    RealmMapper realmMapper;
+
     public String getRealmDn() {
         return idpConfigService.getRealmDn();
     }
@@ -47,7 +58,7 @@ public class RealmService {
             try {
                 return persistenceEntryManager.find(Realm.class, dn);
             } catch (Exception e) {
-                log.error(e.getMessage());
+                logger.error(e.getMessage());
             }
 
         }
@@ -58,7 +69,7 @@ public class RealmService {
         return getAllRealms(0);
     }
 
-    public List<Realm> getAllRealmDetails(int sizeLimit) {
+    public List<Realm> getAllRealms(int sizeLimit) {
         return persistenceEntryManager.findEntries(getDnForRealm(null), Realm.class, null, sizeLimit);
     }
 
@@ -67,12 +78,12 @@ public class RealmService {
         try {
             result = persistenceEntryManager.find(Realm.class, getDnForRealm(inum));
         } catch (Exception ex) {
-            log.error("Failed to load Realm entry", ex);
+            logger.error("Failed to load Realm entry", ex);
         }
         return result;
     }
 
-    public Realm getRealmByName(String name) {
+    public List<Realm> getRealmByName(String name) {
         logger.info("Get RealmResource for name:{})", name);
         if (StringUtils.isBlank(name)) {
 
@@ -81,13 +92,13 @@ public class RealmService {
         }
 
         Filter nameFilter = Filter.createEqualityFilter("NAME", name);
-        log.error("Search Realm with displayNameFilter:{}", nameFilter);
+        logger.error("Search Realm with displayNameFilter:{}", nameFilter);
         return persistenceEntryManager.findEntries(getDnForRealm(null), Realm.class, nameFilter);
     }
 
     public List<Realm> searchRealm(String pattern, int sizeLimit) {
 
-        log.error("Search Realm with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
+        logger.error("Search Realm with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
 
         String[] targetArray = new String[] { pattern };
         Filter nameFilter = Filter.createSubstringFilter("NAME", null, targetArray, null);
@@ -98,7 +109,7 @@ public class RealmService {
         Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(nameFilter, displayNameFilter, descriptionFilter, inumFilter);
 
-        log.error("Search Realm with searchFilter:{}", searchFilter);
+        logger.error("Search Realm with searchFilter:{}", searchFilter);
         return persistenceEntryManager.findEntries(getDnForRealm(null), Realm.class, searchFilter, sizeLimit);
     }
 
@@ -125,7 +136,7 @@ public class RealmService {
         return realm;
     }
 
-    public RealmRepresentation updateRealm(Realm realm) {
+    public Realm updateRealm(Realm realm) {
         logger.error("Update a realm - realm:{})", realm);
         if (realm == null) {
             new InvalidAttributeException("Realm object is null");
@@ -145,19 +156,18 @@ public class RealmService {
         return realm;
     }
 
-    public void deleteRealm(String realmName) {
-        logger.info("Delete realm:{})", realmName);
+    public void deleteRealm(Realm realm) {
+        logger.info("Delete realm:{})", realm);
 
-        if (StringUtils.isBlank(realmName)) {
-            new InvalidAttributeException("Realm name is null!!!");
+        if (realm == null) {
+            throw new InvalidAttributeException("Realm object is null!!!");
         }
 
         // Delete from KC
-        keycloakService.deleteRealm(realmName);
+        keycloakService.deleteRealm(realm.getName());
 
         // Delete from Jans DB
-        persistenceEntryManager.removeRecursively(realmName.getDn(), Realm.class);
-        return;
+        persistenceEntryManager.removeRecursively(realm.getDn(), Realm.class);
     }
 
     public boolean containsRealm(String dn) {
@@ -184,27 +194,27 @@ public class RealmService {
     }
 
     private Realm convertToRealm(RealmRepresentation realmRepresentation) {
-        log.error("realmRepresentation:{}", realmRepresentation);
+        logger.error("realmRepresentation:{}", realmRepresentation);
         Realm realm = null;
         if (realmRepresentation == null) {
             return realm;
         }
-        realm = RealmMapper.kcRealmRepresentationToRealm(realmRepresentation);
-        log.error("converted - realm:{}", realm);
+        realm = realmMapper.kcRealmRepresentationToRealm(realmRepresentation);
+        logger.error("converted - realm:{}", realm);
 
         return realm;
     }
 
     private RealmRepresentation convertToRealmRepresentation(Realm realm) {
-        log.error("realm:{}", realm);
+        logger.error("realm:{}", realm);
         RealmRepresentation realmRepresentation = null;
         if (realm == null) {
             return realmRepresentation;
         }
-        realmRepresentation = RealmMapper.realmToKCRealmRepresentation(realm);
-        log.error("converted realmRepresentation:{}", realmRepresentation);
+        realmRepresentation = realmMapper.realmToKCRealmRepresentation(realm);
+        logger.error("converted realmRepresentation:{}", realmRepresentation);
 
-        log.error(
+        logger.error(
                 "convert Realm data realmRepresentation.getId():{}, realmRepresentation.getRealm():{}, realmRepresentation.getDisplayName():{},realmRepresentation.isEnabled():{}",
                 realmRepresentation.getId(), realmRepresentation.getRealm(), realmRepresentation.getDisplayName(),
                 realmRepresentation.isEnabled());

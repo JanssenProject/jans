@@ -4,6 +4,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.plugin.keycloak.idp.broker.util.Constants;
 import io.jans.configapi.plugin.keycloak.idp.broker.service.RealmService;
 
@@ -64,7 +65,7 @@ public class IdpRealmResource extends BaseResource {
             "Jans - SAML Identity Broker Realm" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_REALM_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Realm.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Realm.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -73,9 +74,30 @@ public class IdpRealmResource extends BaseResource {
     public Response getRealmByName(@Parameter(description = "name") @PathParam(Constants.NAME) @NotNull String name) {
         logger.info("Searching Realm by name: {}", escapeLog(name));
 
-        Realm realm = realmService.getRealmByName(name);
+        List<Realm> realmList = realmService.getRealmByName(name);
 
-        logger.info("Realm found by name:{}, Realm:{}", name, realm);
+        logger.info("Realm found by name:{}, realmList:{}", name, realmList);
+
+        return Response.ok(realmList).build();
+    }
+
+    @Operation(summary = "Get realm by inum", description = "Get realm by inum", operationId = "get-realm-by-inum", tags = {
+            "Jans - SAML Identity Broker Realm" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.JANS_IDP_REALM_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Realm.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { Constants.JANS_IDP_REALM_READ_ACCESS })
+    @Path(Constants.INUM_PATH_PARAM)
+    public Response getRealmByInum(
+            @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+        logger.info("Searching Realm by inum: {}", escapeLog(inum));
+
+        Realm realm = realmService.getRealmByInum(inum);
+
+        logger.info("Realm found by name:{}, realm:{}", inum, realm);
 
         return Response.ok(realm).build();
     }
@@ -83,7 +105,7 @@ public class IdpRealmResource extends BaseResource {
     @Operation(summary = "Create realm", description = "Create realm", operationId = "post-realm", tags = {
             "Jans - SAML Identity Broker Realm" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_REALM_WRITE_ACCESS }))
-    @RequestBody(description = "Realm details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Realm.class), examples = @ExampleObject(name = "Request example", value = "example/idp/post-realm.json")))
+    @RequestBody(description = "Realm details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Realm.class), examples = @ExampleObject(name = "Request example", value = "example/idp/realm/post-realm.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Newly created realm", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Realm.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -102,7 +124,7 @@ public class IdpRealmResource extends BaseResource {
     @Operation(summary = "Update realm", description = "Update realm", operationId = "put-realm", tags = {
             "Jans - SAML Identity Broker Realm" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_REALM_WRITE_ACCESS }))
-    @RequestBody(description = "Realm details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Realm.class), examples = @ExampleObject(name = "Request example", value = "example/idp/put-realm.json")))
+    @RequestBody(description = "Realm details", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Realm.class), examples = @ExampleObject(name = "Request example", value = "example/idp/realm/put-realm.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated Jans realm object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Realm.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -113,7 +135,7 @@ public class IdpRealmResource extends BaseResource {
     public Response updateRealm(@NotNull Realm realm) throws IOException {
         logger.info(" Update realm:{} ", realm);
         checkResourceNotNull(realm, JANS_REALM_DETAILS);
-        Realm = this.realmService.updateRealm(realm);
+        realm = this.realmService.updateRealm(realm);
         logger.info("Updated realm:{}", realm);
         return Response.status(Response.Status.OK).entity(realm).build();
     }
@@ -128,15 +150,14 @@ public class IdpRealmResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.JANS_IDP_REALM_WRITE_ACCESS })
     @DELETE
     public Response deleteRealm(
-            @Parameter(description = "Unique name of KC realm") @PathParam(Constants.NAME) @NotNull String name) {
+            @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
 
-        logger.info("Delete realm by name:{}", escapeLog(name));
+        logger.info("Delete realm by inum:{}", escapeLog(inum));
 
-        Realm realm = realmService.getRealmByName(name);
-        if (realm == null) {
-            checkResourceNotNull(Realm, "Relam does not exists by name - " + name);
-        }
-        realmService.deleteRealm(name);
+        Realm realm = realmService.getRealmByInum(inum);
+        checkResourceNotNull(realm, "Realm identified by" + inum + "'");
+
+        realmService.deleteRealm(realm);
 
         return Response.noContent().build();
     }
