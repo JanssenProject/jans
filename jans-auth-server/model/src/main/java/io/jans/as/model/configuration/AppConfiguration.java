@@ -306,6 +306,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This list details the languages and scripts supported for the user interface")
     private List<String> uiLocalesSupported;
 
+    @DocProperty(description = "This list of authorization details types supported (RFC9396).")
+    private List<String> authorizationDetailsTypesSupported;
+
     @DocProperty(description = "Specifies whether the OP supports use of the claims parameter")
     private Boolean claimsParameterSupported;
 
@@ -2165,6 +2168,14 @@ public class AppConfiguration implements Configuration {
 
     public void setIdTokenTokenBindingCnfValuesSupported(List<String> idTokenTokenBindingCnfValuesSupported) {
         this.idTokenTokenBindingCnfValuesSupported = idTokenTokenBindingCnfValuesSupported;
+    }
+
+    public List<String> getAuthorizationDetailsTypesSupported() {
+        return authorizationDetailsTypesSupported;
+    }
+
+    public void setAuthorizationDetailsTypesSupported(List<String> authorizationDetailsTypesSupported) {
+        this.authorizationDetailsTypesSupported = authorizationDetailsTypesSupported;
     }
 
     public List<String> getUiLocalesSupported() {
