@@ -12,12 +12,10 @@ import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.orm.model.PagedResult;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.model.PersistenceConfiguration;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,7 +28,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 import java.util.EnumSet;
 import jakarta.inject.Inject;
@@ -54,10 +51,21 @@ public class AuthConfigResource extends ConfigBaseResource {
 
     @Inject
     ConfigurationService configurationService;
-    
-    private enum NotAllowedValue {
-        UNKNOWN
+    static final String[] featureArray;
+    static final EnumSet<FeatureFlagType> featureFlagEnumSet;
+    static  
+    {
+        //EnumSet<FeatureFlagType> featureFlagEnumSet = EnumSet.allOf(FeatureFlagType.class);
+        featureFlagEnumSet = EnumSet.allOf(FeatureFlagType.class);
+        featureFlagEnumSet.remove(FeatureFlagType.UNKNOWN);
+        System.out.println("featureFlagEnumSet = " + featureFlagEnumSet);
+        
+        //String[] featureArray = Stream.of(featureFlagEnumSet).map(f -> f.toString()).toArray(String[]::new);
+        featureArray = Stream.of(featureFlagEnumSet).map(f -> f.toString()).toArray(String[]::new);
+        System.out.println("\n\n featureArray = "+featureArray+"\n\n\n");
     }
+    
+
  
     @Operation(summary = "Gets all Jans authorization server configuration properties.", description = "Gets all Jans authorization server configuration properties.", operationId = "get-properties", tags = {
             "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -135,7 +143,7 @@ public class AuthConfigResource extends ConfigBaseResource {
             "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FeatureFlagType.class , not= NotAllowedValue.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FeatureFlagType.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -146,9 +154,9 @@ public class AuthConfigResource extends ConfigBaseResource {
     public Response getFeatureFlagType() {
         EnumSet<FeatureFlagType> set = EnumSet.allOf(FeatureFlagType.class);
         set.remove(FeatureFlagType.UNKNOWN);
-        log.error("set:{}", set);
+        log.error("set:{}, featureFlagEnumSet:{}", set, featureFlagEnumSet);
         
-        return Response.ok(set).build();
+        return Response.ok(featureFlagEnumSet).build();
     }
 
 
@@ -165,12 +173,12 @@ public class AuthConfigResource extends ConfigBaseResource {
         }
     }
     
- /*   private static void getFeatureFlags() {
+   private static void getFeatureFlags() {
         EnumSet<FeatureFlagType> featureFlagEnumSet = EnumSet.allOf(FeatureFlagType.class);
         featureFlagEnumSet.remove(FeatureFlagType.UNKNOWN);
         System.out.println("featureFlagEnumSet = " + featureFlagEnumSet);
         
-        featureFlagEnumArray = Stream.of(FeatureFlagType.values()).map(f -> f.toString()).toArray(String[]::new);
+        String[] array = Stream.of(featureFlagEnumSet).map(f -> f.toString()).toArray(String[]::new);
 
-    }*/
+    }
 }
