@@ -64,13 +64,10 @@ public class CustomScriptService extends AbstractCustomScriptService {
         }
 
         Filter filter = searchFilter;
-        log.debug("filter:{}", filter);
         if (type != null) {
             Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
             filter = Filter.createANDFilter(searchFilter, typeFilter);
         }
-
-        log.debug("Searching CustomScript Flow with filter:{}", filter);
 
         return persistenceEntryManager.findPagedEntries(baseDn(), CustomScript.class, filter, null, sortBy,
                 SortOrder.getByValue(sortOrder), startIndex, limit, maximumRecCount);
