@@ -43,8 +43,13 @@ jobs:
             python_version: 3.6
 
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      with:
+        egress-policy: audit
+
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       with:
         path: temp-jans
 
@@ -63,7 +68,7 @@ jobs:
     - name: Import GPG key
       id: import_gpg
       continue-on-error: true
-      uses: crazy-max/ghaction-import-gpg@v5
+      uses: crazy-max/ghaction-import-gpg@d6f3f49f3345e29369fe57596a3ca8f94c4d2ca7 # v5.4.0
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -112,7 +117,7 @@ jobs:
         sudo ./checksum.sh      
     - name: Upload binaries to release
       id: upload_binaries
-      uses: svenstaro/upload-release-action@v2
+      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
@@ -121,7 +126,7 @@ jobs:
         overwrite: true
     - name: Upload checksum to release
       id: upload_shas
-      uses: svenstaro/upload-release-action@v2
+      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sha256sum
@@ -130,7 +135,7 @@ jobs:
         overwrite: true
     - name: Upload sig to release
       id: upload_sigs
-      uses: svenstaro/upload-release-action@v2
+      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.asc
@@ -140,9 +145,14 @@ jobs:
   build_python_packages:
     runs-on: ubuntu-20.04
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      with:
+        egress-policy: audit
+
     - name: Checkout
-      uses: actions/checkout@v3
-    - uses: addnab/docker-run-action@v3
+      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+    - uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
       name: Build with Suse
       continue-on-error: true
       with:
@@ -169,7 +179,7 @@ jobs:
           mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
           sha256sum jans-cli-tui-linux-suse-X86-64.pyz > jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
     - name: Set up Python 3.6
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
       with:
         python-version: 3.6
     - name: Build with Ubuntu
@@ -189,7 +199,7 @@ jobs:
         make zipapp 
         mv jans-cli-tui.pyz jans-cli-tui-linux-ubuntu-X86-64.pyz
         sha256sum jans-cli-tui-linux-ubuntu-X86-64.pyz > jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
-    - uses: actions/cache@v3
+    - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
       id: cache-installers
       with:
         path: |
@@ -209,9 +219,14 @@ jobs:
       matrix:
         name: [ubuntu, suse]
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      with:
+        egress-policy: audit
+
     - name: Checkout
-      uses: actions/checkout@v3
-    - uses: actions/cache@v3
+      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+    - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
       id: cache-installers
       with:
         path: |
@@ -240,7 +255,7 @@ jobs:
     - name: Upload binaries to release
       id: upload_binaries_setup
       continue-on-error: true
-      uses: svenstaro/upload-release-action@v2
+      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz
@@ -250,7 +265,7 @@ jobs:
     - name: Upload checksum to release
       id: upload_shas_setup
       continue-on-error: true
-      uses: svenstaro/upload-release-action@v2
+      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
@@ -260,7 +275,7 @@ jobs:
     - name: Upload binaries to release
       id: upload_binaries_cli
       continue-on-error: true
-      uses: svenstaro/upload-release-action@v2
+      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz
@@ -270,7 +285,7 @@ jobs:
     - name: Upload checksum to release
       id: upload_shas_cli
       continue-on-error: true
-      uses: svenstaro/upload-release-action@v2
+      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz.sha256sum
@@ -280,8 +295,13 @@ jobs:
   build_demo_packages:
     runs-on: ubuntu-latest
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      with:
+        egress-policy: audit
+
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
     - name: Build with Ubuntu
       continue-on-error: true
       run: |
