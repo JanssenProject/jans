@@ -5,6 +5,7 @@ JANS_PERSISTENCE=$2
 JANS_CI_CD_RUN=$3
 EXT_IP=$4
 INSTALL_ISTIO=$5
+HELM_DEVELOPMENT_REPO=$6
 if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
 fi
@@ -19,6 +20,9 @@ fi
 if [[ $JANS_PERSISTENCE != "LDAP" ]] && [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[ $JANS_PERSISTENCE != "PGSQL" ]]; then
   echo "[E] Incorrect entry. Please enter either LDAP, MYSQL or PGSQL"
   exit 1
+fi
+if [[ ! "$HELM_DEVELOPMENT_REPO" ]]; then
+  HELM_DEVELOPMENT_REPO=""
 fi
 
 LOG_TARGET="FILE"
@@ -229,9 +233,8 @@ auth-server:
 EOF
 sudo helm repo add janssen https://docs.jans.io/charts
 sudo helm repo update
-sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG"
-echo "Waiting for auth-server to come up. This may take 5-10 mins....Please do not cancel out...This will wait for the auth-server to be ready.."
-sleep 300
+sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG" "$HELM_DEVELOPMENT_REPO" --wait
+
 cat << EOF > testendpoints.sh
 sudo microk8s config > config
 KUBECONFIG="$PWD"/config
