@@ -20,7 +20,7 @@
       <maven.min-version>3.3.9</maven.min-version>
       <maven.compiler.source>11</maven.compiler.source>
       <maven.compiler.target>11</maven.compiler.target>
-      <keycloak-server-spi.version>21.1.1</keycloak-server-spi.version>
+      <keycloak-server-spi.version>23.0.0</keycloak-server-spi.version>
       <nimbus.oauth-sdk.version>10.11</nimbus.oauth-sdk.version>
       <nimbus.oauth2-oidc-sdk.version>10.11</nimbus.oauth2-oidc-sdk.version>
       <jackson.coreutils.version>1.8</jackson.coreutils.version>
