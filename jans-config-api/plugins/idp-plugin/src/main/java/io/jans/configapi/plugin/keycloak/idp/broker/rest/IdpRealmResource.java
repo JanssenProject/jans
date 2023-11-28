@@ -72,11 +72,13 @@ public class IdpRealmResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.JANS_IDP_REALM_READ_ACCESS })
     @Path(Constants.NAME_PATH + Constants.NAME_PATH_PARAM)
     public Response getRealmByName(@Parameter(description = "name") @PathParam(Constants.NAME) @NotNull String name) {
-        logger.info("Searching Realm by name: {}", escapeLog(name));
+        if (logger.isInfoEnabled()) {
+            logger.info("Searching Realm by name: {}", escapeLog(name));
+        }
 
         List<Realm> realmList = realmService.getRealmByName(name);
 
-        logger.info("Realm found by name:{}, realmList:{}", name, realmList);
+        logger.info("Realms found - realmList:{}", realmList);
 
         return Response.ok(realmList).build();
     }
@@ -93,11 +95,13 @@ public class IdpRealmResource extends BaseResource {
     @Path(Constants.INUM_PATH_PARAM)
     public Response getRealmByInum(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
-        logger.info("Searching Realm by inum: {}", escapeLog(inum));
+        if (logger.isInfoEnabled()) {
+            logger.info("Searching Realm by inum: {}", escapeLog(inum));
+        }
 
         Realm realm = realmService.getRealmByInum(inum);
 
-        logger.info("Realm found by name:{}, realm:{}", inum, realm);
+        logger.info("Realm found by inum is realm:{}", realm);
 
         return Response.ok(realm).build();
     }
@@ -114,7 +118,9 @@ public class IdpRealmResource extends BaseResource {
             Constants.JANS_IDP_REALM_WRITE_ACCESS })
     @POST
     public Response createNewKCRealm(@NotNull Realm realm) throws IOException {
-        logger.info(" Create new realm:{} ", realm);
+        if (logger.isInfoEnabled()) {
+            logger.info(" Create new realm:{} ", realm);
+        }
         checkResourceNotNull(realm, JANS_REALM_DETAILS);
         realm = this.realmService.createNewRealm(realm);
         logger.info("Created new - realm:{}", realm);
@@ -133,7 +139,10 @@ public class IdpRealmResource extends BaseResource {
             Constants.JANS_IDP_REALM_WRITE_ACCESS })
     @PUT
     public Response updateRealm(@NotNull Realm realm) throws IOException {
-        logger.info(" Update realm:{} ", realm);
+        if (logger.isInfoEnabled()) {
+            logger.info(" Update realm:{} ", realm);
+        }
+
         checkResourceNotNull(realm, JANS_REALM_DETAILS);
         realm = this.realmService.updateRealm(realm);
         logger.info("Updated realm:{}", realm);
@@ -151,8 +160,9 @@ public class IdpRealmResource extends BaseResource {
     @DELETE
     public Response deleteRealm(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
-
-        logger.info("Delete realm by inum:{}", escapeLog(inum));
+        if (logger.isInfoEnabled()) {
+            logger.info("Delete realm by inum:{}", escapeLog(inum));
+        }
 
         Realm realm = realmService.getRealmByInum(inum);
         checkResourceNotNull(realm, "Realm identified by" + inum + "'");

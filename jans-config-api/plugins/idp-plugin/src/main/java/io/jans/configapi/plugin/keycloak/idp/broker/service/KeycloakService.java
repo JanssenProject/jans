@@ -234,7 +234,6 @@ public class KeycloakService {
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
             throw new ConfigurationException("Error while validating SAML IDP Metadata", ex);
         }
 
@@ -309,7 +308,6 @@ public class KeycloakService {
 
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
             throw new ConfigurationException("Error while creating SAML IDP ", ex);
         }
 

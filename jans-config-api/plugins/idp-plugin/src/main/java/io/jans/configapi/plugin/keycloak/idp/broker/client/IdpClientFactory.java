@@ -59,7 +59,6 @@ public class IdpClientFactory {
                 return response;
             }
         } catch(Exception ex){
-            ex.printStackTrace();
             log.error("IdpClientFactory Exception  requestAccessToken is :{}", ex);
         }finally {
         
