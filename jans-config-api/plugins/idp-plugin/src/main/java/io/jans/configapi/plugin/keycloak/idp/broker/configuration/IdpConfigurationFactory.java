@@ -136,7 +136,7 @@ public class IdpConfigurationFactory {
             log.error("Failed to load IDP configuration from persistence. Please fix it!!!.");
             throw new ConfigurationException("Failed to load IDP configuration from persistence.");
         } else {
-            log.error("IDP Configuration loaded successfully - idpLoadedRevision:{}, idpAppConfiguration:{}",
+            log.debug("IDP Configuration loaded successfully - idpLoadedRevision:{}, idpAppConfiguration:{}",
                     this.idpLoadedRevision, getIdpAppConfiguration());
         }
 

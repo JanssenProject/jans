@@ -62,7 +62,8 @@ public class IdpResource extends BaseResource {
     private static final String SAML_IDP_DATA_FORM = "SAML IDP Data From";
     private static final String SAML_IDP_CHECK_STR = "IdentityProvider identified by '";
 
-    private class IdentityProviderPagedResult extends PagedResult<IdentityProvider> {};
+    private class IdentityProviderPagedResult extends PagedResult<IdentityProvider> {
+    };
 
     @Inject
     Logger log;
@@ -112,9 +113,11 @@ public class IdpResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS })
     public Response getSamlIdentityProviderByInum(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.error("Fetch SAML IDP by inum:{}", inum);
+        if (log.isInfoEnabled()) {
+            log.info("Fetch SAML IDP by inum:{}", escapeLog(inum));
+        }
         IdentityProvider idp = idpService.getIdentityProviderByInum(inum);
-        log.error("SAML IDP fetched  idp:{}", idp);
+        log.debug("SAML IDP fetched  idp:{}", idp);
         return Response.ok(idp).build();
     }
 
@@ -130,12 +133,14 @@ public class IdpResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS })
     public Response getSamlSPMetadataJson(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.error("Fetch SAML SP Metadata for IDP by inum:{}", inum);
+        if (log.isInfoEnabled()) {
+            log.info("Fetch SAML SP Metadata for IDP by inum:{}", escapeLog(inum));
+        }
         IdentityProvider identityProvider = idpService.getIdentityProviderByInum(inum);
-        log.error(" identityProvider:{} ", identityProvider);
+        log.debug(" identityProvider:{} ", identityProvider);
         checkResourceNotNull(identityProvider, SAML_IDP_CHECK_STR + inum + "'");
         Response response = idpService.getSpMetadata(identityProvider);
-        log.error(" response:{} ", response);
+        log.info(" response:{} ", response);
 
         return Response.ok(response.getEntity()).build();
     }
@@ -153,12 +158,14 @@ public class IdpResource extends BaseResource {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response getSamlSPMetadataFile(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.error("Fetch SAML SP Metadata URL IDP by inum:{}", inum);
+        if (log.isInfoEnabled()) {
+            log.info("Fetch SAML SP Metadata URL IDP by inum:{}", escapeLog(inum));
+        }
         IdentityProvider identityProvider = idpService.getIdentityProviderByInum(inum);
-        log.error(" identityProvider:{} ", identityProvider);
+        log.debug(" identityProvider:{} ", identityProvider);
         checkResourceNotNull(identityProvider, SAML_IDP_CHECK_STR + inum + "'");
         String spMetadataUrl = idpService.getSpMetadataUrl(identityProvider.getRealm(), identityProvider.getName());
-        log.error(" spMetadataUrl:{} ", spMetadataUrl);
+        log.info(" spMetadataUrl:{} ", spMetadataUrl);
         return Response.ok(spMetadataUrl).build();
     }
 
@@ -177,25 +184,27 @@ public class IdpResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS })
     public Response createSamlIdentityProvider(@MultipartForm BrokerIdentityProviderForm brokerIdentityProviderForm)
             throws IOException {
-        log.error("Create brokerIdentityProviderForm:{}", brokerIdentityProviderForm);
+        if (log.isInfoEnabled()) {
+            log.info("Create brokerIdentityProviderForm:{}", brokerIdentityProviderForm);
+        }
 
         // validation
         checkResourceNotNull(brokerIdentityProviderForm, SAML_IDP_DATA_FORM);
         IdentityProvider idp = brokerIdentityProviderForm.getIdentityProvider();
-        log.error(" Create idp:{} ", idp);
+        log.debug(" Create idp:{} ", idp);
         checkResourceNotNull(idp, SAML_IDP_DATA);
         checkNotNull(idp.getName(), "NAME");
         checkNotNull(idp.getDisplayName(), AttributeNames.DISPLAY_NAME);
         checkNotNull(idp.getRealm(), Constants.REALM);
         // check if IDP with same name already exists
         List<IdentityProvider> existingIdentityProviders = idpService.getIdentityProviderByName(idp.getName());
-        log.error(" existingIdentityProviders:{} ", existingIdentityProviders);
+        log.debug(" existingIdentityProviders:{} ", existingIdentityProviders);
         if (existingIdentityProviders != null && !existingIdentityProviders.isEmpty()) {
             throwBadRequestException("SAML IDP with same name '" + idp.getName() + "' already exists!");
         }
 
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
-        log.error(" Create metaDataFile:{} ", metaDataFile);
+        log.debug(" Create metaDataFile:{} ", metaDataFile);
         if (metaDataFile != null) {
             log.error(" IDP metaDataFile.available():{}", metaDataFile.available());
         }
@@ -203,7 +212,7 @@ public class IdpResource extends BaseResource {
         // create SAML IDP
         idp = idpService.createSamlIdentityProvider(idp, metaDataFile);
 
-        log.error("Create IdentityProvider - idp:{}", idp);
+        log.info("Create IdentityProvider - idp:{}", idp);
         return Response.status(Response.Status.CREATED).entity(idp).build();
     }
 
@@ -223,22 +232,26 @@ public class IdpResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS })
     public Response updateSamlIdentityProvider(@MultipartForm BrokerIdentityProviderForm brokerIdentityProviderForm)
             throws IOException {
-        log.error("Update brokerIdentityProviderForm:{}", brokerIdentityProviderForm);
+        if (log.isInfoEnabled()) {
+            log.info("Update brokerIdentityProviderForm:{}", brokerIdentityProviderForm);
+        }
 
         // validation
         checkResourceNotNull(brokerIdentityProviderForm, SAML_IDP_DATA_FORM);
         IdentityProvider idp = brokerIdentityProviderForm.getIdentityProvider();
-        log.error(" Update idp:{} ", idp);
+        log.debug(" Update idp:{} ", idp);
+
         checkResourceNotNull(idp, SAML_IDP_DATA);
         checkNotNull(idp.getName(), AttributeNames.NAME);
         checkNotNull(idp.getDisplayName(), AttributeNames.DISPLAY_NAME);
         checkNotNull(idp.getInum(), AttributeNames.INUM);
         checkNotNull(idp.getRealm(), Constants.REALM);
         IdentityProvider existingIdentityProvider = idpService.getIdentityProviderByInum(idp.getInum());
-        log.error(" existingIdentityProvider:{} ", existingIdentityProvider);
+
+        log.debug(" existingIdentityProvider:{} ", existingIdentityProvider);
         checkResourceNotNull(existingIdentityProvider, SAML_IDP_CHECK_STR + idp.getInum() + "'");
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
-        log.error(" Update metaDataFile:{} ", metaDataFile);
+        log.debug(" Update metaDataFile:{} ", metaDataFile);
         if (metaDataFile != null) {
             log.error(" IDP metaDataFile.available():{}", metaDataFile.available());
         }
@@ -246,7 +259,7 @@ public class IdpResource extends BaseResource {
         // create SAML IDP
         idp = idpService.updateSamlIdentityProvider(idp, metaDataFile);
 
-        log.error("Updated IdentityProvider idp:{}", idp);
+        log.info("Updated IdentityProvider idp:{}", idp);
         return Response.ok(idp).build();
     }
 
@@ -267,7 +280,7 @@ public class IdpResource extends BaseResource {
             log.debug("IdentityProvider to be deleted - inum:{} ", escapeLog(inum));
         }
         IdentityProvider existingIdentityProvider = idpService.getIdentityProviderByInum(inum);
-        log.error(" existingIdentityProvider:{} ", existingIdentityProvider);
+        log.debug(" existingIdentityProvider:{} ", existingIdentityProvider);
         checkResourceNotNull(existingIdentityProvider, SAML_IDP_CHECK_STR + inum + "'");
 
         idpService.deleteIdentityProvider(existingIdentityProvider);

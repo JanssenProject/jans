@@ -53,7 +53,7 @@ public class SamlService {
         SAMLSchemaBuilder samlSchemaBuilder = new SAMLSchemaBuilder(SAML1Version.SAML_11);
         try {
             //this.samlSchema = samlSchemaBuilder.getSAMLSchema();
-            logger.error("samlSchema:{}", samlSchema);
+            logger.info("samlSchema:{}", samlSchema);
         } catch (Exception ex) {
             logger.error("Failed to load SAMLSchema - ", ex);
         }
@@ -64,13 +64,13 @@ public class SamlService {
     }
 
     private String getTempMetadataFilename(String metadataFolder, String fileName) {
-        logger.error("documentStoreService:{}, localDocumentStoreService:{}, metadataFolder:{}, fileName:{}",
+        logger.info("documentStoreService:{}, localDocumentStoreService:{}, metadataFolder:{}, fileName:{}",
                 documentStoreService, localDocumentStoreService, metadataFolder, fileName);
         synchronized (SamlService.class) {
             String possibleTemp;
             do {
                 possibleTemp = fileName + INumGenerator.generate(2);
-                logger.error("possibleTemp:{}", possibleTemp);
+                logger.debug("possibleTemp:{}", possibleTemp);
             } while (documentStoreService.hasDocument(metadataFolder + possibleTemp));
             return possibleTemp;
         }
@@ -78,7 +78,7 @@ public class SamlService {
 
     public String saveMetadataFile(String module, String metadataTempFolder, String metadataFileName,
             InputStream stream) {
-        logger.error("module:{}, metadataTempFolder:{}, metadataFileName:{}, stream:{}", module, metadataTempFolder,
+        logger.info("module:{}, metadataTempFolder:{}, metadataFileName:{}, stream:{}", module, metadataTempFolder,
                 metadataFileName, stream);
 
         if (StringUtils.isBlank(metadataFileName)) {
@@ -90,18 +90,18 @@ public class SamlService {
         }
 
         String tempFileName = getTempMetadataFilename(metadataTempFolder, metadataFileName);
-        logger.error("metadataTempFolder:{}, tempFileName:{}", metadataTempFolder, tempFileName);
+        logger.debug("metadataTempFolder:{}, tempFileName:{}", metadataTempFolder, tempFileName);
 
         String spMetadataFile = metadataTempFolder + tempFileName;
-        logger.error("documentStoreService:{}, spMetadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
+        logger.debug("documentStoreService:{}, spMetadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
                 spMetadataFile, localDocumentStoreService);
         try {
             boolean result = documentStoreService.saveDocumentStream(spMetadataFile, stream,
                     List.of("jans-server", module));
-            logger.error("SP File saving result:{}", result);
+            logger.debug("SP File saving result:{}", result);
 
             InputStream newFile = documentStoreService.readDocumentAsStream(spMetadataFile);
-            logger.error("SP File read newFile:{}", newFile);
+            logger.debug("SP File read newFile:{}", newFile);
 
             if (result) {
                 return tempFileName;
@@ -130,7 +130,7 @@ public class SamlService {
     }
 
     public boolean renameMetadata(String metadataPath, String destinationMetadataPath) {
-        logger.error("Rename metadata file documentStoreService:{},metadataPath:{}, destinationMetadataPath:{}",
+        logger.debug("Rename metadata file documentStoreService:{},metadataPath:{}, destinationMetadataPath:{}",
                 documentStoreService, metadataPath, destinationMetadataPath);
         try {
             return documentStoreService.renameDocument(metadataPath, destinationMetadataPath);

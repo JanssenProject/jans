@@ -37,7 +37,7 @@ public class IdpClientFactory {
 
       public static Response requestAccessToken(final String idpServerUrl, final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
-        log.error("Request for Access Token -  idpServerUrl:{}, tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", idpServerUrl, tokenUrl,
+        log.info("Request for Access Token -  idpServerUrl:{}, tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", idpServerUrl, tokenUrl,
                 clientId, clientSecret, scope);
         Response response = null;
         try {
@@ -49,13 +49,13 @@ public class IdpClientFactory {
             multivaluedHashMap.add( "client_secret", clientSecret);
             multivaluedHashMap.add( "grant_type", "client_credentials");
             multivaluedHashMap.add( "redirect_uri", idpServerUrl);
-            log.error("Request for Access Token -  multivaluedHashMap:{}", multivaluedHashMap);
+            log.debug("Request for Access Token -  multivaluedHashMap:{}", multivaluedHashMap);
             
             response = request.post(Entity.form(multivaluedHashMap));
-            log.error("Response for Access Token -  response:{}", response);
+            log.debug("Response for Access Token -  response:{}", response);
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
-                log.error("Access Token -  entity:{}", entity);
+                log.trace("Access Token -  entity:{}", entity);
                 return response;
             }
         } catch(Exception ex){
@@ -72,14 +72,14 @@ public class IdpClientFactory {
     }
 
     public  Response getSpMetadata(String metadataEndpoint) {
-        log.error(" SP Metadata - metadataEndpoint:{}", metadataEndpoint);
+        log.info(" SP Metadata - metadataEndpoint:{}", metadataEndpoint);
         Builder metadataClient = getClientBuilder(metadataEndpoint);
         metadataClient.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         Response response = metadataClient.get();
-        log.error("SpMetadata- response:{}", response);
+        log.debug("SpMetadata- response:{}", response);
       
         if (response != null ) {
-            log.error("SP metadata response.getStatusInfo():{}, response.getEntity():{}, response.getEntity().getClass():{}",
+            log.trace("SP metadata response.getStatusInfo():{}, response.getEntity():{}, response.getEntity().getClass():{}",
                     response.getStatusInfo(), response.getEntity(),response.getEntity().getClass());
         }
         

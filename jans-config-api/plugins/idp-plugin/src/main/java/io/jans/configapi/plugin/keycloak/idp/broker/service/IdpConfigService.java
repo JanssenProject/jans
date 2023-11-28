@@ -151,7 +151,7 @@ public class IdpConfigService {
     }
 
     public String getSpMetadataUrl(String realm, String name) {
-        logger.error("Get SP Metadata Url - realm:{}, name:{}", realm, name);
+        logger.debug("Get SP Metadata Url - realm:{}, name:{}", realm, name);
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         String spMetadataUrl = null;
         if (idpAppConfiguration != null) {
@@ -159,7 +159,7 @@ public class IdpConfigService {
             sb.append(idpAppConfiguration.getServerUrl()).append(idpAppConfiguration.getSpMetadataUrl());
             spMetadataUrl = String.format(sb.toString(), realm, name);         
         }
-        logger.error("SP Metadata Url - spMetadataUrl:{}", spMetadataUrl);
+        logger.debug("SP Metadata Url - spMetadataUrl:{}", spMetadataUrl);
         return spMetadataUrl;
     }
 

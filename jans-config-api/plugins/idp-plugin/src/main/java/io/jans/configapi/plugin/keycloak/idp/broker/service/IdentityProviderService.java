@@ -127,12 +127,11 @@ public class IdentityProviderService {
     }
 
     public List<IdentityProvider> getIdentityProviderByName(String name) {
-        log.error("Search IdentityProvider with name:{}", name);
+        log.info("Search IdentityProvider with name:{}", name);
 
         Filter nameFilter = Filter.createEqualityFilter("NAME", name);
-        log.error("Search IdentityProvider with displayNameFilter:{}", nameFilter);
-        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class,
-                nameFilter);
+        log.debug("Search IdentityProvider with displayNameFilter:{}", nameFilter);
+        return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, nameFilter);
     }
 
     public IdentityProvider getIdentityProvider(IdentityProvider identityProvider) {
@@ -145,11 +144,10 @@ public class IdentityProviderService {
 
     public List<IdentityProvider> searchIdentityProvider(String pattern, int sizeLimit) {
 
-        log.error("Search IdentityProvider with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
+        log.info("Search IdentityProvider with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
 
         String[] targetArray = new String[] { pattern };
-        Filter nameFilter = Filter.createSubstringFilter("NAME", null, targetArray,
-                null);
+        Filter nameFilter = Filter.createSubstringFilter("NAME", null, targetArray, null);
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                 null);
         Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
@@ -157,7 +155,7 @@ public class IdentityProviderService {
         Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(nameFilter, displayNameFilter, descriptionFilter, inumFilter);
 
-        log.error("Search IdentityProvider with searchFilter:{}", searchFilter);
+        log.trace("Search IdentityProvider with searchFilter:{}", searchFilter);
         return persistenceEntryManager.findEntries(getDnForIdentityProvider(null), IdentityProvider.class, searchFilter,
                 sizeLimit);
     }
@@ -168,7 +166,7 @@ public class IdentityProviderService {
     }
 
     public PagedResult<IdentityProvider> getIdentityProvider(SearchRequest searchRequest) {
-        log.error("Search IdentityProvider with searchRequest:{}", searchRequest);
+        log.info("Search IdentityProvider with searchRequest:{}", searchRequest);
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
@@ -186,19 +184,19 @@ public class IdentityProviderService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        log.error("IdentityProvider pattern searchFilter:{}", searchFilter);
+        log.debug("IdentityProvider pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
                 Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                log.error("IdentityProvider dataFilter:{}", dataFilter);
+                log.debug("IdentityProvider dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        log.error("IdentityProvider searchFilter:{}", searchFilter);
+        log.debug("IdentityProvider searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForIdentityProvider(null), IdentityProvider.class,
                 searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
@@ -208,14 +206,14 @@ public class IdentityProviderService {
 
     public IdentityProvider addSamlIdentityProvider(IdentityProvider identityProvider, InputStream file)
             throws IOException {
-        log.error("Add new identityProvider:{}, file:{}", identityProvider, file);
+        log.info("Add new identityProvider:{}, file:{}", identityProvider, file);
 
         String inum = generateInumForIdentityProvider();
         identityProvider.setInum(inum);
         identityProvider.setDn(getDnForIdentityProvider(inum));
 
         if (file != null) {
-            log.error("Save IDP metadatfile on server");
+            log.info("Save IDP metadatfile on server");
             saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
         }
 
@@ -233,7 +231,7 @@ public class IdentityProviderService {
     public IdentityProvider updateIdentityProvider(IdentityProvider identityProvider, InputStream file)
             throws IOException {
 
-        if(identityProvider==null) {
+        if (identityProvider == null) {
             return identityProvider;
         }
         if (file != null && file.available() > 0) {
@@ -289,7 +287,7 @@ public class IdentityProviderService {
     }
 
     private IdentityProvider setSamlIdentityProviderDefaultValue(IdentityProvider identityProvider, boolean update) {
-        log.error("setting default value for identityProvider:{}, update:{}", identityProvider, update);
+        log.info("setting default value for identityProvider:{}, update:{}", identityProvider, update);
         if (identityProvider == null) {
             return identityProvider;
         }
@@ -300,21 +298,21 @@ public class IdentityProviderService {
     }
 
     private boolean saveIdpMetaDataFileSourceTypeFile(IdentityProvider identityProvider, InputStream file) {
-        log.error("Saving file identityProvider:{}, file:{}", identityProvider, file);
+        log.info("Saving file identityProvider:{}, file:{}", identityProvider, file);
 
         String idpMetaDataFN = identityProvider.getIdpMetaDataFN();
-        log.error("idpMetaDataFN:{}", idpMetaDataFN);
+        log.debug("idpMetaDataFN:{}", idpMetaDataFN);
 
         boolean emptyidpMetaDataFN = StringHelper.isEmpty(idpMetaDataFN);
-        log.error("emptyidpMetaDataFN:{}", emptyidpMetaDataFN);
+        log.debug("emptyidpMetaDataFN:{}", emptyidpMetaDataFN);
         if ((file == null)) {
-            log.error("File is null");
+            log.debug("File is null");
             if (emptyidpMetaDataFN) {
                 log.error("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
                 return false;
             }
             String filePath = idpConfigService.getIdpMetadataTempDirFilePath(idpMetaDataFN);
-            log.error("filePath:{}", filePath);
+            log.debug("filePath:{}", filePath);
 
             if (filePath == null) {
                 log.error("The trust relationship {} has an invalid Metadata file storage path",
@@ -325,7 +323,7 @@ public class IdentityProviderService {
             if (samlService.isLocalDocumentStoreType()) {
 
                 File newFile = new File(filePath);
-                log.error("newFile:{}", newFile);
+                log.trace("newFile:{}", newFile);
 
                 if (!newFile.exists()) {
                     log.error(
@@ -337,18 +335,18 @@ public class IdentityProviderService {
             return true;
         }
         if (emptyidpMetaDataFN) {
-            log.error("File name is blank emptyidpMetaDataFN:{}", emptyidpMetaDataFN);
+            log.info("File name is blank emptyidpMetaDataFN:{}", emptyidpMetaDataFN);
             idpMetaDataFN = getIdpNewMetadataFileName(identityProvider);
-            log.error("Final idpMetaDataFN:{}", idpMetaDataFN);
+            log.debug("Final idpMetaDataFN:{}", idpMetaDataFN);
             identityProvider.setIdpMetaDataFN(idpMetaDataFN);
 
         }
         InputStream targetStream = file;
-        log.error("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
+        log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
 
         String result = samlService.saveMetadataFile(Constants.IDP_MODULE, idpConfigService.getIdpMetadataTempDir(),
                 idpMetaDataFN, targetStream);
-        log.error("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
+        log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
         if (StringHelper.isNotEmpty(result)) {
             idpMetadataValidationTimer.queue(result);
             // process files in temp that were not processed earlier
@@ -366,25 +364,25 @@ public class IdentityProviderService {
         if (identityProvider == null) {
             return idpMetaDataFN;
         }
-        log.error("idpConfigService.getIdpMetadataFileName(identityProvider.getInum()):{}",
+        log.info("idpConfigService.getIdpMetadataFileName(identityProvider.getInum()):{}",
                 idpConfigService.getIdpMetadataFileName(identityProvider.getInum()));
         return idpConfigService.getIdpMetadataFileName(identityProvider.getInum());
     }
 
     public void processUnprocessedIdpMetadataFiles() {
-        log.error("processing unprocessed IDP metadata files ");
+        log.info("processing unprocessed IDP metadata files ");
         String directory = idpConfigService.getIdpMetadataTempDir();
-        log.error("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
+        log.trace("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
 
         if (Files.exists(Paths.get(directory))) {
-            log.error("directory:{} does exists)", directory);
+            log.trace("directory:{} does exists)", directory);
             File folder = new File(directory);
             File[] files = folder.listFiles();
-            log.error("files:{}", files);
+            log.trace("files:{}", files);
             if (files != null && files.length > 0) {
 
                 for (File file : files) {
-                    log.error("file:{}, file.getName():{}", file, file.getName());
+                    log.trace("file:{}, file.getName():{}", file, file.getName());
                     idpMetadataValidationTimer.queue(file.getName());
                 }
             }
