@@ -246,7 +246,6 @@ sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig=
 
 wait_for_services jans-config-api/api/v1/health/ready
 wait_for_services jans-scim/sys/health-check
-wait_for_services jans-fido2/sys/health-check
 
 cat << EOF > testendpoints.sh
 sudo microk8s config > config
