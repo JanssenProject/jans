@@ -35,7 +35,7 @@
 		<org.jboss.annotations.api.version>2.0.1.Final</org.jboss.annotations.api.version>
 		
 		<jakarta.ejb.api.version>4.0.1</jakarta.ejb.api.version>
-		<jakarta.mail.api.version>2.1.0</jakarta.mail.api.version>
+		<jakarta.mail.api.version>2.1.2</jakarta.mail.api.version>
 		<jakarta.mail.version>1.6.7</jakarta.mail.version>
 
 		<jakarta.websocket.api.version>2.1.0</jakarta.websocket.api.version>
@@ -307,7 +307,7 @@
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>oauth2-oidc-sdk</artifactId>
-                <version>10.15</version>
+                <version>11.7</version>
             </dependency>
 
 			<!-- Weld -->
@@ -482,7 +482,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.10.0</version>
+				<version>1.11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-beanutils</groupId>
@@ -560,6 +560,11 @@
 				<artifactId>jackson-annotations</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jaxb-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
@@ -858,7 +863,7 @@
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
-				<version>6.14.3</version>
+				<version>7.8.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>

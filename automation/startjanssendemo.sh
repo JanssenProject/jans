@@ -5,6 +5,7 @@ JANS_PERSISTENCE=$2
 JANS_CI_CD_RUN=$3
 EXT_IP=$4
 INSTALL_ISTIO=$5
+HELM_DEVELOPMENT_REPO=$6
 if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
 fi
@@ -20,6 +21,9 @@ if [[ $JANS_PERSISTENCE != "LDAP" ]] && [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[
   echo "[E] Incorrect entry. Please enter either LDAP, MYSQL or PGSQL"
   exit 1
 fi
+if [[ ! "$HELM_DEVELOPMENT_REPO" ]]; then
+  HELM_DEVELOPMENT_REPO=""
+fi
 
 LOG_TARGET="FILE"
 LOG_LEVEL="TRACE"
@@ -31,6 +35,15 @@ fi
 if [[ -z $EXT_IP ]]; then
   EXT_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
 fi
+
+wait_for_services() {
+  code=404
+  while [[ "$code" != "200" ]]; do
+    echo "Waiting for https://${JANS_FQDN}/$1 to respond with 200"
+    code=$(curl -s -o /dev/null -w ''%{http_code}'' -k https://"${JANS_FQDN}"/"$1")
+    sleep 5
+  done
+}
 
 sudo apt-get update
 sudo apt-get install openssl -y
@@ -229,9 +242,11 @@ auth-server:
 EOF
 sudo helm repo add janssen https://docs.jans.io/charts
 sudo helm repo update
-sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG"
-echo "Waiting for auth-server to come up. This may take 5-10 mins....Please do not cancel out...This will wait for the auth-server to be ready.."
-sleep 300
+sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG" "$HELM_DEVELOPMENT_REPO"
+
+wait_for_services jans-config-api/api/v1/health/ready
+wait_for_services jans-scim/sys/health-check
+
 cat << EOF > testendpoints.sh
 sudo microk8s config > config
 KUBECONFIG="$PWD"/config

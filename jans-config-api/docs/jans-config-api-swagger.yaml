@@ -10,6 +10,7 @@ info:
 servers:
 - url: https://jans.local.io
   description: The Jans server
+  variables: {}
 tags:
 - name: Attribute
 - name: Default Authentication Method
@@ -974,6 +975,29 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/properties.write
+  /api/v1/jans-auth-server/config/feature-flags:
+    get:
+      tags:
+      - Configuration – Properties
+      summary: Returns feature flags type configured for Jans authorization server.
+      description: Returns feature flags type configured for Jans authorization server.
+      operationId: get-feature-flag-type
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/properties.readonly
   /api/v1/jans-auth-server/config/persistence:
     get:
       tags:
@@ -7495,6 +7519,8 @@ components:
       properties:
         dn:
           type: string
+        selected:
+          type: boolean
         inum:
           type: string
         sourceAttribute:
@@ -7583,21 +7609,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        selected:
-          type: boolean
-        whitePagesCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanView:
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8398,8 +8422,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8409,6 +8431,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9397,14 +9421,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -9743,6 +9767,8 @@ components:
         creationDate:
           type: string
           format: date-time
+        persisted:
+          type: boolean
         user:
           $ref: '#/components/schemas/User'
         ttl:
@@ -9750,8 +9776,6 @@ components:
           format: int32
         opbrowserState:
           type: string
-        persisted:
-          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
