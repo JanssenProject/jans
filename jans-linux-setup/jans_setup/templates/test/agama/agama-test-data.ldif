@@ -149,7 +149,7 @@ agFlowMeta: {"funcName":"_io_jans_agama_test_showConfig","inputs":[],"timeou
  tion":null,"properties":{"phrase":"The quick brown fox jumps over the lazy 
  dog","joke":"What's left when a boat and a train collide? Disbelief."}}
 agFlowQname: io.jans.agama.test.showConfig
-Ly9HZW5lcmF0ZWQgYXQgMjAyMy0xMS0yNFQxOToxNzo1MloKZnVuY3Rpb24gX2
+agFlowTrans:: Ly9HZW5lcmF0ZWQgYXQgMjAyMy0xMS0yNFQxOToxNzo1MloKZnVuY3Rpb24gX2
  lvX2phbnNfYWdhbWFfdGVzdF9zaG93Q29uZmlnKApjb25mCikgewpjb25zdCBfZnFuYW1lID0gI
  mlvLmphbnMuYWdhbWEudGVzdC5zaG93Q29uZmlnIiwgX2Jhc2VQYXRoID0gIiIKbGV0IF9pdCA9
  IG51bGwsIF9pdDIgPSBudWxsCmxldCBpZHggPSBbXSwgX2l0ZW1zID0gW10KCnRyeSB7CgogICA
