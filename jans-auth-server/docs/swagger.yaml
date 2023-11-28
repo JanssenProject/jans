@@ -11,6 +11,7 @@ info:
   license:
     name: License
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: ""
 servers:
   - url: https://jans.local.io/jans-auth
 tags:
