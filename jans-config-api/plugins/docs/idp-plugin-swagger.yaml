@@ -1982,15 +1982,15 @@ components:
             $ref: '#/components/schemas/ScopeRepresentation'
         icon_uri:
           type: string
-        uri:
-          type: string
-          writeOnly: true
         resource_scopes:
           uniqueItems: true
           type: array
           writeOnly: true
           items:
             $ref: '#/components/schemas/ScopeRepresentation'
+        uri:
+          type: string
+          writeOnly: true
     ResourceServerRepresentation:
       type: object
       properties:
