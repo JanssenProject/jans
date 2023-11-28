@@ -84,8 +84,13 @@ jobs:
         jans-pycloudlib
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
       - name: check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of sonarqube analysis
 
@@ -124,7 +129,7 @@ jobs:
       - name: Set up JDK 17
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@0ab4596768b603586c0de567f2430c30f5b0d2b0 # v3.13.0
         with:
           java-version: '17'
           distribution: 'adopt'
@@ -132,7 +137,7 @@ jobs:
       - name: Cache SonarCloud packages for JVM based project
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
-        uses: actions/cache@v3
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
@@ -173,7 +178,7 @@ jobs:
 
       - name: SonarCloud Scan for non-JVM project
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.NON_JVM_PROJECTS, matrix.module)
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarcloud-github-action@5ee47de3c96f0c1c51b09d2ff1fec0cfeefcf67c # master
         with:
           args: >
             -Dsonar.organization=${{ env.REPO_ORG }}
