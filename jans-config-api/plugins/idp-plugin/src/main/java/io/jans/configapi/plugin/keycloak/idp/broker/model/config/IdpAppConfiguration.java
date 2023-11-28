@@ -8,6 +8,7 @@ public class IdpAppConfiguration implements Configuration {
 
     private String applicationName;
     private String trustedIdpDn;
+    private String realmDn;
     private boolean enabled;
 
     private String serverUrl;
@@ -46,6 +47,14 @@ public class IdpAppConfiguration implements Configuration {
 
     public void setTrustedIdpDn(String trustedIdpDn) {
         this.trustedIdpDn = trustedIdpDn;
+    }
+
+    public String getRealmDn() {
+        return realmDn;
+    }
+
+    public void setRealmDn(String realmDn) {
+        this.realmDn = realmDn;
     }
 
     public boolean isEnabled() {
@@ -203,14 +212,14 @@ public class IdpAppConfiguration implements Configuration {
     @Override
     public String toString() {
         return "IdpAppConfiguration [applicationName=" + applicationName + ", trustedIdpDn=" + trustedIdpDn
-                + ", enabled=" + enabled + ", serverUrl=" + serverUrl + ", realm=" + realm + ", clientId=" + clientId
-                + ", clientSecret=" + clientSecret + ", grantType=" + grantType + ", username=" + username
-                + ", password=" + password + ", idpRootDir=" + idpRootDir + ", idpMetadataRootDir=" + idpMetadataRootDir
-                + ", idpMetadataTempDir=" + idpMetadataTempDir + ", idpMetadataFilePattern=" + idpMetadataFilePattern
-                + ", idpMetadataFile=" + idpMetadataFile + ", spMetadataUrl=" + spMetadataUrl + ", spMetadataRootDir="
-                + spMetadataRootDir + ", spMetadataTempDir=" + spMetadataTempDir + ", spMetadataFilePattern="
-                + spMetadataFilePattern + ", spMetadataFile=" + spMetadataFile + ", ignoreValidation="
-                + ignoreValidation + "]";
+                + ", realmDn=" + realmDn + ", enabled=" + enabled + ", serverUrl=" + serverUrl + ", realm=" + realm
+                + ", clientId=" + clientId + ", clientSecret=" + clientSecret + ", grantType=" + grantType
+                + ", username=" + username + ", password=" + password + ", idpRootDir=" + idpRootDir
+                + ", idpMetadataRootDir=" + idpMetadataRootDir + ", idpMetadataTempDir=" + idpMetadataTempDir
+                + ", idpMetadataFilePattern=" + idpMetadataFilePattern + ", idpMetadataFile=" + idpMetadataFile
+                + ", spMetadataUrl=" + spMetadataUrl + ", spMetadataRootDir=" + spMetadataRootDir
+                + ", spMetadataTempDir=" + spMetadataTempDir + ", spMetadataFilePattern=" + spMetadataFilePattern
+                + ", spMetadataFile=" + spMetadataFile + ", ignoreValidation=" + ignoreValidation + "]";
     }
 
 }

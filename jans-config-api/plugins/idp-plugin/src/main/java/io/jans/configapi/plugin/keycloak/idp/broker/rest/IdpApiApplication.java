@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @ApplicationPath(Constants.IDENTITY_PROVIDER)
-@OpenAPIDefinition(info = @Info(title = "Jans Config API", version="1.0", contact =
+@OpenAPIDefinition(info = @Info(title = "Jans Config API", version="OAS Version", contact =
 @Contact(name = "Contact", url = "https://github.com/JanssenProject/jans/discussions"),
 
 license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),

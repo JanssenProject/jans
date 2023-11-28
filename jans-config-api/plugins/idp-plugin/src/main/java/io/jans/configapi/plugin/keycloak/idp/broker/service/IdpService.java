@@ -112,7 +112,7 @@ public class IdpService {
 
         // validate
         if (identityProvider == null) {
-            throw new InvalidAttributeException("IdentityProvider  is null!!!");
+            throw new InvalidAttributeException("IdentityProvider object is null!!!");
         }
 
         if (idpMetadataStream == null) {
@@ -153,7 +153,7 @@ public class IdpService {
 
         // validate
         if (identityProvider == null) {
-            throw new InvalidAttributeException("IdentityProvider for update is null!!!");
+            throw new InvalidAttributeException("IdentityProvider object for update is null!!!");
         }
 
         if (idpMetadataStream == null) {

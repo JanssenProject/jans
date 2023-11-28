@@ -78,6 +78,15 @@ public class IdpConfigService {
         return trustRelationshipDn;
     }
 
+    public String getRealmDn() {
+        IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
+        String realmDn = null;
+        if (idpAppConfiguration != null) {
+            realmDn = idpAppConfiguration.getRealmDn();
+        }
+        return realmDn;
+    }
+    
     public String getIdpRootDir() {
         IdpAppConfiguration idpAppConfiguration = getIdpAppConfiguration();
         String idpRootDir = null;

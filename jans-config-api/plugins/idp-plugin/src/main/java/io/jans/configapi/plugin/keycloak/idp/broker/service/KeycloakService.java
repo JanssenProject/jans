@@ -104,7 +104,7 @@ public class KeycloakService {
         }
         keycloakConfig.getInstance().realms().create(realmRepresentation);
 
-        realmRepresentation = getRealmByName(realmRepresentation.getDisplayName());
+        realmRepresentation = getRealmByName(realmRepresentation.getRealm());
         logger.error("Realm created is - realmRepresentation:{}", realmRepresentation);
         return realmRepresentation;
     }

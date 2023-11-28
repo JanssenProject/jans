@@ -1,27 +1,25 @@
 openapi: 3.0.1
 info:
-  title: Jans Config API - Identity Broker
+  title: Jans Config API
   contact:
-    name: Gluu Support
-    url: https://support.gluu.org
-    email: xxx@gluu.org
+    name: Contact
+    url: https://github.com/JanssenProject/jans/discussions
   license:
     name: Apache 2.0
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
-  version: 1.0.0
+  version: "1.0"
 servers:
 - url: https://jans.io/
   description: The Jans server
-  variables: {}
 tags:
-- name: Jans - SAML IDP Configuration
+- name: Jans - SAML Identity Broker Configuration
 - name: Jans - SAML Identity Broker
 - name: Jans - SAML Identity Broker Realm
 paths:
   /idp/idp-config:
     get:
       tags:
-      - Jans - SAML IDP Configuration
+      - Jans - SAML Identity Broker Configuration
       summary: Gets IDP configuration properties
       description: Gets IDP configuration properties
       operationId: get-idp-config-properties
@@ -41,7 +39,7 @@ paths:
         - https://jans.io/idp/config.readonly
     put:
       tags:
-      - Jans - SAML IDP Configuration
+      - Jans - SAML Identity Broker Configuration
       summary: Update IDP configuration properties
       description: Update IDP configuration properties
       operationId: put-idp-properties
@@ -71,7 +69,7 @@ paths:
         - https://jans.io/idp/config.write
     patch:
       tags:
-      - Jans - SAML IDP Configuration
+      - Jans - SAML Identity Broker Configuration
       summary: Partially modifies IDP configuration properties.
       description: Partially modifies IDP Configuration properties.
       operationId: patch-idp-properties
@@ -1982,15 +1980,15 @@ components:
             $ref: '#/components/schemas/ScopeRepresentation'
         icon_uri:
           type: string
+        uri:
+          type: string
+          writeOnly: true
         resource_scopes:
           uniqueItems: true
           type: array
           writeOnly: true
           items:
             $ref: '#/components/schemas/ScopeRepresentation'
-        uri:
-          type: string
-          writeOnly: true
     ResourceServerRepresentation:
       type: object
       properties:
@@ -2099,6 +2097,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PolicyRepresentation'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceRepresentation'
         displayName:
           type: string
     SocialLinkRepresentation:
@@ -2260,7 +2262,6 @@ components:
     BrokerIdentityProviderForm:
       required:
       - identityProvider
-      - metaDataFile
       type: object
       properties:
         identityProvider:
