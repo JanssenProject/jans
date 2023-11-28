@@ -307,7 +307,7 @@
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>oauth2-oidc-sdk</artifactId>
-                <version>10.15</version>
+                <version>11.7</version>
             </dependency>
 
 			<!-- Weld -->
