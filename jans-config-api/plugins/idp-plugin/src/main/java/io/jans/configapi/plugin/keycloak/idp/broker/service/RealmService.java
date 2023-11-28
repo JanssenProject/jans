@@ -86,9 +86,7 @@ public class RealmService {
     public List<Realm> getRealmByName(String name) {
         logger.info("Get RealmResource for name:{})", name);
         if (StringUtils.isBlank(name)) {
-
-            new InvalidAttributeException("Realm name is null");
-
+            throw new InvalidAttributeException("Realm name is null");
         }
 
         Filter nameFilter = Filter.createEqualityFilter("NAME", name);
@@ -139,7 +137,7 @@ public class RealmService {
     public Realm updateRealm(Realm realm) {
         logger.info("Update a realm - realm:{})", realm);
         if (realm == null) {
-            new InvalidAttributeException("Realm object is null");
+            throw new InvalidAttributeException("Realm object is null");
         }
 
         // Update Realm in DB
