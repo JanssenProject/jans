@@ -36,6 +36,15 @@ if [[ -z $EXT_IP ]]; then
   EXT_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
 fi
 
+wait_for_services() {
+  code=404
+  while [[ "$code" != "200" ]]; do
+    echo "Waiting for https://${JANS_FQDN}/$1 to respond with 200"
+    code=$(curl -s -o /dev/null -w ''%{http_code}'' -k https://"${JANS_FQDN}"/"$1")
+    sleep 5
+  done
+}
+
 sudo apt-get update
 sudo apt-get install openssl -y
 sudo apt-get install python3-pip -y
@@ -233,7 +242,11 @@ auth-server:
 EOF
 sudo helm repo add janssen https://docs.jans.io/charts
 sudo helm repo update
-sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG" "$HELM_DEVELOPMENT_REPO" --wait
+sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG" "$HELM_DEVELOPMENT_REPO"
+
+wait_for_services jans-config-api/api/v1/health/ready
+wait_for_services jans-scim/sys/health-check
+wait_for_services jans-fido2/sys/health-check
 
 cat << EOF > testendpoints.sh
 sudo microk8s config > config
