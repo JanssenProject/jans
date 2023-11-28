@@ -51,7 +51,7 @@ public class IdpConfigResource extends BaseResource {
     IdpConfigService idpConfigService;
 
     @Operation(summary = "Gets IDP configuration properties", description = "Gets IDP configuration properties", operationId = "get-idp-config-properties", tags = {
-            "Jans - SAML IDP Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            "Jans - SAML Identity Broker Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdpAppConfiguration.class))),
@@ -68,7 +68,7 @@ public class IdpConfigResource extends BaseResource {
     }
 
     @Operation(summary = "Update IDP configuration properties", description = "Update IDP configuration properties", operationId = "put-idp-properties", tags = {
-            "Jans - SAML IDP Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            "Jans - SAML Identity Broker Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_CONFIG_WRITE_ACCESS }))
     @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdpAppConfiguration.class), examples = @ExampleObject(name = "Request example", value = "example/idp/config/idp-config-put.json")))
     @ApiResponses(value = {
@@ -89,7 +89,7 @@ public class IdpConfigResource extends BaseResource {
     }
 
     @Operation(summary = "Partially modifies IDP configuration properties.", description = "Partially modifies IDP Configuration properties.", operationId = "patch-idp-properties", tags = {
-            "Jans - SAML IDP Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            "Jans - SAML Identity Broker Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_CONFIG_WRITE_ACCESS }))
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/dp/config/idp-config-patch.json")))
     @ApiResponses(value = {

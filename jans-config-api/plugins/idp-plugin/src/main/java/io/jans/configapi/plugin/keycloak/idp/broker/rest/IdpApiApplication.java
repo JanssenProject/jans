@@ -14,11 +14,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 @ApplicationPath(Constants.IDENTITY_PROVIDER)
-@OpenAPIDefinition(info = @Info(title = "Jans Config API - Identity Broker", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
+@OpenAPIDefinition(info = @Info(title = "Jans Config API", version="1.0", contact =
+@Contact(name = "Contact", url = "https://github.com/JanssenProject/jans/discussions"),
 
 license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
 
-tags = { @Tag(name = "Jans - SAML IDP Configuration"), @Tag(name = "Jans - SAML Identity Broker"), @Tag(name = "Jans - SAML Identity Broker Realm")  },
+tags = { 
+        @Tag(name = "Jans - SAML Identity Broker Configuration"), 
+        @Tag(name = "Jans - SAML Identity Broker"), 
+        @Tag(name = "Jans - SAML Identity Broker Realm")  },
 
 servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
