@@ -7609,13 +7609,13 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanView:
+        userCanEdit:
           type: boolean
-        adminCanEdit:
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
@@ -8422,8 +8422,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8433,6 +8431,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
