@@ -19,18 +19,26 @@ on:
       - "!jans-pycloudlib/CHANGELOG.md"
       - "!jans-pycloudlib/jans/pycloudlib/version.py"
 
+permissions:
+  contents: read
+
 jobs:
   check-commit-message:
     name: Check Commit Message
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
       - name: Checkout Project
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           # We need to fetch with a depth of 2 for pull_request so we can do HEAD^2
           fetch-depth: 2
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v3.8.2
         with:
           node-version: 14
       - run: |
