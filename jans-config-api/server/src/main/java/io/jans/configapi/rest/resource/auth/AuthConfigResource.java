@@ -28,7 +28,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
-import java.util.stream.Stream;
 import java.util.EnumSet;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
@@ -51,21 +50,6 @@ public class AuthConfigResource extends ConfigBaseResource {
 
     @Inject
     ConfigurationService configurationService;
-    static final String[] featureArray;
-    static final EnumSet<FeatureFlagType> featureFlagEnumSet;
-    static  
-    {
-        //EnumSet<FeatureFlagType> featureFlagEnumSet = EnumSet.allOf(FeatureFlagType.class);
-        featureFlagEnumSet = EnumSet.allOf(FeatureFlagType.class);
-        featureFlagEnumSet.remove(FeatureFlagType.UNKNOWN);
-        System.out.println("featureFlagEnumSet = " + featureFlagEnumSet);
-        
-        //String[] featureArray = Stream.of(featureFlagEnumSet).map(f -> f.toString()).toArray(String[]::new);
-        featureArray = Stream.of(featureFlagEnumSet).map(f -> f.toString()).toArray(String[]::new);
-        System.out.println("\n\n featureArray = "+featureArray+"\n\n\n");
-    }
-    
-
  
     @Operation(summary = "Gets all Jans authorization server configuration properties.", description = "Gets all Jans authorization server configuration properties.", operationId = "get-properties", tags = {
             "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -143,7 +127,7 @@ public class AuthConfigResource extends ConfigBaseResource {
             "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FeatureFlagType.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, format="enum")))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -154,9 +138,8 @@ public class AuthConfigResource extends ConfigBaseResource {
     public Response getFeatureFlagType() {
         EnumSet<FeatureFlagType> set = EnumSet.allOf(FeatureFlagType.class);
         set.remove(FeatureFlagType.UNKNOWN);
-        log.error("set:{}, featureFlagEnumSet:{}", set, featureFlagEnumSet);
-        
-        return Response.ok(featureFlagEnumSet).build();
+        log.debug("set:{}", set);        
+        return Response.ok(set).build();
     }
 
 
@@ -173,12 +156,4 @@ public class AuthConfigResource extends ConfigBaseResource {
         }
     }
     
-   private static void getFeatureFlags() {
-        EnumSet<FeatureFlagType> featureFlagEnumSet = EnumSet.allOf(FeatureFlagType.class);
-        featureFlagEnumSet.remove(FeatureFlagType.UNKNOWN);
-        System.out.println("featureFlagEnumSet = " + featureFlagEnumSet);
-        
-        String[] array = Stream.of(featureFlagEnumSet).map(f -> f.toString()).toArray(String[]::new);
-
-    }
 }
