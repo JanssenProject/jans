@@ -66,22 +66,22 @@ class ParamSchema(Schema):
     optional_scopes = List(
         Str(),
         validate=ContainsOnly(OPTIONAL_SCOPES),
-        missing=[],
+        load_default=[],
     )
 
-    ldap_pw = Str(missing="", default="")
+    ldap_pw = Str(load_default="", dump_default="")
 
-    sql_pw = Str(missing="", default="")
+    sql_pw = Str(load_default="", dump_default="")
 
-    couchbase_pw = Str(missing="", default="")
+    couchbase_pw = Str(load_default="", dump_default="")
 
-    couchbase_superuser_pw = Str(missing="", default="")
+    couchbase_superuser_pw = Str(load_default="", dump_default="")
 
-    auth_sig_keys = Str(missing="")
+    auth_sig_keys = Str(load_default="")
 
-    auth_enc_keys = Str(missing="")
+    auth_enc_keys = Str(load_default="")
 
-    salt = Str(missing="", default="")
+    salt = Str(load_default="", dump_default="")
 
     @validates("hostname")
     def validate_fqdn(self, value):
