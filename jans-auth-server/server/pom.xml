@@ -589,7 +589,7 @@
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
-            <version>6.14.3</version> <!-- we need 6.14.3 due to Arquillian -->
+            <version>7.5.1</version> <!-- we need 7.5.1 due to Arquillian -->
 		</dependency>
 		<dependency>
             <groupId>jakarta.websocket</groupId>
