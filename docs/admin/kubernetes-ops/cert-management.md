@@ -21,7 +21,12 @@ Rotating Certificates and Keys in Kubernetes setup
 | -------------------------------- |
 | /etc/certs/web_https.crt         |
 | /etc/certs/web_https.key         |
-        
+
+!!! Note
+    During fresh installation, the config-job checks if SSL certificates and keys are mounted as files. 
+    If no mounted files are found, it attempts to download SSL certificates from the FQDN supplied. If the download is successful, an empty key file is generated.
+    If no mounted or downloaded files are found, it generates self-signed SSL certificates, CA certificates, and keys.
+
 ### Rotate
         
 1.  Create a file named `web-key-rotation.yaml` with the following contents :
