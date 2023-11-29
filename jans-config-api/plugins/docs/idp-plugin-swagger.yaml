@@ -1,0 +1,991 @@
+openapi: 3.0.1
+info:
+  title: Jans Config API
+  contact:
+    name: Contact
+    url: https://github.com/JanssenProject/jans/discussions
+  license:
+    name: Apache 2.0
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: OAS Version
+servers:
+- url: https://jans.io/
+  description: The Jans server
+tags:
+- name: Jans - SAML Identity Broker Configuration
+- name: Jans - SAML Identity Broker
+- name: Jans - SAML Identity Broker Realm
+paths:
+  /idp/idp-config:
+    get:
+      tags:
+      - Jans - SAML Identity Broker Configuration
+      summary: Gets IDP configuration properties
+      description: Gets IDP configuration properties
+      operationId: get-idp-config-properties
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdpAppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/config.readonly
+    put:
+      tags:
+      - Jans - SAML Identity Broker Configuration
+      summary: Update IDP configuration properties
+      description: Update IDP configuration properties
+      operationId: put-idp-properties
+      requestBody:
+        description: GluuAttribute object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdpAppConfiguration'
+            examples:
+              Request example:
+                description: Request example
+                value: |
+                  {
+                      "applicationName": "idp",
+                      "trustedIdpDn": "ou=trusted-idp,o=jans",
+                      "enabled": true,
+                      "serverUrl": "http://localhost:8180",
+                      "realm": "master",
+                      "clientId": "my-client-1",
+                      "clientSecret": "aqOMI7DhNxCFbW0IieBHSrdA6HMTwxiQ",
+                      "grantType": "PASSWORD",
+                      "username": "admin1",
+                      "password": "admin123",
+                      "idpRootDir": "/opt/jans/idp/",
+                      "idpMetadataRootDir": "/opt/idp/configs/keycloak/idp/metadata",
+                      "idpMetadataTempDir": "/opt/idp/configs/keycloak/idp/temp_metadata",
+                      "idpMetadataFilePattern": "%s-idp-metadata.xml",
+                      "idpMetadataFile": "idp-metadata.xml",
+                      "spMetadataUrl": "/realms/%s/broker/%s/endpoint/descriptor",
+                      "spMetadataRootDir": "/opt/idp/configs/keycloak/sp/metadata",
+                      "spMetadataTempDir": "/opt/idp/configs/keycloak/sp/temp_metadata",
+                      "spMetadataFilePattern": "%s-sp-metadata.xml",
+                      "spMetadataFile": "sp-metadata.xml",
+                      "ignoreValidation": false
+                  }
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdpAppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/config.write
+    patch:
+      tags:
+      - Jans - SAML Identity Broker Configuration
+      summary: Partially modifies IDP configuration properties.
+      description: Partially modifies IDP Configuration properties.
+      operationId: patch-idp-properties
+      requestBody:
+        description: String representing patch-document.
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdpAppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/config.write
+  /idp/realm:
+    get:
+      tags:
+      - Jans - SAML Identity Broker Realm
+      summary: Get all realm
+      description: Get all realm
+      operationId: get-realm
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Realm'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/realm.readonly
+    put:
+      tags:
+      - Jans - SAML Identity Broker Realm
+      summary: Update realm
+      description: Update realm
+      operationId: put-realm
+      requestBody:
+        description: Realm details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Realm'
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "200":
+          description: Updated Jans realm object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Realm'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/realm.write
+    post:
+      tags:
+      - Jans - SAML Identity Broker Realm
+      summary: Create realm
+      description: Create realm
+      operationId: post-realm
+      requestBody:
+        description: Realm details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Realm'
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "201":
+          description: Newly created realm
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Realm'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/realm.write
+  /idp/realm/{name}:
+    delete:
+      tags:
+      - Jans - SAML Identity Broker Realm
+      summary: 'Delete realm '
+      description: Delete realm
+      operationId: delete-realm
+      parameters:
+      - name: inum
+        in: path
+        description: Unique identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/realm.write
+  /idp/realm/{inum}:
+    get:
+      tags:
+      - Jans - SAML Identity Broker Realm
+      summary: Get realm by inum
+      description: Get realm by inum
+      operationId: get-realm-by-inum
+      parameters:
+      - name: inum
+        in: path
+        description: Unique identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Realm'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/realm.readonly
+  /idp/realm/name/{name}:
+    get:
+      tags:
+      - Jans - SAML Identity Broker Realm
+      summary: Get realm by name
+      description: Get realm by name
+      operationId: get-realm-by-name
+      parameters:
+      - name: name
+        in: path
+        description: name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Realm'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/realm.readonly
+  /idp/kc/saml/upload:
+    put:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Update SAML Identity Provider
+      description: Update SAML Identity Provider
+      operationId: put-saml-identity-provider
+      requestBody:
+        description: String representing patch-document.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BrokerIdentityProviderForm'
+            examples:
+              Response json example:
+                description: Response json example
+                value: |
+                  {
+                      "dn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans",
+                      "inum": "63350037-8ef7-471d-8447-c691063d8c19",
+                      "creatorId": "jans-admin-2",
+                      "name": "SAML_IDP_104",
+                      "displayName": "Updated Test SAML IDP 104",
+                      "description": "SAML IDP 104 created using Rest API Updated",
+                      "realm": "keycloak-internal-identity",
+                      "enabled": true,
+                      "providerId": "saml",
+                      "trustEmail": true,
+                      "storeToken": false,
+                      "addReadTokenRoleOnCreate": false,
+                      "authenticateByDefault": false,
+                      "linkOnly": false,
+                      "idpMetaDataFN": "63350037-8ef7-471d-8447-c691063d8c19-idp-metadata.xml",
+                      "config": {
+                          "validateSignature": "false",
+                          "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                          "postBindingLogout": "true",
+                          "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                          "postBindingResponse": "true",
+                          "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                          "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                          "loginHint": "false",
+                          "enabledFromMetadata": "true",
+                          "postBindingAuthnRequest": "true",
+                          "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                          "wantAuthnRequestsSigned": "false",
+                          "addExtensionsElementWithKeyInfo": "false",
+                          "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                      },
+                      "baseDn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans"
+                  }
+      responses:
+        "200":
+          description: Updated Trust IDP
+          content:
+            application/json-patch+json:
+              schema:
+                $ref: '#/components/schemas/IdentityProvider'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans",
+                        "inum": "63350037-8ef7-471d-8447-c691063d8c19",
+                        "creatorId": "jans-admin-2",
+                        "name": "SAML_IDP_104",
+                        "displayName": "Test SAML IDP 104",
+                        "description": "SAML IDP 104 created using Rest API",
+                        "realm": "keycloak-internal-identity",
+                        "enabled": true,
+                        "providerId": "saml",
+                        "trustEmail": false,
+                        "storeToken": false,
+                        "addReadTokenRoleOnCreate": false,
+                        "authenticateByDefault": false,
+                        "linkOnly": false,
+                        "idpMetaDataFN": "63350037-8ef7-471d-8447-c691063d8c19-idp-metadata.xml",
+                        "config": {
+                            "validateSignature": "false",
+                            "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                            "postBindingLogout": "true",
+                            "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                            "postBindingResponse": "true",
+                            "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                            "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                            "loginHint": "false",
+                            "enabledFromMetadata": "true",
+                            "postBindingAuthnRequest": "true",
+                            "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                            "wantAuthnRequestsSigned": "false",
+                            "addExtensionsElementWithKeyInfo": "false",
+                            "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                        },
+                        "baseDn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans"
+                    }
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.write
+    post:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Create SAML Identity Provider
+      description: Create SAML Identity Provider
+      operationId: post-saml-identity-provider
+      requestBody:
+        description: String representing patch-document.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BrokerIdentityProviderForm'
+            examples:
+              Response json example:
+                description: Response json example
+                value: "{\n\t\"creatorId\": \"jans-admin-2\",\n\t\"name\": \"SAML_IDP_104\"\
+                  ,\n\t\"displayName\": \"Test SAML IDP 104\",\t\"description\": \"\
+                  SAML IDP 104 created using Rest API\",\n\t\"realm\": \"keycloak-internal-identity\"\
+                  ,\n\t\"enabled\": true,\n\t\"providerId\": \"SAML_IDP_104\",\n\t\
+                  \"trustEmail\": false,\n\t\"storeToken\": false,\n\t\"addReadTokenRoleOnCreate\"\
+                  : false,\n\t\"authenticateByDefault\": false,\n\t\"linkOnly\": false,\n\
+                  \t\"firstBrokerLoginFlowAlias\": null,\n\t\"postBrokerLoginFlowAlias\"\
+                  : null\n\t\n}\n"
+      responses:
+        "201":
+          description: Newly created Trust IDP
+          content:
+            application/json-patch+json:
+              schema:
+                $ref: '#/components/schemas/IdentityProvider'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans",
+                        "inum": "63350037-8ef7-471d-8447-c691063d8c19",
+                        "creatorId": "jans-admin-2",
+                        "name": "SAML_IDP_104",
+                        "displayName": "Test SAML IDP 104",
+                        "description": "SAML IDP 104 created using Rest API",
+                        "realm": "keycloak-internal-identity",
+                        "enabled": true,
+                        "providerId": "saml",
+                        "trustEmail": false,
+                        "storeToken": false,
+                        "addReadTokenRoleOnCreate": false,
+                        "authenticateByDefault": false,
+                        "linkOnly": false,
+                        "idpMetaDataFN": "63350037-8ef7-471d-8447-c691063d8c19-idp-metadata.xml",
+                        "config": {
+                            "validateSignature": "false",
+                            "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                            "postBindingLogout": "true",
+                            "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                            "postBindingResponse": "true",
+                            "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                            "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                            "loginHint": "false",
+                            "enabledFromMetadata": "true",
+                            "postBindingAuthnRequest": "true",
+                            "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                            "wantAuthnRequestsSigned": "false",
+                            "addExtensionsElementWithKeyInfo": "false",
+                            "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                        },
+                        "baseDn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans"
+                    }
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.write
+  /idp/kc/saml/{inum}:
+    get:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Get SAML Identity Provider by Inum
+      description: Get SAML Identity Provider by Inum
+      operationId: get-saml-identity-provider-by-inum
+      parameters:
+      - name: inum
+        in: path
+        description: Unique identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProvider'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans",
+                        "inum": "63350037-8ef7-471d-8447-c691063d8c19",
+                        "creatorId": "jans-admin-2",
+                        "name": "SAML_IDP_104",
+                        "displayName": "Test SAML IDP 104",
+                        "description": "SAML IDP 104 created using Rest API",
+                        "realm": "keycloak-internal-identity",
+                        "enabled": true,
+                        "providerId": "saml",
+                        "trustEmail": false,
+                        "storeToken": false,
+                        "addReadTokenRoleOnCreate": false,
+                        "authenticateByDefault": false,
+                        "linkOnly": false,
+                        "idpMetaDataFN": "63350037-8ef7-471d-8447-c691063d8c19-idp-metadata.xml",
+                        "config": {
+                            "validateSignature": "false",
+                            "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                            "postBindingLogout": "true",
+                            "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                            "postBindingResponse": "true",
+                            "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                            "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                            "loginHint": "false",
+                            "enabledFromMetadata": "true",
+                            "postBindingAuthnRequest": "true",
+                            "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                            "wantAuthnRequestsSigned": "false",
+                            "addExtensionsElementWithKeyInfo": "false",
+                            "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                        },
+                        "baseDn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans"
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.readonly
+    delete:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Delete SAML Identity Provider
+      description: Delete SAML Identity Provider
+      operationId: delete-saml-identity-provider
+      parameters:
+      - name: inum
+        in: path
+        description: Unique identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.delete
+  /idp/kc/saml:
+    get:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Retrieves SAML Identity Provider
+      description: Retrieves SAML Identity Provider
+      operationId: get-saml-identity-provider
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: pattern
+        in: query
+        description: Search pattern
+        schema:
+          type: string
+          default: ""
+      - name: startIndex
+        in: query
+        description: The 1-based index of the first query result
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: sortBy
+        in: query
+        description: Attribute whose value will be used to order the returned response
+        schema:
+          type: string
+          default: inum
+      - name: sortOrder
+        in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
+        schema:
+          type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "applicationType=web,persistClientAuthorizations=true"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProviderPagedResult'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "start": 0,
+                        "totalEntriesCount": 3,
+                        "entriesCount": 3,
+                        "entries": [
+                            {
+                                "dn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans",
+                                "inum": "63350037-8ef7-471d-8447-c691063d8c19",
+                                "creatorId": "jans-admin-2",
+                                "name": "SAML_IDP_104",
+                                "displayName": "Test SAML IDP 104",
+                                "description": "SAML IDP 104 created using Rest API",
+                                "realm": "keycloak-internal-identity",
+                                "enabled": true,
+                                "providerId": "saml",
+                                "trustEmail": false,
+                                "storeToken": false,
+                                "addReadTokenRoleOnCreate": false,
+                                "authenticateByDefault": false,
+                                "linkOnly": false,
+                                "idpMetaDataFN": "63350037-8ef7-471d-8447-c691063d8c19-idp-metadata.xml",
+                                "config": {
+                                    "validateSignature": "false",
+                                    "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                                    "postBindingLogout": "true",
+                                    "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                                    "postBindingResponse": "true",
+                                    "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                                    "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                                    "loginHint": "false",
+                                    "enabledFromMetadata": "true",
+                                    "postBindingAuthnRequest": "true",
+                                    "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                                    "wantAuthnRequestsSigned": "false",
+                                    "addExtensionsElementWithKeyInfo": "false",
+                                    "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                                },
+                                "baseDn": "inum=63350037-8ef7-471d-8447-c691063d8c19,ou=trusted-idp,o=jans"
+                            },
+                            {
+                                "dn": "inum=8254fc20-5322-41e0-b398-7c8b2f86f5e5,ou=trusted-idp,o=jans",
+                                "inum": "8254fc20-5322-41e0-b398-7c8b2f86f5e5",
+                                "creatorId": "jans-admin-2",
+                                "name": "SAML_IDP_102",
+                                "displayName": "Test SAML IDP 101",
+                                "description": "SAML IDP 101 created using Rest API",
+                                "realm": "keycloak-internal-identity",
+                                "enabled": true,
+                                "providerId": "saml",
+                                "trustEmail": false,
+                                "storeToken": false,
+                                "addReadTokenRoleOnCreate": false,
+                                "authenticateByDefault": false,
+                                "linkOnly": false,
+                                "config": {
+                                    "validateSignature": "false",
+                                    "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                                    "postBindingLogout": "true",
+                                    "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                                    "postBindingResponse": "true",
+                                    "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                                    "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                                    "loginHint": "false",
+                                    "enabledFromMetadata": "true",
+                                    "postBindingAuthnRequest": "true",
+                                    "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                                    "wantAuthnRequestsSigned": "false",
+                                    "addExtensionsElementWithKeyInfo": "false",
+                                    "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                                },
+                                "baseDn": "inum=8254fc20-5322-41e0-b398-7c8b2f86f5e5,ou=trusted-idp,o=jans"
+                            },
+                            {
+                                "dn": "inum=ff28d5af-80a5-4ce2-8157-bd1a37ea4a3c,ou=trusted-idp,o=jans",
+                                "inum": "ff28d5af-80a5-4ce2-8157-bd1a37ea4a3c",
+                                "creatorId": "jans-admin-2",
+                                "name": "SAML_IDP_104",
+                                "displayName": "Test SAML IDP 104",
+                                "description": "SAML IDP 104 created using Rest API",
+                                "realm": "keycloak-internal-identity",
+                                "enabled": true,
+                                "providerId": "saml",
+                                "trustEmail": false,
+                                "storeToken": false,
+                                "addReadTokenRoleOnCreate": false,
+                                "authenticateByDefault": false,
+                                "linkOnly": false,
+                                "idpMetaDataFN": "ff28d5af-80a5-4ce2-8157-bd1a37ea4a3c-idp-metadata.xml",
+                                "config": {
+                                    "validateSignature": "false",
+                                    "signingCertificate": "MIIDpzCCAo8CFEJ8QVFd7aejj6RdC9XqybNbp2eBMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQzWhcNMjQxMDExMTU0NTQzWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAoXB81Zlr2ZB1jnplGZ+w3ivhXqLLh+CQWv6DwmtL I2UVHiRZUeSUgWt50JCE4lALt3I1cTqi/uDqtB+nn9/HfxOa73KsJ6/7bY8nWsT+ j1na25H3XnPS4l6c9/WNQAw7VtAHnUvriyzSxD6Ph4Cyodu76yAVxVetgtBEwA/5 /mMVUVoJuVbQ/OvhhM+/Q/gfLgKQxto2Hw3S+wBkBOQXVBLa4Rie6+xXk5VnpAu+ HlqKwxtxdrVWVzImq5YUk/hc7itTi1kfowvXNhrZE0XdzDtiI8Fmxvv2Z2CHCA4E clSuLFmSs82z/6URbzEuxxSk6j0YwjDi/GFkCpdNBbQYDwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQAxO1WswGI8jtTTqw2WgDv/bR5/a0ykZB2TQPKtD1vaIaL9m/jI 5i0Fag3wsJYKiS/eKEXyNtEBDod3164BBan6EBh/AWdIzVHVbCaLocZuLGXINejn 2oB9BrSfYp4rG7SQgMxdh7j+a8VAGBYSUfGqqAwrl4h1QgyNs6qI6eooKTIDMpMZ shSFeKuyeC1plnwqer3BPRCPq0PliILmb9nLhhrLbm5VWrhQbYLZ2Mn8BLiZzEnE TODhtM6cR57DW3BLEvjVxlDAUigvYJihmAbfvgyCSNM2NsylJmQUB7PSO4BTknqG FfQeqvuEiE02g70E+s4HrQH2RSij9w+zl1eQ",
+                                    "postBindingLogout": "true",
+                                    "singleLogoutServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SLO",
+                                    "postBindingResponse": "true",
+                                    "nameIDPolicyFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+                                    "idpEntityId": "https://pujavs-crack-flounder.gluu.info/idp/shibboleth",
+                                    "loginHint": "false",
+                                    "enabledFromMetadata": "true",
+                                    "postBindingAuthnRequest": "true",
+                                    "singleSignOnServiceUrl": "https://pujavs-crack-flounder.gluu.info/idp/profile/SAML2/POST/SSO",
+                                    "wantAuthnRequestsSigned": "false",
+                                    "addExtensionsElementWithKeyInfo": "false",
+                                    "encryptionPublicKey": "MIIDpzCCAo8CFCp0GLTRVjJH2zR9GaTtrRct9bwUMA0GCSqGSIb3DQEBCwUAMIGP MQswCQYDVQQGEwJJTjELMAkGA1UECAwCTUgxDzANBgNVBAcMBm11bWJhaTEaMBgG A1UECgwRR2x1dSBJRFAgU2VydmVyIDIxKDAmBgNVBAMMH3B1amF2cy1jcmFjay1m bG91bmRlci5nbHV1LmluZm8xHDAaBgkqhkiG9w0BCQEWDXB1amFAZ2x1dS5vcmcw HhcNMjMxMDEyMTU0NTQyWhcNMjQxMDExMTU0NTQyWjCBjzELMAkGA1UEBhMCSU4x CzAJBgNVBAgMAk1IMQ8wDQYDVQQHDAZtdW1iYWkxGjAYBgNVBAoMEUdsdXUgSURQ IFNlcnZlciAyMSgwJgYDVQQDDB9wdWphdnMtY3JhY2stZmxvdW5kZXIuZ2x1dS5p bmZvMRwwGgYJKoZIhvcNAQkBFg1wdWphQGdsdXUub3JnMIIBIjANBgkqhkiG9w0B AQEFAAOCAQ8AMIIBCgKCAQEAsCBv4UBQPkXvnwc9IaZHMpn79Dqh6wyGesTPslsQ EbRp3L4aX5xxu/0BKeH4MJhna9rg4ikEP9KPZ7bjXuALXjqqwADnDKYp+EbI/hC5 K2X4wcFb2BGfSlUb4OdzeozSF6MJWC7nfB0o6FTgMlpHRM4A/UymxF8koqy19ESj c1GK+rD7steLhIVQ8tzO80rgkGWlixKf1FoTZw5Rhcpl0h0b15AUVGcFWSx1On1F VLZEeYrLI5vMt2QMHVhO+OfB7cioS2IGYIWeO2IW8ePTwAw/bD/ZzQP6rPYyKYAh newGXcdIjewafrXvwKiX3hUF26SJSupX6xY+W68gahi7YwIDAQABMA0GCSqGSIb3 DQEBCwUAA4IBAQB5PnQeGcMsnGkEOtETvdIKm67C2a2+OWoHyVhZtlYvHSlbFIx6 FAt3/ufX8vJ5N0+D4ReQw5tT3VdDhWhvhrshG50HKR1bF1NIW152v/0B1BxjyhQo p0M6Z2uaCOP7zUd3ZLEIsNH3tqbFV1d+DVLfZDBCUAIOTTySkHWnBjVXlQ2ss63O +SBYBA0U61nxBggzt7UiXBJLyB5+CFafTD4tcGkHjIKLk1CrDPj/4d8d+9EETm0g bVa4bIL1Qb1mUcxQ75xdeuSSp+0u/nk/QBpasFH4uQQWQ0KNviSREl3ShqerybPM EoU3+f42DbxGNwTmEPULvuQAK1k0sxcHuB5I"
+                                },
+                                "baseDn": "inum=ff28d5af-80a5-4ce2-8157-bd1a37ea4a3c,ou=trusted-idp,o=jans"
+                            }
+                        ]
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.readonly
+  /idp/kc/saml/sp-metadata-file/{inum}:
+    get:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Get SAML SP Metadata Endpoint URL
+      description: Get SAML SP Metadata Endpoint URL
+      operationId: get-saml-sp-metadata-url
+      parameters:
+      - name: inum
+        in: path
+        description: Unique identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.readonly
+  /idp/kc/saml/sp-metadata/{inum}:
+    get:
+      tags:
+      - Jans - SAML Identity Broker
+      summary: Get SAML SP Metadata as Json
+      description: Get SAML SP Metadata as Json
+      operationId: get-saml-sp-metadata-json
+      parameters:
+      - name: inum
+        in: path
+        description: Unique identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonNode'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/idp/saml.readonly
+components:
+  schemas:
+    IdpAppConfiguration:
+      type: object
+      properties:
+        applicationName:
+          type: string
+        trustedIdpDn:
+          type: string
+        realmDn:
+          type: string
+        enabled:
+          type: boolean
+        serverUrl:
+          type: string
+        realm:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+        grantType:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        idpRootDir:
+          type: string
+        idpMetadataRootDir:
+          type: string
+        idpMetadataTempDir:
+          type: string
+        idpMetadataFilePattern:
+          type: string
+        idpMetadataFile:
+          type: string
+        spMetadataUrl:
+          type: string
+        spMetadataRootDir:
+          type: string
+        spMetadataTempDir:
+          type: string
+        spMetadataFilePattern:
+          type: string
+        spMetadataFile:
+          type: string
+        ignoreValidation:
+          type: boolean
+    JsonPatch:
+      type: object
+    Realm:
+      required:
+      - displayName
+      - name
+      type: object
+      properties:
+        dn:
+          type: string
+        inum:
+          type: string
+        name:
+          type: string
+        displayName:
+          maxLength: 60
+          minLength: 0
+          type: string
+        enabled:
+          type: boolean
+        baseDn:
+          type: string
+    BrokerIdentityProviderForm:
+      required:
+      - identityProvider
+      type: object
+      properties:
+        identityProvider:
+          $ref: '#/components/schemas/IdentityProvider'
+        metaDataFile:
+          type: object
+    IdentityProvider:
+      required:
+      - creatorId
+      - description
+      - displayName
+      - name
+      - realm
+      type: object
+      properties:
+        dn:
+          type: string
+        inum:
+          type: string
+        creatorId:
+          type: string
+        name:
+          type: string
+        displayName:
+          maxLength: 60
+          minLength: 0
+          type: string
+        description:
+          maxLength: 500
+          minLength: 0
+          type: string
+        realm:
+          type: string
+        enabled:
+          type: boolean
+        providerId:
+          type: string
+        trustEmail:
+          type: boolean
+        storeToken:
+          type: boolean
+        addReadTokenRoleOnCreate:
+          type: boolean
+        authenticateByDefault:
+          type: boolean
+        linkOnly:
+          type: boolean
+        firstBrokerLoginFlowAlias:
+          type: string
+        postBrokerLoginFlowAlias:
+          type: string
+        spMetaDataURL:
+          type: string
+        spMetaDataLocation:
+          type: string
+        idpMetaDataURL:
+          type: string
+        idpMetaDataLocation:
+          type: string
+        status:
+          type: string
+          enum:
+          - active
+          - inactive
+          - expired
+          - register
+        validationStatus:
+          type: string
+          enum:
+          - In Progress
+          - Success
+          - Scheduled
+          - Failed
+        validationLog:
+          type: array
+          items:
+            type: string
+        config:
+          type: object
+          additionalProperties:
+            type: string
+        baseDn:
+          type: string
+    IdentityProviderPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityProvider'
+    JsonNode:
+      type: object
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "https://{op-hostname}/.../token"
+          scopes:
+            https://jans.io/idp/config.readonly: View Jans Identity Broker config
+              related information
+            https://jans.io/idp/config.write: Manage Jans Identity Broker config related
+              information
+            https://jans.io/idp/realm.readonly: View Identity Broker realm related
+              information
+            https://jans.io/idp/realm.write: Manage Identity Broker realm related
+              information
+            https://jans.io/idp/saml.readonly: View Identity Broker SAML Identity
+              Broker related information
+            https://jans.io/idp/saml.write: Manage Identity Broker SAML Identity Broker
+              related information
