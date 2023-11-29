@@ -123,15 +123,7 @@ public class CustomScriptService extends AbstractCustomScriptService {
             filter = Filter.createANDFilter(searchFilter, typeFilter);
         }
         
-       
-        Filter[] allFilters = filter.getFilters();
-        log.info("\n allFilters():{}", allFilters);
-        if(allFilters!=null && allFilters.length>0) {
-            for(Filter fil : allFilters) {
-                log.info("fil.getType():{}, fil.getAttributeName():{}, fil.getAssertionValue():{}, fil.getAssertionValue().getClass():{}", fil.getType(), fil.getAttributeName(), fil.getAssertionValue(),(fil.getAssertionValue()!=null? fil.getAssertionValue().getClass():" "));
-            }
-        }
-        log.info("Searching CustomScript Flow with filter:{}", filter);
+        log.trace("Searching CustomScript Flow with filter:{}", filter);
         return persistenceEntryManager.findPagedEntries(baseDn(), CustomScript.class, filter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
