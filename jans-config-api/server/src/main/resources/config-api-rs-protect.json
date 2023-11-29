@@ -2412,6 +2412,144 @@
           ]
         }
       ]
+    },
+    {
+      "path": "/jans-config-api/idp/config",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.62",
+              "name": "https://jans.io/idp/config.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.63",
+              "name": "https://jans.io/idp/config.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "POST","PUT","PATCH"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.63",
+              "name": "https://jans.io/idp/config.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/idp/kc/realm",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.64",
+              "name": "https://jans.io/idp/realm.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.65",
+              "name": "https://jans.io/idp/realm.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "POST","PUT","PATCH","DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.65",
+              "name": "https://jans.io/idp/realm.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/idp/kc/saml",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.66",
+              "name": "https://jans.io/idp/saml.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.67",
+              "name": "https://jans.io/idp/saml.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "POST","PUT","PATCH","DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.67",
+              "name": "https://jans.io/idp/saml.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

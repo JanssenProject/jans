@@ -10,7 +10,6 @@ info:
 servers:
 - url: https://jans.local.io
   description: The Jans server
-  variables: {}
 tags:
 - name: Attribute
 - name: Default Authentication Method
@@ -7519,8 +7518,6 @@ components:
       properties:
         dn:
           type: string
-        selected:
-          type: boolean
         inum:
           type: string
         sourceAttribute:
@@ -7609,19 +7606,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanEdit:
-          type: boolean
         adminCanView:
-          type: boolean
-        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
+        userCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
+        userCanAccess:
+          type: boolean
         whitePagesCanView:
+          type: boolean
+        selected:
           type: boolean
         baseDn:
           type: string
@@ -8422,6 +8421,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8431,8 +8432,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9767,8 +9766,6 @@ components:
         creationDate:
           type: string
           format: date-time
-        persisted:
-          type: boolean
         user:
           $ref: '#/components/schemas/User'
         ttl:
@@ -9776,6 +9773,8 @@ components:
           format: int32
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

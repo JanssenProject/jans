@@ -57,6 +57,30 @@ class JansSamlInstaller(JettyInstaller):
         self.idp_config_fn = os.path.join(self.templates_folder, 'keycloak.conf')
         self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
 
+        #jans-idp
+        self.jans_idp_enabled = 'true'
+        self.jans_idp_realm = 'realm:tobedefined'
+        self.jans_idp_client_id = 'client_id:tobecreated'
+        self.jans_idp_client_secret = 'client_secret:tobecreated'
+        self.jans_idp_grant_type = 'grant_type:tobedefined'
+        self.jans_idp_user_name = 'user_name:tobedefined'
+        self.jans_idp_password = 'password:tobedefined'
+        self.jans_idp_idp_root_dir = 'root_dir:tobedefined'
+        self.jans_idp_idp_metadata_file_pattern = 'metadata_file_pattern:tobedefined'
+        self.jans_idp_ignore_validation = 'true'
+        self.jans_idp_idp_metadata_file = 'metadata_file:tobedefined'
+        self.jans_idp_ldif_config_fn = os.path.join(self.output_folder, 'jans-idp-configuration.ldif')
+        self.jans_idp_config_json_fn = os.path.join(self.templates_folder, 'jans-idp-config.json')
+        self.jans_idp_server_url = 'server_url:tobedefined'
+        # IDP DIRS
+        self.jans_idp_idp_metadata_root_dir = os.path.join(self.idp_config_root_dir, 'idp/metadata') 
+        self.jans_idp_idp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'idp/temp_metadata')
+
+        # SP DIRS
+        self.jans_idp_sp_metadata_root_dir = os.path.join(self.idp_config_root_dir, 'sp/metadata')
+        self.jans_idp_sp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'sp/temp_metadata')
+
+
         # change this when we figure out this
         Config.keycloack_hostname = 'localhost'
 
@@ -69,25 +93,31 @@ class JansSamlInstaller(JettyInstaller):
 
     def render_import_templates(self):
         self.logIt("Preparing base64 encodings configuration files")
+
         self.renderTemplateInOut(self.config_json_fn, self.templates_folder, self.output_folder, pystring=True)
         Config.templateRenderingDict['saml_dynamic_conf_base64'] = self.generate_base64_ldap_file(
-                os.path.join(
-                    self.output_folder,
-                    os.path.basename(self.config_json_fn)
-                )
+                os.path.join(self.output_folder,os.path.basename(self.config_json_fn))
             )
-
         self.renderTemplateInOut(self.ldif_config_fn, self.templates_folder, self.output_folder)
-        self.dbUtils.import_ldif([self.ldif_config_fn])
+
+        self.renderTemplateInOut(self.jans_idp_config_json_fn, self.templates_folder, self.output_folder, pystring=True)
+        Config.templateRenderingDict['jans_idp_dynamic_conf_base64'] = self.generate_base64_ldap_file(
+                os.path.join(self.output_folder,os.path.basename(self.jans_idp_config_json_fn))
+            )
+        self.renderTemplateInOut(self.jans_idp_ldif_config_fn, self.templates_folder, self.output_folder)
+
+        self.dbUtils.import_ldif([self.ldif_config_fn, self.jans_idp_ldif_config_fn])
 
 
     def create_folders(self):
         for saml_dir in (self.idp_root_dir, self.idp_config_root_dir, self.idp_config_temp_meta_dir, self.idp_config_meta_dir,
                         self.idp_config_data_dir, self.idp_config_log_dir, self.idp_config_providers_dir,
+                        self.jans_idp_idp_metadata_root_dir, self.jans_idp_sp_metadata_root_dir, self.jans_idp_sp_metadata_temp_dir,
                 ):
             self.createDirs(saml_dir)
 
         self.chown(self.idp_root_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+        self.run([paths.cmd_chmod, '0760', saml_dir])
 
     def create_scim_client(self):
         result = self.check_clients([('saml_scim_client_id', '2100.')])
