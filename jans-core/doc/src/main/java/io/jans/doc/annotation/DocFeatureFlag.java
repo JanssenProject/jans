@@ -8,9 +8,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.SOURCE)
 public @interface DocFeatureFlag {
-    String description() default "None";
+    String description();
 
     boolean isRequired() default false;
 
-    String defaultValue() default "None";
+    String defaultValue();
 }
