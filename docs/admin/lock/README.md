@@ -41,28 +41,29 @@ decisions given the same inputs.
 
 Another critical optimization was to move the PIP to the edge, so the PDP
 has all the data it needs to make a decision. This aligns with a principle that
-each microservice is well-encapsulated--all logic and data is encapsulated into
-a single deployment unit.
+each microservice has all logic and data encapsulated into a single
+deployment unit.
 
 ![Jans Lock Toplogy](../../assets/lock-design-diagram-02.png)
 
 To empower this cloud native authorization pattern, Janssen leverages a
 component governed under the Linux Foundation: [OPA](https://openpolicyagent.org),
-a project at the [CNCF](https://cncf.io). OPA is a popular PDP, whose popularity
+a project at the [CNCF](https://cncf.io). OPA is a popular PDP, whose adoption
 grew significantly in response to the need for granular policies for Kubernetes
 access control. The Jans Lock solution pushes token data from Auth Server to OPA,
 enabling authorization based on real time information from the OAuth
 infrastructure. In order to use Lock, admins will have to do a few things:
 
-  * [Enable Lock in Auth Server](./lock_token_stream.md)
-  * [Configure a Lock client instance](./lock_client.md)
+  * [Enable Lock in Auth Server](./lock_as_config.md)
+  * [Configure a Lock client instance](./lock_client_config.md)
   * [Author Rego policies based on OAuth token data](./lock_opa_policies.md)
 
-Lock is a helper demon that calls the OPA API to update it with the latest
-data, policies, and public keys. Lock consumes updates from an Auth Server token
-stream, which contains the reference ids of any new or revoked tokens. Lock
-retrieves the data (i.e. token value) for a given token reference id from the
-database service.
+The Lock helper demon also calls the OPA API to update it with the latest
+policies (from Github), and public keys (from any JWKS endpoint). The
+Auth Server token stream contains only the reference ids of any new or revoked
+tokens. Lock retrieves the data (i.e. token value) for a given token reference
+id from the database service. This design minimizes the traffic on the message
+queue and leverages cloud data distribution topologies.
 
 ![Jans Lock Toplogy](../../assets/lock-design-diagram-01.png)
 
@@ -96,3 +97,5 @@ and API gateway (which is better for North-South web ingress). TLS is required
 to protect the bearer token. MTLS is even better.
 
 ![Jans Lock sample toplogy](../../assets/lock-east-west-service-mesh-diagram.png)
+
+[Next](./lock_as_config.md)
