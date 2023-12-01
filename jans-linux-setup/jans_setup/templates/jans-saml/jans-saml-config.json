@@ -1,22 +1,38 @@
 {
   "applicationName":"saml",
   "samlTrustRelationshipDn":"ou=trustRelationships,o=jans",
-  "samlEnabled": "${saml_enabled}",
+  "trustedIdpDn":"ou=trusted-idp,o=jans",
+  "enabled": "true",
   "selectedIdp": "keycloak",
-  "idpRootDir": "${idp_root_dir}",
+  "serverUrl":"https://${jans_idp_server_url}",
+  "realm": "${jans_idp_realm}",
+  "clientId": "${jans_idp_client_id}",
+  "clientSecret": "${jans_idp_client_secret}",
+  "grantType": "${jans_idp_grant_type}",
+  "username": "${jans_idp_user_name}",
+  "password": "${jans_idp_password}",  
+  "spMetadataUrl":"/realms/%s/broker/%s/endpoint/descriptor",
+  "idpRootDir": "/opt/jans/idp/",
+  "idpMetadataRootDir": "/opt/idp/configs/keycloak/idp/metadata",
+  "idpMetadataTempDir": "/opt/idp/configs/keycloak/idp/temp_metadata",
+  "spMetadataRootDir": "/opt/idp/configs/keycloak/sp/metadata",
+  "spMetadataTempDir": "/opt/idp/configs/keycloak/sp/temp_metadata", 
   "idpMetadataFilePattern":"%s-idp-metadata.xml",
   "spMetadataFilePattern":"%s-sp-metadata.xml",
   "spMetadataFile":"sp-metadata.xml",
-  "configGeneration": "${config_generation}",
-  "ignoreValidation": "${ignore_validation}",
-  "idpConfigs":[
-    {
-      "configId":"${idp_config_id}",
-      "rootDir":"${idp_config_root_dir}",
-      "enabled": "${idp_config_enabled}",
-      "metadataTempDir": "${idp_config_temp_meta_dir}",
-      "metadataDir":"${idp_config_meta_dir}",
-      "metadataFilePattern":"%s-idp-metadata.xml"
-    }
-  ]
+  "ignoreValidation": "false"
 }
+
+
+
+
+ 
+  
+
+ 
+  "idpMetadataFile": "${jans_idp_idp_metadata_file}",
+  
+
+  
+,
+  "ignoreValidation": "${jans_idp_ignore_validation}"
