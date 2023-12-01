@@ -511,7 +511,6 @@
         "rootDir": "/opt/jans/jetty/jans-auth/agama",
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
-        "serializerType": "KRYO",
         "maxItemsLoggedInCollections": 9,
         "pageMismatchErrorPage": "mismatch.ftlh",
         "interruptionErrorPage": "timeout.ftlh",
@@ -520,6 +519,10 @@
         "bridgeScriptPage": "agama.xhtml",
         "defaultResponseHeaders": {
             "Cache-Control": "max-age=0, no-store"
+        },
+        "serializeRules": {
+          "JAVA": ["java", "sun", "com.sun", "jdk"],
+          "KRYO": []
         }
     },
     "blockWebviewAuthorizationEnabled": false,
