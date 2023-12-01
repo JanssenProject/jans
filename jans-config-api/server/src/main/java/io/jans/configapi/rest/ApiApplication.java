@@ -31,7 +31,10 @@ import jakarta.ws.rs.core.Application;
 @OpenAPIDefinition(info = @Info(title = "Jans Config API", contact =
 @Contact(name = "Contact", url = "https://github.com/JanssenProject/jans/discussions"),
 
-        license = @License(name = "License", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
+        license = @License(name = "License", url = "https://github" +
+                ".com/JanssenProject/jans/blob/main/LICENSE"),
+
+        version = "OAS Version"),
 
         tags = { @Tag(name = "Attribute"), @Tag(name = "Default Authentication Method"),
                 @Tag(name = "Cache Configuration"), @Tag(name = "Cache Configuration – Memcached"),
