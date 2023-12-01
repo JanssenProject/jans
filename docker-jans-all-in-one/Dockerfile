@@ -40,7 +40,7 @@ FROM ${JANS_LINK_IMAGE} AS jans-link-src
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.8@sha256:e82fb905ca6efffcdb1b0ed58f207b0ce91aeada78c218ae7dbb16bb31635728
+FROM bellsoft/liberica-openjdk-alpine:19-37@sha256:246f5b1ec383361cccbc49cab71a6a1496e6ee786ac1e6511eff33a54211c980
 
 # hadolint ignore=DL3018
 RUN apk update \
