@@ -195,10 +195,19 @@ def transform_auth_dynamic_config_hook(conf, manager):
         })
         should_update = True
 
-    # avoid setting agama configuration root dir based on java system variable
-    if "rootDir" not in conf["agamaConfiguration"]:
-        conf["agamaConfiguration"]["rootDir"] = "/opt/jans/jetty/jans-auth/agama"
-        should_update = True
+    # add missing agama-level keys
+    for new_key, value in [
+        # avoid setting agama configuration root dir based on java system variable
+        ("rootDir", "/opt/jans/jetty/jans-auth/agama"),
+        # add serializers
+        ("serializeRules", {
+            "JAVA": ["java", "sun", "com.sun", "jdk"],
+            "KRYO": [],
+        }),
+    ]:
+        if new_key not in conf["agamaConfiguration"]:
+            conf["agamaConfiguration"][new_key] = value
+            should_update = True
 
     # return the conf and flag to determine whether it needs update or not
     return conf, should_update
