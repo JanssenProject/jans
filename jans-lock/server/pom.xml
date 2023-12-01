@@ -148,6 +148,16 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- MQ -->
+		<dependency>
+		    <groupId>org.postgresql</groupId>
+		    <artifactId>postgresql</artifactId>
+		</dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
+
 		<!-- Test -->
 		<dependency>
 			<groupId>org.jboss.weld</groupId>
@@ -183,7 +193,7 @@
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+    </dependencies>
 
 	<reporting>
 		<plugins>
