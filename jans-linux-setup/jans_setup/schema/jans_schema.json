@@ -3630,37 +3630,38 @@
       "x_origin": "Jans created attribute"
     },
 	{
-		"desc": "selectedSingleSignOnService",
-		"equality": "caseIgnoreMatch",
-		"names": [
-			"selectedSingleSignOnService"
-		],
-		"oid": "jansAttr",
-		"substr": "caseIgnoreSubstringsMatch",
-		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-		"x_origin": "Gluu created attribute"
+      "desc":"selectedSingleSignOnService",
+      "equality":"caseIgnoreMatch",
+      "names":[
+        "selectedSingleSignOnService"
+      ],
+      "oid":"jansAttr",
+      "substr":"caseIgnoreSubstringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin":"Gluu created attribute"
 	},
 	{
-		"desc": "supportedSingleSignOnServices",
-		"equality": "caseIgnoreMatch",
-		"names": [
-			"supportedSingleSignOnServices"
-		],
-		"oid": "jansAttr",
-		"substr": "caseIgnoreSubstringsMatch",
-		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-		"x_origin": "Gluu created attribute"
-		},       {
-            "desc": "signingCertificates",
-            "equality": "caseIgnoreMatch",
-            "names": [
-                "signingCertificates"
-            ],
-            "oid": "jansAttr",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-            "x_origin": "Gluu created attribute"
-        }
+      "desc":"supportedSingleSignOnServices",
+      "equality":"caseIgnoreMatch",
+      "names":[
+      	"supportedSingleSignOnServices"
+      ],
+      "oid":"jansAttr",
+      "substr":"caseIgnoreSubstringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin":"Gluu created attribute"
+	},
+	{
+      "desc":"signingCertificates",
+      "equality":"caseIgnoreMatch",
+      "names":[
+      	"signingCertificates"
+      ],
+      "oid":"jansAttr",
+      "substr":"caseIgnoreSubstringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin":"Gluu created attribute"
+	}
   ],
   "objectClasses": [
     {
@@ -4932,6 +4933,9 @@
         "realm",
         "jansEnabled",
         "providerId",
+		"selectedSingleSignOnService",
+		"supportedSingleSignOnServices",
+		"signingCertificates",
         "trustEmail",
         "storeToken",
         "addReadTokenRoleOnCreate",

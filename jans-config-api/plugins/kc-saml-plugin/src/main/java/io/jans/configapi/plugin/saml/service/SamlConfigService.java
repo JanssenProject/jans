@@ -3,7 +3,6 @@ package io.jans.configapi.plugin.saml.service;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.configapi.plugin.saml.configuration.SamlConfigurationFactory;
 import io.jans.configapi.plugin.saml.model.config.SamlAppConfiguration;
-import io.jans.configapi.plugin.saml.model.config.IdpConfig;
 import io.jans.configapi.plugin.saml.model.config.SamlConf;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.exception.InvalidConfigurationException;
@@ -28,6 +27,7 @@ public class SamlConfigService {
     @Inject
     SamlConfigurationFactory samlConfigurationFactory;
 
+    // Config handling methods
     public SamlConf findSamlConf() {
         final String dn = samlConfigurationFactory.getSamlConfigurationDn();
         if (StringUtils.isBlank(dn)) {
@@ -50,6 +50,38 @@ public class SamlConfigService {
         return getSamlConf().getDynamicConf();
     }
 
+    // Utility methods
+    public String getTrustRelationshipDn() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String trustRelationshipDn = null;
+        if (samlAppConfiguration != null) {
+            trustRelationshipDn = samlAppConfiguration.getSamlTrustRelationshipDn();
+        }
+        return trustRelationshipDn;
+    }
+
+    public String getTrustedIdpDn() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String trustedIdpDn = null;
+        if (samlAppConfiguration != null) {
+            trustedIdpDn = samlAppConfiguration.getTrustedIdpDn();
+        }
+        return trustedIdpDn;
+    }
+
+    public boolean isSamlEnabled() {
+        final SamlConf samlConf = getSamlConf();
+        logger.debug("samlConf.getDynamicConf():{}", samlConf.getDynamicConf());
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        boolean isSamlEnabled = false;
+        if (samlAppConfiguration != null) {
+            isSamlEnabled = samlAppConfiguration.isEnabled();
+        }
+        return isSamlEnabled;
+    }
+
     public String getSelectedIdp() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -59,16 +91,89 @@ public class SamlConfigService {
         }
         return selectedIdp;
     }
-
-    public boolean isSamlEnabled() {
+    
+    public String getServerUrl() {
         final SamlConf samlConf = getSamlConf();
-        logger.debug("samlConf.getDynamicConf():{}", samlConf.getDynamicConf());
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
-        boolean isSamlEnabled = false;
+        String serverUrl = null;
         if (samlAppConfiguration != null) {
-            isSamlEnabled = samlAppConfiguration.isSamlEnabled();
+            serverUrl = samlAppConfiguration.getServerUrl();
         }
-        return isSamlEnabled;
+        return serverUrl;
+    }
+    
+    public String getRealm() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String realm = null;
+        if (samlAppConfiguration != null) {
+            realm = samlAppConfiguration.getRealm();
+        }
+        return realm;
+    }
+    
+    public String getClientId() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String clientId = null;
+        if (samlAppConfiguration != null) {
+            clientId = samlAppConfiguration.getClientId();
+        }
+        return clientId;
+    }
+    
+    public String getClientSecret() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String clientSecret = null;
+        if (samlAppConfiguration != null) {
+            clientSecret = samlAppConfiguration.getClientSecret();
+        }
+        return clientSecret;
+    }
+    
+    public String getGrantType() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String grantType = null;
+        if (samlAppConfiguration != null) {
+            grantType = samlAppConfiguration.getGrantType();
+        }
+        return grantType;
+    }
+    
+    public String getUsername() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String username = null;
+        if (samlAppConfiguration != null) {
+            username = samlAppConfiguration.getUsername();
+        }
+        return username;
+    }
+    
+    public String getPassword() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String password = null;
+        if (samlAppConfiguration != null) {
+            password = samlAppConfiguration.getPassword();
+        }
+        return password;
+    }
+
+    public String getSpMetadataUrl(String realm, String name) {
+        logger.debug("Get SP Metadata Url - realm:{}, name:{}", realm, name);
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String spMetadataUrl = null;
+        if (samlAppConfiguration != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(samlAppConfiguration.getServerUrl()).append(samlAppConfiguration.getSpMetadataUrl());
+            spMetadataUrl = String.format(sb.toString(), realm, name);
+        }
+        logger.debug("SP Metadata Url - spMetadataUrl:{}", spMetadataUrl);
+        return spMetadataUrl;
     }
 
     public String getIdpRootDir() {
@@ -81,14 +186,64 @@ public class SamlConfigService {
         return idpRootDir;
     }
 
-    public String getTrustRelationshipDn() {
+    public String getIdpMetadataDir() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
-        String trustRelationshipDn = null;
+        String idpMetadataDir = null;
         if (samlAppConfiguration != null) {
-            trustRelationshipDn = samlAppConfiguration.getSamlTrustRelationshipDn();
+            idpMetadataDir = samlAppConfiguration.getIdpMetadataDir();
         }
-        return trustRelationshipDn;
+        return idpMetadataDir;
+    }
+
+    public String getIdpMetadataTempDir() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String idpMetadataTempDir = null;
+        if (samlAppConfiguration != null) {
+            idpMetadataTempDir = samlAppConfiguration.getIdpMetadataTempDir();
+        }
+        return idpMetadataTempDir;
+    }
+
+    public String getIdpMetadataFilePattern() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String idpMetadataFilePattern = null;
+        if (samlAppConfiguration != null) {
+            idpMetadataFilePattern = samlAppConfiguration.getIdpMetadataFilePattern();
+        }
+        return idpMetadataFilePattern;
+    }
+
+    public String getIdpMetadataFile() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String idpMetadataFile = null;
+        if (samlAppConfiguration != null) {
+            idpMetadataFile = samlAppConfiguration.getIdpMetadataFile();
+        }
+        return idpMetadataFile;
+    }
+
+    public String getSpMetadataDir() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String spMetadataDir = null;
+        if (samlAppConfiguration != null) {
+            spMetadataDir = samlAppConfiguration.getSpMetadataDir();
+        }
+        return spMetadataDir;
+    }
+
+    public String getSpMetadataTempDir() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String spMetadataTempDir = null;
+        if (samlAppConfiguration != null) {
+            spMetadataTempDir = samlAppConfiguration.getSpMetadataTempDir();
+        }
+        return spMetadataTempDir;
     }
 
     public String getSpMetadataFilePattern() {
@@ -110,70 +265,15 @@ public class SamlConfigService {
         }
         return spMetadataFile;
     }
-
-    public IdpConfig getSelectedIdpConfig() {
+    
+    public boolean isIgnoreValidation() {
         final SamlConf samlConf = getSamlConf();
-
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
-        IdpConfig selectedIdpConfig = null;
+        boolean ignoreValidation = false;
         if (samlAppConfiguration != null) {
-            String selectedIdp = samlAppConfiguration.getSelectedIdp();
-            List<IdpConfig> idpConfigs = samlAppConfiguration.getIdpConfigs();
-            if (idpConfigs == null || idpConfigs.isEmpty()) {
-                return selectedIdpConfig;
-            }
-            selectedIdpConfig = idpConfigs.stream()
-                    .filter(e -> e.getConfigId() != null && e.getConfigId().equalsIgnoreCase(selectedIdp)).findAny().orElse(null);
+            ignoreValidation = samlAppConfiguration.isIgnoreValidation();
         }
-        return selectedIdpConfig;
-    }
-
-    public String getSelectedIdpConfigRootDir() {
-        String rootDir = null;
-        IdpConfig selectedIdpConfig = getSelectedIdpConfig();
-
-        if (selectedIdpConfig == null) {
-            return rootDir;
-        }
-
-        rootDir = selectedIdpConfig.getRootDir();
-        return rootDir;
-    }
-
-    public String getSelectedIdpConfigMetadataTempDir() {
-        String idpTempMetadataFolder = null;
-        IdpConfig selectedIdpConfig = getSelectedIdpConfig();
-
-        if (selectedIdpConfig == null) {
-            return idpTempMetadataFolder;
-        }
-
-        idpTempMetadataFolder = selectedIdpConfig.getMetadataTempDir();
-        return idpTempMetadataFolder;
-    }
-
-    public String getSelectedIdpConfigMetadataDir() {
-        String metadataDir = null;
-        IdpConfig selectedIdpConfig = getSelectedIdpConfig();
-
-        if (selectedIdpConfig == null) {
-            return metadataDir;
-        }
-
-        metadataDir = selectedIdpConfig.getMetadataDir();
-        return metadataDir;
-    }
-
-    public String getSelectedIdpConfigID() {
-        String configId = null;
-        IdpConfig selectedIdpConfig = getSelectedIdpConfig();
-
-        if (selectedIdpConfig == null) {
-            return configId;
-        }
-
-        configId = selectedIdpConfig.getConfigId();
-        return configId;
+        return ignoreValidation;
     }
 
     private SamlConf getSamlConf() {

@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.saml.service;
 
-import io.jans.configapi.plugin.saml.model.TrustRelationship;
 import io.jans.service.document.store.service.DocumentStoreService;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.service.LocalDocumentStoreService;
@@ -41,10 +40,6 @@ public class SamlIdpService {
 
     @Inject
     Logger logger;
-
-    @Inject
-    SamlConfigService samlConfigService;
-
     @Inject
     private DocumentStoreService documentStoreService;
 
@@ -52,13 +47,13 @@ public class SamlIdpService {
     private LocalDocumentStoreService localDocumentStoreService;
 
     private Schema samlSchema;
-    
+
     @PostConstruct
     public void create() {
         SAMLSchemaBuilder samlSchemaBuilder = new SAMLSchemaBuilder(SAML1Version.SAML_11);
         try {
             this.samlSchema = samlSchemaBuilder.getSAMLSchema();
-            logger.debug("samlSchema", samlSchema);
+            logger.debug("samlSchema:{}", samlSchema);
         } catch (Exception ex) {
             logger.error("Failed to load SAMLSchema - ", ex);
         }
@@ -68,88 +63,46 @@ public class SamlIdpService {
         return documentStoreService.getProviderType() == DocumentStoreType.LOCAL;
     }
 
-    public String getSpMetadataFilePath(String spMetaDataFN) {
-        if (StringUtils.isBlank(getIdpMetadataDir())) {
-            throw new InvalidConfigurationException("Failed to return IDP metadata file path as undefined!");
+    public String saveMetadataFile(String metadataTempDir, String metadataFileName, String documentStoreModuleName,
+            InputStream stream) {
+        logger.info("metadataTempDir:{}, metadataFileName:{}, documentStoreModuleName:{}, stream:{}", metadataTempDir,
+                metadataFileName, documentStoreModuleName, stream);
+
+        if (StringUtils.isBlank(metadataTempDir)) {
+            throw new InvalidConfigurationException("Failed to save file as metadataTempDir is null!");
         }
 
-        String idpMetadataFolder = getIdpMetadataDir();
-        return idpMetadataFolder + spMetaDataFN;
-    }
-
-    public String getIdpMetadataDir() {
-        if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataDir())) {
-            throw new InvalidConfigurationException("Failed to return IDP metadata file path as undefined!");
-        }
-        return samlConfigService.getSelectedIdpConfigMetadataDir() + File.separator;
-    }
-
-    public String getSpMetadataFile() {
-        if (StringUtils.isBlank(samlConfigService.getSpMetadataFile())) {
-            throw new InvalidConfigurationException("Failed to return IDP SP metadata file name as undefined!");
-        }
-        return samlConfigService.getSpMetadataFile();
-    }
-
-    public String getSpNewMetadataFileName(TrustRelationship trustRel) {
-        return getSpNewMetadataFileName(trustRel.getInum());
-    }
-
-    public String getSpNewMetadataFileName(String inum) {
-        String relationshipInum = StringHelper.removePunctuation(inum);
-        return String.format(samlConfigService.getSpMetadataFilePattern(), relationshipInum);
-    }
-
-    public String getIdpMetadataTempDir() {
-        if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataTempDir())) {
-            throw new InvalidConfigurationException("Failed to return IDP metadata Temp directory as undefined!");
+        if (StringUtils.isBlank(metadataFileName)) {
+            throw new InvalidConfigurationException("Failed to save file as metadataFileName is null!");
         }
 
-        return samlConfigService.getSelectedIdpConfigMetadataTempDir() + File.separator;
-    }
-
-    private String getTempMetadataFilename(String idpMetadataFolder, String fileName) {
-        logger.info("documentStoreService:{}, localDocumentStoreService:{}, idpMetadataFolder:{}, fileName:{}",
-                documentStoreService, localDocumentStoreService, idpMetadataFolder, fileName);
-        synchronized (SamlIdpService.class) {
-            String possibleTemp;
-            do {
-                possibleTemp = fileName + INumGenerator.generate(2);
-                logger.debug("possibleTemp:{}", possibleTemp);
-            } while (documentStoreService.hasDocument(idpMetadataFolder + possibleTemp));
-            return possibleTemp;
-        }
-    }
-
-    public String saveSpMetadataFile(String spMetadataFileName, InputStream stream) {
-        logger.info("spMetadataFileName:{}, stream:{}", spMetadataFileName, stream);
-
-        if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir())) {
-            throw new InvalidConfigurationException("Failed to save SP metadata file due to undefined!");
+        if (stream == null) {
+            throw new InvalidConfigurationException("Failed to save metadat as file is null!");
         }
 
-        String idpMetadataTempFolder = getIdpMetadataTempDir();
-        logger.debug("idpMetadataTempFolder:{}", idpMetadataTempFolder);
+        if (StringUtils.isBlank(documentStoreModuleName)) {
+            documentStoreModuleName = "SAML";
+        }
 
-        String tempFileName = getTempMetadataFilename(idpMetadataTempFolder, spMetadataFileName);
-        logger.debug("idpMetadataTempFolder:{}, tempFileName:{}", idpMetadataTempFolder, tempFileName);
+        String tempFileName = getTempMetadataFilename(metadataTempDir, metadataFileName);
+        logger.debug("metadataTempDir:{}, metadataFileName:{}", metadataTempDir, metadataFileName);
 
-        String spMetadataFile = idpMetadataTempFolder + tempFileName;
-        logger.debug("documentStoreService:{}, spMetadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
-                spMetadataFile, localDocumentStoreService);
+        String metadataFile = metadataTempDir + tempFileName;
+        logger.debug("documentStoreService:{}, metadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
+                metadataFile, localDocumentStoreService);
         try {
-            boolean result = documentStoreService.saveDocumentStream(spMetadataFile, stream,
-                    List.of("jans-server", samlConfigService.getSelectedIdpConfigID()));
-            logger.debug("SP File saving result:{}", result);
+            boolean result = documentStoreService.saveDocumentStream(metadataFile, stream,
+                    List.of("jans-server", documentStoreModuleName));
+            logger.debug("SAML file saving result:{}", result);
 
-            InputStream newFile = documentStoreService.readDocumentAsStream(spMetadataFile);
-            logger.debug("SP File read newFile:{}", newFile);
+            InputStream newFile = documentStoreService.readDocumentAsStream(metadataFile);
+            logger.debug("SAML file read newFile:{}", newFile);
 
             if (result) {
                 return tempFileName;
             }
         } catch (Exception ex) {
-            logger.error("Failed to write SP metadata file '{}'", spMetadataFile, ex);
+            logger.error("Failed to write SAML metadata file '{}'", metadataFile, ex);
         } finally {
             IOUtils.closeQuietly(stream);
         }
@@ -160,7 +113,7 @@ public class SamlIdpService {
     public GluuErrorHandler validateMetadata(String metadataPath)
             throws ParserConfigurationException, SAXException, IOException, XMLParserException {
         if (samlSchema == null) {
-            final List<String> validationLog = new ArrayList<String>();
+            final List<String> validationLog = new ArrayList<>();
             validationLog.add(GluuErrorHandler.SCHEMA_CREATING_ERROR_MESSAGE);
             validationLog.add("Failed to load SAML schema");
             return new GluuErrorHandler(false, true, validationLog);
@@ -172,7 +125,8 @@ public class SamlIdpService {
     }
 
     public boolean renameMetadata(String metadataPath, String destinationMetadataPath) {
-        logger.debug("Rename metadata file documentStoreService:{},metadataPath:{}, destinationMetadataPath:{}", documentStoreService, metadataPath, destinationMetadataPath);
+        logger.debug("Rename metadata file documentStoreService:{},metadataPath:{}, destinationMetadataPath:{}",
+                documentStoreService, metadataPath, destinationMetadataPath);
         try {
             return documentStoreService.renameDocument(metadataPath, destinationMetadataPath);
         } catch (Exception ex) {
@@ -180,6 +134,19 @@ public class SamlIdpService {
         }
 
         return false;
+    }
+
+    private String getTempMetadataFilename(String metadataFolder, String fileName) {
+        logger.info("documentStoreService:{}, localDocumentStoreService:{}, metadataFolder:{}, fileName:{}",
+                documentStoreService, localDocumentStoreService, metadataFolder, fileName);
+        synchronized (SamlIdpService.class) {
+            String possibleTemp;
+            do {
+                possibleTemp = fileName + INumGenerator.generate(2);
+                logger.debug("possibleTemp:{}", possibleTemp);
+            } while (documentStoreService.hasDocument(metadataFolder + possibleTemp));
+            return possibleTemp;
+        }
     }
 
 }

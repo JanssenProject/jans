@@ -10,8 +10,10 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
+import io.jans.util.exception.InvalidConfigurationException;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
+import io.jans.configapi.plugin.saml.util.Constants;
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
 
 import io.jans.model.GluuStatus;
@@ -35,9 +37,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AgeFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -285,7 +289,7 @@ public class SamlService {
                 log.debug("The trust relationship {} has an empty Metadata filename", trustRelationship.getInum());
                 return false;
             }
-            String filePath = samlIdpService.getSpMetadataFilePath(spMetadataFileName);
+            String filePath = getSpMetadataFilePath(spMetadataFileName);
             log.debug("filePath:{}", filePath);
 
             if (filePath == null) {
@@ -310,7 +314,7 @@ public class SamlService {
         }
         if (emptySpMetadataFileName) {
             log.debug("emptySpMetadataFileName:{}", emptySpMetadataFileName);
-            spMetadataFileName = samlIdpService.getSpNewMetadataFileName(trustRelationship);
+            spMetadataFileName = getSpNewMetadataFileName(trustRelationship);
             log.debug("spMetadataFileName:{}", spMetadataFileName);
             trustRelationship.setSpMetaDataFN(spMetadataFileName);
 
@@ -318,12 +322,12 @@ public class SamlService {
         InputStream targetStream = file;
         log.debug("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
 
-        String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
+        String result = samlIdpService.saveMetadataFile(samlConfigService.getSpMetadataTempDir(), spMetadataFileName, Constants.SP_MODULE, targetStream);
         log.debug("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
         if (StringHelper.isNotEmpty(result)) {
-            metadataValidationTimer.queue(result);
+            metadataValidationTimer.spQueue(result);
             //process files in temp that were not processed earlier
-            processUnprocessedMetadataFiles();
+            processUnprocessedSpMetadataFiles();
         } else {
             log.error("Failed to save SP meta-data file. Please check if you provide correct file");
         }
@@ -331,22 +335,45 @@ public class SamlService {
         return false;
 
     }
+    
+    public String getSpMetadataFilePath(String spMetaDataFN) {
+        if (StringUtils.isBlank(getSpMetadataDir())) {
+            throw new InvalidConfigurationException("Failed to return SP metadata file path as undefined!");
+        }
+        return getSpMetadataDir() + spMetaDataFN;
+    }
+    
+    public String getSpMetadataDir() {
+        if (StringUtils.isBlank(samlConfigService.getSpMetadataDir())) {
+            throw new InvalidConfigurationException("Failed to return SP metadata file path as undefined!");
+        }
+        return samlConfigService.getSpMetadataDir() + File.separator;
+    }
+    
+    public String getSpNewMetadataFileName(TrustRelationship trustRel) {
+        return getSpNewMetadataFileName(trustRel.getInum());
+    }
 
-    public void processUnprocessedMetadataFiles() {
-        log.debug("processing unprocessed metadata files ");
-        String directory = samlIdpService.getIdpMetadataTempDir();
-        log.debug("directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
+    public String getSpNewMetadataFileName(String inum) {
+        String relationshipInum = StringHelper.removePunctuation(inum);
+        return String.format(samlConfigService.getSpMetadataFilePattern(), relationshipInum);
+    }
+
+    public void processUnprocessedSpMetadataFiles() {
+        log.debug("Processing unprocessed SP Metadata files ");
+        String directory = samlConfigService.getSpMetadataTempDir();
+        log.debug("Check SP Metadata file in directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
 
         if (Files.exists(Paths.get(directory))) {
-            log.debug("directory:{} does exists)", directory);
+            log.debug("SP Metadata Temp directory:{} does exists)", directory);
             File folder = new File(directory);
             File[] files = folder.listFiles();
-            log.debug("files:{}", files);
+            log.debug("SP Metadata files:{}", files);
             if (files != null && files.length > 0) {
 
                 for (File file : files) {
-                    log.debug("file:{}, file.getName():{}", file, file.getName());
-                    metadataValidationTimer.queue(file.getName());
+                    log.debug("SP MetadataFile:{}, file.getName():{}", file, file.getName());
+                    metadataValidationTimer.spQueue(file.getName());
                 }
             }
 

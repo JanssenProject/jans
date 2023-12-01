@@ -14,12 +14,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 @ApplicationPath("/saml")
-@OpenAPIDefinition(info = @Info(title = "Jans Config API - SAML", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
+@OpenAPIDefinition(info = @Info(title = "Jans Config API - SAML", version="OAS Version", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
 
 license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
 
 tags = { @Tag(name = "SAML - Configuration"),
-@Tag(name = "SAML - Trust Relationship")},
+@Tag(name = "SAML - Trust Relationship"),
+@Tag(name = "SAML - Identity Broker"),
+},
 
 servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
@@ -38,6 +40,7 @@ public class ApiApplication extends Application {
 
         classes.add(SamlConfigResource.class);
         classes.add(TrustRelationshipResource.class);
+        classes.add(IdpResource.class);
 				
         return classes;
     }

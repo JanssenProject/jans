@@ -177,14 +177,14 @@ public class TrustRelationshipResource extends BaseResource {
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @Path(Constants.PROCESS_META_FILE)
+    @Path(Constants.PROCESS_SP_META_FILE)
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
     @POST
     public Response processMetadataFiles() {
 
         logger.info("process metadata files");
 
-        samlService.processUnprocessedMetadataFiles();
+        samlService.processUnprocessedSpMetadataFiles();
 
         return Response.ok().build();
     }
