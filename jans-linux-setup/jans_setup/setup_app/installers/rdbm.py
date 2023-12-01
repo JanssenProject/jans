@@ -155,8 +155,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 cmd_create_db = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE DATABASE {};\\""'''.format(Config.rdbm_db)
                 cmd_create_user = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE USER {} WITH PASSWORD '{}';\\""'''.format(Config.rdbm_user, Config.rdbm_password)
                 cmd_grant_previlages = '''su - postgres -c "psql -U postgres -d postgres -c \\"GRANT ALL PRIVILEGES ON DATABASE {} TO {};\\""'''.format(Config.rdbm_db, Config.rdbm_user)
+                cmd_alter_db = f'''su - postgres -c "psql -U postgres -d postgres -c \\"ALTER DATABASE {Config.rdbm_db} OWNER TO {Config.rdbm_user};\\""'''
 
-                for cmd in (cmd_create_db, cmd_create_user, cmd_grant_previlages):
+                for cmd in (cmd_create_db, cmd_create_user, cmd_grant_previlages, cmd_alter_db):
                     self.run(cmd, shell=True)
 
                 if base.clone_type == 'rpm':
