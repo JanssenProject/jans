@@ -28,8 +28,6 @@ The properties of Agama engine configuration are described in the following:
 
 - `scriptsPath`: A path relative to `/opt/jans/jetty/jans-auth/server/agama` that serves as the root of the hierarchy of (Java/Groovy) classes added on the fly. Default value is `/scripts`
 
-- `serializerType`: A low-level property related to [continuations](./advanced-usages.md#other-engine-characteristics) serialization. Set this to `null` if your flows present crashes due to issues with Java serialization. Default value is `KRYO`
-
 - `maxItemsLoggedInCollections`: When a list or map is [logged](../../../agama/language-reference.md#logging)
   in 
   a flow, only the first few items are included in the output. You can use this property to increase that limit. Default value is `9`
@@ -44,10 +42,41 @@ The properties of Agama engine configuration are described in the following:
 
 - `bridgeScriptPage`: This is a facelets (JSF) page the bridge needs for proper operation. This page resides in the authentication server WAR file and will rarely need modifications. Default value is `agama.xhtml`
 
+- `serializeRules`: A JSON object specifying the serialization rules, see below. It is not recommended to remove items from the out-of-the-box rules. Adding items is fine
+
 <!--
 - `defaultResponseHeaders`: A JSON object : {
             "Expires": "0"
-        }-->        
+        }-->    
+
+### Serialization rules
+
+At certain points in the course of a flow, serialization of all its variables is required. The engine employs two mechanisms for this purpose: standard Java serialization and [KRYO](https://github.com/EsotericSoftware/kryo) serialization. Depending on the type of (Java) object to be serialized, administrators can specify when a mechanism is preferred over the other through a set of simple rules.
+
+This can be better explained with an example. Suppose the following configuration:
+
+```
+"serializeRules": {
+  "JAVA": ["ice", "com.acme"],
+  "KRYO": [ "com.acme.bike" ]
+}
+```
+
+- If the object to serialize belongs to class `com.acme.bike.SuperSonic`, both lists are traversed for the best package match. Here KRYO wins because it has a perfect match with respect to the package of the class
+
+- If the class were `com.acme.bike.mega.SuperSonic`, KRYO still wins because it has the closest match to the package of the class
+
+- In case of `ice.cream.Salty`, JAVA is chosen (best match)
+
+- In case of `org.buskers.Singer`, no matches are found, however, KRYO is chosen - it's the **fallback** method
+
+- In case of `com.acmeMan`, no matches are found. KRYO is picked as in the previous case
+
+Please account additional behaviors:
+
+- If the object's class is in the default package (unnamed package), KRYO is used
+- If the exact class name is found in one of the lists, the method represented by such list is employed
+- If the object is a (Java) exception, JAVA is used unless the full class name appears listed in the KRYO rules
 
 ## Bridge configuration
 
