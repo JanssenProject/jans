@@ -156,7 +156,6 @@ class Config:
 
         #passwords
         self.ldapPass = None
-        self.admin_password = None
         self.admin_password = ''
         self.cb_password = None
         self.encoded_cb_password = ''
