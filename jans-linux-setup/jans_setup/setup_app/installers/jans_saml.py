@@ -89,8 +89,8 @@ class JansSamlInstaller(JettyInstaller):
     def install(self):
         """installation steps"""
         self.create_scim_client()
-        self.copy_files()
         self.install_keycloack()
+        self.deploy_jans_keycloack_providers()
         self.config_api_idp_plugin_config()
 
     def render_import_templates(self):
@@ -147,20 +147,20 @@ class JansSamlInstaller(JettyInstaller):
             self.dbUtils.import_ldif([self.clients_ldif_fn])
 
 
-    def copy_files(self):
-        self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
-        self.copyFile(self.source_files[1][0], self.idp_config_providers_dir)
-        base.unpack_zip(self.source_files[2][0], self.idp_config_providers_dir)
-
-
     def install_keycloack(self):
         self.logIt("Installing KC", pbar=self.service_name)
         base.unpack_zip(self.source_files[3][0], self.idp_config_data_dir, with_par_dir=False)
-        self.copyFile(self.source_files[4][0], self.idp_config_providers_dir)
-        base.unpack_zip(self.source_files[5][0], self.idp_config_providers_dir)
         self.update_rendering_dict()
         self.renderTemplateInOut(self.idp_config_fn, self.templates_folder, os.path.join(self.idp_config_data_dir, 'conf'))
         self.chown(self.idp_config_data_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+
+
+    def deploy_jans_keycloack_providers(self):
+        self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
+        self.copyFile(self.source_files[1][0], self.idp_config_providers_dir)
+        base.unpack_zip(self.source_files[2][0], self.idp_config_providers_dir)
+        self.copyFile(self.source_files[4][0], self.idp_config_providers_dir)
+        base.unpack_zip(self.source_files[5][0], self.idp_config_providers_dir)
 
 
     def config_api_idp_plugin_config(self):
