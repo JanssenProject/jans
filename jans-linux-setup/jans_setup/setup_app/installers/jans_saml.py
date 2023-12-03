@@ -90,8 +90,7 @@ class JansSamlInstaller(JettyInstaller):
         """installation steps"""
         self.create_scim_client()
         self.install_keycloack()
-        self.deploy_jans_keycloack_providers()
-        self.config_api_idp_plugin_config()
+
 
     def render_import_templates(self):
         self.logIt("Preparing base64 encodings configuration files")
@@ -155,6 +154,11 @@ class JansSamlInstaller(JettyInstaller):
         self.chown(self.idp_config_data_dir, Config.jetty_user, Config.jetty_group, recursive=True)
 
 
+    def service_post_setup(self):
+        self.deploy_jans_keycloack_providers()
+        self.config_api_idp_plugin_config()
+
+
     def deploy_jans_keycloack_providers(self):
         self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
         self.copyFile(self.source_files[1][0], self.idp_config_providers_dir)
@@ -173,7 +177,7 @@ class JansSamlInstaller(JettyInstaller):
         jans_api_openid_client_fn = 'jans.api-openid-client.json'
         jans_api_realm_fn = 'jans.api-realm.json'
         jans_api_user_fn = 'jans.api-user.json'
-        
+
         self.idp_config_fn = os.path.join(self.templates_folder, 'keycloak.conf')
         self.config_json_fn = os.path.join(self.templates_folder, 'jans-saml-config.json')
 
@@ -184,9 +188,9 @@ class JansSamlInstaller(JettyInstaller):
         self.start()
         #wait a while for KC to start
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        for i in range(15):
-            self.logIt("Wait 2 seconds to KC started")
-            time.sleep(2)
+        for i in range(24):
+            self.logIt("Wait 5 seconds to KC started")
+            time.sleep(5)
             try:
                 self.logIt("Connecting KC")
                 s.connect((Config.idp_config_hostname, int(Config.idp_config_http_port)))
@@ -195,30 +199,31 @@ class JansSamlInstaller(JettyInstaller):
             except Exception:
                 self.logIt("KC not ready")
         else:
-            self.logIt("KC did not start in 30 seconds. Giving up configuration", errorLog=True)
+            self.logIt("KC did not start in 120 seconds. Giving up configuration", errorLog=True, fatal=True)
 
         kcadm_cmd = '/opt/keycloak/bin/kcadm.sh'
         kcm_server_url = f'http://{Config.idp_config_hostname}:{Config.idp_config_http_port}/'
+        env = {'JAVA_HOME': Config.jre_home}
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             kc_tmp_config = os.path.join(tmp_dir, 'kcadm-jans.config')
-            self.run([kcadm_cmd, 'config', 'credentials', '--server', kcm_server_url, '--realm', 'master', '--user', 'admin', '--password', 'admin', '--config', kc_tmp_config])
+            self.run([kcadm_cmd, 'config', 'credentials', '--server', kcm_server_url, '--realm', 'master', '--user', 'admin', '--password', 'admin', '--config', kc_tmp_config], env=env)
 
-            self.run([kcadm_cmd, 'config', 'credentials', '--server', kcm_server_url, '--realm', 'master', '--user', 'admin', '--password', Config.admin_password, '--config', kc_tmp_config])
+            self.run([kcadm_cmd, 'config', 'credentials', '--server', kcm_server_url, '--realm', 'master', '--user', 'admin', '--password', Config.admin_password, '--config', kc_tmp_config], env=env)
 
             # Change default password
-            self.run([kcadm_cmd, 'set-password', '-r', 'master', '--username', 'admin', '--new-password',  Config.admin_password, '--config', kc_tmp_config])
+            self.run([kcadm_cmd, 'set-password', '-r', 'master', '--username', 'admin', '--new-password',  Config.admin_password, '--config', kc_tmp_config], env=env)
 
             # create realm
-            self.run([kcadm_cmd, 'create', 'realms', '-f', os.path.join(jans_api_output_dir, jans_api_realm_fn),'--config', kc_tmp_config])
+            self.run([kcadm_cmd, 'create', 'realms', '-f', os.path.join(jans_api_output_dir, jans_api_realm_fn),'--config', kc_tmp_config], env=env)
 
 
             # create client
-            self.run([kcadm_cmd, 'create', 'clients', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_api_openid_client_fn),'--config', kc_tmp_config])
+            self.run([kcadm_cmd, 'create', 'clients', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_api_openid_client_fn),'--config', kc_tmp_config], env=env)
 
             # create user and change password
-            self.run([kcadm_cmd, 'create', 'users', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_api_user_fn),'--config', kc_tmp_config])
-            self.run([kcadm_cmd, 'set-password', '-r', Config.jans_idp_realm, '--username', Config.jans_idp_user_name, '--new-password', Config.jans_idp_user_password, '--config', kc_tmp_config])
+            self.run([kcadm_cmd, 'create', 'users', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_api_user_fn),'--config', kc_tmp_config], env=env)
+            self.run([kcadm_cmd, 'set-password', '-r', Config.jans_idp_realm, '--username', Config.jans_idp_user_name, '--new-password', Config.jans_idp_user_password, '--config', kc_tmp_config], env=env)
 
             # assign roles to jans-api-user
-            self.run([kcadm_cmd, 'add-roles', '-r', Config.jans_idp_realm, '--uusername', Config.jans_idp_user_name, '--cclientid', 'realm-management', '--rolename', 'manage-identity-providers', '--rolename', 'view-identity-providers', '--rolename', 'view-identity-providers', '--config', kc_tmp_config])
+            self.run([kcadm_cmd, 'add-roles', '-r', Config.jans_idp_realm, '--uusername', Config.jans_idp_user_name, '--cclientid', 'realm-management', '--rolename', 'manage-identity-providers', '--rolename', 'view-identity-providers', '--rolename', 'view-identity-providers', '--config', kc_tmp_config], env=env)
