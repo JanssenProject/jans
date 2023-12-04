@@ -133,6 +133,7 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @PUT
     public Response updateTrustRelationship(@Valid TrustRelationship trustRelationship) throws IOException {
 
