@@ -33,13 +33,14 @@ import java.util.*;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.slf4j.Logger;
 
-@Path(Constants.SAML_TRUST_RELATIONSHIP)
+@Path(Constants.SAML_PATH + Constants.TRUST_RELATIONSHIP)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class TrustRelationshipResource extends BaseResource {
 
     private static final String SAML_TRUST_RELATIONSHIP = "Trust Relationship";
     private static final String SAML_TRUST_RELATIONSHIP_FORM = "Trust Relationship From";
+    private static final String SAML_TRUST_RELATIONSHIP_CHECK_STR = "Trust Relationship identified by '";
 
     @Inject
     Logger logger;
@@ -106,14 +107,13 @@ public class TrustRelationshipResource extends BaseResource {
         TrustRelationship trustRelationship = trustRelationshipForm.getTrustRelationship();
         logger.debug(" Create trustRelationship:{} ", trustRelationship);
         checkResourceNotNull(trustRelationshipForm.getTrustRelationship(), SAML_TRUST_RELATIONSHIP);
-        
+
         InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
         logger.debug(" Create metaDataFile:{} ", metaDataFile);
         if (metaDataFile != null) {
             logger.debug(" Create metaDataFile.available():{}", metaDataFile.available());
         }
 
-        // TO-DO validation of TrustRelationship
         String inum = samlService.generateInumForNewRelationship();
         trustRelationship.setInum(inum);
         trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
@@ -134,12 +134,33 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Path("/upload")
     @PUT
-    public Response updateTrustRelationship(@Valid TrustRelationship trustRelationship) throws IOException {
+    public Response updateTrustRelationship(@MultipartForm TrustRelationshipForm trustRelationshipForm,
+            InputStream metadatafile) throws IOException {
 
-        logger.info("Update trustRelationship:{}", trustRelationship);
+        logger.info("Update trustRelationshipForm:{}", trustRelationshipForm);
+        checkResourceNotNull(trustRelationshipForm, SAML_TRUST_RELATIONSHIP_FORM);
 
-        // TO-DO validation of TrustRelationship
+        TrustRelationship trustRelationship = trustRelationshipForm.getTrustRelationship();
+        logger.debug(" Create trustRelationship:{} ", trustRelationship);
+        checkResourceNotNull(trustRelationshipForm.getTrustRelationship(), SAML_TRUST_RELATIONSHIP);
+
+        InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
+        logger.debug(" Create metaDataFile:{} ", metaDataFile);
+        if (metaDataFile != null) {
+            logger.debug(" Create metaDataFile.available():{}", metaDataFile.available());
+        }
+
+        // validation of TrustRelationship
+        TrustRelationship existingTrustRelationship = samlService
+                .getTrustRelationshipByInum(trustRelationship.getInum());
+        logger.info("TrustRelationship found by trustRelationship.getInum():{}, existingTrustRelationship:{}",
+                trustRelationship.getInum(), existingTrustRelationship);
+        checkResourceNotNull(existingTrustRelationship,
+                SAML_TRUST_RELATIONSHIP_CHECK_STR + trustRelationship.getInum() + "'");
+
+        // Update
         trustRelationship = samlService.updateTrustRelationship(trustRelationship);
 
         logger.info("Post update trustRelationship:{}", trustRelationship);

@@ -20,8 +20,8 @@ public class Constants {
     public static final String REALM_MASTER = "master";
     
     public static final String SAML_CONFIG = "/samlConfig";
-    public static final String SAML_TRUST_RELATIONSHIP = "/trust-relationship";
-    public static final String SAML_SCOPE = "/scope";
+    public static final String TRUST_RELATIONSHIP = "/trust-relationship";
+    public static final String SCOPE = "/scope";
     public static final String PROCESS_SP_META_FILE = "/process-sp-meta-file";
     public static final String PROCESS_IDP_META_FILE = "/process-idp-meta-file";
     public static final String IDENTITY_PROVIDER = "/idp";

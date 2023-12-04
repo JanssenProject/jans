@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
-@ApplicationPath("/saml")
+@ApplicationPath("/kc")
 @OpenAPIDefinition(info = @Info(title = "Jans Config API - SAML", version="OAS Version", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
 
 license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),

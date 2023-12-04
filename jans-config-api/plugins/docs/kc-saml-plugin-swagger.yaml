@@ -17,7 +17,7 @@ tags:
 - name: SAML - Trust Relationship
 - name: SAML - Identity Broker
 paths:
-  /saml/kc/saml/upload:
+  /kc/saml/idp/upload:
     put:
       tags:
       - SAML - Identity Broker
@@ -201,7 +201,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.write
-  /saml/kc/saml/{inum}:
+  /kc/saml/idp/{inum}:
     get:
       tags:
       - SAML - Identity Broker
@@ -292,7 +292,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.delete
-  /saml/kc/saml:
+  /kc/saml/idp:
     get:
       tags:
       - SAML - Identity Broker
@@ -469,7 +469,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.readonly
-  /saml/kc/saml/sp-metadata-file/{inum}:
+  /kc/saml/idp/sp-metadata-file/{inum}:
     get:
       tags:
       - SAML - Identity Broker
@@ -497,7 +497,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.readonly
-  /saml/kc/saml/sp-metadata/{inum}:
+  /kc/saml/idp/sp-metadata/{inum}:
     get:
       tags:
       - SAML - Identity Broker
@@ -525,7 +525,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.readonly
-  /saml/kc/saml/process-idp-meta-file:
+  /kc/saml/idp/process-idp-meta-file:
     post:
       tags:
       - SAML - Identity Broker
@@ -542,7 +542,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.write
-  /saml/samlConfig:
+  /kc/samlConfig:
     get:
       tags:
       - SAML - Configuration
@@ -662,84 +662,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml-config.write
-  /saml/trust-relationship/upload:
-    post:
-      tags:
-      - SAML - Trust Relationship
-      summary: Create Trust Relationship with Metadata File
-      description: Create Trust Relationship with Metadata File
-      operationId: post-trust-relationship-metadata-file
-      requestBody:
-        description: Trust Relationship object
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/TrustRelationshipForm'
-            examples:
-              Request example:
-                description: Request example
-                value: ""
-      responses:
-        "201":
-          description: Newly created Trust Relationship
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.write
-  /saml/trust-relationship/{id}:
-    delete:
-      tags:
-      - SAML - Trust Relationship
-      summary: Delete TrustRelationship
-      description: Delete TrustRelationship
-      operationId: delete-trust-relationship
-      parameters:
-      - name: id
-        in: path
-        description: Unique Id of Trust Relationship
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          description: No Content
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.write
-  /saml/trust-relationship:
-    get:
-      tags:
-      - SAML - Trust Relationship
-      summary: Get all Trust Relationship
-      description: Get all TrustRelationship.
-      operationId: get-trust-relationship
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.readonly
+  /kc/saml/trust-relationship/upload:
     put:
       tags:
       - SAML - Trust Relationship
@@ -770,7 +693,84 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.write
-  /saml/trust-relationship/id/{id}:
+    post:
+      tags:
+      - SAML - Trust Relationship
+      summary: Create Trust Relationship with Metadata File
+      description: Create Trust Relationship with Metadata File
+      operationId: post-trust-relationship-metadata-file
+      requestBody:
+        description: Trust Relationship object
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TrustRelationshipForm'
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "201":
+          description: Newly created Trust Relationship
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+  /kc/saml/trust-relationship/{id}:
+    delete:
+      tags:
+      - SAML - Trust Relationship
+      summary: Delete TrustRelationship
+      description: Delete TrustRelationship
+      operationId: delete-trust-relationship
+      parameters:
+      - name: id
+        in: path
+        description: Unique Id of Trust Relationship
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+  /kc/saml/trust-relationship:
+    get:
+      tags:
+      - SAML - Trust Relationship
+      summary: Get all Trust Relationship
+      description: Get all TrustRelationship.
+      operationId: get-trust-relationship
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.readonly
+  /kc/saml/trust-relationship/id/{id}:
     get:
       tags:
       - SAML - Trust Relationship
@@ -798,7 +798,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.readonly
-  /saml/trust-relationship/process-sp-meta-file:
+  /kc/saml/trust-relationship/process-sp-meta-file:
     post:
       tags:
       - SAML - Trust Relationship
@@ -855,6 +855,20 @@ components:
           type: string
         enabled:
           type: boolean
+        signingCertificates:
+          type: string
+        validateSignature:
+          type: string
+        singleLogoutServiceUrl:
+          type: string
+        nameIDPolicyFormat:
+          type: string
+        idpEntityId:
+          type: string
+        singleSignOnServiceUrl:
+          type: string
+        encryptionPublicKey:
+          type: string
         providerId:
           type: string
         trustEmail:

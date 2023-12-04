@@ -54,7 +54,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
-@Path(Constants.KEYCLOAK + Constants.SAML_PATH)
+@Path(Constants.SAML_PATH + Constants.IDENTITY_PROVIDER)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class IdpResource extends BaseResource {
@@ -201,7 +201,7 @@ public class IdpResource extends BaseResource {
         List<IdentityProvider> existingIdentityProviders = idpService.getIdentityProviderByName(idp.getName());
         log.debug(" existingIdentityProviders:{} ", existingIdentityProviders);
         if (existingIdentityProviders != null && !existingIdentityProviders.isEmpty()) {
-            throwBadRequestException("SAML IDP with same name '" + idp.getName() + "' already exists!");
+            throwBadRequestException("SAML IDP NAME CONFLICT","SAML IDP with same name '" + idp.getName() + "' already exists!");
         }
 
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
@@ -286,7 +286,25 @@ public class IdpResource extends BaseResource {
         idpService.deleteIdentityProvider(existingIdentityProvider);
         return Response.noContent().build();
     }
+    
+    @Operation(summary = "Process unprocessed IDP metadata files", description = "Process unprocessed IDP metadata files", operationId = "post-idp-metadata-files", tags = {
+            "SAML - Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.JANS_IDP_SAML_WRITE_ACCESS }))
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @Path(Constants.PROCESS_IDP_META_FILE)
+    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS })
+    @POST
+    public Response processMetadataFiles() {
 
+        log.info("process metadata files");
+
+        idpService.processUnprocessedIdpMetadataFiles();
+
+        return Response.ok().build();
+    }
+    
     private IdentityProviderPagedResult doSearch(SearchRequest searchReq)
             throws IllegalAccessException, InvocationTargetException {
         if (log.isInfoEnabled()) {
@@ -310,24 +328,6 @@ public class IdpResource extends BaseResource {
 
         log.info("pagedIdentityProvider:{}", pagedIdentityProvider);
         return pagedIdentityProvider;
-    }
-
-    @Operation(summary = "Process unprocessed IDP metadata files", description = "Process unprocessed IDP metadata files", operationId = "post-idp-metadata-files", tags = {
-            "SAML - Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.JANS_IDP_SAML_WRITE_ACCESS }))
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @Path(Constants.PROCESS_IDP_META_FILE)
-    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS })
-    @POST
-    public Response processMetadataFiles() {
-
-        log.info("process metadata files");
-
-        idpService.processUnprocessedIdpMetadataFiles();
-
-        return Response.ok().build();
     }
 
 }

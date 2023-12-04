@@ -60,7 +60,33 @@ public class IdentityProvider extends Entry implements Serializable {
 
     @AttributeName(name = "jansEnabled")
     private boolean enabled;
-
+    
+    //@NotNull
+    @AttributeName(name = "signingCertificates")
+    private String signingCertificates;
+    
+    @AttributeName(name = "validateSignature")
+    private String validateSignature;
+    
+    //@NotNull
+    @AttributeName(name = "singleLogoutServiceUrl")
+    private String singleLogoutServiceUrl;  
+    
+   //@NotNull
+    @AttributeName(name = "nameIDPolicyFormat")
+    private String nameIDPolicyFormat;
+    
+    //@NotNull
+    @AttributeName(name = "idpEntityId")
+    private String idpEntityId;
+    
+    //@NotNull
+    @AttributeName(name = "singleSignOnServiceUrl")
+    private String singleSignOnServiceUrl;
+    
+    @AttributeName(name = "encryptionPublicKey")
+    private String encryptionPublicKey;
+    
     @AttributeName
     private String providerId;
 
@@ -114,9 +140,12 @@ public class IdentityProvider extends Entry implements Serializable {
     @AttributeName(name = "jansValidationLog")
     private List<String> validationLog;
     
+    
     @JsonObject
     @AttributeName(name = "jansSAMLidpConfDyn")
     Map<String, String> config = new HashMap<>();
+    
+    
 
     public String getInum() {
         return inum;
@@ -172,6 +201,62 @@ public class IdentityProvider extends Entry implements Serializable {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public String getSigningCertificates() {
+        return signingCertificates;
+    }
+
+    public void setSigningCertificates(String signingCertificates) {
+        this.signingCertificates = signingCertificates;
+    }
+
+    public String getValidateSignature() {
+        return validateSignature;
+    }
+
+    public void setValidateSignature(String validateSignature) {
+        this.validateSignature = validateSignature;
+    }
+
+    public String getSingleLogoutServiceUrl() {
+        return singleLogoutServiceUrl;
+    }
+
+    public void setSingleLogoutServiceUrl(String singleLogoutServiceUrl) {
+        this.singleLogoutServiceUrl = singleLogoutServiceUrl;
+    }
+
+    public String getNameIDPolicyFormat() {
+        return nameIDPolicyFormat;
+    }
+
+    public void setNameIDPolicyFormat(String nameIDPolicyFormat) {
+        this.nameIDPolicyFormat = nameIDPolicyFormat;
+    }
+
+    public String getIdpEntityId() {
+        return idpEntityId;
+    }
+
+    public void setIdpEntityId(String idpEntityId) {
+        this.idpEntityId = idpEntityId;
+    }
+
+    public String getSingleSignOnServiceUrl() {
+        return singleSignOnServiceUrl;
+    }
+
+    public void setSingleSignOnServiceUrl(String singleSignOnServiceUrl) {
+        this.singleSignOnServiceUrl = singleSignOnServiceUrl;
+    }
+
+    public String getEncryptionPublicKey() {
+        return encryptionPublicKey;
+    }
+
+    public void setEncryptionPublicKey(String encryptionPublicKey) {
+        this.encryptionPublicKey = encryptionPublicKey;
     }
 
     public String getProviderId() {
@@ -310,6 +395,7 @@ public class IdentityProvider extends Entry implements Serializable {
         this.validationLog = validationLog;
     }
 
+    
     public Map<String, String> getConfig() {
         return config;
     }
@@ -322,15 +408,18 @@ public class IdentityProvider extends Entry implements Serializable {
     public String toString() {
         return "IdentityProvider [inum=" + inum + ", creatorId=" + creatorId + ", name=" + name + ", displayName="
                 + displayName + ", description=" + description + ", realm=" + realm + ", enabled=" + enabled
-                + ", providerId=" + providerId + ", trustEmail=" + trustEmail + ", storeToken=" + storeToken
-                + ", addReadTokenRoleOnCreate=" + addReadTokenRoleOnCreate + ", authenticateByDefault="
-                + authenticateByDefault + ", linkOnly=" + linkOnly + ", firstBrokerLoginFlowAlias="
-                + firstBrokerLoginFlowAlias + ", postBrokerLoginFlowAlias=" + postBrokerLoginFlowAlias
-                + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL + ", spMetaDataLocation="
-                + spMetaDataLocation + ", idpMetaDataFN=" + idpMetaDataFN + ", idpMetaDataURL=" + idpMetaDataURL
-                + ", idpMetaDataLocation=" + idpMetaDataLocation + ", status=" + status + ", validationStatus="
-                + validationStatus + ", validationLog=" + validationLog + ", config=" + config + "]";
+                + ", signingCertificates=" + signingCertificates + ", validateSignature=" + validateSignature
+                + ", singleLogoutServiceUrl=" + singleLogoutServiceUrl + ", nameIDPolicyFormat=" + nameIDPolicyFormat
+                + ", idpEntityId=" + idpEntityId + ", singleSignOnServiceUrl=" + singleSignOnServiceUrl
+                + ", encryptionPublicKey=" + encryptionPublicKey + ", providerId=" + providerId + ", trustEmail="
+                + trustEmail + ", storeToken=" + storeToken + ", addReadTokenRoleOnCreate=" + addReadTokenRoleOnCreate
+                + ", authenticateByDefault=" + authenticateByDefault + ", linkOnly=" + linkOnly
+                + ", firstBrokerLoginFlowAlias=" + firstBrokerLoginFlowAlias + ", postBrokerLoginFlowAlias="
+                + postBrokerLoginFlowAlias + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL
+                + ", spMetaDataLocation=" + spMetaDataLocation + ", idpMetaDataFN=" + idpMetaDataFN
+                + ", idpMetaDataURL=" + idpMetaDataURL + ", idpMetaDataLocation=" + idpMetaDataLocation + ", status="
+                + status + ", validationStatus=" + validationStatus + ", validationLog=" + validationLog + ", config="
+                + config + "]";
     }
-
       
 }

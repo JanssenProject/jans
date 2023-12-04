@@ -3628,40 +3628,84 @@
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
-    },
+    },	
 	{
-      "desc":"selectedSingleSignOnService",
+      "desc":"signingCertificate",
       "equality":"caseIgnoreMatch",
       "names":[
-        "selectedSingleSignOnService"
+      	"signingCertificate"
       ],
       "oid":"jansAttr",
       "substr":"caseIgnoreSubstringsMatch",
       "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin":"Gluu created attribute"
+      "x_origin":"Jans created attribute"
 	},
 	{
-      "desc":"supportedSingleSignOnServices",
+      "desc":"validateSignature",
       "equality":"caseIgnoreMatch",
       "names":[
-      	"supportedSingleSignOnServices"
+      	"validateSignature"
       ],
       "oid":"jansAttr",
       "substr":"caseIgnoreSubstringsMatch",
       "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin":"Gluu created attribute"
+      "x_origin":"Jans created attribute"
 	},
 	{
-      "desc":"signingCertificates",
+      "desc":"singleLogoutServiceUrl",
       "equality":"caseIgnoreMatch",
       "names":[
-      	"signingCertificates"
+      	"singleLogoutServiceUrl"
       ],
       "oid":"jansAttr",
       "substr":"caseIgnoreSubstringsMatch",
       "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin":"Gluu created attribute"
-	}
+      "x_origin":"Jans created attribute"
+	},
+	{
+      "desc":"nameIDPolicyFormat",
+      "equality":"caseIgnoreMatch",
+      "names":[
+        "nameIDPolicyFormat"
+      ],
+      "oid":"jansAttr",
+      "substr":"caseIgnoreSubstringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin":"Jans created attribute"
+	},
+	{
+      "desc":"idpEntityId",
+      "equality":"caseIgnoreMatch",
+      "names":[
+      	"idpEntityId"
+      ],
+      "oid":"jansAttr",
+      "substr":"caseIgnoreSubstringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin":"Jans created attribute"
+	},
+	{
+      "desc":"singleSignOnServiceUrl",
+      "equality":"caseIgnoreMatch",
+      "names":[
+      	"singleSignOnServiceUrl"
+      ],
+      "oid":"jansAttr",
+      "substr":"caseIgnoreSubstringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin":"Jans created attribute"
+	},	
+	{
+      "desc":"encryptionPublicKey",
+      "equality":"caseIgnoreMatch",
+      "names":[
+      	"encryptionPublicKey"
+      ],
+      "oid":"jansAttr",
+      "substr":"caseIgnoreSubstringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin":"Jans created attribute"
+	}	
   ],
   "objectClasses": [
     {
@@ -4932,10 +4976,14 @@
         "description",
         "realm",
         "jansEnabled",
-        "providerId",
-		"selectedSingleSignOnService",
-		"supportedSingleSignOnServices",
-		"signingCertificates",
+        "providerId",		
+		"signingCertificate",
+		"validateSignature",
+		"singleLogoutServiceUrl",
+		"nameIDPolicyFormat",
+		"idpEntityId",
+		"singleSignOnServiceUrl",
+		"encryptionPublicKey",
         "trustEmail",
         "storeToken",
         "addReadTokenRoleOnCreate",
