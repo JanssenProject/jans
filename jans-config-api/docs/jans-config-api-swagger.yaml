@@ -7609,17 +7609,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        userCanView:
+          type: boolean
+        adminCanView:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8422,6 +8422,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8431,8 +8433,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8563,16 +8563,16 @@ components:
           type: string
         bridgeScriptPage:
           type: string
-        defaultResponseHeaders:
-          type: object
-          additionalProperties:
-            type: string
         serializeRules:
           type: object
           additionalProperties:
             type: array
             items:
               type: string
+        defaultResponseHeaders:
+          type: object
+          additionalProperties:
+            type: string
     JsonNode:
       type: object
     SsaConfiguration:
@@ -9773,10 +9773,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
