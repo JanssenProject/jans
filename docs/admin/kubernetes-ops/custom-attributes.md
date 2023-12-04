@@ -12,17 +12,13 @@ tags:
 ## Overview
 Making changes in the schema to add custom columns/attributes
 
-1.  Create a directory and download the needed files inside it
+1.  Download the `custom_schema.json` file:
 
-    ```
-    mkdir schema && cd schema
-    wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/schema/jans_schema.json
-    wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/schema/custom_schema.json
-    ```
+    `wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/schema/custom_schema.json`
 
 1.  Make your edits in `custom_schema.json`:
 
-    For example we can add 4 attributes and define them as int, json, bool, and text
+    For example we will add 4 attributes and define them as int, json, bool, and text
 
     Firstly, add the attribute names to the object class:
     ```
@@ -91,9 +87,9 @@ Making changes in the schema to add custom columns/attributes
 
 
 
-1.  Create a configmap with the schema files:  
+1.  Create a configmap with the schema file:  
 
-    `kubectl create cm custom-schema-cm --from-file=./schema -n <namespace>`
+    `kubectl create cm custom-schema-cm --from-file=custom_schema.json -n <namespace>`
 
 
 1.  Mount the configmap in your `override.yaml` under `persistence.volumes` and `persistence.volumeMounts`:
@@ -102,10 +98,11 @@ Making changes in the schema to add custom columns/attributes
     persistence:
         volumeMounts:
             - name: schema
-            mountPath: /app/schema
+              mountPath: /app/schema/custom_schema.json
+              subPath: custom_schema.json
         volumes:
             - name: schema
-            configMap:
+              configMap:
                 name: custom-schema-cm 
     ```
 
