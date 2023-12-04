@@ -8548,11 +8548,6 @@ components:
           type: string
         scriptsPath:
           type: string
-        serializerType:
-          type: string
-          enum:
-          - KRYO
-          - FST
         maxItemsLoggedInCollections:
           type: integer
           format: int32
@@ -8572,6 +8567,12 @@ components:
           type: object
           additionalProperties:
             type: string
+        serializeRules:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
     JsonNode:
       type: object
     SsaConfiguration:
