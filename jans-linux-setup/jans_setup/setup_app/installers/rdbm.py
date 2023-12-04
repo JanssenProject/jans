@@ -177,7 +177,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def get_sql_col_type(self, attrname, table=None):
 
         if attrname in self.dbUtils.sql_data_types:
-            type_ = self.dbUtils.sql_data_types[attrname].get(Config.rdbm_type) or self.dbUtils.sql_data_types[attrname]['mysql']
+            type_ = self.dbUtils.sql_data_types.get(f'{table}:{attrname}',{}).get(Config.rdbm_type) or self.dbUtils.sql_data_types.get(f'{table}:{attrname}',{}).get('mysql') or self.dbUtils.sql_data_types[attrname].get(Config.rdbm_type) or self.dbUtils.sql_data_types[attrname]['mysql']
             if table in type_.get('tables', {}):
                 type_ = type_['tables'][table]
             if 'size' in type_:
