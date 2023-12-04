@@ -1021,6 +1021,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/kubernetes-ops/custom-attributes/</loc>
+         <lastmod>2023-12-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/kubernetes-ops/customization/</loc>
          <lastmod>2023-12-04</lastmod>
          <changefreq>daily</changefreq>
