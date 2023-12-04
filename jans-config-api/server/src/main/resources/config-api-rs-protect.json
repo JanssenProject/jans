@@ -2276,7 +2276,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/saml/trust-relationship",
+      "path": "/jans-config-api/kc/saml/trust-relationship",
       "conditions": [
         {
           "httpMethods": [
@@ -2322,7 +2322,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/saml/samlConfig",
+      "path": "/jans-config-api/kc/samlConfig",
       "conditions": [
         {
           "httpMethods": [
@@ -2368,7 +2368,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/saml/scope",
+      "path": "/jans-config-api/kc/scope",
       "conditions": [
         {
           "httpMethods": [
@@ -2414,7 +2414,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/idp/config",
+      "path": "/jans-config-api/kc/saml/idp/config",
       "conditions": [
         {
           "httpMethods": [
@@ -2460,7 +2460,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/idp/kc/realm",
+      "path": "/jans-config-api/kc/realm",
       "conditions": [
         {
           "httpMethods": [
@@ -2506,7 +2506,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/idp/kc/saml",
+      "path": "/jans-config-api/kc/saml/idp",
       "conditions": [
         {
           "httpMethods": [
