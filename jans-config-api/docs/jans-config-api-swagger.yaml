@@ -7609,19 +7609,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
-        adminCanEdit:
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
         userCanEdit:
           type: boolean
+        adminCanEdit:
+          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9773,10 +9773,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
