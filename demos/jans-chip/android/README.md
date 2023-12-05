@@ -12,13 +12,17 @@
 
 ### Workspace Setup
 
-- Setup workspace using Android Studio IDE
-- Import `android` directory as project
-- IDE should automatically detect `app` as run configuration and now it is ready
-to be launched on an emmulator
-- After launch add configuration endpoint of Janssen Server (with a trusted
-domain, not self-signed certificate) and desired scopes on the register screen 
-to start testing
+1. Clone `jans` monorepo.
+   ```
+    git clone https://github.com/JanssenProject/jans.git
+   ```
+2. Start Android Studio and open `{jans_monorep_path}\demos\jans-chip\android` of cloned jans monorepo. 
+3. Press `ctrl` key twice on Android Studio to open `Run Anything` dialog.
+4. Enter `gradle wrapper --gradle-version 8.0` and press enter key. This will generate gradle wrapper at `{jans_monorep_path}\demos\jans-chip\gradle\wrapper`. 
+5. Build and run project on an emmulator (in Android Studio).
+6. After launch add configuration endpoint of Janssen Server (with a trusted
+   domain, not self-signed certificate) and desired scopes on the register screen
+   to start testing.
 
 ## To-Dos
 
