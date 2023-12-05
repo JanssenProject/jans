@@ -33,7 +33,7 @@ if [[ -z $JANS_CI_CD_RUN ]]; then
 fi
 
 if [[ -z $EXT_IP ]]; then
-  EXT_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
+  EXT_IP=$(curl ipinfo.io/ip)
 fi
 
 wait_for_services() {
