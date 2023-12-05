@@ -189,10 +189,16 @@ public class AuthorizationChallengeService {
         Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
         SessionId sessionUser = sessionIdService.generateAuthenticatedSessionId(authzRequest.getHttpRequest(), user.getDn(), authzRequest.getPrompt());
-        sessionUser.setSessionAttributes(requestParameterMap);
+        final Set<String> sessionAttributesKeySet = sessionUser.getSessionAttributes().keySet();
+        requestParameterMap.forEach((key, value) -> {
+            if (!sessionAttributesKeySet.contains(key)) {
+                sessionUser.getSessionAttributes().put(key, value);
+            }
+        });
 
         cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
         sessionIdService.updateSessionId(sessionUser);
+        log.trace("Session updated with {}", sessionUser);
 
         return sessionUser;
     }
