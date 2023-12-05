@@ -18,7 +18,7 @@ public class Constants {
     public static final String IDP_MODULE = "idp-module";
     public static final String SP_MODULE = "sp-module";
     public static final String REALM_MASTER = "master";
-    
+
     public static final String SAML_CONFIG = "/samlConfig";
     public static final String TRUST_RELATIONSHIP = "/trust-relationship";
     public static final String SCOPE = "/scope";
@@ -47,6 +47,14 @@ public class Constants {
     public static final String OIDC = "oidc";
     public static final String SAML = "saml";
     public static final String REALM = "realm";
+
+    public static final String SIGNING_CERTIFICATES = "signingCertificates";
+    public static final String VALIDATE_SIGNATURE = "validateSignature";
+    public static final String SINGLE_LOGOUT_SERVICE_URL = "singleLogoutServiceUrl";
+    public static final String NAME_ID_POLICY_FORMAT = "nameIDPolicyFormat";
+    public static final String IDP_ENTITY_ID = "idpEntityId";
+    public static final String SINGLE_SIGN_ON_SERVICE_URL = "singleSignOnServiceUrl";
+    public static final String ENCRYPTION_PUBLIC_KEY = "encryptionPublicKey";
 
     public static final List<String> SAML_IDP_CONFIG = new ArrayList<>(
             Arrays.asList("validateSignature", "singleLogoutServiceUrl", "postBindingLogout", "postBindingResponse",

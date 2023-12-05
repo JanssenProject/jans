@@ -100,6 +100,7 @@ public class AppInitializer {
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
         this.createAuthorizationService();
+        log.info("Initialized ApiAppConfiguration:{}", this.configurationFactory.getApiAppConfiguration());
 
         // Initialize python interpreter
         pythonService
@@ -115,11 +116,11 @@ public class AppInitializer {
         statusCheckerTimer.initTimer();
 
         // Schedule timer tasks
-        loggerService.initTimer(true);
+        configurationFactory.initTimer();        
 
         // Schedule timer tasks
-        configurationFactory.initTimer();
-
+        loggerService.initTimer(true);
+        
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
     }
 

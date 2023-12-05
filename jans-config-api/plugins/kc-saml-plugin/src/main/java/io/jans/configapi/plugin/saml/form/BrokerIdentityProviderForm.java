@@ -30,7 +30,6 @@ public class BrokerIdentityProviderForm implements Serializable {
 	@PartType(MediaType.APPLICATION_JSON)
     private IdentityProvider identityProvider;
 
-    @NotNull
 	@FormParam("metaDataFile")
 	@PartType(MediaType.APPLICATION_OCTET_STREAM)
     private transient InputStream  metaDataFile;
