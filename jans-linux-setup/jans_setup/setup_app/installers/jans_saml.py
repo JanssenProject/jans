@@ -45,6 +45,7 @@ class JansSamlInstaller(JettyInstaller):
         (os.path.join(Config.dist_app_dir, 'keycloak.zip'), 'https://github.com/keycloak/keycloak/releases/download/{0}/keycloak-{0}.zip'.format(base.current_app.app_info['KC_VERSION'])),
         (os.path.join(Config.dist_jans_dir, 'kc-jans-authn-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-authn-plugin/{0}/kc-jans-authn-plugin-{0}.jar').format(base.current_app.app_info['jans_version'])),
         (os.path.join(Config.dist_jans_dir, 'kc-jans-authn-plugin-deps.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-authn-plugin/{0}/kc-jans-authn-plugin-{0}-deps.zip').format(base.current_app.app_info['jans_version'])),
+        (os.path.join(Config.dist_jans_dir, 'kc-saml-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/kc-saml-plugin/{0}/kc-saml-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
             ]
 
     def __init__(self):
@@ -82,6 +83,7 @@ class JansSamlInstaller(JettyInstaller):
         Config.jans_idp_idp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'idp/temp_metadata')
         Config.jans_idp_sp_metadata_root_dir = os.path.join(self.idp_config_root_dir, 'sp/metadata')
         Config.jans_idp_sp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'sp/temp_metadata')
+        Config.jans_idp_server_url = 'jans_idp_server_url:tobedefined'
         self.jans_idp_ldif_config_fn = os.path.join(self.output_folder, 'jans-idp-configuration.ldif')
         self.jans_idp_config_json_fn = os.path.join(self.templates_folder, 'jans-idp-config.json')
  
@@ -169,6 +171,10 @@ class JansSamlInstaller(JettyInstaller):
 
     def config_api_idp_plugin_config(self):
 
+        # deploy config-api plugin
+        base.current_app.ConfigApiInstaller.source_files.append(self.source_files[6])
+        base.current_app.ConfigApiInstaller.install_plugin('kc-saml-plugin')
+
         # Render templates
         self.update_rendering_dict()
         jans_api_tmp_dir = os.path.join(self.templates_folder, 'kc_jans_api')
@@ -179,7 +185,6 @@ class JansSamlInstaller(JettyInstaller):
         jans_api_user_fn = 'jans.api-user.json'
 
         self.idp_config_fn = os.path.join(self.templates_folder, 'keycloak.conf')
-        self.config_json_fn = os.path.join(self.templates_folder, 'jans-saml-config.json')
 
         for tmp_fn in (jans_api_openid_client_fn, jans_api_realm_fn, jans_api_user_fn):
             self.renderTemplateInOut(os.path.join(jans_api_tmp_dir, tmp_fn), jans_api_tmp_dir, jans_api_output_dir, pystring=True)
