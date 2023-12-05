@@ -43,6 +43,8 @@ permissions:
 
 jobs:
   docker:
+    permissions:
+      packages: write
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 8
