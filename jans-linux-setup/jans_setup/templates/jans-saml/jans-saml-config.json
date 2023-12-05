@@ -10,7 +10,7 @@
   "clientSecret": "${jans_idp_client_secret}",
   "grantType": "${jans_idp_grant_type}",
   "username": "${jans_idp_user_name}",
-  "password": "${jans_idp_password}",  
+  "password": "${jans_idp_user_password}",  
   "spMetadataUrl":"/realms/%s/broker/%s/endpoint/descriptor",
   "idpRootDir": "/opt/jans/idp/",
   "idpMetadataDir": "/opt/idp/configs/keycloak/idp/metadata",
