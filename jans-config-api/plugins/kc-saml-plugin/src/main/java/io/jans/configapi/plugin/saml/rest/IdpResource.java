@@ -338,6 +338,7 @@ public class IdpResource extends BaseResource {
 
         // validate required fields
         checkNotNull(idp.getSingleSignOnServiceUrl(), Constants.SINGLE_SIGN_ON_SERVICE_URL);
+        checkNotNull(idp.getIdpEntityId(), Constants.IDP_ENTITY_ID);
 
         Map<String, String> config = new HashMap<>();
         config.put(Constants.SIGNING_CERTIFICATES, idp.getSigningCertificates());
