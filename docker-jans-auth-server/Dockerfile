@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-alpine:17.0.8@sha256:e82fb905ca6efffcdb1b0ed58f207b0ce91aeada78c218ae7dbb16bb31635728
+FROM bellsoft/liberica-openjdk-alpine:17-35@sha256:bb65ee28f8527d5fe0d4b6e046964a51b12989cacea3f5c4ff0ad9531a910751
 
 # ===============
 # Alpine packages
