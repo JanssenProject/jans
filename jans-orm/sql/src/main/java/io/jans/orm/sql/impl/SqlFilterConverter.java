@@ -514,7 +514,7 @@ public class SqlFilterConverter {
 					}
 				}
 			} catch (java.lang.IllegalArgumentException ex) {
-				LOG.error("Failed to determine JDBC type '{}' ", attributeType.getType(), ex);
+				LOG.trace("Failed to determine JDBC type '{}' ", attributeType.getType(), ex);
 				// Do nothing. Type is not defined in enum
 			}
 		}
