@@ -2,17 +2,15 @@ openapi: 3.0.1
 info:
   title: Jans Config API
   contact:
-    name: Gluu Support
-    url: https://support.gluu.org
-    email: xxx@gluu.org
+    name: Contact
+    url: https://github.com/JanssenProject/jans/discussions
   license:
-    name: Apache 2.0
+    name: License
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
-  version: 1.0.0
+  version: OAS Version
 servers:
-- url: https://jans.io/
+- url: https://jans.local.io
   description: The Jans server
-  variables: {}
 tags:
 - name: Attribute
 - name: Default Authentication Method
@@ -977,6 +975,29 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/properties.write
+  /api/v1/jans-auth-server/config/feature-flags:
+    get:
+      tags:
+      - Configuration – Properties
+      summary: Returns feature flags type configured for Jans authorization server.
+      description: Returns feature flags type configured for Jans authorization server.
+      operationId: get-feature-flag-type
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/properties.readonly
   /api/v1/jans-auth-server/config/persistence:
     get:
       tags:
@@ -7498,8 +7519,6 @@ components:
       properties:
         dn:
           type: string
-        selected:
-          type: boolean
         inum:
           type: string
         sourceAttribute:
@@ -7588,19 +7607,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        whitePagesCanView:
+          type: boolean
+        selected:
+          type: boolean
         userCanView:
           type: boolean
+        userCanEdit:
+          type: boolean
         adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -7637,6 +7658,8 @@ components:
         endSessionEndpoint:
           type: string
         jwksUri:
+          type: string
+        archivedJwksUri:
           type: string
         registrationEndpoint:
           type: string
@@ -7688,7 +7711,12 @@ components:
           type: boolean
         allowAllValueForRevokeEndpoint:
           type: boolean
+        allowRevokeForOtherClients:
+          type: boolean
         sectorIdentifierCacheLifetimeInMinutes:
+          type: integer
+          format: int32
+        archivedJwkLifetimeInSeconds:
           type: integer
           format: int32
         umaConfigurationEndpoint:
@@ -7801,6 +7829,18 @@ components:
           items:
             type: string
         userInfoEncryptionEncValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionSigningAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionEncryptionAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionEncryptionEncValuesSupported:
           type: array
           items:
             type: string
@@ -8108,6 +8148,8 @@ components:
           type: boolean
         introspectionSkipAuthorization:
           type: boolean
+        introspectionRestrictBasicAuthnToOwnTokens:
+          type: boolean
         endSessionWithAccessToken:
           type: boolean
         cookieDomain:
@@ -8327,6 +8369,28 @@ components:
           type: array
           items:
             type: string
+            enum:
+            - UNKNOWN
+            - HEALTH_CHECK
+            - USERINFO
+            - CLIENTINFO
+            - ID_GENERATION
+            - REGISTRATION
+            - INTROSPECTION
+            - REVOKE_TOKEN
+            - REVOKE_SESSION
+            - ACTIVE_SESSION
+            - END_SESSION
+            - STATUS_SESSION
+            - JANS_CONFIGURATION
+            - CIBA
+            - UMA
+            - U2F
+            - DEVICE_AUTHZ
+            - METRIC
+            - STAT
+            - PAR
+            - SSA
         httpLoggingEnabled:
           type: boolean
         httpLoggingExcludePaths:
@@ -8358,8 +8422,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8369,6 +8431,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8484,11 +8548,6 @@ components:
           type: string
         scriptsPath:
           type: string
-        serializerType:
-          type: string
-          enum:
-          - KRYO
-          - FST
         maxItemsLoggedInCollections:
           type: integer
           format: int32
@@ -8504,6 +8563,12 @@ components:
           type: string
         bridgeScriptPage:
           type: string
+        serializeRules:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
         defaultResponseHeaders:
           type: object
           additionalProperties:
@@ -9098,6 +9163,12 @@ components:
           type: integer
           format: int32
         evidence:
+          type: string
+        introspectionSignedResponseAlg:
+          type: string
+        introspectionEncryptedResponseAlg:
+          type: string
+        introspectionEncryptedResponseEnc:
           type: string
     CustomObjectAttribute:
       type: object
@@ -9697,8 +9768,6 @@ components:
         creationDate:
           type: string
           format: date-time
-        persisted:
-          type: boolean
         user:
           $ref: '#/components/schemas/User'
         ttl:
@@ -9706,6 +9775,8 @@ components:
           format: int32
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

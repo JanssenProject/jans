@@ -45,12 +45,12 @@ public class AdminPermission {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AdminPermission that = (AdminPermission) o;
-        return tag.equals(that.tag) && permission.equals(that.permission) && Objects.equals(description, that.description) && Objects.equals(defaultPermissionInToken, that.defaultPermissionInToken);
+        return tag.equals(that.tag) && permission.equals(that.permission);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tag, permission, description, defaultPermissionInToken);
+        return Objects.hash(tag, permission);
     }
 
     @Override

@@ -72,9 +72,6 @@ nav:
       - RHEL: admin/install/vm-install/rhel.md
       - Suse: admin/install/vm-install/suse.md
       - Dynamic Download: admin/install/vm-install/dynamic-download.md
-    - Docker Installation:
-      - Quick Start: admin/install/docker-install/quick-start.md
-      - Docker compose: admin/install/docker-install/compose.md
     - Helm Deployments:
       - admin/install/helm-install/README.md
       - Local Kubernetes Cluster: admin/install/helm-install/local.md
@@ -82,6 +79,9 @@ nav:
       - Google GKE: admin/install/helm-install/google-gke.md
       - Microsoft Azure AKS: admin/install/helm-install/microsoft-azure.md
       - Using Rancher Marketplace: admin/install/helm-install/rancher.md
+    - Docker Deployments:
+      - Quick Start: admin/install/docker-install/quick-start.md
+      - Docker compose: admin/install/docker-install/compose.md  
     - Setup Instructions: admin/install/setup.md
     - FAQ: admin/install/install-faq.md
   - Kubernetes Operation Guide:
@@ -96,6 +96,7 @@ nav:
     - External Secrets and Configmaps: admin/kubernetes-ops/external-secrets-configmaps.md
     - Health Check: admin/kubernetes-ops/health-check.md
     - TUI K8s: admin/kubernetes-ops/tui-k8s.md
+    - Custom Attributes: admin/kubernetes-ops/custom-attributes.md
   - VM Operation Guide:
     - admin/vm-ops/README.md
     - Upgrade: admin/vm-ops/upgrade.md
@@ -121,6 +122,7 @@ nav:
       - Text-Based User Interface (TUI):
         - admin/config-guide/config-tools/jans-tui/README.md
         - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
+        - Using Logs: admin/config-guide/config-tools/jans-tui/using-command-line-log.md
       - Command Line Interface (CLI):
         - admin/config-guide/config-tools/jans-cli/README.md
       - CLI For Agama: admin/config-guide/agama-configuration.md
@@ -198,6 +200,7 @@ nav:
       - End Session: admin/auth-server/endpoints/end-session.md
       - Clientinfo: admin/auth-server/endpoints/clientinfo.md
       - JWKS URI: admin/auth-server/endpoints/jwks-uri.md
+      - Archived JWKS URI: admin/auth-server/endpoints/archived-jwks-uri.md
       - Introspection: admin/auth-server/endpoints/introspection.md
       - Device Authorization: admin/auth-server/endpoints/device-authorization.md
       - PAR: admin/auth-server/endpoints/par.md

@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.19...jans-auth-server-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* adding scopes in config-api endpoint access token based on tags (admin-ui) [#6413](https://github.com/JanssenProject/jans/issues/6413) ([#6414](https://github.com/JanssenProject/jans/issues/6414)) ([643ba07](https://github.com/JanssenProject/jans/commit/643ba0780b5bf9f7383357075adb505774a39a27))
+* changing names of clients used in admin-ui [#1375](https://github.com/JanssenProject/jans/issues/1375) ([#6326](https://github.com/JanssenProject/jans/issues/6326)) ([9e63acb](https://github.com/JanssenProject/jans/commit/9e63acb28ee4354e361b6b8d3d7aabe0f5f94610))
+* **jans-auth-server:** add configuration property to AS which will allow to bypass basic client authentication restriction to query only own tokens [#6307](https://github.com/JanssenProject/jans/issues/6307) ([#6317](https://github.com/JanssenProject/jans/issues/6317)) ([d44a820](https://github.com/JanssenProject/jans/commit/d44a8206f7bd75ed659b1832f0a67d30ec43076c))
+* **jans-auth-server:** added PKCE support to authz challenge endpoint [#6180](https://github.com/JanssenProject/jans/issues/6180) ([#6339](https://github.com/JanssenProject/jans/issues/6339)) ([d9a24bc](https://github.com/JanssenProject/jans/commit/d9a24bc4399f656915923395858ea085ca3dccfa))
+* **jans-auth-server:** allow revoke any token - explicitly allow by config and scope [#6381](https://github.com/JanssenProject/jans/issues/6381) ([#6412](https://github.com/JanssenProject/jans/issues/6412)) ([47cbee9](https://github.com/JanssenProject/jans/commit/47cbee9cf917f0f79c53e9e0cfe1e2beab3108bc))
+* **jans-auth-server:** enabled JWT response at introspection endpoint configured by AS and client config ([#6433](https://github.com/JanssenProject/jans/issues/6433)) ([06210a9](https://github.com/JanssenProject/jans/commit/06210a9b6e916fd5c06cc463949be9855f4d2909))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** cnf introspection response is null even when valid cert is send during MTLS [#6343](https://github.com/JanssenProject/jans/issues/6343) ([#6363](https://github.com/JanssenProject/jans/issues/6363)) ([6fb2a34](https://github.com/JanssenProject/jans/commit/6fb2a342d61d5e293a44dc7e385e072d3beefecb))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.18...jans-auth-server-v1.0.19) (2023-10-11)
 
 
