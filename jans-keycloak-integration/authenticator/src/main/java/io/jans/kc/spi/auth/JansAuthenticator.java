@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.ArrayList;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 
 import org.jboss.logging.Logger;
 
