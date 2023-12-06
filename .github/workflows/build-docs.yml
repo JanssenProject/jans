@@ -88,6 +88,7 @@ jobs:
 
       - name: Copy generated chart from main
         run: |
+          gpg --export > ~/.gnupg/pubring.gpg
           helm package --sign --key "${{ steps.import_gpg.outputs.name }}" charts/janssen/
           helm package --sign --key "${{ steps.import_gpg.outputs.name }}" charts/janssen-all-in-one/
           cp janssen-*.tgz ../
