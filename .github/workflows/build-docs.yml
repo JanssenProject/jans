@@ -88,11 +88,9 @@ jobs:
 
       - name: Copy generated chart from main
         run: |
-          gpg --export-secret-keys > ~/.gnupg/secring.gpg
           helm package --sign --key "${{ steps.import_gpg.outputs.name }}" --keyring ~/.gnupg/secring.gpg charts/janssen/
           helm package --sign --key "${{ steps.import_gpg.outputs.name }}" --keyring ~/.gnupg/secring.gpg charts/janssen-all-in-one/
           cp janssen-*.tgz ../
-          rm ~/.gnupg/secring.gpg
 
       - name: Configure Git
         run: |
