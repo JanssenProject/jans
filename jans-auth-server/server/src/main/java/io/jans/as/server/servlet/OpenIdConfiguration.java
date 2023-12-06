@@ -164,6 +164,7 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping());
 
             Util.putArray(jsonObj, getAcrValuesList(), ACR_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getAuthorizationDetailsTypesSupported(), AUTHORIZATION_DETAILS_TYPES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getSubjectTypesSupported(), SUBJECT_TYPES_SUPPORTED);
 

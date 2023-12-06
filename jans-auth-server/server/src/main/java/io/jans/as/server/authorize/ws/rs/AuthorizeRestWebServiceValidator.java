@@ -468,4 +468,8 @@ public class AuthorizeRestWebServiceValidator {
             }
         }
     }
+
+    public void validateAuthorizationDetails(AuthzRequest authzRequest, Client client) {
+
+    }
 }

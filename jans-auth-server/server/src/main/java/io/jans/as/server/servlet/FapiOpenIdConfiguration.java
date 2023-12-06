@@ -245,6 +245,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             }
             jsonObj.put(ACR_VALUES_SUPPORTED, acrValuesSupported);
             jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping());
+            Util.putArray(jsonObj, appConfiguration.getAuthorizationDetailsTypesSupported(), AUTHORIZATION_DETAILS_TYPES_SUPPORTED);
 
             JSONArray subjectTypesSupported = new JSONArray();
             for (String subjectType : appConfiguration.getSubjectTypesSupported()) {

@@ -54,6 +54,7 @@ public class AuthzRequest {
     private String claims;
     private String authReqId;
     private String dpopJkt;
+    private String authorizationDetailsString;
     private String httpMethod;
     private String deviceSession;
     private DeviceSession deviceSessionObject;
@@ -67,6 +68,14 @@ public class AuthzRequest {
     private Client client;
     private OAuth2AuditLog auditLog;
     private boolean promptFromJwt;
+
+    public String getAuthorizationDetailsString() {
+        return authorizationDetailsString;
+    }
+
+    public void setAuthorizationDetailsString(String authorizationDetailsString) {
+        this.authorizationDetailsString = authorizationDetailsString;
+    }
 
     public String getDpopJkt() {
         return dpopJkt;
@@ -435,6 +444,7 @@ public class AuthzRequest {
                 ", amrValues='" + amrValues + '\'' +
                 ", request='" + request + '\'' +
                 ", requestUri='" + requestUri + '\'' +
+                ", authorizationDetailsString='" + authorizationDetailsString + '\'' +
                 ", sessionId='" + sessionId + '\'' +
                 ", originHeaders='" + originHeaders + '\'' +
                 ", codeChallenge='" + codeChallenge + '\'' +

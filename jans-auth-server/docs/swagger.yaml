@@ -261,6 +261,12 @@ paths:
           description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
           schema:
             type: string
+        - name: authorization_details
+          in: query
+          required: false
+          description: The request parameter authorization_details contains, in JSON notation, an array of objects. Each JSON object contains the data to specify the authorization requirements for a certain type of resource. The type of resource or access requirement is determined by the type field.
+          schema:
+            type: string
       responses:
         200:
           description: OK
@@ -405,6 +411,9 @@ paths:
                 dpop_jkt:
                   type: string
                   description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
+                authorization_details:
+                  type: string
+                  description: The request parameter authorization_details contains, in JSON notation, an array of objects. Each JSON object contains the data to specify the authorization requirements for a certain type of resource. The type of resource or access requirement is determined by the type field.
 
       responses:
         200:
@@ -922,7 +931,6 @@ paths:
                 title: GluuConfigurationResponse
                 description: Client GluuAttribute by Dn(Distinguished Name) based on Authorization Scope.
                 required:
-                  - id_generation_endpoint
                   - introspection_endpoint
                 type: object
                 properties:
@@ -940,6 +948,11 @@ paths:
                     additionalProperties:
                       type: string
                       description: Scope map object
+                  authorization_details_types_supported:
+                    type: array
+                      description: Array of string. Each string represents supported type of authorization details.
+                      items:
+                        type: string
         500:
           $ref: '#/components/responses/InternalServerError'
   /introspection:

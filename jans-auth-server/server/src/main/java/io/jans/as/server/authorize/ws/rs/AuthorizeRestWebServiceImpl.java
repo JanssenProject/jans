@@ -182,7 +182,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
-            String dpopJkt,
+            String dpopJkt, String authorizationDetails,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
         AuthzRequest authzRequest = new AuthzRequest();
@@ -203,6 +203,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setAcrValues(acrValues);
         authzRequest.setAmrValues(amrValues);
         authzRequest.setDpopJkt(dpopJkt);
+        authzRequest.setAuthorizationDetailsString(authorizationDetails);
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
         authzRequest.setSessionId(sessionId);
@@ -226,7 +227,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
-            String dpopJkt,
+            String dpopJkt, String authorizationDetails,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
         AuthzRequest authzRequest = new AuthzRequest();
@@ -249,6 +250,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
         authzRequest.setDpopJkt(dpopJkt);
+        authzRequest.setAuthorizationDetailsString(authorizationDetails);
         authzRequest.setSessionId(sessionId);
         authzRequest.setOriginHeaders(originHeaders);
         authzRequest.setCodeChallenge(codeChallenge);
@@ -333,6 +335,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequestService.createRedirectUriResponse(authzRequest);
 
         authorizeRestWebServiceValidator.validateAcrs(authzRequest, client);
+        authorizeRestWebServiceValidator.validateAuthorizationDetails(authzRequest, client);
 
         Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
 
