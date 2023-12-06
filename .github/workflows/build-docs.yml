@@ -77,12 +77,6 @@ jobs:
         run: |
           mv ../mkdocs.yml mkdocs.yml
 
-      - name: Copy generated chart from main
-        run: |
-          helm package charts/janssen/
-          helm package charts/janssen-all-in-one/
-          cp janssen-*.tgz ../
-
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@d6f3f49f3345e29369fe57596a3ca8f94c4d2ca7 # v5.4.0
@@ -91,6 +85,12 @@ jobs:
           passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
+
+      - name: Copy generated chart from main
+        run: |
+          helm package --sign --key "${{ steps.import_gpg.outputs.name }}" --keyring "${{ steps.import_gpg.outputs.keyid }}" charts/janssen/
+          helm package --sign --key "${{ steps.import_gpg.outputs.name }}" --keyring "${{ steps.import_gpg.outputs.keyid }}" charts/janssen-all-in-one/
+          cp janssen-*.tgz ../
 
       - name: Configure Git
         run: |
