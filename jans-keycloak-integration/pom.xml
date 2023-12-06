@@ -30,7 +30,7 @@
       <smallrye-config.version>3.4.4</smallrye-config.version>
       <log4j.version>2.19.0</log4j.version>
       <slf4j.version>1.7.36</slf4j.version>
-      <fasterxml-jackson.version>2.12.6</fasterxml-jackson.version>
+      <fasterxml-jackson.version>2.16.0</fasterxml-jackson.version>
       <commons-lang.version>3.13.0</commons-lang.version>
       <commons-collection.version>4.1</commons-collection.version>
       <swagger.version>2.2.7</swagger.version>
