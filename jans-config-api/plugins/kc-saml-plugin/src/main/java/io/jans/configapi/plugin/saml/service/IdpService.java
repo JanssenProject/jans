@@ -138,7 +138,11 @@ public class IdpService {
             log.debug("Newly created kcIdp:{}", kcIdp);
             identityProvider = this.convertToIdentityProvider(kcIdp);
             log.debug("Final created identityProvider:{}", identityProvider);
-
+            
+            //set KC SP MetadataURL name
+            String spMetadataUrl = getSpMetadataUrl(identityProvider.getRealm(), identityProvider.getName());
+            log.info(" Setting KC SP Metadata URL - spMetadataUrl:{} ", spMetadataUrl);
+            identityProvider.setSpMetaDataURL(spMetadataUrl);
         }
         return identityProvider;
     }
@@ -175,6 +179,11 @@ public class IdpService {
             kcIdp = keycloakService.updateIdentityProvider(identityProvider.getRealm(), kcIdp);
             log.debug("Updated kcIdp:{}", kcIdp);
             identityProvider = this.convertToIdentityProvider(kcIdp);
+            
+            //set KC SP MetadataURL name
+            String spMetadataUrl = getSpMetadataUrl(identityProvider.getRealm(), identityProvider.getName());
+            log.info(" Updating KC SP Metadata URL - spMetadataUrl:{} ", spMetadataUrl);
+            identityProvider.setSpMetaDataURL(spMetadataUrl);
         }
         return identityProvider;
     }
