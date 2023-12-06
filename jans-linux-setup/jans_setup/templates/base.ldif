@@ -137,3 +137,13 @@ dn: ou=ssa,o=jans
 objectClass: top
 objectClass: organizationalUnit
 ou: ssa
+
+dn: ou=trusted-idp,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: trusted-idp
+
+dn: ou=realm,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: trusted-idp

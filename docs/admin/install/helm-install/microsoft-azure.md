@@ -228,7 +228,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
             cnSqlDbName: jans
             cnSqlDbPort: 5432
             cnSqlDbDialect: pgsql
-            cnSqlDbHost: my-release-mysql.jans.svc
+            cnSqlDbHost: my-release-postgresql.jans.svc
             cnSqlDbUser: postgres
             cnSqlDbTimezone: UTC
             cnSqldbUserPassword: Test1234#

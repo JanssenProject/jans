@@ -41,7 +41,7 @@ import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.python.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;
