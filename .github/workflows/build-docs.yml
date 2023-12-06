@@ -88,11 +88,11 @@ jobs:
 
       - name: Copy generated chart from main
         run: |
-          echo "${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}" > ~/.gnupg/pubring.gpg
-          helm package --sign --key "${{ steps.import_gpg.outputs.name }}" charts/janssen/
-          helm package --sign --key "${{ steps.import_gpg.outputs.name }}" charts/janssen-all-in-one/
+          gpg --export-secret-keys --armor "${{ steps.import_gpg.outputs.keyid }}" > ~/.gnupg/secring.gpg
+          helm package --sign --key "${{ steps.import_gpg.outputs.name }}" --keyring ~/.gnupg/secring.gpg charts/janssen/
+          helm package --sign --key "${{ steps.import_gpg.outputs.name }}" --keyring ~/.gnupg/secring.gpg charts/janssen-all-in-one/
           cp janssen-*.tgz ../
-          rm ~/.gnupg/pubring.gpg
+          rm ~/.gnupg/secring.gpg
 
       - name: Configure Git
         run: |
