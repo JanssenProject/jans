@@ -39,6 +39,11 @@
         <groupId>org.keycloak</groupId>
         <artifactId>keycloak-services</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-admin-client</artifactId>
+    </dependency>
     <!-- end keycloak dependencies-->
 
     
