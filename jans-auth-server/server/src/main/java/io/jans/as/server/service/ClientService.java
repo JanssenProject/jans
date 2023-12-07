@@ -13,6 +13,7 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.persistence.model.Scope;
+import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.CustomAttribute;
@@ -27,8 +28,9 @@ import io.jans.util.security.StringEncrypter.EncryptionException;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONArray;
-import org.python.jline.internal.Preconditions;
+import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -92,6 +94,7 @@ public class ClientService {
     }
 
     public void merge(Client client) {
+        ignoreCustomObjectClassesForNonLDAP(client);
         ldapEntryManager.merge(client);
         removeFromCache(client);
     }
@@ -159,15 +162,33 @@ public class ClientService {
     }
 
     public boolean isPublic(Client client) {
-        return client != null && client.getAuthenticationMethod() == AuthenticationMethod.NONE;
+        return client != null && client.hasAuthenticationMethod(AuthenticationMethod.NONE);
     }
 
     public Client getClient(String clientId, String registrationAccessToken) {
         final Client client = getClient(clientId);
         if (client != null && registrationAccessToken != null && registrationAccessToken.equals(client.getRegistrationAccessToken())) {
+            rotateRegistrationAccessToken(client);
             return client;
         }
         return null;
+    }
+
+    public String generateRegistrationAccessToken() {
+        return HandleTokenFactory.generateHandleToken();
+    }
+
+    public void rotateRegistrationAccessToken(Client client) {
+        if (client == null) {
+            return;
+        }
+
+        if (BooleanUtils.isFalse(appConfiguration.getRotateClientRegistrationAccessTokenOnUsage())) {
+            return;
+        }
+
+        client.setRegistrationAccessToken(generateRegistrationAccessToken());
+        persist(client);
     }
 
     public Set<Client> getClientsByDns(Collection<String> dnList) {

@@ -6,16 +6,7 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
@@ -33,10 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * OC5:FeatureTest-Supports Combining Claims Requested with scope and Request Object
@@ -54,12 +43,14 @@ public class SupportsCombiningClaimsRequestedWithScopeAndRequestObject extends B
         showTitle("OC5:FeatureTest-Supports Combining Claims Requested with scope and Request Object");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.GIVEN_NAME,
                 JwtClaimName.FAMILY_NAME));
@@ -77,7 +68,6 @@ public class SupportsCombiningClaimsRequestedWithScopeAndRequestObject extends B
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
-        List<String> scopes = Arrays.asList("openid", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 

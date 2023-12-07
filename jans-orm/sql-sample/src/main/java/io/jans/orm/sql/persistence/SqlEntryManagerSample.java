@@ -23,12 +23,29 @@ public class SqlEntryManagerSample {
     private Properties getSampleConnectionProperties() {
         Properties connectionProperties = new Properties();
 
-        connectionProperties.put("sql#db.schema.name", "jans");
-        connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/jans?profileSQL=true");
+
+        boolean mysql = true;
+    		if (mysql) {
+            connectionProperties.put("sql#db.schema.name", "jansdb");
+            connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/jansdb?profileSQL=true");
+            connectionProperties.put("sql#connection.driver-property.serverTimezone", "GMT+2");
+
+            connectionProperties.put("sql#auth.userName", "jans");
+            connectionProperties.put("sql#auth.userPassword", "secret");
+        } else {
+            connectionProperties.put("sql#db.schema.name", "public");
+        	connectionProperties.put("sql#connection.uri", "jdbc:postgresql://localhost:5432/jansdb");
+
+        	connectionProperties.put("sql#auth.userName", "jans");
+            connectionProperties.put("sql#auth.userPassword", "secret");
+        }
 
         connectionProperties.put("sql#connection.driver-property.serverTimezone", "GMT+2");
         connectionProperties.put("sql#connection.pool.max-total", "300");
         connectionProperties.put("sql#connection.pool.max-idle", "300");
+        
+        connectionProperties.put("sql#connection.pool.test-on-create", "true");
+        connectionProperties.put("sql#connection.pool.test-on-return", "true");
 
         connectionProperties.put("sql#auth.userName", "jans");
         connectionProperties.put("sql#auth.userPassword", "secret");

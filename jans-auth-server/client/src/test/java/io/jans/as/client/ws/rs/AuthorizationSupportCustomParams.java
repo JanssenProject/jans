@@ -6,14 +6,7 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
@@ -24,8 +17,6 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-
 
 import static org.testng.Assert.*;
 
@@ -49,6 +40,7 @@ public class AuthorizationSupportCustomParams extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

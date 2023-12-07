@@ -6,8 +6,18 @@
 
 package io.jans.as.common.cert.validation;
 
-import io.jans.as.common.cert.validation.model.ValidationStatus;
-import io.jans.as.model.util.SecurityProviderUtility;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.Principal;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -31,23 +41,20 @@ import org.bouncycastle.cert.ocsp.OCSPRespBuilder;
 import org.bouncycastle.cert.ocsp.RevokedStatus;
 import org.bouncycastle.cert.ocsp.SingleResp;
 import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.Principal;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.List;
+import io.jans.as.common.cert.validation.model.ValidationStatus;
+import io.jans.as.common.cert.validation.model.ValidationStatus.CertificateValidity;
+import io.jans.as.common.cert.validation.model.ValidationStatus.ValidatorSourceType;
+import io.jans.as.model.util.CertUtils;
+import io.jans.util.security.SecurityProviderUtility;
 
 /**
  * Certificate verifier based on OCSP
- *
+ * 
  * @author Yuriy Movchan
  * @version March 10, 2016
  */
@@ -58,10 +65,12 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
     public OCSPCertificateVerifier() {
         SecurityProviderUtility.installBCProvider(true);
     }
-
+    
     /**
-     * @param certificate the certificate from which we need the ExtensionValue
-     * @param oid         the Object Identifier value for the extension.
+     * @param certificate
+     *            the certificate from which we need the ExtensionValue
+     * @param oid
+     *            the Object Identifier value for the extension.
      * @return the extension value as an ASN1Primitive object
      * @throws IOException
      */
@@ -78,8 +87,9 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 
     @Override
     public ValidationStatus validate(X509Certificate certificate, List<X509Certificate> issuers, Date validationDate) {
-        X509Certificate issuer = issuers.get(0);
-        ValidationStatus status = new ValidationStatus(certificate, issuer, validationDate, ValidationStatus.ValidatorSourceType.OCSP, ValidationStatus.CertificateValidity.UNKNOWN);
+
+        X509Certificate issuer = CertUtils.getIssuer(certificate, issuers);
+        ValidationStatus status = new ValidationStatus(certificate, issuer, validationDate, ValidatorSourceType.OCSP, CertificateValidity.UNKNOWN);
 
         try {
             Principal subjectX500Principal = certificate.getSubjectX500Principal();
@@ -93,7 +103,7 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
             log.debug("OCSP URL for '" + subjectX500Principal + "' is '" + ocspUrl + "'");
 
             DigestCalculator digestCalculator = new JcaDigestCalculatorProviderBuilder().build().get(CertificateID.HASH_SHA1);
-            CertificateID certificateId = new CertificateID(digestCalculator, new JcaX509CertificateHolder(certificate), certificate.getSerialNumber());
+            CertificateID certificateId = new CertificateID(digestCalculator, new JcaX509CertificateHolder(issuer), certificate.getSerialNumber());            
 
             // Generate OCSP request
             OCSPReq ocspReq = generateOCSPRequest(certificateId);
@@ -102,7 +112,7 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
             OCSPResp ocspResp = requestOCSPResponse(ocspUrl, ocspReq);
             if (ocspResp.getStatus() != OCSPRespBuilder.SUCCESSFUL) {
                 log.error("OCSP response is invalid!");
-                status.setValidity(ValidationStatus.CertificateValidity.INVALID);
+                status.setValidity(CertificateValidity.INVALID);
                 return status;
             }
 
@@ -126,19 +136,19 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
                 Object certStatus = singleResp.getCertStatus();
                 if (certStatus == CertificateStatus.GOOD) {
                     log.debug("OCSP status is valid for '" + certificate.getSubjectX500Principal() + "'");
-                    status.setValidity(ValidationStatus.CertificateValidity.VALID);
+                    status.setValidity(CertificateValidity.VALID);
                 } else {
                     if (singleResp.getCertStatus() instanceof RevokedStatus) {
                         log.warn("OCSP status is revoked for: " + subjectX500Principal);
                         if (validationDate.before(((RevokedStatus) singleResp.getCertStatus()).getRevocationTime())) {
                             log.warn("OCSP revocation time after the validation date, the certificate '" + subjectX500Principal + "' was valid at " + validationDate);
-                            status.setValidity(ValidationStatus.CertificateValidity.VALID);
+                            status.setValidity(CertificateValidity.VALID);
                         } else {
                             Date revocationDate = ((RevokedStatus) singleResp.getCertStatus()).getRevocationTime();
                             log.info("OCSP for certificate '" + subjectX500Principal + "' is revoked since " + revocationDate);
                             status.setRevocationDate(revocationDate);
                             status.setRevocationObjectIssuingTime(singleResp.getThisUpdate());
-                            status.setValidity(ValidationStatus.CertificateValidity.REVOKED);
+                            status.setValidity(CertificateValidity.REVOKED);
                         }
                     }
                 }
@@ -154,15 +164,16 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
         return status;
     }
 
-    private OCSPReq generateOCSPRequest(CertificateID certificateId) throws OCSPException {
+    private OCSPReq generateOCSPRequest(CertificateID certificateId) throws OCSPException, OperatorCreationException, CertificateEncodingException {
         OCSPReqBuilder ocspReqGenerator = new OCSPReqBuilder();
 
         ocspReqGenerator.addRequest(certificateId);
 
-        return ocspReqGenerator.build();
+        OCSPReq ocspReq = ocspReqGenerator.build();
+        return ocspReq;
     }
 
-    @SuppressWarnings({"deprecation", "resource"})
+    @SuppressWarnings({ "deprecation", "resource" })
     private String getOCSPUrl(X509Certificate certificate) throws IOException {
         ASN1Primitive obj;
         try {
@@ -180,7 +191,7 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 
         AccessDescription[] accessDescriptions = authorityInformationAccess.getAccessDescriptions();
         for (AccessDescription accessDescription : accessDescriptions) {
-            boolean correctAccessMethod = accessDescription.getAccessMethod().equals(X509ObjectIdentifiers.ocspAccessMethod);
+            boolean correctAccessMethod = accessDescription.getAccessMethod().equals((Object)X509ObjectIdentifiers.ocspAccessMethod);
             if (!correctAccessMethod) {
                 continue;
             }
@@ -198,7 +209,7 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 
     }
 
-    public OCSPResp requestOCSPResponse(String url, OCSPReq ocspReq) throws IOException {
+    public OCSPResp requestOCSPResponse(String url, OCSPReq ocspReq) throws IOException, MalformedURLException {
         byte[] ocspReqData = ocspReq.getEncoded();
 
         HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
@@ -219,7 +230,9 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
             }
 
             byte[] responseBytes = IOUtils.toByteArray(con.getInputStream());
-            return new OCSPResp(responseBytes);
+            OCSPResp ocspResp = new OCSPResp(responseBytes);
+
+            return ocspResp;
         } finally {
             if (con != null) {
                 con.disconnect();
@@ -229,7 +242,6 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 
     @Override
     public void destroy() {
-        // nothing to destroy
     }
 
 }

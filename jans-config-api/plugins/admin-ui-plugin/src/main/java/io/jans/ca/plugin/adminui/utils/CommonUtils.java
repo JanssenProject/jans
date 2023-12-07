@@ -1,30 +1,21 @@
 package io.jans.ca.plugin.adminui.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
-import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
+import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import jakarta.inject.Inject;
-import jakarta.json.JsonObject;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.core.*;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
-import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Locale;
 
@@ -50,5 +41,32 @@ public class CommonUtils {
         ZonedDateTime gmtTime = currentDateTime.withZoneSameInstant(ZoneId.of("GMT"));
         DateTimeFormatter currentTimeFormatter = LS_DATE_FORMAT;
         return gmtTime.format(currentTimeFormatter);
+    }
+
+    public static RSAPrivateKey loadPrivateKey(String privateKeyPEM) throws Exception {
+
+        byte[] encoded = Base64.decodeBase64(privateKeyPEM);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+        return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
+    }
+
+    public static String decode(String toDecode) throws UnsupportedEncodingException {
+
+        return java.net.URLDecoder.decode(toDecode, StandardCharsets.UTF_8.name());
+    }
+
+    public static GenericResponse createGenericResponse(boolean result, int responseCode, String responseMessage) {
+        return createGenericResponse(result, responseCode, responseMessage, null);
+    }
+
+    public static GenericResponse createGenericResponse(boolean result, int responseCode, String responseMessage, JsonNode node) {
+        GenericResponse genericResponse = new GenericResponse();
+        genericResponse.setResponseCode(responseCode);
+        genericResponse.setResponseMessage(responseMessage);
+        genericResponse.setSuccess(result);
+        genericResponse.setResponseObject(node);
+        return genericResponse;
     }
 }

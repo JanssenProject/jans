@@ -2,7 +2,7 @@
 <faces-config
     xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_3_0.xsd"
-    version="2.3">
+    version="3.0">
 
     <!-- cas2 -->
     <navigation-rule>

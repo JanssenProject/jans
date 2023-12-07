@@ -9,12 +9,10 @@ package io.jans.fido2.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.*;
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -92,6 +90,14 @@ public class DataMapperService {
         return objectMapper.convertValue(fromValue, toValueType);
     }
 
+    public String writeValueAsString(Object value) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(value);
+    }
+
+    public <T> T readValueString(String content, Class<T> clazz) throws JsonProcessingException {
+        return objectMapper.readValue(content, clazz);
+    }
+
     private ObjectMapper createJsonMapperWithJaxb() {
         final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
@@ -108,5 +114,4 @@ public class DataMapperService {
     private ObjectMapper jsonMapperWithWrapRoot() {
         return createJsonMapperWithJaxb().configure(SerializationFeature.WRAP_ROOT_VALUE, true);
     }
-
 }

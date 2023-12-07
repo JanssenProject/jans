@@ -1,15 +1,12 @@
 
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.layout.containers import Float, HSplit, Window
+from prompt_toolkit.layout.containers import Float, HSplit, Window, ScrollOffsets, AnyContainer
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.layout.containers import (
-    AnyContainer,
-)
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 
@@ -18,6 +15,7 @@ from typing import Optional, Sequence, Union
 from typing import TypeVar, Callable
 
 import cli_style
+from utils.multi_lang import _
 
 class JansSelectBox:
     """_summary_
@@ -25,11 +23,9 @@ class JansSelectBox:
 
     def __init__(
         self,
-        values: Optional[list] = [],
+        values: Optional[list] = None,
         value: Optional[str] = '',
-        height: AnyDimension= 4,
-        rotatable_up: Optional[bool] = True,
-        rotatable_down: Optional[bool] = True,
+        height: AnyDimension = 4,
         ) -> HSplit:
         """_summary_
 
@@ -37,32 +33,26 @@ class JansSelectBox:
             values (list, optional): _description_. Defaults to [].
             value (_type_, optional): _description_. Defaults to None.
             height (int, optional): _description_. Defaults to 4.
-            rotatable_up (bool, optional): _description_. Defaults to True.
-            rotatable_down (bool, optional): _description_. Defaults to True.
         """
 
-        self.values = values
-        self.values_flag = (values[0],values[-1])
+        self.values = values if values else []
         self.set_value(value)
-        # --------------------------------------------------- #
         self.height = min(len(self.values), height)
-        self.rotatable_up = rotatable_up
-        self.rotatable_down = rotatable_down
-        # --------------------------------------------------- #
 
-        self.container = HSplit(children=[Window(
+        self.window = Window(
             content=FormattedTextControl(
                 text=self._get_formatted_text,
                 focusable=True,
             ),
             height=self.height,
             cursorline=False,
-            width=D(),  # 15,
+            width=D(),
             style='bg:#4D4D4D',
-            right_margins=[ScrollbarMargin(display_arrows=True), ],
-            wrap_lines=True,
-            allow_scroll_beyond_bottom=True,
-        )])
+            scroll_offsets=ScrollOffsets(top=2, bottom=2),
+            right_margins=[ScrollbarMargin(display_arrows=True)],
+        )
+
+        self.container = HSplit(children=[self.window])
 
     def set_value(
         self, 
@@ -91,6 +81,7 @@ class JansSelectBox:
         result = []
         for i, entry in enumerate(self.values):
             if i == self.selected_line:
+                result.append([("[SetCursorPosition]", "")])
                 result.append(
                     HTML('<style fg="ansired" bg="{}">{}</style>'.format(cli_style.drop_down_itemSelect, entry[1])))
             else:
@@ -99,48 +90,26 @@ class JansSelectBox:
 
         return merge_formatted_text(result)
 
-    def shift(
-        self, 
-        seq:str, 
-        n:int,
-        )-> str:
-        """_summary_
 
-        Args:
-            seq (_type_): _description_
-            n (_type_): _description_
 
-        Returns:
-            _type_: _description_
-        """
-        return seq[n:]+seq[:n]
+    def _set_value(self):
+        self.value = self.values[self.selected_line][0]
 
     def up(self)-> None:
         """_summary_
         """
-        if self.selected_line == 0:
-            if self.rotatable_up and self.values[self.selected_line] == self.values_flag[0]:
-                pass
-            else:
-                self.values = self.shift(self.values, -1)
-        else:
-            self.selected_line = (self.selected_line - 1) % (self.height)
+        if self.selected_line < len(self.values) and self.selected_line > 0:
+            self.selected_line = self.selected_line - 1
+            self._set_value()
 
-        self.set_value(self.values[self.selected_line][0])
 
     def down(self)-> None:
         """_summary_
         """
-        if self.selected_line + 1 == (self.height):
-            if self.rotatable_down and self.values[self.selected_line] == self.values_flag[-1]:
-                pass
-            else:
-                self.values = self.shift(self.values, 1)
-        else:
-            self.selected_line = (self.selected_line + 1) % (self.height)
+        if self.selected_line < len(self.values) - 1:
+            self.selected_line = self.selected_line + 1
+            self._set_value()
 
-        self.set_value(self.values[self.selected_line][0])
-        
     def __pt_container__(self)-> HSplit:
         return self.container
 
@@ -151,29 +120,40 @@ class DropDownWidget:
 
     def __init__(
         self,
-        values: Optional[list] = [],
+        values: Optional[list] = None,
         value: Optional[str] = '',
-        on_value_changed: Callable= None, 
-        )->Window:
+        on_value_changed: Callable= None,
+        select_one_option: Optional[bool] = True,
+        ) -> Window:
         """init for DropDownWidget
         Args:
             values (list, optional): List of values to select one from them. Defaults to [].
             value (str, optional): The defualt selected value. Defaults to None.
+            select_one_option(bool, optional): Add 'Select One' as first option
 
         Examples:
             widget=DropDownWidget(
                 values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
                 value=self.data.get('tokenEndpointAuthMethodsSupported'))
         """
-        self.values = values
+        self.value_list = values if values else []
+        self._value = value
         self.on_value_changed = on_value_changed
-        values.insert(0, (None, 'Select One'))
-        for val in values:
+        if select_one_option:
+            self.value_list.insert(0, (None, _("Select One")))
+
+        if not self.value_list:
+            self.display_value = _("No option was provided")
+
+        for val in self.value_list:
             if val[0] == value:
-                self.text = val[1]
+                self.display_value = val[1]
                 break
         else:
-            self.text = self.values[0][1] if self.values else "Enter to Select"
+            if select_one_option:
+                self.display_value = self.value_list[0][1] if self.value_list else _("Enter to Select")
+            else:
+                self.display_value = self.value_list[0][1]
 
         self.dropdown = True
         self.window = Window(
@@ -181,12 +161,19 @@ class DropDownWidget:
                 text=self._get_text,
                 focusable=True,
                 key_bindings=self._get_key_bindings(),
-            ), height=D())  # 5  ## large sized enties get >> (window too small)
+            ), height=D())
 
         self.select_box = JansSelectBox(
-            values=self.values, value=value, rotatable_down=True, rotatable_up=True, height=4)
+                                values=self.value_list,
+                                value=value,
+                                height=4
+                                )
+
         self.select_box_float = Float(
-            content=self.select_box, xcursor=True, ycursor=True)
+                            content=self.select_box,
+                            xcursor=True,
+                            ycursor=True
+                            )
 
     @property
     def value(self)-> str:
@@ -195,16 +182,44 @@ class DropDownWidget:
         Returns:
             str: The selected value
         """
-        return self.select_box.value
+        return self._value
 
     @value.setter
     def value(
         self, 
         value:str,
         )-> None:
+        self._value = value
         self.select_box.set_value(value)
+        for val in self.value_list:
+            if val[0] == value:
+                self.display_value = val[1]
+                break
+        else:
+            if self.value_list:
+                self.display_value = self.value_list[0][1]
+
         if self.on_value_changed:
             self.on_value_changed(value)
+
+    @property
+    def values(self) -> list:
+        """Getter for the values property
+
+        Returns:
+            list: values of dropdown widget
+        """
+        return self.value_list
+
+    @values.setter
+    def values(
+        self, 
+        values:list,
+        )-> None:
+        self.value_list = values
+        self.select_box.values = values
+        self.select_box.window.height = len(values)
+        self.select_box.height = self.select_box.window.height
 
     def _get_text(self)-> AnyFormattedText:
         """To get The selected value
@@ -213,8 +228,8 @@ class DropDownWidget:
             str: The selected value
         """
         if get_app().layout.current_window is self.window:
-            return HTML('&gt; <style fg="ansired" bg="{}">{}</style> &lt;'.format(cli_style.drop_down_hover, self.text))
-        return '> {} <'.format(self.text)
+            return HTML('&gt; <style fg="ansired" bg="{}">{}</style> &lt;'.format(cli_style.drop_down_hover, self.display_value))
+        return '> {} <'.format(self.display_value)
 
     def _get_key_bindings(self)-> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
@@ -232,21 +247,22 @@ class DropDownWidget:
 
         @kb.add("enter")
         def _enter(event) -> None:
-            if self.select_box_float not in get_app().layout.container.floats:
-                get_app().layout.container.floats.append(self.select_box_float)
-            else:
-                self.text = self.select_box.values[self.select_box.selected_line][1]
+            if self.select_box_float in get_app().layout.container.floats:
+                self.display_value = self.select_box.values[self.select_box.selected_line][1]
+                self._value = self.select_box.values[self.select_box.selected_line][0]
                 get_app().layout.container.floats.remove(self.select_box_float)
-
-            self.value = self.select_box.value
+            else:
+                get_app().layout.container.floats.append(self.select_box_float)
 
         @kb.add('up')
         def _up(event):
-            self.select_box.up()
+            if self.select_box_float in get_app().layout.container.floats:
+                self.select_box.up()
 
         @kb.add('down')
         def _down(event):
-            self.select_box.down()
+            if self.select_box_float in get_app().layout.container.floats:
+                self.select_box.down()
 
         @kb.add('escape')
         @kb.add('tab')

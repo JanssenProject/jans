@@ -8,7 +8,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.util.DataUtil;
 import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.util.AuthUtil;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -104,13 +104,7 @@ public class AgamaFlowService implements Serializable {
     }
 
     public Flow getFlowByName(String flowName) {
-        List<Flow> flows = persistenceEntryManager.findEntries(getAgamaFlowDn(flowName), Flow.class,
-                Filter.createEqualityFilter(Flow.ATTR_NAMES.QNAME, flowName), 1);
-        logger.debug("Agama Flow with flowName:{} flows:{}", flowName, flows);
-        if (!flows.isEmpty()) {
-            return flows.get(0);
-        }
-        return null;
+        return getFlowByDn(getAgamaFlowDn(flowName));
     }
 
     public Flow getFlowByDn(String dn) {

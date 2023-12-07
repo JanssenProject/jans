@@ -6,17 +6,8 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.ClientInfoClient;
-import io.jans.as.client.ClientInfoResponse;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenResponse;
-
+import com.google.common.collect.Lists;
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -25,13 +16,8 @@ import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -54,11 +40,15 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = new ArrayList<>();
+        scopes.add("clientinfo");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -70,8 +60,6 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = new ArrayList<>();
-        scopes.add("clientinfo");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -110,11 +98,14 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
 
+        String scope = "clientinfo";
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setScope(Lists.newArrayList(scope));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -127,7 +118,6 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        String scope = "clientinfo";
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         TokenResponse response1 = tokenClient.execResourceOwnerPasswordCredentialsGrant(userId, userSecret, scope,

@@ -35,6 +35,7 @@ public class DisplaysPolicyUriInLoginPage extends BaseTest {
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         String policyUri = "http://www.gluu.org/policy";
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -42,6 +43,7 @@ public class DisplaysPolicyUriInLoginPage extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setPolicyUri(policyUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -53,7 +55,6 @@ public class DisplaysPolicyUriInLoginPage extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);

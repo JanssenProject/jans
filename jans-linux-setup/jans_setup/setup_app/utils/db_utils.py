@@ -38,6 +38,7 @@ class DBUtils:
     Base = None
     session = None
     cbm = None
+    mariadb = False
 
     def bind(self, use_ssl=True, force=False):
 
@@ -124,16 +125,34 @@ class DBUtils:
             Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
             self.session = Session()
             self.metadata = sqlalchemy.MetaData()
-            myconn = self.session.connection()
+            self.session.connection()
 
             base.logIt("{} Connection was successful".format(Config.rdbm_type.upper()))
-            
+            if Config.rdbm_type == 'mysql':
+                self.set_mysql_version()
             return True, self.session
 
         except Exception as e:
             if log:
                 base.logIt("Can't connect to {} server: {}".format(Config.rdbm_type.upper(), str(e), True))
             return False, e
+
+
+    def set_mysql_version(self):
+        try:
+            base.logIt("Determining MySQL version")
+            qresult = self.exec_rdbm_query('select version()', getresult=1)
+            self.mysql_version = self.get_version(qresult[0])
+            base.logIt("MySQL version was found as {}".format(self.mysql_version))
+        except Exception as e:
+            base.logIt("Cant determine MySQL version due to {}. Set to unknown".format(e))
+            self.mysql_version = (0, 0, 0)
+
+        # are we on MariDB?
+        version_query = self.engine.execute(sqlalchemy.text('SELECT VERSION()'))
+        version_query_result = version_query.fetchone()
+        if version_query_result:
+            self.mariadb = 'mariadb' in version_query_result[0].lower()
 
     @property
     def json_dialects_instance(self):
@@ -299,17 +318,19 @@ class DBUtils:
             self.log_ldap_result(ldap_operation_result)
 
         elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+            typed_val = self.get_rdbm_val(component, value)
             result = self.get_sqlalchObj_for_dn(dn)
             table_name = result.objectClass
             sqlalchemy_table = self.Base.classes[table_name]
             sqlalchemyObj = self.session.query(sqlalchemy_table).filter(sqlalchemy_table.dn ==dn).first()
             cur_val = getattr(sqlalchemyObj, component)
-            setattr(sqlalchemyObj, component, value)
+            setattr(sqlalchemyObj, component, typed_val)
             self.session.commit()
 
         elif self.moddb == BackendTypes.SPANNER:
             table = self.get_spanner_table_for_dn(dn)
             doc_id = self.get_doc_id_from_dn(dn)
+            typed_val = self.get_rdbm_val(component, value, rdbm_type='spanner')
             self.spanner_client.write_data(table=table, columns=['doc_id', component], values=[doc_id, value], mutation='update')
 
         elif self.moddb == BackendTypes.COUCHBASE:
@@ -337,8 +358,9 @@ class DBUtils:
             base.logIt("Querying LDAP for dn {}".format(dn))
             result = self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
             if result:
-                key, document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
-                return document
+                key_document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
+                if key_document:
+                    return key_document[1]
 
         else:
             bucket = self.get_bucket_for_dn(dn)
@@ -701,11 +723,12 @@ class DBUtils:
 
 
         # fix JSON type for mariadb
-        if Config.rdbm_type == 'mysql':
+        if Config.rdbm_type == 'mysql' and self.mariadb:
             for tbl in self.Base.classes:
-                for col in tbl.__table__.columns:
-                    if isinstance(col.type, sqlalchemy.dialects.mysql.LONGTEXT) and col.comment and col.comment.lower() == 'json':
-                        col.type = sqlalchemy.dialects.mysql.json.JSON()
+                slq_query = self.engine.execute(sqlalchemy.text('SELECT CONSTRAINT_NAME from INFORMATION_SCHEMA.CHECK_CONSTRAINTS where TABLE_NAME="{}" and CHECK_CLAUSE like "%json_valid%"'.format(tbl.__table__.name)))
+                slq_query_result = slq_query.fetchall()
+                for col in slq_query_result:
+                    tbl.__table__.columns[col[0]].type = sqlalchemy.dialects.mysql.json.JSON()
 
         base.logIt("Reflected tables {}".format(list(self.metadata.tables.keys())))
 
@@ -747,17 +770,18 @@ class DBUtils:
     def get_rdbm_val(self, key, val, rdbm_type=None):
 
         data_type = self.get_attr_sql_data_type(key)
+        val_ = val[0] if isinstance(val, list) or isinstance(val, tuple) else val
 
         if data_type in ('SMALLINT', 'BOOL', 'BOOLEAN'):
-            if val[0].lower() in ('1', 'on', 'true', 'yes', 'ok'):
+            if val_.lower() in ('1', 'on', 'true', 'yes', 'ok'):
                 return 1 if data_type == 'SMALLINT' else True
             return 0 if data_type == 'SMALLINT' else False
 
         if data_type == 'INT':
-            return int(val[0])
+            return int(val_)
 
         if data_type in ('DATETIME(3)', 'TIMESTAMP'):
-            dval = val[0].strip('Z')
+            dval = val_.strip('Z')
             sep= 'T' if rdbm_type == 'spanner' else ' '
             postfix = 'Z' if rdbm_type == 'spanner' else ''
             return "{}-{}-{}{}{}:{}:{}{}{}".format(dval[0:4], dval[4:6], dval[6:8], sep, dval[8:10], dval[10:12], dval[12:14], dval[14:17], postfix)
@@ -772,7 +796,7 @@ class DBUtils:
         if data_type in ('ARRAY<STRING(MAX)>', 'JSONB'):
             return val
 
-        return val[0]
+        return val_
 
     def get_clean_objcet_class(self, entry):
 
@@ -939,12 +963,14 @@ class DBUtils:
                             else:
                                 data_list = self.spanner_client.get_dict_data('SELECT {} FROM {} WHERE doc_id="{}"'.format(entry['add'][0], table, doc_id))
                                 cur_data = data_list[0]
-                                if cur_data:
+                                if cur_data and change_attr in cur_data:
+                                    if not cur_data[change_attr]:
+                                        cur_data[change_attr] = []
                                     for cur_val in entry[change_attr]:
                                         typed_val = self.get_rdbm_val(change_attr, cur_val, rdbm_type='spanner')
-                                        cur_data.append(typed_val)
+                                        cur_data[change_attr].append(typed_val)
 
-                                self.spanner_client.write_data(table=table, columns=['doc_id', change_attr], values=[doc_id, cur_data], mutation='update')
+                                self.spanner_client.write_data(table=table, columns=['doc_id', change_attr], values=[doc_id, cur_data[change_attr]], mutation='update')
 
                     elif 'replace' in entry and 'changetype' in entry:
                         table = self.get_spanner_table_for_dn(dn)

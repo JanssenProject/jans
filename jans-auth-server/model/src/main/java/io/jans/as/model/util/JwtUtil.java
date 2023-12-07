@@ -11,7 +11,6 @@ import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.EDDSAPublicKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidParameterException;
@@ -155,12 +154,6 @@ public class JwtUtil {
                 BigInteger y = new BigInteger(1, Base64Util.base64urldecode(yy));
 
                 publicKey = new ECDSAPublicKey(signatureAlgorithm, x, y);
-            } else if (algorithmFamily == AlgorithmFamily.ED) {
-                String xx = jsonPublicKey.getString(X);
-
-                BigInteger x = new BigInteger(1, Base64Util.base64urldecode(xx));
-
-                publicKey = new EDDSAPublicKey(signatureAlgorithm, x.toByteArray());
             } else {
                 throw new InvalidParameterException("Wrong value of the AlgorithmFamily: algorithmFamily = " + algorithmFamily);
             }

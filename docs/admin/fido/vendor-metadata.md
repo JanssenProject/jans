@@ -16,195 +16,195 @@ Janssen's FIDO server has a [configuration parameter](./config.md) called `serve
 Example of authenticator metadata:
 ```
 {
-			"aaguid": "83c44309-....-8be444b573cb",
-			"metadataStatement": {
-				"legalHeader": "Submission of this statement and retrieval and use of this statement indicates acceptance of the appropriate agreement located at https://fidoalliance.org/metadata/metadata-legal-terms/.",
-				"aaguid": "83c44309-....-8be444b573cb",
-				"description": "Just an example",
-				"authenticatorVersion": 448962,
-				"protocolFamily": "fido2",
-				"schema": 3,
-				"upv": [
-					{
-						"major": 1,
-						"minor": 0
-					},
-					{
-						"major": 1,
-						"minor": 1
-					}
-				],
-				"authenticationAlgorithms": [
-					"ed25519_eddsa_sha512_raw",
-					"secp256r1_ecdsa_sha256_raw"
-				],
-				"publicKeyAlgAndEncodings": [
-					"cose"
-				],
-				"attestationTypes": [
-					"basic_full"
-				],
-				"userVerificationDetails": [
-					[
-						{
-							"userVerificationMethod": "passcode_external",
-							"caDesc": {
-								"base": 64,
-								"minLength": 4,
-								"maxRetries": 8,
-								"blockSlowdown": 0
-							}
-						},
-						{
-							"userVerificationMethod": "presence_internal"
-						}
-					],
-					[
-						{
-							"userVerificationMethod": "passcode_external",
-							"caDesc": {
-								"base": 64,
-								"minLength": 4,
-								"maxRetries": 8,
-								"blockSlowdown": 0
-							}
-						}
-					],
-					[
-						{
-							"userVerificationMethod": "fingerprint_internal",
-							"baDesc": {
-								"selfAttestedFRR": 0,
-								"selfAttestedFAR": 0,
-								"maxTemplates": 5,
-								"maxRetries": 5,
-								"blockSlowdown": 0
-							}
-						},
-						{
-							"userVerificationMethod": "presence_internal"
-						}
-					],
-					[
-						{
-							"userVerificationMethod": "none"
-						}
-					],
-					[
-						{
-							"userVerificationMethod": "fingerprint_internal",
-							"baDesc": {
-								"selfAttestedFRR": 0,
-								"selfAttestedFAR": 0,
-								"maxTemplates": 5,
-								"maxRetries": 5,
-								"blockSlowdown": 0
-							}
-						}
-					],
-					[
-						{
-							"userVerificationMethod": "presence_internal"
-						}
-					]
-				],
-				"keyProtection": [
-					"hardware",
-					"secure_element"
-				],
-				"matcherProtection": [
-					"on_chip"
-				],
-				"cryptoStrength": 128,
-				"attachmentHint": [
-					"external",
-					"wired"
-				],
-				"tcDisplay": [],
-				"attestationRootCertificates": [
-					"MII....psmyPzK+Vsgw2jeRQ5JlKDyqE0hebfC1tvFu0CCrJFcw=="
-				],
-				"icon": "data:image/png;base64,iVBORw0KGgoAAAA....k5+36hF7vXAAAAAElFTkSuQmCC",
-				"authenticatorGetInfo": {
-					"versions": [
-						"FIDO_2_0",
-						"FIDO_2_1_PRE",
-						"FIDO_2_1"
-					],
-					"extensions": [
-						"credProtect",
-						"hmac-secret",
-						"largeBlobKey",
-						"credBlob",
-						"minPinLength"
-					],
-					"aaguid": "83c.....73cb",
-					"options": {
-						"plat": false,
-						"rk": true,
-						"clientPin": true,
-						"up": true,
-						"uv": false,
-						"pinUvAuthToken": true,
-						"largeBlobs": true,
-						"ep": false,
-						"bioEnroll": false,
-						"userVerificationMgmtPreview": false,
-						"authnrCfg": true,
-						"credMgmt": true,
-						"credentialMgmtPreview": true,
-						"setMinPINLength": true,
-						"makeCredUvNotRqd": false,
-						"alwaysUv": true
-					},
-					"maxMsgSize": 1200,
-					"pinUvAuthProtocols": [
-						2,
-						1
-					],
-					"maxCredentialCountInList": 8,
-					"maxCredentialIdLength": 128,
-					"transports": [
-						"usb"
-					],
-					"algorithms": [
-						{
-							"type": "public-key",
-							"alg": -7
-						},
-						{
-							"type": "public-key",
-							"alg": -8
-						}
-					],
-					"maxSerializedLargeBlobArray": 1024,
-					"forcePINChange": false,
-					"minPINLength": 4,
-					"firmwareVersion": 328965,
-					"maxCredBlobLength": 32,
-					"maxRPIDsForSetMinPINLength": 1,
-					"preferredPlatformUvAttempts": 3,
-					"uvModality": 2,
-					"remainingDiscoverableCredentials": 25
-				}
-			},
-			"statusReports": [
-				{
-					"status": "FIDO_CERTIFIED_L1",
-					"effectiveDate": "2021-08-06",
-					"url": "www.yubico.com",
-					"certificationDescriptor": "An example",
-					"certificateNumber": "FIDO2.....001",
-					"certificationPolicyVersion": "1.3",
-					"certificationRequirementsVersion": "1.4"
-				},
-				{
-					"status": "FIDO_CERTIFIED",
-					"effectiveDate": "2021-08-06"
-				}
-			],
-			"timeOfLastStatusChange": "2021-08-16"
-		}
+    "aaguid": "83c44309-....-8be444b573cb",
+    "metadataStatement": {
+        "legalHeader": "Submission of this statement and retrieval and use of this statement indicates acceptance of the appropriate agreement located at https://fidoalliance.org/metadata/metadata-legal-terms/.",
+        "aaguid": "83c44309-....-8be444b573cb",
+        "description": "Just an example",
+        "authenticatorVersion": 448962,
+        "protocolFamily": "fido2",
+        "schema": 3,
+        "upv": [
+            {
+                "major": 1,
+                "minor": 0
+            },
+            {
+                "major": 1,
+                "minor": 1
+            }
+        ],
+        "authenticationAlgorithms": [
+            "ed25519_eddsa_sha512_raw",
+            "secp256r1_ecdsa_sha256_raw"
+        ],
+        "publicKeyAlgAndEncodings": [
+            "cose"
+        ],
+        "attestationTypes": [
+            "basic_full"
+        ],
+        "userVerificationDetails": [
+            [
+                {
+                    "userVerificationMethod": "passcode_external",
+                    "caDesc": {
+                        "base": 64,
+                        "minLength": 4,
+                        "maxRetries": 8,
+                        "blockSlowdown": 0
+                    }
+                },
+                {
+                    "userVerificationMethod": "presence_internal"
+                }
+            ],
+            [
+                {
+                    "userVerificationMethod": "passcode_external",
+                    "caDesc": {
+                        "base": 64,
+                        "minLength": 4,
+                        "maxRetries": 8,
+                        "blockSlowdown": 0
+                    }
+                }
+            ],
+            [
+                {
+                    "userVerificationMethod": "fingerprint_internal",
+                    "baDesc": {
+                        "selfAttestedFRR": 0,
+                        "selfAttestedFAR": 0,
+                        "maxTemplates": 5,
+                        "maxRetries": 5,
+                        "blockSlowdown": 0
+                    }
+                },
+                {
+                    "userVerificationMethod": "presence_internal"
+                }
+            ],
+            [
+                {
+                    "userVerificationMethod": "none"
+                }
+            ],
+            [
+                {
+                    "userVerificationMethod": "fingerprint_internal",
+                    "baDesc": {
+                        "selfAttestedFRR": 0,
+                        "selfAttestedFAR": 0,
+                        "maxTemplates": 5,
+                        "maxRetries": 5,
+                        "blockSlowdown": 0
+                    }
+                }
+            ],
+            [
+                {
+                    "userVerificationMethod": "presence_internal"
+                }
+            ]
+        ],
+        "keyProtection": [
+            "hardware",
+            "secure_element"
+        ],
+        "matcherProtection": [
+            "on_chip"
+        ],
+        "cryptoStrength": 128,
+        "attachmentHint": [
+            "external",
+            "wired"
+        ],
+        "tcDisplay": [],
+        "attestationRootCertificates": [
+            "MII....psmyPzK+Vsgw2jeRQ5JlKDyqE0hebfC1tvFu0CCrJFcw=="
+        ],
+        "icon": "data:image/png;base64,iVBORw0KGgoAAAA....k5+36hF7vXAAAAAElFTkSuQmCC",
+        "authenticatorGetInfo": {
+            "versions": [
+                "FIDO_2_0",
+                "FIDO_2_1_PRE",
+                "FIDO_2_1"
+            ],
+            "extensions": [
+                "credProtect",
+                "hmac-secret",
+                "largeBlobKey",
+                "credBlob",
+                "minPinLength"
+            ],
+            "aaguid": "83c.....73cb",
+            "options": {
+                "plat": false,
+                "rk": true,
+                "clientPin": true,
+                "up": true,
+                "uv": false,
+                "pinUvAuthToken": true,
+                "largeBlobs": true,
+                "ep": false,
+                "bioEnroll": false,
+                "userVerificationMgmtPreview": false,
+                "authnrCfg": true,
+                "credMgmt": true,
+                "credentialMgmtPreview": true,
+                "setMinPINLength": true,
+                "makeCredUvNotRqd": false,
+                "alwaysUv": true
+            },
+            "maxMsgSize": 1200,
+            "pinUvAuthProtocols": [
+                2,
+                1
+            ],
+            "maxCredentialCountInList": 8,
+            "maxCredentialIdLength": 128,
+            "transports": [
+                "usb"
+            ],
+            "algorithms": [
+                {
+                    "type": "public-key",
+                    "alg": -7
+                },
+                {
+                    "type": "public-key",
+                    "alg": -8
+                }
+            ],
+            "maxSerializedLargeBlobArray": 1024,
+            "forcePINChange": false,
+            "minPINLength": 4,
+            "firmwareVersion": 328965,
+            "maxCredBlobLength": 32,
+            "maxRPIDsForSetMinPINLength": 1,
+            "preferredPlatformUvAttempts": 3,
+            "uvModality": 2,
+            "remainingDiscoverableCredentials": 25
+        }
+    },
+    "statusReports": [
+        {
+            "status": "FIDO_CERTIFIED_L1",
+            "effectiveDate": "2021-08-06",
+            "url": "www.yubico.com",
+            "certificationDescriptor": "An example",
+            "certificateNumber": "FIDO2.....001",
+            "certificationPolicyVersion": "1.3",
+            "certificationRequirementsVersion": "1.4"
+        },
+        {
+            "status": "FIDO_CERTIFIED",
+            "effectiveDate": "2021-08-06"
+        }
+    ],
+    "timeOfLastStatusChange": "2021-08-16"
+}
 ```
 
 
@@ -228,9 +228,34 @@ Janssen's FIDO2 server -
 1.  Re-downloads the metadata BLOB when it expires.
 1.  Provides trust root certificates for verifying attestation statements during credential registrations.
 
-
 ### 3. Skip metadata validation
-Metadata validation is recommended but not mandatory as per FIDO2 specifications. As per the current implementation, there is no provision in the jans-fido2 server to turn this feature off. However, the intention is to implement it in the future.
+
+Metadata validation is recommended but not mandatory as per FIDO2 specifications.
+In FIDO2 we can disable this validation by setting the `skipValidateMdsInAttestationEnabled` parameter (default is
+false).
+
+It should look something like this:
+
+```
+"fido2Configuration": {
+  ...,
+  "skipValidateMdsInAttestationEnabled": true,
+  ...
+}
+```
+
+### 4. How Apple does it differently
+
+If you check `attStmt` and it contains `x5c`, it is a FULL attestation. FULL basically means that it is a certificate
+that is chained to the vendor. It's signed by a batch private key whose public key is in a batch certificate that is
+chained to the Apple attestation root certificate. Usually certificates have an authorityInfoAccess extension that helps
+locate the root, but Apple chose not to do that. Nevertheless, a quick google give us the needed root
+certificate https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem.
+
+This certificate is downloaded to the path `/etc/jans/conf/fido2/authenticator_cert`.
+
+You can see more details of the implementation in this link from
+https://medium.com/webauthnworks/webauthn-fido2-verifying-apple-anonymous-attestation-5eaff334c849.
 
 ### References:
 

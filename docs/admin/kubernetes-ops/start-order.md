@@ -3,9 +3,9 @@ tags:
   - administration
   - kubernetes
   - operations
-  - start order
+  - start-order
 ---
 
 ## Service Start Order
 
-![svg](../../../assets/kubernetes-services-start-order.svg)
+![svg](../../assets/kubernetes-services-start-order.svg)

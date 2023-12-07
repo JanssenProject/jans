@@ -6,16 +6,13 @@
 package io.jans.as.model.jws;
 
 import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-
-import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPrivateKey;
-import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey;
 
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
@@ -23,6 +20,7 @@ import io.jans.as.model.crypto.signature.EDDSAPrivateKey;
 import io.jans.as.model.crypto.signature.EDDSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Base64Util;
+import io.jans.util.security.SecurityProviderUtility;
 
 /**
  * Implementing the AbstractJwsSigner, that uses EDDSA for signing.
@@ -74,6 +72,9 @@ public class EDDSASigner extends AbstractJwsSigner {
      */
     @Override
     public String generateSignature(String signingInput) throws SignatureException {
+        if (!SecurityProviderUtility.isBcProvMode()) {
+            throw new InvalidParameterException("Wrong CryptoProvider Mode. EdDSA can be used, when BCPROV mode is initialized");
+        }
         SignatureAlgorithm signatureAlgorithm = getSignatureAlgorithm();
         if (signatureAlgorithm == null) {
             throw new SignatureException("The signature algorithm is null");
@@ -90,13 +91,13 @@ public class EDDSASigner extends AbstractJwsSigner {
         try {
             PKCS8EncodedKeySpec privateKeySpec = eddsaPrivateKey.getPrivateKeySpec();
             java.security.KeyFactory keyFactory = java.security.KeyFactory.getInstance(signatureAlgorithm.getName());
-            BCEdDSAPrivateKey privateKey = (BCEdDSAPrivateKey) keyFactory.generatePrivate(privateKeySpec);
-            Signature signer = Signature.getInstance(signatureAlgorithm.getName(), "BC");
+            org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPrivateKey privateKey = (org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPrivateKey) keyFactory.generatePrivate(privateKeySpec);
+            Signature signer = Signature.getInstance(signatureAlgorithm.getName(), SecurityProviderUtility.getBCProvider());
             signer.initSign(privateKey);
             signer.update(signingInput.getBytes());
             byte[] signature = signer.sign();
             return Base64Util.base64urlencode(signature);
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException | InvalidKeyException
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException
                 | IllegalArgumentException e) {
             throw new SignatureException(e);
         }
@@ -107,6 +108,9 @@ public class EDDSASigner extends AbstractJwsSigner {
      */
     @Override
     public boolean validateSignature(String signingInput, String signature) throws SignatureException {
+        if (!SecurityProviderUtility.isBcProvMode()) {
+            throw new InvalidParameterException("Wrong CryptoProvider Mode. EdDSA can be used, when BCPROV mode is initialized");
+        }
         SignatureAlgorithm signatureAlgorithm = getSignatureAlgorithm();
         if (signatureAlgorithm == null) {
             throw new SignatureException("The signature algorithm is null");
@@ -123,13 +127,13 @@ public class EDDSASigner extends AbstractJwsSigner {
         try {
             X509EncodedKeySpec publicKeySpec = eddsaPublicKey.getPublicKeySpec();
             java.security.KeyFactory keyFactory = java.security.KeyFactory.getInstance(signatureAlgorithm.getName());
-            BCEdDSAPublicKey publicKey = (BCEdDSAPublicKey) keyFactory.generatePublic(publicKeySpec);
-            Signature virifier = Signature.getInstance(signatureAlgorithm.getName(), "BC");
+            org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey publicKey = (org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey) keyFactory.generatePublic(publicKeySpec);
+            Signature virifier = Signature.getInstance(signatureAlgorithm.getName(), SecurityProviderUtility.getBCProvider());
             virifier.initVerify(publicKey);
             virifier.update(signingInput.getBytes());
             return virifier.verify(Base64Util.base64urldecode(signature));
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException | InvalidKeyException | IllegalArgumentException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException | IllegalArgumentException e) {
             throw new SignatureException(e);
         }
-    }	
+    }
 }

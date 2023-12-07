@@ -3,9 +3,11 @@ tags:
   - administration
   - vm
   - operations
+  - log-levels
 ---
 
-## Overview
+# Janssen Log Configuration
+
 The Janssen logs can be viewed via SSH access to the server running the Janssen installation.
 
 ## Log Levels

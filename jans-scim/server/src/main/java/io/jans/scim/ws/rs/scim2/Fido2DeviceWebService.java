@@ -10,11 +10,16 @@ import static io.jans.scim.model.scim2.Constants.QUERY_PARAM_SORT_ORDER;
 import static io.jans.scim.model.scim2.Constants.QUERY_PARAM_START_INDEX;
 import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.time.Instant;
 
 import jakarta.annotation.PostConstruct;
@@ -39,8 +44,10 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 
 import io.jans.scim.model.exception.SCIMException;
+import io.jans.scim.model.fido2.Fido2DeviceData;
 import io.jans.scim.model.GluuFido2Device;
 import io.jans.scim.model.scim2.*;
+import io.jans.scim.model.scim2.fido.DeviceData;
 import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
 import io.jans.scim.model.scim2.patch.PatchRequest;
 import io.jans.scim.model.scim2.util.DateUtil;
@@ -74,6 +81,8 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
     private PersistenceEntryManager entryManager;
 
     private String fido2ResourceType;
+    
+    private ObjectMapper mapper;
 
     private Response doSearchDevices(String userId, String filter, Integer startIndex, 
             Integer count, String sortBy, String sortOrder, String attrsList, String excludedAttrsList,
@@ -314,9 +323,30 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         res.setStatus(fidoDevice.getRegistrationStatus());
         res.setDisplayName(fidoDevice.getDisplayName());
 
+        Fido2DeviceData f2dd = fidoDevice.getDeviceData();
+        if (f2dd != null) {
+            DeviceData dd = new DeviceData();
+            dd.setUuid(f2dd.getUuid()); 
+            dd.setPushToken(f2dd.getPushToken()); 
+            dd.setType(f2dd.getType());         
+            dd.setPlatform(f2dd.getPlatform());
+            dd.setName(f2dd.getName());         
+            dd.setOsName(f2dd.getOsName());         
+            dd.setOsVersion(f2dd.getOsVersion());
+        
+            try {
+                if (f2dd.getCustomData() != null) {
+                    dd.setCustomData(mapper.writeValueAsString(f2dd.getCustomData()));
+                }
+            } catch (JsonProcessingException e) {
+                log.error(e.getMessage(), e);
+            }
+            res.setDeviceData(dd);
+        }
+        
     }
 
-    private void transferAttributesToDevice(Fido2DeviceResource res, GluuFido2Device device){
+    private void transferAttributesToDevice(Fido2DeviceResource res, GluuFido2Device device) {
 
         device.setId(res.getId());
 
@@ -326,6 +356,21 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         
         Instant instant = Instant.parse(res.getMeta().getLastModified());
         device.getRegistrationData().setUpdatedDate(new Date(instant.toEpochMilli()));
+        
+        DeviceData deviceData = res.getDeviceData(); 
+        if (deviceData != null) {
+            Map<String, String> customData = null;
+            
+            try {
+                if (deviceData.getCustomData() != null) {
+                    customData = mapper.readValue(deviceData.getCustomData(), new TypeReference<Map<String, String>>(){});
+                }
+            } catch (JsonProcessingException e) {
+                log.error(e.getMessage(), e);
+            }
+            device.setDeviceData(new Fido2DeviceData(deviceData.getUuid(), deviceData.getPushToken(), deviceData.getType(),
+                        deviceData.getPlatform(), deviceData.getName(), deviceData.getOsName(), deviceData.getOsVersion(), customData));
+        }
 
     }
 
@@ -387,9 +432,10 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
     }
 
     @PostConstruct
-    public void setup(){
+    public void setup() {
         init(Fido2DeviceWebService.class);
         fido2ResourceType = ScimResourceUtil.getType(Fido2DeviceResource.class);
+        mapper = new ObjectMapper();
     }
 
 }

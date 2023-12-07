@@ -208,6 +208,9 @@ class PropertiesUtils(SetupUtils):
         if p.get('enable-script'):
             base.argsp.enable_script = p['enable-script'].split()
 
+        if p.get('loadTestData'):
+            base.argsp.t = True
+
         if p.get('rdbm_type') == 'pgsql' and not p.get('rdbm_port'):
             p['rdbm_port'] = '5432'
 
@@ -594,6 +597,75 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('installEleven')
 
 
+    def prompt_for_jans_link(self):
+        if Config.installed_instance and Config.install_jans_link:
+            return
+
+        prompt_jans_link = self.getPrompt("Install Jans Link Server?",
+                                            self.getDefaultOption(Config.install_jans_link)
+                                            )[0].lower()
+
+        Config.install_jans_link = prompt_jans_link == 'y'
+
+        if Config.installed_instance and Config.install_jans_link:
+            Config.addPostSetupService.append('install_jans_link')
+
+
+    def prompt_for_jans_keycloak_link(self):
+        if Config.installed_instance and Config.install_jans_keycloak_link:
+            return
+
+        prompt_to_install = self.getPrompt("Install Jans Keycloak Link Server?",
+                                            self.getDefaultOption(Config.install_jans_keycloak_link)
+                                            )[0].lower()
+
+        Config.install_jans_keycloak_link = prompt_to_install == 'y'
+
+        if Config.installed_instance and Config.install_jans_keycloak_link:
+            Config.addPostSetupService.append('install_jans_keycloak_link')
+
+    def prompt_for_casa(self):
+        if Config.installed_instance and Config.install_casa:
+            return
+
+        prompt = self.getPrompt("Install Jans Casa?",
+                                self.getDefaultOption(Config.install_casa)
+                            )[0].lower()
+
+        Config.install_casa = prompt == 'y'
+
+        if Config.installed_instance and Config.install_casa:
+            Config.addPostSetupService.append('install_casa')
+
+
+    def prompt_to_install(self, install_var):
+        if Config.installed_instance and Config.get(install_var):
+            return False
+
+        if not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
+            return False
+
+        return True
+
+    def prompt_for_jans_saml(self):
+        if not self.prompt_to_install('install_jans_saml'):
+            return
+
+        prompt = self.getPrompt("Install Jans SAML?",
+                                            self.getDefaultOption(Config.install_jans_saml)
+                                            )[0].lower()
+
+        Config.install_jans_saml = prompt == 'y'
+        if Config.installed_instance:
+            if Config.install_jans_saml:
+                Config.addPostSetupService.append('install_jans_saml')
+                if Config.install_config_api and not Config.install_scim_server:
+                    Config.addPostSetupService.append('install_scim_server')
+                    Config.install_scim_server = True
+        else:
+            if Config.install_jans_saml and Config.install_config_api:
+                Config.install_scim_server = True
+
     def promptForConfigApi(self):
         if Config.installed_instance and Config.install_config_api:
             return
@@ -603,9 +675,11 @@ class PropertiesUtils(SetupUtils):
                             )[0].lower()
 
         Config.install_config_api = prompt_for_config_api == 'y'
+        Config.install_jans_cli = Config.install_config_api
 
         if Config.installed_instance and Config.install_config_api:
             Config.addPostSetupService.append('install_config_api')
+            Config.addPostSetupService.append('install_jans_cli')
 
 
     def prompt_for_rdbm(self):
@@ -643,6 +717,9 @@ class PropertiesUtils(SetupUtils):
 
 
     def prompt_for_backend(self):
+        if Config.installed_instance:
+            return
+
         print('Chose Backend Type:')
 
         backend_types = [
@@ -691,10 +768,10 @@ class PropertiesUtils(SetupUtils):
             while True:
                 ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(Config.ldap_binddn), ldapPass)
 
-                if self.checkPassword(ldapPass):
+                if len(ldapPass) >= 0:
                     break
                 else:
-                    print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
+                    print("Password must be at least 1 character.")
 
             Config.ldapPass = ldapPass
 
@@ -918,16 +995,16 @@ class PropertiesUtils(SetupUtils):
             Config.jans_max_mem = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.jans_max_mem))
 
 
-        admin_password =  Config.ldapPass or Config.cb_password or Config.rdbm_password or self.getPW(special='.*=!%&+/-')
+            admin_password =  Config.ldapPass or Config.cb_password or Config.rdbm_password or self.getPW(special='.*=!%&+/-')
 
-        while True:
-            adminPass = self.getPrompt("Enter Password for Admin User", admin_password)
-            if len(adminPass) > 3:
-                break
-            else:
-                print("Admin password should be at least four characters in length.")
+            while True:
+                adminPass = self.getPrompt("Enter Password for Admin User", admin_password)
+                if len(adminPass) > 3:
+                    break
+                else:
+                    print("Admin password should be at least four characters in length.")
 
-        Config.admin_password = adminPass
+            Config.admin_password = adminPass
 
         if Config.profile == 'openbanking':
             self.openbanking_properties()
@@ -936,6 +1013,11 @@ class PropertiesUtils(SetupUtils):
             self.promptForConfigApi()
             self.promptForScimServer()
             self.promptForFido2Server()
+            self.prompt_for_jans_link()
+            self.prompt_for_jans_keycloak_link()
+            self.prompt_for_casa()
+
+            self.prompt_for_jans_saml()
             #self.promptForEleven()
             #if (not Config.installOxd) and Config.oxd_package:
             #    self.promptForOxd()

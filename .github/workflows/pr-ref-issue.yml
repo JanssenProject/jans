@@ -14,15 +14,23 @@ on:
     branches:
       - main
   workflow_dispatch:
+permissions:
+  contents: read
+
 jobs:
   check-prs-issue:
-    if:  startsWith(github.head_ref, 'release-please') || startsWith(github.head_ref, 'dependabot/') || startsWith(github.head_ref, 'snyk-')
+    if:  startsWith(github.head_ref, 'release-please') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true
     name: Check PRs issue
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
       - name: Wait for 25 seconds so that GH can attach issue to the PR if already mentioned by author
         run: sleep 25s
         shell: bash

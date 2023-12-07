@@ -1,0 +1,53 @@
+{
+  "titleEnrollment": "Einlernen",
+  "titleVerification": "Verifikation",
+  "titleIdentification": "Identifikation",
+  "titleLiveDetection": "Lebenderkennung",
+
+  "introductionTitle": "So geht's",
+  "introductionStep1": "Schritt 1",
+  "introductionStep1Desc1": "Kommen Sie näher zur Kamera,",
+  "introductionStep1Desc2": "bevor Sie starten",
+  "introductionTooFarAway": "Zu weit entfernt!",
+  "introductionTooClose": "Zu nah!",
+  "introductionPerfect": "Perfekt!",
+  "introductionStep2": "Schritt 2",
+  "introductionStep2Desc1": "Für Lebenderkennung",
+  "introductionStep2Desc2": "bitte leicht nicken",
+  "introductionDontMoveDevice": "Bitte nicht das Gerät bewegen!",
+  "introductionDontShowAgain": "Verstanden! Diese Anleitung nicht wieder anzeigen",
+
+  "buttonCancel": "zurück",
+  "buttonCancel.title": "Abbruch und zurück zum Aufrufer",
+  "buttonReadyToStart": "Ich bin bereit",
+  "buttonContinue": "Fortfahren ohne Biometrie",
+  "buttonMobileApp": "Starte BioID app",
+
+  "prompt": "Es scheint, als hätten wir keinen Kamerazugriff. Um unsere biometrischen Anwendungen durchzuführen, versuchen Sie bitte Folgendes:<br />- Erlauben Sie Zugriff zur Kamera.<br />- Benutzen Sie einen anderen Browser (z.B. die aktuellste Version von Opera, Firefox, Chrome oder Edge).",
+  "mobileapp": "Wenn Sie die BioID app auf Ihrem Mobilgerät installiert haben, können Sie diese verwenden.",
+
+  "uploadInfo": "Uploading...",
+
+  "capture-error": "Die Bildaufnahme ist fehlgeschlagen.<br />Scheinbar ist der Kamerazugriff nicht erlaubt.<br />Leider ist dadurch keine Gesichts- und Lebenderkennung möglich.",
+  "nogetUserMedia": "Ihr Browser unterstützt das HTML5 Feature Media Capture und Streams API nicht. Bitte nutzen Sie einen anderen Browser oder die BioID App für Mobilgeräte.",
+  "permissionDenied": "Zugriff verweigert!",
+  "webgl-error": "WebGL ist deaktiviert oder nicht verfügbar. Wenn möglich aktivieren sie WebGL oder benutzen sie einen anderen Browser.",
+
+  "UserInstruction-CloseUp": "Vor dem Start bitte näherkommen<br />und das Gesicht im blauen Kopf positionieren",
+  "UserInstruction-NodYourHead": "Nicken Sie mit dem Kopf",
+  "UserInstruction-FollowMe": "Folgen Sie dem blauen Kopf",
+  "UserInstruction-NoMovement": "Folgen Sie der Kopfbewegung",
+  "UserInstruction-PleaseWait": "Bitte warten",
+
+  "Perform-enrollment": "Einlernen...",
+  "Perform-verification": "Verifikation...",
+  "Perform-identification": "Identifikation...",
+  "Perform-livenessdetection": "In Bearbeitung...",
+
+  "NoMotionDetected": "Wir haben keine Bewegung erkannt.<br/>Für Lebenderkennung bitte den Kopf leicht bewegen.",
+  "NoFaceFound": "Es wurde kein geeignetes Gesicht gefunden.<br/>Bitte näherkommen und direkt in die Kamera blicken.",
+  "MultipleFacesFound": "Es wurde mehr als ein Gesicht gefunden oder der Hintergrund ist zu unruhig.<br/>Ihr Gesicht soll den Kreis ganz ausfüllen.",
+  "LiveDetectionFailed": "Lebenderkennung fehlgeschlagen.<br/>Gerade in die Kamera blicken, dann den Kopf langsam bewegen.<br/>Achten Sie auf gleichmäßige Beleuchtung.",
+  "ChallengeResponseFailed": "Challenge-Response Erkennung fehlgeschlagen!<br/>Folgen Sie langsam der Bewegung des Kopfes.",
+  "NotRecognized": "Erkennung fehlgeschlagen.<br/>Sorgen Sie für gleichmäßige Beleuchtung. Für bessere Erkennung bitte nochmals einlernen (enrollment)."
+}

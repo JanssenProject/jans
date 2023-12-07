@@ -39,6 +39,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.mds.AuthenticatorCertificationStatus;
+import io.jans.fido2.service.CertificateService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -56,13 +61,19 @@ public class CertificateVerifier {
     @Inject
     private Base64Service base64Service;
 
+    @Inject
+    private CertificateService certificateService;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     public void checkForTrustedCertsInAttestation(List<X509Certificate> attestationCerts, List<X509Certificate> trustChainCertificates) {
         final List<String> trustedSignatures = trustChainCertificates.stream().map(cert -> base64Service.encodeToString(cert.getSignature()))
                 .collect(Collectors.toList());
         List<String> duplicateSignatures = attestationCerts.stream().map(cert -> base64Service.encodeToString(cert.getSignature()))
-                .filter(sig -> trustedSignatures.contains(sig)).collect(Collectors.toList());
+                .filter(trustedSignatures::contains).collect(Collectors.toList());
         if (!duplicateSignatures.isEmpty()) {
-            throw new Fido2RuntimeException("Root certificate in the attestation");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Root certificate in the attestation");
         }
     }
 
@@ -72,17 +83,17 @@ public class CertificateVerifier {
             Set<TrustAnchor> trustAnchors = trustChainCertificates.parallelStream().map(f -> new TrustAnchor(f, null)).collect(Collectors.toSet());
 
             if (trustAnchors.isEmpty()) {
-                throw new Fido2MissingAttestationCertException("Trust anchors certs list is empty!");
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Trust anchors certs list is empty!");
             }
 
             PKIXParameters params = new PKIXParameters(trustAnchors);
-            CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
+            CertPathValidator cpv = certificateService.instanceCertPathValidatorPKIX();
 
             PKIXRevocationChecker rc = (PKIXRevocationChecker) cpv.getRevocationChecker();
             rc.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL, PKIXRevocationChecker.Option.PREFER_CRLS));
             params.addCertPathChecker(rc);
 
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            CertificateFactory certFactory = certificateService.instanceCertificateFactoryX509();
             CertPath certPath = certFactory.generateCertPath(certs);
 
             X509Certificate cert = verifyPath(cpv, certPath, params);
@@ -90,7 +101,7 @@ public class CertificateVerifier {
                 return cert;
             } else {
                 params = new PKIXParameters(trustAnchors);
-                cpv = CertPathValidator.getInstance("PKIX");
+                cpv = certificateService.instanceCertPathValidatorPKIX();
                 rc = (PKIXRevocationChecker) cpv.getRevocationChecker();
                 rc.setOptions(Collections.emptySet());
                 params.setRevocationEnabled(false);
@@ -98,9 +109,9 @@ public class CertificateVerifier {
 
                 return verifyPath(cpv, certPath, params);
             }
-        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | CertificateException e) {
+        } catch (InvalidAlgorithmParameterException | CertificateException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
-            throw new Fido2RuntimeException("Problem with certificate");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Problem with certificate: " + e.getMessage());
         }
     }
 
@@ -118,11 +129,11 @@ public class CertificateVerifier {
                 return null;
             } else {
                 log.error("Cert not validated against the root {}", ex.getMessage());
-                throw new Fido2RuntimeException("Problem with certificate " + ex.getMessage());
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Problem with certificate " + ex.getMessage());
             }
         } catch (InvalidAlgorithmParameterException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
-            throw new Fido2RuntimeException("Problem with certificate");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Problem with certificate");
         }
     }
 
@@ -139,5 +150,47 @@ public class CertificateVerifier {
             log.warn("Probably not self signed cert. Cert verification problem {}", e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Verify that the MDS entry contains a valid state
+     *
+     * @param aaguid AAGUID from MetadataBlobEntry
+     * @param metadataEntry MetadataBlobEntry
+     * @throws Fido2RuntimeException If it contains errors
+     */
+    public void verifyStatusAcceptable(String aaguid, JsonNode metadataEntry) throws Fido2RuntimeException {
+        if (!metadataEntry.has("statusReports")) {
+            throw new Fido2RuntimeException(String.format("Ignore entry AAGUID: %s due it does not contain 'statusReports' field", aaguid));
+        }
+        JsonNode statusReportsNode = metadataEntry.get("statusReports");
+        if (statusReportsNode.isEmpty()) {
+            throw new Fido2RuntimeException(String.format("Ignore entry AAGUID: %s because 'statusReports' doesn't contain values", aaguid));
+        }
+        for (JsonNode statusNode : metadataEntry.get("statusReports")) {
+            if (!statusNode.has("status")) {
+                throw new Fido2RuntimeException(String.format("Ignore entry AAGUID: %s due it does not contain 'status' field", aaguid));
+            }
+            AuthenticatorCertificationStatus authenticatorStatus = AuthenticatorCertificationStatus.valueOf(statusNode.get("status").asText());
+            String authenticatorEffectiveDate = statusNode.get("effectiveDate").asText();
+            log.debug("Authenticator AAGUID {} status {} effective date {}", aaguid, authenticatorStatus, authenticatorEffectiveDate);
+            if (!isAcceptableStatus(authenticatorStatus)) {
+                throw new Fido2RuntimeException(String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, authenticatorStatus.name()));
+            }
+        }
+    }
+
+    /**
+     * Verify that the status is valid
+     *
+     * @param authenticatorStatus {@link AuthenticatorCertificationStatus} status
+     * @return true if valid, false if invalid
+     */
+    private boolean isAcceptableStatus(AuthenticatorCertificationStatus authenticatorStatus) {
+        return authenticatorStatus != AuthenticatorCertificationStatus.USER_VERIFICATION_BYPASS &&
+                authenticatorStatus != AuthenticatorCertificationStatus.ATTESTATION_KEY_COMPROMISE &&
+                authenticatorStatus != AuthenticatorCertificationStatus.USER_KEY_REMOTE_COMPROMISE &&
+                authenticatorStatus != AuthenticatorCertificationStatus.USER_KEY_PHYSICAL_COMPROMISE &&
+                authenticatorStatus != AuthenticatorCertificationStatus.REVOKED;
     }
 }

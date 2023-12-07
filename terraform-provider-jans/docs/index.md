@@ -35,6 +35,7 @@ the other hand will result in the resource being removed from the state file.
 
 The following resources are considered instance configurations:
 
+- jans_api_app_configuration
 - jans_app_configuration
 - jans_cache_configuration
 - jans_default_authentication_method
@@ -47,6 +48,7 @@ The following resources are considered instance configurations:
 It is recommended to import all of those resources before managing anything else:
 
 ```bash
+terraform import jans_api_app_configuration.global global
 terraform import jans_app_configuration.global global
 terraform import jans_cache_configuration.global global
 terraform import jans_default_authentication_method.global global

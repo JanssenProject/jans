@@ -43,6 +43,12 @@ public class Fido2DeviceResource extends BaseScimResource {
     @StoreReference(ref = "jansStatus")
     private String status;
 
+    @Attribute(description = "Device data for Super Gluu enrollment",
+            mutability = AttributeDefinition.Mutability.IMMUTABLE,
+            type = AttributeDefinition.Type.COMPLEX)
+    @StoreReference(ref = "jansDeviceData")
+    private DeviceData deviceData;
+
     @Attribute
     @StoreReference(ref = "displayName")
     private String displayName;
@@ -85,6 +91,14 @@ public class Fido2DeviceResource extends BaseScimResource {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public DeviceData getDeviceData() {
+        return deviceData;
+    }
+
+    public void setDeviceData(DeviceData deviceData) {
+        this.deviceData = deviceData;
     }
 
 }

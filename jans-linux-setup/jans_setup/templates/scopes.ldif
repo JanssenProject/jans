@@ -119,6 +119,28 @@ jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
 
+dn: inum=6D91,ou=scopes,o=jans
+description: Introspection
+displayName: introspection
+inum: 6D91
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: false
+jansId: introspection
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=6D92,ou=scopes,o=jans
+description: Authorization Challenge
+displayName: authorization_challenge
+inum: 6D92
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: true
+jansId: authorization_challenge
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+
 dn: inum=7D90,ou=scopes,o=jans
 description: revoke_session scope which is required to be able call /revoke_session endpoint
 displayName: revoke_session
@@ -130,6 +152,17 @@ jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
 
+dn: inum=7D91,ou=scopes,o=jans
+description: Revoke Any Token (including tokens of other clients)
+displayName: revoke_any_token
+inum: 7D91
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: false
+jansId: revoke_any_token
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+
 dn: inum=8A01,ou=scopes,o=jans
 description: View your mobile phone number.
 displayName: view_mobile_phone_number
@@ -138,6 +171,17 @@ jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigu
 jansClaim: inum=6DA6,ou=attributes,o=jans
 jansDefScope: false
 jansId: mobile_phone
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=C4F4,ou=scopes,o=jans
+description: Expire OAuth 2.0 Refresh Token when session ends.
+displayName: online_access
+inum: C4F4
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: true
+jansId: online_access
 jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
@@ -159,7 +203,7 @@ description: This scope value requests that an OAuth 2.0 Refresh Token be issued
 displayName: refresh_token
 inum: C4F6
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansDefScope: true
+jansDefScope: false
 jansId: offline_access
 jansScopeTyp: openid
 objectClass: top
@@ -169,9 +213,9 @@ dn: inum=C4F7,ou=scopes,o=jans
 jansId: jans_stat
 inum: C4F7
 description: This scope is required for calling Statistic Endpoint
-jansDefScope: false
+jansDefScope: true
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":false}
-jansScopeTyp: openid
+jansScopeTyp: oauth
 objectClass: top
 objectClass: jansScope
 

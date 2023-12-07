@@ -4,6 +4,7 @@ import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -59,9 +60,10 @@ public abstract class AbstractScimClient<T> implements CloseableClient, Invocati
         /*
          Configures a proxy to interact with the service using the JAX-RS 2.0 Client API
          */
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         CloseableHttpClient httpClient = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                .build();
+                .setConnectionManager(cm).build();
 
         ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder();
         client = builder.httpEngine(new ApacheHttpClient43Engine(httpClient)).build();

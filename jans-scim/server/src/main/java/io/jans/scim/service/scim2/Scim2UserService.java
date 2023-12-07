@@ -419,7 +419,7 @@ public class Scim2UserService implements Serializable {
 					log.debug("transferExtendedAttributesToResource. Copying to resource the value(s) for attribute '{}'",
 							attr);
 					ExtensionField field = fields.get(attr);
-					List<Object> convertedValues = extService.convertValues(field, values, ldapBackend);
+					List<Object> convertedValues = extService.convertValues(field, values);
 
 					if (convertedValues.size() > 0) {
 						map.put(attr, field.isMultiValued() ? convertedValues : convertedValues.get(0));

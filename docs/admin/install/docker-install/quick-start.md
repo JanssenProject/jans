@@ -15,7 +15,7 @@ The quickest way to get a Janssen Server up and running is to install a Docker c
 
 ## System Requirements
 
-System should meet [minimum VM system requirements](vm-requirements.md)
+System should meet [minimum VM system requirements](../vm-install/vm-requirements.md)
 
 ## Install
 
@@ -25,7 +25,7 @@ These environment variables can be set to customize installation as per the need
 Run this command to start the installation:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL "" main
 ```
 
 Console messages like below confirms the successful installation:
@@ -60,19 +60,19 @@ https://demoexample.jans.io/.well-known/openid-configuration
 
 ## Configure Janssen Server
 
-Access the Docker container shell using:
+1. Access the Docker container shell using:
 
-```bash
-docker exec -ti docker-jans-monolith-jans-1 bash
-```
+    ```bash
+    docker exec -ti docker-jans-monolith-jans-1 bash
+    ```
 
-And then use CLI tools to configure Janssen Server as needed.
+2. Grab a pair of client_id and client_pw(secret) from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
 
-```bash
-/opt/jans/jans-cli/config-cli.py
-#or
-/opt/jans/jans-cli/scim-cli.py
-```
+3. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen Server as needed. For example you can run the [TUI](../../config-guide/config-tools/jans-tui/README.md):
+    ```bash
+    python3 /opt/jans/jans-cli/config-cli-tui.py
+    ```
+
 
 ## Uninstall / Remove the Janssen Server
 

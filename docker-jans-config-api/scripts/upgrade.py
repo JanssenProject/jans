@@ -12,13 +12,12 @@ from jans.pycloudlib.persistence import SqlClient
 from jans.pycloudlib.persistence import PersistenceMapper
 from jans.pycloudlib.persistence import doc_id_from_dn
 from jans.pycloudlib.persistence import id_from_dn
-from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("config-api")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
@@ -92,6 +91,25 @@ def _transform_api_dynamic_config(conf):
                 "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication",
             },
         ]
+        should_update = True
+
+    # current plugin names to lookup to
+    plugins_names = tuple(plugin["name"] for plugin in conf["plugins"])
+
+    if "jans-link" not in plugins_names:
+        conf["plugins"].append({
+            "name": "jans-link",
+            "description": "jans-link plugin",
+            "className": "io.jans.configapi.plugin.link.rest.ApiApplication",
+        })
+        should_update = True
+
+    if "saml" not in plugins_names:
+        conf["plugins"].append({
+            "name": "saml",
+            "description": "saml plugin",
+            "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
+        })
         should_update = True
     return conf, should_update
 
@@ -180,10 +198,10 @@ class CouchbaseBackend:
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
         bucket = kwargs.get("bucket")
         req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec: B608
         )
         if not req.ok:
-            return
+            return None
 
         try:
             _attrs = req.json()["results"][0]
@@ -223,7 +241,7 @@ class CouchbaseBackend:
     def search_entries(self, key, filter_="", attrs=None, **kwargs):
         bucket = kwargs.get("bucket")
         req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} {filter_}"
+            f"SELECT META().id, {bucket}.* FROM {bucket} {filter_}"  # nosec: B608
         )
         if not req.ok:
             return []
@@ -286,8 +304,8 @@ class Upgrade:
         self.update_api_dynamic_config()
 
         # add missing scopes into internal config-api client (if enabled)
-        if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
-            self.update_client_scopes()
+        self.update_client_scopes()
+        self.update_test_client_scopes()
 
     def update_client_redirect_uri(self):
         kwargs = {}
@@ -389,11 +407,65 @@ class Upgrade:
                 entry.attrs["jansScope"] = client_scopes + diff
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
+    def update_test_client_scopes(self):
+        test_client_id = self.manager.config.get("test_client_id")
+        id_ = f"inum={test_client_id},ou=clients,o=jans"
+        kwargs = {}
+
+        # search_entries(self, key, filter_="", attrs=None, **kwargs)
+        if self.backend.type in ("sql", "spanner"):
+            id_ = doc_id_from_dn(id_)
+            kwargs = {"table_name": "jansClnt"}
+        elif self.backend.type == "couchbase":
+            id_ = id_from_dn(id_)
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+            client_scopes = entry.attrs["jansScope"]["v"]
+        else:
+            client_scopes = entry.attrs["jansScope"]
+
+        if not isinstance(client_scopes, list):
+            client_scopes = [client_scopes]
+
+        if self.backend.type in ("sql", "spanner"):
+            scopes = [
+                scope_entry.attrs["dn"]
+                for scope_entry in self.backend.search_entries("", **{"table_name": "jansScope"})
+            ]
+        elif self.backend.type == "couchbase":
+            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+            scopes = [
+                scope_entry.attrs["dn"]
+                for scope_entry in self.backend.search_entries("", filter_="WHERE objectClass='jansScope'", **{"bucket": bucket})
+            ]
+        else:
+            scopes = [
+                scope_entry.id
+                for scope_entry in self.backend.search_entries("ou=scopes,o=jans")
+            ]
+
+        # find missing scopes from the client
+        diff = list(set(scopes).difference(client_scopes))
+        if diff:
+            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                entry.attrs["jansScope"]["v"] = client_scopes + diff
+            else:
+                entry.attrs["jansScope"] = client_scopes + diff
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 def main():
     manager = get_manager()
-    upgrade = Upgrade(manager)
-    upgrade.invoke()
+
+    with manager.lock.create_lock("config-api-upgrade"):
+        upgrade = Upgrade(manager)
+        upgrade.invoke()
 
 
 if __name__ == "__main__":

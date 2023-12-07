@@ -64,11 +64,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -83,7 +86,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -122,11 +124,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -141,7 +146,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -180,11 +184,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -199,7 +206,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -240,11 +246,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -258,7 +267,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -300,11 +308,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -318,7 +329,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -360,11 +370,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -378,7 +391,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -420,11 +432,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -438,7 +453,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -480,11 +494,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -498,7 +515,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -540,11 +556,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -558,7 +577,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -600,11 +618,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -618,7 +639,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -660,11 +680,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -678,7 +701,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -720,11 +742,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -738,7 +763,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -780,11 +804,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -799,7 +826,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -850,11 +876,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -869,7 +898,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -920,11 +948,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -939,7 +970,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -988,11 +1018,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1005,7 +1038,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1051,11 +1083,14 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1068,7 +1103,6 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();

@@ -22,6 +22,7 @@ type UMAResource struct {
 	CreationDate    string   `schema:"creation_date" json:"creationDate,omitempty"`
 	ExpirationDate  string   `schema:"expiration_date" json:"expirationDate,omitempty"`
 	Deletable       bool     `schema:"deletable" json:"deletable,omitempty"`
+	Ttl             int      `schema:"ttl" json:"ttl,omitempty"`
 }
 
 // GetUMAResources returns all UMA resources defined in the system.

@@ -7,17 +7,12 @@
 package io.jans.as.server.service;
 
 import com.google.common.collect.Sets;
-import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.cdi.util.CdiUtil;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
@@ -25,6 +20,14 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.slf4j.Logger;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -97,6 +100,7 @@ public class CookieService {
 
     public Set<String> getCurrentSessions(HttpServletRequest request) {
         final String valueFromCookie = getValueFromCookie(request, CURRENT_SESSIONS_COOKIE_NAME);
+        log.trace("current_sessions cookie value: {}", valueFromCookie);
         if (StringUtils.isBlank(valueFromCookie)) {
             return Sets.newHashSet();
         }
@@ -104,22 +108,34 @@ public class CookieService {
         try {
             return Sets.newHashSet(toList(new JSONArray(valueFromCookie)));
         } catch (JSONException e) {
-            log.error("Failed to parse current_sessions, value: " + valueFromCookie, e);
-            return Sets.newHashSet();
+            try {
+                String value = URLDecoder.decode(valueFromCookie, "UTF-8");
+                return Sets.newHashSet(toList(new JSONArray(value)));
+            } catch (UnsupportedEncodingException e1) {
+                log.error("Failed to parse current_sessions, value: " + valueFromCookie, e);
+            }
         }
+
+        log.debug("Return back empty current_sessions.");
+        return Sets.newHashSet();
     }
 
     public void addCurrentSessionCookie(SessionId sessionId, HttpServletRequest request, HttpServletResponse httpResponse) {
-        final Set<String> currentSessions = getCurrentSessions(request);
-        removeOutdatedCurrentSessions(currentSessions, sessionId);
-        currentSessions.add(sessionId.getId());
+        try {
+            final Set<String> currentSessions = getCurrentSessions(request);
+            removeOutdatedCurrentSessions(currentSessions, sessionId);
+            currentSessions.add(sessionId.getId());
 
-        String header = CURRENT_SESSIONS_COOKIE_NAME + "=" + new JSONArray(currentSessions).toString();
-        header += "; Path=/";
-        header += "; Secure";
-        header += "; HttpOnly";
+            String header = CURRENT_SESSIONS_COOKIE_NAME + "=" + URLEncoder.encode(new JSONArray(currentSessions).toString(), "UTF-8");
+            log.trace("on add - {}, addedValue: {}", header, sessionId.getId());
+            header += "; Path=/";
+            header += "; Secure";
+            header += "; HttpOnly";
 
-        createCookie(header, httpResponse);
+            createCookie(header, httpResponse);
+        } catch (UnsupportedEncodingException e) {
+            log.error("Failed to modify current_sessions", e);
+        }
     }
 
     private void removeOutdatedCurrentSessions(Set<String> currentSessions, SessionId session) {

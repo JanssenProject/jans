@@ -8,9 +8,14 @@ package io.jans.model.security;
 
 import java.io.Serializable;
 import java.security.Principal;
-import java.security.acl.Group;
 import java.util.HashMap;
 
+import javax.security.auth.Subject;
+import javax.security.auth.login.LoginException;
+
+import org.slf4j.Logger;
+
+import io.jans.model.security.event.Authenticated;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.RequestScoped;
@@ -19,12 +24,6 @@ import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.interceptor.Interceptor;
-import javax.security.auth.Subject;
-import javax.security.auth.login.LoginException;
-
-import org.slf4j.Logger;
-
-import io.jans.model.security.event.Authenticated;
 
 @RequestScoped
 @Named
@@ -195,44 +194,6 @@ public class Identity implements Serializable {
 
     public void setWorkingParameter(String name, Object value) {
         getWorkingParameters().put(name, value);
-    }
-
-    /**
-     * Adds a role to the authenticated user.
-     *
-     * @param role
-     *            The name of the role to add
-     */
-    public boolean addRole(String role) {
-        if (role == null || "".equals(role)) {
-            return false;
-        }
-
-        if (!isLoggedIn()) {
-            return false;
-        } else {
-            for (Group sg : getSubject().getPrincipals(Group.class)) {
-                if (ROLES_GROUP.equals(sg.getName())) {
-                    return sg.addMember(new Role(role));
-                }
-            }
-
-            SimpleGroup roleGroup = new SimpleGroup(ROLES_GROUP);
-            roleGroup.addMember(new Role(role));
-            getSubject().getPrincipals().add(roleGroup);
-            return true;
-        }
-    }
-
-    public boolean hasRole(String role) {
-        tryLogin();
-
-        for (Group sg : getSubject().getPrincipals(Group.class)) {
-            if (ROLES_GROUP.equals(sg.getName())) {
-                return sg.isMember(new Role(role));
-            }
-        }
-        return false;
     }
 
 }

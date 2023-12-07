@@ -55,6 +55,12 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
             final String postLogoutRedirectUri, final String logoutUri, final String sectorIdentifierUri) throws Exception {
         showTitle("requestEndSession by id_token");
 
+        List<String> scopes = new ArrayList<String>();
+        scopes.add("openid");
+        scopes.add("profile");
+        scopes.add("address");
+        scopes.add("email");
+
         // 1. OpenID Connect Dynamic Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -62,6 +68,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
         registerRequest.setFrontChannelLogoutUri(logoutUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -76,11 +83,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
         responseTypes.add(ResponseType.TOKEN);
         responseTypes.add(ResponseType.ID_TOKEN);
-        List<String> scopes = new ArrayList<String>();
-        scopes.add("openid");
-        scopes.add("profile");
-        scopes.add("address");
-        scopes.add("email");
+
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -145,6 +148,12 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
             final String postLogoutRedirectUri, final String logoutUri, final String sectorIdentifierUri) throws Exception {
         showTitle("requestEndSession by session_id");
 
+        List<String> scopes = new ArrayList<String>();
+        scopes.add("openid");
+        scopes.add("profile");
+        scopes.add("address");
+        scopes.add("email");
+
         // 1. OpenID Connect Dynamic Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -152,6 +161,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
         registerRequest.setFrontChannelLogoutUri(logoutUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -166,11 +176,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
         responseTypes.add(ResponseType.TOKEN);
         responseTypes.add(ResponseType.ID_TOKEN);
-        List<String> scopes = new ArrayList<String>();
-        scopes.add("openid");
-        scopes.add("profile");
-        scopes.add("address");
-        scopes.add("email");
+
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 

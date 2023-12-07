@@ -64,15 +64,20 @@ public class JwtSigner {
     }
 
     public static JwtSigner newJwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, Client client) throws Exception {
-        Preconditions.checkNotNull(client);
+        Preconditions.checkNotNull(client, "Client must not be null");
+        ClientService clientService = CdiUtil.bean(ClientService.class);
+        return newJwtSigner(appConfiguration, webKeys, client, clientService.decryptSecret(client.getClientSecret()));
+    }
+
+    public static JwtSigner newJwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, Client client, String decryptedSecret) {
+        Preconditions.checkNotNull(client, "Client must not be null");
 
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm());
         if (client.getIdTokenSignedResponseAlg() != null) {
             signatureAlgorithm = SignatureAlgorithm.fromString(client.getIdTokenSignedResponseAlg());
         }
 
-        ClientService clientService = CdiUtil.bean(ClientService.class);
-        return new JwtSigner(appConfiguration, webKeys, signatureAlgorithm, client.getClientId(), clientService.decryptSecret(client.getClientSecret()));
+        return new JwtSigner(appConfiguration, webKeys, signatureAlgorithm, client.getClientId(), decryptedSecret);
     }
 
     public Jwt newJwt() throws Exception {

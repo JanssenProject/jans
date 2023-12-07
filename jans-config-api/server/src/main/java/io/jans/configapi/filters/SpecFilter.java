@@ -31,9 +31,10 @@ public class SpecFilter extends AbstractSpecFilter {
 
                 setRequestExample(operation);
                 setResponseExample(operation);
+
             }
         } catch (Exception ex) {
-            //ex.printStackTrace();
+            // ex.printStackTrace();
         }
         return Optional.of(operation);
     }
@@ -52,7 +53,7 @@ public class SpecFilter extends AbstractSpecFilter {
                     }
                 }
             } catch (Exception ex) {
-                //ex.printStackTrace();
+                // ex.printStackTrace();
             }
         }
 
@@ -83,7 +84,7 @@ public class SpecFilter extends AbstractSpecFilter {
                 }
 
             } catch (Exception ex) {
-                //ex.printStackTrace();
+                // ex.printStackTrace();
             }
         }
     }

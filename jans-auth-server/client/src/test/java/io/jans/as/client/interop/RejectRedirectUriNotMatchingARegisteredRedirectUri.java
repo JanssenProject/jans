@@ -43,11 +43,13 @@ public class RejectRedirectUriNotMatchingARegisteredRedirectUri extends BaseTest
         showTitle("OC5:FeatureTest-Reject redirect uri Not Matching a Registered redirect uri");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUri));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -59,7 +61,6 @@ public class RejectRedirectUriNotMatchingARegisteredRedirectUri extends BaseTest
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,

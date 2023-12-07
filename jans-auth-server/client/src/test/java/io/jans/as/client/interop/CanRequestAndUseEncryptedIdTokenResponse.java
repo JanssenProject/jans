@@ -42,6 +42,7 @@ public class CanRequestAndUseEncryptedIdTokenResponse extends BaseTest {
         showTitle("OC5:FeatureTest-Can Request and Use Encrypted ID Token Response");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -50,6 +51,7 @@ public class CanRequestAndUseEncryptedIdTokenResponse extends BaseTest {
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -62,7 +64,6 @@ public class CanRequestAndUseEncryptedIdTokenResponse extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 

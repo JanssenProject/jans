@@ -14,14 +14,12 @@ import io.jans.as.model.error.IErrorType;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.util.StringHelper;
-import org.python.jline.internal.Log;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.application.FacesMessage.Severity;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.slf4j.Logger;
 
 /**
  * Helper service to generate either error response or local error based on application settings
@@ -34,9 +32,6 @@ public class ErrorHandlerService {
 
     @Inject
     private Logger log;
-
-    @Inject
-    private SessionIdService sessionIdService;
 
     @Inject
     private CookieService cookieService;
@@ -63,11 +58,12 @@ public class ErrorHandlerService {
 
     private void addMessage(Severity severity, String facesMessageId) {
         if (StringHelper.isNotEmpty(facesMessageId)) {
-            facesMessages.add(FacesMessage.SEVERITY_ERROR, String.format("#{msgs['%s']}", facesMessageId));
+            facesMessages.add(severity, String.format("#{msgs['%s']}", facesMessageId));
         }
     }
 
     private void handleLocalError(String facesMessageId) {
+        log.debug("Show /error.xhtml with message {}", facesMessageId);
         addMessage(FacesMessage.SEVERITY_ERROR, facesMessageId);
         facesService.redirect("/error.xhtml");
     }
@@ -76,7 +72,7 @@ public class ErrorHandlerService {
         String redirectUri = cookieService.getRpOriginIdCookie();
 
         if (StringHelper.isEmpty(redirectUri)) {
-            Log.error("Failed to get redirect_uri from cookie");
+            log.error("Failed to get redirect_uri from cookie");
             handleLocalError(facesMessageId);
             return;
         }
@@ -87,8 +83,9 @@ public class ErrorHandlerService {
         if (StringHelper.isNotEmpty(hint)) {
             redirectUriResponse.addResponseParameter("hint", "Create authorization request to start new authentication session.");
         }
-        facesService.redirectToExternalURL(redirectUriResponse.toString());
 
+        final String redirectTo = redirectUriResponse.toString();
+        log.debug("Redirect to {}", redirectTo);
+        facesService.redirectToExternalURL(redirectTo);
     }
-
 }

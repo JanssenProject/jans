@@ -1,4 +1,5 @@
 import os
+import stat
 import glob
 import shutil
 import ssl
@@ -37,7 +38,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         self.unit_file = os.path.join(Config.install_dir, 'static/opendj/systemd/opendj.service')
         self.ldapDsconfigCommand = os.path.join(Config.ldap_bin_dir , 'dsconfig')
-        self.ldapDsCreateRcCommand = os.path.join(Config.ldap_bin_dir , 'create-rc-script')
 
 
     def install(self):
@@ -96,12 +96,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         opendj_archive = max(glob.glob(os.path.join(Config.dist_app_dir, 'opendj-server-*4*.zip')))
 
-        try:
-            self.logIt("Unzipping %s in /opt/" % opendj_archive)
-            self.run([paths.cmd_unzip, '-n', '-q', '%s' % (opendj_archive), '-d', '/opt/' ])
-        except:
-            self.logIt("Error encountered while doing unzip %s -d /opt/" % (opendj_archive))
-
+        self.logIt(f"Extracting {opendj_archive} into {Config.opt_dir}")
+        base.unpack_zip(opendj_archive, Config.opt_dir)
         real_ldap_base_dir = os.path.realpath(Config.ldap_base_dir)
         self.chown(real_ldap_base_dir, Config.ldap_user, Config.ldap_group, recursive=True)
 
@@ -115,6 +111,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def install_opendj(self):
         self.logIt("Running OpenDJ Setup")
+
+        Config.backend_service = 'opendj.service'
 
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
         setup_props_fn = os.path.join(Config.ldap_base_dir, 'opendj-setup.properties')
@@ -346,6 +344,14 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
     def setup_opendj_service(self):
         self.copyFile(self.unit_file, Config.unit_files_path)
         self.reload_daemon()
+
+        # create init.d script for k8s
+        if not base.snap:
+            init_script_fn = os.path.join(Config.distFolder, 'scripts', self.service_name)
+            if os.path.exists(init_script_fn):
+                self.removeFile(init_script_fn)
+            opendj_create_rc_script_cmd = os.path.join(Config.ldap_bin_dir , 'create-rc-script')
+            self.run([opendj_create_rc_script_cmd, '--outputFile', init_script_fn, '--userName', Config.ldap_user])
 
     def installed(self):
         if os.path.exists(self.openDjSchemaFolder):

@@ -2,7 +2,8 @@
 tags:
   - administration
   - auth-server
-  - token
+  - oauth
+  - refresh-token
 ---
 
 ## Background
@@ -47,6 +48,10 @@ By default AS always creates new Refresh Token on refresh call to Token Endpoint
 
 ### Refresh Token Management
 
-To revoke a token, a client can do so via the [revocation endpoint][../endpoints/token-revocation] (including revocation of all tokens by `client_id`).
+To revoke a token, a client can do so via the [revocation endpoint](../endpoints/token-revocation.md) (including revocation of all tokens by `client_id`).
+
+### online_access scope
+
+If `online_access` scope is present then refresh token expires when the session ends (for example via front channel logout).
 
 

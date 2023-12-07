@@ -98,7 +98,8 @@
     ],
     "static" : [
         [["sid"], "objectClass = \"jansSessId\""],
-        [["exp"], "objectClass = \"jansSessId\""]
+        [["exp"], "objectClass = \"jansSessId\""],
+        [["distinct (array `deviceSecret_` for `deviceSecret_` in `deviceSecret` end)"], "objectClass = \"jansSessId\""]
     ]
   },
 

@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/moabu/terraform-provider-jans/jans"
+	"github.com/jans/terraform-provider-jans/jans"
 )
 
 func resourceJsonWebKey() *schema.Resource {
@@ -93,6 +93,14 @@ func resourceJsonWebKey() *schema.Resource {
 				Optional: true,
 				Description: `The y member contains the y coordinate for the elliptic curve point. It is represented 
 						as the base64url encoding of the coordinate's big endian representation.`,
+			},
+			"key_ops_type": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The key operations type.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	}

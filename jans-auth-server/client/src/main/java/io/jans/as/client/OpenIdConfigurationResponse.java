@@ -27,6 +27,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 
     private String issuer;
     private String authorizationEndpoint;
+    private String authorizationChallengeEndpoint;
     private String tokenEndpoint;
     private String revocationEndpoint;
     private String sessionRevocationEndpoint;
@@ -35,6 +36,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String checkSessionIFrame;
     private String endSessionEndpoint;
     private String jwksUri;
+    private String archivedJwksUri;
     private String registrationEndpoint;
     private String introspectionEndpoint;
     private String parEndpoint;
@@ -215,6 +217,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     }
 
     /**
+     * Returns the URL of the Authorization Challenge Endpoint.
+     *
+     * @return The URL of the Authorization Challenge Endpoint.
+     */
+    public String getAuthorizationChallengeEndpoint() {
+        return authorizationChallengeEndpoint;
+    }
+
+    /**
+     * Sets Authorization Challenge Endpoint.
+     *
+     * @param authorizationChallengeEndpoint Authorization Challenge Endpoint
+     */
+    public void setAuthorizationChallengeEndpoint(String authorizationChallengeEndpoint) {
+        this.authorizationChallengeEndpoint = authorizationChallengeEndpoint;
+    }
+
+    /**
      * Returns the URL of the Token endpoint.
      *
      * @return The URL of the Token endpoint.
@@ -356,6 +376,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setJwksUri(String jwksUri) {
         this.jwksUri = jwksUri;
+    }
+
+    /**
+     * Gets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @return The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public String getArchivedJwksUri() {
+        return archivedJwksUri;
+    }
+
+    /**
+     * Sets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @param archivedJwksUri The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public void setArchivedJwksUri(String archivedJwksUri) {
+        this.archivedJwksUri = archivedJwksUri;
     }
 
     /**
@@ -1202,6 +1240,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         return "OpenIdConfigurationResponse{" +
                 "issuer='" + issuer + '\'' +
                 ", authorizationEndpoint='" + authorizationEndpoint + '\'' +
+                ", authorizationChallengeEndpoint='" + authorizationChallengeEndpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
                 ", revocationEndpoint='" + revocationEndpoint + '\'' +
                 ", userInfoEndpoint='" + userInfoEndpoint + '\'' +
@@ -1209,6 +1248,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", checkSessionIFrame='" + checkSessionIFrame + '\'' +
                 ", endSessionEndpoint='" + endSessionEndpoint + '\'' +
                 ", jwksUri='" + jwksUri + '\'' +
+                ", archivedJwksUri='" + archivedJwksUri + '\'' +
                 ", registrationEndpoint='" + registrationEndpoint + '\'' +
                 ", introspectionEndpoint='" + introspectionEndpoint + '\'' +
                 ", deviceAuthzEndpoint='" + deviceAuthzEndpoint + '\'' +

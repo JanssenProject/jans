@@ -19,11 +19,14 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 class ConfigApiInstaller(JettyInstaller):
 
     source_files = [
-                (os.path.join(Config.dist_jans_dir, 'jans-config-api.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_jans_dir, 'jans-config-api.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_jans_dir, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
-                (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
-                (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
-                (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/fido2-plugin/{0}/fido2-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/fido2-plugin/{0}/fido2-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'jans-link-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/jans-link-plugin/{0}/jans-link-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'saml-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/saml-plugin/{0}/saml-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'idp-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/idp-plugin/{0}/idp-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 ]
 
     def __init__(self):
@@ -58,22 +61,34 @@ class ConfigApiInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
-        self.copyFile(self.source_files[3][0], self.libDir)
-        user_mgt_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[3][0]))
-        self.add_extra_class(user_mgt_plugin_path)
+        self.install_plugin('user-mgt-plugin')
 
         if Config.install_scim_server:
-            self.copyFile(self.source_files[2][0], self.libDir)
-            scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[2][0]))
-            self.add_extra_class(scim_plugin_path)
+            self.install_plugin('scim-plugin')
 
         if Config.installFido2:
-            self.copyFile(self.source_files[4][0], self.libDir)
-            fido2_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[4][0]))
-            self.add_extra_class(fido2_plugin_path)
+            self.install_plugin('fido2-plugin')
+
+        if Config.install_jans_link:
+            self.install_plugin('jans-link-plugin')
+
+        if Config.install_jans_saml:
+            self.install_plugin('saml-plugin')
+
+        if Config.install_jans_saml:
+            self.install_plugin('idp-plugin')
 
         self.enable()
 
+
+    def install_plugin(self, plugin):
+        for source_file in self.source_files:
+            if plugin in source_file[0]:
+                self.logIt("Installing Jans Config Api Plugin {}".format(plugin))
+                self.copyFile(source_file[0], self.libDir)
+                plugin_path = os.path.join(self.libDir, os.path.basename(source_file[0]))
+                self.add_extra_class(plugin_path)
+                break
 
     def extract_files(self):
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/log4j2.xml', self.custom_config_dir)
@@ -169,8 +184,7 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['configOauthEnabled'] = 'false' if base.argsp.disable_config_api_security else 'true'
         Config.templateRenderingDict['apiApprovedIssuer'] = base.argsp.approved_issuer or 'https://{}'.format(Config.hostname)
 
-        oxauth_config_str = base64.decodebytes(Config.templateRenderingDict['oxauth_config_base64'].encode())
-        oxauth_config = json.loads(oxauth_config_str.decode())
+        _, oxauth_config = self.dbUtils.get_oxAuthConfDynamic()
         for param in ('issuer', 'openIdConfigurationEndpoint', 'introspectionEndpoint', 'tokenEndpoint', 'tokenRevocationEndpoint'):
             Config.templateRenderingDict[param] = oxauth_config[param]
 

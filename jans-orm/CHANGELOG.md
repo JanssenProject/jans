@@ -1,5 +1,128 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.19...jans-orm-v1.0.20) (2023-11-08)
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.18...jans-orm-v1.0.19) (2023-10-11)
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.17...jans-orm-v1.0.18) (2023-09-23)
+
+
+### Bug Fixes
+
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.16...jans-orm-v1.0.17) (2023-09-17)
+
+
+### Bug Fixes
+
+* fix schema and update ldap samples ([#6024](https://github.com/JanssenProject/jans/issues/6024)) ([beabaef](https://github.com/JanssenProject/jans/commit/beabaef7835fa4331f2b889b69d8bb6fab436fcc))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
+## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.15...jans-orm-v1.0.16) (2023-08-02)
+
+
+### Features
+
+* update filters in test to conform latest ORm Filter API ([#5669](https://github.com/JanssenProject/jans/issues/5669)) ([a2aebe2](https://github.com/JanssenProject/jans/commit/a2aebe2995474b3940af2e03d372bd06095006b8))
+
+
+### Bug Fixes
+
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
+
+### Documentation
+
+* demo script application_session (session audit) has been added; ([#5558](https://github.com/JanssenProject/jans/issues/5558)) ([5027518](https://github.com/JanssenProject/jans/commit/5027518b88b4c01ba26b39a974e1f77de9d6643d))
+
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.14...jans-orm-v1.0.15) (2023-07-12)
+
+
+### Bug Fixes
+
+* **jans-orm:** orm compilation failure - wrong object [#5412](https://github.com/JanssenProject/jans/issues/5412) ([#5415](https://github.com/JanssenProject/jans/issues/5415)) ([c4e76f9](https://github.com/JanssenProject/jans/commit/c4e76f95a514efa144b56dbc911b3f5f9e20e904))
+* **jans-orm:** orm compilation failure [#5412](https://github.com/JanssenProject/jans/issues/5412) ([#5413](https://github.com/JanssenProject/jans/issues/5413)) ([d405680](https://github.com/JanssenProject/jans/commit/d405680ae2b028435345297df53a96c2444137fb))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.13...jans-orm-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* add json_valid valid check to MariaDB JSON column to determione ([#4987](https://github.com/JanssenProject/jans/issues/4987)) ([633c49d](https://github.com/JanssenProject/jans/commit/633c49ddf366253f91aa8a9a1961b5cf8b5ef729))
+* add json_valid valid check to MariaDB JSON column to determione ([#4989](https://github.com/JanssenProject/jans/issues/4989)) ([be92541](https://github.com/JanssenProject/jans/commit/be92541336ae29f9fe44ba36f6a59591d74898a1))
+* update MariaDB JSON_CONTAINS function usage to conform latest ([#5025](https://github.com/JanssenProject/jans/issues/5025)) ([ee67a3b](https://github.com/JanssenProject/jans/commit/ee67a3b9251da81eb2568b146e75c3ebe3e371cc)), closes [#5021](https://github.com/JanssenProject/jans/issues/5021)
+
+
+### Bug Fixes
+
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.12...jans-orm-v1.0.13) (2023-05-10)
+
+
+### Bug Fixes
+
+* **config-api:** filtering script is not working when backend is MySQL ([#4771](https://github.com/JanssenProject/jans/issues/4771)) ([967994b](https://github.com/JanssenProject/jans/commit/967994b1c86facc9901b302285f22c9171115835))
+* fix(jans-orm): npe in SqlFilterConverter [#4775](https://github.com/JanssenProject/jans/issues/4775) ([#4776](https://github.com/JanssenProject/jans/issues/4776)) ([6fca451](https://github.com/JanssenProject/jans/commit/6fca45166d504589c2b0e7be4a8cc77fbb293d74))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.11...jans-orm-v1.0.12) (2023-04-18)
+
+
+### Bug Fixes
+
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.10...jans-orm-v1.0.11) (2023-04-05)
+
+
+### Bug Fixes
+
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
+## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.9...jans-orm-v1.0.10) (2023-03-16)
+
+
+### Bug Fixes
+
+* javadoc errors ([#4088](https://github.com/JanssenProject/jans/issues/4088)) ([be10a09](https://github.com/JanssenProject/jans/commit/be10a09c4293ccd4c2d67db5a13e2660a2fd546c))
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.7...jans-orm-v1.0.9) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
+## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.6...jans-orm-v1.0.7) (2023-02-22)
+
+
+### Features
+
+* **config-api:** data conversion, audit log and swagger enhancement ([#3588](https://github.com/JanssenProject/jans/issues/3588)) ([a87b75b](https://github.com/JanssenProject/jans/commit/a87b75bb257b00f71ba643bc81ed110e0c914b79))
+* Support Super Gluu one step authentication to Fido2 server [#3593](https://github.com/JanssenProject/jans/issues/3593) ([#3599](https://github.com/JanssenProject/jans/issues/3599)) ([c013b16](https://github.com/JanssenProject/jans/commit/c013b161f2eb47f5952cbb80c8740f8d62d302c3))
+
+
+### Bug Fixes
+
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+
 ## 1.0.6 (2023-01-09)
 
 

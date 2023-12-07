@@ -106,15 +106,14 @@ public class CorsFilter extends AbstractCorsFilter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
-        Collection<String> globalAllowedOrigins = new ArrayList<>(0);
         if (this.filterEnabled) {
             try {
-                globalAllowedOrigins = doFilterImpl(servletRequest);
+            	Collection<String> clientAllowedOrigins = doFilterImpl(servletRequest);
+            	setContextClientAllowedOrigins(servletRequest, clientAllowedOrigins);            	
             } catch (Exception ex) {
                 log.error("Failed to process request", ex);
             }
             super.doFilter(servletRequest, servletResponse, filterChain);
-            setAllowedOrigins(globalAllowedOrigins);
         } else {
             filterChain.doFilter(servletRequest, servletResponse);
         }
@@ -122,7 +121,7 @@ public class CorsFilter extends AbstractCorsFilter {
 
     protected Collection<String> doFilterImpl(ServletRequest servletRequest)
             throws IOException, ServletException {
-        Collection<String> globalAllowedOrigins = getAllowedOrigins();
+    	List<String> clientAuthorizedOrigins = null;
 
         if (StringHelper.isNotEmpty(servletRequest.getParameter("client_id"))) {
             String clientId = servletRequest.getParameter("client_id");
@@ -130,8 +129,7 @@ public class CorsFilter extends AbstractCorsFilter {
             if (client != null) {
                 String[] authorizedOriginsArray = client.getAuthorizedOrigins();
                 if (authorizedOriginsArray != null && authorizedOriginsArray.length > 0) {
-                    List<String> clientAuthorizedOrigins = Arrays.asList(authorizedOriginsArray);
-                    setAllowedOrigins(clientAuthorizedOrigins);
+                    clientAuthorizedOrigins = Arrays.asList(authorizedOriginsArray);
                 }
             }
         } else {
@@ -154,15 +152,14 @@ public class CorsFilter extends AbstractCorsFilter {
                     if (client != null) {
                         String[] authorizedOriginsArray = client.getAuthorizedOrigins();
                         if (authorizedOriginsArray != null && authorizedOriginsArray.length > 0) {
-                            List<String> clientAuthorizedOrigins = Arrays.asList(authorizedOriginsArray);
-                            setAllowedOrigins(clientAuthorizedOrigins);
+                            clientAuthorizedOrigins = Arrays.asList(authorizedOriginsArray);
                         }
                     }
                 }
             }
         }
 
-        return globalAllowedOrigins;
+        return clientAuthorizedOrigins;
     }
 }
 

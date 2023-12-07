@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/moabu/terraform-provider-jans/jans"
+	"github.com/jans/terraform-provider-jans/jans"
 )
 
 func resourceLoggingConfiguration() *schema.Resource {

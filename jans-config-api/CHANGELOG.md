@@ -1,5 +1,243 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.19...jans-config-api-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* adding scopes in config-api endpoint access token based on tags (admin-ui) [#6413](https://github.com/JanssenProject/jans/issues/6413) ([#6414](https://github.com/JanssenProject/jans/issues/6414)) ([643ba07](https://github.com/JanssenProject/jans/commit/643ba0780b5bf9f7383357075adb505774a39a27))
+* changing names of clients used in admin-ui [#1375](https://github.com/JanssenProject/jans/issues/1375) ([#6326](https://github.com/JanssenProject/jans/issues/6326)) ([9e63acb](https://github.com/JanssenProject/jans/commit/9e63acb28ee4354e361b6b8d3d7aabe0f5f94610))
+* **config-api:** open api spec changes for fetch custom script type endpoint ([#6290](https://github.com/JanssenProject/jans/issues/6290)) ([a8884f3](https://github.com/JanssenProject/jans/commit/a8884f39ee4eea3ef65d7cd41120343201d2b3e6))
+* **jans-config-api:** need API to fetch list containing all script-types from persistence ([#6276](https://github.com/JanssenProject/jans/issues/6276)) ([6958f7b](https://github.com/JanssenProject/jans/commit/6958f7b322e26b245e438939808f11c64c9608e3))
+
+
+### Bug Fixes
+
+* able to add duplicate role [#1432](https://github.com/JanssenProject/jans/issues/1432) ([#6465](https://github.com/JanssenProject/jans/issues/6465)) ([2ca4cc2](https://github.com/JanssenProject/jans/commit/2ca4cc2e334d7d86a1d00770d465626b1bd6dd97))
+* generate latest openApi spec from code [#6444](https://github.com/JanssenProject/jans/issues/6444) ([#6445](https://github.com/JanssenProject/jans/issues/6445)) ([23d40fa](https://github.com/JanssenProject/jans/commit/23d40fad93a58146ece961d053b1c55b525ffc23))
+* incorrect /license/details reponse (admin-ui) [#6418](https://github.com/JanssenProject/jans/issues/6418) ([#6419](https://github.com/JanssenProject/jans/issues/6419)) ([9d5212e](https://github.com/JanssenProject/jans/commit/9d5212ef7aa5efa35d00657bdacbabbc7d48b1e1))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+
+### Documentation
+
+* fixes ([#5984](https://github.com/JanssenProject/jans/issues/5984)) ([8b0cbfb](https://github.com/JanssenProject/jans/commit/8b0cbfbb4ab4731a41bdfc77321b287df3cdd805))
+
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.18...jans-config-api-v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **agama:** add support for autoconfiguration  ([#6210](https://github.com/JanssenProject/jans/issues/6210)) ([18f15da](https://github.com/JanssenProject/jans/commit/18f15da64ec4ccf453b03ada92727ef1114a2043))
+* **config-api, keycloak:** saml plugin to create trust client in DB and keycloak storage provider to jans store ([#6155](https://github.com/JanssenProject/jans/issues/6155)) ([c4f5034](https://github.com/JanssenProject/jans/commit/c4f50343ef5f991cc3c0184cef0fa83ff1d7f03c))
+* keycloak refactoring referred to Issue [#5330](https://github.com/JanssenProject/jans/issues/5330) review ([#6157](https://github.com/JanssenProject/jans/issues/6157)) ([7319120](https://github.com/JanssenProject/jans/commit/73191202f2e39bf040749b69a31d01bdfbcec8eb))
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+
+### Documentation
+
+* update swagger descriptor [#6192](https://github.com/JanssenProject/jans/issues/6192) ([#6211](https://github.com/JanssenProject/jans/issues/6211)) ([0d34524](https://github.com/JanssenProject/jans/commit/0d3452483ea8ed011a9dd9583baac2a211e862d3))
+
+## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.17...jans-config-api-v1.0.18) (2023-09-23)
+
+
+### Bug Fixes
+
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+* remove content-type in header from /retrieve GET request [#6096](https://github.com/JanssenProject/jans/issues/6096) ([#6099](https://github.com/JanssenProject/jans/issues/6099)) ([a85d867](https://github.com/JanssenProject/jans/commit/a85d86743da62c10fef83f2b181d1a992210534f))
+
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.16...jans-config-api-v1.0.17) (2023-09-17)
+
+
+### Features
+
+* BCFIPS support (sub-part 01) ([#5767](https://github.com/JanssenProject/jans/issues/5767)) ([d8cea00](https://github.com/JanssenProject/jans/commit/d8cea008a73ccecb1b734a010b9e9bdd363c8432))
+* commit the admin-ui openapi specs changes [#5913](https://github.com/JanssenProject/jans/issues/5913) ([#5914](https://github.com/JanssenProject/jans/issues/5914)) ([a755d23](https://github.com/JanssenProject/jans/commit/a755d234e7628ac5d5b99a6b265751262969337b))
+* **jans-auth-server:** OAuth 2.0 for First-Party Native Applications ([#5654](https://github.com/JanssenProject/jans/issues/5654)) ([9d90e28](https://github.com/JanssenProject/jans/commit/9d90e28791c49bc86771623601c654f2c662b7a1))
+* refactoring for change in license flow [#5402](https://github.com/JanssenProject/jans/issues/5402) ([#5889](https://github.com/JanssenProject/jans/issues/5889)) ([adf4578](https://github.com/JanssenProject/jans/commit/adf45788f07e678a523c585d1fa4efaa25d836b4))
+* send proper error response with http error code from Admin UI backend apis [#5986](https://github.com/JanssenProject/jans/issues/5986) ([#5989](https://github.com/JanssenProject/jans/issues/5989)) ([fd22ec1](https://github.com/JanssenProject/jans/commit/fd22ec1e90fd1ec4d8ad96dff2d3a4dca9cc7f26))
+
+
+### Bug Fixes
+
+* **config-api:** source LDAP server test ([#5840](https://github.com/JanssenProject/jans/issues/5840)) ([5379b36](https://github.com/JanssenProject/jans/commit/5379b36c138b879173bfb704404c95c81f625626))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+* update org_id in persistence when ssa is uploaded from UI [#5966](https://github.com/JanssenProject/jans/issues/5966) ([#5967](https://github.com/JanssenProject/jans/issues/5967)) ([85a2d68](https://github.com/JanssenProject/jans/commit/85a2d680dac7695eec09772286cd8722ddbc192f))
+* version reference ([432a904](https://github.com/JanssenProject/jans/commit/432a9048fd104e6d8ddeb50684bf5df23f0722cf))
+
+## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.15...jans-config-api-v1.0.16) (2023-08-02)
+
+
+### Features
+
+* adding PKCE in admin-ui authentication (Admin UI plugin) [#5595](https://github.com/JanssenProject/jans/issues/5595) ([#5596](https://github.com/JanssenProject/jans/issues/5596)) ([2a1f11e](https://github.com/JanssenProject/jans/commit/2a1f11ef7932dab8129fb7afe7a85603bb4681a5))
+* **config-api:** jans-link plugin changes to use jans-link module ([#5626](https://github.com/JanssenProject/jans/issues/5626)) ([f96ca52](https://github.com/JanssenProject/jans/commit/f96ca524ebdc642e09724e9d30159078c4d6c5ea))
+
+
+### Bug Fixes
+
+* **config-api:** jans link fix for DN change ([#5543](https://github.com/JanssenProject/jans/issues/5543)) ([40e9d4e](https://github.com/JanssenProject/jans/commit/40e9d4e429ad579b80aec375ab6374ba9a0df9b7))
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.14...jans-config-api-v1.0.15) (2023-07-12)
+
+
+### Features
+
+* **config-api:** cache config plugin refresh attributes ([#5276](https://github.com/JanssenProject/jans/issues/5276)) ([84dc3ee](https://github.com/JanssenProject/jans/commit/84dc3eed60f57da791557a61a738cc18ed8bdbc6))
+* **config-api:** rename cache-refresh-plugin to jans-link-plugin ([#5457](https://github.com/JanssenProject/jans/issues/5457)) ([98d984c](https://github.com/JanssenProject/jans/commit/98d984cc25198067ae07e4e48377deb06175e506))
+* **jans-link:** change schema name cache refresh to link ([#5484](https://github.com/JanssenProject/jans/issues/5484)) ([412f753](https://github.com/JanssenProject/jans/commit/412f753f1f11337b51ab1e212b9bd013021102be))
+
+
+### Bug Fixes
+
+* admin-ui should redirect to login page if license has been already activated [#5282](https://github.com/JanssenProject/jans/issues/5282) ([#5283](https://github.com/JanssenProject/jans/issues/5283)) ([11f6fa6](https://github.com/JanssenProject/jans/commit/11f6fa6c1c3b150411ea2d8ee9bdf787f0f59524))
+* **config-api:** cache refresh pwd encryption and agama spec ([#5449](https://github.com/JanssenProject/jans/issues/5449)) ([f931ce7](https://github.com/JanssenProject/jans/commit/f931ce7330b68cdb9bdfc3dfff9b5d6581be019d))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
+
+### Documentation
+
+* **config-api:** rectify agama doc title ([#5314](https://github.com/JanssenProject/jans/issues/5314)) ([ea743c6](https://github.com/JanssenProject/jans/commit/ea743c6d356e9104ebe3af9a73e5831b91812094))
+
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.13...jans-config-api-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* **config-api:** cache-refresh plugin code ([#5000](https://github.com/JanssenProject/jans/issues/5000)) ([eed9526](https://github.com/JanssenProject/jans/commit/eed9526415996278b52806cfe37a4dfb5076aa00))
+* **jans-auth-server:** added ability to set client expiration via DCR [#5057](https://github.com/JanssenProject/jans/issues/5057) ([#5185](https://github.com/JanssenProject/jans/issues/5185)) ([a15054b](https://github.com/JanssenProject/jans/commit/a15054b1c3350d6ee0bb9c92d39f6b2d992abfa1))
+* **jans-auth-server:** made not found exceptions logging level configurable [#4973](https://github.com/JanssenProject/jans/issues/4973) ([#4982](https://github.com/JanssenProject/jans/issues/4982)) ([98be22b](https://github.com/JanssenProject/jans/commit/98be22b81d365b631d2b7ffcf76d1f3a5ea1935b))
+
+
+### Bug Fixes
+
+* **config-api:** resolved dependency conflict for CustomScriptService ([3121833](https://github.com/JanssenProject/jans/commit/312183373f72f7916b3c4c6cc5176420bba3bae0))
+* **config-api:** revert hide smtp and client model utility method ([#4976](https://github.com/JanssenProject/jans/issues/4976)) ([6519744](https://github.com/JanssenProject/jans/commit/651974408565441951b6a4ca80a4ab555c01352f))
+* **config-api:** test compile issue for cache refresh plugin ([#5144](https://github.com/JanssenProject/jans/issues/5144)) ([af3e707](https://github.com/JanssenProject/jans/commit/af3e7075896cec36f32ee91947dfa1304ca1ebbd))
+* **jans-auth-server:** Illegal op_policy_uri parameter: - exclude entries with blank values from discovery response (oxauth counterpart) [#4888](https://github.com/JanssenProject/jans/issues/4888) ([#4934](https://github.com/JanssenProject/jans/issues/4934)) ([8603290](https://github.com/JanssenProject/jans/commit/8603290cee37c609f9572760c8cf299aba80160e))
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.12...jans-config-api-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-fido2:** interception scripts issue 1485, swagger updates ([#4543](https://github.com/JanssenProject/jans/issues/4543)) ([80274ff](https://github.com/JanssenProject/jans/commit/80274ffd1a20318988d9cc99ee015c5c7d5984b7))
+
+
+### Bug Fixes
+
+* **config-api:** starup issue realted to mail service ([#4853](https://github.com/JanssenProject/jans/issues/4853)) ([6aad8c9](https://github.com/JanssenProject/jans/commit/6aad8c9adf1c00feac6a94e8f5c06e5b22f61c14))
+* jans-config-api/plugins/sample/demo/pom.xml to reduce vulnerabilities ([#4037](https://github.com/JanssenProject/jans/issues/4037)) ([e079b28](https://github.com/JanssenProject/jans/commit/e079b283c0ccbcf768349d3ed80668109e9b7ab2))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#4039](https://github.com/JanssenProject/jans/issues/4039)) ([e0687f2](https://github.com/JanssenProject/jans/commit/e0687f22df61782c326a149930d94e93d5aaf676))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+* set appropriate redirect_uris for registration in DCR using ssa (admin-ui)[#4748](https://github.com/JanssenProject/jans/issues/4748) ([#4749](https://github.com/JanssenProject/jans/issues/4749)) ([749f66b](https://github.com/JanssenProject/jans/commit/749f66b2290d57d49c43481498f1515243a78495))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.11...jans-config-api-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* **config-api:** search pattern, client auth response and security fix ([#4595](https://github.com/JanssenProject/jans/issues/4595)) ([4dbfcc2](https://github.com/JanssenProject/jans/commit/4dbfcc241353c4e03672d4103d10768cbc0c5bdd))
+
+
+### Bug Fixes
+
+* **agama:** avoid assets mess/loss when different projects use the same folder/file names ([#4503](https://github.com/JanssenProject/jans/issues/4503)) ([def096b](https://github.com/JanssenProject/jans/commit/def096bddb8e81ab676d47d6f637dce75bb6991f))
+* **jans-config-api:** agama deployment detail endpoint not including all flows IDs ([#4565](https://github.com/JanssenProject/jans/issues/4565)) ([358c494](https://github.com/JanssenProject/jans/commit/358c49409a172d6419382dd800a21b845a8cc708))
+* jsonvalue has been added; ([#4604](https://github.com/JanssenProject/jans/issues/4604)) ([f3b46f4](https://github.com/JanssenProject/jans/commit/f3b46f4a2b8da47063efe8e3e90d98db58eeec81))
+* mailservice should send non signed emails, if keystore isn't defined (update); ([#4544](https://github.com/JanssenProject/jans/issues/4544)) ([57f4b75](https://github.com/JanssenProject/jans/commit/57f4b75ce68f0f12a775d397f97cf56df5299900))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+* update method wrt previous changes in getDeployment [#4563](https://github.com/JanssenProject/jans/issues/4563) ([#4566](https://github.com/JanssenProject/jans/issues/4566)) ([53adff1](https://github.com/JanssenProject/jans/commit/53adff1bd153a3e20223234b9e26946348dc1620))
+* yaml has been updated; ([f3b46f4](https://github.com/JanssenProject/jans/commit/f3b46f4a2b8da47063efe8e3e90d98db58eeec81))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.10...jans-config-api-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* backend changes for admin-ui to call licenseSpring apis via. SCAN [#4461](https://github.com/JanssenProject/jans/issues/4461) ([#4462](https://github.com/JanssenProject/jans/issues/4462)) ([3617a95](https://github.com/JanssenProject/jans/commit/3617a95cc9b651691acb8072790784db70e1b152))
+* backend changes to submit SSA from admin-ui [#4298](https://github.com/JanssenProject/jans/issues/4298) ([#4364](https://github.com/JanssenProject/jans/issues/4364)) ([7e27b6d](https://github.com/JanssenProject/jans/commit/7e27b6da1a3e8212f72185bbbc09fee99e4be616))
+* **config-api:** user consent mgmt code quality fix ([#4412](https://github.com/JanssenProject/jans/issues/4412)) ([acf64e4](https://github.com/JanssenProject/jans/commit/acf64e4bbc6544269daf863ce6110787fe2e64f9))
+* **jans-config-api:** new endpoint for users consent management ([#4409](https://github.com/JanssenProject/jans/issues/4409)) ([c34b592](https://github.com/JanssenProject/jans/commit/c34b592c6bdfaa3b907b37d5e3851a4870e30e7a))
+* loggerService should update root log level [#4251](https://github.com/JanssenProject/jans/issues/4251) ([#4252](https://github.com/JanssenProject/jans/issues/4252)) ([20264a2](https://github.com/JanssenProject/jans/commit/20264a2f61e7b49015bbf6f7b93e9d241e3176a1))
+* userName -&gt; smtpAuthenticationAccountUsername; ([#4401](https://github.com/JanssenProject/jans/issues/4401)) ([2bbb95d](https://github.com/JanssenProject/jans/commit/2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e))
+
+
+### Bug Fixes
+
+* **config-api:** custom script revision increment on update ([#4452](https://github.com/JanssenProject/jans/issues/4452)) ([27988bd](https://github.com/JanssenProject/jans/commit/27988bd207ef20faa677415d921503b8775b398e))
+* **config-api:** user creation in couchbase DB ([#4450](https://github.com/JanssenProject/jans/issues/4450)) ([b8dfddd](https://github.com/JanssenProject/jans/commit/b8dfddd487f317c2531d593dc8527c9579bff965))
+* mailservice should send non signed emails, if keystore isn't defied; ([#4455](https://github.com/JanssenProject/jans/issues/4455)) ([7b41c44](https://github.com/JanssenProject/jans/commit/7b41c44f2933b8fde79d0478cf8df69303b9b3ba))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+
+## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.9...jans-config-api-v1.0.10) (2023-03-16)
+
+
+### Features
+
+* **config-api:** agama deployment path param change and client authorization ([#4147](https://github.com/JanssenProject/jans/issues/4147)) ([22323ce](https://github.com/JanssenProject/jans/commit/22323cebe180c6e224baf28d66cb435982880df7))
+
+
+### Bug Fixes
+
+* **config-api:** smtp password decryption and encryption logic ([#4161](https://github.com/JanssenProject/jans/issues/4161)) ([4aefb0d](https://github.com/JanssenProject/jans/commit/4aefb0d6a4db39d89b87d703a27e0186fa6780f9))
+* **config-api:** user custom attribute changes and agama param changes ([#4123](https://github.com/JanssenProject/jans/issues/4123)) ([291004e](https://github.com/JanssenProject/jans/commit/291004e59248e3205e0113a9f5ce427f259da076))
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+* prevent getFlowByName method crash by refactoring [#4128](https://github.com/JanssenProject/jans/issues/4128) ([#4129](https://github.com/JanssenProject/jans/issues/4129)) ([092989b](https://github.com/JanssenProject/jans/commit/092989b35308b6a2d6c3b6da4f36bab2b5518f64))
+
+## [1.0.9](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.7...jans-config-api-v1.0.9) (2023-03-09)
+
+
+### Features
+
+* **agama:** update gama deployment endpoint to support configuration properties ([#4049](https://github.com/JanssenProject/jans/issues/4049)) ([392525c](https://github.com/JanssenProject/jans/commit/392525c19152fcd916e0c61e70c436a484bf391c))
+* getting license credentials from SCAN ([#4052](https://github.com/JanssenProject/jans/issues/4052)) ([5c563b7](https://github.com/JanssenProject/jans/commit/5c563b7530847b8ec6b3201fb53676003ef107b0))
+
+
+### Bug Fixes
+
+* **docs:** autogenerate docs ([#4105](https://github.com/JanssenProject/jans/issues/4105)) ([da87cef](https://github.com/JanssenProject/jans/commit/da87cef4efd88796260d123054575c3aceb1ed38))
+* **jans-config-api:** getting license credentials from SCAN ([#4055](https://github.com/JanssenProject/jans/issues/4055)) ([407d618](https://github.com/JanssenProject/jans/commit/407d6187a09689a0d9e8b1ffc9ce9dce3fc6e253))
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
+## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.6...jans-config-api-v1.0.7) (2023-02-22)
+
+
+### Features
+
+* add project metadata and related handling [#3476](https://github.com/JanssenProject/jans/issues/3476) ([#3584](https://github.com/JanssenProject/jans/issues/3584)) ([b95e53e](https://github.com/JanssenProject/jans/commit/b95e53e5eec972b8acb61bd83e327def1364c66c))
+* **config-api:** config api configuration endpoint ([#3648](https://github.com/JanssenProject/jans/issues/3648)) ([c798c4c](https://github.com/JanssenProject/jans/commit/c798c4c5a4756c6ba0466b4eeaa44d0e656098ce))
+* **config-api:** data conversion, audit log and swagger enhancement ([#3588](https://github.com/JanssenProject/jans/issues/3588)) ([a87b75b](https://github.com/JanssenProject/jans/commit/a87b75bb257b00f71ba643bc81ed110e0c914b79))
+* **config-api:** plugin endpoint and audit interceptor ([#3613](https://github.com/JanssenProject/jans/issues/3613)) ([95fadc6](https://github.com/JanssenProject/jans/commit/95fadc6c89c4e91c6d143f0ab9efce0b9395fb14))
+* **config-api:** script default script validation for location ([#3786](https://github.com/JanssenProject/jans/issues/3786)) ([446de9e](https://github.com/JanssenProject/jans/commit/446de9e06b269a5f1b50842bfee4cbcdec9a902f))
+* **jans-auth-server:** renamed "key_ops" -&gt; "key_ops_type" [#3790](https://github.com/JanssenProject/jans/issues/3790) ([#3792](https://github.com/JanssenProject/jans/issues/3792)) ([7a6bcba](https://github.com/JanssenProject/jans/commit/7a6bcba5ca3597f7556d406e4a572c76a229bbdf))
+
+
+### Bug Fixes
+
+* **config-api:** agama swagger spec and admin-ui web key issue ([#3831](https://github.com/JanssenProject/jans/issues/3831)) ([1593997](https://github.com/JanssenProject/jans/commit/159399760c85146c50b54006e7331035de93c42d))
+* **config-api:** fixed start-up issue due to scope objectclass case ([#3697](https://github.com/JanssenProject/jans/issues/3697)) ([eac6440](https://github.com/JanssenProject/jans/commit/eac644071d1ca711564ae07361e66dd6aad84366))
+* **config-api:** plugin result subsequent call ([#3633](https://github.com/JanssenProject/jans/issues/3633)) ([3e4d513](https://github.com/JanssenProject/jans/commit/3e4d5130db1d0166272772300024880e5603c7be))
+* **config-api:** user service conflict with fido2 and script enhancement ([#3767](https://github.com/JanssenProject/jans/issues/3767)) ([5753d39](https://github.com/JanssenProject/jans/commit/5753d3989b96d76699f234cc87f58e355ba313b0))
+* **jans-config-api:** Fixing runtime ambiguity for RegistrationPersistenceService.java ([#3756](https://github.com/JanssenProject/jans/issues/3756)) ([83c7b50](https://github.com/JanssenProject/jans/commit/83c7b50fd6f49e7613273d9b03d8c950ff13593d))
+* **jans-config-api:** runtime exceptions in config-api at startup ([#3725](https://github.com/JanssenProject/jans/issues/3725)) ([8748cc3](https://github.com/JanssenProject/jans/commit/8748cc35b29cce68ac6c5f61fd7b918be765047d))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+
+
+### Documentation
+
+* **config-api:** renamed auto generated swagger file ([#3671](https://github.com/JanssenProject/jans/issues/3671)) ([01525bb](https://github.com/JanssenProject/jans/commit/01525bb6fd320e9e6dc63139d245c92f688af178))
+
 ## 1.0.6 (2023-01-09)
 
 

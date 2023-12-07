@@ -1,0 +1,21 @@
+name: Delete old workflow runs
+on:
+  schedule:
+    - cron: '0 0 */2 * *'
+  workflow_dispatch:
+jobs:
+  del_runs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@708edabfaf5f9b6357ce4c375d22c83834c87f7d # v2.0.5
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 2
+          keep_minimum_runs: 2

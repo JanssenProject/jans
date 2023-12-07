@@ -7,6 +7,7 @@
 package io.jans.as.common.model.session;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.Deletable;
@@ -17,6 +18,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.*;
+
+import static io.jans.as.model.util.StringUtils.implode;
+import static io.jans.as.model.util.StringUtils.spaceSeparatedToList;
+import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -199,11 +204,34 @@ public class SessionId implements Deletable, Serializable {
     }
 
     public void addPermission(String clientId, Boolean granted) {
+        addPermission(clientId, granted, null);
+    }
+
+    public void addPermission(String clientId, Boolean granted, Set<String> scopes) {
         if (permissionGrantedMap == null) {
             permissionGrantedMap = new SessionIdAccessMap();
         }
+        maintainClientScopes(isTrue(granted), clientId, scopes);
         permissionGrantedMap.put(clientId, granted);
     }
+
+    private void maintainClientScopes(boolean granted, String clientId, Set<String> scopes) {
+        final String key = clientId + "_authz_scopes";
+        if (!granted) {
+            getSessionAttributes().remove(key);
+            return;
+        }
+
+        if (scopes != null && !scopes.isEmpty()) {
+            final String existingScopes = getSessionAttributes().get(key);
+
+            final Set<String> resultScopes = Sets.newHashSet(scopes);
+            resultScopes.addAll(spaceSeparatedToList(existingScopes));
+
+            getSessionAttributes().put(key, implode(resultScopes, " "));
+        }
+    }
+
 
     @NotNull
     public Map<String, String> getSessionAttributes() {

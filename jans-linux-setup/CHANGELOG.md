@@ -1,5 +1,303 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.19...jans-linux-setup-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* **jans-auth-server:** allow revoke any token - explicitly allow by config and scope [#6381](https://github.com/JanssenProject/jans/issues/6381) ([#6412](https://github.com/JanssenProject/jans/issues/6412)) ([47cbee9](https://github.com/JanssenProject/jans/commit/47cbee9cf917f0f79c53e9e0cfe1e2beab3108bc))
+* **jans-auth-server:** enabled authorization_challenge scope for dynamic registration [#6277](https://github.com/JanssenProject/jans/issues/6277) ([#6278](https://github.com/JanssenProject/jans/issues/6278)) ([f46fa69](https://github.com/JanssenProject/jans/commit/f46fa695cea73a4d98bd8076c85bf21f819e1fe6))
+* **jans-linux-setup:** display casa brwose url after setup ([#6315](https://github.com/JanssenProject/jans/issues/6315)) ([ef67b12](https://github.com/JanssenProject/jans/commit/ef67b12f1dccee6d49e7b9fa6c5a76814bb17273))
+* **jans-linux-setup:** setup Jans-keycloak-link files ([#6281](https://github.com/JanssenProject/jans/issues/6281)) ([36c8c21](https://github.com/JanssenProject/jans/commit/36c8c21191b99446676bbf21b61eb78c01adda3a))
+
+
+### Bug Fixes
+
+* **jans-linux-setup:** change oxtrust to Janssen ([#6384](https://github.com/JanssenProject/jans/issues/6384)) ([7126c1c](https://github.com/JanssenProject/jans/commit/7126c1c004a40eef415ed0c9d293a3e396caa95f))
+* **jans-linux-setup:** enable agama by default ([#6451](https://github.com/JanssenProject/jans/issues/6451)) ([3c14dd9](https://github.com/JanssenProject/jans/commit/3c14dd988d1977131e5019978b434d6fa5a569cc))
+* **jans-linux-setup:** jans-saml dependencies ([#6379](https://github.com/JanssenProject/jans/issues/6379)) ([7da86e0](https://github.com/JanssenProject/jans/commit/7da86e0f0933d626776ffad39e5077b552438a18))
+* **jans-linux-setup:** KC install fixes ([#6311](https://github.com/JanssenProject/jans/issues/6311)) ([32ad25d](https://github.com/JanssenProject/jans/commit/32ad25d144ac4010a9dbacfd8e34a28d0bd80a3c))
+* **jans-linux-setup:** kc maven urls ([#6386](https://github.com/JanssenProject/jans/issues/6386)) ([e82c3a2](https://github.com/JanssenProject/jans/commit/e82c3a2aca88d1bef047301b1402256c1772b5a2))
+* **jans-linux-setup:** saml install issues ([#6407](https://github.com/JanssenProject/jans/issues/6407)) ([2c1b94c](https://github.com/JanssenProject/jans/commit/2c1b94cf1602a0b212525c09ae570e49c2e7d7fb))
+* **jans-linux-setup:** selected idp ([#6424](https://github.com/JanssenProject/jans/issues/6424)) ([7b60262](https://github.com/JanssenProject/jans/commit/7b602628ccf96e8b7fd080a6e08ade15daa33a05))
+* **jans-linux-setup:** super gluu credentials url ([#6330](https://github.com/JanssenProject/jans/issues/6330)) ([a24cd67](https://github.com/JanssenProject/jans/commit/a24cd6712973df2aef2b9e1c46f1dfe5d9029e4c))
+* **jans-linux-setup:** super gluu credentials url for test data ([#6333](https://github.com/JanssenProject/jans/issues/6333)) ([04582fa](https://github.com/JanssenProject/jans/commit/04582fa2a7edbb8eed0805cb1fabdcd95482b83f))
+* **jans-linux-setup:** typo in filename of casa plugin twilio ([#6471](https://github.com/JanssenProject/jans/issues/6471)) ([c0549f6](https://github.com/JanssenProject/jans/commit/c0549f6ad1e6963358557047098c1f17435fb67a))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+* registration_uri for super gluu script defaults to an /identity ([#6369](https://github.com/JanssenProject/jans/issues/6369)) ([28c4714](https://github.com/JanssenProject/jans/commit/28c47141a22a1139762655e3ccab6cc34cf7798f)), closes [#6183](https://github.com/JanssenProject/jans/issues/6183)
+
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.18...jans-linux-setup-v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **config-api, keycloak:** saml plugin to create trust client in DB and keycloak storage provider to jans store ([#6155](https://github.com/JanssenProject/jans/issues/6155)) ([c4f5034](https://github.com/JanssenProject/jans/commit/c4f50343ef5f991cc3c0184cef0fa83ff1d7f03c))
+* **jans-auth-server:** added "authorization_challenge" scope enforcement [#5856](https://github.com/JanssenProject/jans/issues/5856) ([#6216](https://github.com/JanssenProject/jans/issues/6216)) ([b3db5c8](https://github.com/JanssenProject/jans/commit/b3db5c8cba829fc3e6aec350af7c0b4e5cf068c6))
+* **jans-auth:** new lifetime attribute in ssa ([#6214](https://github.com/JanssenProject/jans/issues/6214)) ([b049e33](https://github.com/JanssenProject/jans/commit/b049e334bbe9d0c3b0214694e9fd6501019b8530))
+* **jans-linux-setup:** hide saml setup for developers ([#6225](https://github.com/JanssenProject/jans/issues/6225)) ([7b8bae6](https://github.com/JanssenProject/jans/commit/7b8bae6c746492f9bdfc18eb0c43467ac831da56))
+
+
+### Bug Fixes
+
+* **jans-casa:** jans-casa installation issues ([#6198](https://github.com/JanssenProject/jans/issues/6198)) ([2775d6f](https://github.com/JanssenProject/jans/commit/2775d6f2b25e0bc62291b98d4db15856ff3ee48e))
+* **jans-linux-setup:** casa url ([#6187](https://github.com/JanssenProject/jans/issues/6187)) ([0df0c86](https://github.com/JanssenProject/jans/commit/0df0c86a684827a2fb932c1fd80d6cf472d3b355))
+* **jans-linux-setup:** post setup fix for config-api ([#6217](https://github.com/JanssenProject/jans/issues/6217)) ([ccfd8b1](https://github.com/JanssenProject/jans/commit/ccfd8b14001ae53fdd8d1e06125c4dba9a4bbc22))
+* **jans-linux-setup:** post-setup install issues ([#6212](https://github.com/JanssenProject/jans/issues/6212)) ([9379e66](https://github.com/JanssenProject/jans/commit/9379e66d3e095cbd06180aa36016c15e398db8c0))
+* **jans-linux-setup:** script hide attribute ([#6181](https://github.com/JanssenProject/jans/issues/6181)) ([b4711cd](https://github.com/JanssenProject/jans/commit/b4711cd1074dccc0b8aad81fc4e4bd238c8a516f))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.17...jans-linux-setup-v1.0.18) (2023-09-23)
+
+
+### Bug Fixes
+
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.16...jans-linux-setup-v1.0.17) (2023-09-17)
+
+
+### Features
+
+* fido2 needs to search cache for session instead of persistent ([#6011](https://github.com/JanssenProject/jans/issues/6011)) ([0cc0c19](https://github.com/JanssenProject/jans/commit/0cc0c192735c0537c28bb7cc96a9db509d9628e0))
+* **jans-auth-server:** added "The Use of Attestation in OAuth 2.0 Dynamic Client Registration" spec support [#5562](https://github.com/JanssenProject/jans/issues/5562) ([#5868](https://github.com/JanssenProject/jans/issues/5868)) ([38653c9](https://github.com/JanssenProject/jans/commit/38653c9cb9eb992213c5f230a5f36ce1187d0197))
+* **jans-auth-server:** OAuth 2.0 for First-Party Native Applications ([#5654](https://github.com/JanssenProject/jans/issues/5654)) ([9d90e28](https://github.com/JanssenProject/jans/commit/9d90e28791c49bc86771623601c654f2c662b7a1))
+* **jans-fido2:** mds optional ([#5409](https://github.com/JanssenProject/jans/issues/5409)) ([fad9961](https://github.com/JanssenProject/jans/commit/fad9961fbeeffb315d6ca495c43f8a4f000eac86))
+* **jans-linux-setup:** add selinux policies to post setup messages ([#5797](https://github.com/JanssenProject/jans/issues/5797)) ([33db186](https://github.com/JanssenProject/jans/commit/33db186fa2fe69adeb79f8e9e58e525fabfa311e))
+* **jans-linux-setup:** make Casa .administrable by default ([#5829](https://github.com/JanssenProject/jans/issues/5829)) ([cd9dbfb](https://github.com/JanssenProject/jans/commit/cd9dbfbdd331ca2a59b8605db9359d614f2a560b))
+* **jans-linux-setup:** option for java version ([#5830](https://github.com/JanssenProject/jans/issues/5830)) ([5d9290c](https://github.com/JanssenProject/jans/commit/5d9290c750ae9108ec4fa5415208d41f9c1c3372))
+* **jans-linux-setup:** salt with argument ([#5786](https://github.com/JanssenProject/jans/issues/5786)) ([d433827](https://github.com/JanssenProject/jans/commit/d4338271d910ec66e2788e77049c111046193a95))
+* **jans-linux-setup:** support for CentOS Stream 9 ([#5803](https://github.com/JanssenProject/jans/issues/5803)) ([1fce49a](https://github.com/JanssenProject/jans/commit/1fce49a9f5301a1ff505e2b911c44b9800c1741f))
+* **jans-linux-setup:** use builtin libs for tar, zip, wget ([#5899](https://github.com/JanssenProject/jans/issues/5899)) ([280c26d](https://github.com/JanssenProject/jans/commit/280c26d6a29b5800172cbde813f9854fdc5bf9fc))
+
+
+### Bug Fixes
+
+* add missing CB index for native SSO ([#6033](https://github.com/JanssenProject/jans/issues/6033)) ([ea8963c](https://github.com/JanssenProject/jans/commit/ea8963c0a91a5d467a22de0b05c51bcb10fc8041))
+* data type too small for jansDeviceData [#5940](https://github.com/JanssenProject/jans/issues/5940) ([#5943](https://github.com/JanssenProject/jans/issues/5943)) ([f342154](https://github.com/JanssenProject/jans/commit/f3421547911c9a34ddb6ca7613f06f17f75b31cf))
+* data type too small for jansDeviceNotificationConf [#5940](https://github.com/JanssenProject/jans/issues/5940) ([#5946](https://github.com/JanssenProject/jans/issues/5946)) ([39ffb3a](https://github.com/JanssenProject/jans/commit/39ffb3a35b397d8cac1a7472908a6aa6d17e1a33))
+* failed to search session by deviceSecret if DB is PostgreSQL [#6012](https://github.com/JanssenProject/jans/issues/6012) ([#6013](https://github.com/JanssenProject/jans/issues/6013)) ([00b4c8d](https://github.com/JanssenProject/jans/commit/00b4c8da3c1b66e1d85d3dc13ba3ed4fff517431))
+* **fido2:** Exception handling for assertion ([#5689](https://github.com/JanssenProject/jans/issues/5689)) ([2c82c5d](https://github.com/JanssenProject/jans/commit/2c82c5d73594464ed8ecec199f57774737cfd4e3))
+* fix schema and update ldap samples ([#6024](https://github.com/JanssenProject/jans/issues/6024)) ([beabaef](https://github.com/JanssenProject/jans/commit/beabaef7835fa4331f2b889b69d8bb6fab436fcc))
+* **jans-cli-tui:** move agama archiever to jans-cli directory ([#5721](https://github.com/JanssenProject/jans/issues/5721)) ([61053f0](https://github.com/JanssenProject/jans/commit/61053f0a9cee48415b57289b8236733dcd725199))
+* **jans-linux-setup:** cb installation with args ([#5860](https://github.com/JanssenProject/jans/issues/5860)) ([2582fd5](https://github.com/JanssenProject/jans/commit/2582fd5018c3a5a40817267b0eaa9c5dc9bc2f50))
+* **jans-linux-setup:** Gluu/Flex Casa ([#5916](https://github.com/JanssenProject/jans/issues/5916)) ([276c082](https://github.com/JanssenProject/jans/commit/276c0828837f0283adda9874ffe6d7fd3f02674f))
+* **jans-linux-setup:** missing attribute mappings ([#5886](https://github.com/JanssenProject/jans/issues/5886)) ([d4bd70b](https://github.com/JanssenProject/jans/commit/d4bd70bfa070dada8165d3f4158038c63d9ea8c0))
+* **jans-linux-setup:** node installer ([#5933](https://github.com/JanssenProject/jans/issues/5933)) ([ddbb2cf](https://github.com/JanssenProject/jans/commit/ddbb2cf1bed6aec78f17e57c1acce237533a1412))
+* **jans-linux-setup:** prompt for Gluu Casa ([#5898](https://github.com/JanssenProject/jans/issues/5898)) ([e388a26](https://github.com/JanssenProject/jans/commit/e388a26d0ada0ca0197b6992f3828f357ae90c5d))
+* **jans-linux-setup:** suse apache version ([#5938](https://github.com/JanssenProject/jans/issues/5938)) ([66c4ef7](https://github.com/JanssenProject/jans/commit/66c4ef766a62788437cce88974357a9a2b20de21))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
+## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.15...jans-linux-setup-v1.0.16) (2023-08-02)
+
+
+### Features
+
+* **jans-auth-server:** added DPoP-Nonce and client level dpop control "dpop_bound_access_tokens" ([#5607](https://github.com/JanssenProject/jans/issues/5607)) ([cc5a47a](https://github.com/JanssenProject/jans/commit/cc5a47a082b68f6655335e29559fd69f3c80e434))
+* **jans-cli-tui:** agama-cli ([#5715](https://github.com/JanssenProject/jans/issues/5715)) ([5fec965](https://github.com/JanssenProject/jans/commit/5fec965f18429882ec0dc3686a5f83b6f9fb6086))
+* **jans-linux-setup:** gluu/flex casa installer ([#5590](https://github.com/JanssenProject/jans/issues/5590)) ([2ce1152](https://github.com/JanssenProject/jans/commit/2ce11527485cece5dea4c714ae8f03b1b19510b1))
+
+
+### Bug Fixes
+
+* **config-api:** jans link fix for DN change ([#5543](https://github.com/JanssenProject/jans/issues/5543)) ([40e9d4e](https://github.com/JanssenProject/jans/commit/40e9d4e429ad579b80aec375ab6374ba9a0df9b7))
+* enlarge column `adsPrjDeplDetails` ([#5644](https://github.com/JanssenProject/jans/issues/5644)) ([ae059fe](https://github.com/JanssenProject/jans/commit/ae059fe0018c3a7a059c2431e63ab0bd90d1f314))
+* **jans-linux-setup:** casa install option --with-casa ([#5598](https://github.com/JanssenProject/jans/issues/5598)) ([4758bf5](https://github.com/JanssenProject/jans/commit/4758bf577bd61746c80d63ee8624fa19cdb3aeed))
+* **jans-linux-setup:** cryptography, opensuse tumbleweed support, openssl requirement ([#5554](https://github.com/JanssenProject/jans/issues/5554)) ([0d461e4](https://github.com/JanssenProject/jans/commit/0d461e42e8ed8559633e8acd1a1a4ab66e3c9ef2))
+* **jans-linux-setup:** jans-link download url ([#5706](https://github.com/JanssenProject/jans/issues/5706)) ([5b750f4](https://github.com/JanssenProject/jans/commit/5b750f42527d2d9b77d681ea893e0971866182db))
+* **jans-linux-setup:** link configuration DN ([#5539](https://github.com/JanssenProject/jans/issues/5539)) ([929b790](https://github.com/JanssenProject/jans/commit/929b790020bd918b1764ddb5bc7359ad82da28c0))
+* **jans-linux-setup:** load test data with setup.properties ([#5723](https://github.com/JanssenProject/jans/issues/5723)) ([b2fa5de](https://github.com/JanssenProject/jans/commit/b2fa5de84c6a9917e0ec0a57a529924b4409ba66))
+* **jans-linux-setup:** new location of jans_test_client_keys.zip ([#5641](https://github.com/JanssenProject/jans/issues/5641)) ([4b00a3a](https://github.com/JanssenProject/jans/commit/4b00a3a17cae115cea31af8e099953666d14bc8d))
+* **jans-linux-setup:** non-document entry ([#5677](https://github.com/JanssenProject/jans/issues/5677)) ([9c4edb3](https://github.com/JanssenProject/jans/commit/9c4edb313c21d6e48c0e81ef966999986d0ec2b8))
+* **jans-linux-setup:** OS dependent location of jwks.json ([#5700](https://github.com/JanssenProject/jans/issues/5700)) ([df27569](https://github.com/JanssenProject/jans/commit/df2756995d9769ae2b5f9585f5a811b75d293a9f))
+* **jans-linux-setup:** remove disabling selinux and apply policies ([#5453](https://github.com/JanssenProject/jans/issues/5453)) ([5b619a6](https://github.com/JanssenProject/jans/commit/5b619a641a3453ec757a7dce86814204451e0865))
+* **jans-linux-setup:** remove fido-u2f-configuration proxypass from apache ([#5624](https://github.com/JanssenProject/jans/issues/5624)) ([46ced1f](https://github.com/JanssenProject/jans/commit/46ced1f5d073377915f1058465d53913f2beb862))
+* **jans-linux-setup:** remove modification of dirAllowed ([#5701](https://github.com/JanssenProject/jans/issues/5701)) ([71107c1](https://github.com/JanssenProject/jans/commit/71107c1a154f58f5916ec6d8ef7c7ce9dd7eea9f))
+* **jans-linux-setup:** remove proxypass fido-configuration ([#5629](https://github.com/JanssenProject/jans/issues/5629)) ([bb92297](https://github.com/JanssenProject/jans/commit/bb92297a970062eab9563675eba1d14a16abe449))
+* **jans-linux-setup:** remove service files after stop while uninstalling ([#5602](https://github.com/JanssenProject/jans/issues/5602)) ([c82dbd2](https://github.com/JanssenProject/jans/commit/c82dbd2ce72a533cbc357f340043ab8bc1643430))
+* **jans-linux-setup:** typed value when setting value ([#5691](https://github.com/JanssenProject/jans/issues/5691)) ([0795df2](https://github.com/JanssenProject/jans/commit/0795df2cc84ad48db2c35db3fcbd7576baa46b1f))
+* **jans-linux-setup:** update build dependencies ([#5702](https://github.com/JanssenProject/jans/issues/5702)) ([0c65fbc](https://github.com/JanssenProject/jans/commit/0c65fbc3af7d85e07c2421e5c4e28fcb50c603e6))
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.14...jans-linux-setup-v1.0.15) (2023-07-12)
+
+
+### Features
+
+* **fido2:** loading mds using external urls ([#5162](https://github.com/JanssenProject/jans/issues/5162)) ([d3d2294](https://github.com/JanssenProject/jans/commit/d3d2294ffabe3de9baa067b39f9578947b6d475f))
+* **jans-link:** change schema name cache refresh to link ([#5484](https://github.com/JanssenProject/jans/issues/5484)) ([412f753](https://github.com/JanssenProject/jans/commit/412f753f1f11337b51ab1e212b9bd013021102be))
+* **jans-link:** set jans-link by default disabled ([#5472](https://github.com/JanssenProject/jans/issues/5472)) ([67a6329](https://github.com/JanssenProject/jans/commit/67a63290addccb0c3244722c19d0a8591e92b458))
+* **jans-linux-setup:** add option --keep-setup ([#5343](https://github.com/JanssenProject/jans/issues/5343)) ([cdec0d2](https://github.com/JanssenProject/jans/commit/cdec0d211d8bd7dda7d668c492c249541740a715))
+* **jans-linux-setup:** argument -disable-selinux ([#5401](https://github.com/JanssenProject/jans/issues/5401)) ([11f5ab1](https://github.com/JanssenProject/jans/commit/11f5ab12471ca0424bacbd5e01099a6dd42401db))
+* **jans-linux-setup:** cache refresh installation ([#4745](https://github.com/JanssenProject/jans/issues/4745)) ([94983ea](https://github.com/JanssenProject/jans/commit/94983ea08b12eb24603223f282eb64ea8981b6fe))
+* **jans-linux-setup:** disable selinux ([#5386](https://github.com/JanssenProject/jans/issues/5386)) ([e684c5f](https://github.com/JanssenProject/jans/commit/e684c5f6e5216a5b5544c269770821f1ef662adc))
+* **jans-linux-setup:** make jans_stat a default oauth scope [#5393](https://github.com/JanssenProject/jans/issues/5393) ([#5394](https://github.com/JanssenProject/jans/issues/5394)) ([1f62b47](https://github.com/JanssenProject/jans/commit/1f62b47f09d347501a5ae8bc302b29cb50140c63))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** ClassCastException during select account [#5285](https://github.com/JanssenProject/jans/issues/5285) ([#5286](https://github.com/JanssenProject/jans/issues/5286)) ([4d17cbc](https://github.com/JanssenProject/jans/commit/4d17cbcdab3272653f2cf547bcef1d8181353ffd))
+* **jans-link:** corrected import class in py script ([#5440](https://github.com/JanssenProject/jans/issues/5440)) ([9b02417](https://github.com/JanssenProject/jans/commit/9b024171c55f17dc3a3d588b250eb8b23d53e165))
+* **jans-linux-setup:** cache refresh port ([#5279](https://github.com/JanssenProject/jans/issues/5279)) ([28fed19](https://github.com/JanssenProject/jans/commit/28fed198e972b4550427d96cd436d392268e1d78))
+* **jans-linux-setup:** CR variable names and snapshot dir ([#5302](https://github.com/JanssenProject/jans/issues/5302)) ([17222c9](https://github.com/JanssenProject/jans/commit/17222c99beb7bc08bb012f96aa6bd454b546d117))
+* **jans-linux-setup:** mapping changes for admin-ui ([#5362](https://github.com/JanssenProject/jans/issues/5362)) ([d7b0f54](https://github.com/JanssenProject/jans/commit/d7b0f54490a1ab48daed0fa4080036ce46374567))
+* **jans-linux-setup:** opendj stop for nonldap backends ([#5318](https://github.com/JanssenProject/jans/issues/5318)) ([b084517](https://github.com/JanssenProject/jans/commit/b084517863b3b0b4739f4a97aaf96753b529f54d))
+* **jans-linux-setup:** remove unit files upon uninstall ([#5344](https://github.com/JanssenProject/jans/issues/5344)) ([b42fbb8](https://github.com/JanssenProject/jans/commit/b42fbb86c913973f2a85388635b0bd61b75207ef))
+* **jans-linux-setup:** scope offline_access is non-default ([#5359](https://github.com/JanssenProject/jans/issues/5359)) ([cc8cfc1](https://github.com/JanssenProject/jans/commit/cc8cfc1482a913720ba424128a7892798f947e4a))
+* **jans-linux-setup:** spanner import ldif with modify add ([#5430](https://github.com/JanssenProject/jans/issues/5430)) ([6a2b408](https://github.com/JanssenProject/jans/commit/6a2b40889f25d8dd5c92e95f421f290f375b7edd))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.13...jans-linux-setup-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* Add DCR flow ([#5096](https://github.com/JanssenProject/jans/issues/5096)) ([4bdea42](https://github.com/JanssenProject/jans/commit/4bdea425bb3d2b174049d03f3664db559e449eb9)), closes [#5092](https://github.com/JanssenProject/jans/issues/5092)
+* **agama:** allow flows to supply the identity of the user to authenticate with a parameterizable attribute ([#5010](https://github.com/JanssenProject/jans/issues/5010)) ([ca941ce](https://github.com/JanssenProject/jans/commit/ca941ce0c2b54a84cd0327f8ac21fe926b533660))
+* **config-api:** cache-refresh plugin code ([#5000](https://github.com/JanssenProject/jans/issues/5000)) ([eed9526](https://github.com/JanssenProject/jans/commit/eed9526415996278b52806cfe37a4dfb5076aa00))
+* **fido2:** Apple_WebAuthn_Root_CA certificate is now downloaded to /authentication_cert folder and read from AttestationCertificateService ([#4756](https://github.com/JanssenProject/jans/issues/4756)) ([1600185](https://github.com/JanssenProject/jans/commit/16001859895d5aa5d840cfc9d425d0ee95149979))
+* **jans-auth-server:** added ability to set client expiration via DCR [#5057](https://github.com/JanssenProject/jans/issues/5057) ([#5185](https://github.com/JanssenProject/jans/issues/5185)) ([a15054b](https://github.com/JanssenProject/jans/commit/a15054b1c3350d6ee0bb9c92d39f6b2d992abfa1))
+* update SG script to conform prod server ([#5103](https://github.com/JanssenProject/jans/issues/5103)) ([0ec3ca8](https://github.com/JanssenProject/jans/commit/0ec3ca8b0e4e8e7287c8041dc75be9b29632da81))
+
+
+### Bug Fixes
+
+* **jans-linux-setup:** change location of persistence script ([#5095](https://github.com/JanssenProject/jans/issues/5095)) ([49054ae](https://github.com/JanssenProject/jans/commit/49054ae66d17d2e7d34febd31ac7ab25be3acdc4))
+* **jans-linux-setup:** maridb json columns ([#5079](https://github.com/JanssenProject/jans/issues/5079)) ([c2be202](https://github.com/JanssenProject/jans/commit/c2be20230a58d1d0ca4111454051fcce83611cce))
+* **jans-linux-setup:** remove dependency distutils ([#5011](https://github.com/JanssenProject/jans/issues/5011)) ([ca42086](https://github.com/JanssenProject/jans/commit/ca42086ef05a63a11006458416ef266a42c958f6))
+* **jans-linux-setup:** type of jans_stat is oauth ([#5059](https://github.com/JanssenProject/jans/issues/5059)) ([c6cc459](https://github.com/JanssenProject/jans/commit/c6cc4595c4f266a26fbcb0ab919352bfc7b9d454))
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.12...jans-linux-setup-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-auth-server:** add "introspection" scope check on introspection endpoint access [#4557](https://github.com/JanssenProject/jans/issues/4557) ([#4716](https://github.com/JanssenProject/jans/issues/4716)) ([ce2d75c](https://github.com/JanssenProject/jans/commit/ce2d75c32df382eb2a28f89793778a3e72659700))
+* **jans-linux-setup:** detect arch before starting setup ([#4667](https://github.com/JanssenProject/jans/issues/4667)) ([302aa9b](https://github.com/JanssenProject/jans/commit/302aa9b8243c6aa90ffb0a722eff3e47f2aaa3e5))
+* **jans-linux-setup:** move openbanking profile to gluu ([#4682](https://github.com/JanssenProject/jans/issues/4682)) ([05fc275](https://github.com/JanssenProject/jans/commit/05fc275948b4eceb6c9264c7107e0c2ae7ec6ebc))
+
+
+### Bug Fixes
+
+* **jans-linux-setup:** create opendj sysv script for k8s ([#4804](https://github.com/JanssenProject/jans/issues/4804)) ([64ba632](https://github.com/JanssenProject/jans/commit/64ba632ba8cf77414a46518ebcd83da154a42b06))
+* **jans-linux-setup:** default keystore type pkcs12 ([#4788](https://github.com/JanssenProject/jans/issues/4788)) ([b57739c](https://github.com/JanssenProject/jans/commit/b57739c2736bdae75771262e9ebfaef17a93f458))
+* **jans-linux-setup:** key_regeneration should look up db for keystore file ([#4780](https://github.com/JanssenProject/jans/issues/4780)) ([6fd85a8](https://github.com/JanssenProject/jans/commit/6fd85a83d715558835fe594a0c8ac76f6399bae6))
+* **jans-linux-setup:** role_based introspection script ([#4738](https://github.com/JanssenProject/jans/issues/4738)) ([86c4fee](https://github.com/JanssenProject/jans/commit/86c4feedd696db0271022e4de0a7ad8092d31738))
+* **jans-linux-setup:** use /opt/dist/scripts in case of k8s ([#4807](https://github.com/JanssenProject/jans/issues/4807)) ([461d96b](https://github.com/JanssenProject/jans/commit/461d96b9fda237c924d074f8ef2bbc98f19c429e))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.11...jans-linux-setup-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* **jans-auth-server:** redirect back to RP when session is expired or if not possible show error page [#4449](https://github.com/JanssenProject/jans/issues/4449) ([#4505](https://github.com/JanssenProject/jans/issues/4505)) ([0983e73](https://github.com/JanssenProject/jans/commit/0983e7397ea2aa99423e5e928690666cd67ca8b2))
+
+
+### Bug Fixes
+
+* avoid setting agama configuration root dir based on java system variable ([#4524](https://github.com/JanssenProject/jans/issues/4524)) ([1d93fd7](https://github.com/JanssenProject/jans/commit/1d93fd7cc3dfd0592781602c5b5bb00f6d5adf4c))
+* **jans-linux-setup:** remove scan_update_token ([#4621](https://github.com/JanssenProject/jans/issues/4621)) ([b20f115](https://github.com/JanssenProject/jans/commit/b20f115e7bf4fa75c7df9c120596e67273f1b10e))
+* **jans-linux-setup:** version 1.0.12 ([#4509](https://github.com/JanssenProject/jans/issues/4509)) ([5d80442](https://github.com/JanssenProject/jans/commit/5d8044229af9f5e44e05cef76b179e7359cff2a8))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.10...jans-linux-setup-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* **agama:** add a "default agama flow" to bridge ([#4309](https://github.com/JanssenProject/jans/issues/4309)) ([3b2248f](https://github.com/JanssenProject/jans/commit/3b2248fdb2a8e842cde1baca81132fa47613c356))
+* **jans-auth-server:** increase sessionIdUnauthenticatedUnusedLifetime value in setup [#4445](https://github.com/JanssenProject/jans/issues/4445) ([#4446](https://github.com/JanssenProject/jans/issues/4446)) ([ecf9395](https://github.com/JanssenProject/jans/commit/ecf93955f391bcda17ad6a2f6ead00d79afee165))
+
+
+### Bug Fixes
+
+* fix push config name ([#4342](https://github.com/JanssenProject/jans/issues/4342)) ([3c8f9f4](https://github.com/JanssenProject/jans/commit/3c8f9f4887981e9f0d391acf22f66de847793b92))
+* **jans-auth-server:** white/blank screen after device flow authn [#4237](https://github.com/JanssenProject/jans/issues/4237) ([#4243](https://github.com/JanssenProject/jans/issues/4243)) ([89f744d](https://github.com/JanssenProject/jans/commit/89f744dcaccb8f0813cee6663b4a8923898b8cc5))
+* **jans-linux-setup:** disable agama script by default (avoid blank page) [#4374](https://github.com/JanssenProject/jans/issues/4374) ([#4375](https://github.com/JanssenProject/jans/issues/4375)) ([cd62ff9](https://github.com/JanssenProject/jans/commit/cd62ff9fe8783f2e87dd5e47c2362d35ba9713ef))
+* **jans-linux-setup:** post setup ([#4325](https://github.com/JanssenProject/jans/issues/4325)) ([b3ae222](https://github.com/JanssenProject/jans/commit/b3ae2225134f4d41c61706bb936e35affc93a72d))
+* **jans-linux-setup:** re-orginize creating smtp configuration ([#4457](https://github.com/JanssenProject/jans/issues/4457)) ([5b543cd](https://github.com/JanssenProject/jans/commit/5b543cdab320de7918b9078735cfafff744ede23))
+* **jans-linux-setup:** remove password strength check for ldap ([#4376](https://github.com/JanssenProject/jans/issues/4376)) ([2c73b1d](https://github.com/JanssenProject/jans/commit/2c73b1d85b4b116797de85d5f8d2d196fe9cde9b))
+* **jans-linux-setup:** TUI string ([#4288](https://github.com/JanssenProject/jans/issues/4288)) ([5db3693](https://github.com/JanssenProject/jans/commit/5db3693a70db474c6886070d3d2dd64baec43846))
+* **jans-linux-setup:** typo - remove attribute county (ref: [#4058](https://github.com/JanssenProject/jans/issues/4058)) ([#4247](https://github.com/JanssenProject/jans/issues/4247)) ([b3756af](https://github.com/JanssenProject/jans/commit/b3756af0077aa38e1d8d2b11521c0e6897d3f739))
+* mailservice should send non signed emails, if keystore isn't defied; ([#4455](https://github.com/JanssenProject/jans/issues/4455)) ([7b41c44](https://github.com/JanssenProject/jans/commit/7b41c44f2933b8fde79d0478cf8df69303b9b3ba))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+
+## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.9...jans-linux-setup-v1.0.10) (2023-03-16)
+
+
+### Features
+
+* **jans-auth-server:** added online_access scope to issue session bound refresh token [#3012](https://github.com/JanssenProject/jans/issues/3012) ([#4106](https://github.com/JanssenProject/jans/issues/4106)) ([635f611](https://github.com/JanssenProject/jans/commit/635f6119fdf4cdf3b3aed33515854ef68257c98f))
+* **jans-linux-setup:** enable agama engine by default  ([#4131](https://github.com/JanssenProject/jans/issues/4131)) ([7e432dc](https://github.com/JanssenProject/jans/commit/7e432dcde57657d1cfa1cd45bde2206156dc6905))
+
+
+### Bug Fixes
+
+* **jans-linux-setup:** set jansAuthMode - default acr mode ([#4162](https://github.com/JanssenProject/jans/issues/4162)) ([f7d0489](https://github.com/JanssenProject/jans/commit/f7d0489e47a86ce146846dda2064d378dd4a0897))
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.8...jans-linux-setup-v1.0.9) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
+## [1.0.8](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.7...jans-linux-setup-v1.0.8) (2023-03-01)
+
+
+### Bug Fixes
+
+* **jans-linux-setup:** install cb before jans installation ([#3981](https://github.com/JanssenProject/jans/issues/3981)) ([dfed3b5](https://github.com/JanssenProject/jans/commit/dfed3b5457cae0bc378f5eaf845a4a5475bdf7e7))
+* **jans-linux-setup:** install ncurses-compat-libs cb backend for el8 ([#3969](https://github.com/JanssenProject/jans/issues/3969)) ([412e07f](https://github.com/JanssenProject/jans/commit/412e07f4fcce17c1a801ab5161f1470dd949bab7))
+* **jans-linux-setup:** start jans-auth after backend ([#3975](https://github.com/JanssenProject/jans/issues/3975)) ([4afbcee](https://github.com/JanssenProject/jans/commit/4afbcee6176aa2efc85c554da07058311f4e3233))
+
+## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.6...jans-linux-setup-v1.0.7) (2023-02-22)
+
+
+### Features
+
+* add -key_ops ALL to setup (ref: [#3747](https://github.com/JanssenProject/jans/issues/3747)) ([#3755](https://github.com/JanssenProject/jans/issues/3755)) ([3ce4bb2](https://github.com/JanssenProject/jans/commit/3ce4bb2847e7a776fc344750bb28292e83658cc0))
+* add custom Github External Authenticator script for ADS [#3625](https://github.com/JanssenProject/jans/issues/3625) ([#3626](https://github.com/JanssenProject/jans/issues/3626)) ([f922a7a](https://github.com/JanssenProject/jans/commit/f922a7a7b075a43750dd792a91a11399517dbb9b))
+* **config-api:** data conversion, audit log and swagger enhancement ([#3588](https://github.com/JanssenProject/jans/issues/3588)) ([a87b75b](https://github.com/JanssenProject/jans/commit/a87b75bb257b00f71ba643bc81ed110e0c914b79))
+* **config-api:** plugin endpoint and audit interceptor ([#3613](https://github.com/JanssenProject/jans/issues/3613)) ([95fadc6](https://github.com/JanssenProject/jans/commit/95fadc6c89c4e91c6d143f0ab9efce0b9395fb14))
+* **jans-auth-server:** added flexible date formatter handler to AS (required by certification tools) [#3600](https://github.com/JanssenProject/jans/issues/3600) ([#3601](https://github.com/JanssenProject/jans/issues/3601)) ([f646d73](https://github.com/JanssenProject/jans/commit/f646d734d79f9da83cfe51103811efd1f8677d7f))
+* **jans-auth-server:** renamed "key_ops" -&gt; "key_ops_type" [#3790](https://github.com/JanssenProject/jans/issues/3790) ([#3792](https://github.com/JanssenProject/jans/issues/3792)) ([7a6bcba](https://github.com/JanssenProject/jans/commit/7a6bcba5ca3597f7556d406e4a572c76a229bbdf))
+* **jans-auth-server:** use key_ops=ssa to generate jwt from ssa ([#3806](https://github.com/JanssenProject/jans/issues/3806)) ([2603bbb](https://github.com/JanssenProject/jans/commit/2603bbb1080345cab4fe814dca39024d8d0b5434))
+* jans-linux-setup create test client with all available scopes ([#3696](https://github.com/JanssenProject/jans/issues/3696)) ([c2da52e](https://github.com/JanssenProject/jans/commit/c2da52e539cc2edf7e2792d507d02bd7886a901f))
+* jans-linux-setup spanner rest client ([#3436](https://github.com/JanssenProject/jans/issues/3436)) ([e4d1d0c](https://github.com/JanssenProject/jans/commit/e4d1d0cc69dad7176d35af4608fd46c4c73ad4ba))
+* jans-linux-setup ssa admin scope ([#3759](https://github.com/JanssenProject/jans/issues/3759)) ([485f7b4](https://github.com/JanssenProject/jans/commit/485f7b4c1718f9f088be9931d3b0312b78727bca))
+* Support Super Gluu one step authentication to Fido2 server [#3593](https://github.com/JanssenProject/jans/issues/3593) ([#3599](https://github.com/JanssenProject/jans/issues/3599)) ([c013b16](https://github.com/JanssenProject/jans/commit/c013b161f2eb47f5952cbb80c8740f8d62d302c3))
+
+
+### Bug Fixes
+
+* auto installing of the GithubAuthenticatorForADS.py has been removed; ([#3889](https://github.com/JanssenProject/jans/issues/3889)) ([bd6b7ad](https://github.com/JanssenProject/jans/commit/bd6b7ad89d16ae8f80c25c6b375860132de7c97e))
+* **config-api:** fixed start-up issue due to scope objectclass case ([#3697](https://github.com/JanssenProject/jans/issues/3697)) ([eac6440](https://github.com/JanssenProject/jans/commit/eac644071d1ca711564ae07361e66dd6aad84366))
+* **config-api:** user service conflict with fido2 and script enhancement ([#3767](https://github.com/JanssenProject/jans/issues/3767)) ([5753d39](https://github.com/JanssenProject/jans/commit/5753d3989b96d76699f234cc87f58e355ba313b0))
+* jans-linux-setup add twilio and jans-fido2 client libraries to jans-auth ([#3716](https://github.com/JanssenProject/jans/issues/3716)) ([4f43328](https://github.com/JanssenProject/jans/commit/4f433288fd46dcc0357e0fd7c4e40cc64842ce51))
+* jans-linux-setup conversion fails for null integer field ([#3610](https://github.com/JanssenProject/jans/issues/3610)) ([207946c](https://github.com/JanssenProject/jans/commit/207946cad8f1b50b9bcb9a0e2f8539d335127492))
+* jans-linux-setup downgrade cryptography ([#3635](https://github.com/JanssenProject/jans/issues/3635)) ([c7b5e3b](https://github.com/JanssenProject/jans/commit/c7b5e3b01de61807143877a166213554a98d42ea))
+* jans-linux-setup downgrade jwt for py3.6 ([#3621](https://github.com/JanssenProject/jans/issues/3621)) ([322f752](https://github.com/JanssenProject/jans/commit/322f752ee15934d15b0398dae03dfd3d341129e0))
+* jans-linux-setup external libs in jans-fido2.xml ([#3627](https://github.com/JanssenProject/jans/issues/3627)) ([8d4783b](https://github.com/JanssenProject/jans/commit/8d4783b7495c0793aad140f78bd1ad06a4aac932))
+* jans-linux-setup installation without test client ([#3706](https://github.com/JanssenProject/jans/issues/3706)) ([e45f19e](https://github.com/JanssenProject/jans/commit/e45f19e6b4d750578cf14fb28eeb8e6c7e67174a))
+* jans-linux-setup key_ops_type for key regeneration tool (ref: [#3881](https://github.com/JanssenProject/jans/issues/3881)) ([#3882](https://github.com/JanssenProject/jans/issues/3882)) ([51c0750](https://github.com/JanssenProject/jans/commit/51c07503eaf97455875ba7436299b04aaecb61c3))
+* jans-linux-setup ldif property objectClass should be case sensitive ([#3702](https://github.com/JanssenProject/jans/issues/3702)) ([0dc14a0](https://github.com/JanssenProject/jans/commit/0dc14a0680f159e72ab8093c8a26865aea1cd33c))
+* jans-linux-setup rename config-api swagger file ([#3678](https://github.com/JanssenProject/jans/issues/3678)) ([4615973](https://github.com/JanssenProject/jans/commit/46159736811dca62ba05f6b80478734d6262c047))
+* jans-linux-setup rename role_based_client as tui_client ([#3630](https://github.com/JanssenProject/jans/issues/3630)) ([b331ef3](https://github.com/JanssenProject/jans/commit/b331ef32b49c870e0a972fc0463e954939317f88))
+* jans-linux-setup save test_client_id to setup.properties ([#3844](https://github.com/JanssenProject/jans/issues/3844)) ([d1d898c](https://github.com/JanssenProject/jans/commit/d1d898c949e91b457c347f68a56b938238247b07))
+* jans-linux-setup script locatipn is db ([#3788](https://github.com/JanssenProject/jans/issues/3788)) ([4381928](https://github.com/JanssenProject/jans/commit/438192893dc3e091de60fc711dd219054dad374a))
+* jans-linux-setup script locatipn is db openbanking ([#3789](https://github.com/JanssenProject/jans/issues/3789)) ([697efc5](https://github.com/JanssenProject/jans/commit/697efc505d6d5f8be04f47d9e46f65ac28ca6ddc))
+* jans-linux-setup sync test client variable names ([#3862](https://github.com/JanssenProject/jans/issues/3862)) ([fe7e24c](https://github.com/JanssenProject/jans/commit/fe7e24cfe18e0263e3e38dc8dd6eacad6c1bf21f))
+* jans-linux-setup test client fixes ([#3699](https://github.com/JanssenProject/jans/issues/3699)) ([72e2f3f](https://github.com/JanssenProject/jans/commit/72e2f3f27b73c009ce68de68e3df484596f3595e))
+* missing comma delimiter for Postgres index fields ([#3741](https://github.com/JanssenProject/jans/issues/3741)) ([1a2d298](https://github.com/JanssenProject/jans/commit/1a2d298c5b4911bfaccdf80203df1a919ff7a6b8))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+
 ## [1.0.6](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.5...jans-linux-setup-v1.0.6) (2023-01-09)
 
 

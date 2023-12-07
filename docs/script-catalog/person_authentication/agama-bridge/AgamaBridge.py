@@ -1,10 +1,14 @@
 # Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
 # Copyright (c) 2020, Janssen Project
 #
+
+from com.fasterxml.jackson.databind import ObjectMapper
+
 from io.jans.agama import NativeJansFlowBridge
 from io.jans.agama.engine.misc import FlowUtils
+from io.jans.as.common.service.common import EncryptionService
 from io.jans.as.server.security import Identity
-from io.jans.as.server.service import AuthenticationService
+from io.jans.as.server.service import AuthenticationService, UserService
 from io.jans.jsf2.service import FacesService
 from io.jans.jsf2.message import FacesMessages
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
@@ -13,6 +17,7 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
 from jakarta.faces.application import FacesMessage
+from java.util import Arrays
 
 import java
 import sys
@@ -22,16 +27,31 @@ class PersonAuthentication(PersonAuthenticationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        print "Agama. Initialization"        
+        print "Agama. Initialization"
+        self.resultParam = "agamaData"
+
         prop = "cust_param_name"
         self.cust_param_name = self.configProperty(configurationAttributes, prop)
         
         if self.cust_param_name == None:
             print "Agama. Custom parameter name not referenced via property '%s'" % prop
             return False
+
+        prop = "default_flow_name"
+        self.default_flow_name = self.configProperty(configurationAttributes, prop)
+        
+        prop = "finish_userid_db_attribute"
+        self.finish_userid_db_attr = self.configProperty(configurationAttributes, prop)
+        
+        if self.finish_userid_db_attr == None:
+            print "Agama. Property '%s' is missing value" % prop
+            return False
             
-        print "Agama. Request param '%s' will be used to pass flow inputs" % self.cust_param_name
+        print "Agama. Request param '%s' will be used to pass flow name and inputs" % self.cust_param_name
+        print "Agama. When '%s' is missing, the flow to launch will be '%s'" % (self.cust_param_name, self.default_flow_name)
+        print "Agama. DB attribute '%s' will be used to map the identity of userId passed in Finish directives (if any)" % self.finish_userid_db_attr
         print "Agama. Initialized successfully"
+
         return True
 
     def destroy(self, configurationAttributes):
@@ -72,12 +92,32 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "Agama. No userId provided in flow result."                        
                         self.setMessageError(FacesMessage.SEVERITY_ERROR, "Unable to determine identity of user")
                         return False
+                    
+                    userService = CdiUtil.bean(UserService)
+                    fuda = self.finish_userid_db_attr
+                    matchingUsers = userService.getUsersByAttribute(fuda, userId, True, 2)
+                    matches = len(matchingUsers)
+                    
+                    if matches != 1:
+                        if matches == 0:
+                            print "Agama. No user matches the required condition: %s=%s" % (fuda, userId)
+                        else:
+                            print "Agama. Several users match the required condition: %s=%s" % (fuda, userId)
                         
-                    authenticated = CdiUtil.bean(AuthenticationService).authenticate(userId)
+                        self.setMessageError(FacesMessage.SEVERITY_ERROR, "Unable to determine identity of user")
+                        return False
+                    
+                    inum = matchingUsers[0].getAttribute("inum")
+                    print "Agama. Authenticating user %s..." % inum
+                    authenticated = CdiUtil.bean(AuthenticationService).authenticateByUserInum(inum)
                     
                     if not authenticated:
-                        print "Agama. Unable to authenticate %s" % userId
+                        print "Agama. Unable to authenticate %s" % inum
                         return False
+                    
+                    data.put("_encInum", CdiUtil.bean(EncryptionService).encrypt(inum))                    
+                    jsonData = CdiUtil.bean(ObjectMapper).writeValueAsString(data) 
+                    CdiUtil.bean(Identity).setWorkingParameter(self.resultParam, jsonData)
             except:
                 print "Agama. Exception: ", sys.exc_info()[1]
                 return False
@@ -100,9 +140,15 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
                 
             param = session.getSessionAttributes().get(self.cust_param_name) 
-            if param == None:
+            if StringHelper.isEmpty(param):
                 print "Agama. Request param '%s' is missing or has no value" % self.cust_param_name
-                return False
+                
+                param = self.default_flow_name
+                if param == None:
+                    print "Agama. Default flow name is not set either..." 
+
+                    print "Agama. Unable to determine the Agama flow to launch. Check the docs"
+                    return False
             
             (qn, ins) = self.extractParams(param)
             if qn == None:
@@ -114,7 +160,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 running = bridge.prepareFlow(session.getId(), qn, ins)
                 
                 if running == None:
-                    print "Agama. Flow '%s' does not exist!" % qn
+                    print "Agama. Flow '%s' does not exist or cannot be launched from a browser!" % qn
                     return False
                 elif running:
                     print "Agama. A flow is already in course"
@@ -132,7 +178,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         
     def getExtraParametersForStep(self, configurationAttributes, step):
-        return None
+        return Arrays.asList(self.resultParam)
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         return 1
@@ -154,7 +200,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def configProperty(self, configProperties, name):
         prop = configProperties.get(name)
-        return None if prop == None else prop.getValue2()
+        val = None
+        
+        if prop != None:
+            val = prop.getValue2()
+            if StringHelper.isEmpty(val):
+                val = None
+
+        return val 
 
     def setMessageError(self, severity, msg):
         facesMessages = CdiUtil.bean(FacesMessages)

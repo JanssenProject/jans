@@ -1,0 +1,5 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/basic.zul"?>
+<div xmlns="xhtml" xmlns:z="zul" self="@define(content)">
+    <z:include src="/error-body.zul" />
+</div>

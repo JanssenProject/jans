@@ -53,6 +53,7 @@ public class ConfigurationTest extends BaseTest {
         assertEquals(response.getStatus(), 200, "Unexpected response code");
         assertNotNull(response.getIssuer(), "The issuer is null");
         assertNotNull(response.getAuthorizationEndpoint(), "The authorizationEndpoint is null");
+        assertNotNull(response.getAuthorizationChallengeEndpoint(), "The authorizationChallengeEndpoint is null");
         assertNotNull(response.getTokenEndpoint(), "The tokenEndpoint is null");
         assertNotNull(response.getRevocationEndpoint(), "The tokenRevocationEndpoint is null");
         assertNotNull(response.getUserInfoEndpoint(), "The userInfoEndPoint is null");

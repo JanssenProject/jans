@@ -100,6 +100,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
+        softwareStatement.getClaims().put("iss", "https://test.issuer.info");
         softwareStatement.getClaims().put(APPLICATION_TYPE.toString(), ApplicationType.WEB);
         softwareStatement.getClaims().put(CLIENT_NAME.toString(), "jans test app");
         softwareStatement.getClaims().put(REDIRECT_URIS.toString(), StringUtils.spaceSeparatedToList(redirectUris));
@@ -204,6 +205,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
+        softwareStatement.getClaims().put("iss", "https://test.issuer.info");
         softwareStatement.getClaims().put(APPLICATION_TYPE.toString(), ApplicationType.WEB);
         softwareStatement.getClaims().put(CLIENT_NAME.toString(), "jans test app");
         softwareStatement.getClaims().put(REDIRECT_URIS.toString(), StringUtils.spaceSeparatedToList(redirectUris));
@@ -464,6 +466,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
+        softwareStatement.getClaims().put("iss", "https://test.issuer.info");
         softwareStatement.getClaims().put(APPLICATION_TYPE.toString(), ApplicationType.WEB);
         softwareStatement.getClaims().put(CLIENT_NAME.toString(), "jans test app");
         softwareStatement.getClaims().put(REDIRECT_URIS.toString(), StringUtils.spaceSeparatedToList(redirectUris));

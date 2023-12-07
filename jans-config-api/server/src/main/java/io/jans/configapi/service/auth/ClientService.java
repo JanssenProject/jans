@@ -19,7 +19,7 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -139,6 +140,18 @@ public class ClientService implements Serializable {
                 filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter));
             }
             searchFilter = Filter.createORFilter(filters);
+        }
+
+        logger.trace("Clients pattern searchFilter:{}", searchFilter);
+        List<Filter> fieldValueFilters = new ArrayList<>();
+        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
+            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
+                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
+                logger.trace("Clients dataFilter:{}", dataFilter);
+                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
+            }
+            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                    Filter.createANDFilter(fieldValueFilters));
         }
 
         logger.debug("Clients searchFilter:{}", searchFilter);

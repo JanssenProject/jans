@@ -68,6 +68,10 @@ public abstract class LoggerService {
     }
 
     public void initTimer() {
+    	initTimer(false);
+    }
+
+    public void initTimer(boolean updateNow) {
         log.info("Initializing Logger Update Timer");
 
         final int delay = 15;
@@ -75,6 +79,10 @@ public abstract class LoggerService {
 
         timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new LoggerUpdateEvent(),
                 Scheduled.Literal.INSTANCE));
+        
+        if (updateNow) {
+        	updateLoggerTimerEvent(null);
+        }
     }
 
     @Asynchronous
@@ -199,6 +207,7 @@ public abstract class LoggerService {
     private void updateAppendersAndLogLevel(LoggingLayoutType loggingLayout, Level level) {
         if (loggingLayout == LoggingLayoutType.TEXT) {
             final LoggerContext ctx = LoggerContext.getContext(false);
+            ctx.getConfiguration().getRootLogger().setLevel(level);
             ctx.reconfigure();
             LoggerContext loggerContext = LoggerContext.getContext(false);
 

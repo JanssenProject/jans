@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:11.0.16
+FROM bellsoft/liberica-openjre-alpine:17.0.8@sha256:156b75d18d01f1a83f9a279e80dad82773c212559b20e40620ccb06b1120ce4f
 
 # ===============
 # Alpine packages
@@ -7,30 +7,19 @@ FROM bellsoft/liberica-openjre-alpine:11.0.16
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache openssl python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps wget git \
-    && mkdir -p /usr/java/latest \
-    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
+    && apk add --no-cache --virtual .build-deps wget git
 
 # ===========
 # Auth client
 # ===========
 
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=1.0.7-SNAPSHOT
-ENV CN_BUILD_DATE='2023-02-07 08:25'
+ENV CN_VERSION=1.0.21-SNAPSHOT
+ENV CN_BUILD_DATE='2023-10-11 10:14'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
-RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
-
-# =================
-# Shibboleth sealer
-# =================
-
-# @TODO: remove them?
-# RUN wget -q https://build.shibboleth.net/nexus/content/repositories/releases/net/shibboleth/utilities/java-support/7.5.1/java-support-7.5.1.jar -P /app/javalibs/ \
-#     && wget -q https://repo1.maven.org/maven2/com/beust/jcommander/1.48/jcommander-1.48.jar -P /app/javalibs/ \
-#     && wget -q https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.26/slf4j-api-1.7.26.jar -P /app/javalibs/ \
-#     && wget -q https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.26/slf4j-simple-1.7.26.jar -P /app/javalibs/
+RUN mkdir -p /opt/jans/configurator/javalibs \
+    && wget -q ${CN_SOURCE_URL} -P /opt/jans/configurator/javalibs/
 
 # ======
 # Python
@@ -100,26 +89,26 @@ ENV CN_SECRET_ADAPTER=vault \
 ENV CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_CONFIGURATION_SKIP_INITIALIZED=false \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
-    CN_AWS_SECRETS_REPLICA_FILE=""
+    CN_AWS_SECRETS_REPLICA_FILE="" \
+    CN_CONFIGURATOR_DB_DIR=/app/db \
+    CN_CONFIGURATOR_CERTS_DIR=/etc/certs
 
 # ====
 # misc
 # ====
 
-LABEL name="janssenproject/configurator" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.7" \
-    release="dev" \
-    summary="Janssen Configuration Manager" \
-    description="Manage config and secret"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/configurator" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.title="Janssen Configuration Manager" \
+    org.opencontainers.image.description="Manage config and secret"
 
 RUN mkdir -p /etc/certs \
     /etc/jans/conf \
@@ -128,16 +117,20 @@ RUN mkdir -p /etc/certs \
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
+RUN ln -sf /usr/lib/jvm/jre /opt/java
+
 # create non-root user
-RUN adduser -s /bin/sh -D -G root -u 1000 1000
+RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 
 # adjust ownership and permission
 RUN chmod -R g=u /app/db \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
-    && chmod 664 /usr/java/latest/jre/lib/security/cacerts
+    && chmod 664 /opt/java/lib/security/cacerts
 
 USER 1000
+
+RUN mkdir -p $HOME/.config/gcloud
 
 ENTRYPOINT ["tini", "-g", "--", "sh", "/app/scripts/entrypoint.sh"]
 CMD ["--help"]

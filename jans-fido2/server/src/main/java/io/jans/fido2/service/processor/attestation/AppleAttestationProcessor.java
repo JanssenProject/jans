@@ -2,28 +2,28 @@ package io.jans.fido2.service.processor.attestation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.service.util.AppleUtilService;
+import io.jans.fido2.service.util.CommonUtilService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.kerby.asn1.parse.Asn1Container;
-import org.apache.kerby.asn1.parse.Asn1ParseResult;
-import org.apache.kerby.asn1.parse.Asn1Parser;
-import org.apache.kerby.asn1.type.Asn1OctetString;
 
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.fido2.ctap.AttestationFormat;
-import io.jans.fido2.exception.AttestationException;
-import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
@@ -32,14 +32,11 @@ import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.mds.AttestationCertificateService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
-import io.jans.fido2.service.verifier.AuthenticatorDataVerifier;
 import io.jans.fido2.service.verifier.CertificateVerifier;
-import io.jans.fido2.service.verifier.CommonVerifiers;
-import io.jans.fido2.service.verifier.UserVerificationVerifier;
 
 /**
  * For Apple's anonymous attestation fmt="apple"
- * 
+ *
  * @author madhumitas
  *
  */
@@ -47,15 +44,6 @@ import io.jans.fido2.service.verifier.UserVerificationVerifier;
 public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	@Inject
 	private Logger log;
-
-	@Inject
-	private CommonVerifiers commonVerifiers;
-
-	@Inject
-	private AuthenticatorDataVerifier authenticatorDataVerifier;
-
-	@Inject
-	private UserVerificationVerifier userVerificationVerifier;
 
 	@Inject
 	private AttestationCertificateService attestationCertificateService;
@@ -72,20 +60,24 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	@Inject
 	private CertificateService certificateService;
 
-	private final String KEY_DESCRIPTION_OID = "1.2.840.113635.100.8.2";
+	@Inject
+	private AppConfiguration appConfiguration;
+
+	@Inject
+	private ErrorResponseFactory errorResponseFactory;
+
+	@Inject
+	private CommonUtilService commonUtilService;
+
+	@Inject
+	private AppleUtilService appleUtilService;
+
+	private static final String SUBJECT_DN = "st=california, o=apple inc., cn=apple webauthn root ca";
 
 	@Override
 	public AttestationFormat getAttestationFormat() {
 		return AttestationFormat.apple;
 	}
-
-	/**
-	 * Apple WebAuthn Root CA PEM - Downloaded from
-	 * https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem
-	 *
-	 * Valid until 03/14/2045 @ 5:00 PM PST
-	 */
-	private static final String APPLE_WEBAUTHN_ROOT_CA = "/etc/jans/conf/fido2/apple/";
 
 	// @Override
 	public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
@@ -108,22 +100,28 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 				certificates.add(cert);
 			}
 
+			if (certificates.isEmpty()) {
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR, "x5c certificates is empty");
+			}
+
 			// the first certificate in x5c
 			X509Certificate credCert = certificates.get(0);
 
-			List<X509Certificate> trustAnchorCertificates = new ArrayList<X509Certificate>();
-			trustAnchorCertificates.addAll(certificateService.getCertificates(APPLE_WEBAUTHN_ROOT_CA));
-			try {
-				log.debug("APPLE_WEBAUTHN_ROOT_CA root certificate" + trustAnchorCertificates.size());
-				X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates,
-						trustAnchorCertificates);
-				log.info("Step 1 completed  ");
-
-			} catch (Fido2MissingAttestationCertException ex) {
-				X509Certificate certificate = certificates.get(0);
-				String issuerDN = certificate.getIssuerDN().getName();
-				log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
-
+			if (appConfiguration.getFido2Configuration().isSkipValidateMdsInAttestationEnabled()) {
+				log.warn("SkipValidateMdsInAttestation is enabled");
+			} else {
+				try {
+					List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getRootCertificatesBySubjectDN(SUBJECT_DN);
+					log.debug("APPLE_WEBAUTHN_ROOT_CA root certificate: " + trustAnchorCertificates.size());
+					X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
+					log.info("Step 1 completed");
+				} catch (Fido2RuntimeException e) {
+//					X509Certificate certificate = certificates.get(0);
+					String issuerDN = credCert.getIssuerDN().getName();
+					log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
+					throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
+							"Failed to find attestation validation signature public certificate with DN: " + issuerDN);
+				}
 			}
 
 			// 2. Concatenate |authenticatorData| and |clientDataHash| to form
@@ -133,13 +131,12 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			// byte[] nonceToHash = new byte[authDataInBytes.length +
 			// clientDataHash.length];
 
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ByteArrayOutputStream baos;
 			try {
-				baos.write(authDataInBytes);
-				baos.write(clientDataHash);
+				baos = commonUtilService.writeOutputStreamByteList(Arrays.asList(authDataInBytes, clientDataHash));
 			} catch (IOException e) {
-				throw new AttestationException(
-						"Concatenate |authenticatorData| and |clientDataHash| to form |nonceToHash|." + e.getMessage());
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
+						"Concatenate |authenticatorData| and |clientDataHash| to form |nonceToHash| : " + e.getMessage());
 			}
 
 			byte[] nonceToHash = baos.toByteArray();
@@ -152,10 +149,10 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			// 4. Verify |nonce| matches the value of the extension with OID (
 			// 1.2.840.113635.100.8.2 ) in |credCert|.
 
-			byte[] attestationChallenge = getExtension(credCert);
+			byte[] attestationChallenge = appleUtilService.getExtension(credCert);
 
 			if (!Arrays.equals(nonce, attestationChallenge)) {
-				throw new AttestationException("Certificate 1.2.840.113635.100.8.2 extension does not match nonce");
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR, "Certificate 1.2.840.113635.100.8.2 extension does not match nonce");
 			} else
 				log.info("Step 4 completed");
 
@@ -167,7 +164,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			PublicKey publicKeyCredCert = credCert.getPublicKey();
 
 			if (!publicKeyAuthData.equals(publicKeyCredCert)) {
-				throw new AttestationException(
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
 						"The public key in the first certificate in x5c doesn't matches the credentialPublicKey in the attestedCredentialData in authenticatorData.");
 			} else {
 				log.info("Step 5 completed");
@@ -182,57 +179,5 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			int alg = -7;// commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
 			credIdAndCounters.setSignatureAlgorithm(alg);
 		}
-
 	}
-
-	/*-
-	[
-	   {
-	       "type": "OBJECT_IDENTIFIER",
-	       "data": "1.2.840.113635.100.8.2"
-	   },
-	   {
-	       "type": "OCTET_STRING",
-	       "data": [
-	           {
-	               "type": "SEQUENCE",
-	               "data": [
-	                   {
-	                       "type": "[1]",
-	                       "data": [
-	                           {
-	                               "type": "OCTET_STRING",
-	                               "data": {
-	                                   "type": "Buffer",
-	                                   "data": [92, 219, 157, 144, 115, 64, 69, 91, 99, 115, 230, 117, 43, 115, 252, 54, 132, 83, 96, 34, 21, 250, 234, 187, 124, 22, 95, 11, 173, 172, 7, 204]
-	                               }
-	                           }
-	                       ]
-	                   }
-	               ]
-	           }
-	       ]
-	   }
-	]
-	*/
-
-	public byte[] getExtension(X509Certificate attestationCert) {
-		byte[] extensionValue = attestationCert.getExtensionValue(KEY_DESCRIPTION_OID);
-		byte[] extracted;
-		try {
-			Asn1OctetString extensionEnvelope = new Asn1OctetString();
-			extensionEnvelope.decode(extensionValue);
-			extensionEnvelope.getValue();
-			byte[] extensionEnvelopeValue = extensionEnvelope.getValue();
-			Asn1Container container = (Asn1Container) Asn1Parser.parse(ByteBuffer.wrap(extensionEnvelopeValue));
-			Asn1ParseResult firstElement = container.getChildren().get(0);
-			Asn1OctetString octetString = new Asn1OctetString();
-			octetString.decode(firstElement);
-			extracted = octetString.getValue();
-			return extracted;
-		} catch (IOException | RuntimeException e) {
-			throw new AttestationException("Failed to extract nonce from Apple anonymous attestation statement.");
-		}
-	}
-
 }

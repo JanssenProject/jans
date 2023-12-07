@@ -6,26 +6,27 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.common.model.session.SessionId;
-import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.jsf2.message.FacesMessages;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
@@ -33,22 +34,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static io.jans.as.model.authorize.AuthorizeRequestParam.CLIENT_ID;
-import static io.jans.as.model.authorize.AuthorizeRequestParam.NONCE;
-import static io.jans.as.model.authorize.AuthorizeRequestParam.RESPONSE_TYPE;
-import static io.jans.as.model.authorize.AuthorizeRequestParam.SCOPE;
-import static io.jans.as.model.authorize.AuthorizeRequestParam.STATE;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.*;
 import static io.jans.as.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
-import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_ATTEMPTS;
-import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_LAST_ATTEMPT;
-import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
+import static io.jans.as.server.service.DeviceAuthorizationService.*;
 
 /**
  * Action used to process all requests related to device authorization.
  */
 @Named
 @RequestScoped
+@SuppressWarnings("java:S1948")
 public class DeviceAuthorizationAction implements Serializable {
+
+    private static final String INVALID_USER_CODE_MESSAGE_KEY = "device.authorization.invalid.user.code";
 
     @Inject
     private Logger log;
@@ -111,8 +109,16 @@ public class DeviceAuthorizationAction implements Serializable {
      * Reset data in session or create a new one whether there is no session.
      */
     public void initializeSession() {
+        initializeOrCreateSession();
+    }
+
+    @SuppressWarnings("java:S1117")
+    public SessionId initializeOrCreateSession() {
         SessionId sessionId = sessionIdService.getSessionId();
-        Map<String, String> sessionAttributes = new HashMap<>();
+        Map<String, String> sessionAttributes = sessionId != null ? sessionId.getSessionAttributes() : new HashMap<>();
+        sessionAttributes.put(Constants.DEVICE_AUTHORIZATION, Boolean.TRUE.toString());
+        sessionAttributes.remove(SESSION_USER_CODE);
+
         if (StringUtils.isNotBlank(userCode)) {
             sessionAttributes.put(SESSION_USER_CODE, userCode);
         }
@@ -131,61 +137,76 @@ public class DeviceAuthorizationAction implements Serializable {
             sessionAttributes.put(SESSION_ATTEMPTS, String.valueOf(attempts));
             sessionId.setSessionAttributes(sessionAttributes);
             sessionIdService.updateSessionId(sessionId);
+            log.debug("Updated session for device authorization grant page, sessionId: {}", sessionId.getId());
         }
+        return sessionId;
     }
 
     /**
      * Processes user code introduced or loaded in the veritification page and redirects whether user code is correct
      * or return an error if there is something wrong.
      */
+    @SuppressWarnings("java:S1117")
     public void processUserCodeVerification() {
-        SessionId session = sessionIdService.getSessionId();
-        if (session == null) {
-            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("error.errorEncountered"));
-            return;
-        }
-
-        if (!preventBruteForcing(session)) {
-            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.brute.forcing.msg"));
-            return;
-        }
-
-        String userCode;
-        if (StringUtils.isBlank(userCodePart1) && StringUtils.isBlank(userCodePart2)) {
-            userCode = session.getSessionAttributes().get(SESSION_USER_CODE);
-        } else {
-            userCode = userCodePart1 + '-' + userCodePart2;
-        }
-        userCode = userCode.toUpperCase();
-
-        if (!validateFormat(userCode)) {
-            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.invalid.user.code"));
-            return;
-        }
-
-        DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
-        log.debug("Verifying device authorization cache data: {}", cacheData);
-
-        String message = null;
-        if (cacheData != null) {
-            if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
-                session.getSessionAttributes().put(SESSION_USER_CODE, userCode);
-                session.getSessionAttributes().remove(SESSION_LAST_ATTEMPT);
-                session.getSessionAttributes().remove(SESSION_ATTEMPTS);
-                sessionIdService.updateSessionId(session);
-
-                redirectToAuthorization(cacheData);
-            } else if (cacheData.getStatus() == DeviceAuthorizationStatus.DENIED) {
-                message = languageBean.getMessage("device.authorization.access.denied.msg");
-            } else {
-                message = languageBean.getMessage("device.authorization.expired.code.msg");
+        try {
+            SessionId session = sessionIdService.getSessionId();
+            if (session == null) {
+                log.trace("No session found during device authorization, creating new unauthenticated session ...");
+                session = initializeOrCreateSession();
             }
-        } else {
-            message = languageBean.getMessage("device.authorization.invalid.user.code");
-        }
 
-        if (message != null) {
-            facesMessages.add(FacesMessage.SEVERITY_WARN, message);
+            if (!preventBruteForcing(session)) {
+                log.trace("Brute force prevention during device authorization, sessionId: {}", session.getId());
+                facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.brute.forcing.msg"));
+                return;
+            }
+
+            final String userCode;
+            if (StringUtils.isBlank(userCodePart1) && StringUtils.isBlank(userCodePart2)) {
+                userCode = session.getSessionAttributes().get(SESSION_USER_CODE).toUpperCase();
+            } else {
+                userCode = (userCodePart1 + '-' + userCodePart2).toUpperCase();
+            }
+
+            if (!validateFormat(userCode)) {
+                log.trace("Invalid user code during device authorization, userCode: {}, sessionId: {}", userCode, session.getId());
+                facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage(INVALID_USER_CODE_MESSAGE_KEY));
+                return;
+            }
+
+            DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
+            log.debug("Verifying device authorization cache data: {}", cacheData);
+
+            String message = null;
+            if (cacheData != null) {
+                if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
+                    session.getSessionAttributes().put(SESSION_USER_CODE, userCode);
+                    session.getSessionAttributes().remove(SESSION_LAST_ATTEMPT);
+                    session.getSessionAttributes().remove(SESSION_ATTEMPTS);
+                    sessionIdService.updateSessionId(session);
+
+                    redirectToAuthorization(cacheData);
+                } else if (cacheData.getStatus() == DeviceAuthorizationStatus.DENIED) {
+                    log.trace("Cache data status=DENIED during device authorization, userCode: {}, sessionId: {}", userCode, session.getId());
+                    message = languageBean.getMessage("device.authorization.access.denied.msg");
+                } else {
+                    log.trace("Cache data EXPIRED during device authorization, userCode: {}, sessionId: {}", userCode, session.getId());
+                    message = languageBean.getMessage("device.authorization.expired.code.msg");
+                }
+            } else {
+                log.trace("Unable to validate user code during device authorization, userCode: {}, sessionId: {}", userCode, session.getId());
+                message = languageBean.getMessage(INVALID_USER_CODE_MESSAGE_KEY);
+            }
+
+            if (message != null) {
+                log.trace("Message during device authorization, message: {}, userCode: {}, sessionId: {}", message, userCode, session.getId());
+                facesMessages.add(FacesMessage.SEVERITY_WARN, message);
+            }
+        } catch (Exception e) {
+            log.error("Failed to process user code validation", e);
+
+            facesMessages.clear();
+            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage(INVALID_USER_CODE_MESSAGE_KEY));
         }
     }
 
@@ -226,6 +247,7 @@ public class DeviceAuthorizationAction implements Serializable {
      *
      * @param cacheData Data related to the device code request.
      */
+    @SuppressWarnings("java:S1117")
     private void redirectToAuthorization(DeviceAuthorizationCacheControl cacheData) {
         try {
             log.info("Redirecting to authorization code flow to process device authorization, data: {}", cacheData);
@@ -235,6 +257,7 @@ public class DeviceAuthorizationAction implements Serializable {
             String scope = Util.listAsString(cacheData.getScopes());
             String state = UUID.randomUUID().toString();
             String nonce = UUID.randomUUID().toString();
+            String acr = appConfiguration.getDeviceAuthzAcr();
 
             RedirectUri authRequest = new RedirectUri(authorizationEndpoint);
             authRequest.addResponseParameter(CLIENT_ID, clientId);
@@ -242,8 +265,13 @@ public class DeviceAuthorizationAction implements Serializable {
             authRequest.addResponseParameter(SCOPE, scope);
             authRequest.addResponseParameter(STATE, state);
             authRequest.addResponseParameter(NONCE, nonce);
+            if (StringUtils.isNotBlank(acr)) {
+                authRequest.addResponseParameter(ACR_VALUES, acr);
+            }
 
-            FacesContext.getCurrentInstance().getExternalContext().redirect(authRequest.toString());
+            final String redirectTo = authRequest.toString();
+            log.debug("Redirecting to: {}", redirectTo);
+            FacesContext.getCurrentInstance().getExternalContext().redirect(redirectTo);
         } catch (IOException e) {
             log.error("Problems trying to redirect to authorization page from device authorization action", e);
             String message = languageBean.getMessage("error.errorEncountered");

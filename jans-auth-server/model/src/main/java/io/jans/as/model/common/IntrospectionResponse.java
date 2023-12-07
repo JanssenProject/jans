@@ -52,8 +52,10 @@ public class IntrospectionResponse {
     private String issuer;
     @JsonProperty(value = "jti")
     private String jti;
-    @JsonProperty(value = "acr_values")
-    private String acrValues;
+    @JsonProperty(value = "acr")
+    private String acr;
+    @JsonProperty(value = "auth_time")
+    private Integer authTime;
 
     // DPoP
     @JsonProperty(value = "nbf")
@@ -69,12 +71,20 @@ public class IntrospectionResponse {
         this.active = active;
     }
 
-    public String getAcrValues() {
-        return acrValues;
+    public String getAcr() {
+        return acr;
     }
 
-    public void setAcrValues(String acrValues) {
-        this.acrValues = acrValues;
+    public void setAcr(String acr) {
+        this.acr = acr;
+    }
+
+    public Integer getAuthTime() {
+        return authTime;
+    }
+
+    public void setAuthTime(Integer authTime) {
+        this.authTime = authTime;
     }
 
     public boolean isActive() {
@@ -195,7 +205,8 @@ public class IntrospectionResponse {
                 ", audience='" + audience + '\'' +
                 ", issuer='" + issuer + '\'' +
                 ", jti='" + jti + '\'' +
-                ", acrValues='" + acrValues + '\'' +
+                ", acr='" + acr + '\'' +
+                ", authTime='" + authTime + '\'' +
                 '}';
     }
 }

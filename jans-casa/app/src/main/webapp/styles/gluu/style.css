@@ -1,0 +1,305 @@
+@import url('https://fonts.googleapis.com/css?family=Lato:400,400i,700,700i');
+/*
+@font-face {
+    font-family: 'Lato';
+    font-style: italic;
+    font-weight: 400;
+    src: local('Lato Italic'), local('Lato-Italic'), url(../../fonts/S6u8w4BMUTPHjxsAXC-q.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Lato';
+    font-style: italic;
+    font-weight: 700;
+    src: local('Lato Bold Italic'), local('Lato-BoldItalic'), url(../../fonts/S6u_w4BMUTPHjxsI5wq_Gwft.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Lato Regular'), local('Lato-Regular'), url(../../fonts/S6uyw4BMUTPHjx4wXg.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Lato Bold'), local('Lato-Bold'), url(../../fonts/S6u9w4BMUTPHh6UVSwiPGQ.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+*/
+html {
+    font-family: 'Lato', sans-serif;
+    font-size: 20px;
+    /* Sets the base of the rem scale used in tachyons */
+}
+
+.bg-washed-blue2 {
+    background-color: #fafbfe;
+}
+
+.blue2 {
+    color: #0273ff;
+}
+
+.f7-cust {
+    font-size: .8rem;
+}
+
+.f2-cust {
+    font-size: 1.75rem;
+}
+
+.mw-60r {
+    max-width: 60rem;
+}
+
+.miw-16r {
+    min-width: 16rem;
+}
+
+.miw-2r {
+    min-width: 2rem;
+}
+
+.dark-blue2 {
+    color: #34495c;
+}
+
+.w-14r {
+    width: 14rem;
+}
+
+#dropdownMenu::after {
+    display:none;
+}
+
+#menu a:hover {
+    border-color: #f4f4f4;
+}
+
+#menu a.bl-hover:hover {
+    border-color: #15b565;
+}
+
+.collapsible-menu-item {
+    /* This is a dummy class used as marker for javascript managed layout */
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+.bg-orange2 {
+    background-color: #f0ad4e;
+}
+
+.hover-bg-orange2:hover {
+    background-color: #ec971f;
+}
+
+.hover-bg-orange2:focus {
+    background-color: #ec971f;
+}
+
+.bsgreen {
+    color: #28a745;
+}
+
+.bg-bsgreen-success {
+    background-color: #28a745;
+}
+
+.hover-bsgreen-success:hover {
+    background-color: #449d44;
+}
+
+.hover-bsgreen-success:focus {
+    background-color: #449d44;
+}
+
+.tooltip-inner {
+    font-size: .7rem;
+    background-color: #111;/*#4d4d56;*/
+    border-radius: 2px;
+}
+
+.bg-blank {
+    /* bg-white is defined by both tachyons and bootstrap; the latter uses !important so we resort to this style */
+    background-color: #fff;
+}
+
+.text-field:focus {
+    border-color: rgba( 0, 0, 0, .4 ); /* black-40 */
+}
+
+.lh-tight {
+    line-height: .75;
+}
+
+.unactivated{
+    opacity: 0.45;
+    cursor:not-allowed !important;
+}
+
+.prog-bar {
+    height: 1rem; /* lh-solid */
+}
+
+.prog-bar > .ui-progressbar-value {
+    margin: 0; /* ma0 */
+}
+
+.prog-bar > .ui-widget-header {
+    background-color: #19a974; /* bg-green */
+}
+
+/* Overrides some default bootstrap stylings */
+body {
+    font-family: 'Lato', sans-serif;
+    /* Temporal fix for https://tracker.zkoss.org/browse/ZK-4483 */
+	height: initial;	/* auto ? */
+	position: relative;
+}
+
+a:hover {
+    text-decoration: none; /* no-underline */
+}
+
+label {
+    margin-top: .5rem; /* mt2 */
+    margin-bottom: .25rem /*mb1*/
+}
+
+.btn-success:focus, .btn:focus {
+	box-shadow: none;
+}
+
+.table{
+    color: gray;
+}
+
+.table-hover tbody tr:hover{
+    color: gray;
+}
+
+/* wicked input box */
+
+.focused-text {
+    border: solid #bdc4c6;
+    border-width: 0 0 1px 0;
+    outline: none;
+    transition: .2s ease-in-out;
+    box-sizing: border-box;
+    background-color: transparent;
+}
+
+.focused-text:focus {
+    box-shadow: none;
+    border-bottom: 2px solid #28b025;
+}
+
+.focused-label {
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    font-size: .75rem;
+    cursor: text;
+    transition: .2s ease-in-out;
+    box-sizing: border-box;
+    height: .8rem;
+    width: 100%;
+    pointer-events: none;
+    margin-top: .25rem;
+}
+
+.focused-text:valid + .focused-label,
+.focused-text:focus + .focused-label {
+    top: -22px;
+    font-size: .7rem;
+    color: #15b565;
+}
+
+/* intl-tel-input overrides */
+
+.iti__flag {
+    background-image: url("../../images/flags.png");
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .iti__flag {background-image: url("../../images/flags@2x.png");}
+}
+
+.iti {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+}
+
+.iti__flag-container {
+    position: relative;
+    padding: 0 !important;
+}
+
+.iti .focused-text {
+    margin-left: 10px !important;
+    margin-top: 3px !important;
+    border-radius: 0;
+    padding: 0 0 0 10px !important;
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    font-size: .8rem;
+}
+
+.iti__selected-flag {
+    background-color: transparent;
+    color: rgb( 120, 137, 147);
+    line-height: 1.412;
+    border-bottom: 1px solid #bdc4c6;
+    padding: .46rem 0;
+}
+
+.iti__selected-flag .iti__arrow {
+    right: 0;
+    border-top: 5px dashed;
+    border-top: 4px solid\9;
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+    color: rgb( 120, 137, 147);
+}
+
+.iti--separate-dial-code .iti__selected-flag {
+    background-color: transparent;
+}
+
+.iti__selected-flag:focus {
+    outline: none;
+}
+
+.iti__country-list {
+    border-radius: 4px;
+    margin-top: 10px;
+    border: 0;
+    font-size: 14px;
+    max-height: 400px;
+    overflow: auto;
+    box-shadow: 0 0 0 1px rgba(39, 44, 48, .05), 0 2px 7px 1px rgba(39, 44, 48, .16);
+}
+
+.iti__divider {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.iti__arrow--up {
+    border-bottom: 0;
+}

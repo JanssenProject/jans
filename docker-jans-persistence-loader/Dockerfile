@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM bellsoft/liberica-openjre-alpine:17.0.8@sha256:156b75d18d01f1a83f9a279e80dad82773c212559b20e40620ccb06b1120ce4f
 
 # ===============
 # Alpine packages
@@ -7,7 +7,9 @@ FROM alpine:3.16
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps git wget
+    && apk add --no-cache --virtual .build-deps git wget \
+    && mkdir -p /usr/java/latest \
+    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
 # ======
 # Python
@@ -24,7 +26,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=2603bbb1080345cab4fe814dca39024d8d0b5434
+ENV JANS_SOURCE_VERSION=00aee0c26565e8b0b574370610a75139c2155568
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -39,12 +41,11 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git sparse-checkout add ${JANS_SCRIPT_CATALOG_DIR} \
     && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES}
 
-RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/static/opendj /app/templates
+RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/static/opendj /app/templates
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/static/extension /app/static/extension \
-    && cp -R ${JANS_SETUP_DIR}/openbanking/static/extension /app/openbanking/static/extension \
     && cp ${JANS_SETUP_DIR}/static/couchbase/index.json /app/static/couchbase/index.json \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/opendj_types.json \
     && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
@@ -52,16 +53,11 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json \
     && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json \
     && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
-    && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/ \
     && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json -P /app/static/ \
     && cp ${JANS_SETUP_DIR}/templates/*.ldif /app/templates \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
-    && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \
-    && cp ${JANS_SETUP_DIR}/openbanking/templates/attributes.ldif /app/templates/attributes.ob.ldif \
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
-    && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim \
+    && cp ${JANS_SETUP_DIR}/static/site/site.ldif /app/templates/o_site.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
 # cleanup
@@ -155,35 +151,38 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
-    CN_AWS_SECRETS_REPLICA_FILE=""
+    CN_AWS_SECRETS_REPLICA_FILE="" \
+    CN_DUO_ENABLED=true
 
 # ====
 # misc
 # ====
 
-LABEL name="janssenproject/persistence-loader" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.7" \
-    release="dev" \
-    summary="Janssen Authorization Server Persistence loader" \
-    description="Generate initial data for persistence layer"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/persistence-loader" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.title="Janssen Authorization Server Persistence loader" \
+    org.opencontainers.image.description="Generate initial data for persistence layer"
 
 RUN mkdir -p /app/custom_ldif /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
 # this overrides existing templates
 COPY templates /app/templates
+
+# disable keyRegeneration
+RUN sed -i -r 's/("keyRegenerationEnabled":)true/\1false/g' /app/templates/jans-auth/jans-auth-config.json
+
 RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
-RUN adduser -s /bin/sh -D -G root -u 1000 1000
+RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 
 # adjust ownership and permission
 RUN chmod -R g=u /app/custom_ldif \
@@ -191,6 +190,8 @@ RUN chmod -R g=u /app/custom_ldif \
     && chmod -R g=u /etc/jans
 
 USER 1000
+
+RUN mkdir -p $HOME/.config/gcloud
 
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["sh", "/app/scripts/entrypoint.sh"]

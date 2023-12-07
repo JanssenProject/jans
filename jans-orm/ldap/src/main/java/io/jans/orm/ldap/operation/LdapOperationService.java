@@ -80,9 +80,6 @@ public interface LdapOperationService extends PersistenceOperationService {
      * @return true if successfully added
      * @throws DuplicateEntryException
      * @throws ConnectionException
-     * @throws DuplicateEntryException
-     * @throws ConnectionException
-     * @throws LDAPException
      */
     boolean addEntry(String dn, Collection<Attribute> atts) throws DuplicateEntryException, ConnectionException;
 

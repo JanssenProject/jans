@@ -8,7 +8,8 @@ tags:
 
 # Overview
 
-Janssen Server's `/end_session` endpoint supports logout using [OpenId Connect Front Channel Logout](https://openid.net/specs/openid-connect-frontchannel-1_0.html) mechanism.
+Janssen Server's `/end_session` endpoint supports logout using 
+[OpenId Connect RP-initiated Logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html) mechanism.
 When using OpenID Connect Logout, it is recommended to use Front-Channel Logout. In Front-Channel Logout the browser 
 receives a page with a list of application logout urls within an iframe. This prompts the browser to call each 
 application logout individually and the OpenID Connect end-session endpoint via Javascript.
@@ -30,10 +31,14 @@ https://janssen.server.host/jans-auth/restv1/end_session
 Refer to [this](https://gluu.org/docs/gluu-server/4.4/operation/logout/#openid-connect-single-log-out-slo) article from 
 Gluu Server documentation to understand how end session endpoint works in Janssen Server.  
 
+More information about request and response of the end session endpoint can be found in the OpenAPI specification 
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
+
+
 ## Disabling The Endpoint Using Feature Flag
 
 `/end_session` endpoint can be enabled or disable using [END_SESSION feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#endsession).
-Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
+Use [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/config-tools/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
 disable `END_SESSION` flag as required.
@@ -43,7 +48,7 @@ disable `END_SESSION` flag as required.
 ## Configuration Properties
 
 End session endpoint can be further configured using Janssen Server configuration properties listed below. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+[Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
 - [allowEndSessionWithUnmatchedSid](../../reference/json/properties/janssenauthserver-properties.md#allowendsessionwithunmatchedsid)
@@ -56,7 +61,7 @@ navigate via `Auth Server`->`Properties`.
 
 Apart from the above-mentioned server properties, the properties relevant to individual clients can be configured
 during client registration or can be edited later. When using 
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties, navigate via `Auth Server`->
+[Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure the properties, navigate via `Auth Server`->
 `Clients`->`logout` as show in image below:
 
 ![](../../../assets/image-logout-client-config.png)

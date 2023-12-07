@@ -1,6 +1,6 @@
 # config
 
-![Version: 1.0.7-dev](https://img.shields.io/badge/Version-1.0.7--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.7-dev](https://img.shields.io/badge/AppVersion-1.0.7--dev-informational?style=flat-square)
+![Version: 1.0.21-dev](https://img.shields.io/badge/Version-1.0.21--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.21-dev](https://img.shields.io/badge/AppVersion-1.0.21--dev-informational?style=flat-square)
 
 Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 
@@ -19,7 +19,7 @@ Configuration parameters for setup and initial configuration secret and config l
 
 ## Requirements
 
-Kubernetes: `>=v1.21.0-0`
+Kubernetes: `>=v1.22.0-0`
 
 ## Values
 
@@ -29,11 +29,16 @@ Kubernetes: `>=v1.21.0-0`
 | additionalLabels | object | `{}` | Additional labels that will be added across all resources definitions in the format of {mylabel: "myapp"} |
 | adminPassword | string | `"Test1234#"` | Admin password to log in to the UI. |
 | city | string | `"Austin"` | City. Used for certificate creation. |
+| configmap.cnAwsAccessKeyId | string | `""` |  |
+| configmap.cnAwsDefaultRegion | string | `"us-west-1"` |  |
+| configmap.cnAwsProfile | string | `"janssen"` |  |
+| configmap.cnAwsSecretAccessKey | string | `""` |  |
+| configmap.cnAwsSecretsEndpointUrl | string | `""` |  |
+| configmap.cnAwsSecretsNamePrefix | string | `"janssen"` |  |
+| configmap.cnAwsSecretsReplicaRegions | list | `[]` |  |
 | configmap.cnCacheType | string | `"NATIVE_PERSISTENCE"` | Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` . |
-| configmap.cnConfigGoogleSecretNamePrefix | string | `"janssen"` | Prefix for Janssen configuration secret in Google Secret Manager. Defaults to janssen. If left intact janssen-configuration secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
-| configmap.cnConfigGoogleSecretVersionId | string | `"latest"` | Secret version to be used for configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
 | configmap.cnConfigKubernetesConfigMap | string | `"cn"` | The name of the Kubernetes ConfigMap that will hold the configuration layer |
-| configmap.cnCouchbaseBucketPrefix | string | `"jans"` | The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Gluu. |
+| configmap.cnCouchbaseBucketPrefix | string | `"jans"` | The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen. |
 | configmap.cnCouchbaseCrt | string | `"SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo="` | Couchbase certificate authority string. This must be encoded using base64. This can also be found in your couchbase UI Security > Root Certificate. In mTLS setups this is not required. |
 | configmap.cnCouchbaseIndexNumReplica | int | `0` | The number of replicas per index created. Please note that the number of index nodes must be one greater than the number of index replicas. That means if your couchbase cluster only has 2 index nodes you cannot place the number of replicas to be higher than 1. |
 | configmap.cnCouchbasePassword | string | `"P@ssw0rd"` | Couchbase password for the restricted user config.configmap.cnCouchbaseUser  that is often used inside the services. The password must contain one digit, one uppercase letter, one lower case letter and one symbol . |
@@ -42,11 +47,14 @@ Kubernetes: `>=v1.21.0-0`
 | configmap.cnCouchbaseUrl | string | `"cbjanssen.default.svc.cluster.local"` | Couchbase URL. Used only when global.cnPersistenceType is hybrid or couchbase. This should be in FQDN format for either remote or local Couchbase clusters. The address can be an internal address inside the kubernetes cluster |
 | configmap.cnCouchbaseUser | string | `"janssen"` | Couchbase restricted user. Used only when global.cnPersistenceType is hybrid or couchbase. |
 | configmap.cnGoogleProjectId | string | `"google-project-to-save-config-and-secrets-to"` | Project id of the google project the secret manager belongs to. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
-| configmap.cnGoogleSecretManagerPassPhrase | string | `"Test1234#"` | Passphrase for Janssen secret in Google Secret Manager. This is used for encrypting and decrypting data from the Google Secret Manager. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
 | configmap.cnGoogleSecretManagerServiceAccount | string | `"SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo="` | Service account with roles roles/secretmanager.admin base64 encoded string. This is used often inside the services to reach the configuration layer. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
+| configmap.cnGoogleSecretNamePrefix | string | `"janssen"` | Prefix for Janssen secret in Google Secret Manager. Defaults to janssen. If left janssen-secret secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
+| configmap.cnGoogleSecretVersionId | string | `"latest"` | Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
 | configmap.cnGoogleSpannerDatabaseId | string | `""` | Google Spanner Database ID. Used only when global.cnPersistenceType is spanner. |
 | configmap.cnGoogleSpannerInstanceId | string | `""` | Google Spanner ID. Used only when global.cnPersistenceType is spanner. |
 | configmap.cnJettyRequestHeaderSize | int | `8192` | Jetty header size in bytes in the auth server |
+| configmap.cnLdapCrt | string | `"SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo="` | OpenDJ certificate string. This must be encoded using base64. |
+| configmap.cnLdapKey | string | `"SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo="` | OpenDJ key string. This must be encoded using base64. |
 | configmap.cnLdapUrl | string | `"opendj:1636"` | OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`. |
 | configmap.cnMaxRamPercent | string | `"75.0"` | Value passed to Java option -XX:MaxRAMPercentage |
 | configmap.cnPersistenceHybridMapping | string | `"{}"` | Specify data that should be saved in each persistence (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`. {  "default": "<couchbase|ldap|spanner|sql>",  "user": "<couchbase|ldap|spanner|sql>",  "site": "<couchbase|ldap|spanner|sql>",  "cache": "<couchbase|ldap|spanner|sql>",  "token": "<couchbase|ldap|spanner|sql>",  "session": "<couchbase|ldap|spanner|sql>", } |
@@ -55,8 +63,6 @@ Kubernetes: `>=v1.21.0-0`
 | configmap.cnRedisType | string | `"STANDALONE"` | Redis service type. `STANDALONE` or `CLUSTER`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`. |
 | configmap.cnRedisUrl | string | `"redis.redis.svc.cluster.local:6379"` | Redis URL and port number <url>:<port>. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`. |
 | configmap.cnRedisUseSsl | bool | `false` | Boolean to use SSL in Redis. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`. |
-| configmap.cnSecretGoogleSecretNamePrefix | string | `"janssen"` | Prefix for Janssen secret in Google Secret Manager. Defaults to janssen. If left janssen-secret secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
-| configmap.cnSecretGoogleSecretVersionId | string | `"latest"` | Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
 | configmap.cnSecretKubernetesSecret | string | `"cn"` | Kubernetes secret name holding configuration keys. Used when global.configSecretAdapter is set to kubernetes which is the default. |
 | configmap.cnSqlDbDialect | string | `"mysql"` | SQL database dialect. `mysql` or `pgsql` |
 | configmap.cnSqlDbHost | string | `"my-release-mysql.default.svc.cluster.local"` | SQL database host uri. |
@@ -74,8 +80,10 @@ Kubernetes: `>=v1.21.0-0`
 | fullNameOverride | string | `""` |  |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"janssenproject/configurator"` | Image  to use for deploying. |
-| image.tag | string | `"1.0.7_dev"` | Image  tag to use for deploying. |
+| image.tag | string | `"1.0.21_dev"` | Image  tag to use for deploying. |
 | ldapPassword | string | `"P@ssw0rds"` | LDAP admin password if OpennDJ is used for persistence. |
+| ldapTruststorePassword | string | `"changeit"` | LDAP truststore password if OpenDJ is used for persistence |
+| lifecycle | object | `{}` |  |
 | migration | object | `{"enabled":false,"migrationDataFormat":"ldif","migrationDir":"/ce-migration"}` | CE to CN Migration section |
 | migration.enabled | bool | `false` | Boolean flag to enable migration from CE |
 | migration.migrationDataFormat | string | `"ldif"` | migration data-format depending on persistence backend. Supported data formats are ldif, couchbase+json, spanner+avro, postgresql+json, and mysql+json. |
@@ -88,6 +96,7 @@ Kubernetes: `>=v1.21.0-0`
 | resources.limits.memory | string | `"300Mi"` | Memory limit. |
 | resources.requests.cpu | string | `"300m"` | CPU request. |
 | resources.requests.memory | string | `"300Mi"` | Memory request. |
+| salt | string | `""` | Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value. |
 | state | string | `"TX"` | State code. Used for certificate creation. |
 | usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service. |
 | usrEnvs.normal | object | `{}` | Add custom normal envs to the service. variable1: value1 |

@@ -22,6 +22,8 @@ public class Constants {
     public static final String SALT_FILE_NAME = "salt";
     public static final String CERTS_DIR = "certsDir";
 
+    public static final String APPLICATION_TOKEN_INTROSPECTION_JWT = "application/token-introspection+jwt";
+
     public static final String ERROR = "error";
     public static final String ERROR_DESCRIPTION = "error_description";
     public static final String ERROR_URI = "error_uri";
@@ -35,6 +37,8 @@ public class Constants {
     public static final String CLIENT_ASSERTION = "client_assertion";
     public static final String CLIENT_ASSERTION_TYPE = "client_assertion_type";
     public static final String CLIENT_ID = "client_id";
+    public static final String DEVICE_AUTHORIZATION = "device_authorization";
+    public static final String AUTHORIZATION_CODE = "authorization_code";
 
     public static final String LOG_FOUND = "Found '{}' entries";
 

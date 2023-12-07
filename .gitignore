@@ -159,3 +159,7 @@ data-sources.json
 .settings
 .classpath
 .project
+
+# scanner reports
+trivy.json
+grype.json

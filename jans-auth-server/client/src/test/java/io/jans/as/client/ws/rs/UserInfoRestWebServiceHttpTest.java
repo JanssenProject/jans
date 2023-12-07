@@ -6,29 +6,13 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoRequest;
-import io.jans.as.client.UserInfoResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.client.model.authorize.UserInfoMember;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.AuthorizationMethod;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.common.*;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -46,11 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for User Info Web Services (HTTP)
@@ -110,13 +90,13 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "mobile_phone");
 
         // 1. Register client
         RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "mobile_phone");
         AuthorizationResponse response1 = requestAuthorization(userId, userSecret, redirectUri, responseTypes, clientId, scopes);
 
         String accessToken = response1.getAccessToken();
@@ -150,7 +130,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "org_name", "work_phone");
 
         // 1. Register client
-        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri, scopes);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
@@ -266,15 +246,16 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
+        String scope = "openid profile address email org_name work_phone";
 
-        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri, Arrays.asList(scope.split(" ")));
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
         String username = userId;
         String password = userSecret;
-        String scope = "openid profile address email org_name work_phone";
+
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         TokenResponse response1 = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, scope,
@@ -388,6 +369,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
         registerRequest.setAccessTokenLifetime(3);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -450,6 +432,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setClaims(Arrays.asList(
                 "o"));
@@ -549,6 +532,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 GrantType.AUTHORIZATION_CODE
         );
 
+        List<String> scopes = Arrays.asList("openid");
+
         // 1. Dynamic Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -558,7 +543,9 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -571,9 +558,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
-
-        List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -642,6 +626,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -688,6 +673,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -734,6 +720,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -780,6 +767,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -825,6 +813,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS384);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -870,6 +859,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -915,6 +905,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES256);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -960,6 +951,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES384);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1005,6 +997,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES512);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1050,6 +1043,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS256);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1095,6 +1089,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS384);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1140,6 +1135,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS512);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1191,6 +1187,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
             registerRequest.setSubjectType(SubjectType.PAIRWISE);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1251,6 +1248,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
             registerRequest.setSubjectType(SubjectType.PAIRWISE);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1311,6 +1309,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
             registerRequest.setSubjectType(SubjectType.PAIRWISE);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1366,6 +1365,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1416,6 +1416,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1449,12 +1450,20 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
     private RegisterResponse register(final String redirectUris, final List<ResponseType> responseTypes,
                                       final List<GrantType> grantTypes, final String sectorIdentifierUri) {
+        return register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri, Tester.standardScopes);
+    }
+
+    private RegisterResponse register(final String redirectUris, final List<ResponseType> responseTypes,
+                                      final List<GrantType> grantTypes, final String sectorIdentifierUri,
+                                      final List<String> scopes) {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1507,6 +1516,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1564,6 +1574,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS512);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>1.0.7-SNAPSHOT</version>
+	<version>1.0.21-SNAPSHOT</version>
 
     <distributionManagement>
 	  <repository>
@@ -17,7 +17,10 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.0.3</maven.min-version>
-		
+
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+
 		<httpcore.version>4.4.15</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 
@@ -32,7 +35,9 @@
 		<org.jboss.annotations.api.version>2.0.1.Final</org.jboss.annotations.api.version>
 		
 		<jakarta.ejb.api.version>4.0.1</jakarta.ejb.api.version>
-		<jakarta.mail.api.version>2.1.0</jakarta.mail.api.version>
+		<jakarta.mail.api.version>2.1.2</jakarta.mail.api.version>
+		<jakarta.mail.version>1.6.7</jakarta.mail.version>
+
 		<jakarta.websocket.api.version>2.1.0</jakarta.websocket.api.version>
 		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version>
 		<org.glassfish.jakarta.el.api.version>5.0.0-M1</org.glassfish.jakarta.el.api.version>
@@ -41,17 +46,21 @@
 		<jackson.bom.version>2.13.4.20221013</jackson.bom.version>
 		<jackson.version>2.13.4</jackson.version>
 		<jackson.databind.version>2.13.4.2</jackson.databind.version>
-		<json.version>20220924</json.version>
+		<json.version>20231013</json.version>
 
 		<log4j.version>2.19.0</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
 
-		<guava.version>31.1-jre</guava.version>
+		<guava.version>32.1.1-jre</guava.version>
 	
-		<aws.sns.version>1.12.327</aws.sns.version>
+		<aws.sns.version>1.12.448</aws.sns.version>
 		<jackrabbit.version>2.21.13</jackrabbit.version>
 
 		<bc.version>1.70</bc.version>
+		<junit.jupiter.version>5.9.2</junit.jupiter.version>
+		<mockito.version>5.1.1</mockito.version>
+
+		<jetty.version>11.0.16</jetty.version>
 	</properties>
 
 	<repositories>
@@ -271,10 +280,35 @@
 				<version>${bc.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcmail-jdk15on</artifactId>
+				<version>${bc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bc-fips</artifactId>
+				<version>(,1.0.2.4]</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-fips</artifactId>
+				<version>1.0.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcmail-fips</artifactId>
+				<version>1.0.4</version>
+			</dependency>
+			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.28</version>
+				<version>9.37.1</version>
 			</dependency>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>oauth2-oidc-sdk</artifactId>
+                <version>11.7</version>
+            </dependency>
 
 			<!-- Weld -->
 			<dependency>
@@ -286,29 +320,32 @@
 			</dependency>
 			
 			<!-- Jakarta lib required but not part of Weld dependency -->
-		  	<dependency>
-               <groupId>jakarta.ejb</groupId>
-               <artifactId>jakarta.ejb-api</artifactId>
-               <version>${jakarta.ejb.api.version}</version>
-            </dependency>
 			<dependency>
-        		<groupId>jakarta.mail</groupId>
-        		<artifactId>jakarta.mail-api</artifactId>
-        		<version>${jakarta.mail.api.version}</version>
-      		</dependency>
-      		  <dependency>
-                <groupId>jakarta.websocket</groupId>
-                <artifactId>jakarta.websocket-api</artifactId>
-                <version>${jakarta.websocket.api.version}</version>
-            </dependency>
-            <dependency>
+				<groupId>jakarta.ejb</groupId>
+				<artifactId>jakarta.ejb-api</artifactId>
+				<version>${jakarta.ejb.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.mail</groupId>
+				<artifactId>jakarta.mail-api</artifactId>
+				<version>${jakarta.mail.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>jakarta.mail</artifactId>
+				<version>${jakarta.mail.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.websocket</groupId>
+				<artifactId>jakarta.websocket-api</artifactId>
+				<version>${jakarta.websocket.api.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>${jakarta.xml.bind.api.version}</version>
 			</dependency>
-            
-			
-				
+
 		<!-- 	<dependency>
 				<groupId>javax.enterprise</groupId>
 				<artifactId>cdi-api</artifactId>
@@ -377,7 +414,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>1.0.7-SNAPSHOT</version>
+				<version>1.0.21-SNAPSHOT</version>
 			</dependency> -->
 
 			<!-- hibernate -->
@@ -523,6 +560,11 @@
 				<artifactId>jackson-annotations</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jaxb-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
@@ -558,7 +600,7 @@
 			<dependency>
 				<groupId>org.codehaus.jettison</groupId>
 				<artifactId>jettison</artifactId>
-				<version>1.5.2</version>
+				<version>1.5.4</version>
 			</dependency>
 
 			<!-- Jython -->
@@ -652,13 +694,6 @@
 				<version>1.3.0</version>
 			</dependency>
 
-			<!-- Net -->
-			<dependency>
-				<groupId>com.sun.mail</groupId>
-				<artifactId>jakarta.mail</artifactId>
-				<version>1.6.7</version>
-			</dependency>
-
 			<!-- Cache -->
 			<dependency>
 				<groupId>net.sf.ehcache</groupId>
@@ -715,14 +750,14 @@
 			<dependency>
 				<groupId>com.unboundid</groupId>
 				<artifactId>unboundid-ldapsdk</artifactId>
-				<version>6.0.6</version>
+				<version>6.0.8</version>
 			</dependency>
 
 			<!-- Couchbase -->
 			<dependency>
 				<groupId>com.couchbase.client</groupId>
 				<artifactId>java-client</artifactId>
-				<version>3.3.4</version>
+				<version>3.4.4</version>
 			</dependency>
 
 			<!-- SQL JDBC Drivers -->
@@ -739,12 +774,12 @@
 			<dependency>
 				<groupId>com.mysql</groupId>
 				<artifactId>mysql-connector-j</artifactId>
-				<version>8.0.31</version>
+				<version>8.0.32</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.5.1</version>
+			    <version>42.6.0</version>
 			</dependency>
 
 			<!-- SQL Query -->
@@ -763,7 +798,7 @@
 			<dependency>
 			    <groupId>com.google.cloud</groupId>
 			    <artifactId>google-cloud-spanner</artifactId>
-			    <version>6.31.2</version>
+			    <version>6.39.0</version>
 			</dependency>
 
 			<!-- Metrics -->
@@ -777,7 +812,7 @@
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
-				<version>2.3.2</version>
+				<version>2.4.0-rc2</version>
 			</dependency>
 
 			<!-- AWS SNS -->
@@ -804,6 +839,11 @@
 				<artifactId>dom4j</artifactId>
 				<version>2.3.1</version>
 			</dependency>
+			<dependency>
+				<groupId>javax.activation</groupId>
+				<artifactId>activation</artifactId>
+				<version>1.1.1</version>
+			</dependency>
 
 			<!-- Velocity -->
 			<dependency>
@@ -823,7 +863,7 @@
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
-				<version>6.14.3</version>
+				<version>7.8.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -832,7 +872,51 @@
 				<version>4.13.2</version>
 				<scope>test</scope>
 			</dependency>
-
+			<dependency>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-junit5</artifactId>
+				<version>4.0.0.Final</version>
+				<scope>test</scope>
+			</dependency>
+			<!-- JUnit Jupiter -->
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<version>${junit.jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>${junit.jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-params</artifactId>
+				<version>${junit.jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<!-- Mockito -->
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-inline</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+				
             <!-- java compiler lib -->
             <dependency>
                 <groupId>net.openhft</groupId>
@@ -875,4 +959,5 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
 </project>

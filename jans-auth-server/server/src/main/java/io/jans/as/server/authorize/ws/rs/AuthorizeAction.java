@@ -8,6 +8,8 @@ package io.jans.as.server.authorize.ws.rs;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.SubjectType;
@@ -19,6 +21,7 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Util;
+import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.auth.Authenticator;
 import io.jans.as.server.i18n.LanguageBean;
@@ -28,17 +31,16 @@ import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.common.CibaRequestCacheControl;
 import io.jans.as.server.model.common.DefaultScope;
-import io.jans.as.common.model.session.SessionId;
-import io.jans.as.common.model.session.SessionIdState;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
-import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalConsentGatheringService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
+import io.jans.as.server.service.external.ExternalSelectAccountService;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
@@ -46,15 +48,10 @@ import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.net.NetworkService;
+import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import io.jans.util.ilocale.LocaleUtil;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
@@ -65,6 +62,12 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -106,6 +109,9 @@ public class AuthorizeAction {
 
     @Inject
     private ExternalConsentGatheringService externalConsentGatheringService;
+
+    @Inject
+    private ExternalSelectAccountService externalSelectAccountService;
 
     @Inject
     private AuthenticationMode defaultAuthenticationMode;
@@ -227,7 +233,16 @@ public class AuthorizeAction {
         }
     }
 
-    public void checkPermissionGranted() throws IOException {
+    public void checkPermissionGranted() {
+        try {
+            checkPermissionGrantedInternal();
+        } catch (Exception e) {
+            log.error("Failed to perform checkPermissionGranted()", e);
+            permissionDenied();
+        }
+    }
+
+    public void checkPermissionGrantedInternal() throws IOException {
         if ((clientId == null) || clientId.isEmpty()) {
             log.debug("Permission denied. client_id should be not empty.");
             permissionDenied();
@@ -282,10 +297,12 @@ public class AuthorizeAction {
             Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
             String redirectTo = "/login.xhtml";
+            requestParameterMap.put(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
 
+            List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
-            if (useExternalAuthenticator) {
-                List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
+            boolean skipScript = shouldSkipScript(acrValuesList);
+            if (useExternalAuthenticator && !skipScript) {
                 if (acrValuesList.isEmpty()) {
                     acrValuesList = Arrays.asList(defaultAuthenticationMode.getName());
                 }
@@ -378,12 +395,14 @@ public class AuthorizeAction {
         }
 
         if (log.isTraceEnabled()) {
-            log.trace("checkPermissionGranted, userDn = " + session.getUserDn());
+            log.trace("checkPermissionGranted, userDn = {}", session.getUserDn());
         }
 
         if (prompts.contains(io.jans.as.model.common.Prompt.SELECT_ACCOUNT)) {
             Map requestParameterMap = requestParameterService.getAllowedParameters(externalContext.getRequestParameterMap());
-            facesService.redirect("/selectAccount.xhtml", requestParameterMap);
+            final String selectAccountPage = getSelectAccountPage(client);
+            log.trace("Select account page: {}" + selectAccountPage);
+            facesService.redirect(selectAccountPage, requestParameterMap);
             return;
         }
 
@@ -392,7 +411,13 @@ public class AuthorizeAction {
             return;
         }
 
-        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, (HttpServletRequest) externalContext.getRequest(), (HttpServletResponse) externalContext.getResponse());
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setHttpRequest((HttpServletRequest) externalContext.getRequest());
+        authzRequest.setHttpResponse((HttpServletResponse) externalContext.getResponse());
+        authzRequest.setClient(client);
+        authzRequest.setSessionId(sessionId);
+
+        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, authzRequest, prompts);
         final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
 
         final boolean hasConsentPrompt = prompts.contains(io.jans.as.model.common.Prompt.CONSENT);
@@ -442,6 +467,25 @@ public class AuthorizeAction {
                 return;
             }
         }
+    }
+
+    private String getSelectAccountPage(Client client) {
+        ExecutionContext executionContext = ExecutionContext.of(externalContext);
+        executionContext.setClient(client);
+
+        String selectAccountPageFromScript = externalSelectAccountService.externalGetSelectAccountPage(executionContext);
+        if (StringUtils.isNotBlank(selectAccountPageFromScript)) {
+            return selectAccountPageFromScript;
+        }
+        return "/selectAccount.xhtml";
+    }
+
+    public boolean shouldSkipScript(List<String> acrValues) {
+        if (acrValues.size() == 1 && acrValues.contains(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME)) {
+            return true;
+        }
+        return acrValues.isEmpty() && BooleanUtils.isFalse(appConfiguration.getUseHighestLevelScriptIfAcrScriptNotFound())
+                && OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(defaultAuthenticationMode.getName());
     }
 
     private SessionId handleAcrChange(SessionId session, List<io.jans.as.model.common.Prompt> prompts) {
@@ -795,8 +839,8 @@ public class AuthorizeAction {
         return sessionId;
     }
 
-    public void setSessionId(String p_sessionId) {
-        sessionId = p_sessionId;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     public void permissionGranted() {
@@ -812,11 +856,6 @@ public class AuthorizeAction {
     public void permissionDenied() {
         final SessionId session = getSession();
         authorizeService.permissionDenied(session);
-    }
-
-    private void authenticationFailedSessionInvalid() {
-        facesMessages.add(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage");
-        facesService.redirect("/error.xhtml");
     }
 
     public void invalidRequest() {

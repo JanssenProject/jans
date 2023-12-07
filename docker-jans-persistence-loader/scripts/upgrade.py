@@ -1,5 +1,4 @@
 import contextlib
-import itertools
 import json
 import logging.config
 import os
@@ -19,14 +18,14 @@ from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from utils import get_role_scope_mappings
+from hooks import transform_auth_dynamic_config_hook
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("persistence-loader")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
 manager = get_manager()
-
 
 #: ID of base entry
 JANS_BASE_DN = "o=jans"
@@ -56,214 +55,6 @@ DEFAULT_JANS_ATTRS = '{"spontaneousClientId":null,"spontaneousClientScopes":null
 
 #: jans_stat scope
 JANS_STAT_SCOPE_DN = "inum=C4F7,ou=scopes,o=jans"
-
-
-def _transform_auth_dynamic_config(conf):
-    should_update = False
-    distribution = os.environ.get("CN_DISTRIBUTION", "default")
-
-    if "redirectUrisRegexEnabled" not in conf:
-        # enable only if not using openbanking distro
-        conf["redirectUrisRegexEnabled"] = bool(distribution != "openbanking")
-        should_update = True
-
-    # common config in all distributions
-    if "accessTokenSigningAlgValuesSupported" not in conf:
-        conf["accessTokenSigningAlgValuesSupported"] = [
-            "none",
-            "HS256",
-            "HS384",
-            "HS512",
-            "RS256",
-            "RS384",
-            "RS512",
-            "ES256",
-            "ES384",
-            "ES512",
-            "ES512",
-            "PS256",
-            "PS384",
-            "PS512"
-        ]
-        should_update = True
-
-    if "forceSignedRequestObject" not in conf:
-        conf["forceSignedRequestObject"] = False
-        should_update = True
-
-    if "grantTypesAndResponseTypesAutofixEnabled" not in conf:
-        conf["grantTypesAndResponseTypesAutofixEnabled"] = False
-        should_update = True
-
-    if "sessionIdEnabled" in conf:
-        conf.pop("sessionIdEnabled")
-        should_update = True
-
-    # assert the authorizationRequestCustomAllowedParameters contains dict values instead of string
-    params_with_dict = list(itertools.takewhile(
-        lambda x: isinstance(x, dict), conf["authorizationRequestCustomAllowedParameters"]
-    ))
-    if not params_with_dict:
-        conf["authorizationRequestCustomAllowedParameters"] = [
-            {"paramName": p[0], "returnInResponse": p[1]}
-            for p in [
-                ("customParam1", False),
-                ("customParam2", False),
-                ("customParam3", False),
-                ("customParam4", True),
-                ("customParam5", True),
-            ]
-        ]
-        should_update = True
-
-    if "useHighestLevelScriptIfAcrScriptNotFound" not in conf:
-        conf["useHighestLevelScriptIfAcrScriptNotFound"] = True
-        should_update = True
-
-    if "httpLoggingExcludePaths" not in conf:
-        conf["httpLoggingExcludePaths"] = conf.pop("httpLoggingExludePaths", [])
-        should_update = True
-
-    if "requestUriBlockList" not in conf:
-        conf["requestUriBlockList"] = [
-            "localhost",
-            "127.0.0.1",
-        ]
-        should_update = True
-
-    if "ssaConfiguration" not in conf:
-        hostname = manager.config.get("hostname")
-        conf["ssaConfiguration"] = {
-            "ssaEndpoint": f"https://{hostname}/jans-auth/restv1/ssa",
-            "ssaSigningAlg": "RS256",
-            "ssaExpirationInDays": 30
-        }
-        should_update = True
-
-    if "ssaCustomAttributes" not in conf["ssaConfiguration"]:
-        conf["ssaConfiguration"]["ssaCustomAttributes"] = []
-        should_update = True
-
-    for grant_type in [
-        "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange",
-    ]:
-        if grant_type not in conf["grantTypesSupported"]:
-            conf["grantTypesSupported"].append(grant_type)
-            should_update = True
-
-    # change ox to jans
-    for old_attr, new_attr in [
-        ("oxElevenGenerateKeyEndpoint", "jansElevenGenerateKeyEndpoint"),
-        ("oxElevenSignEndpoint", "jansElevenSignEndpoint"),
-        ("oxElevenVerifySignatureEndpoint", "jansElevenVerifySignatureEndpoint"),
-        ("oxElevenDeleteKeyEndpoint", "jansElevenDeleteKeyEndpoint"),
-        ("oxElevenJwksEndpoint", "jansElevenJwksEndpoint"),
-        ("oxOpenIdConnectVersion", "jansOpenIdConnectVersion"),
-        ("oxId", "jansId"),
-    ]:
-        if new_attr not in conf:
-            conf[new_attr] = conf.pop(old_attr, None)
-            should_update = True
-
-    if "blockWebviewAuthorizationEnabled" not in conf:
-        conf["blockWebviewAuthorizationEnabled"] = False
-        should_update = True
-
-    if "dateFormatterPatterns" not in conf:
-        # remove old config
-        conf.pop("userInfoConfiguration", None)
-        conf["dateFormatterPatterns"] = {
-            "birthdate": "yyyy-MM-dd",
-        }
-        should_update = True
-
-    # specific config per distribution
-    if distribution == "openbanking":
-        if "dcrAuthorizationWithMTLS" not in conf:
-            conf["dcrAuthorizationWithMTLS"] = False
-            should_update = True
-
-        if "scopesSupported" not in conf:
-            conf["scopesSupported"] = [
-                "openid",
-                "consents",
-                "accounts",
-                "resources",
-            ]
-            should_update = True
-
-        if "jwt" not in conf["responseModesSupported"]:
-            conf["responseModesSupported"].append("jwt")
-            should_update = True
-
-        if "private_key_jwt" not in conf["tokenEndpointAuthMethodsSupported"]:
-            conf["tokenEndpointAuthMethodsSupported"].append("private_key_jwt")
-            should_update = True
-
-        # if conf["redirectUrisRegexEnabled"]:
-        #     conf["redirectUrisRegexEnabled"] = False
-        #     should_update = True
-    else:
-        if all([
-            os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"),
-            conf["personCustomObjectClassList"]
-        ]):
-            conf["personCustomObjectClassList"] = []
-            should_update = True
-
-        if "subjectIdentifiersPerClientSupported" not in conf:
-            conf["subjectIdentifiersPerClientSupported"] = ["mail", "uid"]
-            should_update = True
-
-        if "agamaConfiguration" not in conf:
-            conf["agamaConfiguration"] = {
-                "enabled": False,
-                "templatesPath": "/ftl",
-                "scriptsPath": "/scripts",
-                "serializerType": "KRYO",
-                "maxItemsLoggedInCollections": 3,
-                "pageMismatchErrorPage": "mismatch.ftl",
-                "interruptionErrorPage": "timeout.ftl",
-                "crashErrorPage": "crash.ftl",
-                "finishedFlowPage": "finished.ftl",
-                "bridgeScriptPage": "agama.xhtml",
-                "defaultResponseHeaders": {
-                    "Cache-Control": "max-age=0, no-store",
-                },
-            }
-            should_update = True
-
-        if "interruptionTime" in conf["agamaConfiguration"]:
-            conf["agamaConfiguration"].pop("interruptionTime", None)
-            should_update = True
-
-        # add Cache-Control and remove Expires, Content-Type
-        if "Cache-Control" not in conf["agamaConfiguration"]["defaultResponseHeaders"]:
-            conf["agamaConfiguration"]["defaultResponseHeaders"]["Cache-Control"] = "max-age=0, no-store"
-            conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Expires", None)
-            conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Content-Type", None)
-            should_update = True
-
-        for grant_type in [
-            "urn:ietf:params:oauth:grant-type:device_code",
-            "urn:ietf:params:oauth:grant-type:token-exchange",
-        ]:
-            if grant_type not in conf["dynamicGrantTypeDefault"]:
-                conf["dynamicGrantTypeDefault"].append(grant_type)
-                should_update = True
-
-        # ensure agama_flow listed in authorizationRequestCustomAllowedParameters
-        if "agama_flow" not in [
-            p["paramName"] for p in conf["authorizationRequestCustomAllowedParameters"]
-        ]:
-            conf["authorizationRequestCustomAllowedParameters"].append({
-                "paramName": "agama_flow", "returnInResponse": False,
-            })
-            should_update = True
-
-    # return the conf and flag to determine whether it needs update or not
-    return conf, should_update
 
 
 def _transform_token_server_client(attrs):
@@ -313,6 +104,8 @@ def collect_claim_names(ldif_file="/app/templates/attributes.ldif"):
         parser = LDIFParser(fd)
 
         for dn, entry in parser.parse():
+            if "jansClaimName" not in entry:
+                continue
             rows[dn] = entry["jansClaimName"][0]
     return rows
 
@@ -354,6 +147,9 @@ class LDAPBackend:
             attrs[k] = [(mod, v)]
         return self.client.modify(key, attrs)
 
+    def delete_entry(self, key, **kwargs):
+        return self.client.delete(key)
+
 
 class SQLBackend:
     def __init__(self, manager):
@@ -373,6 +169,10 @@ class SQLBackend:
         attrs = attrs or {}
         table_name = kwargs.get("table_name")
         return self.client.update(table_name, key, attrs), ""
+
+    def delete_entry(self, key, **kwargs):
+        table_name = kwargs.get("table_name")
+        return self.client.delete(table_name, key)
 
 
 class CouchbaseBackend:
@@ -445,6 +245,10 @@ class CouchbaseBackend:
         # drop the index
         self.client.exec_query(f'DROP INDEX `{bucket}`.`def_jans_fix_oc`')
 
+    def delete_entry(self, key, **kwargs):
+        bucket = kwargs.get("bucket")
+        return self.client.delete(bucket, key)
+
 
 class SpannerBackend:
     def __init__(self, manager):
@@ -464,6 +268,10 @@ class SpannerBackend:
         attrs = attrs or {}
         table_name = kwargs.get("table_name")
         return self.client.update(table_name, key, attrs), ""
+
+    def delete_entry(self, key, **kwargs):
+        table_name = kwargs.get("table_name")
+        return self.client.delete(table_name, key)
 
 
 BACKEND_CLASSES = {
@@ -507,21 +315,25 @@ class Upgrade:
         self.update_scripts_entries()
         self.update_admin_ui_config()
         self.update_tui_client()
+        self.update_config()
 
     def update_scripts_entries(self):
         # default to ldap persistence
         kwargs = {}
         scim_id = JANS_SCIM_SCRIPT_DN
         basic_id = JANS_BASIC_SCRIPT_DN
+        duo_id = "inum=5018-F9CF,ou=scripts,o=jans"
 
         if self.backend.type in ("sql", "spanner"):
             kwargs = {"table_name": "jansCustomScr"}
             scim_id = doc_id_from_dn(scim_id)
             basic_id = doc_id_from_dn(basic_id)
+            duo_id = doc_id_from_dn(duo_id)
         elif self.backend.type == "couchbase":
             kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
             scim_id = id_from_dn(scim_id)
             basic_id = id_from_dn(basic_id)
+            duo_id = id_from_dn(duo_id)
 
         # toggle scim script
         scim_entry = self.backend.get_entry(scim_id, **kwargs)
@@ -537,6 +349,11 @@ class Upgrade:
         if basic_entry and not as_boolean(basic_entry.attrs["jansEnabled"]):
             basic_entry.attrs["jansEnabled"] = True
             self.backend.modify_entry(basic_entry.id, basic_entry.attrs, **kwargs)
+
+        # delete DUO entry
+        duo_entry = self.backend.get_entry(duo_id, **kwargs)
+        if duo_entry and not as_boolean(os.environ.get("CN_DUO_ENABLED")):
+            self.backend.delete_entry(duo_entry.id, **kwargs)
 
     def update_auth_dynamic_config(self):
         # default to ldap persistence
@@ -558,7 +375,7 @@ class Upgrade:
         if self.backend.type != "couchbase":
             entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
 
-        conf, should_update = _transform_auth_dynamic_config(entry.attrs["jansConfDyn"])
+        conf, should_update = transform_auth_dynamic_config_hook(entry.attrs["jansConfDyn"], self.manager)
 
         if should_update:
             if self.backend.type != "couchbase":
@@ -783,20 +600,20 @@ class Upgrade:
                 break
 
         try:
-            current_role_mapping = json.loads(entry.attrs["jansConfDyn"])
+            conf = json.loads(entry.attrs["jansConfDyn"])
         except TypeError:
-            current_role_mapping = entry.attrs["jansConfDyn"]
+            conf = entry.attrs["jansConfDyn"]
 
         should_update = False
 
         # check for rolePermissionMapping
         #
         # - compare role permissions for api-admin
-        for i, api_role in enumerate(current_role_mapping["rolePermissionMapping"]):
+        for i, api_role in enumerate(conf["rolePermissionMapping"]):
             if api_role["role"] == "api-admin":
                 # compare permissions between the ones from persistence (current) and newer permissions
                 if sorted(api_role["permissions"]) != sorted(api_admin_perms):
-                    current_role_mapping["rolePermissionMapping"][i]["permissions"] = api_admin_perms
+                    conf["rolePermissionMapping"][i]["permissions"] = api_admin_perms
                     should_update = True
                 break
 
@@ -808,24 +625,29 @@ class Upgrade:
         # determine current permission with index/position
         current_perms = {
             permission["permission"]: {"index": i}
-            for i, permission in enumerate(current_role_mapping["permissions"])
+            for i, permission in enumerate(conf["permissions"])
         }
 
         for perm in role_mapping["permissions"]:
             if perm["permission"] not in current_perms:
                 # add missing permission
-                current_role_mapping["permissions"].append(perm)
+                conf["permissions"].append(perm)
                 should_update = True
             else:
                 # add missing defaultPermissionInToken
                 index = current_perms[perm["permission"]]["index"]
-                if "defaultPermissionInToken" in current_role_mapping["permissions"][index]:
+                if "defaultPermissionInToken" in conf["permissions"][index]:
                     continue
-                current_role_mapping["permissions"][index]["defaultPermissionInToken"] = perm["defaultPermissionInToken"]
+                conf["permissions"][index]["defaultPermissionInToken"] = perm["defaultPermissionInToken"]
                 should_update = True
 
+        # licenseSpringCredentials must be removed in favor of SCAN license credentials
+        if "licenseSpringCredentials" in conf:
+            conf.pop("licenseSpringCredentials", None)
+            should_update = True
+
         if should_update:
-            entry.attrs["jansConfDyn"] = json.dumps(current_role_mapping)
+            entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
@@ -918,6 +740,88 @@ class Upgrade:
                 entry.attrs["jansScope"].append(ssa_scope)
                 should_update = True
 
+        # use token reference
+        try:
+            attrs = json.loads(entry.attrs["jansAttrs"])
+        except TypeError:
+            attrs = entry.attrs["jansAttrs"]
+        finally:
+            if attrs["runIntrospectionScriptBeforeJwtCreation"] is True:
+                attrs["runIntrospectionScriptBeforeJwtCreation"] = False
+                should_update = True
+            if "inum=2D3E.5A04,ou=scripts,o=jans" not in attrs["updateTokenScriptDns"]:
+                attrs["updateTokenScriptDns"].append("inum=2D3E.5A04,ou=scripts,o=jans")
+                should_update = True
+            if "inum=A44E-4F3D,ou=scripts,o=jans" in attrs["introspectionScripts"]:
+                attrs["introspectionScripts"].remove("inum=A44E-4F3D,ou=scripts,o=jans")
+                should_update = True
+            entry.attrs["jansAttrs"] = json.dumps(attrs)
+
+        if should_update:
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_config(self):
+        kwargs = {}
+        id_ = "ou=configuration,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansAppConf"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        should_update = False
+
+        # set jansAuthMode if still empty
+        if not entry.attrs.get("jansAuthMode"):
+            entry.attrs["jansAuthMode"] = "simple_password_auth"
+            should_update = True
+
+        # default smtp config
+        default_smtp_conf = {
+            "key_store": "/etc/certs/smtp-keys.pkcs12",
+            "key_store_password": self.manager.secret.get("smtp_jks_pass_enc"),
+            "key_store_alias": self.manager.config.get("smtp_alias"),
+            "signing_algorithm": self.manager.config.get("smtp_signing_alg"),
+        }
+
+        # set jansSmtpConf if still empty
+        smtp_conf = entry.attrs.get("jansSmtpConf")
+
+        if isinstance(smtp_conf, dict):  # likely mysql
+            if not smtp_conf["v"]:
+                entry.attrs["jansSmtpConf"]["v"].append(json.dumps(default_smtp_conf))
+                should_update = True
+            else:
+                if new_smtp_conf := _transform_smtp_config(default_smtp_conf, smtp_conf["v"]):
+                    entry.attrs["jansSmtpConf"]["v"][0] = json.dumps(new_smtp_conf)
+                    should_update = True
+
+        # other persistence backends
+        else:
+            # ensure smtp_conf is a list
+            if not isinstance(smtp_conf, list):
+                smtp_conf = [smtp_conf]
+
+            if not smtp_conf:
+                entry.attrs["jansSmtpConf"].append(json.dumps(default_smtp_conf))
+                should_update = True
+            else:
+                if new_smtp_conf := _transform_smtp_config(default_smtp_conf, smtp_conf):
+                    entry.attrs["jansSmtpConf"][0] = json.dumps(new_smtp_conf)
+                    should_update = True
+
+        scim_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
+        if as_boolean(entry.attrs["jansScimEnabled"]) != scim_enabled:
+            entry.attrs["jansScimEnabled"] = scim_enabled
+            should_update = True
+
         if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
@@ -960,13 +864,73 @@ def _transform_auth_errors_config(conf):
             "uri": None,
         })
         should_update = True
+
+    if "invalid_ssa_metadata" not in ssa_errors:
+        conf["ssa"].append({
+            "id": "invalid_ssa_metadata",
+            "description": "The value of one of the SSA Metadata fields is invalid and the server has rejected this request. Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter of a SSA's Metadata.",
+            "uri": None,
+        })
+        should_update = True
+
+    # dpop as part of token errors
+    dpop_errors = [
+        {
+            "id": "use_dpop_nonce",
+            "description": "Authorization server requires nonce in DPoP proof.",
+            "uri": None
+        },
+        {
+            "id": "use_new_dpop_nonce",
+            "description": "Authorization server requires new nonce in DPoP proof.",
+            "uri": None
+        },
+    ]
+    token_err_ids = [err["id"] for err in conf["token"]]
+
+    for err in dpop_errors:
+        if err["id"] in token_err_ids:
+            continue
+        conf["token"].append(err)
+        should_update = True
+
+    # add stale_evidence on register
+    reg_errors = [err["id"] for err in conf["register"]]
+    if "stale_evidence" not in reg_errors:
+        conf["register"].append({
+            "id": "stale_evidence",
+            "description": "The provided evidence is not current. Resend fresh evidence.",
+            "uri": None,
+        })
+        should_update = True
+
     return conf, should_update
 
 
 def _transform_auth_static_config(conf):
     should_update = False
 
-    if "ssa" not in conf["baseDn"]:
-        conf["baseDn"]["ssa"] = "ou=ssa,o=jans"
-        should_update = True
+    for key, dn in [
+        ("ssa", "ou=ssa,o=jans"),
+        ("archivedJwks", "ou=archived_jwks,o=jans"),
+    ]:
+        if key not in conf["baseDn"]:
+            conf["baseDn"][key] = dn
+            should_update = True
     return conf, should_update
+
+
+def _transform_smtp_config(default_smtp_conf, smtp_conf):
+    old_smtp_conf = json.loads(smtp_conf[0])
+    new_smtp_conf = {}
+
+    for k, v in default_smtp_conf.items():
+        if k in old_smtp_conf:
+            continue
+
+        # rename key and migrate the value (fallback to default value)
+        new_smtp_conf[k] = old_smtp_conf.pop(
+            # old key uses `-` instead of `_` char
+            k.replace("_", "-"), ""
+        ) or v
+    return new_smtp_conf

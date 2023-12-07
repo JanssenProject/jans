@@ -66,6 +66,23 @@
 	<listener>
 		<listener-class>com.sun.faces.config.ConfigureListener</listener-class>
 	</listener>
+	<!-- FILTERS MAPPING -->
+	<filter-mapping>
+		<filter-name>ServletLoggingFilter</filter-name>
+		<url-pattern />
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>AuthenticationFilter</filter-name>
+		<url-pattern />
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>CorrelationIdFilter</filter-name>
+		<url-pattern />
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>CorsFilter</filter-name>
+		<url-pattern />
+	</filter-mapping>
 
 	<servlet>
 		<servlet-name>Faces Servlet</servlet-name>

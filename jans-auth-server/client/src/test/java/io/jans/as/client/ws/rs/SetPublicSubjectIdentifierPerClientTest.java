@@ -25,11 +25,11 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
 import static io.jans.as.model.common.ResponseType.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -46,12 +46,13 @@ public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
             final String subjectIdentifierAttribute, final String expectedSubValue) throws InvalidJwtException {
         showTitle("setPublicSubjectIdentifierPerClient");
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         RegisterResponse registerResponse = clientRegistration(redirectUri, responseTypes,
-                SubjectType.PUBLIC, subjectIdentifierAttribute, false);
+                SubjectType.PUBLIC, subjectIdentifierAttribute, false, scopes);
 
         String clientId = registerResponse.getClientId();
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
@@ -84,7 +85,7 @@ public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
-        clientRegistration(redirectUri, responseTypes, SubjectType.PAIRWISE, "mail", true);
+        clientRegistration(redirectUri, responseTypes, SubjectType.PAIRWISE, "mail", true, new ArrayList<>());
     }
 
     @Parameters({"redirectUri"})
@@ -96,18 +97,19 @@ public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
-        clientRegistration(redirectUri, responseTypes, SubjectType.PUBLIC, "invalid_attribute", true);
+        clientRegistration(redirectUri, responseTypes, SubjectType.PUBLIC, "invalid_attribute", true, new ArrayList<>());
     }
 
     @NotNull
     private RegisterResponse clientRegistration(
             String redirectUri, List<ResponseType> responseTypes, SubjectType subjectType,
-            String subjectIdentifierAttribute, boolean checkError) {
+            String subjectIdentifierAttribute, boolean checkError, List<String> scopes) {
         List<String> redirectUriList = Arrays.asList(redirectUri.split(StringUtils.SPACE));
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", redirectUriList);
         registerRequest.setSubjectType(subjectType);
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSubjectIdentifierAttribute(subjectIdentifierAttribute);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

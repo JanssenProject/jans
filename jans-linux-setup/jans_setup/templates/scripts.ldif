@@ -283,7 +283,7 @@ dn: inum=8BAF-80D7,ou=scripts,o=jans
 description: Fido2 authentication module
 displayName: fido2
 inum: 8BAF-80D7
-jansConfProperty: {"value1":"fido2_server_uri","value2":"https://%(hostname)s","hide":false,"description":""}
+jansConfProperty: {"value1":"fido2_server_uri","value2":"https://%(hostname)s","description":""}
 jansLevel: 70
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
@@ -299,11 +299,15 @@ dn: inum=92F0-BF9E,ou=scripts,o=jans
 description: Super Gluu authentication module
 displayName: super_gluu
 inum: 92F0-BF9E
+jansConfProperty: {"value1":"AS_ENDPOINT","value2":"https://account.gluu.org","description":""}
+jansConfProperty: {"value1":"AS_SSA","value2":"","description":""}
+jansConfProperty: {"value1":"AS_CLIENT_ID","value2":"","description":""}
+jansConfProperty: {"value1":"AS_CLIENT_SECRET","value2":"","description":""}
 jansConfProperty: {"value1":"qr_options","value2":"{ size: 500, mSize: 0.05 }","description":""}
 jansConfProperty: {"value1":"label","value2":"Super Gluu","description":""}
-jansConfProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
+jansConfProperty: {"value1":"registration_uri","value2":"","description":""}
 jansConfProperty: {"value1":"authentication_mode","value2":"two_step","description":""}
-jansConfProperty: {"value1":"notification_service_mode","value2":"gluu","description":""}
+jansConfProperty: {"value1":"notification_service_mode","value2":"jans","description":""}
 jansConfProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
 jansConfProperty: {"value1":"supergluu_android_download_url","value2":"https://play.google.com/store/apps/details?id=gluu.org.super.gluu&hl=en_US","description":""}
 jansConfProperty: {"value1":"supergluu_ios_download_url","value2":"https://itunes.apple.com/us/app/super-gluu/id1093479646","description":""}
@@ -439,7 +443,7 @@ inum: 8AF7.D82A
 jansLevel: 100
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
-jansScr::%(persistence_extension_samplescript)s
+jansScr::%(persistence_extension_persistenceextension)s
 jansScrTyp: persistence_extension
 objectClass: top
 objectClass: jansCustomScr
@@ -473,6 +477,21 @@ jansScr::%(update_token_sample_script)s
 jansScrTyp: update_token
 jansProgLng: python
 
+version: 1
+dn: inum=2D3E.5A04,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Role Based Scopes Update Script
+displayName: role_based_scopes_update_token
+inum: 2D3E.5A04
+jansEnabled: TRUE
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansProgLng: python
+jansRevision: 12
+jansScr::%(introspection_role_based_scopes_update_token_role_based_scopes_update_token)s
+jansScrTyp: update_token
+
 dn: inum=C1BA-C1BA,ou=scripts,o=jans
 description: Firebase notification sender
 displayName: firebase_ciba_end_user_notification
@@ -487,20 +506,6 @@ objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
-dn: inum=A44E-4F3D,ou=scripts,o=jans
-objectClass: top
-objectClass: jansCustomScr
-description: Role Based Scopes
-displayName: role_based_scopes
-inum: A44E-4F3D
-jansEnabled: true
-jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
-jansProgLng: python
-jansRevision: 1
-jansScr::%(introspection_introspection_role_based_scope)s
-jansScrTyp: introspection
-
 dn: inum=A110-88AB,ou=scripts,o=jans
 objectClass: top
 objectClass: jansCustomScr
@@ -508,8 +513,8 @@ description: Jans Config Api authorization script
 displayName: config_api_authorization
 inum: A110-88AB
 jansEnabled: false
-jansConfProperty: {"value1":"testProp1","value2":"Test value 1","hide":false,"description":""}
-jansConfProperty: {"value1":"testProp2","value2":"Test value 2","hide":false,"description":""}
+jansConfProperty: {"value1":"testProp1","value2":"Test value 1","description":""}
+jansConfProperty: {"value1":"testProp2","value2":"Test value 2","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansLevel: 100
 jansRevision: 1
@@ -531,13 +536,29 @@ jansRevision: 11
 jansScr::%(discovery_discovery)s
 jansScrTyp: discovery
 
+dn: inum=0300-BA99,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Default Authorization Challenge Java Script
+displayName: default_challenge
+inum: 0300-BA99
+jansEnabled: true
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansProgLng: java
+jansRevision: 11
+jansScr::%(authorization_challenge_authorizationchallenge)s
+jansScrTyp: authorization_challenge
+
 dn: inum=BADA-BADA,ou=scripts,o=jans
 objectClass: jansCustomScr
 objectClass: top
 description: Agama Script
 displayName: agama
 inum: BADA-BADA
-jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","hide":false,"description":""}
+jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","description":""}
+jansConfProperty: {"value1":"default_flow_name","value2":"","description":""}
+jansConfProperty: {"value1":"finish_userid_db_attribute","value2":"uid","description":""}
 jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
@@ -562,30 +583,15 @@ jansRevision: 1
 jansScr::%(person_authentication_forgot_password_forgot_password)s
 jansScrTyp: person_authentication
 
-dn: inum=CACD-5902,ou=scripts,o=jans
-objectClass: top
-objectClass: jansCustomScr
-description: Scan Token Update Script
-displayName: scan_update_token
-inum: CACD-5902
-jansEnabled: false
-jansLevel: 100
-jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
-jansConfProperty: {"value1":"BILLING_API_URL", "value2":"https://my.billing.api.com/", "hide":false, "description":"URL to billing API"}
-jansRevision: 1
-jansScr::%(update_token_updatetoken)s
-jansScrTyp: update_token
-jansProgLng: python
-
 dn: inum=E706-F8A8,ou=scripts,o=jans
 objectClass: top
 objectClass: jansCustomScr
 description: GitHub Inbound Authentication script
 displayName: github
 inum: E706-F8A8
-jansConfProperty: {"value1":"hide","value2":"true","hide":false,"description":""}
-jansConfProperty: {"value1":"github_creds_file","value2":"/etc/jans/conf/github.json","hide":false,"description":""}
-jansConfProperty: {"value1":"description","value2":"GitHub Login","hide":false,"description":""}
+jansConfProperty: {"value1":"hide","value2":"true","description":""}
+jansConfProperty: {"value1":"github_creds_file","value2":"/etc/jans/conf/github.json","description":""}
+jansConfProperty: {"value1":"description","value2":"GitHub Login","description":""}
 jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
@@ -593,24 +599,6 @@ jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":
 jansProgLng: python
 jansRevision: 0
 jansScr::%(person_authentication_github_external_authenticator_githubexternalauthenticator)s
-jansScrTyp: person_authentication
-
-dn: inum=E706-F8A9,ou=scripts,o=jans
-objectClass: top
-objectClass: jansCustomScr
-description: GitHub Inbound Custom Authentication script For ADS
-displayName: github_ads
-inum: E706-F8A9
-jansConfProperty: {"value1":"hide","value2":"true","hide":false,"description":""}
-jansConfProperty: {"value1":"github_creds_file","value2":"/etc/jans/conf/github.json","hide":false,"description":""}
-jansConfProperty: {"value1":"description","value2":"GitHub Login","hide":false,"description":""}
-jansEnabled: false
-jansLevel: 10
-jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
-jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansProgLng: python
-jansRevision: 0
-jansScr::%(person_authentication_github_external_authenticator_githubauthenticatorforads)s
 jansScrTyp: person_authentication
 
 dn: inum=8333-DFBC,ou=scripts,o=jans

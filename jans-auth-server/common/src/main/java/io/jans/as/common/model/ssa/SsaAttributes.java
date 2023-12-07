@@ -26,6 +26,9 @@ public class SsaAttributes {
     @JsonProperty("softwareId")
     private String softwareId;
 
+    @JsonProperty("lifetime")
+    private Integer lifetime;
+
     @JsonProperty("softwareRoles")
     private List<String> softwareRoles;
 
@@ -80,6 +83,14 @@ public class SsaAttributes {
         this.clientDn = clientDn;
     }
 
+    public Integer getLifetime() {
+        return lifetime;
+    }
+
+    public void setLifetime(Integer lifetime) {
+        this.lifetime = lifetime;
+    }
+
     public Map<String, String> getCustomAttributes() {
         if (customAttributes == null) {
             customAttributes = new HashMap<>();
@@ -97,6 +108,7 @@ public class SsaAttributes {
                 "oneTimeUse=" + oneTimeUse +
                 ", rotateSsa=" + rotateSsa +
                 ", clientDn='" + clientDn + '\'' +
+                ", lifetime=" + lifetime +
                 ", customAttributes=" + customAttributes +
                 '}';
     }

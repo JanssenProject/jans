@@ -24,13 +24,17 @@ tags:
 | mdsAccessToken | MDS access token | [Details](#mdsaccesstoken) |
 | mdsCertsFolder | MDS TOC root certificates folder | [Details](#mdscertsfolder) |
 | mdsTocsFolder | MDS TOC files folder | [Details](#mdstocsfolder) |
+| metadataUrlsProvider | String value to provide source of URLs with external metadata | [Details](#metadataurlsprovider) |
 | metricReporterEnabled | Boolean value specifying whether metric reporter is enabled | [Details](#metricreporterenabled) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep report data | [Details](#metricreporterkeepdatadays) |
+| oldU2fMigrationEnabled | Boolean value to enable disable old oxAuth U2F enrollments migration | [Details](#oldu2fmigrationenabled) |
 | personCustomObjectClassList | Custom object class list for dynamic person enrolment | [Details](#personcustomobjectclasslist) |
 | requestedCredentialTypes | List of Requested Credential Types | [Details](#requestedcredentialtypes) |
 | requestedParties | Authenticators metadata in json format | [Details](#requestedparties) |
 | serverMetadataFolder | Authenticators metadata in json format | [Details](#servermetadatafolder) |
+| sessionIdPersistInCache | Boolean value specifying whether to persist session_id in cache | [Details](#sessionidpersistincache) |
+| superGluuEnabled | Boolean value to enable disable Super Gluu extension | [Details](#supergluuenabled) |
 | unfinishedRequestExpiration | Expiration time in seconds for pending enrollment/authentication requests | [Details](#unfinishedrequestexpiration) |
 | useLocalCache | Boolean value to indicate if Local Cache is to be used | [Details](#uselocalcache) |
 | userAutoEnrollment | Allow to enroll users on enrollment/authentication requests | [Details](#userautoenrollment) |
@@ -162,6 +166,15 @@ tags:
 - Default value: None
 
 
+### metadataUrlsProvider
+
+- Description: String value to provide source of URLs with external metadata
+
+- Required: No
+
+- Default value: None
+
+
 ### metricReporterEnabled
 
 - Description: Boolean value specifying whether metric reporter is enabled
@@ -183,6 +196,15 @@ tags:
 ### metricReporterKeepDataDays
 
 - Description: The days to keep report data
+
+- Required: No
+
+- Default value: None
+
+
+### oldU2fMigrationEnabled
+
+- Description: Boolean value to enable disable old oxAuth U2F enrollments migration
 
 - Required: No
 
@@ -223,6 +245,23 @@ tags:
 - Required: No
 
 - Default value: None
+
+
+### superGluuEnabled
+
+- Description: Boolean value to enable disable Super Gluu extension
+
+- Required: No
+
+- Default value: None
+
+### sessionIdPersistInCache
+
+- Description: Boolean value specifying whether to persist session_id in cache
+
+- Required: No
+
+- Default value: false
 
 
 ### unfinishedRequestExpiration

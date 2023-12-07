@@ -8,10 +8,11 @@ package io.jans.as.server.service.external.context;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.server.authorize.ws.rs.AuthzRequest;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -21,11 +22,31 @@ public class ExternalPostAuthnContext extends ExternalScriptContext {
     private final Client client;
     private final SessionId session;
     private CustomScriptConfiguration script;
+    private AuthzRequest authzRequest;
+    private List<Prompt> prompts;
 
-    public ExternalPostAuthnContext(Client client, SessionId session, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        super(httpRequest, httpResponse);
+    public ExternalPostAuthnContext(Client client, SessionId session, AuthzRequest authzRequest, List<Prompt> prompts) {
+        super(authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
         this.client = client;
         this.session = session;
+        this.authzRequest = authzRequest;
+        this.prompts = prompts;
+    }
+
+    public AuthzRequest getAuthzRequest() {
+        return authzRequest;
+    }
+
+    public void setAuthzRequest(AuthzRequest authzRequest) {
+        this.authzRequest = authzRequest;
+    }
+
+    public List<Prompt> getPrompts() {
+        return prompts;
+    }
+
+    public void setPrompts(List<Prompt> prompts) {
+        this.prompts = prompts;
     }
 
     public CustomScriptConfiguration getScript() {
@@ -50,6 +71,8 @@ public class ExternalPostAuthnContext extends ExternalScriptContext {
                 "client=" + client +
                 ", session=" + (session != null ? session.getId() : "") +
                 ", script=" + script +
+                ", prompts=" + prompts +
+                ", authzRequest=" + authzRequest +
                 "} " + super.toString();
     }
 }

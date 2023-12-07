@@ -15,7 +15,7 @@ metadata:
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
 {{- end }}
 spec:
-  schedule: "0 */{{ .Values.keysLife }} * * *"
+  schedule: "@every {{ .Values.keysLife }}h"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
@@ -40,6 +40,8 @@ spec:
                 {{- include "auth-server-key-rotation.usr-envs" . | indent 16 }}
                 {{- include "auth-server-key-rotation.usr-secret-envs" . | indent 16 }}
               imagePullPolicy: {{ .Values.image.pullPolicy }}
+              lifecycle:
+{{- toYaml .Values.lifecycle | nindent 16 }}
               volumeMounts:
               {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
                 - mountPath: {{ .Values.global.cnAwsSharedCredentialsFile }}
@@ -66,7 +68,20 @@ spec:
                   mountPath: "/etc/certs/couchbase.crt"
                   subPath: couchbase.crt
                 {{- end }}
+                - name: cb-pass
+                  mountPath: {{ .Values.global.cnCouchbasePasswordFile }}
+                  subPath: couchbase_password
               {{- end }}
+                {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
+                - name: sql-pass
+                  mountPath: {{ .Values.global.cnSqlPasswordFile }}
+                  subPath: sql_password
+                {{- end }}
+                {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
+                - name: ldap-pass
+                  mountPath: {{ .Values.global.cnLdapPasswordFile }}
+                  subPath: ldap_password
+                {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -86,7 +101,7 @@ spec:
               resources:
 {{- toYaml .Values.resources | nindent 16 }}
               {{- end }}
-              args: ["patch", "auth", "--opts", "interval:{{ .Values.keysLife }}"]
+              args: ["patch", "auth", "--opts", "interval:{{ .Values.keysLife }}", "--opts", "key-strategy:{{ .Values.keysStrategy }}", "--opts", "privkey-push-delay:{{ .Values.keysPushDelay }}", "--opts", "privkey-push-strategy:{{ .Values.keysPushStrategy }}"]
           volumes:
           {{- with .Values.volumes }}
 {{- toYaml . | nindent 12 }}
@@ -123,5 +138,17 @@ spec:
                 secretName: {{ .Release.Name }}-cb-crt
             {{- end }}
           {{- end }}
+          {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
+            - name: sql-pass
+              secret:
+                secretName: {{ .Release.Name }}-sql-pass
+          {{- end }}
+          {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
+            - name: ldap-pass
+              secret:
+                secretName: {{ .Release.Name }}-ldap-pass
+                items:
+                - key: ldap_password
+                  path: ldap_password
+          {{- end }}
           restartPolicy: Never
-

@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/moabu/terraform-provider-jans/jans"
+	"github.com/jans/terraform-provider-jans/jans"
 )
 
 func resourceAgamaFlow() *schema.Resource {
@@ -30,6 +30,11 @@ func resourceAgamaFlow() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Flow qualified name",
+			},
+			"trans_hash": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "",
 			},
 			"revision": {
 				Type:        schema.TypeInt,
@@ -102,10 +107,19 @@ func resourceAgamaFlow() *schema.Resource {
 				Optional:    true,
 				Description: "Source code",
 			},
+			"transpiled": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
 			"code_error": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Errors in the flow source detected by Agama transpiler",
+			},
+			"base_dn": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}

@@ -1,0 +1,26 @@
+dn: inum=%(test_client_id)s,ou=clients,o=jans
+del: false
+displayName: Jans Test Client with all scopes
+inum: %(test_client_id)s
+jansAccessTknAsJwt: false
+jansAccessTknSigAlg: RS256
+jansAppTyp: web
+jansAttrs: {"tlsClientAuthSubjectDn": "", "runIntrospectionScriptBeforeJwtCreation": false, "keepClientAuthorizationAfterExpiration": false, "allowSpontaneousScopes": false, "spontaneousScopes": [], "spontaneousScopeScriptDns": [], "backchannelLogoutUri": [], "backchannelLogoutSessionRequired": false, "additionalAudience": [], "postAuthnScripts": [], "consentGatheringScripts": [], "introspectionScripts": [], "rptClaimsScripts": []}
+jansClntSecret: %(test_client_encoded_pw)s
+jansDisabled: false
+jansGrantTyp: authorization_code
+jansGrantTyp: refresh_token
+jansGrantTyp: client_credentials
+jansIdTknSignedRespAlg: RS256
+jansInclClaimsInIdTkn: false
+jansLogoutSessRequired: false
+jansPersistClntAuthzs: true
+jansRespTyp: code
+jansRptAsJwt: false
+# the remaining scopes will be pre-populated on upgrade script
+jansScope: inum=C4F7,ou=scopes,o=jans
+jansSubjectTyp: pairwise
+jansTknEndpointAuthMethod: client_secret_basic
+jansTrustedClnt: false
+objectClass: top
+objectClass: jansClnt

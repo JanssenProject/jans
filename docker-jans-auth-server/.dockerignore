@@ -2,10 +2,11 @@
 *
 
 # include required files/directories
-!certs
 !conf
 !jetty
 !libs
 !scripts
 !LICENSE
 !requirements.txt
+!templates
+!static

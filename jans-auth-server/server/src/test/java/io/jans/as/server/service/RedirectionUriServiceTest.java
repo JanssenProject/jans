@@ -3,10 +3,9 @@ package io.jans.as.server.service;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import org.junit.Before;
+import io.jans.as.server.session.ws.rs.EndSessionService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
 import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
@@ -42,9 +41,43 @@ public class RedirectionUriServiceTest {
     @Mock
     private LocalResponseCache localResponseCache;
 
+    @Mock
+    private EndSessionService endSessionService;
+
     @Test
-    public void validateRedirectionUri_withValidRedirectUri_returnNotNullValue() throws Exception {
-        final String redirectURl = "https://test.gluu.org/jans-auth-rp/home.htm" ;
+    public void validatePostLogoutRedirectUri_whenAllowedByClientWhiteList_shouldReturnUrl() {
+        when(appConfiguration.getAllowPostLogoutRedirectWithoutValidation()).thenReturn(true);
+        when(endSessionService.isUrlWhiteListed(anyString())).thenReturn(true);
+
+        final String result = redirectionUriService.validatePostLogoutRedirectUri("https://postlogout.com", new String[]{"https://test.org"});
+        assertEquals("https://postlogout.com", result);
+    }
+
+    @Test
+    public void validatePostLogoutRedirectUri_whenNotAllowedByClientWhiteList_shouldReturnEmptyString() {
+        when(appConfiguration.getAllowPostLogoutRedirectWithoutValidation()).thenReturn(true);
+        when(endSessionService.isUrlWhiteListed(anyString())).thenReturn(false);
+
+        final String result = redirectionUriService.validatePostLogoutRedirectUri("https://postlogout.com", new String[0]);
+        assertEquals("", result);
+    }
+
+    @Test
+    public void isAllowedByRegExp_withNullRegExp_shouldReturnFalse() {
+        assertFalse(RedirectionUriService.isAllowedByRegExp("https://test.gluu.org/jans-auth-rp/home.htm", new Client()));
+    }
+
+    @Test
+    public void validateRedirectionUri_regExpIsNull_returnNull() {
+        final String singleRedirectUri = "https://client.example.com/cb2";
+        final Client client = new Client();
+
+        assertNull(redirectionUriService.validateRedirectionUri(client, singleRedirectUri));
+    }
+
+    @Test
+    public void validateRedirectionUri_withValidRedirectUri_returnNotNullValue() {
+        final String redirectURl = "https://test.gluu.org/jans-auth-rp/home.htm";
 
         when(redirectionUriService.getSectorRedirectUris(anyString())).thenReturn(getSectorIdentifiers());
 

@@ -24,6 +24,8 @@ parser.add_argument('-n', help="No interactive prompt before install starts. Run
 parser.add_argument('-N', '--no-httpd', help="No apache httpd server", action='store_true')
 parser.add_argument('-u', help="Update hosts file with IP address / hostname", action='store_true')
 parser.add_argument('-csx', help="Collect setup properties, save and exit", action='store_true')
+parser.add_argument('-encode-salt', help="24 characters length string to be used for encoding passwords")
+
 rdbm_group = parser.add_mutually_exclusive_group()
 rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql', 'spanner'], help="Enables using remote RDBM server")
 rdbm_group.add_argument('-local-rdbm', choices=['mysql', 'pgsql'], help="Enables installing/configuring local RDBM server")
@@ -61,7 +63,10 @@ parser.add_argument('--cli-test-client', help="Use config api test client for CL
 parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in Database")
 
 parser.add_argument('-enable-script', action='append', help="inum of script to enable", required=False)
-parser.add_argument('-disable-script', action='append', help="inum of script to enable", required=False)
+parser.add_argument('-disable-script', action='append', help="inum of script to disable", required=False)
+
+parser.add_argument('-java-version', help="Version of Amazon Corretto", choices=['11', '17'], required=False)
+
 
 if PROFILE != OPENBANKING_PROFILE:
 
@@ -91,6 +96,11 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
     parser.add_argument('--install-eleven', help="Install Eleven Server", action='store_true')
+    parser.add_argument('--install-jans-link', help="Install Link Server", action='store_true')
+    parser.add_argument('--install-jans-keycloak-link', help="Install Keycloak Link Server", action='store_true')
+
+    parser.add_argument('--with-casa', help="Install Jans Casa Server", action='store_true')
+    parser.add_argument('--install-jans-saml', help="Install Jans SAML", action='store_true')
     #parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
     parser.add_argument('--load-config-api-test', help="Load Config Api Test Data", action='store_true')
 
@@ -106,7 +116,7 @@ if PROFILE != OPENBANKING_PROFILE:
 
     # test-client
     parser.add_argument('-test-client-id', help="ID of test client which has all available scopes. Must be in UUID format.")
-    parser.add_argument('-test-client-secret', help="Secret for test client")
+    parser.add_argument('-test-client-pw', help="Secret for test client")
     parser.add_argument('-test-client-redirect-uri', help="Redirect URI for test client")
     parser.add_argument('--test-client-trusted', help="Make test client trusted", action='store_true')
 
@@ -145,7 +155,7 @@ def add_to_me(you):
 
 def get_parser():
     argsp, others = parser.parse_known_args()
-    if argsp.test_client_id:
+    if getattr(argsp, 'test_client_id', None):
         try:
             uuid.UUID(argsp.test_client_id)
         except:

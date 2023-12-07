@@ -8,12 +8,67 @@ tags:
 
 # Ubuntu Janssen Installation
 
-Before you install, check the [VM system requirements](vm-requirements.md).
-
 ## Supported Versions
+- Ubuntu 22.04
 - Ubuntu 20.04
 
+Before you install, check the [VM system requirements](vm-requirements.md).
+
+
+- Download the GPG key zip file , unzip and import GPG key
+
+```shell
+wget https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
+```
+
+```shell
+unzip automation-jans-public-gpg.zip
+```
+
+```shell
+sudo gpg --import automation-jans-public-gpg.asc;
+
+```
+
 ## Install the Package
+
+### Ubuntu 22.04
+
+- Download the release package from the Github Janssen Project
+[Releases](https://github.com/JanssenProject/jans/releases)
+
+```
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu22.04_amd64.deb -P /tmp
+```
+
+- Verify integrity of the downloaded package by verifying published `sha256sum`.   
+
+    Download `sha256sum` file for the package
+
+    ```shell
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum -P /tmp
+    ```
+
+    Check the hash if it is matching.
+
+    ```shell
+    cd /tmp
+    sha256sum -c jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum
+    ```
+
+    Output similar to below should confirm the integrity of the downloaded package.
+
+    ```text
+    jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum: OK
+    ```
+
+- Install the package
+
+```
+sudo apt install  ./jans_replace-janssen-version.ubuntu22.04_amd64.deb
+```
+
+### Ubuntu 20.04
 
 - Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases)
@@ -30,22 +85,23 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum -P /tmp
     ```
 
-    Check the hash if it is matching. 
+    Check the hash if it is matching.
 
     ```shell
-    sha256sum -c /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum
+    cd /tmp
+    sha256sum -c jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
-    
+
     ```text
-    <package-name>: OK
+    jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum: OK
     ```
 
 - Install the package
 
 ```
-apt install -y /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version.ubuntu20.04_amd64.deb
 ```
 
 ## Run the setup script
@@ -53,7 +109,7 @@ apt install -y /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb
 - Run the setup script in interactive mode:
 
 ```
-python3 /opt/jans/jans-setup/setup.py
+sudo python3 /opt/jans/jans-setup/setup.py
 ```
 
 See more detailed [instructions](../setup.md) on the setup script if you're
@@ -65,7 +121,24 @@ interactive mode.
 
 After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
-## Ubuntu Janssen Un-Installation
+## Log in to Text User Interface (TUI)
+
+Begin configuration by accessing the TUI with the following command:
+
+```
+sudo /opt/jans/jans-cli/jans_cli_tui.py
+```
+
+Full TUI documentation can be found [here](../../config-guide/config-tools/jans-tui/README.md)
+
+If you have selected casa during installation you can access casa using url ```https://<host>/jans-casa```
+
+## Let's Encrypt
+To enable communication with Janssen Server over tls (https) in production environment, Janssen Server needs details about CA certificate.
+
+To generate Let’s Encrypt CA certificate follow this [let's encrypt](https://github.com/JanssenProject/jans/blob/main/docs/contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
+ 
+## Uninstall
 
 Removing Janssen is a two step process:
 
@@ -75,7 +148,7 @@ Removing Janssen is a two step process:
 Use the command below to uninstall the Janssen server
 
 ```
-python3 /opt/jans/jans-setup/install.py -uninstall
+sudo python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
 You'll see the following confirmation:

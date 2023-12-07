@@ -1,5 +1,133 @@
 # Changelog
 
+## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.19-1...docker-jans-configurator-v1.0.20-1) (2023-11-08)
+
+
+### Features
+
+* **jans-pycloudlib:** add lock to prevent race condition ([#6329](https://github.com/JanssenProject/jans/issues/6329)) ([9dd82da](https://github.com/JanssenProject/jans/commit/9dd82da5c87ee829c73a1135ce8740b8353f8ab5))
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+## [1.0.19-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.18-1...docker-jans-configurator-v1.0.19-1) (2023-10-11)
+
+
+### Features
+
+* **docker-jans:** upgrade base image to Java 17 ([#6231](https://github.com/JanssenProject/jans/issues/6231)) ([8ed40e9](https://github.com/JanssenProject/jans/commit/8ed40e91a56c256cb34262659b6e0657571f8c97))
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+## [1.0.18-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.17-1...docker-jans-configurator-v1.0.18-1) (2023-09-23)
+
+
+### Bug Fixes
+
+* jar dep ([66c4c15](https://github.com/JanssenProject/jans/commit/66c4c1534a153f3bed4b0bab568e7f43591ccbdd))
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
+## [1.0.17-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.16-1...docker-jans-configurator-v1.0.17-1) (2023-09-17)
+
+
+### Features
+
+* **docker-jans-configurator:** custom location for generate.json via ENV ([#5905](https://github.com/JanssenProject/jans/issues/5905)) ([b9ec4d3](https://github.com/JanssenProject/jans/commit/b9ec4d3dc8a0721e75cca8ba8b6759f286238cb1))
+
+
+### Bug Fixes
+
+* **docker-jans-configurator:** use longer expiration time for initial jwks ([#5992](https://github.com/JanssenProject/jans/issues/5992)) ([3a532a2](https://github.com/JanssenProject/jans/commit/3a532a2aa3b26528cb1da93ca368f498796e4cc9))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
+## [1.0.16-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.15-1...docker-jans-configurator-v1.0.16-1) (2023-08-02)
+
+
+### Bug Fixes
+
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
+## [1.0.15-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.14-1...docker-jans-configurator-v1.0.15-1) (2023-07-12)
+
+
+### Bug Fixes
+
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
+## [1.0.14-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.13-1...docker-jans-configurator-v1.0.14-1) (2023-06-12)
+
+
+### Bug Fixes
+
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
+## [1.0.13-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.12-1...docker-jans-configurator-v1.0.13-1) (2023-05-10)
+
+
+### Bug Fixes
+
+* ensure google libs support all possible credentials ([#4777](https://github.com/JanssenProject/jans/issues/4777)) ([d0759e5](https://github.com/JanssenProject/jans/commit/d0759e595517ca16b97a1ce4f7cd168b29ff17dd))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.11-1...docker-jans-configurator-v1.0.12-1) (2023-04-18)
+
+
+### Bug Fixes
+
+* opencontainer labels ([f8b0b36](https://github.com/JanssenProject/jans/commit/f8b0b365600bd700128bb9d92df6de7ba14830b6))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.10-1...docker-jans-configurator-v1.0.11-1) (2023-04-05)
+
+
+### Bug Fixes
+
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
+## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.9-1...docker-jans-configurator-v1.0.10-1) (2023-03-16)
+
+
+### Bug Fixes
+
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.8-1...docker-jans-configurator-v1.0.9-1) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
+## [1.0.8-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.7-1...docker-jans-configurator-v1.0.8-1) (2023-03-01)
+
+
+### Bug Fixes
+
+* **docker-jans:** resolve required keys_ops_type for generating/rotating keys ([#3990](https://github.com/JanssenProject/jans/issues/3990)) ([0ed67fb](https://github.com/JanssenProject/jans/commit/0ed67fbdd5a9fb6a40072d0a8c027b626e3830b8))
+
+## 1.0.7-1 (2023-02-22)
+
+
+### Features
+
+* **docker-jans-configurator:** allow user-defined salt ([#3624](https://github.com/JanssenProject/jans/issues/3624)) ([cf743b7](https://github.com/JanssenProject/jans/commit/cf743b72298cea03b3667909215ca3251ac9f19b))
+* **docker-jans:** introduce key_ops when generating keys ([#3770](https://github.com/JanssenProject/jans/issues/3770)) ([2495842](https://github.com/JanssenProject/jans/commit/249584257c3e892f5106d0e3559d1c0caa4a8d77))
+* **jans-auth-server:** renamed "key_ops" -&gt; "key_ops_type" [#3790](https://github.com/JanssenProject/jans/issues/3790) ([#3792](https://github.com/JanssenProject/jans/issues/3792)) ([7a6bcba](https://github.com/JanssenProject/jans/commit/7a6bcba5ca3597f7556d406e4a572c76a229bbdf))
+
+
+### Bug Fixes
+
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## 1.0.6-1 (2023-01-09)
 
 

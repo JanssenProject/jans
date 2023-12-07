@@ -12,10 +12,17 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.*;
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.StringUtils;
 import io.jans.util.StringHelper;
-import org.apache.commons.cli.*;
+import io.jans.util.security.SecurityProviderUtility;
+
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
@@ -37,6 +44,7 @@ import static io.jans.as.model.jwk.JWKParameter.*;
  * KeyGenerator -sig_keys RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA -enc_keys RSA1_5 RSA-OAEP RSA-OAEP-256 ECDH-ES ECDH-ES+A128KW ECDH-ES+A192KW ECDH-ES+A256KW -keystore /Users/JAVIER/tmp/mykeystore.jks -keypasswd secret -dnname "CN=Jans Auth CA Certificates" -expiration 365
  * <p/>
  * KeyGenerator -sig_keys RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA -ox11 https://ce.gluu.info:8443/oxeleven/rest/generateKey -expiration 365 -at xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+ * Note that EdDSA is not allowed in FIPS mode
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
@@ -82,6 +90,10 @@ public class KeyGenerator {
 
             Option signingKeysOption = new Option(SIGNING_KEYS, true,
                     "Signature keys to generate (RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA).");
+            if (SecurityProviderUtility.checkFipsMode()) {
+            	signingKeysOption = new Option(SIGNING_KEYS, true,
+                        "Signature keys to generate (RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512).");
+            }
             signingKeysOption.setArgs(Option.UNLIMITED_VALUES);
 
             Option encryptionKeysOption = new Option(ENCRYPTION_KEYS, true,
@@ -93,12 +105,12 @@ public class KeyGenerator {
             options.addOption(KEY_STORE_FILE, true, "Key Store file.");
             options.addOption(KEY_STORE_PASSWORD, true, "Key Store password.");
             options.addOption(DN_NAME, true, "DN of certificate issuer.");
-            options.addOption(OXELEVEN_ACCESS_TOKEN, true, "oxEleven Access Token");
+            options.addOption(OXELEVEN_ACCESS_TOKEN, true, "oxEleven Access Token.");
             options.addOption(OXELEVEN_GENERATE_KEY_ENDPOINT, true, "oxEleven Generate Key Endpoint.");
             options.addOption(EXPIRATION, true, "Expiration in days.");
             options.addOption(EXPIRATION_HOURS, true, "Expiration in hours.");
-            options.addOption(KEY_LENGTH, true, "Key length");
-            options.addOption(KEY_OPS_TYPE, true, "Key Operations Type");
+            options.addOption(KEY_LENGTH, true, "Key length.");
+            options.addOption(KEY_OPS_TYPE, true, "Key Operations Type.");
             options.addOption(TEST_PROP_FILE, true, "Tests property file.");
             options.addOption(HELP, false, "Show help.");
         }

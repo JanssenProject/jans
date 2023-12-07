@@ -11,6 +11,7 @@ import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.Jwt;
@@ -32,15 +33,17 @@ import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalIntrospectionContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.service.stat.StatService;
+import io.jans.as.server.util.ServerUtil;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
 import io.jans.service.CacheService;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.inject.Inject;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
@@ -106,6 +109,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     private IdToken createIdTokenInternal(AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken, ExecutionContext executionContext) throws Exception {
+        executionContext.initFromGrantIfNeeded(this);
+
         JsonWebResponse jwr = idTokenFactory.createJwr(this, authorizationCode, accessToken, refreshToken, executionContext);
         final IdToken idToken = new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
@@ -186,6 +191,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Override
     public AccessToken createAccessToken(ExecutionContext context) {
         try {
+            context.initFromGrantIfNeeded(this);
+
             final AccessToken accessToken = super.createAccessToken(context);
             if (accessToken.getExpiresIn() < 0) {
                 log.trace("Failed to create access token with negative expiration time");
@@ -222,6 +229,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 log.trace("Created plain access token: {}", accessToken.getCode());
 
             return accessToken;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
@@ -231,6 +240,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     public JwtSigner createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws Exception {
         final User user = getUser();
         final Client client = getClient();
+
+        context.initFromGrantIfNeeded(this);
 
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
                 .fromString(appConfiguration.getDefaultSignatureAlgorithm());
@@ -247,6 +258,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setClaim("username", user != null ? user.getAttribute("displayName") : null);
         jwt.getClaims().setClaim("token_type", accessToken.getTokenType().getName());
         jwt.getClaims().setClaim("code", accessToken.getCode()); // guarantee uniqueness : without it we can get race condition
+        jwt.getClaims().setClaim("acr", getAcrValues());
+        jwt.getClaims().setClaim("auth_time", ServerUtil.dateToSeconds(getAuthenticationTime()));
         jwt.getClaims().setExpirationTime(accessToken.getExpirationDate());
         jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
         jwt.getClaims().setSubjectIdentifier(getSub());
@@ -271,6 +284,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     private void runIntrospectionScriptAndInjectValuesIntoJwt(Jwt jwt, ExecutionContext executionContext) {
+        executionContext.initFromGrantIfNeeded(this);
+
         JSONObject responseAsJsonObject = new JSONObject();
 
         ExternalIntrospectionContext context = new ExternalIntrospectionContext(this, executionContext.getHttpRequest(), executionContext.getHttpResponse(), appConfiguration, attributeService);
@@ -288,6 +303,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private RefreshToken saveRefreshToken(RefreshToken refreshToken, ExecutionContext executionContext) {
         try {
+            executionContext.initFromGrantIfNeeded(this);
+
             if (refreshToken.getExpiresIn() > 0) {
                 final TokenEntity entity = asToken(refreshToken);
                 executionContext.setRefreshTokenEntity(entity);
@@ -296,6 +313,10 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 if (!externalOk) {
                     log.trace("External script forbids refresh token creation.");
                     return null;
+                }
+
+                if (executionContext.getScopes().contains(ScopeConstants.ONLINE_ACCESS)) {
+                    entity.getAttributes().setOnlineAccess(true);
                 }
 
                 persist(entity);
@@ -328,11 +349,13 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Override
     public RefreshToken createRefreshToken(ExecutionContext context) {
+        context.initFromGrantIfNeeded(this);
         return saveRefreshToken(() -> super.createRefreshToken(context), context);
     }
 
     @Override
     public RefreshToken createRefreshToken(ExecutionContext context, int lifetime) {
+        context.initFromGrantIfNeeded(this);
         return saveRefreshToken(() -> super.createRefreshToken(context, lifetime), context);
     }
 
@@ -350,6 +373,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
             String state, ExecutionContext executionContext) {
         try {
+            executionContext.initFromGrantIfNeeded(this);
             executionContext.setScopes(getScopes());
             executionContext.setClaimsAsString(getClaims());
             executionContext.setNonce(nonce);
@@ -373,6 +397,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             metricService.incCounter(MetricType.TOKEN_ID_TOKEN_COUNT);
 
             return idToken;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
@@ -435,6 +461,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setClientId(getClientId());
 
         result.getAttributes().setX5cs256(token.getX5ts256());
+        result.getAttributes().setDpopJkt(getDpopJkt());
 
         result.setDpop(token.getDpop());
 

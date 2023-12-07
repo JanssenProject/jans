@@ -6,20 +6,28 @@
 - An initial underscore in variables and function names prevent flow writers to use variables with the same names in their DSL code
 -->
 //Generated at ${.now?iso_utc}
-function ${flow.@id}<#recurse flow>
+<#assign fqname = flow.@fqname>
+function ${flow.@fun}<#recurse flow>
+    <#-- see header macro -->
+} catch (_e) {
+    return _makeJavaException(_fqname, _e)   <#-- See jans#6530 -->
+}
+
 }
 
 <#macro header>
 (
-<#if .node.configs?size = 0>_p<#else>${.node.configs.short_var}</#if>
+<#if .node.configs?size == 0>_p<#else>${.node.configs.short_var}</#if>
 <#if .node.inputs?size gt 0>
     , ${.node.inputs.short_var?join(", ")}
 </#if>
 ) {
-const _basePath = ${.node.base.STRING}
+const _fqname = "${fqname}", _basePath = ${.node.base.STRING}
 let _it = null, _it2 = null
 <#-- idx is accessible to flow writers (it's not underscore-prefixed). It allows to access the status of loops -->
 let idx = [], _items = []
+
+try {
 </#macro>
 
 <#macro statement>
@@ -32,7 +40,7 @@ let idx = [], _items = []
 <#macro rrf_call>
     <#local hasbool = .node.BOOL?size gt 0>
 
-    <#if .node.variable?size = 0>
+    <#if .node.variable?size == 0>
         _it = {}
     <#else>
         _it = ${.node.variable}
@@ -54,11 +62,7 @@ let idx = [], _items = []
 <#macro action_call>
     <#local catch=.node.preassign_catch?size gt 0>
 
-    <#if catch>
-try {
-    var ${.node.preassign_catch.short_var} = null
-    </#if>
-    <@util_preassign node=.node /> _actionCall(
+    _it = _actionCall(
     <#if .node.static_call?size gt 0>
         null, false, "${.node.static_call.qname}", "${.node.static_call.ALPHANUM}"
         , <@util_argslist node=.node.static_call />
@@ -67,28 +71,48 @@ try {
         , <@util_argslist node=.node.oo_call />
     </#if>    
     )
-
+    
+    _it2 = _it.second
     <#if catch>
-} catch (_e) {
-    ${.node.preassign_catch.short_var} = _e.javaException
-}
+        var ${.node.preassign_catch.short_var} = _it2
+    <#else>
+        if (!_isNil(_it2)) return _it2   <#-- "propagate exception" to parent, see jans#6530 -->
     </#if>
+
+    if (_isNil(_it2)) <@util_preassign node=.node /> _it.first
+
+    _it = null      <#-- avoids a later serialization of a Pair -->
 </#macro>
 
 <#macro flow_call>
+    <#local catch=.node.preassign_catch?size gt 0>
+
     <#if .node.variable?size gt 0>
         _it = ${.node.variable}
     <#else>
         _it = "${.node.qname}"
     </#if>
-_it = _flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_argslist node=.node />)
-if (_it === undefined) return
-if (_it.bubbleUp) return _it.value 
-    <@util_preassign node=.node /> _it.value
+
+    _it = _flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_argslist node=.node />)
+
+    if (_it.bubbleUp) return _it.value
+
+    _it = _it.value
+    _it2 = _isJavaException(_it)
+
+    <#if catch>
+        var ${.node.preassign_catch.short_var} = _it2 ? _it : null
+    <#else>
+        if (_it2) return _it  <#-- "propagate exception" to parent -->
+    </#if>
+    
+    if (!_it2) <@util_preassign node=.node /> _it
+    
+    _it = null
 </#macro>
 
 <#macro rfac>
-<#if .node.variable?size = 0>
+<#if .node.variable?size == 0>
     _it = ${.node.STRING}
 <#else>
     _it = ${.node.variable}
@@ -108,7 +132,7 @@ return _finish(_it)
 </#macro>
 
 <#macro loopy>
-    <#if .node.variable?size = 0>
+    <#if .node.variable?size == 0>
 _it = ${.node.UINT}
     <#else>
 _it = ${.node.variable}
@@ -182,7 +206,7 @@ _equals(${.node.simple_expr[0]}, ${.node.simple_expr[1]})
 </#macro>
 
 <#macro boolean_op_expr>
-    <#if .node.AND?size = 0>
+    <#if .node.AND?size == 0>
 ||
     <#else>
 &&
@@ -191,7 +215,7 @@ _equals(${.node.simple_expr[0]}, ${.node.simple_expr[1]})
 </#macro>
 
 <#macro log>
-_log(<@util_argslist node=.node />)
+_log2(_fqname, <@util_argslist node=.node />)
 </#macro>
 
 <#macro util_loop_body node>
@@ -212,7 +236,7 @@ else {
 
 <#macro util_preassign node>
     <#local var = "" >
-    <#if node.preassign?size = 0>
+    <#if node.preassign?size == 0>
         <#if node.preassign_catch?size gt 0 && node.preassign_catch.variable?size gt 0>
             <#local var = node.preassign_catch.variable >
         </#if>

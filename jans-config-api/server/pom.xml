@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.0.7-SNAPSHOT</version>
+		<version>1.0.21-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -162,6 +162,11 @@
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-json-p-provider</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-multipart-provider</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
 
 		<!-- Jakarta -->
 		<dependency>
@@ -234,10 +239,6 @@
 			<artifactId>commons-collections4</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>jakarta.faces</artifactId>
 		</dependency>
@@ -250,7 +251,6 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-deploy</artifactId>
-			<version>${jetty.version}</version>
 		</dependency>
 
 		<!-- Jython -->
@@ -264,7 +264,11 @@
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core-jakarta</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-models-jakarta</artifactId>
+			<version>${swagger-models-jakarta}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -331,13 +335,6 @@
 				</dependencies>
 			</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<failOnError>false</failOnError>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
@@ -461,7 +458,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
-				<version>1.1</version>
 				<executions>
 					<execution>
 						<phase>validate</phase>

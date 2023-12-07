@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/moabu/terraform-provider-jans/jans"
+	"github.com/jans/terraform-provider-jans/jans"
 )
 
 func TestResourceScimAppConfiguration_Mapping(t *testing.T) {
@@ -41,6 +41,15 @@ func TestResourceScimAppConfiguration_Mapping(t *testing.T) {
 	}
 
 	newCfg := jans.ScimAppConfigurations{}
+
+	patches, err := patchFromResourceData(data, &newCfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(patches) != 16 {
+		t.Errorf("Got %d patches, expected 16", len(patches))
+	}
 
 	if err := fromSchemaResource(data, &newCfg); err != nil {
 		t.Fatal(err)

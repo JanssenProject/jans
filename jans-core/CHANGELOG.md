@@ -1,5 +1,164 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.19...jans-core-v1.0.20) (2023-11-08)
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.18...jans-core-v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **config-api, keycloak:** saml plugin to create trust client in DB and keycloak storage provider to jans store ([#6155](https://github.com/JanssenProject/jans/issues/6155)) ([c4f5034](https://github.com/JanssenProject/jans/commit/c4f50343ef5f991cc3c0184cef0fa83ff1d7f03c))
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.17...jans-core-v1.0.18) (2023-09-23)
+
+
+### Bug Fixes
+
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
+## [1.0.17](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.16...jans-core-v1.0.17) (2023-09-17)
+
+
+### Features
+
+* BCFIPS support (sub-part 03) ([#5852](https://github.com/JanssenProject/jans/issues/5852)) ([8b0d12b](https://github.com/JanssenProject/jans/commit/8b0d12b96f7ea9f82f322c536e0deec03f63edbd))
+* fido2 needs to search cache for session instead of persistent ([#6011](https://github.com/JanssenProject/jans/issues/6011)) ([0cc0c19](https://github.com/JanssenProject/jans/commit/0cc0c192735c0537c28bb7cc96a9db509d9628e0))
+* **jans-auth-server:** added "The Use of Attestation in OAuth 2.0 Dynamic Client Registration" spec support [#5562](https://github.com/JanssenProject/jans/issues/5562) ([#5868](https://github.com/JanssenProject/jans/issues/5868)) ([38653c9](https://github.com/JanssenProject/jans/commit/38653c9cb9eb992213c5f230a5f36ce1187d0197))
+* **jans-auth-server:** added JIT compiler support under jvm 17 ([#5954](https://github.com/JanssenProject/jans/issues/5954)) ([3760380](https://github.com/JanssenProject/jans/commit/37603801aa7856db9f657119b2cf890d169f3df2))
+* **jans-auth-server:** OAuth 2.0 for First-Party Native Applications ([#5654](https://github.com/JanssenProject/jans/issues/5654)) ([9d90e28](https://github.com/JanssenProject/jans/commit/9d90e28791c49bc86771623601c654f2c662b7a1))
+
+
+### Bug Fixes
+
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
+## [1.0.16](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.15...jans-core-v1.0.16) (2023-08-02)
+
+
+### Features
+
+* add new methnod to fido2 extension to allow modify json ([#5683](https://github.com/JanssenProject/jans/issues/5683)) ([256675b](https://github.com/JanssenProject/jans/commit/256675b2ad9e195ea793eee00257ed400f815a56)), closes [#5680](https://github.com/JanssenProject/jans/issues/5680)
+
+
+### Bug Fixes
+
+* authentication Filter should not process OPTIONS request ([#5525](https://github.com/JanssenProject/jans/issues/5525)) ([aed5e4f](https://github.com/JanssenProject/jans/commit/aed5e4f52cc0ac6d0f278a6813e698068cd4ec9e)), closes [#5524](https://github.com/JanssenProject/jans/issues/5524)
+* **jans-core:** db document Store fixes [#5619](https://github.com/JanssenProject/jans/issues/5619) ([#5620](https://github.com/JanssenProject/jans/issues/5620)) ([1bdbbd5](https://github.com/JanssenProject/jans/commit/1bdbbd5ab9910d6697c6bcdc6e230cebb9c369a9))
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.14...jans-core-v1.0.15) (2023-07-12)
+
+
+### Bug Fixes
+
+* **jans-auth-server:** initializing of jsf navigation has been updated; ([#5253](https://github.com/JanssenProject/jans/issues/5253)) ([bed5d6f](https://github.com/JanssenProject/jans/commit/bed5d6fb7f9718c40a347108f8433c6552cacae9))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.13...jans-core-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* **jans-auth-server:** Support of Select Account interception script [#3452](https://github.com/JanssenProject/jans/issues/3452) ([#5149](https://github.com/JanssenProject/jans/issues/5149)) ([b062148](https://github.com/JanssenProject/jans/commit/b062148b7395e2828432061363058d7e1a9dd6db))
+* **jans-cache-refresh:** add cache refresh to Jans ([#5007](https://github.com/JanssenProject/jans/issues/5007)) ([878dd5e](https://github.com/JanssenProject/jans/commit/878dd5e414345aac8ba49490cd1aa8604e834533))
+
+
+### Bug Fixes
+
+* **config-api:** resolved dependency conflict for CustomScriptService ([3121833](https://github.com/JanssenProject/jans/commit/312183373f72f7916b3c4c6cc5176420bba3bae0))
+* **config-api:** revert hide smtp and client model utility method ([#4976](https://github.com/JanssenProject/jans/issues/4976)) ([6519744](https://github.com/JanssenProject/jans/commit/651974408565441951b6a4ca80a4ab555c01352f))
+* failed to initialize resteasy proxy from script at server ([#5118](https://github.com/JanssenProject/jans/issues/5118)) ([51f9ad9](https://github.com/JanssenProject/jans/commit/51f9ad9bfa02c285b99deab81e593817b6c61137)), closes [#5116](https://github.com/JanssenProject/jans/issues/5116)
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.12...jans-core-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-fido2:** interception scripts issue 1485, swagger updates ([#4543](https://github.com/JanssenProject/jans/issues/4543)) ([80274ff](https://github.com/JanssenProject/jans/commit/80274ffd1a20318988d9cc99ee015c5c7d5984b7))
+
+
+### Bug Fixes
+
+* cors filter should not store in local variable allowed ([#4688](https://github.com/JanssenProject/jans/issues/4688)) ([0d99195](https://github.com/JanssenProject/jans/commit/0d99195972dfe2963d3d0b785cd25b7337b55296)), closes [#4687](https://github.com/JanssenProject/jans/issues/4687)
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.11...jans-core-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* **config-api:** search pattern, client auth response and security fix ([#4595](https://github.com/JanssenProject/jans/issues/4595)) ([4dbfcc2](https://github.com/JanssenProject/jans/commit/4dbfcc241353c4e03672d4103d10768cbc0c5bdd))
+
+
+### Bug Fixes
+
+* jsonvalue has been added; ([#4604](https://github.com/JanssenProject/jans/issues/4604)) ([f3b46f4](https://github.com/JanssenProject/jans/commit/f3b46f4a2b8da47063efe8e3e90d98db58eeec81))
+* mailservice should send non signed emails, if keystore isn't defined (update); ([#4544](https://github.com/JanssenProject/jans/issues/4544)) ([57f4b75](https://github.com/JanssenProject/jans/commit/57f4b75ce68f0f12a775d397f97cf56df5299900))
+* mismatch in notation used for SmtpConfiguration [#4581](https://github.com/JanssenProject/jans/issues/4581) ([#4600](https://github.com/JanssenProject/jans/issues/4600)) ([3a62f05](https://github.com/JanssenProject/jans/commit/3a62f0588b996df97f9f21f26edd2d980b4fadec))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+* yaml has been updated; ([f3b46f4](https://github.com/JanssenProject/jans/commit/f3b46f4a2b8da47063efe8e3e90d98db58eeec81))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.10...jans-core-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* loggerService should update root log level [#4251](https://github.com/JanssenProject/jans/issues/4251) ([#4252](https://github.com/JanssenProject/jans/issues/4252)) ([20264a2](https://github.com/JanssenProject/jans/commit/20264a2f61e7b49015bbf6f7b93e9d241e3176a1))
+* userName -&gt; smtpAuthenticationAccountUsername; ([#4401](https://github.com/JanssenProject/jans/issues/4401)) ([2bbb95d](https://github.com/JanssenProject/jans/commit/2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e))
+
+
+### Bug Fixes
+
+* mailservice should send non signed emails, if keystore isn't defied; ([#4455](https://github.com/JanssenProject/jans/issues/4455)) ([7b41c44](https://github.com/JanssenProject/jans/commit/7b41c44f2933b8fde79d0478cf8df69303b9b3ba))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+
+## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.9...jans-core-v1.0.10) (2023-03-16)
+
+
+### Bug Fixes
+
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.7...jans-core-v1.0.9) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
+## 1.0.7 (2023-02-22)
+
+
+### Features
+
+* add Jupiter+Weld+Mockito+Extension to Fido2 ([#3875](https://github.com/JanssenProject/jans/issues/3875)) ([0152435](https://github.com/JanssenProject/jans/commit/01524358cbd720ad547c6b0d622c2cc32e76a125))
+* **config-api:** health check response rectification and Agama ADS swagger spec ([#3293](https://github.com/JanssenProject/jans/issues/3293)) ([faf2888](https://github.com/JanssenProject/jans/commit/faf2888f3d58d14fc6361d5a9ff5f743984cea4f))
+* **jans-core:** add AES utility class [#3215](https://github.com/JanssenProject/jans/issues/3215) ([#3242](https://github.com/JanssenProject/jans/issues/3242)) ([7e59795](https://github.com/JanssenProject/jans/commit/7e59795e21bc63b173802346b614e7ae6112de4e))
+
+
+### Bug Fixes
+
+* **config-api:** user service conflict with fido2 and script enhancement ([#3767](https://github.com/JanssenProject/jans/issues/3767)) ([5753d39](https://github.com/JanssenProject/jans/commit/5753d3989b96d76699f234cc87f58e355ba313b0))
+* login page doesn't display the correct localized characters ([#3528](https://github.com/JanssenProject/jans/issues/3528)) ([395b376](https://github.com/JanssenProject/jans/commit/395b3769750d2d32f624060c0b6e6ceeee7df0be)), closes [#1660](https://github.com/JanssenProject/jans/issues/1660)
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* store correct script revision after script reload from file ([#3704](https://github.com/JanssenProject/jans/issues/3704)) ([2ca6a83](https://github.com/JanssenProject/jans/commit/2ca6a833132b129c29924106ed65db430917cb8c)), closes [#3703](https://github.com/JanssenProject/jans/issues/3703)
+
 ## 1.0.6 (2023-01-09)
 
 

@@ -38,7 +38,7 @@ the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-
 ## Disabling The Endpoint Using Feature Flag
 
 `Token revocation` endpoint can be enabled or disable using [REVOKE_TOKEN feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#revoketoken).
-Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
+Use [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/config-tools/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
 disable `REVOKE_TOKEN` flag as required.
@@ -48,11 +48,12 @@ disable `REVOKE_TOKEN` flag as required.
 ## Configuration Properties
 
 Token revocation endpoint can be further configured using Janssen Server configuration properties listed below. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+[Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
 - [mtlstokenrevocationendpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlstokenrevocationendpoint)
 - [tokenRevocationEndpoint](../../reference/json/properties/janssenauthserver-properties.md#tokenrevocationendpoint)
+- [allowRevokeForOtherClients](../../reference/json/properties/janssenauthserver-properties.md#allowrevokeforotherclients)
 
 ## Revoke all tokens by `client_id`
 
@@ -61,6 +62,15 @@ To remove all tokens for given `client_id` it's required:
 - pass in request parameter `token_type_hint=all`
 
 `client` is identified by Client Authentication performed by AS to grant access to `/revoke` endpoint.
+
+## Revoke tokens of other clients
+
+By default Revoke Endpoint allows revoke only own client's tokens. 
+However it is possible to allow revoking of any token (which is issued with other client).
+
+For this it is required:
+- set global AS configuration property `allowRevokeForOtherClients` to `true`
+- add `revoke_any_token` scope to `client` which performs revoke call  
 
 ## Revoke Interception Script
 

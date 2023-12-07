@@ -6,12 +6,12 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.cdi.event.AuthConfigurationEvent;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
-import org.json.JSONObject;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.json.JSONObject;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,6 +39,10 @@ public class LocalResponseCache {
 
     private int currentDiscoveryLifetime = DEFAULT_DISCOVERY_LIFETIME;
     private int currentSectorIdentifierLifetime = DEFAULT_SECTOR_IDENTIFIER_LIFETIME;
+
+    public void invalidateDiscoveryCache() {
+        discoveryCache.invalidate(DISCOVERY_CACHE_KEY);
+    }
 
     @Asynchronous
     public void reloadConfigurationTimerEvent(@Observes @Scheduled AuthConfigurationEvent authConfigurationEvent) {

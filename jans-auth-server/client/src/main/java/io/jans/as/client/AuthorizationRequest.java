@@ -71,6 +71,8 @@ public class AuthorizationRequest extends BaseRequest {
     private String codeChallenge;
     private String codeChallengeMethod;
 
+    private String dpopJkt;
+
     private Map<String, String> customResponseHeaders;
 
     /**
@@ -122,6 +124,24 @@ public class AuthorizationRequest extends BaseRequest {
 
     public void setCodeChallengeMethod(String codeChallengeMethod) {
         this.codeChallengeMethod = codeChallengeMethod;
+    }
+
+    /**
+     * Gets dpop_jkt
+     *
+     * @return dpop_jkt
+     */
+    public String getDpopJkt() {
+        return dpopJkt;
+    }
+
+    /**
+     * Sets dpop_jkt
+     *
+     * @param dpopJkt dpop_jkt
+     */
+    public void setDpopJkt(String dpopJkt) {
+        this.dpopJkt = dpopJkt;
     }
 
     /**
@@ -580,6 +600,7 @@ public class AuthorizationRequest extends BaseRequest {
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.DPOP_JKT, dpopJkt);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS, customResponseHeadersAsString);
 
             for (String key : getCustomParameters().keySet()) {
@@ -640,6 +661,7 @@ public class AuthorizationRequest extends BaseRequest {
             putNotBlank(parameters, AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
             putNotBlank(parameters, AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
             putNotBlank(parameters, AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
+            putNotBlank(parameters, AuthorizeRequestParam.DPOP_JKT, dpopJkt);
             putNotBlank(parameters, AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS, customResponseHeadersAsString);
 
             for (String key : getCustomParameters().keySet()) {

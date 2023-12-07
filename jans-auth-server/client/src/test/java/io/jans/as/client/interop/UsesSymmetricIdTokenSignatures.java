@@ -6,13 +6,7 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -27,8 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -48,6 +40,7 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
         showTitle("OC5:FeatureTest-Uses Symmetric ID Token Signatures HS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -55,6 +48,7 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -67,7 +61,6 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -97,6 +90,7 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
         showTitle("OC5:FeatureTest-Uses Symmetric ID Token Signatures HS384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -104,6 +98,7 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -116,7 +111,6 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -146,6 +140,7 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
         showTitle("OC5:FeatureTest-Uses Symmetric ID Token Signatures HS512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -153,6 +148,7 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -165,7 +161,6 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 

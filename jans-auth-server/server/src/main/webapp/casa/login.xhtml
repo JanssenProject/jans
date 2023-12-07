@@ -23,10 +23,7 @@
 					<h:inputSecret id="password" value="#{credentials.password}" styleClass="focused-text w-100 pb1 dark-gray" />
 					<label class="focused-label-big">#{msgs['login.password']}</label>
 				</div>
-				<div class="w5 mt2 pb3">
-					<a href="/identity/person/passwordReminder.htm" class="green hover-green f7">#{msgs['login.forgotYourPassword']}</a>
-				</div>
-				<div class="mt4">
+				<div class="mt5">
 					<h:commandButton class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button"
 						value="#{msgs['login.login']}" action="#{authenticator.authenticate}" />
 				</div>

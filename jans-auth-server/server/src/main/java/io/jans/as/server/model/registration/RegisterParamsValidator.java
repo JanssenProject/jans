@@ -7,6 +7,7 @@
 package io.jans.as.server.model.registration;
 
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
@@ -20,10 +21,6 @@ import io.jans.as.model.util.Pair;
 import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.util.ServerUtil;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.slf4j.Logger;
-
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -31,6 +28,10 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.slf4j.Logger;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -163,6 +164,30 @@ public class RegisterParamsValidator {
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter userinfo_encrypted_response_enc is not valid.");
         }
 
+        if (registerRequest.getIntrospectionSignedResponseAlg() != null &&
+                !appConfiguration.getIntrospectionSigningAlgValuesSupported().contains(
+                        registerRequest.getIntrospectionSignedResponseAlg().toString())) {
+            log.debug("Parameter introspection_signed_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter introspection_signed_response_alg is not valid.");
+        }
+
+        if (registerRequest.getIntrospectionEncryptedResponseAlg() != null &&
+                !appConfiguration.getIntrospectionEncryptionAlgValuesSupported().contains(
+                        registerRequest.getIntrospectionEncryptedResponseAlg().toString())) {
+            log.debug("Parameter introspection_encrypted_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter introspection_encrypted_response_alg is not valid.");
+        }
+
+        if (registerRequest.getIntrospectionEncryptedResponseEnc() != null &&
+                !appConfiguration.getIntrospectionEncryptionEncValuesSupported().contains(
+                        registerRequest.getIntrospectionEncryptedResponseEnc().toString())) {
+            log.debug("Parameter introspection_encrypted_response_enc is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter introspection_encrypted_response_enc is not valid.");
+        }
+
         if (registerRequest.getRequestObjectSigningAlg() != null &&
                 !appConfiguration.getRequestObjectSigningAlgValuesSupported().contains(
                         registerRequest.getRequestObjectSigningAlg().toString())) {
@@ -193,6 +218,16 @@ public class RegisterParamsValidator {
             log.debug("Parameter token_endpoint_auth_method is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter token_endpoint_auth_method is not valid.");
+        }
+
+        if (registerRequest.getAdditionalTokenEndpointAuthMethods() != null && !registerRequest.getAdditionalTokenEndpointAuthMethods().isEmpty()) {
+            for (AuthenticationMethod authenticationMethod : registerRequest.getAdditionalTokenEndpointAuthMethods()) {
+                if (!appConfiguration.getTokenEndpointAuthMethodsSupported().contains(authenticationMethod.toString())) {
+                    log.debug("additional_token_endpoint_auth_method contains not valid value: {}", authenticationMethod);
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                            RegisterErrorResponseType.INVALID_CLIENT_METADATA, "additional_token_endpoint_auth_method contains not valid value.");
+                }
+            }
         }
 
         if (registerRequest.getTokenEndpointAuthSigningAlg() != null &&
@@ -273,9 +308,7 @@ public class RegisterParamsValidator {
                         case WEB:
                             if (HTTP.equalsIgnoreCase(uri.getScheme())) {
                                 if (!LOCALHOST.equalsIgnoreCase(uri.getHost()) && !LOOPBACK.equalsIgnoreCase(uri.getHost())) {
-                                    log.debug("Invalid protocol for redirect_uri: " +
-                                            redirectUri +
-                                            " (only https protocol is allowed for application_type=web or localhost/127.0.0.1 for http)");
+                                    log.debug("Invalid protocol for redirect_uri: {} (only https protocol is allowed for application_type=web or localhost/127.0.0.1 for http)", redirectUri);
                                     valid = false;
                                 }
                             }
@@ -293,6 +326,7 @@ public class RegisterParamsValidator {
                                 grantTypes.contains(GrantType.CLIENT_CREDENTIALS)))
                 && !responseTypes.contains(ResponseType.TOKEN) && !responseTypes.contains(ResponseType.ID_TOKEN);
 
+        log.trace("Validating redirect uris ... valid: {}, redirectUris: {}, grantTypes: {}, subjectType: {}", valid, redirectUris, grantTypes, subjectType);
 
         /*
          * Providers that use pairwise sub (subject) values SHOULD utilize the sector_identifier_uri value
@@ -377,6 +411,10 @@ public class RegisterParamsValidator {
      * All the Redirect Uris must match to return true.
      */
     private boolean checkWhiteListRedirectUris(List<String> redirectUris) {
+        if (redirectUris == null || redirectUris.isEmpty()) {
+            return true;
+        }
+
         boolean valid = true;
         List<String> whiteList = appConfiguration.getClientWhiteList();
         URLPatternList urlPatternList = new URLPatternList(whiteList);
@@ -392,6 +430,10 @@ public class RegisterParamsValidator {
      * None of the Redirect Uris must match to return true.
      */
     private boolean checkBlackListRedirectUris(List<String> redirectUris) {
+        if (redirectUris == null || redirectUris.isEmpty()) {
+            return true;
+        }
+
         boolean valid = true;
         List<String> blackList = appConfiguration.getClientBlackList();
         URLPatternList urlPatternList = new URLPatternList(blackList);

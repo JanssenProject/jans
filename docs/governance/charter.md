@@ -1,3 +1,9 @@
+---
+tags:
+  - governance
+  - charter
+---
+
 # Technical Charter (the “Charter”) for Janssen Project a Series of LF Projects, LLC 
 
 **Adopted December 8, 2020**

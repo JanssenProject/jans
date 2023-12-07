@@ -31,6 +31,7 @@ import java.util.Arrays;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.X509TrustManager;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -39,15 +40,16 @@ import com.google.api.client.json.webtoken.JsonWebSignature;
 /**
  * Sample code to verify the device attestation statement offline.
  */
+@ApplicationScoped
 public class OfflineVerify {
 
     private static final DefaultHostnameVerifier HOSTNAME_VERIFIER = new DefaultHostnameVerifier();
 
-    public static AttestationStatement parseAndVerify(String signedAttestationStatment) {
+    public AttestationStatement parseAndVerify(String signedAttestationStatment) {
         return parseAndVerify(signedAttestationStatment, null);
     }
 
-    public static AttestationStatement parseAndVerify(String signedAttestationStatment, X509TrustManager tm) {
+    public AttestationStatement parseAndVerify(String signedAttestationStatment, X509TrustManager tm) {
         // Parse JSON Web Signature format.
         JsonWebSignature jws;
         try {
@@ -95,7 +97,7 @@ public class OfflineVerify {
      * @param leafCert
      * @return
      */
-    private static boolean verifyHostname(String hostname, X509Certificate leafCert) {
+    private boolean verifyHostname(String hostname, X509Certificate leafCert) {
         try {
             // Check that the hostname matches the certificate. This method throws an
             // exception if
@@ -109,7 +111,7 @@ public class OfflineVerify {
         return false;
     }
 
-    private static void process(String signedAttestationStatement) {
+    private void process(String signedAttestationStatement) {
         AttestationStatement stmt = parseAndVerify(signedAttestationStatement);
         if (stmt == null) {
             System.err.println("Failure: Failed to parse and verify the attestation statement.");
@@ -136,7 +138,8 @@ public class OfflineVerify {
             System.err.println("Usage: OfflineVerify <signed attestation statement>");
             return;
         }
-        process(args[0]);
+        OfflineVerify offlineVerify = new OfflineVerify();
+        offlineVerify.process(args[0]);
     }
 
 }

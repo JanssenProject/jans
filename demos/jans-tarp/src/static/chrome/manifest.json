@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "jans-tarp",
+  "version": "1.0.0",
+  "description": "Relying Party tool in form of a Chrome Extension.",
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+
+  "action": {
+    "default_title": "jans-tarp",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage",
+    "identity",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*/*"
+  ],
+  "options_page": "options.html",
+  "incognito": "split"
+}

@@ -6,7 +6,7 @@
 
 package io.jans.configapi.interceptor;
 
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.model.attribute.AttributeDataType;
 import io.jans.configapi.core.util.DataUtil;
 import io.jans.configapi.model.configuration.DataFormatConversionConf;
@@ -172,13 +172,13 @@ public class RequestReaderInterceptor {
         if (listAttributes != null && !listAttributes.isEmpty()) {
             for (AttributeData attData : listAttributes) {
                 logger.debug("AttributeData - attData:{}", attData);
-                GluuAttribute gluuAttribute = attributeService.getByLdapName(attData.getName());
+                JansAttribute jansAttribute = attributeService.getByLdapName(attData.getName());
 
-                logger.debug("AttributeData details - attData.getName():{}, attData.getValue():{},gluuAttribute:{}",
-                        attData.getName(), attData.getValue(), gluuAttribute);
+                logger.debug("AttributeData details - attData.getName():{}, attData.getValue():{},jansAttribute:{}",
+                        attData.getName(), attData.getValue(), jansAttribute);
 
-                if (attData.getValue() != null && gluuAttribute != null) {
-                    AttributeDataType attributeDataType = gluuAttribute.getDataType();
+                if (attData.getValue() != null && jansAttribute != null) {
+                    AttributeDataType attributeDataType = jansAttribute.getDataType();
                     logger.debug(
                             "AttributeDataType - attData.getName():{}, attributeDataType:{}, AttributeDataType.DATE.getValue():{}",
                             attData.getName(), attributeDataType, AttributeDataType.DATE.getValue());

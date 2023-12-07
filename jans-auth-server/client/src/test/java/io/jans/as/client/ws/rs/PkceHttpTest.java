@@ -6,15 +6,7 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -31,11 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -54,12 +42,18 @@ public class PkceHttpTest extends BaseTest {
 
         // 1. Register client
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -69,11 +63,6 @@ public class PkceHttpTest extends BaseTest {
         AssertBuilder.registerResponse(registerResponse).created().check();
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
@@ -124,14 +113,21 @@ public class PkceHttpTest extends BaseTest {
     @Test
     public void invalidCodeVerifier(
             final String redirectUris, final String userId, final String userSecret, final String redirectUri,
-            final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) {
         showTitle("invalidCodeVerifier");
+
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -142,11 +138,6 @@ public class PkceHttpTest extends BaseTest {
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes, redirectUri, null);

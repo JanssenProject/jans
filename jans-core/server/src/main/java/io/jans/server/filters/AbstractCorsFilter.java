@@ -99,9 +99,11 @@ public abstract class AbstractCorsFilter implements Filter {
         // Determines the CORS request type.
         AbstractCorsFilter.CORSRequestType requestType = checkRequestType(request);
 
+        dumpRequestDetails("before doFilter", request, requestType);
+
         // Adds CORS specific attributes to request.
         if (decorateRequest) {
-            AbstractCorsFilter.decorateCORSProperties(request, requestType);
+            decorateCORSProperties(request, requestType);
         }
         switch (requestType) {
             case SIMPLE:
@@ -125,6 +127,8 @@ public abstract class AbstractCorsFilter implements Filter {
                 this.handleInvalidCORS(request, response, filterChain);
                 break;
         }
+
+        dumpRequestDetails("after doFilter", request, requestType);
     }
 
     @Override
@@ -154,25 +158,28 @@ public abstract class AbstractCorsFilter implements Filter {
                             AbstractCorsFilter.CORSRequestType.SIMPLE,
                             AbstractCorsFilter.CORSRequestType.ACTUAL));
         }
+        dumpRequestDetails("before handleSimpleCORS", request, requestType);
 
         final String origin = request
                 .getHeader(AbstractCorsFilter.REQUEST_HEADER_ORIGIN);
         final String method = request.getMethod();
 
         // Section 6.1.2
-        if (!isOriginAllowed(origin)) {
+        if (!isOriginAllowed(request, origin)) {
+        	log.trace("handleSimpleCORS: handleInvalidCORS");
             handleInvalidCORS(request, response, filterChain);
             return;
         }
 
         if (!allowedHttpMethods.contains(method)) {
+        	log.trace("handleSimpleCORS: handleInvalidCORS");
             handleInvalidCORS(request, response, filterChain);
             return;
         }
 
         // Section 6.1.3
         // Add a single Access-Control-Allow-Origin header.
-        if (isAnyOriginAllowed() && !supportsCredentials) {
+        if (isAnyOriginAllowed(request) && !supportsCredentials) {
             // If resource doesn't support credentials and if any origin is
             // allowed
             // to make CORS request, return header with '*'.
@@ -209,6 +216,8 @@ public abstract class AbstractCorsFilter implements Filter {
                     exposedHeadersString);
         }
 
+        dumpRequestDetails("after handleSimpleCORS", request, requestType);
+
         // Forward the request down the filter chain.
         filterChain.doFilter(request, response);
     }
@@ -234,11 +243,13 @@ public abstract class AbstractCorsFilter implements Filter {
                             CORSRequestType.PRE_FLIGHT.name().toLowerCase()));
         }
 
+        dumpRequestDetails("before handlePreflightCORS", request, requestType);
+
         final String origin = request
                 .getHeader(AbstractCorsFilter.REQUEST_HEADER_ORIGIN);
 
         // Section 6.2.2
-        if (!isOriginAllowed(origin)) {
+        if (!isOriginAllowed(request, origin)) {
             handleInvalidCORS(request, response, filterChain);
             return;
         }
@@ -292,7 +303,7 @@ public abstract class AbstractCorsFilter implements Filter {
                     AbstractCorsFilter.RESPONSE_HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS,
                     "true");
         } else {
-            if (isAnyOriginAllowed()) {
+            if (isAnyOriginAllowed(request)) {
                 response.addHeader(
                         AbstractCorsFilter.RESPONSE_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN,
                         "*");
@@ -321,6 +332,8 @@ public abstract class AbstractCorsFilter implements Filter {
                     AbstractCorsFilter.RESPONSE_HEADER_ACCESS_CONTROL_ALLOW_HEADERS,
                     join(allowedHttpHeaders, ","));
         }
+
+        dumpRequestDetails("after handlePreflightCORS", request, requestType);
 
         // Do not forward the request down the filter chain.
     }
@@ -363,7 +376,7 @@ public abstract class AbstractCorsFilter implements Filter {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.resetBuffer();
 
-        if (log.isDebugEnabled()) {
+        if (log.isDebugEnabled() || log.isTraceEnabled()) {
             // Debug so no need for i18n
             StringBuilder message =
                     new StringBuilder("Invalid CORS request; Origin=");
@@ -402,7 +415,7 @@ public abstract class AbstractCorsFilter implements Filter {
      * @param request         The {@link HttpServletRequest} object.
      * @param corsRequestType The {@link CORSRequestType} object.
      */
-    protected static void decorateCORSProperties(
+    protected void decorateCORSProperties(
             final HttpServletRequest request,
             final CORSRequestType corsRequestType) {
         if (request == null) {
@@ -414,6 +427,8 @@ public abstract class AbstractCorsFilter implements Filter {
             throw new IllegalArgumentException(
                     SM.getString("corsFilter.nullRequestType"));
         }
+
+        dumpRequestDetails("before decorateCORSProperties", request, corsRequestType);
 
         switch (corsRequestType) {
             case SIMPLE:
@@ -462,8 +477,9 @@ public abstract class AbstractCorsFilter implements Filter {
                 // Don't set any attributes
                 break;
         }
-    }
 
+        dumpRequestDetails("after decorateCORSProperties", request, corsRequestType);
+    }
 
     /**
      * Joins elements of {@link Set} into a string, where each element is
@@ -565,17 +581,23 @@ public abstract class AbstractCorsFilter implements Filter {
      * Checks if the Origin is allowed to make a CORS request.
      *
      * @param origin The Origin.
+     * @param request 
      * @return <code>true</code> if origin is allowed; <code>false</code>
      * otherwise.
      */
-    private boolean isOriginAllowed(final String origin) {
-        if (isAnyOriginAllowed()) {
+    private boolean isOriginAllowed(ServletRequest servletRequest, final String origin) {
+        if (isAnyOriginAllowed(servletRequest)) {
             return true;
         }
 
         // If 'Origin' header is a case-sensitive match of any of allowed
         // origins, then return true, else return false.
-        return allowedOrigins.contains(origin);
+        if ((allowedOrigins != null) && allowedOrigins.contains(origin)) {
+        	return true;
+        }
+
+        Collection<String> clientAllowedOrigins = getContextClientAllowedOrigins(servletRequest);
+        return (clientAllowedOrigins != null) && clientAllowedOrigins.contains(origin);
     }
 
 
@@ -717,14 +739,71 @@ public abstract class AbstractCorsFilter implements Filter {
      *
      * @return <code>true</code> if it's enabled; false otherwise.
      */
-    public boolean isAnyOriginAllowed() {
-        if (allowedOrigins != null && allowedOrigins.size() == 0) {
-            return true;
-        }
+	public boolean isAnyOriginAllowed(ServletRequest servletRequest) {
+		if (allowedOrigins != null && allowedOrigins.size() == 0) {
+			if (!hasContextClientAllowedOrigins(servletRequest)) {
+				return true;
+			}
 
-        return false;
+			Collection<String> clientAllowedOrigins = getContextClientAllowedOrigins(servletRequest);
+			if (clientAllowedOrigins != null && clientAllowedOrigins.size() == 0) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+    protected void setContextClientAllowedOrigins(ServletRequest servletRequest, Collection<String> clientAllowedOrigins) {
+    	if (log.isTraceEnabled()) {
+    		log.trace("setContextClientAllowedOrigins: {}", clientAllowedOrigins);
+    	}
+    	servletRequest.setAttribute(PARAM_CLIENT_ALLOWED_ORIGINS, clientAllowedOrigins);
     }
 
+    @SuppressWarnings("unchecked")
+	protected Collection<String> getContextClientAllowedOrigins(ServletRequest servletRequest) {
+    	return (Collection<String>) servletRequest.getAttribute(PARAM_CLIENT_ALLOWED_ORIGINS);
+    }
+
+	protected boolean hasContextClientAllowedOrigins(ServletRequest servletRequest) {
+    	Enumeration<String> attributeNames =  servletRequest.getAttributeNames();
+    	while (attributeNames.hasMoreElements()) {
+    		String attributeName = attributeNames.nextElement();
+    		if (PARAM_CLIENT_ALLOWED_ORIGINS.equals(attributeName)) {
+    			return true;
+    		}
+		}
+
+    	return false;
+    }
+
+	private void dumpRequestDetails(final String prefix, final HttpServletRequest request, final CORSRequestType corsRequestType) {
+		if (!log.isTraceEnabled()) {
+			return;
+        }
+    	StringBuilder allAttributes = new StringBuilder("[");
+    	for (Iterator<String> it = request.getAttributeNames().asIterator(); it.hasNext();) {
+    		if (allAttributes.length() > 1) {
+    			allAttributes.append(",");
+    		}
+			String attributeName = (String) it.next();
+			allAttributes.append(attributeName).append(" = ").append(request.getAttribute(attributeName));
+		}
+    	allAttributes.append("]");
+    	
+    	StringBuilder allHeaders = new StringBuilder("[");
+    	for (Iterator<String> it = request.getHeaderNames().asIterator(); it.hasNext();) {
+    		if (allHeaders.length() > 1) {
+    			allHeaders.append(",");
+    		}
+			String HeaderName = (String) it.next();
+			allHeaders.append(HeaderName).append(" = ").append(request.getHeader(HeaderName));
+		}
+    	allHeaders.append("]");
+    	
+    	log.trace("{}: request method {} to URI {}, corsType {}, attributes {}, headers {}", prefix, request.getMethod(), request.getRequestURI(), corsRequestType, allAttributes, allHeaders);
+	}
 
     /**
      * Returns a {@link Set} of headers that should be exposed by browser.
@@ -1068,6 +1147,8 @@ public abstract class AbstractCorsFilter implements Filter {
     public static final String PARAM_CORS_REQUEST_DECORATE =
             "cors.request.decorate";
 
+	public static final String PARAM_CLIENT_ALLOWED_ORIGINS = "CLIENT_ALLOWED_ORIGINS";
+
 }
 
 final class StringManager {
@@ -1268,6 +1349,7 @@ final class StringManager {
         // Return the default
         return getManager(packageName);
     }
+    
 }
 
 final class Constants {

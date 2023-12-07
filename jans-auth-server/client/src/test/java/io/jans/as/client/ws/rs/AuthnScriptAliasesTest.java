@@ -31,6 +31,7 @@ public class AuthnScriptAliasesTest extends BaseTest {
             final String sectorIdentifierUri) {
         showTitle("acrAliasTest");
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
         // 1. Register client
@@ -38,6 +39,7 @@ public class AuthnScriptAliasesTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -49,7 +51,6 @@ public class AuthnScriptAliasesTest extends BaseTest {
 
         String clientId = registerResponse.getClientId();
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
@@ -72,6 +73,7 @@ public class AuthnScriptAliasesTest extends BaseTest {
             final String sectorIdentifierUri) {
         showTitle("acrAliasAuthorizedAcrValuesTest");
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
         // 1. Register client
@@ -82,6 +84,7 @@ public class AuthnScriptAliasesTest extends BaseTest {
         registerRequest.setAuthorizedAcrValues(Arrays.asList(
                 "basic_alias1", "basic_alias2"
         ));
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -93,7 +96,6 @@ public class AuthnScriptAliasesTest extends BaseTest {
 
         String clientId = registerResponse.getClientId();
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 

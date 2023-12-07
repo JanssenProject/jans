@@ -4,15 +4,20 @@ tags:
   - auth-server
   - openidc
   - feature
+  - ID Token
 ---
 
-## This content is in progress
+# ID Token
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Janssen Server is an OpenID Connect Provider(OP). OpenID Connect extends OAuth 2.0 and adds user authentication
+capabilities using ID token.
 
-## Have questions in the meantime?
+To add end-user authentication capabilities to an OAuth flow, it is important to use `openid` scope in the
+request as specified [here](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest). In absence of `openid`
+scope, the Janssen Server will not treat the incoming request as OpenID Connect request.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+For further information on how to configure and customize OpenID Connect using ID Token read
+[here](../tokens/openid-id-token.md)
 
 ## Want to contribute?
 

@@ -326,22 +326,22 @@ public class CouchbaseFilterConverterTest {
 		ConvertedExpression expressionSub1 = simpleConverter.convertToCouchbaseFilter(filterSub1, null, null);
 
 		String querySub1 = toSelectSQL(expressionSub1);
-		assertEquals(expressionSub1.expression(), "uid LIKE %$uid_any%");
+		assertEquals(expressionSub1.expression(), "uid LIKE $uid_any");
 		assertEquals(querySub1, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE uid LIKE \"%test%\"");
 
 		Filter filterSub2 = Filter.createSubstringFilter("uid", "a", new String[] { "test" }, null);
 		ConvertedExpression expressionSub2 = simpleConverter.convertToCouchbaseFilter(filterSub2, null, null);
 
 		String querySub2 = toSelectSQL(expressionSub2);
-		assertEquals(expressionSub2.expression(), "uid LIKE $uid_i%$uid_any%");
-		assertEquals(querySub2, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE uid LIKE \"a%test%\"");
+		assertEquals(expressionSub2.expression(), "uid LIKE $uid_i$uid_any");
+		assertEquals(querySub2, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE uid LIKE \"a%%test%\"");
 
 		Filter filterSub3 = Filter.createSubstringFilter("uid", null, new String[] { "test" }, "z");
 		ConvertedExpression expressionSub3 = simpleConverter.convertToCouchbaseFilter(filterSub3, null, null);
 
 		String querySub3 = toSelectSQL(expressionSub3);
-		assertEquals(expressionSub3.expression(), "uid LIKE %$uid_any%$uid_f");
-		assertEquals(querySub3, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE uid LIKE \"%test%z\"");
+		assertEquals(expressionSub3.expression(), "uid LIKE $uid_any$uid_f");
+		assertEquals(querySub3, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE uid LIKE \"%test%%z\"");
 	}
 
 	@Test
@@ -350,29 +350,29 @@ public class CouchbaseFilterConverterTest {
 		ConvertedExpression expressionSub1 = simpleConverter.convertToCouchbaseFilter(filterSub1, null, null);
 
 		String querySub1 = toSelectSQL(expressionSub1);
-		assertEquals(expressionSub1.expression(), "ANY uid_ IN uid SATISFIES uid_ LIKE %$uid_any% END");
+		assertEquals(expressionSub1.expression(), "ANY uid_ IN uid SATISFIES uid_ LIKE $uid_any END");
 		assertEquals(querySub1, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES uid_ LIKE \"%test%\" END");
 
 		Filter filterSub2 = Filter.createSubstringFilter("uid", "a", new String[] { "test" }, null).multiValued();
 		ConvertedExpression expressionSub2 = simpleConverter.convertToCouchbaseFilter(filterSub2, null, null);
 
 		String querySub2 = toSelectSQL(expressionSub2);
-		assertEquals(expressionSub2.expression(), "ANY uid_ IN uid SATISFIES uid_ LIKE $uid_i%$uid_any% END");
-		assertEquals(querySub2, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES uid_ LIKE \"a%test%\" END");
+		assertEquals(expressionSub2.expression(), "ANY uid_ IN uid SATISFIES uid_ LIKE $uid_i$uid_any END");
+		assertEquals(querySub2, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES uid_ LIKE \"a%%test%\" END");
 
 		Filter filterSub3 = Filter.createSubstringFilter("uid", null, new String[] { "test" }, "z").multiValued();
 		ConvertedExpression expressionSub3 = simpleConverter.convertToCouchbaseFilter(filterSub3, null, null);
 
 		String querySub3 = toSelectSQL(expressionSub3);
-		assertEquals(expressionSub3.expression(), "ANY uid_ IN uid SATISFIES uid_ LIKE %$uid_any%$uid_f END");
-		assertEquals(querySub3, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES uid_ LIKE \"%test%z\" END");
+		assertEquals(expressionSub3.expression(), "ANY uid_ IN uid SATISFIES uid_ LIKE $uid_any$uid_f END");
+		assertEquals(querySub3, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES uid_ LIKE \"%test%%z\" END");
 
 		Filter filterSub4 = Filter.createSubstringFilter("uid", null, new String[] { "test" }, "z").multiValued(3);
 		ConvertedExpression expressionSub4 = simpleConverter.convertToCouchbaseFilter(filterSub4, null, null);
 
 		String querySub4 = toSelectSQL(expressionSub4);
-		assertEquals(expressionSub4.expression(), "ANY uid_ IN uid SATISFIES uid_ LIKE %$uid_any%$uid_f END");
-		assertEquals(querySub4, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES uid_ LIKE \"%test%z\" END");
+		assertEquals(expressionSub4.expression(), "ANY uid_ IN uid SATISFIES uid_ LIKE $uid_any$uid_f END");
+		assertEquals(querySub4, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES uid_ LIKE \"%test%%z\" END");
 	}
 
 	@Test
@@ -381,29 +381,29 @@ public class CouchbaseFilterConverterTest {
 		ConvertedExpression expressionSub1 = simpleConverter.convertToCouchbaseFilter(filterSub1, null, null);
 
 		String querySub1 = toSelectSQL(expressionSub1);
-		assertEquals(expressionSub1.expression(), "ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE %$uid_any% END");
+		assertEquals(expressionSub1.expression(), "ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE $uid_any END");
 		assertEquals(querySub1, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE \"%test%\" END");
 
 		Filter filterSub2 = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), "a", new String[] { "test" }, null).multiValued();
 		ConvertedExpression expressionSub2 = simpleConverter.convertToCouchbaseFilter(filterSub2, null, null);
 
 		String querySub2 = toSelectSQL(expressionSub2);
-		assertEquals(expressionSub1.expression(), "ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE %$uid_any% END");
-		assertEquals(querySub2, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE \"a%test%\" END");
+		assertEquals(expressionSub1.expression(), "ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE $uid_any END");
+		assertEquals(querySub2, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE \"a%%test%\" END");
 
 		Filter filterSub3 = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, new String[] { "test" }, "z").multiValued();
 		ConvertedExpression expressionSub3 = simpleConverter.convertToCouchbaseFilter(filterSub3, null, null);
 
 		String querySub3 = toSelectSQL(expressionSub3);
-		assertEquals(expressionSub1.expression(), "ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE %$uid_any% END");
-		assertEquals(querySub3, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE \"%test%z\" END");
+		assertEquals(expressionSub1.expression(), "ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE $uid_any END");
+		assertEquals(querySub3, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE \"%test%%z\" END");
 
 		Filter filterSub4 = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, new String[] { "test" }, "z").multiValued(3);
 		ConvertedExpression expressionSub4 = simpleConverter.convertToCouchbaseFilter(filterSub4, null, null);
 
 		String querySub4 = toSelectSQL(expressionSub4);
-		assertEquals(expressionSub1.expression(), "ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE %$uid_any% END");
-		assertEquals(querySub4, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE \"%test%z\" END");
+		assertEquals(expressionSub1.expression(), "ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE $uid_any END");
+		assertEquals(querySub4, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ANY uid_ IN uid SATISFIES LOWER( uid_ ) LIKE \"%test%%z\" END");
 	}
 
 	@Test
@@ -526,7 +526,7 @@ public class CouchbaseFilterConverterTest {
         
 		ConvertedExpression expression = simpleConverter.convertToCouchbaseFilter(filter, null, null);
 		String query = toSelectSQL(expression);
-		assertEquals(expression.expression(), "( ( LOWER( description ) LIKE %$description_any% OR LOWER( displayName ) LIKE %$displayName_any% ) AND ( ( jansScrTyp = $jansScrTyp ) OR ( $jansScrTyp IN jansScrTyp ) ) )");
+		assertEquals(expression.expression(), "( ( LOWER( description ) LIKE $description_any OR LOWER( displayName ) LIKE $displayName_any ) AND ( ( jansScrTyp = $jansScrTyp ) OR ( $jansScrTyp IN jansScrTyp ) ) )");
 		assertEquals(query, "SELECT jans_doc.* FROM `gluu` AS jans_doc WHERE ( ( LOWER( description ) LIKE \"%test_value%\" OR LOWER( displayName ) LIKE \"%test_value%\" ) AND ( ( jansScrTyp = \"person_authentication\" ) OR ( \"person_authentication\" IN jansScrTyp ) ) )");
 	}
 

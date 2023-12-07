@@ -20,6 +20,7 @@ import io.jans.as.model.json.JsonApplier;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.ciba.CIBARegisterClientMetadataService;
 import io.jans.as.server.service.ScopeService;
@@ -38,8 +39,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.StringUtils.toList;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -80,6 +83,88 @@ public class RegisterService {
         return null;
     }
 
+    public Set<ResponseType> identifyResponseTypes(Collection<ResponseType> requestResponseTypes, Collection<GrantType> requestGrantTypes) {
+        Set<ResponseType> result = new HashSet<>(requestResponseTypes);
+
+        if (result.isEmpty()) { // fallback to "code", spec: If omitted, the default is that the Client will use only the code Response Type.
+            result.add(ResponseType.CODE);
+        }
+
+        if (isTrue(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled())) {
+            if (isTrue(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh())) {
+                if (result.isEmpty()) {
+                    result.add(ResponseType.CODE);
+                }
+
+                if (requestGrantTypes.contains(GrantType.AUTHORIZATION_CODE)) {
+                    result.add(ResponseType.CODE);
+                }
+            }
+            if (requestGrantTypes.contains(GrantType.IMPLICIT)) {
+                result.add(ResponseType.TOKEN);
+            }
+        }
+
+        result.retainAll(appConfiguration.getAllResponseTypesSupported());
+        return result;
+    }
+
+    public Set<GrantType> identifyGrantTypes(Collection<ResponseType> identifiedResponseTypes, Collection<GrantType> requestGrantTypes) {
+        Set<GrantType> result = new HashSet<>(requestGrantTypes);
+
+        if (result.isEmpty()) {
+            result.add(GrantType.AUTHORIZATION_CODE);
+        }
+
+        if (isTrue(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled())) {
+            if (isTrue(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh())) {
+                if (identifiedResponseTypes.contains(ResponseType.CODE)) {
+                    result.add(GrantType.AUTHORIZATION_CODE);
+                    result.add(GrantType.REFRESH_TOKEN);
+                }
+                if (result.contains(GrantType.AUTHORIZATION_CODE)) {
+                    identifiedResponseTypes.add(ResponseType.CODE);
+                    result.add(GrantType.REFRESH_TOKEN);
+                }
+            }
+
+            if (identifiedResponseTypes.contains(ResponseType.TOKEN) || identifiedResponseTypes.contains(ResponseType.ID_TOKEN)) {
+                result.add(GrantType.IMPLICIT);
+            }
+            if (result.contains(GrantType.IMPLICIT)) {
+                identifiedResponseTypes.add(ResponseType.TOKEN);
+            }
+        }
+
+        result.retainAll(appConfiguration.getGrantTypesSupported());
+        result.retainAll(appConfiguration.getDynamicGrantTypeDefault());
+
+        return result;
+    }
+
+    private void assignResponseTypesAndGrantTypes(Client client, RegisterRequest requestObject, boolean update) {
+        final Set<ResponseType> identifiedResponseTypes = identifyResponseTypes(requestObject.getResponseTypes(), requestObject.getGrantTypes());
+        final Set<GrantType> identifiedGrantTypes = identifyGrantTypes(identifiedResponseTypes, requestObject.getGrantTypes());
+
+        final boolean isNewClient = !update;
+
+        if (isNewClient || !requestObject.getResponseTypes().isEmpty()) {
+            client.setResponseTypes(identifiedResponseTypes.toArray(new ResponseType[0]));
+        }
+
+        if (isNewClient || (isTrue(appConfiguration.getEnableClientGrantTypeUpdate()) && !requestObject.getGrantTypes().isEmpty())) {
+            client.setGrantTypes(identifiedGrantTypes.toArray(new GrantType[0]));
+        }
+
+        log.trace("Updating client with responseTypes: {}, grantTypes: {}, isNewClient: {}", identifiedResponseTypes, identifiedGrantTypes, isNewClient);
+    }
+
+    @SuppressWarnings("java:S1168")
+    public static String[] listAsArrayWithoutDuplicates(List<String> list) {
+        List<String> result = new ArrayList<>(new HashSet<>(list)); // Remove repeated elements
+        return result.toArray(new String[0]);
+    }
+
     // yuriyz - ATTENTION : this method is used for both registration and update client metadata cases, therefore any logic here
     // will be applied for both cases.
     @SuppressWarnings("java:S3776")
@@ -90,13 +175,12 @@ public class RegisterService {
 
         List<String> redirectUris = requestObject.getRedirectUris();
         if (redirectUris != null && !redirectUris.isEmpty()) {
-            redirectUris = new ArrayList<>(new HashSet<>(redirectUris)); // Remove repeated elements
-            client.setRedirectUris(redirectUris.toArray(new String[0]));
+            client.setRedirectUris(listAsArrayWithoutDuplicates(redirectUris));
         }
+
         List<String> claimsRedirectUris = requestObject.getClaimsRedirectUris();
         if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
-            claimsRedirectUris = new ArrayList<>(new HashSet<>(claimsRedirectUris)); // Remove repeated elements
-            client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[0]));
+            client.setClaimRedirectUris(listAsArrayWithoutDuplicates(claimsRedirectUris));
         }
 
         client.setApplicationType(requestObject.getApplicationType() != null ? requestObject.getApplicationType() : ApplicationType.WEB);
@@ -105,48 +189,11 @@ public class RegisterService {
             client.setSectorIdentifierUri(requestObject.getSectorIdentifierUri());
         }
 
-        Set<ResponseType> responseTypeSet = new HashSet<>(requestObject.getResponseTypes());
-        Set<GrantType> grantTypeSet = new HashSet<>(requestObject.getGrantTypes());
-
-        if (isTrue(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled())) {
-            if (isTrue(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh())) {
-                if (responseTypeSet.isEmpty() && grantTypeSet.isEmpty()) {
-                    responseTypeSet.add(ResponseType.CODE);
-                }
-                if (responseTypeSet.contains(ResponseType.CODE)) {
-                    grantTypeSet.add(GrantType.AUTHORIZATION_CODE);
-                    grantTypeSet.add(GrantType.REFRESH_TOKEN);
-                }
-                if (grantTypeSet.contains(GrantType.AUTHORIZATION_CODE)) {
-                    responseTypeSet.add(ResponseType.CODE);
-                    grantTypeSet.add(GrantType.REFRESH_TOKEN);
-                }
-            }
-            if (responseTypeSet.contains(ResponseType.TOKEN) || responseTypeSet.contains(ResponseType.ID_TOKEN)) {
-                grantTypeSet.add(GrantType.IMPLICIT);
-            }
-            if (grantTypeSet.contains(GrantType.IMPLICIT)) {
-                responseTypeSet.add(ResponseType.TOKEN);
-            }
-        }
-
-        responseTypeSet.retainAll(appConfiguration.getAllResponseTypesSupported());
-        grantTypeSet.retainAll(appConfiguration.getGrantTypesSupported());
-
-        Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
-        grantTypeSet.retainAll(dynamicGrantTypeDefault);
-
-        if (!update || !requestObject.getResponseTypes().isEmpty()) {
-            client.setResponseTypes(responseTypeSet.toArray(new ResponseType[0]));
-        }
-        if (!update || (isTrue(appConfiguration.getEnableClientGrantTypeUpdate()) && !requestObject.getGrantTypes().isEmpty())) {
-            client.setGrantTypes(grantTypeSet.toArray(new GrantType[0]));
-        }
+        assignResponseTypesAndGrantTypes(client, requestObject, update);
 
         List<String> contacts = requestObject.getContacts();
         if (contacts != null && !contacts.isEmpty()) {
-            contacts = new ArrayList<>(new HashSet<>(contacts)); // Remove repeated elements
-            client.setContacts(contacts.toArray(new String[0]));
+            client.setContacts(listAsArrayWithoutDuplicates(contacts));
         }
 
         for (String key : requestObject.getClientNameLanguageTags()) {
@@ -252,6 +299,15 @@ public class RegisterService {
         if (requestObject.getUserInfoEncryptedResponseEnc() != null) {
             client.setUserInfoEncryptedResponseEnc(requestObject.getUserInfoEncryptedResponseEnc().toString());
         }
+        if (requestObject.getIntrospectionSignedResponseAlg() != null) {
+            client.getAttributes().setIntrospectionSignedResponseAlg(requestObject.getIntrospectionSignedResponseAlg().toString());
+        }
+        if (requestObject.getIntrospectionEncryptedResponseAlg() != null) {
+            client.getAttributes().setIntrospectionEncryptedResponseAlg(requestObject.getIntrospectionEncryptedResponseAlg().toString());
+        }
+        if (requestObject.getIntrospectionEncryptedResponseEnc() != null) {
+            client.getAttributes().setIntrospectionEncryptedResponseEnc(requestObject.getIntrospectionEncryptedResponseEnc().toString());
+        }
         if (requestObject.getRequestObjectSigningAlg() != null) {
             client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());
         }
@@ -263,19 +319,28 @@ public class RegisterService {
         }
         if (requestObject.getTokenEndpointAuthMethod() != null) {
             client.setTokenEndpointAuthMethod(requestObject.getTokenEndpointAuthMethod().toString());
+        } else if (requestObject.getAdditionalTokenEndpointAuthMethods() != null && !requestObject.getAdditionalTokenEndpointAuthMethods().isEmpty()) {
+            client.setTokenEndpointAuthMethod(requestObject.getAdditionalTokenEndpointAuthMethods().iterator().next().toString());
         } else { // If omitted, the default is client_secret_basic
             client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
         }
+
+        if (requestObject.getAdditionalTokenEndpointAuthMethods() != null) {
+            client.getAttributes().setAdditionalTokenEndpointAuthMethods(requestObject.getAdditionalTokenEndpointAuthMethods().stream().map(AuthenticationMethod::toString).collect(Collectors.toList()));
+        }
+
         if (requestObject.getTokenEndpointAuthSigningAlg() != null) {
             client.setTokenEndpointAuthSigningAlg(requestObject.getTokenEndpointAuthSigningAlg().toString());
         }
         if (requestObject.getDefaultMaxAge() != null) {
             client.setDefaultMaxAge(requestObject.getDefaultMaxAge());
         }
+        if (!update) { // do not allow update it. It can be set only during creation
+            client.getAttributes().setRequestedLifetime(requestObject.getLifetime());
+        }
         List<String> defaultAcrValues = requestObject.getDefaultAcrValues();
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
-            defaultAcrValues = new ArrayList<>(new HashSet<>(defaultAcrValues)); // Remove repeated elements
-            client.setDefaultAcrValues(defaultAcrValues.toArray(new String[defaultAcrValues.size()]));
+            client.setDefaultAcrValues(listAsArrayWithoutDuplicates(defaultAcrValues));
         }
         if (StringUtils.isNotBlank(requestObject.getInitiateLoginUri())) {
             client.setInitiateLoginUri(requestObject.getInitiateLoginUri());
@@ -296,13 +361,12 @@ public class RegisterService {
 
         final List<String> groups = requestObject.getGroups();
         if (groups != null && !groups.isEmpty()) {
-            client.setGroups(new HashSet<>(groups).toArray(new String[0])); // remove duplicates
+            client.setGroups(listAsArrayWithoutDuplicates(groups));
         }
 
         List<String> postLogoutRedirectUris = requestObject.getPostLogoutRedirectUris();
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
-            postLogoutRedirectUris = new ArrayList<>(new HashSet<>(postLogoutRedirectUris)); // Remove repeated elements
-            client.setPostLogoutRedirectUris(postLogoutRedirectUris.toArray(new String[postLogoutRedirectUris.size()]));
+            client.setPostLogoutRedirectUris(listAsArrayWithoutDuplicates(postLogoutRedirectUris));
         }
 
         if (StringUtils.isNotBlank(requestObject.getFrontChannelLogoutUri())) {
@@ -317,39 +381,15 @@ public class RegisterService {
 
         List<String> requestUris = requestObject.getRequestUris();
         if (requestUris != null && !requestUris.isEmpty()) {
-            requestUris = new ArrayList<>(new HashSet<>(requestUris)); // Remove repeated elements
-            client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
+            client.setRequestUris(listAsArrayWithoutDuplicates(requestUris));
         }
 
         List<String> authorizedOrigins = requestObject.getAuthorizedOrigins();
         if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
-            authorizedOrigins = new ArrayList<>(new HashSet<>(authorizedOrigins)); // Remove repeated elements
-            client.setAuthorizedOrigins(authorizedOrigins.toArray(new String[authorizedOrigins.size()]));
+            client.setAuthorizedOrigins(listAsArrayWithoutDuplicates(authorizedOrigins));
         }
 
-        List<String> scopes = requestObject.getScope();
-        if (grantTypeSet.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
-            scopes = Lists.newArrayList(scopes);
-            scopes.retainAll(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes());
-        }
-        List<String> scopesDn;
-        if (scopes != null && !scopes.isEmpty() && isTrue(appConfiguration.getDynamicRegistrationScopesParamEnabled())) {
-            List<String> defaultScopes = scopeService.getDefaultScopesDn();
-            List<String> requestedScopes = scopeService.getScopesDn(scopes);
-            Set<String> allowedScopes = new HashSet<>();
-
-            for (String requestedScope : requestedScopes) {
-                if (defaultScopes.contains(requestedScope)) {
-                    allowedScopes.add(requestedScope);
-                }
-            }
-
-            scopesDn = new ArrayList<>(allowedScopes);
-            client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
-        } else {
-            scopesDn = scopeService.getDefaultScopesDn();
-            client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
-        }
+        assignScopes(client, requestObject);
 
         List<String> claims = requestObject.getClaims();
         if (claims != null && !claims.isEmpty()) {
@@ -358,7 +398,7 @@ public class RegisterService {
         }
 
         if (requestObject.getJsonObject() != null) {
-            final String orgId = requestObject.getJsonObject().optString("org_id");
+            final String orgId = requestObject.getJsonObject().optString(RegisterRequestParam.ORG_ID.getName());
             if (StringUtils.isNotBlank(orgId)) {
                 client.setOrganization(orgId);
             }
@@ -376,6 +416,9 @@ public class RegisterService {
         if (requestObject.getRequirePar() != null) {
             client.getAttributes().setRequirePar(requestObject.getRequirePar());
         }
+        if (requestObject.getDpopBoundAccessToken() != null) {
+            client.getAttributes().setDpopBoundAccessToken(requestObject.getDpopBoundAccessToken());
+        }
 
         if (StringUtils.isNotBlank(requestObject.getSoftwareId())) {
             client.setSoftwareId(requestObject.getSoftwareId());
@@ -385,6 +428,9 @@ public class RegisterService {
         }
         if (StringUtils.isNotBlank(requestObject.getSoftwareStatement())) {
             client.setSoftwareStatement(requestObject.getSoftwareStatement());
+        }
+        if (StringUtils.isNotBlank(requestObject.getEvidence())) {
+            client.getAttributes().setEvidence(requestObject.getEvidence());
         }
 
         if (StringUtils.isNotBlank(requestObject.getSubjectIdentifierAttribute())) {
@@ -404,6 +450,38 @@ public class RegisterService {
         cibaRegisterClientMetadataService.updateClient(client, requestObject.getBackchannelTokenDeliveryMode(),
                 requestObject.getBackchannelClientNotificationEndpoint(), requestObject.getBackchannelAuthenticationRequestSigningAlg(),
                 requestObject.getBackchannelUserCodeParameter());
+    }
+
+    public void assignScopes(Client client, RegisterRequest requestObject) {
+        if (isFalse(appConfiguration.getDynamicRegistrationScopesParamEnabled())) {
+            log.debug("Skip scopes update. Reason - configuration dynamicRegistrationScopesParamEnabled=false");
+            return;
+        }
+
+        List<String> requestScopes = requestObject.getScope();
+        if (requestScopes == null || requestScopes.isEmpty()) {
+            log.trace("No scopes in request");
+            return;
+        }
+
+        // apply ROPC restriction
+        if (Arrays.asList(client.getGrantTypes()).contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
+            requestScopes = Lists.newArrayList(requestScopes);
+            requestScopes.retainAll(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes());
+        }
+
+        List<String> defaultScopes = scopeService.getDefaultScopesDn();
+        List<String> requestedScopes = scopeService.getScopesDn(requestScopes);
+        Set<String> allowedScopes = new HashSet<>();
+
+        for (String requestedScope : requestedScopes) {
+            if (defaultScopes.contains(requestedScope)) {
+                allowedScopes.add(requestedScope);
+            }
+        }
+
+        log.trace("Allowed scopes: {}, requested scopes: {}, default scopes: {}", allowedScopes, requestedScopes, defaultScopes);
+        client.setScopes(allowedScopes.toArray(new String[0]));
     }
 
     /**

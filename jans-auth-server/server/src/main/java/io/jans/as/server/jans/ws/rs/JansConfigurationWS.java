@@ -18,7 +18,7 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -114,7 +114,7 @@ public class JansConfigurationWS {
                 final List<String> claimIdList = scope.getClaims();
                 if (claimIdList != null && !claimIdList.isEmpty()) {
                     for (String claimDn : claimIdList) {
-                        final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
+                        final JansAttribute attribute = attributeService.getAttributeByDn(claimDn);
                         final String claimName = attribute.getClaimName();
                         if (StringUtils.isNotBlank(claimName)) {
                             claimsList.add(claimName);

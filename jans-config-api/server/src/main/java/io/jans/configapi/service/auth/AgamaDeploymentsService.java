@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 
@@ -40,7 +41,7 @@ public class AgamaDeploymentsService {
 
     public Deployment getDeployment(String name) {
         
-        String[] attrs = new String[]{ "jansStartDate", "jansEndDate", "adsPrjDeplDetails" };
+        String[] attrs = new String[]{ "jansId", "jansStartDate", "jansEndDate", "adsPrjDeplDetails" };
         logger.info("Looking up project named {}", name);
 
         Deployment d = null;
@@ -53,7 +54,7 @@ public class AgamaDeploymentsService {
 
     }
     
-    public boolean createDeploymentTask(String name, byte[] gamaBinary) {
+    public boolean createDeploymentTask(String name, byte[] gamaBinary, boolean autoconfigure) {
         
         Deployment d = null;
         String id = idFromName(name);
@@ -74,7 +75,8 @@ public class AgamaDeploymentsService {
             return false;
         }
         
-        DeploymentDetails dd = new DeploymentDetails();
+        DeploymentDetails dd = new DeploymentDetails();        
+        dd.setAutoconfigure(autoconfigure);
         dd.getProjectMetadata().setProjectName(name);
 
         if (!existing) {
@@ -131,9 +133,7 @@ public class AgamaDeploymentsService {
     }
 
     private static String idFromName(String name) {
-        String hash = Integer.toString(name.hashCode());
-        if (hash.startsWith("-")) hash = hash.substring(1);
-        return hash;
+        return UUID.nameUUIDFromBytes(name.getBytes(UTF_8)).toString();
     }
 
 }

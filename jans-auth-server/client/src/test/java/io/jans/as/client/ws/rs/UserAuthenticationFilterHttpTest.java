@@ -58,6 +58,7 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -102,6 +103,7 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -146,6 +148,7 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -190,6 +193,7 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -240,6 +244,7 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

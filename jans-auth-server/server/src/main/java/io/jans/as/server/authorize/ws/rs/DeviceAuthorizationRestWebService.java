@@ -26,7 +26,6 @@ import jakarta.ws.rs.core.SecurityContext;
  */
 public interface DeviceAuthorizationRestWebService {
 
-
     /**
      * Device Authorization Request [RFC8628 3.1].
      * Generates user_code, device_code and data needed to follow the device authorization flow
@@ -44,5 +43,4 @@ public interface DeviceAuthorizationRestWebService {
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);
-
 }

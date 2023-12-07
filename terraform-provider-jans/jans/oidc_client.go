@@ -24,6 +24,7 @@ type OidcClientAttribute struct {
 	RopcScripts                             []string `schema:"ropc_scripts" json:"ropcScripts,omitempty"`
 	ParLifetime                             int      `schema:"par_lifetime" json:"parLifetime,omitempty"`
 	RequirePar                              bool     `schema:"require_par" json:"requirePar,omitempty"`
+	DpopBoundAccessToken                    bool     `schema:"dpop_bound_access_token" json:"dpopBoundAccessToken,omitempty"`
 	JansAuthSignedRespAlg                   string   `schema:"jans_auth_signed_resp_alg" json:"jansAuthSignedRespAlg,omitempty"`
 	JansAuthEncRespAlg                      string   `schema:"jans_auth_enc_resp_alg" json:"jansAuthEncRespAlg,omitempty"`
 	JansAuthEncRespEnc                      string   `schema:"jans_auth_enc_resp_enc" json:"jansAuthEncRespEnc,omitempty"`
@@ -31,12 +32,21 @@ type OidcClientAttribute struct {
 	RedirectUrisRegex                       string   `schema:"redirect_uris_regex" json:"redirectUrisRegex,omitempty"`
 	JansAuthorizedAcr                       []string `schema:"jans_authorized_acr" json:"jansAuthorizedAcr,omitempty"`
 	JansDefaultPromptLogin                  bool     `schema:"jans_default_prompt_login" json:"jansDefaultPromptLogin,omitempty"`
+	IdTokenLifetime                         int      `schema:"id_token_lifetime" json:"idTokenLifetime,omitempty"`
+	AllowOfflineAccessWithoutConsent        bool     `schema:"allow_offline_access_without_consent" json:"allowOfflineAccessWithoutConsent,omitempty"`
+	MinimumAcrLevel                         int      `schema:"minimum_acr_level" json:"minimumAcrLevel,omitempty"`
+	MinimumAcrLevelAutoresolve              bool     `schema:"minimum_acr_level_autoresolve" json:"minimumAcrLevelAutoresolve,omitempty"`
+	AdditionalTokenEndpointAuthMethods      []string `schema:"additional_token_endpoint_auth_methods" json:"additionalTokenEndpointAuthMethods,omitempty"`
+	MinimumAcrPriorityList                  []string `schema:"minimum_acr_priority_list" json:"minimumAcrPriorityList,omitempty"`
+	RequestedLifetime                       int      `schema:"requested_lifetime" json:"requestedLifetime,omitempty"`
+	Evidence                                string   `schema:"evidence" json:"evidence,omitempty"`
 }
 
 // OidcClient is the definition of an OpenId Connect Client.
 type OidcClient struct {
 	Dn                                         string               `schema:"dn" json:"dn,omitempty"`
-	Inum                                       string               `schema:"inum" json:"inum,omitempty"`
+	ExpirationDate                             string               `schema:"expiration_date" json:"expirationDate,omitempty"`
+	Deletable                                  bool                 `schema:"deletable" json:"deletable,omitempty"`
 	ClientSecret                               string               `schema:"client_secret" json:"clientSecret,omitempty"`
 	FrontChannelLogoutUri                      string               `schema:"front_channel_logout_uri" json:"frontChannelLogoutUri,omitempty"`
 	FrontChannelLogoutSessionRequired          bool                 `schema:"front_channel_logout_session_required" json:"frontChannelLogoutSessionRequired,omitempty"`
@@ -50,11 +60,15 @@ type OidcClient struct {
 	ApplicationType                            string               `schema:"application_type" json:"applicationType,omitempty"`
 	Contacts                                   []string             `schema:"contacts" json:"contacts,omitempty"`
 	IdTokenTokenBindingCnf                     string               `schema:"id_token_token_binding_cnf" json:"idTokenTokenBindingCnf,omitempty"`
-	ClientName                                 OptionalString       `schema:"client_name" json:"clientName,omitempty"`
 	LogoUri                                    OptionalString       `schema:"logo_uri" json:"logoUri,omitempty"`
 	ClientUri                                  OptionalString       `schema:"client_uri" json:"clientUri,omitempty"`
 	PolicyUri                                  OptionalString       `schema:"policy_uri" json:"policyUri,omitempty"`
 	TosUri                                     OptionalString       `schema:"tos_uri" json:"tosUri,omitempty"`
+	ClientNameLocalized                        map[string]string    `schema:"client_name_localized" json:"clientNameLocalized,omitempty"`
+	LogoUriLocalized                           map[string]string    `schema:"logo_uri_localized" json:"logoUriLocalized,omitempty"`
+	ClientUriLocalized                         map[string]string    `schema:"client_uri_localized" json:"clientUriLocalized,omitempty"`
+	PolicyUriLocalized                         map[string]string    `schema:"policy_uri_localized" json:"policyUriLocalized,omitempty"`
+	TosUriLocalized                            map[string]string    `schema:"tos_uri_localized" json:"tosUriLocalized,omitempty"`
 	JwksUri                                    string               `schema:"jwks_uri" json:"jwksUri,omitempty"`
 	Jwks                                       string               `schema:"jwks" json:"jwks,omitempty"`
 	SectorIdentifierUri                        string               `schema:"sector_identifier_uri" json:"sectorIdentifierUri,omitempty"`
@@ -71,7 +85,6 @@ type OidcClient struct {
 	TokenEndpointAuthMethod                    string               `schema:"token_endpoint_auth_method" json:"tokenEndpointAuthMethod,omitempty"`
 	TokenEndpointAuthSigningAlg                string               `schema:"token_endpoint_auth_signing_alg" json:"tokenEndpointAuthSigningAlg,omitempty"`
 	DefaultMaxAge                              int                  `schema:"default_max_age" json:"defaultMaxAge,omitempty"`
-	RequireAuthTime                            bool                 `schema:"require_auth_time" json:"requireAuthTime,omitempty"`
 	DefaultAcrValues                           []string             `schema:"default_acr_values" json:"defaultAcrValues,omitempty"`
 	InitiateLoginUri                           string               `schema:"initiate_login_uri" json:"initiateLoginUri,omitempty"`
 	PostLogoutRedirectUris                     []string             `schema:"post_logout_redirect_uris" json:"postLogoutRedirectUris,omitempty"`
@@ -99,14 +112,15 @@ type OidcClient struct {
 	BackchannelTokenDeliveryMode               string               `schema:"backchannel_token_delivery_mode" json:"backchannelTokenDeliveryMode,omitempty"`
 	BackchannelClientNotificationEndpoint      string               `schema:"backchannel_client_notification_endpoint" json:"backchannelClientNotificationEndpoint,omitempty"`
 	BackchannelAuthenticationRequestSigningAlg string               `schema:"backchannel_authentication_request_signing_alg" json:"backchannelAuthenticationRequestSigningAlg,omitempty"`
-	BackchannelUserCodeParameter               string               `schema:"backchannel_user_code_parameter" json:"backchannelUserCodeParameter,omitempty"`
-	ExpirationDate                             string               `schema:"expiration_date" json:"expirationDate,omitempty"`
-	Deletable                                  bool                 `schema:"deletable" json:"deletable,omitempty"`
-	JansID                                     string               `schema:"jans_id" json:"jansId,omitempty"`
+	BackchannelUserCodeParameter               bool                 `schema:"backchannel_user_code_parameter" json:"backchannelUserCodeParameter,omitempty"`
 	Description                                string               `schema:"description" json:"description,omitempty"`
+	Organization                               string               `schema:"organization" json:"organization,omitempty"`
+	Groups                                     []string             `schema:"groups" json:"groups,omitempty"`
+	Ttl                                        int                  `schema:"ttl" json:"ttl,omitempty"`
+	DisplayName                                string               `schema:"display_name" json:"displayName,omitempty"`
 	AuthenticationMethod                       string               `schema:"authentication_method" json:"authenticationMethod,omitempty"`
-	TokenBindingSupported                      bool                 `schema:"token_binding_supported" json:"tokenBindingSupported,omitempty"`
 	BaseDn                                     string               `schema:"base_dn" json:"baseDn,omitempty"`
+	Inum                                       string               `schema:"inum" json:"inum,omitempty"`
 }
 
 // GetOidcClients returns all currently configured OIDC clients.

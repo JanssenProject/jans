@@ -1,6 +1,8 @@
 import os
 import glob
 import ruamel.yaml
+import shutil
+import tempfile
 
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
@@ -25,9 +27,9 @@ class OxdInstaller(SetupUtils, BaseInstaller):
 
     def install(self):
         self.logIt("Installing", pbar=self.service_name)
-        self.run(['tar', '-zxf', Config.oxd_package, '--no-same-owner', '--strip-components=1', '-C', self.oxd_root])
+        self.shutil.unpack_archive(Config.oxd_package, self.oxd_root)
         self.run(['chown', '-R', 'jetty:jetty', self.oxd_root])
-        
+
         if base.snap:
             self.log_dir = os.path.join(base.snap_common, 'jans/oxd-server/log/')
         else:
@@ -144,31 +146,22 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         return os.path.exists(self.oxd_server_yml_fn)
 
     def download_files(self, force=False):
-        oxd_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/oxd-server/{0}/oxd-server-{0}-distribution.zip').format(base.current_app.app_info['ox_version'])
+        oxd_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/oxd-server/{0}/oxd-server-{0}-distribution.zip').format(base.current_app.app_info['jans_version'])
 
         self.logIt("Downloading {} and preparing package".format(os.path.basename(oxd_url)))
 
-        oxd_zip_fn = '/tmp/oxd-server.zip'
-        oxd_tgz_fn = '/tmp/oxd-server.tgz' if base.snap else os.path.join(Config.dist_jans_dir, 'oxd-server.tgz')
-        tmp_dir = os.path.join('/tmp', os.urandom(5).hex())
-        oxd_tmp_dir = os.path.join(tmp_dir, 'oxd-server')
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            oxd_zip_fn = os.path.join(tmp_dir, 'oxd-server.zip')
+            oxd_tmp_dir = os.path.join(tmp_dir, 'oxd-server')
+            self.download_file(oxd_url, oxd_zip_fn)
+            shutil.unpack_archive(oxd_zip_fn, oxd_tmp_dir)
+            self.createDirs(os.path.join(oxd_tmp_dir, 'data'))
 
-        self.run([paths.cmd_mkdir, '-p', oxd_tmp_dir])
-        self.download_file(oxd_url, oxd_zip_fn)
-        self.run([paths.cmd_unzip, '-qqo', oxd_zip_fn, '-d', oxd_tmp_dir])
-        self.run([paths.cmd_mkdir, os.path.join(oxd_tmp_dir, 'data')])
+            oxd_server_sh_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/master/debian/oxd-server'
+            self.download_file(oxd_server_sh_url, os.path.join(oxd_tmp_dir, 'bin/oxd-server'))
+            Config.oxd_package = shutil.make_archive(os.path.join(Config.dist_jans_dir, 'oxd-server'), "gztar", root_dir=tmp_dir, base_dir="oxd-server")
 
-        if not base.snap:
-            service_file = 'oxd-server.init.d' if base.deb_sysd_clone else 'oxd-server.service'
-            service_url = 'https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/oxd-server.service'.format(base.current_app.app_info['ox_version'], service_file)
-            self.download_file(service_url, os.path.join(oxd_tmp_dir, service_file))
-
-        oxd_server_sh_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/master/debian/oxd-server'
-        self.download_file(oxd_server_sh_url, os.path.join(oxd_tmp_dir, 'bin/oxd-server'))
-
-        self.run(['tar', '-zcf', oxd_tgz_fn, 'oxd-server'], cwd=tmp_dir)
-        #self.run(['rm', '-r', '-f', tmp_dir])
-        Config.oxd_package = oxd_tgz_fn
+            Config.oxd_package = oxd_tgz_fn
 
     def create_folders(self):
         if not os.path.exists(self.oxd_root):

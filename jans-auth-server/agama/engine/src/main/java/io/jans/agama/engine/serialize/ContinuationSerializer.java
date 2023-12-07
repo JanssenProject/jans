@@ -49,7 +49,7 @@ public class ContinuationSerializer {
         try (   ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream sos = new CustomObjectOutputStream(baos)) {
 
-            //Pair is not java-serializable, use a 2-length array
+            //Pair is not serialization-friendly, use a 2-length array
             sos.writeObject(new Object[] { scope, continuation });
             return baos.toByteArray();
         }

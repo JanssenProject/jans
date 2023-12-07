@@ -16,6 +16,15 @@
       "type": "STRING(MAX)"
     }
   },
+  "jansAttr:description": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "pgsql": {
+      "size": 768,
+      "type": "VARCHAR"
+    }
+  },
   "displayName": {
     "mysql": {
       "size": 128,
@@ -256,6 +265,9 @@
     "mysql": {
       "type": "TEXT"
     },
+    "pgsql": {
+      "type": "TEXT"
+    },
     "spanner": {
       "type": "STRING(MAX)"
     }
@@ -264,13 +276,27 @@
     "mysql": {
       "type": "TEXT"
     },
+    "pgsql": {
+      "type": "TEXT"
+    },
     "spanner": {
       "type": "STRING(MAX)"
     }
   },
   "jansDeviceData": {
     "mysql": {
-      "type": "TINYTEXT"
+      "type": "TEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "jansDeviceNotificationConf": {
+    "mysql": {
+      "type": "TEXT"
     },
     "pgsql": {
       "type": "TEXT"
@@ -795,6 +821,20 @@
       "type": "STRING"
     }
   },
+  "jansApp": {
+    "mysql": {
+      "size": 96,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 96,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 96,
+      "type": "STRING"
+    }
+  },
   "jansReq": {
     "mysql": {
       "type": "TEXT"
@@ -888,16 +928,13 @@
   },
   "adsPrjDeplDetails": {
     "mysql": {
-      "size": 2048,
-      "type": "VARCHAR"
+      "type": "TEXT"
     },
     "pgsql": {
-      "size": 2048,
-      "type": "VARCHAR"
+      "type": "TEXT"
     },
     "spanner": {
-      "size": 2048,
-      "type": "STRING"
+      "type": "STRING(MAX)"
     }
   }
 }

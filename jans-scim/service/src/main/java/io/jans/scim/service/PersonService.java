@@ -19,7 +19,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 
 import io.jans.as.model.common.IdType;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.model.AttributeData;
@@ -395,7 +395,7 @@ public class PersonService implements Serializable {
 		Filter userMailFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter("mail"), StringHelper.toLowerCase(mail));
 		
 		boolean multiValued = false;
-		GluuAttribute mailAttribute = attributeService.getAttributeByName("mail");
+		JansAttribute mailAttribute = attributeService.getAttributeByName("mail");
 		if ((mailAttribute != null) && (mailAttribute.getOxMultiValuedAttribute() != null) && mailAttribute.getOxMultiValuedAttribute()) {
 			multiValued = true;
 		}

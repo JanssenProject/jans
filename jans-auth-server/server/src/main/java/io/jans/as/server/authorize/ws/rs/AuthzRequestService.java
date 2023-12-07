@@ -12,7 +12,6 @@ import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.WebKeysConfiguration;
@@ -33,6 +32,7 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.server.model.audit.Action;
@@ -49,6 +49,8 @@ import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -183,6 +185,8 @@ public class AuthzRequestService {
 
         authzRequest.setState(StringUtils.isNotBlank(par.getAttributes().getState()) ? par.getAttributes().getState() : "");
 
+        if (StringUtils.isNotBlank(par.getAttributes().getDpopJkt()))
+            authzRequest.setDpopJkt(par.getAttributes().getDpopJkt());
         if (StringUtils.isNotBlank(par.getAttributes().getNonce()))
             authzRequest.setNonce(par.getAttributes().getNonce());
         if (StringUtils.isNotBlank(par.getAttributes().getSessionId()))
@@ -206,7 +210,7 @@ public class AuthzRequestService {
     }
 
     @SuppressWarnings("java:S3776")
-    public void processRequestObject(AuthzRequest authzRequest, Client client, Set<String> scopes, User user, List<Prompt> prompts) {
+    public void processRequestObject(AuthzRequest authzRequest, Client client, Set<String> scopes, User user) {
         final RedirectUriResponse redirectUriResponse = authzRequest.getRedirectUriResponse();
 
         JwtAuthorizationRequest jwtRequest = null;
@@ -269,13 +273,14 @@ public class AuthzRequestService {
                 if (StringUtils.isNotBlank(jwtRequest.getCodeChallengeMethod())) {
                     authzRequest.setCodeChallengeMethod(jwtRequest.getCodeChallengeMethod());
                 }
+                if (StringUtils.isNotBlank(jwtRequest.getDpopJkt())) {
+                    authzRequest.setDpopJkt(jwtRequest.getDpopJkt());
+                }
                 if (jwtRequest.getDisplay() != null && StringUtils.isNotBlank(jwtRequest.getDisplay().getParamName())) {
                     authzRequest.setDisplay(jwtRequest.getDisplay().getParamName());
                 }
                 if (!jwtRequest.getPrompts().isEmpty()) {
-                    prompts.clear();
-                    prompts.addAll(Lists.newArrayList(jwtRequest.getPrompts()));
-                    authzRequest.setPrompt(implode(prompts, " "));
+                    authzRequest.setPromptList(jwtRequest.getPrompts());
                     authzRequest.setPromptFromJwt(true);
                 }
                 if (jwtRequest.getResponseMode() != null) {
@@ -555,11 +560,35 @@ public class AuthzRequestService {
         authzRequest.setRedirectUriResponse(redirectUriResponse);
     }
 
+    public static boolean canLogWebApplicationException(WebApplicationException e) {
+        if (e == null || e.getResponse() == null) {
+            return false;
+        }
+        final int status = e.getResponse().getStatus();
+        return status != 302;
+    }
+
     public void createOauth2AuditLog(AuthzRequest authzRequest) {
-        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(authzRequest.getHttpRequest()), Action.USER_AUTHORIZATION);
+        createOauth2AuditLog(authzRequest, Action.USER_AUTHORIZATION);
+    }
+
+    public void createOauth2AuditLog(AuthzRequest authzRequest, Action action) {
+        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(authzRequest.getHttpRequest()), action);
         oAuth2AuditLog.setClientId(authzRequest.getClientId());
         oAuth2AuditLog.setScope(authzRequest.getScope());
 
         authzRequest.setAuditLog(oAuth2AuditLog);
+    }
+
+    public void setCustomParameters(AuthzRequest authzRequest) {
+        final HttpServletRequest httpRequest = authzRequest.getHttpRequest();
+
+        authzRequest.setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString())));
+        if (authzRequest.getCustomParameters() == null) {
+            authzRequest.setCustomParameters(new HashMap<>());
+        }
+        if (HttpMethod.POST.endsWith(authzRequest.getHttpMethod())) {
+            requestParameterService.addCustomParameters(httpRequest, authzRequest.getCustomParameters());
+        }
     }
 }

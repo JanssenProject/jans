@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,6 @@ import io.jans.orm.sql.operation.SqlOperationService;
 import io.jans.orm.sql.operation.SupportedDbType;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
-import org.apache.commons.text.StringEscapeUtils;
 
 /**
  * Filter to SQL query convert
@@ -492,6 +492,30 @@ public class SqlFilterConverter {
 				if (dateValue != null) {
 					assertionValue = dateValue;
 				}
+			}
+			try {
+				if (attributeType != null) {
+					String columnType = attributeType.getType();
+
+					java.sql.JDBCType jdbcType;
+					// Fix for PostgreSQL 
+					if (StringHelper.equalsIgnoreCase(columnType, "bool")) { 
+						jdbcType = java.sql.JDBCType.BOOLEAN;
+					} else {
+						jdbcType = java.sql.JDBCType.valueOf(StringHelper.toUpperCase(columnType));
+					}
+	
+					if (jdbcType == java.sql.JDBCType.SMALLINT) {
+						boolean res = StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1");
+						assertionValue = res ? 1 : 0;
+					} else if (jdbcType == java.sql.JDBCType.BOOLEAN) {
+						boolean res = StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1");
+						assertionValue = res;
+					}
+				}
+			} catch (java.lang.IllegalArgumentException ex) {
+				LOG.trace("Failed to determine JDBC type '{}' ", attributeType.getType(), ex);
+				// Do nothing. Type is not defined in enum
 			}
 		}
 

@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/moabu/terraform-provider-jans/jans"
+	"github.com/jans/terraform-provider-jans/jans"
 )
 
 func resourceCacheConfiguration() *schema.Resource {
@@ -168,6 +168,11 @@ func resourceRedisCacheConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Directory Path to Trust Store.",
 			},
+			"ssl_trust_store_password": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Password for accessing the Trust Store.",
+			},
 			"max_idle_connections": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -260,11 +265,12 @@ func resourceCacheConfigurationUpdate(ctx context.Context, d *schema.ResourceDat
 	c := meta.(*jans.Client)
 
 	var cacheConfig jans.CacheConfiguration
-	if err := fromSchemaResource(d, &cacheConfig); err != nil {
+	patches, err := patchFromResourceData(d, &cacheConfig)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := c.UpdateCacheConfiguration(ctx, &cacheConfig); err != nil {
+	if _, err := c.PatchCacheConfiguration(ctx, patches); err != nil {
 		return diag.FromErr(err)
 	}
 

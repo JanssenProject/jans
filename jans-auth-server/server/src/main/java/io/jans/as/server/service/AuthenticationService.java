@@ -220,7 +220,7 @@ public class AuthenticationService {
         SessionId sessionId = sessionIdService.getSessionId();
         if (sessionId != null) {
             Map<String, String> sessionIdAttributes = sessionId.getSessionAttributes();
-            if (authenticated) {
+            if (authenticated && StringHelper.isNotEmpty(userName)) {
                 sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
             }
             sessionIdService.updateSessionIdIfNeeded(sessionId, authenticated);
@@ -508,6 +508,50 @@ public class AuthenticationService {
         if (protectionServiceEnabled) {
             authenticationProtectionService.storeAttempt(userName, authenticated);
             authenticationProtectionService.doDelayIfNeeded(userName);
+        }
+
+        return authenticated;
+    }
+
+    public boolean authenticateByUserInum(String userInum) {
+        log.debug("Authenticating user with LDAP: inum: '{}', credentials: '{}'", userInum,
+                System.identityHashCode(credentials));
+
+        boolean authenticated = false;
+        boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
+
+        com.codahale.metrics.Timer.Context timerContext = metricService
+                .getTimer(MetricType.USER_AUTHENTICATION_RATE).time();
+        try {
+            User user = userService.getUserByInum(userInum);
+            if ((user != null) && checkUserStatus(user)) {
+                credentials.setUsername(user.getUserId());
+                configureAuthenticatedUser(user);
+                updateLastLogonUserTime(user);
+
+                log.trace("Authenticate: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'",
+                        System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+
+                authenticated = true;
+            }
+        } finally {
+            timerContext.stop();
+        }
+
+        setAuthenticatedUserSessionAttribute(null, authenticated);
+
+        MetricType metricType;
+        if (authenticated) {
+            metricType = MetricType.USER_AUTHENTICATION_SUCCESS;
+        } else {
+            metricType = MetricType.USER_AUTHENTICATION_FAILURES;
+        }
+
+        metricService.incCounter(metricType);
+
+        if (protectionServiceEnabled) {
+            authenticationProtectionService.storeAttempt(userInum, authenticated);
+            authenticationProtectionService.doDelayIfNeeded(userInum);
         }
 
         return authenticated;

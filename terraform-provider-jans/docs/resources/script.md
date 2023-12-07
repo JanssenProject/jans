@@ -26,12 +26,12 @@ resource "jans_script" "test" {
 	enabled 									= true
 	modified 									= false
 	internal 									= false
-	location_type 						= "LDAP"
+	location_type 						= "db"
 	base_dn 									= "inum=4A4E-4F3D,ou=scripts,o=jans"
 
 	module_properties {
 			value1 = "location_type"
-			value2 = "ldap"
+			value2 = "db"
 	}
 
 	module_properties {
@@ -64,6 +64,7 @@ resource "jans_script" "test" {
 - `enabled` (Boolean) boolean value indicating if script enabled.
 - `internal` (Boolean) boolean value indicating if the script is internal.
 - `inum` (String) XRI i-number. Identifier to uniquely identify the script.
+- `location_path` (String)
 - `location_type` (String)
 - `modified` (Boolean) boolean value indicating if the script is modified.
 - `revision` (Number) Update revision number of the script.

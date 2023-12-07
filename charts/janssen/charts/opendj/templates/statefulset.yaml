@@ -29,45 +29,10 @@ spec:
       {{- end }}
     spec:
       securityContext:
-        runAsUser: 1000
         runAsNonRoot: true
-      initContainers:
-      - command:
-        - /bin/sh
-        - -c
-        - ls -l /opt/opendj; /bin/chown -R 1000:1000 /opt/opendj || echo "did not work"; ls -l /opt/opendj; sleep 5
-        image: busybox:latest
-        imagePullPolicy: Always
-        name: change-folders-ownership
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-        volumeMounts:
-        {{- range $key, $values := $.Values.openDjVolumeMounts }}
-          - mountPath: {{$values.mountPath}}
-            name: {{$values.name}}
-            subPath: {{$key}}
-        {{- end }}
-        {{- with $.Values.volumeMounts }}
-{{- toYaml . | nindent 10 }}
-        {{- end }}
-    {{- with $.Values.image.pullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-      dnsPolicy: {{ $.Values.dnsPolicy | quote }}
-    {{- with $.Values.dnsConfig }}
-      dnsConfig:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-      volumes:
-      {{- with $.Values.volumes }}
-{{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.topologySpreadConstraints }}
-      topologySpreadConstraints:
-        {{- include "opendj.topology-spread-constraints" . | indent 8 }}
-      {{- end }}
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
       - name: {{ include "opendj.name" $ }}
         imagePullPolicy: {{ $.Values.image.pullPolicy }}
@@ -76,9 +41,7 @@ spec:
           {{- include "opendj.usr-envs" $ | indent 12 }}
           {{- include "opendj.usr-secret-envs" $ | indent 12 }}
         lifecycle:
-          preStop:
-            exec:
-              command: ["/bin/sh", "-c", "python3 /app/scripts/deregister_peer.py 1>&/proc/1/fd/1"]
+{{- toYaml .Values.lifecycle | nindent 10 }}
         envFrom:
         - configMapRef:
             name: {{ $.Release.Name }}-config-cm
@@ -104,6 +67,18 @@ spec:
         {{- with $.Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
         {{- end }}
+          - name: ldap-certkey
+            mountPath: {{ .Values.global.cnLdapCertFile }}
+            subPath: opendj.crt
+          - name: ldap-certkey
+            mountPath: {{ .Values.global.cnLdapKeyFile }}
+            subPath: opendj.key
+          - name: ldap-pass
+            mountPath: {{ .Values.global.cnLdapPasswordFile }}
+            subPath: ldap_password
+          - name: ldap-pass
+            mountPath: {{ .Values.global.cnLdapTruststorePasswordFile }}
+            subPath: ldap_truststore_password
         livenessProbe:
 {{- toYaml $.Values.livenessProbe | nindent 10 }}
         readinessProbe:
@@ -116,6 +91,13 @@ spec:
         resources:
 {{- toYaml $.Values.resources | nindent 10 }}
         {{- end }}
+      volumes:
+      - name: ldap-pass
+        secret:
+          secretName: {{ .Release.Name }}-ldap-pass
+      - name: ldap-certkey
+        secret:
+          secretName: {{ .Release.Name }}-ldap-certkey
   volumeClaimTemplates:
   - metadata:
       name: opendj-volume

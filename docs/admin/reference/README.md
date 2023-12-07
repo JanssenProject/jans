@@ -4,9 +4,8 @@ tags:
   - reference
 ---
 
-# Overview
+# Reference Guide
 
-Please use the left navigation menu to browse the content of this section while we are still working on developing content for `Overview` page.
+The purpose of the reference guide is to provide exhaustive listings that are useful for administrators and developers. This includes, for example, the listing of all the REST APIs exposed by Janssen Server modules or the listing of all the properties used to configure Janssen Server.
 
-!!! Contribute
-    If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
+Use the left navigation bar to traverse through sub-sections of the reference guide.

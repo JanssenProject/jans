@@ -1,5 +1,160 @@
 # Changelog
 
+## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.19-1...docker-jans-persistence-loader-v1.0.20-1) (2023-11-08)
+
+
+### Features
+
+* **jans-pycloudlib:** add lock to prevent race condition ([#6329](https://github.com/JanssenProject/jans/issues/6329)) ([9dd82da](https://github.com/JanssenProject/jans/commit/9dd82da5c87ee829c73a1135ce8740b8353f8ab5))
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** incorrect persistence entry check for ldap and couchbase ([#6297](https://github.com/JanssenProject/jans/issues/6297)) ([87ac453](https://github.com/JanssenProject/jans/commit/87ac453c121b9bdd2dfd7cb4ebb7b8628f322474))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+## [1.0.19-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.18-1...docker-jans-persistence-loader-v1.0.19-1) (2023-10-11)
+
+
+### Features
+
+* **docker-jans:** upgrade base image to Java 17 ([#6231](https://github.com/JanssenProject/jans/issues/6231)) ([8ed40e9](https://github.com/JanssenProject/jans/commit/8ed40e91a56c256cb34262659b6e0657571f8c97))
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+## [1.0.18-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.17-1...docker-jans-persistence-loader-v1.0.18-1) (2023-09-23)
+
+
+### Bug Fixes
+
+* prepare for 1.0.18 release ([87af7e4](https://github.com/JanssenProject/jans/commit/87af7e4d41728ce2966362883b47e5354f8c3803))
+
+## [1.0.17-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.16-1...docker-jans-persistence-loader-v1.0.17-1) (2023-09-17)
+
+
+### Features
+
+* **docker-jans:** sync assets of images ([#5907](https://github.com/JanssenProject/jans/issues/5907)) ([acbc763](https://github.com/JanssenProject/jans/commit/acbc763f31422c3d9f80f44ade82cc8519dc4fa4))
+
+
+### Bug Fixes
+
+* **docker-jans-persistence-loader:** data type too small for jansDevice data ([#5951](https://github.com/JanssenProject/jans/issues/5951)) ([06a8bcd](https://github.com/JanssenProject/jans/commit/06a8bcdf1367a358946773af56a6c2b4aa3a3d6e))
+* **docker-jans-persistence-loader:** search session by deviceSecret ([#6038](https://github.com/JanssenProject/jans/issues/6038)) ([d299d7f](https://github.com/JanssenProject/jans/commit/d299d7f926e07c7e0af04d5069d51ba9b000393f))
+* prepare for 1.0.17 release ([4ba8c15](https://github.com/JanssenProject/jans/commit/4ba8c151734f02d762e902b46a35cae2d498fa8f))
+
+## [1.0.16-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.15-1...docker-jans-persistence-loader-v1.0.16-1) (2023-08-02)
+
+
+### Features
+
+* add jans-link support in CN ([#5546](https://github.com/JanssenProject/jans/issues/5546)) ([cdc0a13](https://github.com/JanssenProject/jans/commit/cdc0a13554fccbe370c75a8624c75dd232223a8d))
+* **docker-jans:** add dpop nonce ([#5640](https://github.com/JanssenProject/jans/issues/5640)) ([15bb0c1](https://github.com/JanssenProject/jans/commit/15bb0c1e019522aa3a911c1784dae53afb90d408))
+
+
+### Bug Fixes
+
+* **docker-jans-persistence-loader:** enlarge column adsPrjDeplDetails ([#5651](https://github.com/JanssenProject/jans/issues/5651)) ([aba08ab](https://github.com/JanssenProject/jans/commit/aba08abaff80c8136b226c213ede2c9784f17943))
+* prepare for 1.0.16 release ([042ce79](https://github.com/JanssenProject/jans/commit/042ce7941b9597fade8d5f10e40a89d9e7662315))
+* prepare for 1.0.16 release ([b2649c3](https://github.com/JanssenProject/jans/commit/b2649c33a9857f356f91df2f38787ec56269e6dd))
+
+## [1.0.15-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.14-1...docker-jans-persistence-loader-v1.0.15-1) (2023-07-12)
+
+
+### Features
+
+* **docker:** add deletion support for persistence ([#5370](https://github.com/JanssenProject/jans/issues/5370)) ([96be085](https://github.com/JanssenProject/jans/commit/96be0853b2d04a13df15e7e053a89f4607d9c0e1))
+
+
+### Bug Fixes
+
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
+## [1.0.14-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.13-1...docker-jans-persistence-loader-v1.0.14-1) (2023-06-12)
+
+
+### Bug Fixes
+
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
+## [1.0.13-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.12-1...docker-jans-persistence-loader-v1.0.13-1) (2023-05-10)
+
+
+### Bug Fixes
+
+* **docker-jans-persistence-loader:** ensure smtp config is multivalued ([#4836](https://github.com/JanssenProject/jans/issues/4836)) ([589a330](https://github.com/JanssenProject/jans/commit/589a330c6ccbae6df76eb6b94122599103d8b27d))
+* **docker-jans:** sync role-based introspection script ([#4753](https://github.com/JanssenProject/jans/issues/4753)) ([f744330](https://github.com/JanssenProject/jans/commit/f74433098011bb9546d27ca2b55d7e83dc4e0531))
+* ensure google libs support all possible credentials ([#4777](https://github.com/JanssenProject/jans/issues/4777)) ([d0759e5](https://github.com/JanssenProject/jans/commit/d0759e595517ca16b97a1ce4f7cd168b29ff17dd))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.11-1...docker-jans-persistence-loader-v1.0.12-1) (2023-04-18)
+
+
+### Bug Fixes
+
+* **docker-jans-persistence-loader:** rename smtp config keys ([#4528](https://github.com/JanssenProject/jans/issues/4528)) ([f0c3045](https://github.com/JanssenProject/jans/commit/f0c3045a8821318238a58b2a61901359c3e71991))
+* opencontainer labels ([f8b0b36](https://github.com/JanssenProject/jans/commit/f8b0b365600bd700128bb9d92df6de7ba14830b6))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.10-1...docker-jans-persistence-loader-v1.0.11-1) (2023-04-05)
+
+
+### Features
+
+* **jans-auth-server:** increase sessionIdUnauthenticatedUnusedLifetime value in setup [#4445](https://github.com/JanssenProject/jans/issues/4445) ([#4446](https://github.com/JanssenProject/jans/issues/4446)) ([ecf9395](https://github.com/JanssenProject/jans/commit/ecf93955f391bcda17ad6a2f6ead00d79afee165))
+
+
+### Bug Fixes
+
+* **docker-jans-persistence-loader:** disable agama engine by default ([#4400](https://github.com/JanssenProject/jans/issues/4400)) ([9a81459](https://github.com/JanssenProject/jans/commit/9a81459c5c503691b3d0e98c4e3c0cf5a35b5bc3))
+* **docker-jans-persistence-loader:** set highest level script to false by default ([#4250](https://github.com/JanssenProject/jans/issues/4250)) ([c29fc73](https://github.com/JanssenProject/jans/commit/c29fc7368bdb7a98d31077b78c8b1a07ebd98331))
+* **docker-jans:** update smtp config and agama script entry ([#4384](https://github.com/JanssenProject/jans/issues/4384)) ([d24dffb](https://github.com/JanssenProject/jans/commit/d24dffb93ed445b00819d696d87e046bcf5eb269))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
+## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.9-1...docker-jans-persistence-loader-v1.0.10-1) (2023-03-16)
+
+
+### Features
+
+* **docker-jans-persistence-loader:** add online_access scope and enable agama engine by default ([#4136](https://github.com/JanssenProject/jans/issues/4136)) ([8c0bbb3](https://github.com/JanssenProject/jans/commit/8c0bbb3b564623407c66ae934be77ca16ac94c42))
+* **docker-jans:** add client auth scopes ([#4156](https://github.com/JanssenProject/jans/issues/4156)) ([1ae907b](https://github.com/JanssenProject/jans/commit/1ae907b3abda9f2df03cfcab805931fdbd1bfc11))
+
+
+### Bug Fixes
+
+* **docker-jans-config-api:** remove licenseSpringCredentials from admin-ui jansConfDyn ([#4125](https://github.com/JanssenProject/jans/issues/4125)) ([2cf8aa0](https://github.com/JanssenProject/jans/commit/2cf8aa01b65c809a9bb6c3576cf949ddd23a5fdd))
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.7-1...docker-jans-persistence-loader-v1.0.9-1) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
+## 1.0.7-1 (2023-02-22)
+
+
+### Features
+
+* **docker-jans-persistence-loader:** add ssa admin scope ([#3762](https://github.com/JanssenProject/jans/issues/3762)) ([540f619](https://github.com/JanssenProject/jans/commit/540f6196bfe4e5b239486ef5728e381b18d65bc8))
+* **docker-jans:** add admin-ui scopes ([#3530](https://github.com/JanssenProject/jans/issues/3530)) ([bc62673](https://github.com/JanssenProject/jans/commit/bc626739bf7a2ed10e7551eda6ea4cc45e7ea49a))
+* **docker-jans:** change persistence entry check to read configuration ([#3618](https://github.com/JanssenProject/jans/issues/3618)) ([d465c19](https://github.com/JanssenProject/jans/commit/d465c191c8276c5d409e1200ddd7e3a364089e96))
+
+
+### Bug Fixes
+
+* **docker-jans-persistence-loader:** add missing persist tokens config when upgrading from previous version ([#3849](https://github.com/JanssenProject/jans/issues/3849)) ([5b8036d](https://github.com/JanssenProject/jans/commit/5b8036dff57423f36ffa6f47bdd7a150db55d51e))
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* rename role_based_client as tui_client ([#3657](https://github.com/JanssenProject/jans/issues/3657)) ([c393cb2](https://github.com/JanssenProject/jans/commit/c393cb2052f7e73cc6a02b84bbc673bcc93dc13d))
+
 ## 1.0.6-1 (2023-01-09)
 
 

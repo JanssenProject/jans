@@ -53,7 +53,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         return staticConfiguration.getBaseDn().getPeople();
     }
 
-    public long countFido2RegisteredDevices(String username) {
+    public long countFido2RegisteredDevices(String username, String domain) {
         String userInum = getUserInum(username);
         if (userInum == null) {
             return 0;
@@ -68,7 +68,8 @@ public class UserService extends io.jans.as.common.service.common.UserService {
 
         Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
         Filter registeredFilter = Filter.createEqualityFilter("jansStatus", "registered");
-        Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter);
+        Filter domainFilter = Filter.createEqualityFilter("jansApp", domain);
+        Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter, domainFilter);
 
         return persistenceEntryManager.countEntries(baseDn, Fido2RegistrationEntry.class, filter);
     }

@@ -7,19 +7,20 @@ import (
 
 // JsonWebKey is the representation of a JSON Web Key.
 type JsonWebKey struct {
-	Name  string   `schema:"name" json:"name"`
-	Descr string   `schema:"descr" json:"descr"`
-	Kid   string   `schema:"kid" json:"kid"`
-	Kty   string   `schema:"kty" json:"kty"`
-	Use   string   `schema:"use" json:"use"`
-	Alg   string   `schema:"alg" json:"alg"`
-	Crv   string   `schema:"crv" json:"crv"`
-	Exp   int      `schema:"exp" json:"exp"`
-	X5c   []string `schema:"x5c" json:"x5c"`
-	N     string   `schema:"n" json:"n"`
-	E     string   `schema:"e" json:"e"`
-	X     string   `schema:"x" json:"x"`
-	Y     string   `schema:"y" json:"y"`
+	Name       string   `schema:"name" json:"name"`
+	Descr      string   `schema:"descr" json:"descr"`
+	Kid        string   `schema:"kid" json:"kid"`
+	Kty        string   `schema:"kty" json:"kty"`
+	Use        string   `schema:"use" json:"use"`
+	Alg        string   `schema:"alg" json:"alg"`
+	Crv        string   `schema:"crv" json:"crv"`
+	Exp        int      `schema:"exp" json:"exp"`
+	X5c        []string `schema:"x5c" json:"x5c"`
+	N          string   `schema:"n" json:"n"`
+	E          string   `schema:"e" json:"e"`
+	X          string   `schema:"x" json:"x"`
+	Y          string   `schema:"y" json:"y"`
+	KeyOpsType []string `schema:"key_ops_type" json:"key_ops_type"`
 }
 
 // WebKeysConfiguration is a list of JSON Web Keys, configured in the server.

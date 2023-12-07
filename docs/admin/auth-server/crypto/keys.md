@@ -3,6 +3,7 @@ tags:
   - administration
   - auth-server
   - cryptography
+  - keys
 ---
 
 # Overview
@@ -27,6 +28,12 @@ Gets list of JSON Web Key (JWK) used by server. JWK is a JSON data structure tha
 ```https://<your_server>/jans-auth/restv1/jwks```
 
 ***Let's see some example of JWT public keys used in janssen.***
+
+When jwk is expired, it is archived and can be access by following url:
+
+```https://<your_server>/jans-auth/restv1/jwks/archived/{kid}``` 
+
+More info about archived jwks can be found [here](../endpoints/archived-jwks-uri.md)
 
 ### Example-1
 
@@ -175,18 +182,18 @@ levels of complexity and security.
 
 Let's see some signing key algorithms 
 
-| Name | Kty | Use | Alg | 
-|--------|-------|------|---------|
-|RS256 Sign Key|RSA |sig|RS256|
-|RS384 Sign Key|RSA|sig|RS384|
-|RS512 Sign Key|RSA|sig|RS512|
-|ES256 Sign Key|EC|sig|ES256|
-|ES256 Sign Key|EC|sig|ES256K|
-|ES384 Sign Key|EC|sig|ES384|
-|ES512 Sign Key|EC|sig|ES384|
-|PS256 Sign Key|RSA|sig|PS256|
-|PS384 sign Key|RSA|sig|PS384|
-|PS512 sign Key|RSA|sig|PS512|
+| Name           | Kty | Use | Alg    | 
+|----------------|-----|-----|--------|
+| RS256 Sign Key | RSA | sig | RS256  |
+| RS384 Sign Key | RSA | sig | RS384  |
+| RS512 Sign Key | RSA | sig | RS512  |
+| ES256 Sign Key | EC  | sig | ES256  |
+| ES256 Sign Key | EC  | sig | ES256K |
+| ES384 Sign Key | EC  | sig | ES384  |
+| ES512 Sign Key | EC  | sig | ES384  |
+| PS256 Sign Key | RSA | sig | PS256  |
+| PS384 sign Key | RSA | sig | PS384  |
+| PS512 sign Key | RSA | sig | PS512  |
 
 ## Encryption algorithms
 
@@ -196,11 +203,11 @@ Ideally, only authorized parties can decipher a ciphertext back to plaintext and
 
 Let's see some encryption keys.
 
-| Name | Kty | Use | Alg | 
-|--------|-------|------|---------|
-|RSA1_5 Encryption key|RSA |enc|RSA1_5|
-|RSA-OAEP Encryption Key|RSA|enc|RSA-OAEP|
-|ECDH-ES Encryption Key|CE|enc|ECDH-ES|
+| Name                    | Kty | Use | Alg      | 
+|-------------------------|-----|-----|----------|
+| RSA1_5 Encryption key   | RSA | enc | RSA1_5   |
+| RSA-OAEP Encryption Key | RSA | enc | RSA-OAEP |
+| ECDH-ES Encryption Key  | CE  | enc | ECDH-ES  |
 
 
 

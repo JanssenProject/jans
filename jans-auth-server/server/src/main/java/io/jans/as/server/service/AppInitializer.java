@@ -6,12 +6,22 @@
 
 package io.jans.as.server.service;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.as.persistence.model.configuration.IDPAuthConf;
 import io.jans.as.server.model.auth.AuthenticationMode;
@@ -53,6 +63,7 @@ import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
+import io.jans.util.security.SecurityProviderUtility;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 import jakarta.annotation.PostConstruct;
@@ -67,15 +78,6 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
-import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.slf4j.Logger;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
@@ -219,6 +221,7 @@ public class AppInitializer {
         supportedCustomScriptTypes.remove(CustomScriptType.SCIM);
         supportedCustomScriptTypes.remove(CustomScriptType.IDP);
         supportedCustomScriptTypes.remove(CustomScriptType.CONFIG_API);
+        supportedCustomScriptTypes.remove(CustomScriptType.FIDO2_EXTENSION);
 
         statService.init();
 
@@ -228,7 +231,7 @@ public class AppInitializer {
         // Schedule timer tasks
         metricService.initTimer();
         configurationFactory.initTimer();
-        loggerService.initTimer();
+        loggerService.initTimer(true);
         ldapStatusTimer.initTimer();
         cleanerTimer.initTimer();
         customScriptManager.initTimer(supportedCustomScriptTypes);

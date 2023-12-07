@@ -6,32 +6,6 @@
 
 package io.jans.as.server.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.as.model.uma.persistence.UmaPermission;
-import io.jans.as.server.uma.service.UmaScopeService;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.base.CustomAttribute;
-import io.jans.service.cdi.util.CdiUtil;
-import io.jans.util.ArrayHelper;
-import io.jans.util.Util;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.faces.context.ExternalContext;
-import jakarta.faces.context.FacesContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.CacheControl;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -45,6 +19,32 @@ import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+
+import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.server.uma.service.UmaScopeService;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.base.CustomAttribute;
+import io.jans.service.cdi.util.CdiUtil;
+import io.jans.util.ArrayHelper;
+import io.jans.util.Util;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.CacheControl;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -141,14 +141,11 @@ public class ServerUtil {
     }
 
     public static ObjectMapper createJsonMapper() {
-        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
 
-        final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);
-
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.getDeserializationConfig().with(pair);
-        mapper.getSerializationConfig().with(pair);
+        mapper.getDeserializationConfig().with(jackson);
+        mapper.getSerializationConfig().with(jackson);
         return mapper;
     }
 

@@ -1,7 +1,6 @@
 import json
 import logging.config
 import os
-import re
 import typing as _t
 from functools import cached_property
 from string import Template
@@ -39,15 +38,15 @@ from plugins import discover_plugins
 from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("config-api")
 
 
 def main():
     manager = get_manager()
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
 
-    render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
-    render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
+    render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
+    render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
 
     mapper = PersistenceMapper()
     persistence_groups = mapper.groups().keys()
@@ -60,7 +59,7 @@ def main():
     if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
-            "/app/templates/jans-ldap.properties.tmpl",
+            "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
         sync_ldap_truststore(manager)
@@ -68,7 +67,7 @@ def main():
     if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
-            "/app/templates/jans-couchbase.properties.tmpl",
+            "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
         # need to resolve whether we're using default or user-defined couchbase cert
@@ -79,14 +78,14 @@ def main():
 
         render_sql_properties(
             manager,
-            f"/app/templates/jans-{db_dialect}.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties",
             "/etc/jans/conf/jans-sql.properties",
         )
 
     if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
-            "/app/templates/jans-spanner.properties.tmpl",
+            "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
 
@@ -100,16 +99,15 @@ def main():
     cert_to_truststore(
         "web_https",
         "/etc/certs/web_https.crt",
-        "/usr/java/latest/jre/lib/security/cacerts",
+        "/opt/java/lib/security/cacerts",
         "changeit",
     )
 
-    modify_jetty_xml()
-    modify_webdefault_xml()
     configure_logging()
 
-    persistence_setup = PersistenceSetup(manager)
-    persistence_setup.import_ldif_files()
+    with manager.lock.create_lock("config-api-setup"):
+        persistence_setup = PersistenceSetup(manager)
+        persistence_setup.import_ldif_files()
 
     plugins = discover_plugins()
     logger.info(f"Loaded config-api plugins: {plugins}")
@@ -119,39 +117,16 @@ def main():
         admin_ui_plugin.setup()
         configure_admin_ui_logging()
 
-
-def modify_jetty_xml():
-    fn = "/opt/jetty/etc/jetty.xml"
-    with open(fn) as f:
-        txt = f.read()
-
-    # disable contexts
-    updates = re.sub(
-        r'<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>',
-        r'<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">\n\t\t\t\t <Set name="showContexts">false</Set>\n\t\t\t </New>',
-        txt,
-        flags=re.DOTALL | re.M,
-    )
-
-    with open(fn, "w") as f:
-        f.write(updates)
-
-
-def modify_webdefault_xml():
-    fn = "/opt/jetty/etc/webdefault.xml"
-    with open(fn) as f:
-        txt = f.read()
-
-    # disable dirAllowed
-    updates = re.sub(
-        r'(<param-name>dirAllowed</param-name>)(\s*)(<param-value>)true(</param-value>)',
-        r'\1\2\3false\4',
-        txt,
-        flags=re.DOTALL | re.M,
-    )
-
-    with open(fn, "w") as f:
-        f.write(updates)
+    try:
+        manager.secret.to_file(
+            "smtp_jks_base64",
+            "/etc/certs/smtp-keys.pkcs12",
+            decode=True,
+            binary_mode=True,
+        )
+    except ValueError:
+        # likely secret is not created yet
+        logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
 
 
 def configure_logging():
@@ -224,10 +199,13 @@ def configure_logging():
         else:
             config[key] = file_aliases[key]
 
-    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
-        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+    if any([
+        as_boolean(custom_config.get("enable_stdout_log_prefix")),
+        as_boolean(os.environ.get("CN_ENABLE_STDOUT_LOG_PREFIX")),
+    ]):
+        config["log_prefix"] = "${sys:config_api.log.console.prefix}%X{config_api.log.console.group} - "
 
-    with open("/app/templates/log4j2.xml") as f:
+    with open("/app/templates/jans-config-api/log4j2.xml") as f:
         txt = f.read()
 
     logfile = "/opt/jans/jetty/jans-config-api/resources/log4j2.xml"
@@ -255,7 +233,7 @@ def configure_admin_ui_logging():
 
     # ensure custom config is ``dict`` type
     if not isinstance(custom_config, dict):
-        logger.warning("Invalid data type for CN_CONFIG_API_APP_LOGGERS; fallback to defaults")
+        logger.warning("Invalid data type for CN_ADMIN_UI_PLUGIN_LOGGERS; fallback to defaults")
         custom_config = {}
 
     # list of supported levels; OFF is not supported
@@ -290,14 +268,17 @@ def configure_admin_ui_logging():
             continue
 
         if value == "STDOUT":
-            config[key] = "Console"
+            config[key] = "AdminUI_Console"
         else:
             config[key] = file_aliases[key]
 
-    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
-        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+    if any([
+        as_boolean(custom_config.get("enable_stdout_log_prefix")),
+        as_boolean(os.environ.get("CN_ENABLE_STDOUT_LOG_PREFIX")),
+    ]):
+        config["log_prefix"] = "${sys:admin_ui.log.console.prefix}%X{admin_ui.log.console.group} - "
 
-    with open("/app/plugins/admin-ui/log4j2-adminui.xml") as f:
+    with open("/app/templates/jans-config-api/log4j2-adminui.xml") as f:
         txt = f.read()
 
     tmpl = Template(txt)
@@ -333,19 +314,18 @@ class PersistenceSetup:
             return json.loads(entry["jansConfDyn"])
 
         # couchbase
-        elif self.persistence_type == "couchbase":
+        if self.persistence_type == "couchbase":
             key = id_from_dn(dn)
             bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
             req = self.client.exec_query(
-                f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+                f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec:  608
             )
             attrs = req.json()["results"][0]
             return attrs["jansConfDyn"]
 
         # ldap
-        else:
-            entry = self.client.get(dn, attributes=["jansConfDyn"])
-            return json.loads(entry.entry_attributes_as_dict["jansConfDyn"][0])
+        entry = self.client.get(dn, attributes=["jansConfDyn"])
+        return json.loads(entry.entry_attributes_as_dict["jansConfDyn"][0])
 
     def transform_url(self, url):
         auth_server_url = os.environ.get("CN_AUTH_SERVER_URL", "")
@@ -358,8 +338,7 @@ class PersistenceSetup:
             path = f"/jans-auth{parse_result.path}"
         else:
             path = parse_result.path
-        url = f"http://{auth_server_url}{path}"
-        return url
+        return f"http://{auth_server_url}{path}"
 
     def get_injected_urls(self):
         auth_config = self.get_auth_config()
@@ -413,6 +392,24 @@ class PersistenceSetup:
             ).decode()
             self.manager.secret.set("jca_client_encoded_pw", ctx["jca_client_encoded_pw"])
 
+        # test client
+        ctx["test_client_id"] = self.manager.config.get("test_client_id")
+        if not ctx["test_client_id"]:
+            ctx["test_client_id"] = f"{uuid4()}"
+            self.manager.config.set("test_client_id", ctx["test_client_id"])
+
+        ctx["test_client_pw"] = self.manager.secret.get("test_client_pw")
+        if not ctx["test_client_pw"]:
+            ctx["test_client_pw"] = get_random_chars()
+            self.manager.secret.set("test_client_pw", ctx["test_client_pw"])
+
+        ctx["test_client_encoded_pw"] = self.manager.secret.get("test_client_encoded_pw")
+        if not ctx["test_client_encoded_pw"]:
+            ctx["test_client_encoded_pw"] = encode_text(
+                ctx["test_client_pw"], self.manager.secret.get("encoded_salt"),
+            ).decode()
+            self.manager.secret.set("test_client_encoded_pw", ctx["test_client_encoded_pw"])
+
         # pre-populate config_api_dynamic_conf_base64
         with open("/app/templates/jans-config-api/dynamic-conf.json") as f:
             tmpl = Template(f.read())
@@ -447,11 +444,10 @@ class PersistenceSetup:
 
     def import_ldif_files(self) -> None:
         # create missing scopes, saved as scopes.ldif (if enabled)
-        if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
-            logger.info("Missing scopes creation is enabled!")
-            self.generate_scopes_ldif()
+        logger.info("Missing scopes creation is enabled!")
+        self.generate_scopes_ldif()
 
-        files = ["config.ldif", "scopes.ldif", "clients.ldif", "scim-scopes.ldif"]
+        files = ["config.ldif", "scopes.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
 
         for file_ in ldif_files:

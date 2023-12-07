@@ -42,3 +42,4 @@ If any of those 3 parameters is not provided, the provider will not be able to c
 Optionally, users can also set the following variables:
 
 * `insecure_client` - If set to `true`, the provider will not verify the TLS certificate of the Janssen server. This is useful for testing purposes and should not be used in production, unless absolutely unavoidable.
+

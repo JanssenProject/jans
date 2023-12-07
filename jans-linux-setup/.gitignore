@@ -12,3 +12,4 @@ pylib/__pycache_/
 *.egg-info
 dist/
 @*
+*.iml

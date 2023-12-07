@@ -16,10 +16,12 @@ import shutil
 import multiprocessing
 import ssl
 import tempfile
+import urllib.request
+
 
 from pathlib import Path
 from collections import OrderedDict
-from urllib.request import urlretrieve
+
 
 # disable ssl certificate check
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -64,6 +66,9 @@ with open(os_release_fn) as f:
                     os_type = 'ubuntu'
                 elif ('sles' in os_type) or ('opensuse' in os_type):
                     os_type = 'suse'
+                    if 'tumbleweed' in row[1]:
+                        os_version = 'tumbleweed'
+                        break
             elif row[0] == 'VERSION_ID':
                 os_version = row[1].split('.')[0]
 
@@ -108,6 +113,13 @@ def get_os_description():
 
 if snap:
     snapctl = shutil.which('snapctl')
+
+systemctl = False
+systemctl_cmd = shutil.which('systemctl')
+service_cmd = shutil.which('service')
+if systemctl_cmd:
+    systemctl = os.popen(systemctl_cmd + ' is-system-running').read().strip() == 'offline'
+
 
 # resources
 current_file_max = int(open("/proc/sys/fs/file-max").read().strip())
@@ -174,8 +186,8 @@ def check_resources():
 
 
 def determineApacheVersion(full=False):
-    httpd_cmd = shutil.which(httpd_name)
-    cmd = httpd_name + " -v | egrep '^Server version'"
+    httpd_cmd = shutil.which(httpd_name) or shutil.which('apache2ctl')
+    cmd = httpd_cmd + " -v | egrep '^Server version'"
     output = run(cmd, shell=True)
     apache_version_re = re.search('Apache/(\d).(\d).(\d)', output.strip())
     if apache_version_re:
@@ -312,7 +324,7 @@ def find_script_names(ldif_file):
                 
     return name_list
 
-def download(url, dst, verbose=False):
+def download(url, dst, verbose=False, headers=None):
     pardir, fn = os.path.split(dst)
     if not os.path.exists(pardir):
         logIt("Creating driectory", pardir)
@@ -323,11 +335,17 @@ def download(url, dst, verbose=False):
         if verbose:
             print(logs)
 
+
+    if headers:
+        opener = urllib.request.build_opener()
+        opener.addheaders = headers
+        urllib.request.install_opener(opener)
+
     mylog("Downloading {} to {}".format(url, dst))
     download_tries = 1
     while download_tries < 4:
         try:
-            urlretrieve(url, dst)
+            urllib.request.urlretrieve(url, dst)
             mylog("Download size: {} bytes".format(os.path.getsize(dst)))
             time.sleep(0.1)
         except:
@@ -336,6 +354,8 @@ def download(url, dst, verbose=False):
              time.sleep(1)
         else:
             break
+
+    urllib.request.install_opener(None)
 
 def extract_file(zip_file, source, target, ren=False):
     zip_obj = zipfile.ZipFile(zip_file, "r")
@@ -401,7 +421,30 @@ def extract_subdir(zip_fn, sub_dir, target_dir, par_dir=None):
         shutil.unpack_archive(zip_fn, unpack_dir, format='zip')
         shutil.copytree(os.path.join(unpack_dir, par_dir, sub_dir), target_dir)
 
-current_app.app_info = readJsonFile(os.path.join(par_dir, 'app_info.json'))
+def unpack_zip(zip_fn, extract_dir, with_par_dir=True):
+    logIt(f"Extracting {zip_fn} to {extract_dir} with parent directory {with_par_dir}")
+    if not with_par_dir and not os.path.exists(extract_dir):
+        os.makedirs(extract_dir)
+
+    with zipfile.ZipFile(zip_fn) as zip_file:
+        info_list = zip_file.infolist()
+        for info in info_list:
+            fpath = Path(info.filename)
+            n = 0 if with_par_dir else 1
+            out_path = os.path.join(extract_dir, *fpath.parts[n:])
+
+            if info.is_dir():
+                if not os.path.exists(out_path):
+                    os.makedirs(out_path)
+            else:
+                with open(out_path, 'wb') as w:
+                    w.write(zip_file.read(info))
+
+            perm = info.external_attr >> 16
+            os.chmod(out_path, perm)
+
+app_info_fn = os.environ.get('JANS_APP_INFO') or os.path.join(par_dir, 'app_info.json')
+current_app.app_info = readJsonFile(app_info_fn)
 current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')
 
 def as_bool(val):

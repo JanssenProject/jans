@@ -1,17 +1,5 @@
 package io.jans.service.document.store.provider;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.conf.DBDocumentStoreConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
@@ -22,6 +10,14 @@ import io.jans.util.StringHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * @author Shekhar L. on 29/10/2022
@@ -76,6 +72,9 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		Document oxDocument = null;
 		try {
 			oxDocument = documentService.getDocumentByDisplayName(DisplayName);
+			if(oxDocument != null) {
+				return true;
+			}
 		} catch (Exception e) {
 			log.error("Failed to check if path '" + DisplayName + "' exists in repository", e);
 		}
@@ -115,7 +114,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		oxDocument.setDisplayName(name);
 		
 		 try {
-			String documentContent = Base64.getEncoder().encodeToString(IOUtils.toByteArray(documentStream));
+			String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
 			oxDocument.setDocument(documentContent);
 			String inum = documentService.generateInumForNewDocument();
 			oxDocument.setInum(inum);	
@@ -158,7 +157,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			return null;
 		}
 
-		InputStream InputStream = new ByteArrayInputStream(Base64.getDecoder().decode(filecontecnt));
+		InputStream InputStream = new ByteArrayInputStream(filecontecnt.getBytes());
 		return InputStream;
 	}
 

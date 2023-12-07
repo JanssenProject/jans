@@ -14,6 +14,7 @@ import java.util.Map;
 public class HttpResponse {
     private int status;
     private Map<String, String> headers;
+    private String body;
 
     public int getStatus() {
         return status;
@@ -29,5 +30,13 @@ public class HttpResponse {
 
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

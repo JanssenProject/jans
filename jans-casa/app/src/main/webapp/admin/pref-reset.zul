@@ -1,0 +1,69 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.adm.title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.ui.vm.admin.PreferenceResetViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.adm.resets_title}</h2>
+                    <p>${labels.adm.resets_text}</p>
+                    <p class="mb0">${labels.adm.resets_note}</p>
+                </div>
+                <div class="${css.panel}">
+                    <div class="pb2 flex flex-wrap items-center">
+                        <z:textbox sclass="${css.textInput} w4 w5-ns mr2" placeholder="${labels.adm.resets_textbox_placeholder}"
+                                   value="@bind(vm.searchPattern)" focus="true" id="pattern"
+                                   w:onChange="alertRef = $('#feedback-pref-reset')" onOK="@('search')" />
+                        <z:button label="${labels.general.search}" sclass="${css.primaryButton}"
+                                  w:onClick="alertRef = $('#feedback-pref-reset')" onClick="@('search')" />
+                        <z:label sclass="f7 dark-blue2 ml3" visible="@load((vm.users ne null) and (empty vm.users))" value="${labels.adm.resets_nomatches}" />
+                    </div>
+                    <div class="mt2">
+                        <div class="alert alert-success dn" id="feedback-pref-reset" role="alert" />
+                    </div>
+                </div>
+                <z:div sclass="${css.panel}" visible="@load(not empty vm.users)">
+                    <span sclass="dark-blue2">${labels.adm.resets_hintgrid}</span>
+
+                    <z:div sclass="flex items-center flex-column pt2 ph3-ns">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th scope="col"> </th>
+                                    <th scope="col">${labels.adm.reset_column_username}</th>
+                                    <th scope="col" class="dn dtc-ns">${labels.adm.reset_column_name}</th>
+                                    <th scope="col">${labels.adm.reset_column_familyname}</th>
+                                </tr>
+                            </thead>
+                            <h:tbody children="@load(vm.users)" sclass="f7">
+                                <zk:template name="children">
+                                    <h:tr sclass="pointer" style="@load(each.alreadyReset ? 'cursor:not-allowed' : '')"
+                                          onClick="@('rowClicked', self.getFellow(each.id), each)">
+                                        <td><z:checkbox id="@load(each.id)" disabled="@load(each.alreadyReset)" checked="@bind(each.checked)" /></td>
+                                        <td><z:label value="@load(each.userName)" /></td>
+                                        <td class="dn dtc-ns"><z:label unless="${sessionContext.browser.mobile}" value="@load(each.givenName)" /></td>
+                                        <td><z:label value="@load(each.lastName)" /></td>
+                                    </h:tr>
+                                </zk:template>
+                            </h:tbody>
+                        </table>
+
+                        <div class="pt3">
+                            <z:button label="${labels.adm.resets_reset}" sclass="${css.primaryButton} mr3" onClick="@('doReset')" />
+                            <z:button label="${labels.general.cancel}" sclass="${css.tertiaryButton} ph4" onClick="@('cancelReset')"/>
+                        </div>
+                    </z:div>
+                </z:div>
+            </section>
+        </div>
+    </z:div>
+
+</zk:zk>

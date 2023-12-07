@@ -20,13 +20,15 @@ import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalDiscoveryService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
+import io.jans.util.OxConstants;
 import jakarta.inject.Inject;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -104,8 +106,10 @@ public class OpenIdConfiguration extends HttpServlet {
 
             jsonObj.put(ISSUER, appConfiguration.getIssuer());
             jsonObj.put(AUTHORIZATION_ENDPOINT, appConfiguration.getAuthorizationEndpoint());
+            jsonObj.put(AUTHORIZATION_CHALLENGE_ENDPOINT, appConfiguration.getAuthorizationChallengeEndpoint());
             jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
             jsonObj.put(JWKS_URI, appConfiguration.getJwksUri());
+            jsonObj.put(ARCHIVED_JWKS_URI, appConfiguration.getArchivedJwksUri());
             jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
 
             if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN))
@@ -159,7 +163,7 @@ public class OpenIdConfiguration extends HttpServlet {
 
             jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping());
 
-            Util.putArray(jsonObj, externalAuthenticationService.getAcrValuesList(), ACR_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, getAcrValuesList(), ACR_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getSubjectTypesSupported(), SUBJECT_TYPES_SUPPORTED);
 
@@ -170,6 +174,10 @@ public class OpenIdConfiguration extends HttpServlet {
             Util.putArray(jsonObj, appConfiguration.getUserInfoSigningAlgValuesSupported(), USER_INFO_SIGNING_ALG_VALUES_SUPPORTED);
             Util.putArray(jsonObj, appConfiguration.getUserInfoEncryptionAlgValuesSupported(), USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED);
             Util.putArray(jsonObj, appConfiguration.getUserInfoEncryptionEncValuesSupported(), USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED);
+
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionSigningAlgValuesSupported(), INTROSPECTION_SIGNING_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionAlgValuesSupported(), INTROSPECTION_ENCRYPTION_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionEncValuesSupported(), INTROSPECTION_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getIdTokenSigningAlgValuesSupported(), ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED);
             Util.putArray(jsonObj, appConfiguration.getIdTokenEncryptionAlgValuesSupported(), ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED);
@@ -249,12 +257,25 @@ public class OpenIdConfiguration extends HttpServlet {
         }
     }
 
+    public List<String> getAcrValuesList() {
+        return getAcrValuesList(externalAuthenticationService.getAcrValuesList());
+    }
+
+    public static List<String> getAcrValuesList(final List<String> scriptAliases) {
+        if (!scriptAliases.contains(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME)) {
+            scriptAliases.add(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
+        }
+        return scriptAliases;
+    }
+
     @SuppressWarnings("java:S3776")
     private void addMtlsAliases(JSONObject jsonObj) {
         JSONObject aliases = new JSONObject();
 
         if (StringUtils.isNotBlank(appConfiguration.getMtlsAuthorizationEndpoint()))
             aliases.put(AUTHORIZATION_ENDPOINT, appConfiguration.getMtlsAuthorizationEndpoint());
+        if (StringUtils.isNotBlank(appConfiguration.getMtlsAuthorizationChallengeEndpoint()))
+            aliases.put(AUTHORIZATION_CHALLENGE_ENDPOINT, appConfiguration.getMtlsAuthorizationChallengeEndpoint());
         if (StringUtils.isNotBlank(appConfiguration.getMtlsTokenEndpoint()))
             aliases.put(TOKEN_ENDPOINT, appConfiguration.getMtlsTokenEndpoint());
         if (StringUtils.isNotBlank(appConfiguration.getMtlsJwksUri()))
@@ -292,6 +313,16 @@ public class OpenIdConfiguration extends HttpServlet {
     }
 
     public static void filterOutKeys(JSONObject jsonObj, AppConfiguration appConfiguration) {
+
+        // filter out keys with blank values
+        if (BooleanUtils.isFalse(appConfiguration.getAllowBlankValuesInDiscoveryResponse())) {
+            for (String key : new HashSet<>(jsonObj.keySet())) {
+                if (jsonObj.get(key) == null || StringUtils.isBlank(jsonObj.optString(key))) {
+                    jsonObj.remove(key);
+                }
+            }
+        }
+
         final List<String> denyKeys = appConfiguration.getDiscoveryDenyKeys();
         if (!denyKeys.isEmpty()) {
             for (String key : new HashSet<>(jsonObj.keySet())) {
@@ -324,7 +355,7 @@ public class OpenIdConfiguration extends HttpServlet {
      * <li>scope_to_claims_mapping</li>
      * </ul>
      * will be moved from /.well-known/openid-configuration to
-     * /.well-known/gluu-configuration
+     * /.well-known/openid-configuration
      */
     @Deprecated
     @SuppressWarnings("java:S3776")
@@ -360,7 +391,7 @@ public class OpenIdConfiguration extends HttpServlet {
                     final List<String> claimIdList = scope.getClaims();
                     if (claimIdList != null && !claimIdList.isEmpty()) {
                         for (String claimDn : claimIdList) {
-                            final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
+                            final JansAttribute attribute = attributeService.getAttributeByDn(claimDn);
                             final String claimName = attribute.getClaimName();
                             if (StringUtils.isNotBlank(claimName) && !Boolean.TRUE.equals(attribute.getJansHideOnDiscovery())) {
                                 claimsList.put(claimName);
@@ -396,7 +427,7 @@ public class OpenIdConfiguration extends HttpServlet {
      * <li>scope_to_claims_mapping</li>
      * </ul>
      * will be moved from /.well-known/openid-configuration to
-     * /.well-known/gluu-configuration
+     * /.well-known/openid-configuration
      */
     @Deprecated
     private JSONObject createAuthLevelMapping() {

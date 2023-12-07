@@ -4,7 +4,11 @@ tags:
   - auth-server
   - oauth
   - feature
+  - grant
+  - client-credentials
 ---
+
+# OAuth 2.0 client credentials Grant
 
 ### Sequence Diagram
 

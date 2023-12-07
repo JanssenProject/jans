@@ -3,6 +3,9 @@ tags:
   - administration
   - reference
   - database
+  - mysql
+  - schema
+  - er-diagram
 ---
 
 

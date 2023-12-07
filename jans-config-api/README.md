@@ -2,7 +2,7 @@
 
 This project uses Weld, the reference implementation of CDI: Contexts and Dependency Injection for the Java EE Platform - a JCP standard for dependency injection and contextual lifecycle management.
 
-If you want to learn more about Weld, please visit its website: https://weld.cdi-spec.org/
+If you want to learn more about Weld, please visit its [website](https://weld.cdi-spec.org/)
 
 ## Objective
 
@@ -18,4 +18,3 @@ The application can be deployed on web server like jetty and can be now runnable
 
 ## Documentation
 Learn more in the [jans-config-api documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger-auto.yaml).
-

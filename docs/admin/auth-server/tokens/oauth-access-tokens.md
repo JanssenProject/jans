@@ -2,7 +2,9 @@
 tags:
   - administration
   - auth-server
-  - token
+  - oauth
+  - access-token
+  
 ---
 
 ## OAuth Access Tokens
@@ -60,17 +62,17 @@ default, Jans Auth Server access tokens expire after 5 minutes.
 
 ### Access Token Schema
 
-| claim         | Description           |
-| ------------- | ----------------------|
-| `active`      | `true` or `false`.    |  
-| `iss`         | The URI of the issuer authorization server |
-| `aud`         | The audience, used by the client to verify it is the correct recipient. During registration, the client can specify `additional_audience` values |
-| `iat`         | When the client was issued, in seconds, e.g. *1514797822* |
-| `exp`         | When the token expires, in seconds, e.g. *1514797942* |
-| `scope`       | A space delimited list of scopes |
-| `client_id`   | Recipient of the token |
-| `nbf`         | Not before, which insures the token is only valid within a certain time window |
-| `cnf`         | Confirmation, used for TLS client certificate bound tokens |
+| claim       | Description                                                                                                                                      |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `active`    | `true` or `false`.                                                                                                                               |  
+| `iss`       | The URI of the issuer authorization server                                                                                                       |
+| `aud`       | The audience, used by the client to verify it is the correct recipient. During registration, the client can specify `additional_audience` values |
+| `iat`       | When the client was issued, in seconds, e.g. *1514797822*                                                                                        |
+| `exp`       | When the token expires, in seconds, e.g. *1514797942*                                                                                            |
+| `scope`     | A space delimited list of scopes                                                                                                                 |
+| `client_id` | Recipient of the token                                                                                                                           |
+| `nbf`       | Not before, which insures the token is only valid within a certain time window                                                                   |
+| `cnf`       | Confirmation, used for TLS client certificate bound tokens                                                                                       |
 
 It is possible to add additional claims to an access token via the
 Auth Server interception scripts. The preferred script is the

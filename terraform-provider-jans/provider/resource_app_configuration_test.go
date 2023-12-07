@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/moabu/terraform-provider-jans/jans"
+	"github.com/jans/terraform-provider-jans/jans"
 )
 
 func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
@@ -22,7 +22,7 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 		AuthenticationProtectionConfiguration: jans.AuthenticationProtectionConfiguration{
 			DelayTime: 16,
 		},
-		AgamaConfiguration: jans.AgamaConfiguration{
+		AgamaConfiguration: jans.EngineConfiguration{
 			DefaultResponseHeaders: map[string]string{
 				"X-Frame-Options": "SAMEORIGIN",
 			},
@@ -46,6 +46,10 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 			"refresh_token",
 			"client_credentials",
 		},
+		ResponseTypesSupported: [][]string{
+			{"code", "token"},
+			{"code", "id_token"},
+		},
 	}
 
 	if err := toSchemaResource(data, authConfig); err != nil {
@@ -53,6 +57,15 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 	}
 
 	newConfig := jans.AppConfiguration{}
+
+	patches, err := patchFromResourceData(data, &newConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(patches) != 6 {
+		t.Errorf("Got %d patches, expected 6", len(patches))
+	}
 
 	if err := fromSchemaResource(data, &newConfig); err != nil {
 		t.Fatal(err)

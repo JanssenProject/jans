@@ -9,6 +9,7 @@ package io.jans.as.server.authorize.ws.rs;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
 import io.jans.as.model.common.FeatureFlagType;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.StringUtils;
@@ -24,31 +25,22 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.StringHelper;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
-import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.*;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.DEVICE_CODE;
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.EXPIRES_IN;
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.INTERVAL;
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.USER_CODE;
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFICATION_URI;
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.*;
 import static io.jans.as.model.token.TokenErrorResponseType.INVALID_CLIENT;
 import static io.jans.as.model.token.TokenErrorResponseType.INVALID_GRANT;
 
@@ -82,10 +74,6 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
     @Inject
     private ClientService clientService;
 
-    @Context
-    private HttpServletRequest servletRequest;
-
-
     @Override
     public Response deviceAuthorization(String clientId, String scope, HttpServletRequest httpRequest,
                                         HttpServletResponse httpResponse, SecurityContext securityContext) {
@@ -114,6 +102,7 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
             }
 
             if (!deviceAuthorizationService.hasDeviceCodeCompatibility(client)) {
+                log.trace("Device code grant type ({}) is not added to the client {}", GrantType.DEVICE_CODE.getValue(), client.getClientId());
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, INVALID_GRANT, "");
             }
 
@@ -134,7 +123,8 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
             DeviceAuthorizationCacheControl deviceAuthorizationCacheControl = new DeviceAuthorizationCacheControl(userCode,
                     deviceCode, client, scopes, verificationUri, expiresIn, interval, lastAccess, status);
             deviceAuthorizationService.saveInCache(deviceAuthorizationCacheControl, true, true);
-            log.info("Device authorization flow initiated, userCode: {}, deviceCode: {}, clientId: {}, verificationUri: {}, expiresIn: {}, interval: {}", userCode, deviceCode, clientId, verificationUri, expiresIn, interval);
+            log.info("Device authorization flow initiated, userCode: {}, deviceCode: {}, clientId: {}, verificationUri: {}, expiresIn: {}, interval: {}, scopes: {}",
+                    userCode, deviceCode, clientId, verificationUri, expiresIn, interval, scopes);
 
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
             return Response.ok()

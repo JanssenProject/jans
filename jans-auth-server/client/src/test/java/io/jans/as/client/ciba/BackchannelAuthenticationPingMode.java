@@ -8,6 +8,7 @@ package io.jans.as.client.ciba;
 
 import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
+import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
@@ -79,6 +80,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -192,6 +194,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -244,6 +247,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -313,6 +317,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -424,6 +429,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
@@ -483,6 +489,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
@@ -542,6 +549,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
@@ -601,6 +609,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
@@ -660,6 +669,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
@@ -719,6 +729,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
@@ -778,6 +789,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
@@ -837,6 +849,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
@@ -896,6 +909,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
@@ -953,6 +967,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1004,6 +1019,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1055,6 +1071,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1106,6 +1123,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1157,6 +1175,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1208,6 +1227,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1259,6 +1279,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1310,6 +1331,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1361,6 +1383,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1412,6 +1435,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1463,6 +1487,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1514,6 +1539,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1565,6 +1591,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1616,6 +1643,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1667,6 +1695,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1705,6 +1734,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1747,6 +1777,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1791,6 +1822,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1839,6 +1871,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1887,6 +1920,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1937,6 +1971,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1994,6 +2029,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS256);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2048,6 +2084,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS384);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2099,6 +2136,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2151,6 +2189,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES256);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2203,6 +2242,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES384);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2255,6 +2295,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES512);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2307,6 +2348,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS256);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2359,6 +2401,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS384);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2411,6 +2454,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS512);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2464,6 +2508,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2517,6 +2562,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A256KW);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2573,6 +2619,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2633,6 +2680,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2691,6 +2739,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

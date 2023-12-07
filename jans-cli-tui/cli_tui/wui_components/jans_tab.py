@@ -14,8 +14,6 @@ from cli_style import get_color_for_style
 selected_tab_style = get_color_for_style('tab-selected')
 unselected_tab_style = get_color_for_style('tab-unselected')
 
-shortcut_re = re.compile(r'\[(.*?)\]')
-
 class JansTab():
     """This is a tab widget used for Jan Client TUI
     """

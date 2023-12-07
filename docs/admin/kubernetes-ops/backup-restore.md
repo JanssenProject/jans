@@ -60,7 +60,7 @@ kubectl create -f secret-backup.yaml
 4.  Insall jans using the override or user supplied values with the same chart version:
 
 ```bash
-helm install <release-name> janssen/janssen -f values.yaml --version=<backup-chart-version> -n <namespace>
+helm install <release-name> janssen/janssen -f values.yaml --version=<replace-janssen-version> -n <namespace>
 ```
 
 ## Automatic Backup and Restore

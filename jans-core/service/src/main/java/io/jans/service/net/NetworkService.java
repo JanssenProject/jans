@@ -6,18 +6,18 @@
 
 package io.jans.service.net;
 
-import io.jans.net.InetAddressUtility;
-import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.faces.context.FacesContext;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import org.slf4j.Logger;
+
+import io.jans.net.InetAddressUtility;
+import io.jans.util.StringHelper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Network service
@@ -25,7 +25,6 @@ import java.net.URISyntaxException;
  * @author Yuriy Movchan Date: 04/28/2016
  */
 @ApplicationScoped
-@Named
 public class NetworkService implements Serializable {
 
     private static final long serialVersionUID = -1393318600428448743L;

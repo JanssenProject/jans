@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Jans-Chip</string>
+    <string name="error_title">Error</string>
+    <string name="click_to_add_scopes">Click to add scopes...</string>
+    <string name="configuration_endpoint">Configuration Endpoint</string>
+    <string name="register_oidc_client">Register OIDC Client</string>
+    <string name="app_integrity_status">App Integrity Status</string>
+    <string name="register">Register</string>
+</resources>

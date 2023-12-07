@@ -44,6 +44,7 @@ class JansGDialog:
 
         def do_handler(button_text, handler, keep_dialog):
             if handler:
+                self.current_button_text = button_text
                 handler(self)
 
             if not (keep_dialog or self.future.done()):

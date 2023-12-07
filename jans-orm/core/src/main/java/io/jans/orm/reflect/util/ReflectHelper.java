@@ -149,7 +149,7 @@ public final class ReflectHelper {
 
     /**
      * Perform resolution of a class name.
-     * <p/>
+     * <br>
      * Here we first check the context classloader, if one, before delegating to
      * {@link Class#forName(String, boolean, ClassLoader)} using the caller's
      * classloader
@@ -176,7 +176,7 @@ public final class ReflectHelper {
 
     /**
      * Perform resolution of a class name.
-     * <p/>
+     * <br>
      * Same as {@link #classForName(String, Class)} except that here we delegate
      * to {@link Class#forName(String)} if the context classloader lookup is
      * unsuccessful.
@@ -200,7 +200,7 @@ public final class ReflectHelper {
 
     /**
      * Is this member publicly accessible.
-     * <p/>
+     * <br>
      * Short-hand for {@link #isPublic(Class, Member)} passing the member +
      * {@link Member#getDeclaringClass()}
      *

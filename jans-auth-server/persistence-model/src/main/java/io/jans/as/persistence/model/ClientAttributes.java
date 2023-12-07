@@ -80,6 +80,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("requirePar")
     private Boolean requirePar;
 
+    @JsonProperty("dpopBoundAccessToken")
+    private Boolean dpopBoundAccessToken;
+
     @JsonProperty("jansAuthSignedRespAlg")
     private String authorizationSignedResponseAlg;
 
@@ -113,8 +116,75 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("minimumAcrLevelAutoresolve")
     private Boolean minimumAcrLevelAutoresolve;
 
+    @JsonProperty("additionalTokenEndpointAuthMethods")
+    private List<String> additionalTokenEndpointAuthMethods;
+
     @JsonProperty("minimumAcrPriorityList")
     private List<String> minimumAcrPriorityList;
+
+    @JsonProperty("requestedLifetime")
+    private Integer requestedLifetime; // in seconds
+
+    @JsonProperty("evidence")
+    private String evidence;
+
+    @JsonProperty("introspectionSignedResponseAlg")
+    private String introspectionSignedResponseAlg;
+
+    @JsonProperty("introspectionEncryptedResponseAlg")
+    private String introspectionEncryptedResponseAlg;
+
+    @JsonProperty("introspectionEncryptedResponseEnc")
+    private String introspectionEncryptedResponseEnc;
+
+    public String getIntrospectionSignedResponseAlg() {
+        return introspectionSignedResponseAlg;
+    }
+
+    public void setIntrospectionSignedResponseAlg(String introspectionSignedResponseAlg) {
+        this.introspectionSignedResponseAlg = introspectionSignedResponseAlg;
+    }
+
+    public String getIntrospectionEncryptedResponseAlg() {
+        return introspectionEncryptedResponseAlg;
+    }
+
+    public void setIntrospectionEncryptedResponseAlg(String introspectionEncryptedResponseAlg) {
+        this.introspectionEncryptedResponseAlg = introspectionEncryptedResponseAlg;
+    }
+
+    public String getIntrospectionEncryptedResponseEnc() {
+        return introspectionEncryptedResponseEnc;
+    }
+
+    public void setIntrospectionEncryptedResponseEnc(String introspectionEncryptedResponseEnc) {
+        this.introspectionEncryptedResponseEnc = introspectionEncryptedResponseEnc;
+    }
+
+    public String getEvidence() {
+        return evidence;
+    }
+
+    public void setEvidence(String evidence) {
+        this.evidence = evidence;
+    }
+
+    public Boolean getDpopBoundAccessToken() {
+        if (dpopBoundAccessToken == null) dpopBoundAccessToken = false;
+        return dpopBoundAccessToken;
+    }
+
+    public void setDpopBoundAccessToken(Boolean dpopBoundAccessToken) {
+        this.dpopBoundAccessToken = dpopBoundAccessToken;
+    }
+
+    public Integer getRequestedLifetime() {
+        return requestedLifetime;
+    }
+
+    public void setRequestedLifetime(Integer requestedLifetime) {
+        this.requestedLifetime = requestedLifetime;
+    }
 
     public Boolean getMinimumAcrLevelAutoresolve() {
         return minimumAcrLevelAutoresolve;
@@ -122,6 +192,15 @@ public class ClientAttributes implements Serializable {
 
     public void setMinimumAcrLevelAutoresolve(Boolean minimumAcrLevelAutoresolve) {
         this.minimumAcrLevelAutoresolve = minimumAcrLevelAutoresolve;
+    }
+
+    public List<String> getAdditionalTokenEndpointAuthMethods() {
+        if (additionalTokenEndpointAuthMethods == null) additionalTokenEndpointAuthMethods = new ArrayList<>();
+        return additionalTokenEndpointAuthMethods;
+    }
+
+    public void setAdditionalTokenEndpointAuthMethods(List<String> additionalTokenEndpointAuthMethods) {
+        this.additionalTokenEndpointAuthMethods = additionalTokenEndpointAuthMethods;
     }
 
     public List<String> getMinimumAcrPriorityList() {
@@ -415,8 +494,16 @@ public class ClientAttributes implements Serializable {
                 ", allowOfflineAccessWithoutConsent=" + allowOfflineAccessWithoutConsent +
                 ", minimumAcrLevel=" + minimumAcrLevel +
                 ", minimumAcrLevelAutoresolve=" + minimumAcrLevelAutoresolve +
+                ", additionalTokenEndpointAuthMethods=" + additionalTokenEndpointAuthMethods +
                 ", minimumAcrPriorityList=" + minimumAcrPriorityList +
                 ", defaultPromptLogin=" + defaultPromptLogin +
+                ", requestedLifetime=" + requestedLifetime +
+                ", requirePar=" + requirePar +
+                ", evidence=" + evidence +
+                ", dpopBoundAccessToken=" + dpopBoundAccessToken +
+                ", introspectionSignedResponseAlg=" + introspectionSignedResponseAlg +
+                ", introspectionEncryptedResponseAlg=" + introspectionEncryptedResponseAlg +
+                ", introspectionEncryptedResponseEnc=" + introspectionEncryptedResponseEnc +
                 '}';
     }
 }

@@ -33,7 +33,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 ## Installation Steps
 
-Start a fresh ubuntu `18.04` or `20.04` 4 CPU, 16 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Then execute the following
+Start a fresh Ubuntu `18.04`/`20.04`/`22.04` 4 CPU, 8 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Then execute the following
 
 ```bash
 sudo su -
@@ -42,7 +42,7 @@ sudo su -
 wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
 
-This will install docker, microk8s, helm and Janssen with the default settings that can be found inside [values.yaml](https://github.com/JanssenProject/jans/blob/main/charts/janssen/values.yaml).  
+This will install Docker, Microk8s, Helm and Janssen with the default settings that can be found inside [values.yaml](https://github.com/JanssenProject/jans/blob/main/charts/janssen/values.yaml).  
 
 The installer will automatically add a record to your hosts record in the VM but if you want access the endpoints outside the VM you must  map the `ip` of the instance running ubuntu to the FQDN you provided and then access the endpoints at your browser such in the example in the table below.
 
@@ -52,3 +52,5 @@ The installer will automatically add a record to your hosts record in the VM but
 | fido2       | `https://FQDN/.well-known/fido2-configuration` |
 | scim        | `https://FQDN/.well-known/scim-configuration`  |
 
+## Configure Janssen
+  You can use the [TUI](../../kubernetes-ops/tui-k8s.md) to configure Janssen components. The TUI calls the Config API to perform ad hoc configuration.

@@ -14,7 +14,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.exception.InvalidClaimException;
 import io.jans.as.model.json.JsonApplier;
 import io.jans.as.persistence.model.Scope;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.model.attribute.AttributeDataType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -269,25 +269,25 @@ public class ScopeService {
 
     private void fillClaims(Map<String, Object> claims, List<String> scopeClaims, User user) throws InvalidClaimException {
         for (String claimDn : scopeClaims) {
-            GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
+            JansAttribute jansAttribute = attributeService.getAttributeByDn(claimDn);
 
-            String claimName = gluuAttribute.getClaimName();
-            String ldapName = gluuAttribute.getName();
+            String claimName = jansAttribute.getClaimName();
+            String ldapName = jansAttribute.getName();
 
             if (StringUtils.isBlank(claimName)) {
-                log.error("Failed to get claim because claim name is not set for attribute, id: {}", gluuAttribute.getDn());
+                log.error("Failed to get claim because claim name is not set for attribute, id: {}", jansAttribute.getDn());
                 continue;
             }
             if (StringUtils.isBlank(ldapName)) {
-                log.error("Failed to get claim because name is not set for attribute, id: {}", gluuAttribute.getDn());
+                log.error("Failed to get claim because name is not set for attribute, id: {}", jansAttribute.getDn());
                 continue;
             }
 
-            setClaimField(ldapName, claimName, user, gluuAttribute, claims);
+            setClaimField(ldapName, claimName, user, jansAttribute, claims);
         }
     }
 
-    private void setClaimField(String ldapName, String claimName, User user, GluuAttribute gluuAttribute,
+    private void setClaimField(String ldapName, String claimName, User user, JansAttribute jansAttribute,
                                Map<String, Object> claims) throws InvalidClaimException {
         Object attribute = null;
         if (ldapName.equals("uid")) {
@@ -296,22 +296,22 @@ public class ScopeService {
             attribute = user.getUpdatedAt();
         } else if (ldapName.equals("createdAt")) {
             attribute = user.getCreatedAt();
-        } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
-            final Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
+        } else if (AttributeDataType.BOOLEAN.equals(jansAttribute.getDataType())) {
+            final Object value = user.getAttribute(jansAttribute.getName(), true, jansAttribute.getOxMultiValuedAttribute());
             if (value instanceof String) {
                 attribute = Boolean.parseBoolean(String.valueOf(value));
             } else {
                 attribute = value;
             }
-        } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
-            final Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
+        } else if (AttributeDataType.DATE.equals(jansAttribute.getDataType())) {
+            final Object value = user.getAttribute(jansAttribute.getName(), true, jansAttribute.getOxMultiValuedAttribute());
             if (value instanceof Date) {
                 attribute = value;
             } else if (value != null) {
                 attribute = entryManager.decodeTime(user.getDn(), value.toString());
             }
         } else {
-            attribute = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
+            attribute = user.getAttribute(jansAttribute.getName(), true, jansAttribute.getOxMultiValuedAttribute());
         }
 
         if (attribute != null) {

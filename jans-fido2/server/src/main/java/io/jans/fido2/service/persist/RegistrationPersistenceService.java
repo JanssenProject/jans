@@ -15,12 +15,13 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.shared.UserService;
 import io.jans.orm.PersistenceEntryManager;
@@ -55,6 +56,9 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
     @Inject
     private PersistenceEntryManager persistenceEntryManager;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     public void save(Fido2RegistrationData registrationData) {
         Fido2RegistrationEntry registrationEntry = buildFido2RegistrationEntry(registrationData, false);
 
@@ -71,7 +75,7 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
 	            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
 	                user = userService.addDefaultUser(userName);
 	            } else {
-	                throw new Fido2RuntimeException("Auto user enrollment was disabled. User not exists!");
+	                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");
 	            }
 	        }
 	        userInum = userService.getUserInum(user);
@@ -95,17 +99,24 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
         return registrationEntry;
 	}
 
-    public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId, String rpId) {
+    public Optional<Fido2RegistrationEntry> findByPublicKeyId(String userName, String publicKeyId, String rpId) {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
+    	if (StringHelper.isNotEmpty(userName)) {
+            String userInum = userService.getUserInum(userName);
+            if (userInum == null) {
+                return Optional.empty();
+            }
+            baseDn = getBaseDnForFido2RegistrationEntries(userInum);
+    	}
 
         Filter filter;
         Filter publicKeyIdFilter = Filter.createEqualityFilter("jansPublicKeyId", publicKeyId);
         Filter publicKeyIdHashFilter = Filter.createEqualityFilter("jansPublicKeyIdHash", getPublicKeyIdHash(publicKeyId));
         if (StringHelper.isNotEmpty(rpId)) {
         	Filter appIdFilter = Filter.createEqualityFilter("jansApp", rpId);
-            filter = Filter.createORFilter(publicKeyIdFilter, publicKeyIdHashFilter, appIdFilter);
+            filter = Filter.createANDFilter(publicKeyIdFilter, publicKeyIdHashFilter, appIdFilter);
         } else {
-            filter = Filter.createORFilter(publicKeyIdFilter, publicKeyIdHashFilter);
+            filter = Filter.createANDFilter(publicKeyIdFilter, publicKeyIdHashFilter);
         }
         List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
         
@@ -114,6 +125,10 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
         }
 
         return Optional.empty();
+    }
+
+    public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId, String rpId) {
+    	return findByPublicKeyId(null, publicKeyId, rpId);
     }
 
     public List<Fido2RegistrationEntry> findAllByUsername(String username) {

@@ -30,14 +30,20 @@ resource "jans_organization" "global" {
 
 ### Optional
 
+- `country_name` (String) Organization country name
+- `custom_messages` (List of String)
 - `description` (String) Organization description
 - `display_name` (String) Organization name
+- `js_favicon_path` (String) Path to organization favicon image
+- `js_logo_path` (String) Path to organization logo image
 - `manager_group` (String) qualified id of the group Example: inum=60B7,ou=groups,o=jans
 - `member` (String) String describing memberOf
 - `organization` (String)
 - `organization_title` (String)
 - `short_name` (String)
+- `status` (String)
 - `theme_color` (String) color of the theme Example: 166309
+- `title` (String)
 
 ### Read-Only
 

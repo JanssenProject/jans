@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.7-SNAPSHOT</version>
+		<version>1.0.21-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -26,6 +26,16 @@
 			<testResource>
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
+				<excludes>
+					<exclude>jans_test_client_keys.zip</exclude>
+				</excludes>
+			</testResource>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>jans_test_client_keys.zip</include>
+				</includes>
 			</testResource>
 		</testResources>
 
@@ -74,28 +84,81 @@
 				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.4.1</version>
+				<configuration>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
+					<createDependencyReducedPom>false</createDependencyReducedPom>
+					<createSourcesJar>false</createSourcesJar>
+				</configuration>
 				<executions>
 					<execution>
+						<id>uber-jar-with-all-dependencies</id>
 						<phase>package</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>shade</goal>
 						</goals>
+						<configuration>
+                            <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+							<finalName>jans-auth-client-jar-with-dependencies</finalName>
+							<shadedArtifactId>jans-auth-client-jar-with-dependencies</shadedArtifactId>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<manifestEntries>
+										<mainClass>io.jans.as.client.util.KeyGenerator</mainClass>
+									</manifestEntries>
+								</transformer>
+							</transformers>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+										<exclude>META-INF/LICENSE</exclude>
+									</excludes>
+								</filter>
+							</filters>
+						</configuration>
+					</execution>
+					<execution>
+						<id>uber-jar-without-crypto-provider</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+                            <shadedClassifierName>jar-without-crypto-provider</shadedClassifierName>
+							<finalName>jans-auth-client-jar-without-provider-dependencies</finalName>
+							<shadedArtifactId>jans-auth-client-jar-without-provider-dependencies</shadedArtifactId>
+							<artifactSet>
+								<excludes>
+									<exclude>org.bouncycastle:*</exclude>
+								</excludes>
+							</artifactSet>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<manifestEntries>
+										<mainClass>io.jans.as.client.util.KeyGenerator</mainClass>
+									</manifestEntries>
+								</transformer>
+							</transformers>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+										<exclude>META-INF/LICENSE</exclude>
+									</excludes>
+								</filter>
+							</filters>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<archive>
-						<manifest>
-							<mainClass>io.jans.as.client.util.KeyGenerator</mainClass>
-						</manifest>
-                        <manifestEntries>
-                            <Multi-Release>true</Multi-Release>
-                        </manifestEntries>
-					</archive>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -132,6 +195,10 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jaxb-annotations</artifactId>
+        </dependency>
 
 		<dependency>
 			<groupId>commons-codec</groupId>

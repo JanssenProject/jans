@@ -60,6 +60,7 @@ def find_version(*file_paths):
     here = os.path.abspath(os.path.dirname(__file__))
     with codecs.open(os.path.join(here, *file_paths), 'r') as f:
         version_file = f.read()
+    version_file = version_file.replace('-SNAPSHOT', '-dev')
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
                               version_file, re.M)
     if version_match:
@@ -82,7 +83,7 @@ setup(
     package_data={'': ['*.yaml', '.enabled']},
     zip_safe=False,
     install_requires=[
-        "ruamel.yaml>=0.16.5",
+        "ruamel.yaml>=0.16.5,<0.18.0",
         "PyJWT==2.4.0",
         "pygments",
         "prompt_toolkit==3.0.33",

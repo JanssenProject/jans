@@ -12,7 +12,6 @@ info:
 servers:
 - url: https://jans.io/
   description: The Jans server
-  variables: {}
 tags:
 - name: Configuration – User Management
 paths:
@@ -49,12 +48,24 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
+          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "mail=abc@mail.com,jansStatus=true"
       responses:
         "200":
           description: Ok
@@ -121,6 +132,15 @@ paths:
       summary: Update User
       description: Update User
       operationId: put-user
+      parameters:
+      - name: removeNonLDAPAttributes
+        in: query
+        description: "Boolean flag to indicate if attributes to be removed for non-LDAP\
+          \ DB. Default value is true, indicating non-LDAP attributes will be removed\
+          \ from request."
+        schema:
+          type: boolean
+          default: true
       requestBody:
         description: User object
         content:
@@ -302,6 +322,8 @@ paths:
                         "givenName": "Test3",
                         "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "404":
@@ -317,6 +339,15 @@ paths:
       summary: Create new User
       description: Create new User
       operationId: post-user
+      parameters:
+      - name: removeNonLDAPAttributes
+        in: query
+        description: "Boolean flag to indicate if attributes to be removed for non-LDAP\
+          \ DB. Default value is true, indicating non-LDAP attributes will be removed\
+          \ from request."
+        schema:
+          type: boolean
+          default: true
       requestBody:
         description: User object
         content:
@@ -495,6 +526,8 @@ paths:
                         "givenName": "Test3",
                         "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -654,6 +687,14 @@ paths:
         required: true
         schema:
           type: string
+      - name: removeNonLDAPAttributes
+        in: query
+        description: "Boolean flag to indicate if attributes to be removed for non-LDAP\
+          \ DB. Default value is true, indicating non-LDAP attributes will be removed\
+          \ from request."
+        schema:
+          type: boolean
+          default: true
       requestBody:
         description: UserPatchRequest
         content:
@@ -772,6 +813,8 @@ paths:
                         "givenName": "Test3",
                         "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "404":
@@ -794,10 +837,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     CustomUser:
       type: object
       properties:

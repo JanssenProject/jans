@@ -40,7 +40,7 @@ import static org.testng.Assert.assertTrue;
  */
 public class DeviceAuthzRequestRegistrationTest extends BaseTest {
 
-    protected static RegisterResponse registerClientForDeviceAuthz(AuthenticationMethod authenticationMethod,
+    public static RegisterResponse registerClientForDeviceAuthz(AuthenticationMethod authenticationMethod,
                                                                    List<GrantType> grantTypes, String redirectUris,
                                                                    String sectorIdentifierUri, String registrationEndpoint) {
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);

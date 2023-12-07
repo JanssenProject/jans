@@ -6,14 +6,7 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
@@ -30,8 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -51,6 +42,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures RS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -58,6 +50,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -69,7 +62,6 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -99,6 +91,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures RS384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -106,6 +99,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -117,7 +111,6 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -147,6 +140,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures RS512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -154,6 +148,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -165,7 +160,6 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -195,6 +189,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures ES256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -202,6 +197,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -213,7 +209,6 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -246,6 +241,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures ES384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -253,6 +249,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -264,7 +261,6 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -297,6 +293,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures ES512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -304,6 +301,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -315,7 +313,6 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 

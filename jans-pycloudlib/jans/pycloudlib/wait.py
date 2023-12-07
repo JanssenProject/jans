@@ -96,20 +96,20 @@ def get_wait_interval() -> int:
 def on_backoff(details: Details) -> None:
     """Emit logs automatically when error is thrown while running a backoff-decorated function."""
     error = sys.exc_info()[1]
-    label = details["kwargs"].pop("label", "Service")
+    label = details["kwargs"].get("label") or "Service"
     logger.warning(f"{label} is not ready; reason={error}; retrying in {details['wait']:0.1f} seconds")
 
 
 def on_success(details: Details) -> None:
     """Emit logs automatically when there's no error while running a backoff-decorated function."""
-    label = details["kwargs"].pop("label", "Service")
+    label = details["kwargs"].get("label") or "Service"
     logger.info(f"{label} is ready")
 
 
 def on_giveup(details: Details) -> None:
     """Emit logs automatically when a backoff-decorated function exceeds allowed retries."""
-    label = details["kwargs"].pop("label", "Service")
-    logger.error(f"{label} is not ready after {details['elapsed']:0.1f}")
+    label = details["kwargs"].get("label") or "Service"
+    logger.error(f"{label} is not ready after {details['elapsed']:0.1f} seconds")
 
 
 retry_on_exception = backoff.on_exception(
@@ -186,7 +186,7 @@ def wait_for_ldap(manager: Manager, **kwargs: _t.Any) -> None:
     search_mapping = {
         "default": ("ou=jans-auth,ou=configuration,o=jans", "(objectClass=jansAppConf)"),
         "user": (_ADMIN_GROUP_DN, "(objectClass=jansGrp)"),
-        "site": ("ou=cache-refresh,o=site", "(ou=cache-refresh)"),
+        "site": ("ou=link,o=site", "(ou=link)"),
         "cache": ("ou=cache,o=jans", "(ou=cache)"),
         "token": ("ou=tokens,o=jans", "(ou=tokens)"),
         "session": ("ou=sessions,o=jans", "(ou=sessions)"),

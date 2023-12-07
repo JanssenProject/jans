@@ -1,7 +1,7 @@
 package io.jans.scim2.listener;
 
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.util.StringHelper;
+import io.jans.util.security.SecurityProviderUtility;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -12,7 +12,7 @@ import io.jans.as.model.common.IdType;
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DummyEntry;
 import io.jans.orm.search.filter.Filter;
@@ -119,7 +119,7 @@ public class InumGenerator {
 			case CONFIGURATION:
 				return GluuConfiguration.class;
 			case ATTRIBUTE:
-				return GluuAttribute.class;
+				return JansAttribute.class;
 			case PEOPLE:
 				return User.class;
 		}

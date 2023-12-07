@@ -6,18 +6,9 @@
 
 package io.jans.as.client.ciba;
 
-import io.jans.as.client.BackchannelAuthenticationClient;
-import io.jans.as.client.BackchannelAuthenticationRequest;
-import io.jans.as.client.BackchannelAuthenticationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
+import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
@@ -30,13 +21,8 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
-
-import static io.jans.as.client.client.Asserter.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * @author Milton BO
@@ -53,10 +39,13 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
             final String clientJwksUri, final String backchannelUserCode, final String userId) throws InterruptedException {
         showTitle("backchannelTokenDeliveryModePollExpiredRequest");
 
+        final List<String> scopes = Arrays.asList("openid", "profile", "email", "address", "phone");
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(scopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL);
         registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
@@ -82,7 +71,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid", "profile", "email", "address", "phone"));
+        backchannelAuthenticationRequest.setScope(scopes);
         backchannelAuthenticationRequest.setLoginHint(userId);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -138,6 +127,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -220,6 +210,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);

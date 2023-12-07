@@ -69,6 +69,10 @@
             <AppenderRef ref="FILE" />
         </Logger>
 		
+		<Logger name="io.jans.configapi.core" level="${log4j.default.log.level}">
+            <AppenderRef ref="FILE" />
+        </Logger>
+		
 		<Logger name="audit" level="INFO" additivity="false">
             <AppenderRef ref="AUDIT_FILE" />
         </Logger>

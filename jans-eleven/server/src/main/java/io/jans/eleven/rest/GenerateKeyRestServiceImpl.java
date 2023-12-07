@@ -17,6 +17,7 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
@@ -35,8 +36,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-
-import sun.security.rsa.RSAPublicKeyImpl;
 
 /**
  * @author Javier Rojas Blum
@@ -91,7 +90,7 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
                 jsonObject.put(GenerateKeyResponseParam.ALGORITHM, signatureAlgorithm.getName());
                 jsonObject.put(GenerateKeyResponseParam.EXPIRATION_TIME, expirationTime);
                 if (SignatureAlgorithmFamily.RSA.equals(signatureAlgorithm.getFamily())) {
-                    RSAPublicKeyImpl rsaPublicKey = (RSAPublicKeyImpl) publicKey;
+                	RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
                     jsonObject.put(GenerateKeyResponseParam.MODULUS, Base64Util.base64UrlEncode(rsaPublicKey.getModulus().toByteArray()));
                     jsonObject.put(GenerateKeyResponseParam.EXPONENT, Base64Util.base64UrlEncode(rsaPublicKey.getPublicExponent().toByteArray()));
                 } else if (SignatureAlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {

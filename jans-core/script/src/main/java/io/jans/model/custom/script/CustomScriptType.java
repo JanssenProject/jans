@@ -6,9 +6,6 @@
 
 package io.jans.model.custom.script;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.model.auth.AuthenticationCustomScript;
 import io.jans.model.custom.script.type.BaseExternalType;
@@ -16,6 +13,8 @@ import io.jans.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
 import io.jans.model.custom.script.type.authz.ConsentGatheringType;
 import io.jans.model.custom.script.type.authz.DummyConsentGatheringType;
+import io.jans.model.custom.script.type.authzchallenge.AuthorizationChallengeType;
+import io.jans.model.custom.script.type.authzchallenge.DummyAuthorizationChallengeType;
 import io.jans.model.custom.script.type.ciba.DummyEndUserNotificationType;
 import io.jans.model.custom.script.type.ciba.EndUserNotificationType;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
@@ -24,6 +23,8 @@ import io.jans.model.custom.script.type.configapi.ConfigApiType;
 import io.jans.model.custom.script.type.configapi.DummyConfigApiType;
 import io.jans.model.custom.script.type.discovery.DiscoveryType;
 import io.jans.model.custom.script.type.discovery.DummyDiscoveryType;
+import io.jans.model.custom.script.type.fido2.DummyFido2ExtensionType;
+import io.jans.model.custom.script.type.fido2.Fido2ExtensionType;
 import io.jans.model.custom.script.type.id.DummyIdGeneratorType;
 import io.jans.model.custom.script.type.id.IdGeneratorType;
 import io.jans.model.custom.script.type.idp.DummyIdpType;
@@ -44,6 +45,8 @@ import io.jans.model.custom.script.type.scim.DummyScimType;
 import io.jans.model.custom.script.type.scim.ScimType;
 import io.jans.model.custom.script.type.scope.DummyDynamicScopeType;
 import io.jans.model.custom.script.type.scope.DynamicScopeType;
+import io.jans.model.custom.script.type.selectaccount.DummySelectAccountType;
+import io.jans.model.custom.script.type.selectaccount.SelectAccountType;
 import io.jans.model.custom.script.type.session.ApplicationSessionType;
 import io.jans.model.custom.script.type.session.DummyApplicationSessionType;
 import io.jans.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
@@ -52,15 +55,13 @@ import io.jans.model.custom.script.type.ssa.DummyModifySsaResponseType;
 import io.jans.model.custom.script.type.ssa.ModifySsaResponseType;
 import io.jans.model.custom.script.type.token.DummyUpdateTokenType;
 import io.jans.model.custom.script.type.token.UpdateTokenType;
-import io.jans.model.custom.script.type.uma.UmaClaimsGatheringType;
-import io.jans.model.custom.script.type.uma.UmaDummyClaimsGatheringType;
-import io.jans.model.custom.script.type.uma.UmaDummyRptClaimsType;
-import io.jans.model.custom.script.type.uma.UmaDummyRptPolicyType;
-import io.jans.model.custom.script.type.uma.UmaRptClaimsType;
-import io.jans.model.custom.script.type.uma.UmaRptPolicyType;
+import io.jans.model.custom.script.type.uma.*;
 import io.jans.model.custom.script.type.user.CacheRefreshType;
 import io.jans.model.custom.script.type.user.DummyCacheRefreshType;
 import io.jans.orm.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * List of supported custom scripts
@@ -71,6 +72,7 @@ public enum CustomScriptType implements AttributeEnum {
 
     PERSON_AUTHENTICATION("person_authentication", "Person Authentication", PersonAuthenticationType.class, AuthenticationCustomScript.class,
             "PersonAuthentication", new DummyPersonAuthenticationType()),
+    AUTHORIZATION_CHALLENGE("authorization_challenge", "Authorization Challenge", AuthorizationChallengeType.class, CustomScript.class, "AuthorizationChallenge", new DummyAuthorizationChallengeType()),
     INTROSPECTION("introspection", "Introspection", IntrospectionType.class, CustomScript.class, "Introspection", new DummyIntrospectionType()),
     RESOURCE_OWNER_PASSWORD_CREDENTIALS("resource_owner_password_credentials", "Resource Owner Password Credentials", ResourceOwnerPasswordCredentialsType.class, CustomScript.class, "ResourceOwnerPasswordCredentials", new DummyResourceOwnerPasswordCredentialsType()),
     APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession",
@@ -93,6 +95,7 @@ public enum CustomScriptType implements AttributeEnum {
     SPONTANEOUS_SCOPE("spontaneous_scope", "Spontaneous Scopes", SpontaneousScopeType.class, CustomScript.class, "SpontaneousScope", new DummySpontaneousScopeType()),
     END_SESSION("end_session", "End Session", EndSessionType.class, CustomScript.class, "EndSession", new DummyEndSessionType()),
     POST_AUTHN("post_authn", "Post Authentication", PostAuthnType.class, CustomScript.class, "PostAuthn", new DummyPostAuthnType()),
+    SELECT_ACCOUNT("select_account", "Select Account", SelectAccountType.class, CustomScript.class, "SelectAccount", new DummySelectAccountType()),
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType()),
     CIBA_END_USER_NOTIFICATION("ciba_end_user_notification", "CIBA End User Notification", EndUserNotificationType.class,
             CustomScript.class, "EndUserNotification", new DummyEndUserNotificationType()),
@@ -103,6 +106,7 @@ public enum CustomScriptType implements AttributeEnum {
     UPDATE_TOKEN("update_token", "Update Token", UpdateTokenType.class, CustomScript.class, "UpdateToken", new DummyUpdateTokenType()),
     CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType()),
     MODIFY_SSA_RESPONSE("modify_ssa_response", "Modify SSA Response", ModifySsaResponseType.class, CustomScript.class, "ModifySsaResponse", new DummyModifySsaResponseType()),
+    FIDO2_EXTENSION("fido2_extension", "Fido2 Extension", Fido2ExtensionType.class, CustomScript.class, "Fido2Extension", new DummyFido2ExtensionType()),
     ;
 
     private String value;

@@ -207,6 +207,7 @@ public class UserServiceTest {
         doNothing().when(persistenceEntryManager).persist(any());
         when(persistenceEntryManager.find(anyString(), any(), any())).thenReturn(user);
         when(inumService.generatePeopleInum()).thenReturn(UUID.randomUUID().toString());
+        when(dataSourceTypeService.isLDAP(anyString())).thenReturn(true);
         userService.setReturnTestListPersonCustomObjectClassList(true);
 
         User resultUser = userService.addUser(user, true);
@@ -215,8 +216,8 @@ public class UserServiceTest {
         assertNotNull(user.getAttribute("jansStatus"));
         assertNotNull(user.getAttribute("inum"));
         assertEquals(user.getAttribute("jansStatus"), GluuStatus.ACTIVE.getValue());
-        assertTrue(resultUser.getCustomObjectClasses().length == 2);
-        assertTrue(resultUser.getCustomObjectClasses()[0].equals(user.getCustomObjectClasses()[0]));
+        assertEquals(resultUser.getCustomObjectClasses().length, 2);
+        assertEquals(user.getCustomObjectClasses()[0], resultUser.getCustomObjectClasses()[0]);
     }
 
     @Test

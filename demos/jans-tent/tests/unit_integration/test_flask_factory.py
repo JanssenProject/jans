@@ -1,15 +1,42 @@
 from unittest import TestCase
+from unittest.mock import MagicMock
 import clientapp
 from flask import Flask
 import os
+import builtins
+from clientapp.helpers.client_handler import ClientHandler
+import helper
 
 
 class TestFlaskApp(TestCase):
+
+    def setUp(self) -> None:
+        self.stashed_add_config_from_json = clientapp.add_config_from_json
+        clientapp.cfg.CLIENT_ID = 'any-client-id-stub'
+        clientapp.cfg.CLIENT_SECRET = 'any-client-secret-stub'
+        clientapp.cfg.SERVER_META_URL = 'https://ophostname.com/server/meta/url'
+        clientapp.add_config_from_json = MagicMock(name='add_config_from_json')
+        clientapp.add_config_from_json.return_value(None)
+        self.stashed_discover = ClientHandler.discover
+        self.stashed_register_client = ClientHandler.register_client
+        self.stashed_open = builtins.open
+        builtins.open = MagicMock(name='open')
+        ClientHandler.discover = MagicMock(name='discover')
+        ClientHandler.discover.return_value = helper.OP_DATA_DICT_RESPONSE
+        ClientHandler.register_client = MagicMock(name='register_client')
+        ClientHandler.register_client.return_value = helper.REGISTER_CLIENT_RESPONSE
+
+    def tearDown(self) -> None:
+        ClientHandler.discover = self.stashed_discover
+        ClientHandler.register_client = self.stashed_register_client
+        builtins.open = self.stashed_open
+        clientapp.add_config_from_json = self.stashed_add_config_from_json
+
     def test_create_app_should_exist(self):
         self.assertEqual(hasattr(clientapp, 'create_app'), True,
                          'app factory does not exists')
 
-    def test_create_app_should_be_inokable(self):
+    def test_create_app_should_be_invokable(self):
         self.assertEqual(callable(clientapp.create_app), True,
                          'cannot invoke create_app from clientapp')
 

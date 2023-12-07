@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:22.04@sha256:2b7412e6465c3c7fc5bb21d3e6f1917c167358449fecac8176c6e496e5c1f05f
 
 # Don't start any optional services except for the few we need.
 RUN find /etc/systemd/system \
@@ -16,7 +16,7 @@ RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker \
 # Prevent prompt errors during package installation
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update \
-    && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc \
+    && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc python3-psycopg2 python3-ldap3 git maven \
     && apt-get clean \
     # Cleaning up package lists
     && rm -rf /var/lib/apt/lists/*
@@ -38,7 +38,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=2603bbb1080345cab4fe814dca39024d8d0b5434
+ENV JANS_SOURCE_VERSION=a3026d7957a1aaefa30269904744975352ae4642
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -78,13 +78,12 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
 # misc stuff
 # ==========
 
-LABEL name="janssenproject/monolith" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.7" \
-    release="dev" \
-    summary="Janssen Monolith Image" \
-    description="Janssen Authorization server"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/monolith" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.title="Janssen Monolith Image" \
+    org.opencontainers.image.description="Janssen Authorization server"
 
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh

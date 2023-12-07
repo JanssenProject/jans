@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/moabu/terraform-provider-jans/jans"
+	"github.com/jans/terraform-provider-jans/jans"
 )
 
 func resourceScript() *schema.Resource {
@@ -65,12 +65,33 @@ func resourceScript() *schema.Resource {
 				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 
 					enums := []string{
-						"person_authentication", "introspection", "resource_owner_password_credentials",
-						"application_session", "cache_refresh", "client_registration", "id_generator",
-						"uma_rpt_policy", "uma_rpt_claims", "uma_claims_gathering", "consent_gathering",
-						"dynamic_scope", "spontaneous_scope", "end_session", "post_authn", "scim",
-						"ciba_end_user_notification", "revoke_token", "persistence_extension", "idp",
-						"discovery", "update_token", "config_api",
+						"person_authentication",
+						"authorization_challenge",
+						"introspection",
+						"resource_owner_password_credentials",
+						"application_session",
+						"cache_refresh",
+						"client_registration",
+						"id_generator",
+						"uma_rpt_policy",
+						"uma_rpt_claims",
+						"uma_claims_gathering",
+						"consent_gathering",
+						"dynamic_scope",
+						"spontaneous_scope",
+						"end_session",
+						"post_authn",
+						"select_account",
+						"scim",
+						"ciba_end_user_notification",
+						"revoke_token",
+						"persistence_extension",
+						"idp",
+						"discovery",
+						"update_token",
+						"config_api_auth",
+						"modify_ssa_response",
+						"fido2_extension",
 					}
 					return validateEnum(v, enums)
 				},
@@ -183,6 +204,11 @@ func resourceScript() *schema.Resource {
 				Description: "boolean value indicating if the script is internal.",
 			},
 			"location_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
+			"location_path": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "",

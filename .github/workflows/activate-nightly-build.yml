@@ -1,0 +1,40 @@
+name: Activate Nightly Build
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 23 * * *"
+permissions:
+  contents: read
+
+jobs:
+  publish_binary_packages:
+    permissions:
+      contents: write  # for Git to git push
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+
+    - name: set nightly version
+      id: nightly
+      continue-on-error: false
+      if: ${{ github.event_name }} == 'schedule' || ${{ github.event.inputs.nightly }} == 'true'
+      run: |
+        VERSION=`curl  "https://api.github.com/repos/cli/cli/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c2-` 
+        echo $VERSION
+        curl -sSL https://github.com/cli/cli/releases/download/v${VERSION}/gh_${VERSION}_linux_amd64.tar.gz -o gh_${VERSION}_linux_amd64.tar.gz
+        tar xvf gh_${VERSION}_linux_amd64.tar.gz
+        sudo cp gh_${VERSION}_linux_amd64/bin/gh /usr/local/bin/
+        gh version
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+        NIGHTLY_VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
+        gh release delete v${NIGHTLY_VERSION}.nightly --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}.nightly" does not exist
+        gh release delete v${NIGHTLY_VERSION}.nightly --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}.nightly" does not exist
+        git push --delete origin v${NIGHTLY_VERSION}.nightly || echo "v${NIGHTLY_VERSION}.nightly" does not exist
+        gh release create v${NIGHTLY_VERSION}.nightly --generate-notes --prerelease --title "v${NIGHTLY_VERSION}.nightly"

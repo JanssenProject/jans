@@ -14,13 +14,11 @@ from prompt_toolkit.eventloop import get_event_loop
 
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_user_dialog import EditUserDialog
-from utils.utils import DialogUtils, common_data
+from utils.utils import DialogUtils, common_data, check_email
 from utils.static import DialogResult
 from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
 from utils.static import DialogResult, cli_style, common_strings
-
-common_data.users = SimpleNamespace()
 
 class Plugin(DialogUtils):
     """This is a general class for plugins 
@@ -44,12 +42,6 @@ class Plugin(DialogUtils):
     def process(self) -> None:
         pass
 
-    def on_page_enter(self) -> None:
-        """Function to perform preliminary tasks before this page entered.
-        """
-        # we need claims everywhere
-        self.get_claims()
-
     def set_center_frame(self) -> None:
         """center frame content
         """
@@ -58,7 +50,6 @@ class Plugin(DialogUtils):
         self.nav_buttons = VSplit([],width=D())
         self.app.center_container = HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Users"), name='oauth:scopes:get', jans_help=_("Retreive first {} users").format(self.app.entries_per_page), handler=self.get_users),
                         self.app.getTitledText(_("Search"), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_user, style='class:outh_containers_scopes.text'),
                         self.app.getButton(text=_("Add Users"), name='oauth:scopes:add', jans_help=_("To add a new user press this button"), handler=self.edit_user_dialog),
                         ],
@@ -243,16 +234,20 @@ class Plugin(DialogUtils):
             self.app.show_message(fix_title, _("Username and/or Email is empty"))
             return
 
+        if not check_email(raw_data['mail']):
+            self.app.show_message(fix_title, _("Please enter a valid email"))
+            return
+
         if 'baseDn' not in dialog.data and not raw_data['userPassword'].strip():
             self.app.show_message(fix_title, _("Please enter Password"))
             return
 
-        user_info = {'customObjectClasses':['top', 'jansCustomPerson'], 'customAttributes':[]}
+        user_info = {'customObjectClasses':['top', 'jansPerson'], 'customAttributes':[]}
         for key_ in ('mail', 'userId', 'displayName', 'givenName'):
             user_info[key_] = raw_data.pop(key_)
 
         if 'baseDn' not in dialog.data:
-            user_info['userPassword'] = raw_data['userPassword']
+            user_info['userPassword'] = raw_data.pop('userPassword')
 
         for key_ in ('inum', 'baseDn', 'dn'):
             if key_ in raw_data:
@@ -312,20 +307,6 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
-    def get_claims(self) -> None:
-        """This method for getting claims
-        """
-        if hasattr(common_data.users, 'claims'):
-            return
-        async def coroutine():
-            cli_args = {'operation_id': 'get-attributes', 'endpoint_args':'limit:200,status:active'}
-            self.app.start_progressing(_("Retreiving claims"))
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-            result = response.json()
-            common_data.users.claims = result['entries']
-
-        asyncio.ensure_future(coroutine())
 
     def search_user(self, tbuffer:Buffer) -> None:
         """This method handel the search for Users

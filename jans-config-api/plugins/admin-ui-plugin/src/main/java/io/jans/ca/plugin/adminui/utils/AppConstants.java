@@ -10,4 +10,10 @@ public interface AppConstants {
     public static final String SCOPE_ADMINUI_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/read-all";
     public static final String SCOPE_ADMINUI_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/write-all";
     public static final String SCOPE_ADMINUI_DELETE = "https://jans.io/oauth/jans-auth-server/config/adminui/delete-all";
+    //scan api urls
+    public static final String SCAN_DEV_AUTH_SERVER = "https://account-dev.gluu.cloud";
+    public static final String SCAN_PROD_AUTH_SERVER = "https://account.gluu.org";
+    public static final String SCAN_DEV_SERVER = "https://cloud-dev.gluu.cloud";
+    public static final String SCAN_PROD_SERVER = "https://cloud.gluu.org";
+
 }

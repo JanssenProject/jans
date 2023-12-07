@@ -4,7 +4,6 @@ tags:
 - installation
 - vm
 - RHEL
-- CentOS
 ---
 
 # Red Hat EL Janssen Installation
@@ -12,13 +11,31 @@ tags:
 Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Supported versions
-- Red Hat Enterprise Linus 8 (RHEL 8)
-- CentOS 8
-## Disable SELinux
-You can disbale SELinux temporarly by executing `setenforce 0`. To disable permanently edit file `/etc/selinux/config`.
+- Red Hat Enterprise Linux 8 (RHEL 8)
 
 ## Install the Package
 
+- Install EPEL and mod-auth-openidc as dependencies
+
+```
+sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+sudo yum -y module enable mod_auth_openidc 
+```
+
+
+- Download the GPG key zip file , unzip and import GPG key
+
+```shell
+wget https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
+```
+
+```shell
+unzip automation-jans-public-gpg.zip
+```
+
+```shell
+sudo rpm -import automation-jans-public-gpg.asc
+```
 
 - Download the release package from the Github Janssen Project
   [Releases](https://github.com/JanssenProject/jans/releases)
@@ -44,13 +61,13 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    <package-name>: OK
+    jans-replace-janssen-version-el8.x86_64.rpm: OK
     ```
   
 - Install the package
 
 ```
-yum install ~/jans-replace-janssen-version-el8.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-el8.x86_64.rpm
 ```
 
 ## Run the setup script
@@ -75,7 +92,44 @@ interactive mode.
 
 After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
-## Red Hat / Centos Un-installation
+## Log in to Text User Interface (TUI)
+
+Begin configuration by accessing the TUI with the following command:
+
+```
+sudo /opt/jans/jans-cli/jans_cli_tui.py
+```
+
+Full TUI documentation can be found [here](../../config-guide/config-tools/jans-tui/README.md)
+
+If you have selected casa during installation you can access casa using url``` https://<host>/jans-casa ```
+
+## Enabling HTTPS 
+
+To enable communication with Janssen Server over TLS (https) in a production 
+environment, Janssen Server needs details about CA certificate. Update the 
+HTTPS cofiguration file `https_jans.conf` as shown below:
+
+!!! Note
+    Want to use `Let's Encrypt` to get a certificate? Follow [this guide](../../../contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
+
+- Open `https_jans.conf` 
+  ```bash
+  sudo vi /etc/httpd/conf.d/https_jans.conf
+  ```
+
+- Update `SSLCertificateFile` and `SSLCertificateKeyFile` parameters values
+  ```bash
+  SSLCertificateFile location_of_fullchain.pem
+  SSLCertificateKeyFile location_of_privkey.pem
+  ```
+
+- Restart `httpd` service for changes to take effect
+  ```bash
+  sudo service httpd restart
+  ```
+  
+## Uninstall
 
 Removing Janssen is a two step process:
 
@@ -85,7 +139,7 @@ Removing Janssen is a two step process:
 * Use the command below to uninstall the Janssen server
 
 ```
-python3 /opt/jans/jans-setup/install.py -uninstall
+sudo python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
 Console output like below will confirm the successful uninstallation of the Janssen Server
@@ -110,7 +164,6 @@ Stopping jans-auth
 Removing /etc/default/jans-client-api
 Stopping jans-client-api
 Stopping OpenDj Server
-sh: 1: /opt/opendj/bin/stop-ds: not found
 Executing rm -r -f /etc/certs
 Executing rm -r -f /etc/jans
 Executing rm -r -f /opt/jans

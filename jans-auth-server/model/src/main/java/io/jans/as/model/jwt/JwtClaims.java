@@ -73,6 +73,10 @@ public class JwtClaims extends JwtClaimSet {
         setClaim(ISSUED_AT, issuedAt);
     }
 
+    public void setIatNow() {
+        setIssuedAt(new Date());
+    }
+
     /**
      * Identifies the principal that issued the JWT.
      *

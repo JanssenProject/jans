@@ -68,17 +68,25 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
                 txt += 'Java Type'.ljust(30) + Config.java_type.rjust(35) + "\n"
 
+            def get_install_string(prefix, install_var):
+                if not base.argsp.allow_pre_released_features and Config.get(install_var+'_pre_released'):
+                    return ''
+                return prefix.ljust(30) + repr(getattr(Config, install_var, False)).rjust(35) + (' *' if install_var in Config.addPostSetupService else '') + '\n'
 
-            txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installHttpd' in Config.addPostSetupService else '') + "\n"
-            txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
-            txt += 'Install Jans Config API'.ljust(30) + repr(Config.install_config_api).rjust(35) + "\n"
+            txt += get_install_string('Install Apache 2 web server', 'installHttpd')
+            txt += get_install_string('Install Auth Server', 'installOxAuth')
+            txt += get_install_string('Install Jans Config API', 'install_config_api')
             if Config.profile == 'jans':
-                txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
-                #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
+                txt += get_install_string('Install Fido2 Server', 'installFido2')
+                txt += get_install_string('Install Scim Server', 'install_scim_server')
+                txt += get_install_string('Install Jans Link Server', 'install_jans_link')
+                txt += get_install_string('Install Jans KC Link Server', 'install_jans_keycloak_link')
+                txt += get_install_string('Install Jans Casa Server', 'install_casa')
+                txt += get_install_string('Install Jans SAML', 'install_jans_saml')
+
 
             if Config.profile == 'jans' and Config.installEleven:
-                txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
+                txt += get_install_string('Install Eleven Server', 'installEleven')
 
             if base.argsp.t:
                 txt += 'Load Test Data '.ljust(30) + repr( base.argsp.t).rjust(35) + "\n"
@@ -109,7 +117,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         #Download jans-auth-client-jar-with-dependencies
         if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
-            oxauth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['ox_version'])
+            oxauth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['jans_version'])
             self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
             base.download(oxauth_client_jar_url, Config.non_setup_properties['oxauth_client_jar_fn'])
 
@@ -129,7 +137,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
+
         self.extract_scripts()
+
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
@@ -195,6 +205,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 self.run([paths.cmd_chmod, '644', Config.sysemProfile])
 
     def make_salt(self):
+        if base.argsp.encode_salt:
+            self.logIt("Salt {} is provided via argument".format(base.argsp.encode_salt))
+            Config.encode_salt = base.argsp.encode_salt
+
         if not Config.encode_salt:
             Config.encode_salt= self.getPW() + self.getPW()
 
@@ -433,12 +447,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def create_test_client(self):
         ldif_fn = self.clients_ldif_fn = os.path.join(Config.output_dir, 'test-client.ldif')
-        client_id = Config.get('test_client_id') or base.argsp.test_client_id
-        client_pw = Config.get('test_client_pw') or base.argsp.test_client_secret or self.getPW()
+        client_id = Config.get('test_client_id') or getattr(base.argsp, 'test_client_id', None)
+        client_pw = Config.get('test_client_pw') or getattr(base.argsp, 'test_client_pw', None) or self.getPW()
         encoded_pw = self.obscure(client_pw)
-        trusted_client = Config.get('test_client_trusted_client')
-        if not trusted_client:
-            trusted_client = 'true' if base.argsp.test_client_trusted else 'false'
+        trusted_client = 'true' if (Config.get('test_client_trusted') or base.argsp.test_client_trusted) else 'false'
 
         if base.argsp.test_client_redirect_uri:
             redirect_uri = base.argsp.test_client_redirect_uri.split(',')
@@ -460,21 +472,23 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         self.dbUtils.import_ldif([ldif_fn])
 
-        Config.test_client_id = base.argsp.test_client_id
+        Config.test_client_id = client_id
         Config.test_client_pw = client_pw
         Config.test_client_pw_encoded = encoded_pw
         Config.test_client_redirect_uri = redirect_uri
-        Config.test_client_trusted_client = trusted_client
+        Config.test_client_trusted = trusted_client
         Config.test_client_scopes = ' '.join(scopes)
 
 
     def post_install_before_saving_properties(self):
 
-        if base.argsp.test_client_id or Config.get('test_client_id'):
+        if getattr(base.argsp, 'test_client_id', None) or Config.get('test_client_id'):
             self.create_test_client()
 
 
     def post_install_tasks(self):
+
+        self.apply_selinux_plicies()
 
         self.deleteLdapPw()
 
@@ -562,6 +576,22 @@ class JansInstaller(BaseInstaller, SetupUtils):
         #enable scripts
         self.enable_scripts(base.argsp.enable_script)
 
+    def apply_selinux_plicies(self):
+        self.logIt("Applying SELinux Policies")
+        setsebool_cmd = shutil.which('setsebool')
+
+        if not setsebool_cmd:
+            self.logIt("SELinux setsebool command not found")
+            return
+
+        selinux_policies = ['httpd_can_network_connect 1 -P']
+
+        for se_pol in selinux_policies:
+            cmd = [setsebool_cmd] + se_pol.split()
+            self.run(cmd)
+
+        Config.post_messages.append("The following SELinux Policies were applied:\n{}".format( '\n'.join([ '  * ' + p for p in selinux_policies])))
+
     def enable_scripts(self, inums, enable=True):
         if inums:
             for inum in inums:
@@ -569,3 +599,57 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def extract_scripts(self):
         base.extract_from_zip(base.current_app.jans_zip, 'docs/script-catalog', Config.script_catalog_dir)
+
+
+    def generate_smtp_config(self):
+        self.logIt("Generating smtp keys", pbar=self.service_name)
+
+        if not Config.get('smtp_jks_pass'):
+            Config.smtp_jks_pass = self.getPW()
+            try:
+                Config.smtp_jks_pass_enc = self.obscure(Config.smtp_jks_pass)
+            except Exception as e:
+                self.logIt("JansInstaller. __init__ failed. Reason: %s" % str(e), errorLog=True)
+
+
+        cmd_cert_gen = [Config.cmd_keytool, '-genkeypair',
+                        '-alias', Config.smtp_alias,
+                        '-keyalg', 'ec',
+                        '-groupname', 'secp256r1',
+                        '-sigalg', Config.smtp_signing_alg,
+                        '-validity', '3650',
+                        '-storetype', Config.default_store_type,
+                        '-keystore', Config.smtp_jks_fn,
+                        '-keypass', Config.smtp_jks_pass,
+                        '-storepass', Config.smtp_jks_pass,
+                        '-dname', 'CN=SMTP CA Certificate'
+                    ]
+
+        self.run(cmd_cert_gen)
+
+    def order_services(self):
+
+        service_list = [
+                        ('jans-eleven', 'installEleven'),
+                        ('jans-auth', 'installOxAuth'),
+                        ('jans-config-api', 'install_config_api'),
+                        ('casa', 'install_casa'),
+                        ('jans-fido2', 'installFido2'),
+                        ('jans-link', 'install_jans_link'),
+                        ('jans-scim', 'install_scim_server'),
+                        ('saml', 'install_jans_saml'),
+                        ('jans-keycloak-link', 'install_jans_keycloak_link'),
+                        ]
+        service_listr = service_list[:]
+        service_listr.reverse()
+        for i, service in enumerate(service_listr):
+            order_var_str = 'order_{}_service'.format(service[0].replace('-','_'))
+            for sservice in (service_listr[i+1:]):
+                if Config.get(sservice[1]):
+                    Config.templateRenderingDict[order_var_str] = sservice[0]+'.service'
+                    break
+                else:
+                    if service[0] != 'jans-auth':
+                        Config.templateRenderingDict[order_var_str] = 'jans-auth.service'
+                    else:
+                        Config.templateRenderingDict['order_jans_auth_service'] =  'jans-eleven.service' if Config.installEleven else  Config.backend_service

@@ -12,8 +12,7 @@ Docker image packaging for config-api.
 
 ## Versions
 
-See [Releases](https://github.com/JanssenProject/docker-jans-config-api/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/config-api:1.0.1_dev`.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fconfig-api) for available versions.
 
 ## Environment Variables
 
@@ -63,10 +62,10 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_TRUSTSTORE_ENABLE`: Enable truststore for encrypted Couchbase connection (default to `true`).
 - `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
 - `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
-- `CN_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
+- `CN_CONFIG_API_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
 - `CN_CONFIG_API_LOG_LEVEL`: Log level for config api. Options include `OFF`, `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`.  and `ALL`. This defaults to `INFO`
 - `CN_AUTH_SERVER_URL`: Base URL of Janssen Auth server, i.e. `auth-server:8080` (default to empty string).
-- `GOOGLE_APPLICATION_CREDENTIALS`: JSON file (contains Google credentials) that should be injected into container.
+- `GOOGLE_APPLICATION_CREDENTIALS`: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
@@ -74,7 +73,7 @@ The following environment variables are supported by the container:
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 - `CN_CONFIG_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
-- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, and `user-mgt`). Note that unknown plugin name will be ignored.
+- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, `user-mgt`, `jans-link`, `saml`). Note that unknown plugin name will be ignored.
 - `CN_TOKEN_SERVER_CERT_FILE`: Path to token server certificate (default to `/etc/certs/token_server.crt`).
 - `CN_TOKEN_SERVER_BASE_HOSTNAME`: Hostname of token server (default to empty string).
 - `CN_ADMIN_UI_PLUGIN_LOGGERS`: Custom logging configuration for AdminUI plugin in JSON-string format with hash type (see [Configure plugin loggers](#configure-plugin-loggers) section for details).
@@ -213,3 +212,4 @@ i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
+

@@ -27,6 +27,7 @@ import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Javier Rojas Blum
@@ -92,7 +93,7 @@ public class ClientAssertion {
                             // Validate client
                             if (client != null) {
                                 JwtType jwtType = JwtType.fromString(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-                                AuthenticationMethod authenticationMethod = client.getAuthenticationMethod();
+                                Set<AuthenticationMethod> authenticationMethods = client.getAllAuthenticationMethods();
                                 SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
 
                                 if (jwtType == null && signatureAlgorithm != null) {
@@ -100,8 +101,8 @@ public class ClientAssertion {
                                 }
 
                                 if (jwtType != null && signatureAlgorithm != null && signatureAlgorithm.getFamily() != null &&
-                                        ((authenticationMethod == AuthenticationMethod.CLIENT_SECRET_JWT && AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily()))
-                                                || (authenticationMethod == AuthenticationMethod.PRIVATE_KEY_JWT && (AlgorithmFamily.RSA.equals(signatureAlgorithm.getFamily()) || AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily()))))) {
+                                        ((authenticationMethods.contains(AuthenticationMethod.CLIENT_SECRET_JWT) && AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily()))
+                                                || (authenticationMethods.contains(AuthenticationMethod.PRIVATE_KEY_JWT) && (AlgorithmFamily.RSA.equals(signatureAlgorithm.getFamily()) || AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily()))))) {
                                     if (client.getTokenEndpointAuthSigningAlg() == null || SignatureAlgorithm.fromString(client.getTokenEndpointAuthSigningAlg()).equals(signatureAlgorithm)) {
                                         clientSecret = clientService.decryptSecret(client.getClientSecret());
 

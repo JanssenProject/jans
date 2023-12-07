@@ -9,6 +9,9 @@ package io.jans.as.model.common;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Javier Rojas Blum Date: 03.23.2012
  */
@@ -88,6 +91,17 @@ public enum AuthenticationMethod {
             }
         }
         return null;
+    }
+
+    public static List<AuthenticationMethod> fromList(List<String> list) {
+        List<AuthenticationMethod> result = new ArrayList<>();
+        for (String s : list) {
+            final AuthenticationMethod authenticationMethod = fromString(s);
+            if (authenticationMethod != null) {
+                result.add(authenticationMethod);
+            }
+        }
+        return result;
     }
 
     /**

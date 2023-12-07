@@ -12,7 +12,6 @@ info:
 servers:
 - url: https://jans.io/
   description: The Jans server
-  variables: {}
 tags:
 - name: Fido2 - Configuration
 paths:
@@ -132,7 +131,11 @@ components:
             type: string
         superGluuEnabled:
           type: boolean
+        sessionIdPersistInCache:
+          type: boolean
         oldU2fMigrationEnabled:
+          type: boolean
+        errorReasonEnabled:
           type: boolean
         fido2Configuration:
           $ref: '#/components/schemas/Fido2Configuration'
@@ -167,6 +170,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RequestedParty'
+        metadataUrlsProvider:
+          type: string
+        skipDownloadMdsEnabled:
+          type: boolean
+        skipValidateMdsInAttestationEnabled:
+          type: boolean
     RequestedParty:
       type: object
       properties:

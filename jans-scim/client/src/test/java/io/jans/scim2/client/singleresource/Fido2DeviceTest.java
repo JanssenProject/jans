@@ -1,6 +1,7 @@
 package io.jans.scim2.client.singleresource;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.NestedNullException;
 import io.jans.scim.model.scim2.ListResponse;
 import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
 import io.jans.scim.model.scim2.util.IntrospectUtil;
@@ -84,7 +85,12 @@ public class Fido2DeviceTest extends BaseTest {
 
         //Naively compare (property-to-property) the original and new object. It's feasible since all of them are strings
         for (String path : IntrospectUtil.allAttrs.get(fido2Class)){
-            String val=BeanUtils.getProperty(device, path);
+            String val;
+            try {
+                val = BeanUtils.getProperty(device, path);
+            } catch (NestedNullException nene) {
+                val = null;
+            }
             //Exclude metas since they diverge and skip if original attribute was null (when passing null for an update, server ignores)
             if (!path.startsWith("meta") && val!=null) {
                 assertEquals(BeanUtils.getProperty(updated, path), val);

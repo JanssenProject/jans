@@ -11,10 +11,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -85,11 +82,15 @@ public class AttestationCertificateService {
 			List<X509Certificate> attestationCertificates) {
 		JsonNode metaDataStatement = null;
 		// incase of u2f-fido2 attestation
-		if (metadataNode != null) {
-			try {
-				metaDataStatement = dataMapperService.readTree(metadataNode.get("metadataStatement").toPrettyString());
-			} catch (IOException e) {
-				log.error("Error parsing the metadata statement", e);
+		if ((metadataNode != null)) {
+			if (metadataNode.has("attestationRootCertificates")) {
+				metaDataStatement = metadataNode;
+			} else if (metadataNode.has("metadataStatement")) {
+				try {
+					metaDataStatement = dataMapperService.readTree(metadataNode.get("metadataStatement").toPrettyString());
+				} catch (IOException e) {
+					log.error("Error parsing the metadata statement", e);
+				}
 			}
 		}
 
@@ -123,7 +124,7 @@ public class AttestationCertificateService {
 				
 				return getAttestationRootCertificates(metadata, attestationCertificates);
 			} catch (Fido2RuntimeException ex) {
-				log.warn("Failed to get metadata from Fido2 meta-data server");
+				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
 				
 				metadataForAuthenticator = dataMapperService.createObjectNode();
 			}
@@ -155,8 +156,26 @@ public class AttestationCertificateService {
 		}
 	}
 
+	/**
+	 * Get root certificates by subjectDN
+	 *
+	 * @param subjectDN subjectDN
+	 * @return List with certificates or empty
+	 */
+	public List<X509Certificate> getRootCertificatesBySubjectDN(String subjectDN) {
+		if (rootCertificatesMap == null || rootCertificatesMap.isEmpty() || subjectDN == null || subjectDN.isEmpty()) {
+			return Collections.emptyList();
+		}
+		List<X509Certificate> certificates = new ArrayList<>();
+		rootCertificatesMap.forEach((s, x509Certificate) -> {
+			if (s.equals(subjectDN)) {
+				certificates.add(x509Certificate);
+			}
+		});
+		return certificates;
+	}
+
 	private KeyStore getCertificationKeyStore(String aaguid, List<X509Certificate> certificates) {
 		return keyStoreCreator.createKeyStore(aaguid, certificates);
 	}
-
 }

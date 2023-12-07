@@ -44,6 +44,7 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         showTitle("OC5:FeatureTest-Accept Valid Asymmetric ID Token Signature RS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -51,6 +52,7 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -62,7 +64,6 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -93,6 +94,7 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
 
@@ -106,6 +108,7 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         registerRequest.setSubjectType(SubjectType.PUBLIC);
         registerRequest.setDefaultMaxAge(3600);
         registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -117,7 +120,6 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 

@@ -16,6 +16,7 @@ OPENBANKING_PROFILE = 'openbanking'
 class Config:
 
     # we define statics here so that is is acessible without construction
+    opt_dir = '/opt'
     jansOptFolder = '/opt/jans'
     distFolder = '/opt/dist'
     jre_home = '/opt/jre'
@@ -84,8 +85,9 @@ class Config:
         self.jetty_user = self.jetty_group = 'jetty'
         self.root_user = self.root_group = 'root'
         self.ldap_user = self.ldap_group = 'ldap'
-
+        self.backend_service = 'network.target'
         self.dump_config_on_error = False
+
         if not self.output_dir:
             self.output_dir = os.path.join(install_dir, 'output')
 
@@ -94,7 +96,7 @@ class Config:
             self.ldap_base_dir = os.path.join(base.snap_common, 'opendj')
             self.jetty_user = 'root'
 
-        self.default_store_type = 'JKS'
+        self.default_store_type = 'PKCS12'
 
         #create dummy progress bar that logs to file in case not defined
         progress_log_file = os.path.join(LOG_DIR, 'progress-bar.log')
@@ -198,12 +200,15 @@ class Config:
         self.install_scim_server = True
         self.installFido2 = True
         self.install_config_api = True
-        self.installCasa = False
+        self.install_casa = False
         self.installOxd = False
         self.installEleven = False
         self.install_jans_cli = True
+        self.install_jans_link = True
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
+        self.install_jans_saml = False
+        self.install_jans_keycloak_link = False
 
         # backward compatibility
         self.os_type = base.os_type
@@ -235,7 +240,7 @@ class Config:
         self.city = None
         self.state = None
         self.admin_email = None
-        self.encoded_ox_ldap_pw = None
+        self.ldap_bind_encoded_pw = None
         self.encode_salt = None
         self.admin_inum = None
 
@@ -251,7 +256,7 @@ class Config:
         self.encoded_ldapTrustStorePass = None
 
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
-        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.p12')
+        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.pkcs12')
 
         self.oxd_package = base.determine_package(os.path.join(self.dist_jans_dir, 'oxd-server*.tgz'))
 
@@ -294,7 +299,7 @@ class Config:
         self.ldif_agama = os.path.join(self.output_dir, 'agama.ldif')
 
         self.ldif_metric = os.path.join(self.staticFolder, 'metric/o_metric.ldif')
-        self.ldif_site = os.path.join(self.install_dir, 'static/cache-refresh/o_site.ldif')
+        self.ldif_site = os.path.join(self.install_dir, 'static/site/site.ldif')
         self.ldif_configuration = os.path.join(self.output_dir, 'configuration.ldif')
 
         self.system_profile_update_init = os.path.join(self.output_dir, 'system_profile_init')
@@ -313,6 +318,10 @@ class Config:
 
         self.default_enc_key_algs = 'RSA1_5 RSA-OAEP ECDH-ES'
         self.default_key_expiration = 365
+
+        self.smtp_jks_fn = os.path.join(self.certFolder, 'smtp-keys.' + self.default_store_type.lower())
+        self.smtp_alias = 'smtp_sig_ec256'
+        self.smtp_signing_alg = 'SHA256withECDSA'
 
         self.post_messages = []
 
@@ -383,8 +392,8 @@ class Config:
 
                         ('site',     {   'ldif': [self.ldif_site],
                                         'memory_allocation': 100,
-                                        'mapping': 'cache-refresh',
-                                        'document_key_prefix': ['site_', 'cache-refresh_'],
+                                        'mapping': 'jans-link',
+                                        'document_key_prefix': ['site_', 'jans-link_'],
                                     }),
 
                         ('cache',    {   'ldif': [],

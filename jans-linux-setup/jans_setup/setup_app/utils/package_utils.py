@@ -54,17 +54,18 @@ class PackageUtils(SetupUtils):
 
         os_type_version = base.os_type + ' ' + base.os_version
 
-        if base.argsp.local_rdbm == 'mysql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'mysql'):
-            package_list[os_type_version]['mandatory'] += ' mysql-server'
-        if base.argsp.local_rdbm == 'pgsql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'pgsql'):
-            package_list[os_type_version]['mandatory'] += ' postgresql python3-psycopg2 postgresql-contrib'
-            if base.clone_type == 'deb':
-                package_list[os_type_version]['mandatory'] += ''
-            elif base.clone_type == 'rpm':
-                package_list[os_type_version]['mandatory'] += ' postgresql-server'
-                self.run(['dnf', '-y', 'module', 'disable', 'postgresql'])
-                self.run(['dnf', '-y', 'module', 'reset', 'postgresql'])
-                self.run(['dnf', '-y', 'module', 'enable', 'postgresql:12'])
+        if not Config.installed_instance:
+            if base.argsp.local_rdbm == 'mysql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'mysql'):
+                package_list[os_type_version]['mandatory'] += ' mysql-server'
+            if base.argsp.local_rdbm == 'pgsql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'pgsql'):
+                package_list[os_type_version]['mandatory'] += ' postgresql python3-psycopg2 postgresql-contrib'
+                if base.clone_type == 'deb':
+                    package_list[os_type_version]['mandatory'] += ''
+                elif base.clone_type == 'rpm':
+                    package_list[os_type_version]['mandatory'] += ' postgresql-server'
+                    self.run(['dnf', '-y', 'module', 'disable', 'postgresql'])
+                    self.run(['dnf', '-y', 'module', 'reset', 'postgresql'])
+                    self.run(['dnf', '-y', 'module', 'enable', 'postgresql:12'])
 
 
         for pypackage in package_list[os_type_version]['python']:
@@ -122,11 +123,6 @@ class PackageUtils(SetupUtils):
             default_site = '/etc/apache2/sites-enabled/000-default.conf'
             if os.path.exists(default_site):
                 os.remove(default_site)
-
-        #re-new paths
-        paths.cmd_wget = shutil.which('wget')
-        paths.cmd_tar = shutil.which('tar')
-        paths.cmd_unzip = shutil.which('unzip')
 
 
     def installPackage(self, packageName, remote=False):

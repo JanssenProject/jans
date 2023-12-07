@@ -7,13 +7,16 @@
 package io.jans.as.client.ciba;
 
 import io.jans.as.client.*;
+import io.jans.as.client.builder.RegistrationBuilder;
 import io.jans.as.client.client.AssertBuilder;
+import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -43,7 +46,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePoll_whenCallWithValidData_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -62,7 +65,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -83,7 +86,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePoll_whenCallWithValidDataAndSectorIdentifier_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withSectorIdentifierUri(sectorIdentifierUri)
                 .withJwksUri(clientJwksUri)
@@ -105,7 +108,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -126,7 +129,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePoll_whenCallWithValidDataAndSubjectTypePublic_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withSubjectType(SubjectType.PUBLIC)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -145,7 +148,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -166,7 +169,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePoll_whenCallWithValidDataAndFindAndUpdate_shouldRegisterAndUpdateSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .execute();
 
@@ -176,7 +179,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -187,7 +190,7 @@ public class RegistrationTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
 
         // 3. Client Update
-        RegisterResponse clientUpdateResponse = RegisterClient.builder()
+        RegisterResponse clientUpdateResponse = getBuilder()
                 .withRegistrationAccessToken(registrationAccessToken)
                 .withRegistrationEndpoint(registrationClientUri)
                 .withSectorIdentifierUri(sectorIdentifierUri)
@@ -217,7 +220,7 @@ public class RegistrationTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(clientJwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwks(jwkResponse.getJwks().toString())
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -246,7 +249,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -273,7 +276,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing_whenCallWithValidData_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -293,7 +296,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -314,7 +317,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing_whenCallWithValidDataAndSectorIdentifier_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withSectorIdentifierUri(sectorIdentifierUri)
@@ -336,7 +339,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -355,7 +358,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing_whenCallWithValidDataAndSubjectTypePublic_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withSubjectType(SubjectType.PUBLIC)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -375,7 +378,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -397,7 +400,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing_whenCallWithValidDataAndFindAndUpdate_shouldRegisterAndUpdateSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .execute();
 
@@ -407,7 +410,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -418,7 +421,7 @@ public class RegistrationTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
 
         // 3. Client Update
-        RegisterResponse clientUpdateResponse = RegisterClient.builder()
+        RegisterResponse clientUpdateResponse = getBuilder()
                 .withRegistrationAccessToken(registrationAccessToken)
                 .withRegistrationEndpoint(registrationClientUri)
                 .withSectorIdentifierUri(sectorIdentifierUri)
@@ -440,6 +443,13 @@ public class RegistrationTest extends BaseTest {
         assertRegisterResponseClaimsAreContained(clientUpdateResponse, JWKS_URI, SECTOR_IDENTIFIER_URI);
     }
 
+    @NotNull
+    private RegistrationBuilder getBuilder() {
+        final RegistrationBuilder builder = RegisterClient.builder();
+        builder.withScopes(Tester.standardScopes);
+        return builder;
+    }
+
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
     public void backchannelTokenDeliveryModePing_whenCallWithValidDataAndTokenParamsAndJwks_shouldRegisterSuccessfully(final String clientJwksUri,
                                                   final String backchannelClientNotificationEndpoint) {
@@ -449,7 +459,7 @@ public class RegistrationTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(clientJwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwks(jwkResponse.getJwks().toString())
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -479,7 +489,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -504,7 +514,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush_whenCallWithValidData_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
@@ -522,7 +532,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -541,7 +551,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush_whenCallWithValidDataAndSectorIdentifier_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withSectorIdentifierUri(sectorIdentifierUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -561,7 +571,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -582,7 +592,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush_whenCallWithValidDataAndSubjectTypePublic_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withSubjectType(SubjectType.PUBLIC)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -601,7 +611,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -620,7 +630,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush_whenCallWithValidDataAndFindAndUpdate_shouldRegisterAndUpdateSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = RegisterClient.builder()
+        RegisterResponse registerResponse = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .execute();
 
@@ -630,7 +640,7 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = RegisterClient.builder()
+        RegisterResponse clientReadResponse = getBuilder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
@@ -640,7 +650,7 @@ public class RegistrationTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
 
         // 3. Client Update
-        RegisterResponse clientUpdateResponse = RegisterClient.builder()
+        RegisterResponse clientUpdateResponse = getBuilder()
                 .withRegistrationAccessToken(registrationAccessToken)
                 .withRegistrationEndpoint(registrationClientUri)
                 .withSectorIdentifierUri(sectorIdentifierUri)
@@ -667,7 +677,7 @@ public class RegistrationTest extends BaseTest {
     public void backchannelRegistration_whenCallMissingTokenDeliveryMode_shouldFail(final String clientJwksUri) {
         showTitle("backchannelRegistration_whenCallWithoutTokenDeliveryMode_shouldFail");
 
-        RegisterResponse response = RegisterClient.builder()
+        RegisterResponse response = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -683,7 +693,7 @@ public class RegistrationTest extends BaseTest {
     @Test
     public void backchannelTokenDeliveryModePing_whenCallMissingClientNotificationEndPoint_shouldFail(final String clientJwksUri) {
         showTitle("backchannelTokenDeliveryModePing_whenCallWithoutClientNotificationEndPoint_shouldFail");
-        RegisterResponse response = RegisterClient.builder()
+        RegisterResponse response = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -700,7 +710,7 @@ public class RegistrationTest extends BaseTest {
     @Test
     public void backchannelTokenDeliveryModePush_whenCallMissingClientNotificationEndPoint_shouldFail(final String clientJwksUri) {
         showTitle("backchannelTokenDeliveryModePing_whenCallWithoutClientNotificationEndPoint_shouldFail");
-        RegisterResponse response = RegisterClient.builder()
+        RegisterResponse response = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -717,7 +727,7 @@ public class RegistrationTest extends BaseTest {
     @Test
     public void backchannelTokenDeliveryModePing_whenCallMissingGrantTypes_shouldFail(final String clientJwksUri, final String backchannelClientNotificationEndpoint) {
         showTitle("backchannelTokenDeliveryModePing_whenCallWithoutGrantTypes_shouldFail");
-        RegisterResponse response = RegisterClient.builder()
+        RegisterResponse response = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Arrays.asList())// Missing  grant type urn:openid:params:grant-type:ciba
@@ -734,7 +744,7 @@ public class RegistrationTest extends BaseTest {
     @Test
     public void backchannelTokenDeliveryModePoll_whenCallMissingGrantTypes_shouldFail(final String clientJwksUri, final String backchannelClientNotificationEndpoint) {
         showTitle("backchannelTokenDeliveryModePoll_whenCallWithoutGrantTypes_shouldFail");
-        RegisterResponse response = RegisterClient.builder()
+        RegisterResponse response = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Arrays.asList())// Missing  grant type urn:openid:params:grant-type:ciba
@@ -751,7 +761,7 @@ public class RegistrationTest extends BaseTest {
     @Test
     public void backchannelTokenDeliveryModePing_whenCallMissingJwksUri_shouldFail(final String backchannelClientNotificationEndpoint) {
         showTitle("backchannelTokenDeliveryModePing_whenCallWithoutJwksUri_shouldFail");
-        RegisterResponse response = RegisterClient.builder()
+        RegisterResponse response = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
@@ -769,7 +779,7 @@ public class RegistrationTest extends BaseTest {
     public void backchannelTokenDeliveryModePoll_whenCallMissingJwksUri_shouldFail(final String backchannelClientNotificationEndpoint) {
         showTitle("backchannelTokenDeliveryModePoll_whenCallWithoutJwksUri_shouldFail");
 
-        RegisterResponse response = RegisterClient.builder()
+        RegisterResponse response = getBuilder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)

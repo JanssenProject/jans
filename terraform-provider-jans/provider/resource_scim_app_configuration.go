@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/moabu/terraform-provider-jans/jans"
+	"github.com/jans/terraform-provider-jans/jans"
 )
 
 func resourceScimAppConfiguration() *schema.Resource {
@@ -149,11 +149,12 @@ func resourceScimAppConfigurationUpdate(ctx context.Context, d *schema.ResourceD
 	c := meta.(*jans.Client)
 
 	var scimAppConfig jans.ScimAppConfigurations
-	if err := fromSchemaResource(d, &scimAppConfig); err != nil {
+	patches, err := patchFromResourceData(d, &scimAppConfig)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if _, err := c.UpdateScimAppConfiguration(ctx, &scimAppConfig); err != nil {
+	if _, err := c.PatchScimAppConfiguration(ctx, patches); err != nil {
 		return diag.FromErr(err)
 	}
 

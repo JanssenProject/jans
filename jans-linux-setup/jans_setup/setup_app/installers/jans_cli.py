@@ -67,10 +67,12 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'cli', 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'config-cli.py')])
         self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'jans_cli_tui.py'), os.path.join(self.jans_cli_install_dir, 'config-cli-tui.py')])
-        #self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'scim-cli.py')])
         self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'cli', 'config_cli.py')])
         self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'jans_cli_tui.py')])
 
+        gama_archiever_fn = 'gama-archieve-cli.py'
+        self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, gama_archiever_fn)])
+        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, gama_archiever_fn), os.path.join(Config.jansOptBinFolder, gama_archiever_fn)])
 
         #extract python libraries
         base.extract_from_zip(self.source_files[0][0], 'jwt', os.path.join(self.pylib_dir, 'jwt'))
@@ -80,8 +82,14 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         # extract yaml files
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(ops_dir, 'jca', 'jans-config-api-swagger.yaml'), ren=True)
-        for plugin_yaml_file in ('fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml'):
+        plugin_yamls = ['fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml']
+
+        if Config.install_jans_link:
+            plugin_yamls.append('jans-link-plugin-swagger.yaml')
+
+        for plugin_yaml_file in plugin_yamls:
             base.extract_file(base.current_app.jans_zip, 'jans-config-api/plugins/docs/'+plugin_yaml_file, os.path.join(ops_dir, 'jca', plugin_yaml_file), ren=True)
+
         base.extract_file(base.current_app.jans_zip, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(ops_dir, 'scim', 'scim.yaml'), ren=True)
         base.extract_file(base.current_app.jans_zip, 'jans-auth-server/docs/swagger.yaml', os.path.join(ops_dir, 'auth', 'swagger.yaml'), ren=True)
 
@@ -127,6 +135,8 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         config.write(self.config_ini_fn.open('w'))
         self.config_ini_fn.chmod(0o600)
 
+    def installed(self):
+        return os.path.exists(self.pylib_dir)
 
     def render_import_templates(self):
         self.renderTemplateInOut(self.ldif_client, self.templates_folder, self.output_folder)

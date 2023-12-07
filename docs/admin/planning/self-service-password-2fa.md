@@ -3,6 +3,7 @@ tags:
   - administration
   - planning
   - 2FA
+  - self-service
   - Account Recovery
 ---
 

@@ -21,27 +21,15 @@ import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.io.IOException;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.Files;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.FileVisitor;
-import java.nio.file.FileVisitResult;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Base64;
+import java.util.*;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
-import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
-import java.util.Date;
-import java.util.List;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,6 +62,9 @@ public class Deployer {
 
     private static final String METADATA_FILE = "project.json";
     private static final boolean ON_CONTAINERS = System.getenv("CN_VERSION") != null;
+    
+    private static final long DEPLOY_TIMEOUT = TimeUnit.MINUTES.toMillis(5);
+    private static final Pattern BP_PATT = Pattern.compile("\n[ \\t]+Basepath[ \\t]+\"");
     
     @Inject
     private ObjectMapper mapper;
@@ -108,19 +99,26 @@ public class Deployer {
                 new String[]{ "jansId", "jansStartDate", "jansEndDate", "adsPrjDeplDetails" });
         
         //Find the oldest, non-active entry without finish timestamp. Pick that one
-        Deployment deployment = depls.stream().filter(d -> d.getFinishedAt() == null)
+        Deployment dep = depls.stream().filter(d -> d.getFinishedAt() == null)
                 .min((d1, d2) -> d1.getCreatedAt().compareTo(d2.getCreatedAt())).orElse(null);
 
-        if (deployment == null) {
+        if (dep == null) {
             updateFlowsAndAssets(depls);
-        } else {
-            deployProject(deployment.getDn(), deployment.getId(),
-                    deployment.getDetails().getProjectMetadata().getProjectName());
-        }
 
+            //find deployments in course
+            filter = Filter.createANDFilter(Filter.createEqualityFilter("jansActive", true),
+                            Filter.createNOTFilter(Filter.createPresenceFilter("jansEndDate")));
+
+            removeStaleDeployments(entryManager.findEntries(BASE_DN, Deployment.class, filter,
+                        new String[]{ "jansId", "jansStartDate" }), System.currentTimeMillis());
+        } else {
+            deployProject(dep.getDn(), dep.getId(), dep.getDetails().isAutoconfigure(),
+                    dep.getDetails().getProjectMetadata().getProjectName());
+        }
+        
     }
     
-    private void deployProject(String dn, String prjId, String name) throws IOException {
+    private void deployProject(String dn, String prjId, boolean autoconf, String name) throws IOException {
 
         logger.info("Deploying project {}", name);
         DeploymentDetails dd = new DeploymentDetails();
@@ -130,11 +128,11 @@ public class Deployer {
         //Here, b64EncodedAssets has the layout of a .gama file
         dep.setTaskActive(true);
         dep.setAssets(null);
-        
+
         logger.info("Marking deployment task as active");
         //This merge helps other nodes/pods not to take charge of this very deployment task
         entryManager.merge(dep);
-  
+
         Path p = extractGamaFile(b64EncodedAssets);
         String tmpdir = p.toString();
         dd.setProjectMetadata(computeMetadata(name, tmpdir));
@@ -147,22 +145,20 @@ public class Deployer {
         if (Files.isDirectory(pcode) && Files.isDirectory(pweb)) {
             
             try {
-                Set<String> flowIds = createFlows(pcode, dd);
+                //craft a path so assets of different projects do not collide, see jans#4501
+                String prjBasepath = makeShortSafePath(prjId);
+                Set<String> flowIds = createFlows(pcode, dd, prjBasepath, autoconf);
                 if (dd.getError() == null) {
                     projectsFlows.put(prjId, flowIds);
 
-                    Set<String> libsPaths = transferJarFiles(plib);
-                    ZipFile zip = compileAssetsArchive(p, pweb, plib);
+                    ZipFile zip = compileAssetsArchive(p, pweb, plib, prjBasepath);
                     byte[] bytes = extractZipFileWithPurge(zip, ASSETS_DIR,
                             projectsBasePaths.get(prjId), projectsLibs.get(prjId));
 
-                    Set<String> basePaths = new HashSet<>();
-                    //Update this project's base paths: use the subdirs of web folder
-                    Files.find​(pweb, 1, (pa, attrs) -> attrs.isDirectory())
-                        .map(pa -> pa.getFileName().toString()).forEach(basePaths::add);
-                    basePaths.remove(pweb.getFileName().toString());
+                    Set<String> basePaths = Set.of(prjBasepath);
                     projectsBasePaths.put(prjId, basePaths);
 
+                    Set<String> libsPaths = transferJarFiles(plib);
                     //Update this project's libs paths
                     libsPaths.addAll(computeSourcePaths(plib));
                     projectsLibs.put(prjId, libsPaths);
@@ -194,8 +190,8 @@ public class Deployer {
         }
         logger.info("Finishing deployment task...");
 
+        entryManager.merge(dep);    //If this fails, deployment will remain pending, see #removeStaleDeployments
         projectsFinishTimes.put(prjId, d.getTime());
-        entryManager.merge(dep);
         
         try {
             logger.debug("Cleaning .gama extraction dir");
@@ -206,7 +202,8 @@ public class Deployer {
 
     }
     
-    private Set<String> createFlows(Path dir, DeploymentDetails dd) throws IOException {
+    private Set<String> createFlows(Path dir, DeploymentDetails dd, 
+                String prjBasepath, boolean autoconfigure) throws IOException {
 
         BiPredicate<Path, BasicFileAttributes> matcher = 
             (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith("." + FLOW_EXT);
@@ -225,9 +222,16 @@ public class Deployer {
         
         if (flowsPaths.isEmpty()) {
             dd.setError("There are no flows in this archive");
+        } else {
+            logger.debug("Flows' basepaths will all be prefixed with '{}'", prjBasepath);  
         }
         
         Map<String, String> flowsOutcome = new HashMap<>();
+        ProjectMetadata prjMetadata = dd.getProjectMetadata();
+        List<String> noDirectLaunch = Optional.ofNullable(
+                prjMetadata.getNoDirectLaunchFlows()).orElse(Collections.emptyList());
+        Map<String, Map<String, Object>> configHints = Optional.ofNullable(
+                prjMetadata.getConfigHints()).orElse(Collections.emptyMap());
         
         for (Path p: flowsPaths) {
             String error = null;
@@ -235,6 +239,8 @@ public class Deployer {
             String qname = p.getFileName().toString();
             
             try {
+                //this is a workaround to avoid assets mess/loss when different projects use the same folder/file names
+                source = insertProjectBasepath(source, prjBasepath);
                 qname = qname.substring(0, qname.length() - FLOW_EXT.length() - 1);
                 
                 logger.info("Processing flow {}", qname);
@@ -246,10 +252,13 @@ public class Deployer {
                 
                 Flow fl = aps.getFlow(qname, true);
                 boolean add = fl == null;
+                FlowMetadata prvMeta = null;
+
                 if (add) {
                     fl = new Flow();
                 } else {
                     logger.info("Flow already existing in DB");
+                    prvMeta = fl.getMetadata();
                 }
                 
                 FlowMetadata meta = fl.getMetadata();
@@ -257,9 +266,19 @@ public class Deployer {
                 meta.setInputs(tresult.getInputs());
                 meta.setTimeout(tresult.getTimeout());
                 meta.setTimestamp(System.currentTimeMillis());
-                meta.setAuthor(dd.getProjectMetadata().getAuthor());
-                //No displayname or description. No handling of properties either
-    
+                meta.setAuthor(prjMetadata.getAuthor());
+
+                if (prvMeta != null) {
+                    meta.setDisplayName(prvMeta.getDisplayName());
+                    meta.setDescription(prvMeta.getDescription());
+                    meta.setProperties(prvMeta.getProperties());
+                }
+
+                if (autoconfigure) {
+                    logger.warn("Setting flow configuration as provided in project archive");
+                    meta.setProperties(configHints.get(qname));
+                }
+                
                 String compiled = tresult.getCode();
                 fl.setMetadata(meta);
                 fl.setSource(source);
@@ -267,8 +286,8 @@ public class Deployer {
                 
                 fl.setQname(qname);
                 fl.setTransHash(futils.hash(compiled));
-                // revision = 0 and enabled by default assumed
-                fl.setEnabled(true);
+                // revision = 0 assumed by default                
+                fl.setEnabled(!noDirectLaunch.contains(qname));
                 
                 if (add) {
                     fl.setDn(dnFromQname(qname));
@@ -305,16 +324,14 @@ public class Deployer {
         
     }
     
-    private ZipFile compileAssetsArchive(Path root, Path webroot, Path lib) throws IOException {
-        
-        String rnd = rndName();
+    private ZipFile compileAssetsArchive(Path root, Path webroot, Path lib, String prjBasepath) throws IOException {
 
-        Path agama = Files.createDirectory(Paths.get(root.toString(), rnd));
+        Path agama = Files.createDirectory(Paths.get(root.toString(), rndName()));
         String agamStr = agama.toString();
         logger.debug("Created temp directory");
 
-        Path ftl = Files.createDirectory(Paths.get(agamStr, "ftl"));
-        Path fl = Files.createDirectory(Paths.get(agamStr, "fl"));
+        Path ftl = Files.createDirectories(Paths.get(agamStr, "ftl", prjBasepath));
+        Path fl = Files.createDirectories(Paths.get(agamStr, "fl", prjBasepath));
         Path scripts = Files.createDirectory(Paths.get(agamStr, SCRIPTS_SUBDIR));
 
         logger.debug("Copying templates to {}", ftl);
@@ -335,8 +352,8 @@ public class Deployer {
         logger.info("Compressing to {}", newZipPath);
 
         ZipFile newZip = new ZipFile(newZipPath.toFile());
-        newZip.addFolder(ftl.toFile(), params);
-        newZip.addFolder(fl.toFile(), params);
+        newZip.addFolder(ftl.toFile().getParentFile(), params);
+        newZip.addFolder(fl.toFile().getParentFile(), params);
         newZip.addFolder(scripts.toFile(), params);
 
         return newZip;
@@ -410,11 +427,11 @@ public class Deployer {
             //This conditional can only evaluate truthy in a multinode environment (containers) or
             //upon application startup in a VM installation
             if (finishedAt == null || finishedAt < d.getFinishedAt().getTime()) {
-                //Retrieve associated assets
-                String b64EncodedAssets = entryManager.find(d.getDn(), Deployment.class, 
-                        new String[]{ Deployment.ASSETS_ATTR }).getAssets();
-
                 try {
+                    //Retrieve associated assets
+                    String b64EncodedAssets = entryManager.find(d.getDn(), Deployment.class, 
+                            new String[]{ Deployment.ASSETS_ATTR }).getAssets();
+
                     if (finishedAt != null) {
                         purge(projectsBasePaths.get(prjId), projectsLibs.get(prjId));
                     }
@@ -424,7 +441,7 @@ public class Deployer {
                     
                     logger.info("Assets of project {} were synced", name);
                     projectsFinishTimes.put(prjId, d.getFinishedAt().getTime());
-                } catch (IOException e) {
+                } catch (Exception e) {
                     logger.error("Error syncing assets of project " + name, e);
                 }
 
@@ -509,6 +526,23 @@ public class Deployer {
         return meta;
         
     }
+    
+    private void removeStaleDeployments(List<Deployment> deployments, long instant) {
+
+        for (Deployment d : deployments) {
+            if (d.getCreatedAt().getTime() + DEPLOY_TIMEOUT < instant) {
+
+                try {
+                    String prjId = d.getId();
+                    logger.info("Removing stale deployment {}", prjId);
+                    entryManager.remove(d.getDn(), Deployment.class);
+                } catch (Exception e) {
+                    logger.error("Error removing deployment", e);
+                } 
+            }
+        }
+
+    }
 
     private static String dnFromQname(String qname) {
         return String.format("%s=%s,%s", Flow.ATTR_NAMES.QNAME,
@@ -517,7 +551,6 @@ public class Deployer {
     
     // ========== File-system related utilities follow: ===========
 
-    //Walpurgis
     private void purge(Set<String> dirs, Set<String> filesToRemove) throws IOException {
         
         if (dirs != null) {
@@ -553,9 +586,8 @@ public class Deployer {
     private void extract(String b64EncodedAssets, String destination) throws IOException {
         
         if (b64EncodedAssets == null) return;
-        
-        String name = rndName();
-        Path p = Files.createTempFile​(name, null);
+
+        Path p = Files.createTempFile​(rndName(), null);
         logger.debug("Dumping decoded Base64 representation to {}", p);
         Files.write(p, b64Decoder.decode(b64EncodedAssets.getBytes(UTF_8)));
 
@@ -570,11 +602,10 @@ public class Deployer {
     }
     
     private Path extractGamaFile(String b64EncodedContents) throws IOException {
-        
-        String tmpdir = rndName();
-        Path p = Files.createTempDirectory(tmpdir);
 
+        Path p = Files.createTempDirectory(rndName());
         logger.info("Extracting .gama file to {}", p);
+
         extract(b64EncodedContents, p.toString());
         return p;
         
@@ -634,8 +665,7 @@ public class Deployer {
                  try {
                      Files.copy(dir, targetdir);
                  } catch (FileAlreadyExistsException e) {
-                      if (!Files.isDirectory(targetdir))
-                          throw e;
+                      if (!Files.isDirectory(targetdir)) throw e;
                  }
                  return FileVisitResult.CONTINUE;
 
@@ -661,6 +691,24 @@ public class Deployer {
 
     private static String rndName() {
         return ("" + Math.random()).substring(2);
+    }
+    
+    private String insertProjectBasepath(String code, String basepath) {
+        
+        Matcher m = BP_PATT.matcher(code);
+        if (m.find()) {
+            int i = m.end();
+            if (!m.find()) {    //Ensure there is only one occurrence
+                return code.substring(0, i) + basepath + "/" + code.substring(i);
+            }
+        }
+        return code;
+    }
+    
+    private String makeShortSafePath(String id) {
+        //radix 36 entails safe filename/url characters: 0-9 plus a-z
+        String path = Integer.toString(id.hashCode(), Math.min(36, Character.MAX_RADIX));
+        return path.substring(path.charAt(0) == '-' ? 1 : 0);
     }
 
     @PostConstruct

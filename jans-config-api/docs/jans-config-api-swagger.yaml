@@ -2,17 +2,15 @@ openapi: 3.0.1
 info:
   title: Jans Config API
   contact:
-    name: Gluu Support
-    url: https://support.gluu.org
-    email: xxx@gluu.org
+    name: Contact
+    url: https://github.com/JanssenProject/jans/discussions
   license:
-    name: Apache 2.0
+    name: License
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
-  version: 1.0.0
+  version: OAS Version
 servers:
-- url: https://jans.io/
+- url: https://jans.local.io
   description: The Jans server
-  variables: {}
 tags:
 - name: Attribute
 - name: Default Authentication Method
@@ -31,7 +29,7 @@ tags:
 - name: OAuth - UMA Resources
 - name: OAuth - Scopes
 - name: Agama - Configuration
-- name: Agama - Developer Studio
+- name: Agama
 - name: Statistics - User
 - name: Health - Check
 - name: Server Stats
@@ -40,6 +38,7 @@ tags:
 - name: Auth Server Health - Check
 - name: Plugins
 - name: Configuration – Config API
+- name: Client Authorization
 paths:
   /api/v1/health:
     get:
@@ -173,16 +172,18 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/acrs.write
         - https://jans.io/oauth/config/write-all
-  /api/v1/agama-deployment:
+  /api/v1/agama-deployment/{name}:
     get:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Fetches deployed Agama project based on name.
       description: Fetches deployed Agama project based on name.
-      operationId: get-agama-dev-studio-prj-by-name
+      operationId: get-agama-prj-by-name
       parameters:
       - name: name
-        in: query
+        in: path
+        description: Agama project name
+        required: true
         schema:
           type: string
       responses:
@@ -198,8 +199,6 @@ paths:
                   value: ""
         "204":
           description: No Content
-        "400":
-          description: Bad Request
         "401":
           description: Unauthorized
         "404":
@@ -209,16 +208,20 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.readonly
-        - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/read-all
     post:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Deploy an Agama project.
       description: Deploy an Agama project.
-      operationId: post-agama-dev-studio-prj
+      operationId: post-agama-prj
       parameters:
       - name: name
+        in: path
+        description: Agama project name
+        required: true
+        schema:
+          type: string
+      - name: autoconfigure
         in: query
         schema:
           type: string
@@ -252,23 +255,22 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/write-all
     delete:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Delete a deployed Agama project.
       description: Delete a deployed Agama project.
-      operationId: delete-agama-dev-studio-prj
+      operationId: delete-agama-prj
       parameters:
       - name: name
-        in: query
+        in: path
+        description: Agama project name
+        required: true
         schema:
           type: string
       responses:
         "204":
           description: No Content
-        "400":
-          description: Bad Request
         "401":
           description: Unauthorized
         "404":
@@ -280,13 +282,89 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.delete
-  /api/v1/agama-deployment/list:
+  /api/v1/agama-deployment/configs/{name}:
     get:
       tags:
-      - Agama - Developer Studio
+      - Agama
+      summary: Retrieve the list of configs based on name.
+      description: Retrieve the list of configs based on name.
+      operationId: get-agama-prj-configs
+      parameters:
+      - name: name
+        in: path
+        description: Agama project name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Agama projects configs
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.readonly
+    put:
+      tags:
+      - Agama
+      summary: Update an Agama project.
+      description: Update an Agama project.
+      operationId: put-agama-prj
+      parameters:
+      - name: name
+        in: path
+        description: Agama project name
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: object
+                additionalProperties:
+                  type: object
+      responses:
+        "202":
+          description: Agama project accepted
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "409":
+          description: Conflict
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.write
+  /api/v1/agama-deployment:
+    get:
+      tags:
+      - Agama
       summary: Retrieve the list of projects deployed currently.
       description: Retrieve the list of projects deployed currently.
-      operationId: get-agama-dev-prj
+      operationId: get-agama-prj
       parameters:
       - name: start
         in: query
@@ -316,313 +394,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.readonly
-        - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/read-all
-  /api/v1/agama:
-    get:
-      tags:
-      - Agama - Configuration
-      summary: Fetches all agama flow.
-      description: Fetches all agama flow.
-      operationId: get-agama-flows
-      parameters:
-      - name: pattern
-        in: query
-        description: Search pattern
-        schema:
-          type: string
-          default: ""
-      - name: limit
-        in: query
-        description: Search size - max size of the results to return
-        schema:
-          type: integer
-          format: int32
-          default: 50
-      - name: startIndex
-        in: query
-        description: The 1-based index of the first query result
-        schema:
-          type: integer
-          format: int32
-          default: 0
-      - name: sortBy
-        in: query
-        description: Attribute whose value will be used to order the returned response
-        schema:
-          type: string
-          default: agFlowQname
-      - name: sortOrder
-        in: query
-        description: Order in which the sortBy param is applied. Allowed values are
-          "ascending" and "descending"
-        schema:
-          type: string
-          default: ascending
-      - name: includeSource
-        in: query
-        description: Boolean flag to indicate agama source is to be included
-        schema:
-          type: boolean
-          default: false
-      responses:
-        "200":
-          description: Agama Flows
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PagedResult'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "start": 0,
-                        "totalEntriesCount": 1,
-                        "entriesCount": 1,
-                        "entries": [
-                            {
-                                "dn": "agFlowQname=test,ou=flows,ou=agama,o=jans",
-                                "qname": "test",
-                                "revision": -1,
-                                "enabled": false,
-                                "metadata": {
-                                    "timestamp": 1666786067495
-                                },
-                                "source": "Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                                "baseDn": "agFlowQname=test,ou=flows,ou=agama,o=jans"
-                            }
-                        ]
-                    }
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.readonly
-        - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/read-all
-    post:
-      tags:
-      - Agama - Configuration
-      summary: Create a new agama flow
-      description: Create a new agama flow
-      operationId: post-agama-flow
-      requestBody:
-        description: Agama Flow
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Flow'
-            examples:
-              Request example:
-                description: Request example
-                value: |
-                  {
-                    "enabled": false,
-                    "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                    "qname": "test"
-                  }
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Flow'
-              examples:
-                Response example:
-                  description: Response example
-                  value: |
-                    {
-                      "enabled": false,
-                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                      "qname": "test"
-                    }
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.write
-  /api/v1/agama/{qname}:
-    get:
-      tags:
-      - Agama - Configuration
-      summary: Gets an agama flow based on Qname.
-      description: Gets an agama flow based on Qname.
-      operationId: get-agama-flow
-      parameters:
-      - name: qname
-        in: path
-        description: Agama Flow name
-        required: true
-        schema:
-          type: string
-      - name: includeSource
-        in: query
-        description: Boolean flag to indicate agama source is to be included
-        schema:
-          type: boolean
-          default: false
-      responses:
-        "200":
-          description: Agama Flow
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Flow'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "dn": "agFlowQname=test,ou=flows,ou=agama,o=jans",
-                        "qname": "test",
-                        "revision": -1,
-                        "enabled": false,
-                        "metadata": {
-                            "timestamp": 1666786067495
-                        },
-                        "baseDn": "agFlowQname=test,ou=flows,ou=agama,o=jans"
-                    }
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.readonly
-        - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/read-all
-    post:
-      tags:
-      - Agama - Configuration
-      summary: Create a new agama flow from source
-      description: Create a new agama flow from source.
-      operationId: post-agama-flow-from-source
-      parameters:
-      - name: qname
-        in: path
-        description: Agama Flow name
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: Agama Flow
-        content:
-          text/plain:
-            schema:
-              type: string
-            examples:
-              Request example:
-                description: Request example
-                value: "//This is a comment\nFlow test\n    Basepath \"hello\" \n\n\
-                  in = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\n\
-                  Finish \"john_doe\"\n"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Flow'
-              examples:
-                Response example:
-                  description: Response example
-                  value: |
-                    {
-                      "enabled": false,
-                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                      "qname": "test"
-                    }
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.write
-    delete:
-      tags:
-      - Agama - Configuration
-      summary: Deletes an agama flow based on Qname
-      description: Deletes an agama flow based on Qname
-      operationId: delete-agama-flow
-      parameters:
-      - name: qname
-        in: path
-        description: Agama Flow name
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          description: No Content
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.delete
-    patch:
-      tags:
-      - Agama - Configuration
-      summary: Partially modify a Agama Flow
-      description: Partially modify a Agama Flow
-      operationId: patch-agama-flow
-      parameters:
-      - name: qname
-        in: path
-        description: Agama Flow name
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: JsonPatch object
-        content:
-          application/json-patch+json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/JsonPatch'
-            examples:
-              Request example:
-                description: Request example
-                value: |
-                  [{ "op": "replace", "path": "/source", "value": "Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\""}]
-      responses:
-        "200":
-          description: Patched Agama Flow
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Flow'
-              examples:
-                Response example:
-                  description: Response example
-                  value: |
-                    {
-                      "enabled": false,
-                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                      "qname": "test"
-                    }
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.write
   /api/v1/agama/syntax-check/{qname}:
     post:
       tags:
@@ -658,63 +429,12 @@ paths:
         - https://jans.io/oauth/config/agama.readonly
         - https://jans.io/oauth/config/agama.write
         - https://jans.io/oauth/config/read-all
-  /api/v1/agama/source/{qname}:
-    put:
-      tags:
-      - Agama - Configuration
-      summary: Update agama flow from source file
-      description: Update agama flow from source file.
-      operationId: put-agama-flow-from-source
-      parameters:
-      - name: qname
-        in: path
-        description: Agama Flow name
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: String representing patch-document.
-        content:
-          text/plain:
-            schema:
-              type: string
-            examples:
-              Request example:
-                description: Request example
-                value: "//This is a comment\nFlow test\n    Basepath \"hello\" \n\n\
-                  in = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\n\
-                  Finish \"john_doe\"\n"
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Flow'
-              examples:
-                Response example:
-                  description: Response example
-                  value: |
-                    {
-                      "enabled": false,
-                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                      "qname": "test"
-                    }
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.write
   /api/v1/attributes:
     get:
       tags:
       - Attribute
-      summary: Gets a list of Gluu attributes.
-      description: Gets a list of Gluu attributes.
+      summary: Gets a list of Jans attributes.
+      description: Gets a list of Jans attributes.
       operationId: get-attributes
       parameters:
       - name: limit
@@ -756,6 +476,16 @@ paths:
         schema:
           type: string
           default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "adminCanEdit=true,dataType=string"
       responses:
         "200":
           description: Ok
@@ -854,11 +584,11 @@ paths:
       description: Updates an existing attribute
       operationId: put-attributes
       requestBody:
-        description: GluuAttribute object
+        description: JansAttribute object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GluuAttribute'
+              $ref: '#/components/schemas/JansAttribute'
             examples:
               Request example:
                 description: Request example
@@ -896,7 +626,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -942,11 +672,11 @@ paths:
       description: Adds a new attribute
       operationId: post-attributes
       requestBody:
-        description: GluuAttribute object
+        description: JansAttribute object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GluuAttribute'
+              $ref: '#/components/schemas/JansAttribute'
             examples:
               Request example:
                 description: Request example
@@ -984,7 +714,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -1043,7 +773,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -1116,8 +846,8 @@ paths:
     patch:
       tags:
       - Attribute
-      summary: Partially modify a GluuAttribute
-      description: Partially modify a GluuAttribute
+      summary: Partially modify a JansAttribute
+      description: Partially modify a JansAttribute
       operationId: patch-attributes-by-inum
       parameters:
       - name: inum
@@ -1141,11 +871,11 @@ paths:
                   [ {op:replace, path: displayName, value: "CustomAttribute" } ]
       responses:
         "200":
-          description: Updated GluuAttribute
+          description: Updated JansAttribute
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GluuAttribute'
+                $ref: '#/components/schemas/JansAttribute'
               examples:
                 Response example:
                   description: Response example
@@ -1245,6 +975,29 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/properties.write
+  /api/v1/jans-auth-server/config/feature-flags:
+    get:
+      tags:
+      - Configuration – Properties
+      summary: Returns feature flags type configured for Jans authorization server.
+      description: Returns feature flags type configured for Jans authorization server.
+      operationId: get-feature-flag-type
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/properties.readonly
   /api/v1/jans-auth-server/config/persistence:
     get:
       tags:
@@ -1892,6 +1645,166 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/cache.write
+  /api/v1/clients/authorizations/{userId}/{clientId}/{username}:
+    delete:
+      tags:
+      - Client Authorization
+      summary: Revoke client authorization
+      description: Revoke client authorizations
+      operationId: delete-client-authorization
+      parameters:
+      - name: userId
+        in: path
+        description: User identifier
+        required: true
+        schema:
+          type: string
+      - name: clientId
+        in: path
+        description: Client identifier
+        required: true
+        schema:
+          type: string
+      - name: username
+        in: path
+        description: User name
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/client/authorizations.delete
+  /api/v1/clients/authorizations/{userId}:
+    get:
+      tags:
+      - Client Authorization
+      summary: Gets list of client authorization
+      description: Gets list of client authorizations
+      operationId: get-client-authorization
+      parameters:
+      - name: userId
+        in: path
+        description: User identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientAuth'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "DeletableEntity{expirationDate=null, deletable=false} BaseEntry [dn=inum=3000.1e5c4db0-e01e-4e8c-9360-28cb6f0a8026,ou=clients,o=jans]": [
+                            {
+                                "dn": "inum=10B2,ou=scopes,o=jans",
+                                "inum": "10B2",
+                                "displayName": "view_username",
+                                "id": "user_name",
+                                "description": "View your local username in the Janssen Server.",
+                                "scopeType": "openid",
+                                "claims": [
+                                    "inum=42E0,ou=attributes,o=jans"
+                                ],
+                                "defaultScope": false,
+                                "attributes": {
+                                    "showInConfigurationEndpoint": true
+                                },
+                                "creationDate": "2023-03-31T12:03:39",
+                                "umaType": false,
+                                "baseDn": "inum=10B2,ou=scopes,o=jans"
+                            },
+                            {
+                                "dn": "inum=43F1,ou=scopes,o=jans",
+                                "inum": "43F1",
+                                "displayName": "view_profile",
+                                "id": "profile",
+                                "description": "View your basic profile info.",
+                                "scopeType": "openid",
+                                "claims": [
+                                    "inum=2B29,ou=attributes,o=jans",
+                                    "inum=0C85,ou=attributes,o=jans",
+                                    "inum=B4B0,ou=attributes,o=jans",
+                                    "inum=A0E8,ou=attributes,o=jans",
+                                    "inum=5EC6,ou=attributes,o=jans",
+                                    "inum=B52A,ou=attributes,o=jans",
+                                    "inum=64A0,ou=attributes,o=jans",
+                                    "inum=EC3A,ou=attributes,o=jans",
+                                    "inum=3B47,ou=attributes,o=jans",
+                                    "inum=3692,ou=attributes,o=jans",
+                                    "inum=98FC,ou=attributes,o=jans",
+                                    "inum=A901,ou=attributes,o=jans",
+                                    "inum=36D9,ou=attributes,o=jans",
+                                    "inum=BE64,ou=attributes,o=jans",
+                                    "inum=6493,ou=attributes,o=jans",
+                                    "inum=4CF1,ou=attributes,o=jans",
+                                    "inum=29DA,ou=attributes,o=jans"
+                                ],
+                                "defaultScope": false,
+                                "attributes": {
+                                    "showInConfigurationEndpoint": true
+                                },
+                                "creationDate": "2023-03-31T12:03:39",
+                                "umaType": false,
+                                "baseDn": "inum=43F1,ou=scopes,o=jans"
+                            },
+                            {
+                                "dn": "inum=F0C4,ou=scopes,o=jans",
+                                "inum": "F0C4",
+                                "displayName": "authenticate_openid_connect",
+                                "id": "openid",
+                                "description": "Authenticate using OpenID Connect.",
+                                "scopeType": "openid",
+                                "defaultScope": true,
+                                "attributes": {
+                                    "showInConfigurationEndpoint": true
+                                },
+                                "creationDate": "2023-03-31T12:03:39",
+                                "umaType": false,
+                                "baseDn": "inum=F0C4,ou=scopes,o=jans"
+                            },
+                            {
+                                "dn": "inum=341A,ou=scopes,o=jans",
+                                "inum": "341A",
+                                "displayName": "view_client",
+                                "id": "clientinfo",
+                                "description": "View the client info.",
+                                "scopeType": "openid",
+                                "claims": [
+                                    "inum=2B29,ou=attributes,o=jans",
+                                    "inum=29DA,ou=attributes,o=jans"
+                                ],
+                                "defaultScope": false,
+                                "attributes": {
+                                    "showInConfigurationEndpoint": true
+                                },
+                                "creationDate": "2023-03-31T12:03:39",
+                                "umaType": false,
+                                "baseDn": "inum=341A,ou=scopes,o=jans"
+                            }
+                        ]
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/client/authorizations.readonly
   /api/v1/openid/clients:
     get:
       tags:
@@ -1925,12 +1838,24 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
+          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "applicationType=web,persistClientAuthorizations=true"
       responses:
         "200":
           description: Ok
@@ -3087,6 +3012,8 @@ paths:
                         "baseDn": "inum=1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6,ou=clients,o=jans",
                         "inum": "1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6"
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -3642,9 +3569,19 @@ paths:
     post:
       tags:
       - Configuration – SMTP
-      summary: Test SMTP server configuration
-      description: Test SMTP server configuration
+      summary: Signing Test SMTP server configuration
+      description: Signing Test SMTP server configuration
       operationId: test-config-smtp
+      requestBody:
+        description: SmtpTest object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmtpTest'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
       responses:
         "200":
           description: Ok
@@ -3659,12 +3596,12 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/smtp.readonly
+        - https://jans.io/oauth/config/smtp.write
   /api/v1/config/scripts:
     get:
       tags:
       - Custom Scripts
-      summary: Fetch custom script by name
+      summary: Gets a list of custom scripts
       description: Gets a list of custom scripts
       operationId: get-config-scripts
       parameters:
@@ -3701,6 +3638,16 @@ paths:
         schema:
           type: string
           default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "adminCanEdit=true,dataType=string"
       responses:
         "200":
           description: Ok
@@ -4114,6 +4061,136 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/scripts.readonly
+  /api/v1/config/scripts/types:
+    get:
+      tags:
+      - Custom Scripts
+      summary: Fetch custom script types
+      description: Fetch custom script types
+      operationId: get-custom-script-type
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  enum:
+                  - person_authentication
+                  - authorization_challenge
+                  - introspection
+                  - resource_owner_password_credentials
+                  - application_session
+                  - cache_refresh
+                  - client_registration
+                  - id_generator
+                  - uma_rpt_policy
+                  - uma_rpt_claims
+                  - uma_claims_gathering
+                  - consent_gathering
+                  - dynamic_scope
+                  - spontaneous_scope
+                  - end_session
+                  - post_authn
+                  - select_account
+                  - scim
+                  - ciba_end_user_notification
+                  - revoke_token
+                  - persistence_extension
+                  - idp
+                  - discovery
+                  - update_token
+                  - config_api_auth
+                  - modify_ssa_response
+                  - fido2_extension
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    [
+                        "discovery",
+                        "consent_gathering",
+                        "ciba_end_user_notification",
+                        "id_generator",
+                        "idp",
+                        "introspection",
+                        "persistence_extension",
+                        "cache_refresh",
+                        "uma_rpt_policy",
+                        "update_token",
+                        "scim",
+                        "end_session",
+                        "config_api_auth",
+                        "uma_claims_gathering",
+                        "person_authentication",
+                        "resource_owner_password_credentials",
+                        "authorization_challenge",
+                        "client_registration",
+                        "dynamic_scope",
+                        "application_session"
+                    ]
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/scripts.readonly
+  /api/v1/config/scripts/script-types:
+    get:
+      tags:
+      - Custom Scripts
+      summary: Fetch custom script types
+      description: Fetch custom script types
+      operationId: get-custom-script-types
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    [
+                        "discovery",
+                        "consent_gathering",
+                        "ciba_end_user_notification",
+                        "id_generator",
+                        "idp",
+                        "introspection",
+                        "persistence_extension",
+                        "cache_refresh",
+                        "uma_rpt_policy",
+                        "update_token",
+                        "scim",
+                        "end_session",
+                        "config_api_auth",
+                        "uma_claims_gathering",
+                        "person_authentication",
+                        "resource_owner_password_credentials",
+                        "authorization_challenge",
+                        "client_registration",
+                        "dynamic_scope",
+                        "application_session"
+                    ]
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/scripts.readonly
   /api/v1/config/scripts/type/{type}:
     get:
       tags:
@@ -4161,6 +4238,16 @@ paths:
         schema:
           type: string
           default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "adminCanEdit=true,dataType=string"
       responses:
         "200":
           description: Ok
@@ -5249,12 +5336,14 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
+          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
+          default: ascending
       - name: withAssociatedClients
         in: query
         description: Boolean fag to indicate if clients associated with the scope
@@ -5262,6 +5351,16 @@ paths:
         schema:
           type: boolean
           default: false
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "scopeType=spontaneous,defaultScope=true"
       responses:
         "200":
           description: Ok
@@ -6855,12 +6954,24 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
+          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: deletable=true
       responses:
         "200":
           description: Ok
@@ -7336,12 +7447,14 @@ components:
           type: array
           items:
             type: string
+        error:
+          type: string
+        autoconfigure:
+          type: boolean
         flowsError:
           type: object
           additionalProperties:
             type: string
-        error:
-          type: string
         projectMetadata:
           $ref: '#/components/schemas/ProjectMetadata'
     ProjectMetadata:
@@ -7355,6 +7468,18 @@ components:
           type: string
         description:
           type: string
+        version:
+          type: string
+        configs:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: object
+        noDirectLaunch:
+          type: array
+          items:
+            type: string
     PagedResult:
       type: object
       properties:
@@ -7371,57 +7496,6 @@ components:
           type: array
           items:
             type: object
-    Flow:
-      type: object
-      properties:
-        dn:
-          type: string
-        qname:
-          type: string
-        transHash:
-          type: string
-        revision:
-          type: integer
-          format: int32
-        enabled:
-          type: boolean
-        metadata:
-          $ref: '#/components/schemas/FlowMetadata'
-        source:
-          type: string
-        transpiled:
-          type: string
-        codeError:
-          type: string
-        baseDn:
-          type: string
-    FlowMetadata:
-      type: object
-      properties:
-        funcName:
-          type: string
-        inputs:
-          type: array
-          items:
-            type: string
-        timeout:
-          type: integer
-          format: int32
-        displayName:
-          type: string
-        author:
-          type: string
-        timestamp:
-          type: integer
-          format: int64
-        description:
-          type: string
-        properties:
-          type: object
-          additionalProperties:
-            type: object
-    JsonPatch:
-      type: object
     AttributeValidation:
       type: object
       properties:
@@ -7433,7 +7507,7 @@ components:
           format: int32
         regexp:
           type: string
-    GluuAttribute:
+    JansAttribute:
       required:
       - dataType
       - description
@@ -7445,8 +7519,6 @@ components:
       properties:
         dn:
           type: string
-        selected:
-          type: boolean
         inum:
           type: string
         sourceAttribute:
@@ -7535,19 +7607,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
+        whitePagesCanView:
+          type: boolean
+        selected:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
-          type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -7569,6 +7643,8 @@ components:
           type: string
         authorizationEndpoint:
           type: string
+        authorizationChallengeEndpoint:
+          type: string
         tokenEndpoint:
           type: string
         tokenRevocationEndpoint:
@@ -7582,6 +7658,8 @@ components:
         endSessionEndpoint:
           type: string
         jwksUri:
+          type: string
+        archivedJwksUri:
           type: string
         registrationEndpoint:
           type: string
@@ -7600,6 +7678,8 @@ components:
         deviceAuthzEndpoint:
           type: string
         mtlsAuthorizationEndpoint:
+          type: string
+        mtlsAuthorizationChallengeEndpoint:
           type: string
         mtlsTokenEndpoint:
           type: string
@@ -7631,7 +7711,12 @@ components:
           type: boolean
         allowAllValueForRevokeEndpoint:
           type: boolean
+        allowRevokeForOtherClients:
+          type: boolean
         sectorIdentifierCacheLifetimeInMinutes:
+          type: integer
+          format: int32
+        archivedJwkLifetimeInSeconds:
           type: integer
           format: int32
         umaConfigurationEndpoint:
@@ -7744,6 +7829,18 @@ components:
           items:
             type: string
         userInfoEncryptionEncValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionSigningAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionEncryptionAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionEncryptionEncValuesSupported:
           type: array
           items:
             type: string
@@ -7899,6 +7996,8 @@ components:
           type: boolean
         returnClientSecretOnRead:
           type: boolean
+        rotateClientRegistrationAccessTokenOnUsage:
+          type: boolean
         rejectJwtWithNoneAlg:
           type: boolean
         expirationNotificatorEnabled:
@@ -7953,6 +8052,8 @@ components:
           type: boolean
         disablePromptLogin:
           type: boolean
+        disablePromptConsent:
+          type: boolean
         sessionIdLifetime:
           type: integer
           format: int32
@@ -7964,6 +8065,8 @@ components:
         configurationUpdateInterval:
           type: integer
           format: int32
+        logNotFoundEntityAsError:
+          type: boolean
         enableClientGrantTypeUpdate:
           type: boolean
         dynamicGrantTypeDefault:
@@ -8041,7 +8144,11 @@ components:
           type: string
         introspectionAccessTokenMustHaveUmaProtectionScope:
           type: boolean
+        introspectionAccessTokenMustHaveIntrospectionScope:
+          type: boolean
         introspectionSkipAuthorization:
+          type: boolean
+        introspectionRestrictBasicAuthnToOwnTokens:
           type: boolean
         endSessionWithAccessToken:
           type: boolean
@@ -8103,6 +8210,8 @@ components:
           type: boolean
         returnDeviceSecretFromAuthzEndpoint:
           type: boolean
+        dcrForbidExpirationTimeInRequest:
+          type: boolean
         dcrSignatureValidationEnabled:
           type: boolean
         dcrSignatureValidationSharedSecret:
@@ -8119,10 +8228,12 @@ components:
           type: boolean
         dcrAuthorizationWithMTLS:
           type: boolean
-        dcrIssuers:
-          type: array
-          items:
-            type: string
+        dcrAttestationEvidenceRequired:
+          type: boolean
+        trustedSsaIssuers:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TrustedIssuerConfig'
         useLocalCache:
           type: boolean
         fapiCompatibility:
@@ -8142,6 +8253,8 @@ components:
         skipRefreshTokenDuringRefreshing:
           type: boolean
         refreshTokenExtendLifetimeOnRotation:
+          type: boolean
+        allowBlankValuesInDiscoveryResponse:
           type: boolean
         checkUserPresenceOnRefreshToken:
           type: boolean
@@ -8173,6 +8286,8 @@ components:
           type: integer
           format: int32
         deviceAuthzResponseTypeToProcessAuthz:
+          type: string
+        deviceAuthzAcr:
           type: string
         backchannelClientId:
           type: string
@@ -8228,7 +8343,16 @@ components:
         dpopJtiCacheTime:
           type: integer
           format: int32
+        dpopUseNonce:
+          type: boolean
+        dpopNonceCacheTime:
+          type: integer
+          format: int32
+        dpopJktForceForAuthorizationCode:
+          type: boolean
         allowIdTokenWithoutImplicitGrantType:
+          type: boolean
+        forceRopcInAuthorizationEndpoint:
           type: boolean
         discoveryCacheLifetimeInMinutes:
           type: integer
@@ -8245,6 +8369,28 @@ components:
           type: array
           items:
             type: string
+            enum:
+            - UNKNOWN
+            - HEALTH_CHECK
+            - USERINFO
+            - CLIENTINFO
+            - ID_GENERATION
+            - REGISTRATION
+            - INTROSPECTION
+            - REVOKE_TOKEN
+            - REVOKE_SESSION
+            - ACTIVE_SESSION
+            - END_SESSION
+            - STATUS_SESSION
+            - JANS_CONFIGURATION
+            - CIBA
+            - UMA
+            - U2F
+            - DEVICE_AUTHZ
+            - METRIC
+            - STAT
+            - PAR
+            - SSA
         httpLoggingEnabled:
           type: boolean
         httpLoggingExcludePaths:
@@ -8264,10 +8410,18 @@ components:
           $ref: '#/components/schemas/SsaConfiguration'
         blockWebviewAuthorizationEnabled:
           type: boolean
+        authorizationChallengeDefaultAcr:
+          type: string
+        authorizationChallengeShouldGenerateSession:
+          type: boolean
         dateFormatterPatterns:
           type: object
           additionalProperties:
             type: string
+        httpLoggingResponseBodyContent:
+          type: boolean
+        skipAuthenticationFilterOptionsMethod:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8394,11 +8548,6 @@ components:
           type: string
         scriptsPath:
           type: string
-        serializerType:
-          type: string
-          enum:
-          - KRYO
-          - FST
         maxItemsLoggedInCollections:
           type: integer
           format: int32
@@ -8414,6 +8563,12 @@ components:
           type: string
         bridgeScriptPage:
           type: string
+        serializeRules:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
         defaultResponseHeaders:
           type: object
           additionalProperties:
@@ -8471,11 +8626,20 @@ components:
           type: string
         sharedSecret:
           type: string
+    TrustedIssuerConfig:
+      type: object
+      properties:
+        automaticallyGrantedScopes:
+          type: array
+          items:
+            type: string
     PersistenceConfiguration:
       type: object
       properties:
         persistenceType:
           type: string
+    JsonPatch:
+      type: object
     CacheConfiguration:
       type: object
       properties:
@@ -8576,6 +8740,91 @@ components:
         maxRetryAttempts:
           type: integer
           format: int32
+    ClientAuth:
+      type: object
+      properties:
+        clientAuths:
+          type: object
+          additionalProperties:
+            uniqueItems: true
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+    Scope:
+      type: object
+      properties:
+        dn:
+          type: string
+        expirationDate:
+          type: string
+          format: date-time
+        deletable:
+          type: boolean
+        inum:
+          type: string
+        displayName:
+          type: string
+        id:
+          type: string
+        iconUrl:
+          type: string
+        description:
+          type: string
+        scopeType:
+          type: string
+          enum:
+          - openid
+          - dynamic
+          - uma
+          - spontaneous
+          - oauth
+        claims:
+          type: array
+          items:
+            type: string
+        defaultScope:
+          type: boolean
+        groupClaims:
+          type: boolean
+        dynamicScopeScripts:
+          type: array
+          items:
+            type: string
+        umaAuthorizationPolicies:
+          type: array
+          items:
+            type: string
+        attributes:
+          $ref: '#/components/schemas/ScopeAttributes'
+        creatorId:
+          type: string
+        creatorType:
+          type: string
+          enum:
+          - none
+          - client
+          - user
+          - auto
+        creationDate:
+          type: string
+          format: date-time
+        creatorAttributes:
+          type: object
+          additionalProperties:
+            type: string
+        umaType:
+          type: boolean
+        baseDn:
+          type: string
+    ScopeAttributes:
+      type: object
+      properties:
+        spontaneousClientScopes:
+          type: array
+          items:
+            type: string
+        showInConfigurationEndpoint:
+          type: boolean
     Client:
       type: object
       properties:
@@ -8874,6 +9123,8 @@ components:
           format: int32
         requirePar:
           type: boolean
+        dpopBoundAccessToken:
+          type: boolean
         jansAuthSignedRespAlg:
           type: string
         jansAuthEncRespAlg:
@@ -8900,10 +9151,25 @@ components:
           format: int32
         minimumAcrLevelAutoresolve:
           type: boolean
+        additionalTokenEndpointAuthMethods:
+          type: array
+          items:
+            type: string
         minimumAcrPriorityList:
           type: array
           items:
             type: string
+        requestedLifetime:
+          type: integer
+          format: int32
+        evidence:
+          type: string
+        introspectionSignedResponseAlg:
+          type: string
+        introspectionEncryptedResponseAlg:
+          type: string
+        introspectionEncryptedResponseEnc:
+          type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -8915,10 +9181,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -9044,8 +9310,12 @@ components:
         port:
           type: integer
           format: int32
-        requires_ssl:
-          type: boolean
+        connect_protection:
+          type: string
+          enum:
+          - None
+          - StartTls
+          - SslTls
         trust_host:
           type: boolean
         from_name:
@@ -9054,9 +9324,26 @@ components:
           type: string
         requires_authentication:
           type: boolean
-        user_name:
+        smtp_authentication_account_username:
           type: string
-        password:
+        smtp_authentication_account_password:
+          type: string
+        key_store:
+          type: string
+        key_store_password:
+          type: string
+        key_store_alias:
+          type: string
+        signing_algorithm:
+          type: string
+    SmtpTest:
+      type: object
+      properties:
+        sign:
+          type: boolean
+        subject:
+          type: string
+        message:
           type: string
     CustomScript:
       type: object
@@ -9082,6 +9369,7 @@ components:
           type: string
           enum:
           - person_authentication
+          - authorization_challenge
           - introspection
           - resource_owner_password_credentials
           - application_session
@@ -9096,6 +9384,7 @@ components:
           - spontaneous_scope
           - end_session
           - post_authn
+          - select_account
           - scim
           - ciba_end_user_notification
           - revoke_token
@@ -9105,6 +9394,7 @@ components:
           - update_token
           - config_api_auth
           - modify_ssa_response
+          - fido2_extension
         programmingLanguage:
           type: string
           enum:
@@ -9364,81 +9654,6 @@ components:
           type: string
         baseDn:
           type: string
-    Scope:
-      type: object
-      properties:
-        dn:
-          type: string
-        expirationDate:
-          type: string
-          format: date-time
-        deletable:
-          type: boolean
-        inum:
-          type: string
-        displayName:
-          type: string
-        id:
-          type: string
-        iconUrl:
-          type: string
-        description:
-          type: string
-        scopeType:
-          type: string
-          enum:
-          - openid
-          - dynamic
-          - uma
-          - spontaneous
-          - oauth
-        claims:
-          type: array
-          items:
-            type: string
-        defaultScope:
-          type: boolean
-        groupClaims:
-          type: boolean
-        dynamicScopeScripts:
-          type: array
-          items:
-            type: string
-        umaAuthorizationPolicies:
-          type: array
-          items:
-            type: string
-        attributes:
-          $ref: '#/components/schemas/ScopeAttributes'
-        creatorId:
-          type: string
-        creatorType:
-          type: string
-          enum:
-          - none
-          - client
-          - user
-          - auto
-        creationDate:
-          type: string
-          format: date-time
-        creatorAttributes:
-          type: object
-          additionalProperties:
-            type: string
-        umaType:
-          type: boolean
-        baseDn:
-          type: string
-    ScopeAttributes:
-      type: object
-      properties:
-        spontaneousClientScopes:
-          type: array
-          items:
-            type: string
-        showInConfigurationEndpoint:
-          type: boolean
     CustomScope:
       type: object
       properties:
@@ -9553,8 +9768,6 @@ components:
         creationDate:
           type: string
           format: date-time
-        persisted:
-          type: boolean
         user:
           $ref: '#/components/schemas/User'
         ttl:
@@ -9562,6 +9775,8 @@ components:
           format: int32
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

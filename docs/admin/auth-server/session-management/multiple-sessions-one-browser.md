@@ -28,7 +28,7 @@ this case, Auth Server renders the default page:
 This page iterates `current_sessions` and enables the person
 to login as a different account, for example:
 
-![Sample Select Account login page screenshot](../../../../assets/auth_server_sessions_selectAccount.png)
+![Sample Select Account login page screenshot](../../../assets/auth_server_sessions_selectAccount.png)
 
 You can override this page if you place a `selectAccount.xhtml` in
 `custom/pages`.

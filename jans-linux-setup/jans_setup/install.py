@@ -2,6 +2,7 @@
 
 import sys
 import os
+import glob
 import argparse
 import zipfile
 import shutil
@@ -27,6 +28,7 @@ jans_app_dir = '/opt/dist/jans'
 maven_base_url = 'https://maven.jans.io/maven/io/jans/'
 jetty_home = '/opt/jans/jetty'
 jans_zip_file = os.path.join(jans_app_dir, 'jans.zip')
+openbanking_zip_file = os.path.join(jans_app_dir, 'openbanking.zip')
 
 package_installer = shutil.which('apt') or shutil.which('dnf') or shutil.which('yum') or shutil.which('zypper')
 
@@ -41,23 +43,20 @@ parser.add_argument('-uninstall', help="Uninstall Jans server and removes all fi
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
 parser.add_argument('-yes', help="No prompt", action='store_true')
 parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
+parser.add_argument('--keep-setup', help="Keep setup files for future install", action='store_true')
 parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
 parser.add_argument('-download-exit', help="Downloads files and exits", action='store_true')
 parser.add_argument('--setup-branch', help="Jannsen setup github branch", default="main")
 parser.add_argument('--setup-dir', help="Setup directory", default=os.path.join(jans_dir, 'jans-setup'))
 parser.add_argument('-force-download', help="Force downloading files", action='store_true')
-
+parser.add_argument('--github-access-token', help="Github access token to retrieve openbanking setup profile")
+parser.add_argument('--openbanking-setup-branch', help="Openbanking setup github branch", default="main")
 argsp = parser.parse_args()
 
 
 bacup_ext = '-back.' + time.ctime()
 
 def check_install_dependencies():
-
-    try:
-        from distutils import dist
-    except ImportError:
-        package_dependencies.append('python3-distutils')
 
     try:
         import ldap3
@@ -84,7 +83,29 @@ def download_jans_acrhieve():
     print("Downloading {} as {}".format(jans_acrhieve_url, jans_zip_file))
     request.urlretrieve(jans_acrhieve_url, jans_zip_file)
 
+    if argsp.profile == 'openbanking':
+        access_token = argsp.github_access_token
+        if not access_token:
+            access_token = input("Please enter github access token: ")
+        if not access_token:
+            print("Can't continue without github access token for openbanking profile")
+            sys.exit()
 
+        openbanking_acrhieve_url = 'https://github.com/GluuFederation/openbanking/archive/refs/heads/{}.zip'.format(argsp.openbanking_setup_branch)
+
+        opener = request.build_opener()
+        opener.addheaders = [('Authorization', 'token '+access_token)]
+        request.install_opener(opener)
+
+        print("Downloading {} as {}".format(openbanking_acrhieve_url, openbanking_zip_file))
+
+        try:
+            request.urlretrieve(openbanking_acrhieve_url, openbanking_zip_file)
+        except Exception as e:
+            print("Can't download openbanking profile", e)
+            sys.exit()
+
+        request.install_opener(None)
 
 def check_installation():
     if not (os.path.exists(jetty_home) and os.path.exists('/etc/jans/conf/jans.properties')):
@@ -131,20 +152,24 @@ def profile_setup():
                 shutil.copy(source_file, target_dir)
 
 
+def extract_from_zip(zip_fn, source_dir, target_dir):
+    zip_object = zipfile.ZipFile(zip_fn)
+    parent_dir = zip_object.filelist[0].orig_filename
+    zip_object.close()
+
+    unpack_dir = os.path.join(jans_app_dir, os.urandom(8).hex())
+    shutil.unpack_archive(zip_fn, unpack_dir)
+    shutil.copytree(os.path.join(unpack_dir, parent_dir, source_dir), target_dir)
+
+    shutil.rmtree(unpack_dir)
 
 def extract_setup():
     if os.path.exists(argsp.setup_dir):
         shutil.move(argsp.setup_dir, argsp.setup_dir + bacup_ext)
 
     print("Extracting jans-setup package")
-    jans_zip = zipfile.ZipFile(jans_zip_file)
-    parent_dir = jans_zip.filelist[0].orig_filename
 
-    unpack_dir = os.path.join(jans_app_dir, os.urandom(4).hex())
-    shutil.unpack_archive(jans_zip_file, unpack_dir)
-    shutil.copytree(os.path.join(unpack_dir, parent_dir, 'jans-linux-setup/jans_setup'), argsp.setup_dir)
-    jans_zip.close()
-    shutil.rmtree(unpack_dir)
+    extract_from_zip(jans_zip_file, 'jans-linux-setup/jans_setup', argsp.setup_dir)
 
     target_setup = os.path.join(argsp.setup_dir, 'setup.py')
     if not os.path.exists(target_setup):
@@ -162,6 +187,13 @@ def extract_setup():
 
     with open(os.path.join(argsp.setup_dir, 'profile'), 'w') as w:
         w.write(argsp.profile)
+
+    if argsp.profile == 'openbanking' and os.path.exists(openbanking_zip_file):
+        print("Extracting Openbanking profile")
+        target_dir = os.path.join(argsp.setup_dir, 'openbanking')
+        if os.path.exists(target_dir):
+            shutil.move(target_dir, target_dir + bacup_ext)
+        extract_from_zip(openbanking_zip_file, 'jans-linux-setup/openbanking', target_dir)
 
 def uninstall_jans():
     check_installation()
@@ -184,29 +216,53 @@ def uninstall_jans():
                 print("Please type \033[1m yes \033[0m to uninstall")
 
     print("Uninstalling Jannsen Server...")
-    for service in os.listdir(jetty_home):
-        if os.path.exists(os.path.join(jetty_home, service)):
-            default_fn = os.path.join('/etc/default/', service)
-            if os.path.exists(default_fn):
-                print("Removing", default_fn)
-                os.remove(default_fn)
-            print("Stopping", service)
-            os.system('systemctl stop ' + service)
 
-    if argsp.profile == 'jans':
-        print("Stopping OpenDj Server")
-        os.system('/opt/opendj/bin/stop-ds')
+    service_list = os.listdir(jetty_home)
+    if os.path.exists('/opt/keycloak'):
+        service_list.append('kc')
 
-    remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
+    if os.path.exists('/opt/opendj/bin/stop-ds'):
+        service_list.append('opendj')
+
+    for service in service_list:
+
+        print("Stopping", service)
+        os.system('systemctl stop ' + service)
+        os.system('systemctl disable ' + service)
+
+        default_fn = os.path.join('/etc/default/', service)
+        if os.path.exists(default_fn):
+            print("Removing", default_fn)
+            os.remove(default_fn)
+
+        unit_fn = os.path.join('/etc/systemd/system', service + '.service')
+        if os.path.exists(unit_fn):
+            os.remove(unit_fn)
+
+    os.system('systemctl daemon-reload')
+    os.system('systemctl reset-failed')
+
+    remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*', '/opt/keycloak', '/opt/idp']
     if argsp.profile == 'jans':
         remove_list.append('/opt/opendj')
     if not argsp.keep_downloads:
         remove_list.append('/opt/dist')
 
+    if not argsp.keep_setup:
+        remove_list.append('/opt/jans')
+    else:
+        for rdir in glob.glob('/opt/jans/*'):
+            if rdir != '/opt/jans/jans-setup':
+                remove_list.append(rdir)
+        os.system('rm -r -f /opt/jans/jans-setup/output')
+        os.system('rm -f /opt/jans/jans-setup/logs/*.log')
+        os.system('rm -f /opt/jans/jans-setup/setup.properties.last')
+
     for p in remove_list:
-        cmd = 'rm -r -f ' + p
-        print("Executing", cmd)
-        os.system('rm -r -f ' + p)
+        if glob.glob(p):
+            cmd = 'rm -r -f ' + p
+            print("Executing", cmd)
+            os.system('rm -r -f ' + p)
 
     apache_conf_fn_list = []
 

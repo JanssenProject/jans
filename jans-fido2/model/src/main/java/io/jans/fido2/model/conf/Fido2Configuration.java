@@ -43,6 +43,12 @@ public class Fido2Configuration {
     private List<String> requestedCredentialTypes = new ArrayList<String>();
     @DocProperty(description = "Authenticators metadata in json format")
     private List<RequestedParty> requestedParties = new ArrayList<RequestedParty>();
+    @DocProperty(description = "String value to provide source of URLs with external metadata")
+    private String metadataUrlsProvider;
+    @DocProperty(description = "Boolean value indicating whether the MDS download should be omitted")
+    private boolean skipDownloadMdsEnabled = false;
+    @DocProperty(description = "Boolean value indicating whether MDS validation should be omitted during attestation")
+    private boolean skipValidateMdsInAttestationEnabled = false;
 
     public String getAuthenticatorCertsFolder() {
         return authenticatorCertsFolder;
@@ -132,4 +138,27 @@ public class Fido2Configuration {
 		this.requestedParties = requestedParties;
 	}
 
+    public String getMetadataUrlsProvider() {
+        return metadataUrlsProvider;
+    }
+
+    public void setMetadataUrlsProvider(String metadataUrlsProvider) {
+        this.metadataUrlsProvider = metadataUrlsProvider;
+    }
+
+    public boolean isSkipDownloadMdsEnabled() {
+        return skipDownloadMdsEnabled;
+    }
+
+    public void setSkipDownloadMdsEnabled(boolean skipDownloadMdsEnabled) {
+        this.skipDownloadMdsEnabled = skipDownloadMdsEnabled;
+    }
+
+    public boolean isSkipValidateMdsInAttestationEnabled() {
+        return skipValidateMdsInAttestationEnabled;
+    }
+
+    public void setSkipValidateMdsInAttestationEnabled(boolean skipValidateMdsInAttestationEnabled) {
+        this.skipValidateMdsInAttestationEnabled = skipValidateMdsInAttestationEnabled;
+    }
 }

@@ -6,17 +6,7 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
-import io.jans.as.client.JwkResponse;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
@@ -26,16 +16,10 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
-import io.jans.as.model.crypto.signature.ECDSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jws.ECDSASigner;
-import io.jans.as.model.jws.HMACSigner;
-import io.jans.as.model.jws.PlainTextSignature;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
@@ -49,11 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * @author Javier Rojas Blum
@@ -79,6 +59,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.NONE);
         registerRequest.setClaims(Arrays.asList(
@@ -188,6 +169,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.NONE);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.NONE);
@@ -277,7 +259,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -298,6 +280,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
@@ -389,7 +372,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -410,6 +393,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
@@ -501,7 +485,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -522,6 +506,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
@@ -613,7 +598,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -637,6 +622,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
@@ -728,7 +714,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -752,6 +738,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS384);
@@ -843,7 +830,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -867,6 +854,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS512);
@@ -958,7 +946,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -982,6 +970,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES256);
@@ -1073,7 +1062,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -1097,6 +1086,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES384);
@@ -1188,7 +1178,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -1212,6 +1202,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES512);
@@ -1303,7 +1294,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -1324,6 +1315,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.A128KW);
@@ -1418,7 +1410,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -1439,6 +1431,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A256KW);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.A256KW);
@@ -1533,7 +1526,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -1556,6 +1549,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
@@ -1660,7 +1654,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -1683,6 +1677,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
@@ -1787,7 +1782,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }
@@ -1810,6 +1805,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.clientInfoScopes);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
@@ -1915,7 +1911,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AssertBuilder.userInfoResponse(userInfoResponse)
                 .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                 .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
                 .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
     }

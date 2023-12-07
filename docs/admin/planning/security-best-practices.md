@@ -1,6 +1,9 @@
 ---
 tags:
-  - security recommendations
+  - administration
+  - planning
+  - security
+  - recommendations
 ---
 
 Janssen Project distributions are designed to be easy to deploy. Its default
@@ -39,7 +42,7 @@ databases used by Gluu to store all its configuration are not Internet facing.
 
 ## OpenID
 
-Review the [OAuth 2.0 Security Best Current Practice](OAuth 2.0 Security Best Current Practice) IETF draft.
+Review the [OAuth 2.0 Security Best Current Practice](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics) IETF draft.
 
 Don't use the implicit flow. In the implicit flow, the client is not
 authenticated, and a token is returned from the Authorization endpoint. If the

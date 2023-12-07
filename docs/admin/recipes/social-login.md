@@ -11,8 +11,8 @@ tags:
 You can use a `PersonAuthenticationType` script to allow users to sign using credentials from popular **Social Identity providers** or **Inbound Identity Providers** like Facebook, Google and Apple. After users authenticate, we provision their Social Identity Provider credentials into the Jans-auth server. No additional username, password, credentials are needed for this user.
 
 1. Facebook
-2. [Google](../../../script-catalog/person-authentication/google-external-authenticator/README.md)
-3. [Apple](../../../script-catalog/person-authentication/apple-external-authenticator/README.md)
+2. [Google](../../script-catalog/person_authentication/google-external-authenticator/README.md)
+3. [Apple](../../script-catalog/person_authentication/apple-external-authenticator/README.md)
 
 Following is a high-level diagram depicting a typical flow - user authentication on a Social Identity Platform and subsequent user provisioning on Jans-Auth server.
 

@@ -12,22 +12,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.audit.debug.entity.HttpRequest;
 import io.jans.as.server.audit.debug.entity.HttpResponse;
+import io.jans.as.server.audit.debug.wrapper.LogResponseWrapper;
 import io.jans.as.server.audit.debug.wrapper.RequestWrapper;
 import io.jans.as.server.audit.debug.wrapper.ResponseWrapper;
+import jakarta.inject.Inject;
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 
-import jakarta.inject.Inject;
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.annotation.WebFilter;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -38,7 +35,8 @@ import java.util.Set;
  *
  * @author Yuriy Movchan Date: 06/09/2019
  */
-@WebFilter(urlPatterns = {"/*"})
+@WebFilter(filterName = "ServletLoggingFilter",
+        urlPatterns = {"/*"})
 public class ServletLoggingFilter implements Filter {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -83,17 +81,27 @@ public class ServletLoggingFilter implements Filter {
         }
 
         RequestWrapper requestWrapper = new RequestWrapper(httpRequest);
-        ResponseWrapper responseWrapper = new ResponseWrapper(httpResponse);
+        HttpServletResponseWrapper responseWrapper = null;
+        /** If httpLoggingResponseBodyContent  is enabled then LogResponseWrapper is used, otherwise normal ResponseWrapper is used **/
+        if (log.isDebugEnabled() && appConfiguration.getHttpLoggingResponseBodyContent()) {
+            responseWrapper = new LogResponseWrapper((HttpServletResponse) response);
+        } else {
+            responseWrapper = new ResponseWrapper(httpResponse);
+        }
 
-        chain.doFilter(httpRequest, httpResponse);
-
+        chain.doFilter(httpRequest, responseWrapper);
         Duration duration = duration(start);
 
         // yuriyz: log request and response only after filter handling.
         // #914 - we don't want to effect server functionality due to logging. Currently content can be messed if it is InputStream.
         if (log.isDebugEnabled()) {
-            log.debug(getRequestDescription(requestWrapper, duration));
-            log.debug(getResponseDescription(responseWrapper));
+            String strDebugLog = "\nREQUEST: " + getRequestDescription(requestWrapper, duration);
+            strDebugLog += "\nRESPONSE: " + getResponseDescription(responseWrapper);
+            /** A copy of body content is logged **/
+            if (appConfiguration.getHttpLoggingResponseBodyContent()) {
+                strDebugLog += "\nRESPONSE BODY: " + ((LogResponseWrapper) responseWrapper).getBodyCopy();
+            }
+            log.debug(strDebugLog);
         }
     }
 
@@ -119,10 +127,11 @@ public class ServletLoggingFilter implements Filter {
         }
     }
 
-    protected String getResponseDescription(ResponseWrapper responseWrapper) {
+
+    protected String getResponseDescription(HttpServletResponseWrapper responseWrapper) {
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.setStatus(responseWrapper.getStatus());
-        httpResponse.setHeaders(responseWrapper.getHeaders());
+        httpResponse.setHeaders(((ResponseWrapper) responseWrapper).getHeaders());
         try {
             return OBJECT_MAPPER.writeValueAsString(httpResponse);
         } catch (JsonProcessingException e) {

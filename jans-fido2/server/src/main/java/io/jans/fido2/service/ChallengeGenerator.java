@@ -34,6 +34,14 @@ public class ChallengeGenerator {
     @Inject
     private Base64Service base64Service;
 
+    public String getAttestationChallenge() {
+    	return getChallenge();
+    }
+
+    public String getAssertionChallenge() {
+    	return getChallenge();
+    }
+
     public String getChallenge() {
         byte buffer[] = new byte[32];
         new SecureRandom().nextBytes(buffer);

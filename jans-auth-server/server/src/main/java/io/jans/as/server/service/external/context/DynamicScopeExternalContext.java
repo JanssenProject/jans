@@ -10,6 +10,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.common.IAuthorizationGrant;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class DynamicScopeExternalContext extends ExternalScriptContext {
     private final IAuthorizationGrant authorizationGrant;
 
     public DynamicScopeExternalContext(List<Scope> dynamicScopes, JsonWebResponse jsonWebResponse, IAuthorizationGrant authorizationGrant) {
-        super(null);
+        super((HttpServletRequest) null);
 
         this.dynamicScopes = dynamicScopes;
         this.jsonWebResponse = jsonWebResponse;

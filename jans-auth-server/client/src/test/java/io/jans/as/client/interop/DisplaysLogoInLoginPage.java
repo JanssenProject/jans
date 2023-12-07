@@ -39,6 +39,7 @@ public class DisplaysLogoInLoginPage extends BaseTest {
         showTitle("OC5:FeatureTest-Displays Logo in Login Page");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String logoUri = "http://www.gluu.org/wp-content/themes/gluursn/images/logo.png";
 
         // 1. Register client
@@ -47,6 +48,7 @@ public class DisplaysLogoInLoginPage extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setLogoUri(logoUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -58,7 +60,6 @@ public class DisplaysLogoInLoginPage extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,

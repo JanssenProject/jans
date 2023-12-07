@@ -327,7 +327,20 @@ public final class StringHelper {
             return defaultValue;
         }
     }
+
     public static boolean toBoolean(final String string, boolean defaultValue) {
+        if (isEmpty(string)) {
+            return defaultValue;
+        }
+
+        try {
+            return Boolean.parseBoolean(string);
+        } catch (NumberFormatException ex) {
+            return defaultValue;
+        }
+    }
+
+    public static Boolean toBoolean(final String string, Boolean defaultValue) {
         if (isEmpty(string)) {
             return defaultValue;
         }

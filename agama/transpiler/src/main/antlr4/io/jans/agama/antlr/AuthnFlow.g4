@@ -55,7 +55,7 @@ preassign_catch: variable? WS? '|' WS? short_var WS? EQ WS? ;
 
 variable: short_var | QNAME | DOTEXPR | DOTIDXEXPR ;
 
-flow_call: preassign? FLOWCALL WS ('$' variable | qname) argument* WS? (overrides | NL) ;
+flow_call: (preassign | preassign_catch)? FLOWCALL WS ('$' variable | qname) argument* WS? (overrides | NL) ;
 
 overrides: INDENT OVERRIDE (WS STRING WS STRING)* (WS? NL STRING WS STRING)* WS? NL DEDENT ;
 //I don't get why the NL is needed above

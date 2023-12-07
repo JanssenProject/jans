@@ -4,12 +4,13 @@ from prompt_toolkit.layout import FormattedTextControl, Window
 from typing import Optional, Sequence, Union
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
+
 class Spinner:
     def __init__(self, 
-            value: Optional[int]= 1, 
-            min_value: Optional[int]= 1, 
-            max_value: Optional[int]= 100,  
-            style: Optional[str]= 'bg:#cccccc fg:blue',  
+            value: Optional[int] = 1,
+            min_value: Optional[int] = 1,
+            max_value: Optional[int] = 100,
+            style: Optional[str]= 'bg:#cccccc fg:blue',
             ) -> Window:
 
         self.value = value

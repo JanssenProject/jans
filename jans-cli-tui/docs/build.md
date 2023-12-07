@@ -13,11 +13,11 @@ make zipapp
 ./jans-cli-tui.pyz
 ```
 
-It will ask credentials unless you have no ~/.config/jans-cli.ini. Login to Jans server and get
-credentials:
+It will ask for credentials if you do not have ~/.config/jans-cli.ini. To get the credentials, please login to Janssen Server and get credentials using command below:
 ```
-cat /opt/jans/jans-setup/setup.properties.last | grep role
+cat /opt/jans/jans-setup/setup.properties.last | grep tui
 tui_client_encoded_pw=4jnkODv3KRV6xNm1oGQ8+g\=\=
 tui_client_id=2000.eac308d1-95e3-4e38-87cf-1532af310a9e
 tui_client_pw=GnEkCqg4Vsks
 ```
+Use plain text password `tui_client_pw`

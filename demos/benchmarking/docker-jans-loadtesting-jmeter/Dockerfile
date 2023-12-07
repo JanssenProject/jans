@@ -1,4 +1,5 @@
-FROM blazemeter/taurus:master-f96971fa-2022-12-12
+# FROM blazemeter/taurus:master-f96971fa-2022-12-12
+FROM blazemeter/taurus:1.16.26@sha256:689eee4c4948ea54f65db2388d143c128121cdaa2a2814496481c005d437ba4c
 
 # ===============
 # Ubuntu packages
@@ -21,8 +22,11 @@ ENV FQDN="https://demoexample.jans.io" \
     AUTHZ_CLIENT_SECRET="" \
     ROPC_CLIENT_ID="" \
     ROPC_CLIENT_SECRET="" \
+    DCR_CLIENT_ID="" \
+    DCR_CLIENT_SECRET="" \
     RUN_AUTHZ_TEST=false \
     RUN_ROPC_TEST=false \
+    RUN_DCR_TEST=false \
     TEST_USERS_PREFIX_STRING="test_user" \
     THREAD_COUNT=200 \
     COUCHBASE_URL="" \
@@ -66,12 +70,11 @@ RUN mkdir -p /root/.bzt/jmeter-taurus \
     && tar zxvf /scripts/apache-jmeter-5.5.tgz -C /root/.bzt/jmeter-taurus \
     && mv /root/.bzt/jmeter-taurus/apache-jmeter-5.5 /root/.bzt/jmeter-taurus/5.5
 
-LABEL name="janssenproject/demo_loadtesting" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.7" \
-    release="dev" \
-    summary="Janssen Jmeter tests" \
-    description="Janssen Jmeter and user loader image"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/loadtesting-jmeter" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.title="Janssen Jmeter tests" \
+    org.opencontainers.image.description="Janssen Jmeter and user loader image"
 
 ENTRYPOINT ["bash", "/scripts/entrypoint.sh"]

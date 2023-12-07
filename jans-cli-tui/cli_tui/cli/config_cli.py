@@ -154,20 +154,20 @@ parser.add_argument("--debug-log-file", default='swagger.log', help="Log file na
 parser.add_argument("--operation-id", help="Operation ID to be done")
 parser.add_argument("--url-suffix", help="Argument to be added api endpoint url. For example inum:2B29")
 parser.add_argument("--info", choices=op_list, help="Help for operation")
+
 parser.add_argument("--op-mode", choices=['get', 'post', 'put', 'patch', 'delete'], default='get',
                     help="Operation mode to be done")
+
 parser.add_argument("--endpoint-args",
                     help="Arguments to pass endpoint separated by comma. For example limit:5,status:INACTIVE")
+
 parser.add_argument("--schema", help="Get sample json schema")
 
 parser.add_argument("-CC", "--config-api-mtls-client-cert", help="Path to SSL Certificate file")
 parser.add_argument("-CK", "--config-api-mtls-client-key", help="Path to SSL Key file")
 parser.add_argument("--key-password", help="Password for SSL Key file")
 parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true', default=True)
-
 parser.add_argument("-use-test-client", help="Use test client without device authorization", action='store_true')
-
-
 parser.add_argument("--patch-add", help="Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
@@ -176,8 +176,9 @@ parser.add_argument("--log-dir", help="Log directory", default=log_dir)
 parser.add_argument("-revoke-session", help="Revokes session", action='store_true')
 parser.add_argument("-scim", help="SCIM Mode", action='store_true', default=False)
 parser.add_argument("-auth", help="Jans OAuth Server Mode", action='store_true', default=False)
-
 parser.add_argument("--data", help="Path to json data file")
+parser.add_argument("--output-access-token", help="Prints jwt access token and exits", action='store_true')
+
 args = parser.parse_args()
 
 
@@ -208,13 +209,13 @@ if not(host and (client_id and client_secret or access_token)):
 
     if config_ini_fn.exists():
         config.read_string(config_ini_fn.read_text())
-        host = config['DEFAULT']['jans_host']
+        host = config['DEFAULT'].get('jans_host')
 
         if 'jca_test_client_id' in config['DEFAULT'] and test_client:
             client_id = config['DEFAULT']['jca_test_client_id']
             secret_key_str = 'jca_test_client_secret'
         else:
-            client_id = config['DEFAULT']['jca_client_id']
+            client_id = config['DEFAULT'].get('jca_client_id')
             secret_key_str = 'jca_client_secret'
 
         secret_enc_key_str = secret_key_str + '_enc'
@@ -346,6 +347,19 @@ class JCA_CLI:
             self.cli_logger.debug('requests response headers: %s', str(response.headers))
             self.cli_logger.debug('requests response text: %s', str(response.text))
 
+    def log_cmd(self, operation_id, url_suffix, endpoint_args, data):
+
+        cmdl = [sys.executable, __file__, '--operation-id', operation_id]
+        if url_suffix:
+            cmdl += ['--url-suffix', '"{}"'.format(url_suffix)]
+        if endpoint_args:
+            cmdl += ['--endpoint-args', '"{}"'.format(endpoint_args)]
+        if data:
+            cmdl += ['--data', "'{}'".format(json.dumps(data))]
+
+        with open(os.path.join(log_dir, 'cli_cmd.log'), 'a') as w:
+            w.write(' '.join(cmdl) + '\n')
+
     def set_user(self):
         self.auth_username = None
         self.auth_password = None
@@ -382,12 +396,6 @@ class JCA_CLI:
         if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
             self.mtls_client_cert = (args.config_api_mtls_client_cert, args.config_api_mtls_client_key)
 
-    def drop_to_shell(self, mylocals):
-        locals_ = locals()
-        locals_.update(mylocals)
-        code.interact(local=locals_)
-        sys.exit()
-
 
     def get_request_header(self, headers=None, access_token=None):
         if headers is None:
@@ -404,6 +412,27 @@ class JCA_CLI:
         ret_val.update(headers)
         return ret_val
 
+    def get_openid_configuration(self):
+
+        try:
+            response = requests.get(
+                    url = 'https://{}{}'.format(self.idp_host, self.discovery_endpoint),
+                    headers=self.get_request_header({'Accept': 'application/json'}),
+                    verify=self.verify_ssl,
+                    cert=self.mtls_client_cert
+                )
+        except Exception as e:
+            self.cli_logger.error(str(e))
+            if self.wrapped:
+                return str(e)
+
+            raise ValueError(
+                self.colored_text("Unable to get OpenID configuration:\n {}".format(str(e)), error_color))
+
+        self.openid_configuration = response.json()
+        self.cli_logger.debug("OpenID Config: %s", self.openid_configuration)
+
+        return response
 
     def check_connection(self):
         self.cli_logger.debug("Checking connection")
@@ -448,23 +477,7 @@ class JCA_CLI:
             write_config()
             return response.text
 
-        try:
-            response = requests.get(
-                    url = 'https://{}{}'.format(self.idp_host, self.discovery_endpoint),
-                    headers=self.get_request_header({'Accept': 'application/json'}),
-                    verify=self.verify_ssl,
-                    cert=self.mtls_client_cert
-                )
-        except Exception as e:
-            self.cli_logger.error(str(e))
-            if self.wrapped:
-                return str(e)
-
-            raise ValueError(
-                self.colored_text("Unable to get OpenID configuration:\n {}".format(str(e)), error_color))
-
-        self.openid_configuration = response.json()
-        self.cli_logger.debug("OpenID Config: %s", self.openid_configuration)
+        self.get_openid_configuration()
 
         return True
 
@@ -489,7 +502,6 @@ class JCA_CLI:
             raise ValueError(
                 self.colored_text("Unable to connect jans-auth server:\n {}".format(str(e)), error_color))
 
-
         self.log_response(response)
 
         if self.wrapped:
@@ -498,6 +510,10 @@ class JCA_CLI:
             print(response.status_code)
             print(response.text)
 
+        for key in ('user_data', 'access_token_enc', 'access_token'):
+            if key in config['DEFAULT']:
+                config['DEFAULT'].pop(key)
+        write_config()
 
 
     def check_access_token(self):
@@ -519,14 +535,6 @@ class JCA_CLI:
             if not self.wrapped:
                 print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
                 self.access_token = None
-
-    def validate_date_time(self, date_str):
-        try:
-            datetime.datetime.fromisoformat(date_str)
-            return True
-        except Exception as e:
-            self.log_response('invalid date-time format: %s'.format(str(e)))
-            return False
 
 
     def get_scoped_access_token(self, scope, set_access_token=True):
@@ -625,11 +633,10 @@ class JCA_CLI:
 
             result = response.json()
 
-            if 'verification_uri' in result and 'user_code' in result:
+            if 'verification_uri_complete' in result and 'user_code' in result:
 
-                msg = "Please visit verification url {} and enter user code {} within {} secods".format(
-                        self.colored_text(result['verification_uri'], success_color),
-                        self.colored_text(result['user_code'], bold_color),
+                msg = "Please visit verification url {} and authorize this device within {} secods".format(
+                        self.colored_text(result['verification_uri_complete'], success_color),
                         result['expires_in']
                         )
                 print(msg)
@@ -719,12 +726,18 @@ class JCA_CLI:
         return True, ''
 
     def get_access_token(self, scope):
-        if self.my_op_mode != 'auth':
+
+        if self.my_op_mode != 'auth' and scope:
             if self.use_test_client:
                 self.get_scoped_access_token(scope)
             elif not self.access_token and not self.wrapped:
                 self.check_access_token()
                 self.get_jwt_access_token()
+
+        if args.output_access_token and self.access_token:
+            print(self.access_token)
+            sys.exit()
+
         return True, ''
 
     def print_exception(self, e):
@@ -754,233 +767,6 @@ class JCA_CLI:
         return u"\u001b[38;5;{}m{}\u001b[0m".format(color, text)
 
 
-    def guess_bool(self, val):
-        if val == '_false':
-            return False
-        if val == '_true':
-            return True
-
-
-    def check_type(self, val, vtype):
-        if vtype == 'string' and val:
-            return str(val)
-        elif vtype == 'integer':
-            if isinstance(val, int):
-                return val
-            if val.isnumeric():
-                return int(val)
-        elif vtype == 'object':
-            try:
-                retVal = json.loads(val)
-                if isinstance(retVal, dict):
-                    return retVal
-            except:
-                pass
-        elif vtype == 'boolean':
-            guessed_val = self.guess_bool(val)
-            if not guessed_val is None:
-                return guessed_val
-
-        error_text = "Please enter a(n) {} value".format(vtype)
-        if vtype == 'boolean':
-            error_text += ': _true, _false'
-
-        raise TypeError(self.colored_text(error_text, warning_color))
-
-    def get_input(self, values=[], text='Selection', default=None, itype=None,
-                  help_text=None, sitype=None, enforce='__true__',
-                  example=None, spacing=0, iformat=None
-                  ):
-        if isinstance(default, str):
-            default = html.escape(default)
-
-        if 'b' in values and 'q' in values and 'x' in values:
-            greyed_help_list = [ ('b', 'back'), ('q', 'quit'),  ('x', 'logout and quit') ]
-            for k,v in (('w', 'write result'), ('y', 'yes'), ('n', 'no')):
-                if k in values:
-                    greyed_help_list.insert(1, (k, v))
-            grey_help_text = ', '.join(['{}: {}'.format(k,v) for k,v in greyed_help_list])
-            print(self.colored_text(grey_help_text, grey_color))
-        print()
-        type_text = ''
-        if itype:
-            if itype == 'array':
-                type_text = "Type: array of {} separated by _,".format(sitype)
-                if values:
-                    type_text += ' Valid values: {}'.format(', '.join(values))
-            elif itype == 'boolean':
-                type_text = "Type: " + itype
-                if default is None:
-                    default = False
-            else:
-                type_text = "Type: " + itype
-                if values:
-                    type_text += ', Valid values: {}'.format(self.colored_text(', '.join(values), bold_color))
-
-        if help_text:
-            help_text = help_text.strip('.') + '. ' + type_text
-        else:
-            help_text = type_text
-
-        if help_text:
-            print(' ' * spacing, self.colored_text('«{}»'.format(help_text), 244), sep='')
-
-        if example:
-            if isinstance(example, list):
-                example_str = ', '.join(example)
-            else:
-                example_str = str(example)
-            print(' ' * spacing, self.colored_text('Example: {}'.format(example_str), 244), sep='')
-
-        if not default is None:
-            default_text = str(default).lower() if itype == 'boolean' else str(default)
-            text += '  [<b>' + default_text + '</b>]'
-            if itype == 'integer':
-                default = int(default)
-
-        if not text.endswith('?'):
-            text += ':'
-
-        if itype == 'boolean' and not values:
-            values = ['_true', '_false']
-
-        while True:
-
-            selection = input(' ' * spacing + self.colored_text(text, 20) + ' ')
-
-            selection = selection.strip()
-            if selection.startswith('_file '):
-                fname = selection.split()[1]
-                if os.path.isfile(fname):
-                    with open(fname) as f:
-                        selection = f.read().strip()
-                else:
-                    print(self.colored_text("File {} does not exist".format(fname), warning_color))
-                    continue
-
-            if itype == 'boolean' and not selection:
-                return False
-
-            if not selection and default:
-                return default
-
-            if enforce and not selection:
-                continue
-
-            if not enforce and not selection:
-                if itype == 'array':
-                    return []
-                return None
-
-            if selection and iformat:
-                if iformat == 'date-time' and not self.validate_date_time(selection):
-                    print(' ' * spacing,
-                              self.colored_text('Please enter date-time string, i.e. 2001-07-04T12:08:56.235', warning_color),
-                              sep='')
-                    continue
-
-            if 'q' in values and selection == 'q':
-                print("Quiting...")
-                sys.exit()
-
-            if 'x' in values and selection == 'x':
-                print("Logging out...")
-                if 'access_token_enc' in config['DEFAULT']:
-                    config['DEFAULT'].pop('access_token_enc')
-                    write_config()
-                print("Quiting...")
-                sys.exit()
-                break
-
-
-            if itype == 'object' and sitype:
-                try:
-                    object_ = self.check_type(selection, itype)
-                except Exception as e:
-                    print(' ' * spacing, e, sep='')
-                    continue
-
-                data_ok = True
-                for items in object_:
-                    try:
-                        self.check_type(object_[items], sitype)
-                    except Exception as e:
-                        print(' ' * spacing, e, sep='')
-                        data_ok = False
-                if data_ok:
-                    return object_
-                else:
-                    continue
-
-            if itype == 'array' and default and not selection:
-                return default
-
-            if itype == 'array' and sitype:
-                if selection == '_null':
-                    selection = []
-                    data_ok = True
-                else:
-                    selection = selection.split('_,')
-                    for i, item in enumerate(selection):
-                        data_ok = True
-                        try:
-                            selection[i] = self.check_type(item.strip(), sitype)
-                            if selection[i] == '_null':
-                                selection[i] = None
-                            if values:
-                                if not selection[i] in values:
-                                    data_ok = False
-                                    print(' ' * spacing, self.colored_text(
-                                        "Please enter array of {} separated by _,".format(', '.join(values)),
-                                        warning_color), sep='')
-                                    break
-                        except TypeError as e:
-                            print(' ' * spacing, e, sep='')
-                            data_ok = False
-                if data_ok:
-                    break
-            else:
-                if not itype is None:
-                    try:
-                        selection = self.check_type(selection, itype)
-                    except TypeError as e:
-                        if enforce:
-                            print(' ' * spacing, e, sep='')
-                            continue
-
-                if values:
-                    if selection in values:
-                        break
-                    elif itype == 'boolean':
-                        if isinstance(selection, bool):
-                            break
-                        else:
-                            continue
-                    else:
-                        print(' ' * spacing,
-                              self.colored_text('Please enter one of {}'.format(', '.join(values)), warning_color),
-                              sep='')
-
-                if not values and not selection and not enforce:
-                    break
-
-                if not values and selection:
-                    break
-
-        if selection == '_null':
-            selection = None
-        elif selection == '_q':
-            selection = 'q'
-
-        return selection
-
-
-    def print_underlined(self, text):
-        print()
-        print(text)
-        print('-' * len(text.splitlines()[-1]))
-
-
     def pretty_print(self, data):
         pp_string = json.dumps(data, indent=2)
         if args.no_color:
@@ -1001,39 +787,6 @@ class JCA_CLI:
             param = {'name': pname, 'description': pname, 'schema': {'type': 'string'}}
 
         return param
-
-
-    def obtain_parameters(self, endpoint, single=False):
-        parameters = {}
-
-        endpoint_parameters = []
-        if 'parameters' in endpoint.info:
-            endpoint_parameters = endpoint.info['parameters']
-
-        end_point_param = self.get_endpiont_url_param(endpoint)
-        if end_point_param and not end_point_param in endpoint_parameters:
-            endpoint_parameters.insert(0, end_point_param)
-
-        n = 1 if single else len(endpoint_parameters)
-
-        for param in endpoint_parameters[0:n]:
-            param_name = param['name']
-            if param_name not in parameters:
-                text_ = param['name']
-                help_text = param.get('description') or param.get('summary')
-                enforce = True if param['schema']['type'] == 'integer' or (end_point_param and end_point_param['name'] == param['name']) else False
-
-                parameters[param_name] = self.get_input(
-                    text=text_.strip('.'),
-                    itype=param['schema']['type'],
-                    default=param['schema'].get('default'),
-                    enforce=enforce,
-                    help_text=help_text,
-                    example=param.get('example'),
-                    values=param['schema'].get('enum', [])
-                )
-
-        return parameters
 
 
     def get_path_by_id(self, operation_id):
@@ -1065,6 +818,7 @@ class JCA_CLI:
             sys.stderr.write("Please wait while retrieving data ...\n")
 
         security = self.get_scope_for_endpoint(endpoint)
+
         self.get_access_token(security)
 
         headers=self.get_request_header({'Accept': 'application/json'})
@@ -1114,10 +868,15 @@ class JCA_CLI:
 
     def post_requests(self, endpoint, data, params=None):
         url = 'https://{}{}'.format(self.host, endpoint.path)
+        url_param_name = self.get_url_param(endpoint.path)
+
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
         mime_type = self.get_mime_for_endpoint(endpoint)
         headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
+
+        if params and url_param_name in params:
+            url = url.format(**{url_param_name: params.pop(url_param_name)})
 
         post_params = {
             'url': url,
@@ -1265,7 +1024,9 @@ class JCA_CLI:
                 if neq > 1:
                     arg_name = arg[:neq].strip()
                     arg_val = arg[neq + 1:].strip()
-                    if arg_name and arg_val:
+                    if arg_name in args_dict:
+                        args_dict[arg_name] += ','+arg_val
+                    else:
                         args_dict[arg_name] = arg_val
 
         return args_dict
@@ -1322,22 +1083,37 @@ class JCA_CLI:
                                     for apptype in path['requestBody'].get('content', {}):
                                         if 'schema' in path['requestBody']['content'][apptype]:
                                             if path['requestBody']['content'][apptype]['schema'].get('type') == 'object' and '$ref' not in path['requestBody']['content'][apptype]['schema']:
-                                                print('  Parameters:')
-                                                for param in path['requestBody']['content'][apptype]['schema']['properties']:
-                                                    req_s = '*' if param in path['requestBody']['content'][apptype]['schema'].get('required', []) else ''
-                                                    print('    {}{}: {}'.format(param, req_s, path['requestBody']['content'][apptype]['schema']['properties'][param].get('description') or "Description not found for this property"))
+                                                
+                                                for prop_var in ('properties', 'additionalProperties'):
+                                                    if prop_var in path['requestBody']['content'][apptype]['schema']:
+                                                        break
+                                                else:
+                                                    prop_var = None
+                                                if prop_var:
+                                                    print('  Parameters:')
+                                                    for param in path['requestBody']['content'][apptype]['schema'][prop_var]:
+                                                        req_s = '*' if param in path['requestBody']['content'][apptype]['schema'].get('required', []) else ''
+                                                        if isinstance(path['requestBody']['content'][apptype]['schema'][prop_var][param], dict) and path['requestBody']['content'][apptype]['schema'][prop_var][param].get('description'):
+                                                            desc = path['requestBody']['content'][apptype]['schema'][prop_var][param]['description']
+                                                        else:
+                                                            desc = "Description not found for this property"
+                                                        print('    {}{}: {}'.format(param, req_s, desc))
 
-                                            elif path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
+                                            elif path['requestBody']['content'][apptype]['schema'].get('type') == 'array' and '$ref' in path['requestBody']['content'][apptype]['schema']['items']:
                                                 schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
                                                 print('  Schema: Array of {}{}'.format(mode_suffix, os.path.basename(schema_path)))
                                             else:
-                                                schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
-                                                print('  Schema: {}{}'.format(mode_suffix, os.path.basename(schema_path)))
+                                                if '$ref' in path['requestBody']['content'][apptype]['schema']:
+                                                    schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
+                                                    print('  Schema: {}{}'.format(mode_suffix, os.path.basename(schema_path)))
                             break
         if schema_path:
             print()
             scim_arg = ' -scim' if '-scim' in sys.argv else ''
-            print("To get sample schema type {0}{3} --schema <schma>, for example {0}{3} --schema {2}{1}".format(sys.argv[0], os.path.basename(schema_path), mode_suffix, scim_arg))
+            schema_path_string = '{}{}'.format(mode_suffix, os.path.basename(schema_path))
+            if ' ' in schema_path_string:
+                schema_path_string = '\"{}\"'.format(schema_path_string)
+            print("To get sample schema type {0}{2} --schema <schema>, for example {0}{2} --schema {1}".format(sys.argv[0], schema_path_string, scim_arg))
 
     def render_json_entry(self, val):
         if isinstance(val, str) and val.startswith('_file '):
@@ -1351,14 +1127,18 @@ class JCA_CLI:
 
     def get_json_from_file(self, data_fn):
 
-        if not os.path.exists(data_fn):
-            self.exit_with_error("Can't find file {}".format(data_fn))
+        if not os.path.isfile(data_fn):
+            try:
+                data = json.loads(data_fn)
+            except Exception as e:
+                self.exit_with_error("Error parsing json: {}".format(e))
 
-        try:
-            with open(data_fn) as f:
-                data = json.load(f)
-        except:
-            self.exit_with_error("Error parsing json file {}".format(data_fn))
+        else:
+            try:
+                with open(data_fn) as f:
+                    data = json.load(f)
+            except Exception as e:
+                self.exit_with_error("Error parsing json file {}: {}".format(data_fn, e))
 
         if isinstance(data, list):
             for entry in data:
@@ -1397,7 +1177,7 @@ class JCA_CLI:
 
 
     def print_response(self, response):
-        if response:
+        if response is not None:
             sys.stderr.write("Server Response:\n")
             self.pretty_print(response)
 
@@ -1527,7 +1307,25 @@ class JCA_CLI:
                     else:
                         data = [{'op': pop, 'path': '/'+ pdata.lstrip('/')}]
 
-        caller_function = getattr(self, 'process_command_' + path['__method__'])
+        call_method = path['__method__'].lower()
+        caller_function = getattr(self, 'process_command_' + call_method)
+
+        cmd_data = data
+        if not data and data_fn:
+            for key in op_path.get('requestBody', {}).get('content', {}).keys():
+                if 'zip' in key:
+                    break
+            else:
+                cmd_data = self.get_json_from_file(data_fn)
+
+        if call_method in ('post', 'put', 'patch'):
+            self.log_cmd(operation_id, url_suffix, endpoint_args, cmd_data)
+
+        if path['__path__'] == '/admin-ui/adminUIPermissions' and 'permission' in data:
+            tag, _ = os.path.splitext(os.path.basename(data['permission']))
+            if tag:
+                data['tag'] = tag
+
         return caller_function(path, suffix_param, endpoint_params, data_fn, data=data)
 
 
@@ -1537,6 +1335,46 @@ class JCA_CLI:
                 for schema in cfg_yaml[self.my_op_mode][plugin]['components']['schemas']:
                     if schema == schema_name:
                         return '#/components/schemas/' + schema
+
+
+    def get_nasted_schema(self,data):
+        result = self.find_key('$ref', data)
+        if result:
+            return result
+        return None
+
+    def find_key(self,key, dictionary):
+        if key in dictionary:
+            return dictionary[key]
+        for k, v in dictionary.items():
+            if isinstance(v, dict):
+                result = self.find_key(key, v)
+                if result:
+                    return result
+        return None
+
+    def change_certain_value_from_list(self,keys_to_lookup,my_dict_nested,data_to_change):
+
+        value = OrderedDict()
+        value.update(my_dict_nested)
+        for key in keys_to_lookup[:-2]:
+            value = value[key]
+        # assign a new value to the final key > -2 to discared `$ref`
+        value[keys_to_lookup[-2]] = data_to_change
+
+        return my_dict_nested
+
+
+    def list_leading_to_value(self,my_dict, value, keys=[]):
+        for k, v in my_dict.items():
+            if isinstance(v, dict):
+                result = self.list_leading_to_value(v, value, keys + [k])
+                if result is not None:
+                    return result
+            elif v == value:
+                return keys + [k]
+        
+
 
     def get_schema_from_reference(self, plugin_name, ref):
         schema_path_list = ref.strip('/#').split('/')
@@ -1563,15 +1401,51 @@ class JCA_CLI:
             schema_ = all_schema
 
         for key_ in schema_.get('properties', []):
+
             if '$ref' in schema_['properties'][key_]:
-                schema_['properties'][key_] = self.get_schema_from_reference(plugin_name, schema_['properties'][key_]['$ref'])
+                current_schema = self.get_schema_from_reference(plugin_name, schema_['properties'][key_]['$ref'])
+                ref = self.get_nasted_schema(current_schema) ## cehck for nasted `$ref` schema
+                
+
+                if False: #ref :
+                    print(ref)
+                    ### Get schema from refrence for the new `ref`
+                    new_schema = self.get_schema_from_reference(plugin_name, ref) 
+
+                    ### Get List of keys to the `ref` value ex: ['properties', 'agamaConfiguration', 'properties', 'clientAuthMapSchema', 'additionalProperties', 'items', '$ref']
+                    keys_to_lookup = self.list_leading_to_value(my_dict=current_schema, value=ref) 
+
+                    ### Change the value that List of keys looks at.
+                    schema_['properties'][key_] =OrderedDict(self.change_certain_value_from_list(keys_to_lookup,current_schema,new_schema['properties'])) 
+
+                else:
+                    schema_['properties'][key_] = current_schema
+                
             elif schema_['properties'][key_].get('type') == 'array' and '$ref' in schema_['properties'][key_]['items']:
+                
                 ref_path = schema_['properties'][key_]['items'].pop('$ref')
                 ref_schema = self.get_schema_from_reference(plugin_name, ref_path)
                 schema_['properties'][key_]['properties'] = ref_schema['properties']
                 schema_['properties'][key_]['title'] = ref_schema['title']
                 schema_['properties'][key_]['description'] = ref_schema.get('description', '')
                 schema_['properties'][key_]['__schema_name__'] = ref_schema['__schema_name__']
+
+            # else:
+            #     ref = self.get_nasted_schema(schema_)
+            #     print('ref else: '+str(ref)+'\n')
+            #     if ref :
+            #         ### Get schema from refrence for the new `ref`
+            #         new_schema = self.get_schema_from_reference(plugin_name, ref) 
+
+            #         ### Get List of keys to the `ref` value ex: ['properties', 'agamaConfiguration', 'properties', 'clientAuthMapSchema', 'additionalProperties', 'items', '$ref']
+            #         keys_to_lookup = self.list_leading_to_value(my_dict=current_schema, value=ref) 
+
+            #         ### Change the value that List of keys looks at.
+            #         schema_['properties'][key_] =OrderedDict(self.change_certain_value_from_list(keys_to_lookup,current_schema,new_schema['properties'])) 
+
+               
+
+
 
         if not 'title' in schema_:
             schema_['title'] = p
@@ -1673,7 +1547,8 @@ def main():
             cli_object.get_sample_schema(args.schema)
         elif args.operation_id:
             cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
-
+        elif args.output_access_token:
+            cli_object.get_access_token(None)
     #except Exception as e:
     #    print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
     #    with open(error_log_file, 'a') as w:

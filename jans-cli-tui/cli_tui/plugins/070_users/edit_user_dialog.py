@@ -2,18 +2,10 @@ from typing import Optional, Sequence, Callable
 import asyncio
 from functools import partial
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.layout.containers import (
-    HSplit,
-    VSplit,
-    DynamicContainer,
-    Window,
-)
-from prompt_toolkit.widgets import (
-    Button,
-    Label,
-    CheckboxList,
-    Dialog,
-)
+from prompt_toolkit.layout.containers import HSplit, VSplit,\
+    DynamicContainer, Window
+
+from prompt_toolkit.widgets import Button, Label, CheckboxList, Dialog
 from prompt_toolkit.eventloop import get_event_loop
 from utils.static import DialogResult
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
@@ -74,7 +66,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
         """
 
         ret_val = {}
-        for tmp in common_data.users.claims:
+        for tmp in common_data.jans_attributes:
             if tmp['name'] == claim:
                 ret_val = tmp
                 break
@@ -159,7 +151,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         for ca in self.data.get('customAttributes', []):
 
-            if ca['name'] in ('middleName', 'sn', 'jansStatus', 'nickname', 'jansActive'):
+            if ca['name'] in ('middleName', 'sn', 'jansStatus', 'nickname', 'jansActive', 'userPassword'):
                 continue
 
             claim_prop = self.get_claim_properties(ca['name'])
@@ -171,9 +163,8 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 )
 
             elif claim_prop.get('dataType') == 'boolean':
-                checked = get_custom_attribute(ca['value']).lower() == 'true'
                 self.edit_user_content.insert(-1, 
-                    self.app.getTitledCheckBox(_(claim_prop['displayName']), name=ca['name'], checked=checked, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, ca['name']))
+                    self.app.getTitledCheckBox(_(claim_prop['displayName']), name=ca['name'], checked=ca['value'], style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, ca['name']))
                 )
 
         self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),show_scrollbar=False)
@@ -241,7 +232,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 cur_claims.append(w.me.window.jans_name)
 
         claims_list = []
-        for claim in common_data.users.claims:
+        for claim in common_data.jans_attributes:
             if not claim['oxMultiValuedAttribute'] and claim['name'] in cur_claims:
                 continue
             if claim['name'] in ('memberOf', 'userPassword', 'uid', 'jansStatus', 'jansActive', 'updatedAt'):
@@ -252,7 +243,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         def add_claim(dialog) -> None:
             for claim_ in claims_checkbox.current_values:
-                for claim_prop in common_data.users.claims:
+                for claim_prop in common_data.jans_attributes:
                     if claim_prop['name'] == claim_:
                         break
                 display_name = claim_prop['displayName']

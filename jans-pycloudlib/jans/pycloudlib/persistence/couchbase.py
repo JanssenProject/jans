@@ -56,14 +56,10 @@ def _get_cb_password(manager: Manager, password_file: str, secret_name: str) -> 
         with open(password_file) as f:
             password = f.read().strip()
             manager.secret.set(secret_name, password)
-            logger.warning(
-                f"Loading password from {password_file} file is deprecated and will be removed in future releases. "
-                f"Note, the password has been saved to secrets with key {secret_name} for later usage."
-            )
     else:
         # get from secrets (if any)
         password = manager.secret.get(secret_name)
-    return password
+    return password  # noqa: R504
 
 
 def get_couchbase_user(manager: _t.Union[Manager, None] = None) -> str:
@@ -810,6 +806,30 @@ class CouchbaseClient:
             return False
         return True
 
+    def delete(self, bucket: str, id_: str) -> bool:
+        """Delete document from a bucket.
+
+        Args:
+            bucket: Bucket name
+            id_: ID of the document.
+        """
+        bucket = bucket
+        kwargs: dict[str, _t.Any] = {"key": id_}
+        req = self.exec_query(
+            f"DELETE FROM {bucket} USE KEYS $key",  # nosec: B608
+            **kwargs,
+        )
+
+        if not req.ok:
+            try:
+                data = json.loads(req.text)
+                err = data["errors"][0]["msg"]
+            except (ValueError, KeyError, IndexError):
+                err = req.reason
+            logger.warning(f"Unable to find document {id_} in bucket {bucket}; reason={err}")
+            return False
+        return bool(req.json()["status"] == "success")
+
 
 # backward-compat
 def suppress_verification_warning() -> None:
@@ -887,7 +907,7 @@ def get_bucket_for_key(key: str) -> str:
 
     if key_prefix in ("groups_", "people_", "authorizations_"):
         bucket = f"{bucket_prefix}_user"
-    elif key_prefix in ("site_", "cache-refresh_"):
+    elif key_prefix in ("site_", "link_"):
         bucket = f"{bucket_prefix}_site"
     elif key_prefix in ("tokens_",):
         bucket = f"{bucket_prefix}_token"

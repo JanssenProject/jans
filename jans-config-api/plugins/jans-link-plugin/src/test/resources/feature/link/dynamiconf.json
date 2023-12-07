@@ -1,0 +1,59 @@
+{
+    "inumConfig": {
+        "configId": "local_inum",
+        "bindDN": "cn=directory manager",
+        "bindPassword": "OQ1zzYrG5jDoFiLiAMernA==",
+        "servers": [
+            "localhost:1636"
+        ],
+        "maxConnections": 10,
+        "useSSL": true,
+        "baseDNs": [
+            "ou=link,o=site"
+        ],
+        "useAnonymousBind": false,
+        "enabled": true,
+        "version": 0,
+        "level": 0
+    },
+    "targetConfig": {
+        "maxConnections": 2,
+        "useSSL": false,
+        "useAnonymousBind": false,
+        "enabled": false,
+        "version": 0,
+        "level": 0
+    },
+    "ldapSearchSizeLimit": 1000,
+    "keyAttributes": [
+        "uid"
+    ],
+    "keyObjectClasses": [
+        "gluuPerson"
+    ],
+    "sourceAttributes": [
+        "mail",
+        "cn",
+        "sn"
+    ],
+    "updateMethod": "copy",
+    "defaultInumServer": true,
+    "keepExternalPerson": true,
+    "useSearchLimit": false,
+    "attributeMapping": [
+        {
+            "source": "uid",
+            "destination": "uid"
+        },
+        {
+            "source": "cn",
+            "destination": "cn"
+        },
+        {
+            "source": "sn",
+            "destination": "sn"
+        }
+    ],
+    "snapshotFolder": "/var/cr-snapshots",
+    "snapshotMaxCount": 10
+}

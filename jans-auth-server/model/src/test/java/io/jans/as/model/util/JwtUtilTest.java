@@ -10,6 +10,8 @@ import io.jans.as.model.BaseTest;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mockito.MockedStatic;
@@ -95,23 +97,6 @@ public class JwtUtilTest extends BaseTest {
         })) {
             fooUtilsMocked.when(() -> JwtUtil.getJsonKey(null, null, "keyId001")).thenReturn(getJsonDefault(null));
             io.jans.as.model.crypto.PublicKey publicKey = JwtUtil.getPublicKey(null, null, SignatureAlgorithm.ES256, "keyId001");
-            assertNotNull(publicKey);
-        }
-    }
-
-    @Test
-    public void getPublicKey_algorithmFamilyED_validPublicKey() {
-        showTitle("getPublicKey_algorithmFamilyED_validPublicKey");
-        try (MockedStatic<JwtUtil> fooUtilsMocked = Mockito.mockStatic(JwtUtil.class, invocation -> {
-            Method method = invocation.getMethod();
-            if ("getPublicKey".equals(method.getName())) {
-                return invocation.callRealMethod();
-            } else {
-                return invocation.getMock();
-            }
-        })) {
-            fooUtilsMocked.when(() -> JwtUtil.getJsonKey(null, null, "keyId001")).thenReturn(getJsonDefault(null));
-            io.jans.as.model.crypto.PublicKey publicKey = JwtUtil.getPublicKey(null, null, SignatureAlgorithm.EDDSA, "keyId001");
             assertNotNull(publicKey);
         }
     }

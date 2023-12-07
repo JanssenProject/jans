@@ -7,7 +7,7 @@
 from io.jans.model.custom.script.type.user import CacheRefreshType
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
-from io.jans.oxtrust.model import JanssenCustomAttribute
+from io.jans.model import JansCustomAttribute
 from io.jans.model.custom.script.model.bind import BindCredentials
 
 import java

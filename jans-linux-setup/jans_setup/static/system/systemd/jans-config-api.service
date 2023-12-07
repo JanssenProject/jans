@@ -1,6 +1,6 @@
 [Unit]
 Description=Janssen Config API service
-After=jans-auth.service
+After=%(order_jans_config_api_service)s
 
 [Service]
 Type=forking

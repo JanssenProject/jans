@@ -6,10 +6,17 @@
 
 package io.jans.as.server.service.net;
 
-import io.jans.as.server.model.net.HttpServiceResponse;
-import io.jans.net.SslDefaultHttpClient;
-import io.jans.util.StringHelper;
-import io.jans.util.Util;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -32,21 +39,15 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 
+import io.jans.as.server.model.net.HttpServiceResponse;
+import io.jans.net.SslDefaultHttpClient;
+import io.jans.util.StringHelper;
+import io.jans.util.Util;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * Provides operations with http requests
@@ -55,6 +56,7 @@ import java.util.Map.Entry;
  */
 @ApplicationScoped
 @Named
+@Deprecated
 public class HttpService implements Serializable {
 
     private static final long serialVersionUID = -2398422090669045605L;

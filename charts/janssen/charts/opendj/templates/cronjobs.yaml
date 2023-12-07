@@ -65,7 +65,7 @@ spec:
                 set_java_args() {
                     # not sure if we can omit `-server` safely
                     local java_args="-server"
-                    java_args="${java_args} -XX:+UseContainerSupport -XX:MaxRAMPercentage=${GLUU_MAX_RAM_PERCENTAGE} ${GLUU_JAVA_OPTIONS}"
+                    java_args="${java_args} -XX:+UseContainerSupport -XX:MaxRAMPercentage=${CN_MAX_RAM_PERCENTAGE} ${CN_JAVA_OPTIONS}"
                     # set the env var so it is loaded by `start-ds` script
                     export OPENDJ_JAVA_ARGS=${java_args}
                 }
@@ -76,14 +76,9 @@ spec:
 
                 mkdir -p /opt/opendj/locks
 
-                export JAVA_VERSION=$(java -version 2>&1 | awk -F '[\"_]' 'NR==1{print $2}')
-
                 python3 /app/scripts/wait.py
+                python3 /app/scripts/bootstrap.py
 
-                if [ ! -f /deploy/touched ]; then
-                    python3 /app/scripts/entrypoint.py
-                    touch /deploy/touched
-                fi
                 # run OpenDJ server
                 set_java_args
                 exec /opt/opendj/bin/start-ds -N &
@@ -91,5 +86,25 @@ spec:
                 RANDOM_NUM=$(cat /dev/urandom | tr -cd '0-5' | head -c 1)
                 LDAP_BACKUP_FILE=backup-$RANDOM_NUM.ldif
                 /opt/opendj/bin/export-ldif --hostname "$LDAP_HOST" --port 4444 --bindDN "$LDAP_BIND_DN" --bindPassword "$LDAP_PASSWORD" --backendID userRoot --ldifFile /opt/opendj/ldif/$LDAP_BACKUP_FILE --trustAll
+              volumeMounts:
+              - name: ldap-certkey
+                mountPath: {{ .Values.global.cnLdapCertFile }}
+                subPath: opendj.crt
+              - name: ldap-certkey
+                mountPath: {{ .Values.global.cnLdapKeyFile }}
+                subPath: opendj.key
+              - name: ldap-pass
+                mountPath: {{ .Values.global.cnLdapPasswordFile }}
+                subPath: ldap_password
+              - name: ldap-pass
+                mountPath: {{ .Values.global.cnLdapTruststorePasswordFile }}
+                subPath: ldap_truststore_password
           restartPolicy: Never
+          volumes:
+          - name: ldap-pass
+            secret:
+              secretName: {{ .Release.Name }}-ldap-pass
+          - name: ldap-certkey
+            secret:
+              secretName: {{ .Release.Name }}-ldap-certkey
 {{- end }}

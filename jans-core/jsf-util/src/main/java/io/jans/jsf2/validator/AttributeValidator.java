@@ -14,7 +14,7 @@ import jakarta.faces.validator.FacesValidator;
 import jakarta.faces.validator.Validator;
 
 import io.jans.util.StringHelper;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.model.attribute.AttributeValidation;
 
 /**
@@ -29,7 +29,7 @@ public class AttributeValidator implements Validator {
 
     @Override
     public void validate(FacesContext context, UIComponent comp, Object value) {
-        GluuAttribute attribute = (GluuAttribute) comp.getAttributes().get("attribute");
+        JansAttribute attribute = (JansAttribute) comp.getAttributes().get("attribute");
 
         if (attribute == null) {
             ((UIInput) comp).setValid(true);

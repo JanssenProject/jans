@@ -17,12 +17,7 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "entrypoint": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "wait": {
+        "scim": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,

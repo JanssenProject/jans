@@ -18,7 +18,7 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.ciba.CIBARegisterClientResponseService;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.util.security.StringEncrypter;
 import jakarta.ejb.Stateless;
@@ -83,6 +83,7 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_URI.toString(), client.getClientUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, POLICY_URI.toString(), client.getPolicyUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TOS_URI.toString(), client.getTosUri());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, ORG_ID.toString(), client.getOrganization());
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_NAME.toString(), client.getClientNameLocalized());
         Util.addToJSONObjectIfNotNull(responseJsonObject, LOGO_URI.toString(), client.getLogoUriLocalized());
@@ -108,10 +109,14 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_SIGNED_RESPONSE_ALG.toString(), client.getUserInfoSignedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), client.getUserInfoEncryptedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), client.getUserInfoEncryptedResponseEnc());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, INTROSPECTION_SIGNED_RESPONSE_ALG.toString(), client.getAttributes().getIntrospectionSignedResponseAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, INTROSPECTION_ENCRYPTED_RESPONSE_ALG.toString(), client.getAttributes().getIntrospectionEncryptedResponseAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, INTROSPECTION_ENCRYPTED_RESPONSE_ENC.toString(), client.getAttributes().getIntrospectionEncryptedResponseEnc());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_SIGNING_ALG.toString(), client.getRequestObjectSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ALG.toString(), client.getRequestObjectEncryptionAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ENC.toString(), client.getRequestObjectEncryptionEnc());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TOKEN_ENDPOINT_AUTH_METHOD.toString(), client.getTokenEndpointAuthMethod());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, ADDITIONAL_TOKEN_ENDPOINT_AUTH_METHODS.toString(), client.getAttributes().getAdditionalTokenEndpointAuthMethods().toArray(new String[0]));
         Util.addToJSONObjectIfNotNull(responseJsonObject, TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), client.getTokenEndpointAuthSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, DEFAULT_MAX_AGE.toString(), client.getDefaultMaxAge());
         Util.addToJSONObjectIfNotNull(responseJsonObject, DEFAULT_ACR_VALUES.toString(), client.getDefaultAcrValues());
@@ -165,8 +170,8 @@ public class RegisterJsonService {
         if (claimDns != null) {
             claimNames = new String[claimDns.length];
             for (int i = 0; i < claimDns.length; i++) {
-                GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDns[i]);
-                claimNames[i] = gluuAttribute.getClaimName();
+                JansAttribute jansAttribute = attributeService.getAttributeByDn(claimDns[i]);
+                claimNames[i] = jansAttribute.getClaimName();
             }
         }
 

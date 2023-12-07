@@ -30,6 +30,7 @@ import org.json.JSONObject;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import static io.jans.as.client.util.ClientUtil.*;
 import static io.jans.as.model.register.RegisterRequestParam.*;
@@ -104,12 +105,17 @@ public class RegisterRequest extends BaseRequest {
     private SignatureAlgorithm userInfoSignedResponseAlg;
     private KeyEncryptionAlgorithm userInfoEncryptedResponseAlg;
     private BlockEncryptionAlgorithm userInfoEncryptedResponseEnc;
+    private SignatureAlgorithm introspectionSignedResponseAlg;
+    private KeyEncryptionAlgorithm introspectionEncryptedResponseAlg;
+    private BlockEncryptionAlgorithm introspectionEncryptedResponseEnc;
     private SignatureAlgorithm requestObjectSigningAlg;
     private KeyEncryptionAlgorithm requestObjectEncryptionAlg;
     private BlockEncryptionAlgorithm requestObjectEncryptionEnc;
     private AuthenticationMethod tokenEndpointAuthMethod;
+    private List<AuthenticationMethod> additionalTokenEndpointAuthMethods;
     private SignatureAlgorithm tokenEndpointAuthSigningAlg;
     private Integer defaultMaxAge;
+    private Integer lifetime;
     private List<String> defaultAcrValues;
     private Integer minimumAcrLevel;
     private Boolean minimumAcrLevelAutoresolve;
@@ -122,9 +128,11 @@ public class RegisterRequest extends BaseRequest {
     private Integer accessTokenLifetime;
     private Integer parLifetime;
     private Boolean requirePar;
+    private Boolean dpopBoundAccessToken;
     private String softwareId;
     private String softwareVersion;
     private String softwareStatement;
+    private String evidence;
     private Boolean defaultPromptLogin;
     private List<String> authorizedAcrValues;
     private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
@@ -893,6 +901,60 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Returns the JWS alg algorithm (JWA) required for Introspection responses.
+     *
+     * @return The JWS algorithm (JWA).
+     */
+    public SignatureAlgorithm getIntrospectionSignedResponseAlg() {
+        return introspectionSignedResponseAlg;
+    }
+
+    /**
+     * Sets the JWS alg algorithm (JWA) required for Introspection responses.
+     *
+     * @param introspectionSignedResponseAlg The JWS algorithm (JWA).
+     */
+    public void setIntrospectionSignedResponseAlg(SignatureAlgorithm introspectionSignedResponseAlg) {
+        this.introspectionSignedResponseAlg = introspectionSignedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE alg algorithm (JWA) required for encrypting Introspection responses.
+     *
+     * @return The JWE algorithm (JWA).
+     */
+    public KeyEncryptionAlgorithm getIntrospectionEncryptedResponseAlg() {
+        return introspectionEncryptedResponseAlg;
+    }
+
+    /**
+     * Sets the JWE alg algorithm (JWA) required for encrypting Introspection responses.
+     *
+     * @param introspectionEncryptedResponseAlg The JWE algorithm (JWA).
+     */
+    public void setIntrospectionEncryptedResponseAlg(KeyEncryptionAlgorithm introspectionEncryptedResponseAlg) {
+        this.introspectionEncryptedResponseAlg = introspectionEncryptedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE enc algorithm (JWA) required for symmetric encryption of Introspection responses.
+     *
+     * @return The JWE algorithm (JWA).
+     */
+    public BlockEncryptionAlgorithm getIntrospectionEncryptedResponseEnc() {
+        return introspectionEncryptedResponseEnc;
+    }
+
+    /**
+     * Sets the JWE enc algorithm (JWA) required for symmetric encryption of Introspection responses.
+     *
+     * @param introspectionEncryptedResponseEnc The JWE algorithm (JWA).
+     */
+    public void setIntrospectionEncryptedResponseEnc(BlockEncryptionAlgorithm introspectionEncryptedResponseEnc) {
+        this.introspectionEncryptedResponseEnc = introspectionEncryptedResponseEnc;
+    }
+
+    /**
      * Returns the JWS alg algorithm (JWA) required for UserInfo responses.
      *
      * @return The JWS algorithm (JWA).
@@ -1022,6 +1084,14 @@ public class RegisterRequest extends BaseRequest {
         this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
     }
 
+    public List<AuthenticationMethod> getAdditionalTokenEndpointAuthMethods() {
+        return additionalTokenEndpointAuthMethods;
+    }
+
+    public void setAdditionalTokenEndpointAuthMethods(List<AuthenticationMethod> additionalTokenEndpointAuthMethods) {
+        this.additionalTokenEndpointAuthMethods = additionalTokenEndpointAuthMethods;
+    }
+
     /**
      * Returns the Requested Client Authentication method for the Token Endpoint.
      *
@@ -1056,6 +1126,24 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setDefaultMaxAge(Integer defaultMaxAge) {
         this.defaultMaxAge = defaultMaxAge;
+    }
+
+    /**
+     * Gets client life time
+     *
+     * @return client life time
+     */
+    public Integer getLifetime() {
+        return lifetime;
+    }
+
+    /**
+     * Sets client life time
+     *
+     * @param lifetime life time
+     */
+    public void setLifetime(Integer lifetime) {
+        this.lifetime = lifetime;
     }
 
     /**
@@ -1276,6 +1364,24 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Gets dpopBoundAccessToken
+     *
+     * @return dpopBoundAccessToken
+     */
+    public Boolean getDpopBoundAccessToken() {
+        return dpopBoundAccessToken;
+    }
+
+    /**
+     * Sets dpopBoundAccessToken
+     *
+     * @param dpopBoundAccessToken dpop bound access token
+     */
+    public void setDpopBoundAccessToken(Boolean dpopBoundAccessToken) {
+        this.dpopBoundAccessToken = dpopBoundAccessToken;
+    }
+
+    /**
      * Returns a unique identifier string (UUID) assigned by the client developer or software publisher used by
      * registration endpoints to identify the client software to be dynamically registered.
      *
@@ -1335,6 +1441,28 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setSoftwareStatement(String softwareStatement) {
         this.softwareStatement = softwareStatement;
+    }
+
+    /**
+     * Evidence is a set of claims generated by an attester to be appraised by a verifier.
+     * Evidence may include configuration data, measurements, telemetry, or inferences. This is a string
+     * value containing the evidence, as produced by the selected attestation technology.
+     *
+     * @return evidence
+     */
+    public String getEvidence() {
+        return evidence;
+    }
+
+    /**
+     * Evidence is a set of claims generated by an attester to be appraised by a verifier.
+     * Evidence may include configuration data, measurements, telemetry, or inferences. This is a string
+     * value containing the evidence, as produced by the selected attestation technology.
+     *
+     * @param evidence evidence
+     */
+    public void setEvidence(String evidence) {
+        this.evidence = evidence;
     }
 
     public BackchannelTokenDeliveryMode getBackchannelTokenDeliveryMode() {
@@ -1588,7 +1716,9 @@ public class RegisterRequest extends BaseRequest {
         result.setAccessTokenLifetime(integerOrNull(requestObject, ACCESS_TOKEN_LIFETIME.toString()));
         result.setParLifetime(integerOrNull(requestObject, PAR_LIFETIME.toString()));
         result.setRequirePar(booleanOrNull(requestObject, REQUIRE_PAR.toString()));
+        result.setDpopBoundAccessToken(booleanOrNull(requestObject, DPOP_BOUND_ACCESS_TOKEN.toString()));
         result.setDefaultMaxAge(integerOrNull(requestObject, DEFAULT_MAX_AGE.toString()));
+        result.setLifetime(integerOrNull(requestObject, LIFETIME.toString()));
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
         result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
         result.setSpontaneousScopes(extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
@@ -1614,10 +1744,14 @@ public class RegisterRequest extends BaseRequest {
         result.setUserInfoSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(USERINFO_SIGNED_RESPONSE_ALG.toString())));
         result.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())));
         result.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())));
+        result.setIntrospectionSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(INTROSPECTION_SIGNED_RESPONSE_ALG.toString())));
+        result.setIntrospectionEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(INTROSPECTION_ENCRYPTED_RESPONSE_ALG.toString())));
+        result.setIntrospectionEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(INTROSPECTION_ENCRYPTED_RESPONSE_ENC.toString())));
         result.setRequestObjectSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(REQUEST_OBJECT_SIGNING_ALG.toString())));
         result.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
         result.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
         result.setTokenEndpointAuthMethod(AuthenticationMethod.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_METHOD.toString())));
+        result.setAdditionalTokenEndpointAuthMethods(AuthenticationMethod.fromList(extractListByKey(requestObject, ADDITIONAL_TOKEN_ENDPOINT_AUTH_METHODS.toString())));
         result.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())));
         result.setRedirectUris(extractListByKey(requestObject, REDIRECT_URIS.toString()));
         result.setScope(extractListByKey(requestObject, SCOPE.toString()));
@@ -1657,6 +1791,7 @@ public class RegisterRequest extends BaseRequest {
         result.setSoftwareId(requestObject.optString(SOFTWARE_ID.toString()));
         result.setSoftwareVersion(requestObject.optString(SOFTWARE_VERSION.toString()));
         result.setSoftwareStatement(requestObject.optString(SOFTWARE_STATEMENT.toString()));
+        result.setEvidence(requestObject.optString(EVIDENCE.toString()));
         result.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.fromString(requestObject.optString(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString())));
         result.setBackchannelClientNotificationEndpoint(requestObject.optString(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
         result.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.fromString(requestObject.optString(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString())));
@@ -1777,6 +1912,15 @@ public class RegisterRequest extends BaseRequest {
         if (userInfoEncryptedResponseEnc != null) {
             function.apply(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), userInfoEncryptedResponseEnc.getName());
         }
+        if (introspectionSignedResponseAlg != null) {
+            function.apply(INTROSPECTION_SIGNED_RESPONSE_ALG.toString(), introspectionSignedResponseAlg.getName());
+        }
+        if (introspectionEncryptedResponseAlg != null) {
+            function.apply(INTROSPECTION_ENCRYPTED_RESPONSE_ALG.toString(), introspectionEncryptedResponseAlg.getName());
+        }
+        if (introspectionEncryptedResponseEnc != null) {
+            function.apply(INTROSPECTION_ENCRYPTED_RESPONSE_ENC.toString(), introspectionEncryptedResponseEnc.getName());
+        }
         if (requestObjectSigningAlg != null) {
             function.apply(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
         }
@@ -1789,11 +1933,17 @@ public class RegisterRequest extends BaseRequest {
         if (tokenEndpointAuthMethod != null) {
             function.apply(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
         }
+        if (additionalTokenEndpointAuthMethods != null) {
+            function.apply(ADDITIONAL_TOKEN_ENDPOINT_AUTH_METHODS.toString(), toJSONArray(additionalTokenEndpointAuthMethods.stream().map(AuthenticationMethod::toString).collect(Collectors.toList())));
+        }
         if (tokenEndpointAuthSigningAlg != null) {
             function.apply(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), tokenEndpointAuthSigningAlg.toString());
         }
         if (defaultMaxAge != null) {
             function.apply(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
+        }
+        if (lifetime != null) {
+            function.apply(LIFETIME.toString(), lifetime.toString());
         }
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
             function.apply(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues));
@@ -1847,6 +1997,9 @@ public class RegisterRequest extends BaseRequest {
         if (StringUtils.isNotBlank(softwareStatement)) {
             function.apply(SOFTWARE_STATEMENT.toString(), softwareStatement);
         }
+        if (StringUtils.isNotBlank(evidence)) {
+            function.apply(EVIDENCE.toString(), evidence);
+        }
         if (backchannelTokenDeliveryMode != null) {
             function.apply(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), backchannelTokenDeliveryMode.toString());
         }
@@ -1899,6 +2052,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (requirePar != null) {
             function.apply(REQUIRE_PAR.toString(), requirePar.toString());
+        }
+        if (dpopBoundAccessToken != null) {
+            function.apply(DPOP_BOUND_ACCESS_TOKEN.toString(), dpopBoundAccessToken.toString());
         }
 
         if (redirectUrisRegex != null) {

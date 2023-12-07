@@ -18,17 +18,18 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
 import io.jans.service.cache.CacheConfiguration;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -140,7 +141,7 @@ public class GrantService {
             final String baseDn = clientService.buildClientDn(clientId);
             return persistenceEntryManager.findEntries(baseDn, TokenEntity.class, Filter.createPresenceFilter("tknCde"));
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            logException(e);
         }
         return Collections.emptyList();
     }
@@ -154,11 +155,19 @@ public class GrantService {
         }
     }
 
+    private void logException(Exception e) {
+        if (isTrue(appConfiguration.getLogNotFoundEntityAsError())) {
+            log.error(e.getMessage(), e);
+        } else {
+            log.trace(e.getMessage(), e);
+        }
+    }
+
     private TokenEntity load(String tokenDn) {
         try {
             return persistenceEntryManager.find(TokenEntity.class, tokenDn);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            logException(e);
         }
         return null;
     }
@@ -167,7 +176,7 @@ public class GrantService {
         try {
             return persistenceEntryManager.findEntries(tokenBaseDn(), TokenEntity.class, Filter.createEqualityFilter("grtId", grantId));
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            logException(e);
         }
         return Collections.emptyList();
     }
@@ -176,7 +185,7 @@ public class GrantService {
         try {
             return persistenceEntryManager.findEntries(tokenBaseDn(), TokenEntity.class, Filter.createEqualityFilter("authzCode", TokenHashUtil.hash(authorizationCode)));
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            logException(e);
         }
         return Collections.emptyList();
     }
@@ -189,26 +198,33 @@ public class GrantService {
                 grants.addAll(ldapGrants);
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            logException(e);
         }
         return grants;
     }
 
     public void logout(String sessionDn) {
         final List<TokenEntity> tokens = getGrantsBySessionDn(sessionDn);
-        if (BooleanUtils.isFalse(appConfiguration.getRemoveRefreshTokensForClientOnLogout())) {
-            List<TokenEntity> refreshTokens = Lists.newArrayList();
-            for (TokenEntity token : tokens) {
-                if (token.getTokenTypeEnum() == TokenType.REFRESH_TOKEN) {
-                    refreshTokens.add(token);
-                }
-            }
-            if (!refreshTokens.isEmpty()) {
-                log.trace("Refresh tokens are not removed on logout (because removeRefreshTokensForClientOnLogout configuration property is false)");
-                tokens.removeAll(refreshTokens);
+        filterOutRefreshTokenFromDeletion(tokens);
+        removeSilently(tokens);
+    }
+
+    public void filterOutRefreshTokenFromDeletion(List<TokenEntity> tokens) {
+        if (isTrue(appConfiguration.getRemoveRefreshTokensForClientOnLogout())) {
+            return;
+        }
+
+        List<TokenEntity> refreshTokensForExclusion = Lists.newArrayList();
+
+        for (TokenEntity token : tokens) {
+            if (token.getTokenTypeEnum() == TokenType.REFRESH_TOKEN && !token.getAttributes().isOnlineAccess()) {
+                refreshTokensForExclusion.add(token);
             }
         }
-        removeSilently(tokens);
+        if (!refreshTokensForExclusion.isEmpty()) {
+            log.trace("Refresh tokens are not removed on logout (because removeRefreshTokensForClientOnLogout configuration property is false or online_access scope is used).");
+            tokens.removeAll(refreshTokensForExclusion);
+        }
     }
 
     public void removeAllTokensBySession(String sessionDn) {

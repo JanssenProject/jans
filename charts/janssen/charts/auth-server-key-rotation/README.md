@@ -1,6 +1,6 @@
 # auth-server-key-rotation
 
-![Version: 1.0.7-dev](https://img.shields.io/badge/Version-1.0.7--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.7-dev](https://img.shields.io/badge/AppVersion-1.0.7--dev-informational?style=flat-square)
+![Version: 1.0.21-dev](https://img.shields.io/badge/Version-1.0.21--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.21-dev](https://img.shields.io/badge/AppVersion-1.0.21--dev-informational?style=flat-square)
 
 Responsible for regenerating auth-keys per x hours
 
@@ -18,7 +18,7 @@ Responsible for regenerating auth-keys per x hours
 
 ## Requirements
 
-Kubernetes: `>=v1.21.0-0`
+Kubernetes: `>=v1.22.0-0`
 
 ## Values
 
@@ -32,8 +32,12 @@ Kubernetes: `>=v1.21.0-0`
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"janssenproject/certmanager"` | Image  to use for deploying. |
-| image.tag | string | `"1.0.7_dev"` | Image  tag to use for deploying. |
+| image.tag | string | `"1.0.21_dev"` | Image  tag to use for deploying. |
 | keysLife | int | `48` | Auth server key rotation keys life in hours |
+| keysPushDelay | int | `0` | Delay (in seconds) before pushing private keys to Auth server |
+| keysPushStrategy | string | `"NEWER"` | Set key selection strategy after pushing private keys to Auth server (only takes effect when keysPushDelay value is greater than 0) |
+| keysStrategy | string | `"NEWER"` | Set key selection strategy used by Auth server |
+| lifecycle | object | `{}` |  |
 | nodeSelector | object | `{}` |  |
 | resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
 | tolerations | list | `[]` |  |

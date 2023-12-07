@@ -71,7 +71,8 @@ public abstract class ExternalScriptService implements Serializable {
     	if (!customScriptManager.isSupportedType(customScriptType)) {
     		return;
     	}
-        // Get actual list of external configurations
+
+    	// Get actual list of external configurations
         List<CustomScriptConfiguration> newCustomScriptConfigurations = customScriptManager
                 .getCustomScriptConfigurationsByScriptType(customScriptType);
         addExternalConfigurations(newCustomScriptConfigurations);

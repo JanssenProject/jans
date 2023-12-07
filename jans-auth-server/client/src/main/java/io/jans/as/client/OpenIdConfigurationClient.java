@@ -104,6 +104,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
 
         response.setIssuer(jsonObj.optString(ISSUER, null));
         response.setAuthorizationEndpoint(jsonObj.optString(AUTHORIZATION_ENDPOINT, null));
+        response.setAuthorizationChallengeEndpoint(jsonObj.optString(AUTHORIZATION_CHALLENGE_ENDPOINT, null));
         response.setTokenEndpoint(jsonObj.optString(TOKEN_ENDPOINT, null));
         response.setRevocationEndpoint(jsonObj.optString(REVOCATION_ENDPOINT, null));
         response.setSessionRevocationEndpoint(jsonObj.optString(SESSION_REVOCATION_ENDPOINT, null));
@@ -112,6 +113,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         response.setCheckSessionIFrame(jsonObj.optString(CHECK_SESSION_IFRAME, null));
         response.setEndSessionEndpoint(jsonObj.optString(END_SESSION_ENDPOINT, null));
         response.setJwksUri(jsonObj.optString(JWKS_URI, null));
+        response.setArchivedJwksUri(jsonObj.optString(ARCHIVED_JWKS_URI, null));
         response.setRegistrationEndpoint(jsonObj.optString(REGISTRATION_ENDPOINT, null));
         response.setIntrospectionEndpoint(jsonObj.optString(INTROSPECTION_ENDPOINT, null));
         response.setParEndpoint(jsonObj.optString(PAR_ENDPOINT, null));
