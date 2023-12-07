@@ -1,20 +1,10 @@
----
-tags:
-- administration
-- reference
-- kubernetes
-- docker image
-- casa
----
-
 ## Overview
 
 Docker assets for Casa
 
 ## Versions
 
-See [Releases](https://github.com/GluuFederation/docker-casa/releases) for stable versions.
-For bleeding-edge/unstable version, use `gluufederation/casa:5.0.0_dev`.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fcasa) for available versions.
 
 ## Environment Variables
 
@@ -64,7 +54,7 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
 - `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
 - `CN_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
-- `CN_DOCUMENT_STORE_TYPE`: Document store type (one of `DB`, `LOCAL` or `JCA`; default to `LOCAL`).
+- `CN_DOCUMENT_STORE_TYPE`: Document store type (one of `LOCAL` or `JCA`; default to `LOCAL`).
 - `CN_JACKRABBIT_URL`: URL to remote repository (default to `http://localhost:8080`).
 - `CN_JACKRABBIT_SYNC_INTERVAL`: Interval between files sync (default to `300` seconds).
 - `CN_JACKRABBIT_ADMIN_ID`: Admin username (default to `admin`).
@@ -77,14 +67,15 @@ The following environment variables are supported by the container:
 - `CN_SQL_DB_USER`: Username to interact with SQL backend (default to `jans`).
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Instance ID of Google Spanner (default to empty string).
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Database ID of Google Spanner (default to empty string).
-- `GOOGLE_APPLICATION_CREDENTIALS`: JSON file (contains Google credentials) that should be injected into container.
+- `GOOGLE_APPLICATION_CREDENTIALS`: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
 - `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
-- `GLUU_CASA_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
+- `CN_CASA_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
 - `CN_CASA_ADMIN_LOCK_FILE`: Path to lock file to enable/disable administration feature (default to `/opt/jans/jetty/jans-casa/.administrable`). If file is not exist, the feature is disabled.
 - `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.
+- `CN_CASA_JWKS_SIZE_LIMIT`: Default HTTP size limit (in bytes) when retrieving remote JWKS (default to `100000`).
 
 ### Configure app loggers
 
