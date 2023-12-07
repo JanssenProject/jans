@@ -6,11 +6,11 @@
 
 package io.jans.service.message.test.dev;
 
-import io.jans.service.cache.RedisConfiguration;
 import io.jans.service.message.MessageProvider;
 import io.jans.service.message.StandaloneMessageProviderFactory;
 import io.jans.service.message.model.config.MessageConfiguration;
 import io.jans.service.message.model.config.MessageProviderType;
+import io.jans.service.message.model.config.RedisMessageConfiguration;
 import io.jans.service.message.pubsub.PubSubInterface;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
@@ -26,7 +26,7 @@ public class StandaloneRedisMessageTest {
 		MessageConfiguration messageConfiguration = new MessageConfiguration();
 		messageConfiguration.setMessageProviderType(MessageProviderType.REDIS);
 
-		RedisConfiguration redisMessageConfiguration = new RedisConfiguration();
+		RedisMessageConfiguration redisMessageConfiguration = new RedisMessageConfiguration();
 		redisMessageConfiguration.setServers("192.168.1.151:6379");
 		redisMessageConfiguration.setPassword("rgy1GUg+1kY="); // secret
 
