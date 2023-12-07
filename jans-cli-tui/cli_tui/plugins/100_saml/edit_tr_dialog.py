@@ -351,8 +351,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
 
 
     def save(self):
-        
-        
+
         tr_data = self.make_data_from_dialog({'tr': self.edit_tr_container})
 
         if self.new_tr:
@@ -384,10 +383,11 @@ class EditTRDialog(JansGDialog, DialogUtils):
                     self.app.show_message(_(common_strings.error), _("Please locate metadata file."), tobefocused=self.edit_tr_container)
                     return
 
-        tr_data['clientId'] = '!FIXME!'
         tr_data['spMetaDataSourceType'] = 'FILE'
 
         tr_data['releasedAttributes'] = [entry[0] for entry in self.released_attributes_container.entries]
+
+
 
         if self.new_tr:
             tr_data['spMetaDataFN'] = os.path.basename(self.metadata_file_path)
@@ -399,7 +399,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
                     data[k] = self.data[k]
 
         async def coroutine():
-            operation_id = 'post-trust-relationship-metadata-file' if self.new_tr else 'put-trust-relationship_1'
+            operation_id = 'post-trust-relationship-metadata-file' if self.new_tr else 'put-trust-relationship'
             cli_args = {'operation_id': operation_id, 'data': data}
             self.app.start_progressing()
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
@@ -411,7 +411,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
                 await self.myparent.get_trust_relations()
 
             else:
-                self.app.show_message(_(common_strings.error), _("Save failed: {}\n").format(response.text), tobefocused=self.edit_tr_container)
+                self.app.show_message(_(common_strings.error), _("Save failed: Status {} - {}\n").format(response.status_code, response.text), tobefocused=self.edit_tr_container)
                 self.app.stop_progressing(_("Failed to save Trust Relationship."))
 
 
