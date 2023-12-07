@@ -170,7 +170,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                         self.writeFile(hba_file_path, hba_file_content)
                         self.start('postgresql')
 
-            self.enable('postgresql')
+                self.enable('postgresql')
 
         self.dbUtils.bind(force=True)
 
