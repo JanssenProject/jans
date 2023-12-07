@@ -1,0 +1,11 @@
+io.jans.scim
+io.jans.scim.service.antlr.scimFilter
+io.jans.scim.service.antlr.scimFilter.antlr4
+io.jans.scim.service.antlr.scimFilter.enums
+io.jans.scim.service.antlr.scimFilter.util
+io.jans.scim.service.external
+io.jans.scim.service.init
+io.jans.scim.service.scim2
+io.jans.scim.service.scim2.interceptor
+io.jans.scim.service.scim2.serialization
+io.jans.scim.ws.rs.scim2

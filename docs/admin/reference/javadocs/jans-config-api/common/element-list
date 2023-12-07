@@ -1,0 +1,5 @@
+io.jans.configapi.exception
+io.jans.configapi.model.configuration
+io.jans.configapi.model.status
+io.jans.configapi.rest.model
+io.jans.configapi.util

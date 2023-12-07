@@ -1,0 +1,6 @@
+io.jans.configapi.plugin.mgt.extensions
+io.jans.configapi.plugin.mgt.model.config
+io.jans.configapi.plugin.mgt.model.user
+io.jans.configapi.plugin.mgt.rest
+io.jans.configapi.plugin.mgt.service
+io.jans.configapi.plugin.mgt.util

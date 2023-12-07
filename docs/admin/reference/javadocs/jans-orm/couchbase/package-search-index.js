@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.orm.couchbase.impl"},{"l":"io.jans.orm.couchbase.model"},{"l":"io.jans.orm.couchbase.operation"},{"l":"io.jans.orm.couchbase.operation.impl"},{"l":"io.jans.orm.couchbase.operation.watch"}]

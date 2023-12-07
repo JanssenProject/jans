@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.orm.util"},{"l":"io.jans.orm.util.init"},{"l":"io.jans.orm.util.properties"}]

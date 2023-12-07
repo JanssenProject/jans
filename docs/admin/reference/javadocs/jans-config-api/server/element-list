@@ -1,0 +1,17 @@
+io.jans.configapi.configuration
+io.jans.configapi.external.context
+io.jans.configapi.external.service
+io.jans.configapi.filters
+io.jans.configapi.interceptor
+io.jans.configapi.rest
+io.jans.configapi.rest.health
+io.jans.configapi.rest.resource.auth
+io.jans.configapi.security.api
+io.jans.configapi.security.client
+io.jans.configapi.security.service
+io.jans.configapi.service.auth
+io.jans.configapi.service.cdi.event
+io.jans.configapi.service.conf
+io.jans.configapi.service.logger
+io.jans.configapi.service.status
+io.jans.configapi.util

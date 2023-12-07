@@ -1,0 +1,6 @@
+io.jans.orm.cloud.spanner.impl
+io.jans.orm.cloud.spanner.model
+io.jans.orm.cloud.spanner.operation
+io.jans.orm.cloud.spanner.operation.impl
+io.jans.orm.cloud.spanner.operation.watch
+io.jans.orm.cloud.spanner.util

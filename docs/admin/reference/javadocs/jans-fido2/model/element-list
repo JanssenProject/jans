@@ -1,0 +1,7 @@
+io.jans.entry
+io.jans.fido2.ctap
+io.jans.fido2.model.assertion
+io.jans.fido2.model.attestation
+io.jans.fido2.model.conf
+io.jans.fido2.model.error
+io.jans.fido2.sg
