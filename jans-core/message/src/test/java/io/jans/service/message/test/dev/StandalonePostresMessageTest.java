@@ -34,7 +34,7 @@ public class StandalonePostresMessageTest {
 		postgresMessageConfiguration.setMessageWaitMillis(100);
 		postgresMessageConfiguration.setMessageSleepThreadTime(200);
 
-		messageConfiguration.setPostgresMessageConfiguration(postgresMessageConfiguration);
+		messageConfiguration.setPostgresConfiguration(postgresMessageConfiguration);
 
 		StandaloneMessageProviderFactory messageProviderFactory = new StandaloneMessageProviderFactory(stringEncrypter);
 		MessageProvider messageProvider = messageProviderFactory.getMessageProvider(messageConfiguration);
