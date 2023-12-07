@@ -7611,13 +7611,13 @@ components:
           type: boolean
         selected:
           type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -9773,10 +9773,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
