@@ -88,7 +88,7 @@ RDN_MAPPING = {
     "default": "",
     "user": "people, groups, authorizations",
     "cache": "cache",
-    "site": "cache-refresh",
+    "site": "link",
     "token": "tokens",
     "session": "sessions",
 }
@@ -214,7 +214,7 @@ class PersistenceMapper:
             "sql": ["cache", "", "sessions"],
             "couchbase": ["people, groups, authorizations"],
             "spanner": ["tokens"],
-            "ldap": ["cache-refresh"],
+            "ldap": ["link"],
         }
         ```
         """

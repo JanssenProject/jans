@@ -62,7 +62,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.registrationUri = None
         if configurationAttributes.containsKey("registration_uri"):
-            self.registrationUri = configurationAttributes.get("registration_uri").getValue2()
+            registrationUriValue = configurationAttributes.get("registration_uri").getValue2()
+            if StringHelper.isNotEmptyString(registrationUriValue):
+                self.registrationUri = registrationUriValue
 
         authentication_mode = configurationAttributes.get("authentication_mode").getValue2()
         if StringHelper.isEmpty(authentication_mode):

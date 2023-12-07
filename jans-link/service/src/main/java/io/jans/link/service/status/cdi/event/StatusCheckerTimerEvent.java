@@ -9,6 +9,5 @@ package io.jans.link.service.status.cdi.event;
 public class StatusCheckerTimerEvent {
     
     public StatusCheckerTimerEvent() {}
-    
 
 }

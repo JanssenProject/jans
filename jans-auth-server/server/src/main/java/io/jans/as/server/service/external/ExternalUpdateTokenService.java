@@ -119,6 +119,7 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
     @NotNull
     private List<CustomScriptConfiguration> getScripts(@NotNull ExternalUpdateTokenContext context) {
         if (customScriptConfigurations == null || customScriptConfigurations.isEmpty() || context.getClient() == null) {
+            log.trace("No UpdateToken scripts or client is null.");
             return Lists.newArrayList();
         }
 

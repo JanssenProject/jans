@@ -52,6 +52,7 @@ public class ApiConstants {
     public static final String GRANT_TYPES = "/grant-types";
     public static final String CACHE = "/cache";
     public static final String PERSISTENCE = "/persistence";
+    public static final String FEATURE_FLAGS = "/feature-flags";
     public static final String DATABASE = "/database";
     public static final String LDAP = "/ldap";
     public static final String SQL = "/sql";
@@ -102,6 +103,8 @@ public class ApiConstants {
     public static final String ID = "id";
     public static final String SCOPE_INUM = "scope_inum";
     public static final String TYPE = "type";
+    public static final String TYPES = "types";
+    public static final String SCRIPTS_TYPES = "script-types";
     public static final String NAME = "name";
     public static final String DISPLAY_NAME = "displayName";
     public static final String KID = "kid";

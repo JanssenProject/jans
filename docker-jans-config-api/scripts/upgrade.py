@@ -103,6 +103,14 @@ def _transform_api_dynamic_config(conf):
             "className": "io.jans.configapi.plugin.link.rest.ApiApplication",
         })
         should_update = True
+
+    if "saml" not in plugins_names:
+        conf["plugins"].append({
+            "name": "saml",
+            "description": "saml plugin",
+            "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
+        })
+        should_update = True
     return conf, should_update
 
 
@@ -454,8 +462,10 @@ class Upgrade:
 
 def main():
     manager = get_manager()
-    upgrade = Upgrade(manager)
-    upgrade.invoke()
+
+    with manager.lock.create_lock("config-api-upgrade"):
+        upgrade = Upgrade(manager)
+        upgrade.invoke()
 
 
 if __name__ == "__main__":

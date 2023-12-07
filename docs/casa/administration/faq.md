@@ -14,22 +14,7 @@ tags:
 
 ### Where are the logs?
 
-The application logs are located at `/opt/jans/jetty/casa/logs`. By default, Casa uses the INFO level for messages. You can change the log level at will using the app's admin UI.
-
-<!--
-**Note: check the logs**
-
-To work properly, Casa requires stable dependent components (filesystem, database, oxd, oxauth, servlet container, etc). Thus, it's important to determine if all expected services are working properly. 
-
-At startup, the app gathers a good amount of information from its environment. If something is missing or went wrong, messages will be shown in the log. Some messages may warn you about parameters not supplied that were simply inferred for you. 
-
-During normal use, the app will show feedback to users if operations were successful or failed. In the latter case, the log is also worth to look at to diagnose the anomalies.
-
-### How do I restart the application?
-
-Just [restart](https://gluu.org/docs/ce/4.4/operation/services/#restart) casa service.
--->
-
+The application logs are located at `/opt/jans/jetty/jans-casa/logs`. By default, Casa uses the INFO level for messages. You can change the log level at will using the app's admin UI.
 
 ### How do I custom brand Casa?
 
@@ -47,7 +32,7 @@ If you've followed the steps as described above, next time he attempts to log in
 
 ### How to adjust the issuer for OTP tokens
 
-When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in the Gluu Flex Server OTP script. For example, you might want to set the `issuer` property to `ACME Dev` on your dev server, and `ACME, Inc.` on your production server. 
+When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in the Janssen Server OTP script. For example, you might want to set the `issuer` property to `ACME Dev` on your dev server, and `ACME, Inc.` on your production server. 
 
 
 ## Errors shown in the UI
@@ -59,7 +44,7 @@ This is the 503 HTTP error. There is an Apache server in front of the applicatio
 
 This reveals a problem in execution of *casa* custom script. Check if `jans-auth_script.log` is showing an error related to the authentication method in question.
 
-If you cannot diagnose the issue, please use the [support forum](https://support.gluu.org) to ask for help. 
+If you cannot diagnose the issue, please use the [Janssen Server discussions](https://github.com/JanssenProject/jans/discussions) to ask for help. 
 
 ### An "Unauthorized access" error is shown when accessing the application
 
@@ -75,7 +60,7 @@ Once fixed, please restart the application. You will have to see a "WEBAPP INITI
 
 ### Admin console is not shown 
 
-If you have logged in using an administrative account and cannot find any admin features in the UI ensure you have performed this [step](./installation.md#unlocking-admin-features).
+If you have logged in using an administrative account and cannot find any admin features in the UI ensure you have performed this [step](./README.md#unlocking-admin-features).
 
 ### A previously enabled method is not available anymore
 
@@ -113,4 +98,4 @@ Upon startup, the application needs to query the OpenID metadata URL of oxAuth t
 
 ## My problem is not listed here
 
-Feel free to open a [support](https://support.gluu.org) ticket.
+Feel free to [ask Janssen Server community](https://github.com/JanssenProject/jans/discussions).

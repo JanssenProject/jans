@@ -27,7 +27,6 @@ func TestAccResourceAgamaDeployment_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccResourceCheckAgamaDeploymentExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", "test-deployment"),
-					resource.TestCheckResourceAttrSet(resourceName, "deployment_file_hash"),
 				),
 			},
 		},
@@ -45,6 +44,7 @@ func testAccResourceAgamaDeploymentConfig_basic() string {
 resource "jans_agama_deployment" "test" {
 	name 						= "test-deployment"
 	deployment_file = "` + testFile + `"
+	autoconfigure   = true
 }
 `
 }

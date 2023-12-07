@@ -318,7 +318,7 @@ class Crypto64:
 
         try:
             if Config.get('ldapPass'):
-                Config.encoded_ox_ldap_pw = self.obscure(Config.ldapPass)
+                Config.ldap_bind_encoded_pw = self.obscure(Config.ldapPass)
             if Config.get('cb_password'):
                 Config.encoded_cb_password = self.obscure(Config.cb_password)
             if Config.get('opendj_p12_pass'):

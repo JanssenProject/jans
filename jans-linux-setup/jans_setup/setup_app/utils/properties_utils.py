@@ -611,6 +611,19 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_jans_link')
 
 
+    def prompt_for_jans_keycloak_link(self):
+        if Config.installed_instance and Config.install_jans_keycloak_link:
+            return
+
+        prompt_to_install = self.getPrompt("Install Jans Keycloak Link Server?",
+                                            self.getDefaultOption(Config.install_jans_keycloak_link)
+                                            )[0].lower()
+
+        Config.install_jans_keycloak_link = prompt_to_install == 'y'
+
+        if Config.installed_instance and Config.install_jans_keycloak_link:
+            Config.addPostSetupService.append('install_jans_keycloak_link')
+
     def prompt_for_casa(self):
         if Config.installed_instance and Config.install_casa:
             return
@@ -643,16 +656,15 @@ class PropertiesUtils(SetupUtils):
                                             )[0].lower()
 
         Config.install_jans_saml = prompt == 'y'
-        if Config.install_jans_saml:
-            while True:
-                selected_idp = self.getPrompt("  Please enter selected IDP")
-                if selected_idp:
-                    Config.saml_selected_idp = selected_idp
-                    break
-
-        if Config.installed_instance and Config.install_jans_saml:
-            Config.addPostSetupService.append('install_jans_saml')
-
+        if Config.installed_instance:
+            if Config.install_jans_saml:
+                Config.addPostSetupService.append('install_jans_saml')
+                if Config.install_config_api and not Config.install_scim_server:
+                    Config.addPostSetupService.append('install_scim_server')
+                    Config.install_scim_server = True
+        else:
+            if Config.install_jans_saml and Config.install_config_api:
+                Config.install_scim_server = True
 
     def promptForConfigApi(self):
         if Config.installed_instance and Config.install_config_api:
@@ -1002,6 +1014,7 @@ class PropertiesUtils(SetupUtils):
             self.promptForScimServer()
             self.promptForFido2Server()
             self.prompt_for_jans_link()
+            self.prompt_for_jans_keycloak_link()
             self.prompt_for_casa()
 
             self.prompt_for_jans_saml()

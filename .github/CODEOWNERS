@@ -4,7 +4,8 @@
 # These owners will be the default owners for everything in this branch of
 # the repo. Unless a later match takes precedence
 
-/keycloak-integration/ @uprightech
+/jans-keycloak-integration/ @uprightech
+/jans-keycloak-link/ @shekhar16
 /docker-jans-*/ @moabu @iromli
 /automation/ @moabu
 /charts/ @moabu

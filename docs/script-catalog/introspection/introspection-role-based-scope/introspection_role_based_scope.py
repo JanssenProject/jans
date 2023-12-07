@@ -11,6 +11,7 @@ from io.jans.orm import PersistenceEntryManager
 from io.jans.model.custom.script.type.introspection import IntrospectionType
 from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.model.config.adminui import AdminConf
+from io.jans.as.common.model.session import SessionId
 from org.json import JSONObject
 from java.lang import String
 
@@ -49,14 +50,14 @@ class Introspection(IntrospectionType):
         try:
             # Getting user-info-jwt
             ujwt = context.getHttpRequest().getParameter("ujwt")
-            print ujwt
             if not ujwt:
                 print "UJWT is empty or null. Only the default scopes will be added to the token."
                 entryManager = CdiUtil.bean(PersistenceEntryManager)
+
                 adminConf = AdminConf()
                 adminUIConfig = entryManager.find(adminConf.getClass(), "ou=admin-ui,ou=configuration,o=jans")
                 permissions = adminUIConfig.getDynamic().getPermissions()
-                
+
                 for ele in permissions:
                     if ele.getDefaultPermissionInToken() is not None and ele.getDefaultPermissionInToken():
                         scopes.append(ele.getPermission())
@@ -91,6 +92,17 @@ class Introspection(IntrospectionType):
                             for scope in ele.getPermissions():
                                 if not scope in scopes:
                                     scopes.append(scope)
+             
+                    permissionTag = context.getHttpRequest().getParameter("permission_tag")
+                    permissions = adminUIConfig.getDynamic().getPermissions()
+
+                    if permissionTag is not None:
+                        print "The request has tags : {}".format(permissionTag)
+                        permissionTagArr = permissionTag.split()
+                        scopesWithMatchingTags = self.filterScopesMatchingWithTags(permissionTagArr, permissions)
+                        scopes = self.createScopeListMatchingWithTags(scopesWithMatchingTags, scopes)
+
+
                 except Exception as e:
                     print "Error:  Failed to fetch/parse Admin UI roleScopeMapping from DB"
                     print e
@@ -102,3 +114,19 @@ class Introspection(IntrospectionType):
                 print "Exception occured. Unable to resolve role/scope mapping."
                 print e
         return True
+
+    def filterScopesMatchingWithTags(self, permissionTag, permissions):
+        scopesWithMatchingTags = []
+        for permissionObj in permissions:
+            for tag in permissionTag:
+                if permissionObj.getTag() == tag:
+                    scopesWithMatchingTags.append(permissionObj.getPermission())
+        return scopesWithMatchingTags
+
+
+    def createScopeListMatchingWithTags(self, scopesWithMatchingTags, scopes):
+        returnScopes = []
+        for scopeWithMatchingTags in scopesWithMatchingTags:
+            if scopeWithMatchingTags in scopes:
+                returnScopes.append(scopeWithMatchingTags)
+        return returnScopes

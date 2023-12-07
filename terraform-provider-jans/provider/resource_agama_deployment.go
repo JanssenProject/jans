@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -58,11 +58,13 @@ func resourceAgamaDeployment() *schema.Resource {
 				Required:    true,
 				Description: "Path to the deployment file (in zip format)",
 			},
-			"deployment_file_hash": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Hash of the deployment file, used to detect changes.",
-				ForceNew:    true,
+			"autoconfigure": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				Description: `Passing 'true' will make this project be configured with the sample configurations
+				found in the provided binary archive. This param should rarely be passed: use only in controlled 
+				environments where the archive is not shared with third parties`,
 			},
 			"task_active": {
 				Type:        schema.TypeBool,
@@ -79,7 +81,7 @@ func resourceAgamaDeploymentCreate(ctx context.Context, d *schema.ResourceData, 
 
 	name := d.Get("name").(string)
 	fileName := d.Get("deployment_file").(string)
-	fileHash := d.Get("deployment_file_hash").(string)
+	autoconfig := d.Get("autoconfigure").(bool)
 
 	// check if file exists and can be accessed
 	if _, err := os.Stat(fileName); err != nil {
@@ -94,13 +96,13 @@ func resourceAgamaDeploymentCreate(ctx context.Context, d *schema.ResourceData, 
 	defer deploymentFile.Close()
 
 	// read file into byte array
-	contents, err := ioutil.ReadAll(deploymentFile)
+	contents, err := io.ReadAll(deploymentFile)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	tflog.Debug(ctx, "Creating new agama deployment")
-	if err := c.CreateAgamaDeployment(ctx, name, contents); err != nil {
+	if err := c.CreateAgamaDeployment(ctx, name, autoconfig, contents); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := waitForAgamaDeploymetCreation(ctx, c, name); err != nil {
@@ -110,7 +112,6 @@ func resourceAgamaDeploymentCreate(ctx context.Context, d *schema.ResourceData, 
 
 	d.SetId(name)
 	d.Set("name", name)
-	d.Set("deployment_file_hash", fileHash)
 
 	return resourceAgamaDeploymentRead(ctx, d, meta)
 }

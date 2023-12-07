@@ -4,9 +4,9 @@ tags:
 - user guide
 ---
 
-# Gluu Casa User Guide
+# Jans Casa User Guide
 
-Gluu Casa ("Casa") is a self-service web portal for managing account security preferences. The primary use-case for Casa is self-service 2FA, but other use cases and functionalities can be supported via Casa plugins. The options displayed in the user portal will always depend upon which settings have been enabled by the administrator. 
+Jans Casa ("Casa") is a self-service web portal for managing account security preferences. The primary use-case for Casa is self-service 2FA, but other use cases and functionalities can be supported via Casa plugins. The options displayed in the user portal will always depend upon which settings have been enabled by the administrator. 
 
 ## Sign in for the first time
 
@@ -141,7 +141,7 @@ Navigate to the `Password Reset` widget. Enter your current and new passwords, t
 
 If the administrator has enabled the `Consent Management` plugin, it will appear in the navigation menu for all users. 
 
-New entries are added automatically whenever the user is prompted for, and authorizes the release of their personal data to an application accessed using their Gluu account.   
+New entries are added automatically whenever the user is prompted for, and authorizes the release of their personal data to an application accessed using their Janssen Server account.   
 
 ![image](https://user-images.githubusercontent.com/5271048/53795147-f5e7d900-3ef6-11e9-9907-ee4c2be2516f.png)
 

@@ -35,22 +35,28 @@ class BaseInstaller:
 
         self.create_folders()
 
-        # render unit file
-        unit_files_dir = os.path.join(Config.staticFolder, 'system/systemd')
-        unit_file = os.path.join(unit_files_dir, self.service_name + '.service')
-        if os.path.exists(unit_file):
-            self.renderTemplateInOut(unit_file, unit_files_dir, Config.unit_files_path)
-
         self.install()
         self.copy_static()
         self.generate_configuration()
 
         # before rendering templates, let's push variables of this class to Config.templateRenderingDict
         self.update_rendering_dict()
+        self.render_unit_file()
 
         self.render_import_templates()
         self.update_backend()
         self.service_post_setup()
+
+    def render_unit_file(self, unit=None):
+        # render unit file
+
+        units = self.get_systemd_service_list(unit)
+
+        for unit in units:
+            unit_files_dir = os.path.join(Config.staticFolder, 'system/systemd')
+            unit_file = os.path.join(unit_files_dir, unit + '.service')
+            if os.path.exists(unit_file):
+                self.renderTemplateInOut(unit_file, unit_files_dir, Config.unit_files_path)
 
     def update_rendering_dict(self):
         mydict = {}
@@ -118,31 +124,38 @@ class BaseInstaller:
             return result.get('dn')
 
 
+    def get_systemd_service_list(self, service):
+        if service:
+            return [service]
+        return getattr(self, 'systemd_units', None) or [self.service_name]
+
     def run_service_command(self, operation, service):
-        if not service:
-            service = self.service_name
 
-        if base.snap:
-            service = os.environ['SNAP_NAME'] + '.' + service
+        services = self.get_systemd_service_list(service)
 
-        try:
+        for service in services:
+
             if base.snap:
-                cmd_list = [base.snapctl, operation, service]
-                if operation == 'start':
-                    cmd_list.insert(-1, '--enable')
-                self.run(cmd_list, None, None, True)
-            elif base.systemctl:
-                local_script = os.path.join(Config.distFolder, 'scripts', service)
-                if os.path.exists(local_script):
-                    self.run([local_script, operation], useWait=True)
+                service = os.environ['SNAP_NAME'] + '.' + service
+
+            try:
+                if base.snap:
+                    cmd_list = [base.snapctl, operation, service]
+                    if operation == 'start':
+                        cmd_list.insert(-1, '--enable')
+                    self.run(cmd_list, None, None, True)
+                elif base.systemctl:
+                    local_script = os.path.join(Config.distFolder, 'scripts', service)
+                    if os.path.exists(local_script):
+                        self.run([local_script, operation], useWait=True)
+                    else:
+                        self.run([base.service_cmd, service, operation], useWait=True)
+                elif (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
+                    self.run([base.service_path, operation, service], None, None, True)
                 else:
-                    self.run([base.service_cmd, service, operation], useWait=True)
-            elif (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
-                self.run([base.service_path, operation, service], None, None, True)
-            else:
-                self.run([base.service_path, service, operation], None, None, True)
-        except:
-            self.logIt("Error running operation {} for service {}".format(operation, service), True)
+                    self.run([base.service_path, service, operation], None, None, True)
+            except:
+                self.logIt("Error running operation {} for service {}".format(operation, service), True)
 
     def enable(self, service=None):
         if not base.snap:

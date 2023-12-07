@@ -21,7 +21,7 @@ import io.jans.chip.utils.AppConfig;
                 OPConfiguration.class,
                 AppIntegrityEntity.class
         },
-        version = 1
+        version = AppConfig.ROOM_DATABASE_VERSION
 )
 public abstract class AppDatabase extends RoomDatabase {
     private static final String LOG_TAG = AppDatabase.class.getSimpleName();
@@ -36,6 +36,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 instance = Room.databaseBuilder(context.getApplicationContext(),
                                 AppDatabase.class, AppDatabase.DATABASE_NAME)
                         .allowMainThreadQueries()
+                        .fallbackToDestructiveMigration()
                         .build();
             }
         }

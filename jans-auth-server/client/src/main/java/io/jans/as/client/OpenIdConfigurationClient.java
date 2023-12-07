@@ -113,6 +113,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         response.setCheckSessionIFrame(jsonObj.optString(CHECK_SESSION_IFRAME, null));
         response.setEndSessionEndpoint(jsonObj.optString(END_SESSION_ENDPOINT, null));
         response.setJwksUri(jsonObj.optString(JWKS_URI, null));
+        response.setArchivedJwksUri(jsonObj.optString(ARCHIVED_JWKS_URI, null));
         response.setRegistrationEndpoint(jsonObj.optString(REGISTRATION_ENDPOINT, null));
         response.setIntrospectionEndpoint(jsonObj.optString(INTROSPECTION_ENDPOINT, null));
         response.setParEndpoint(jsonObj.optString(PAR_ENDPOINT, null));

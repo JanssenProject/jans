@@ -44,12 +44,13 @@ server uses steps laid out in the
 [specification](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-checking-dpop-proofs) to acertain 
 this.
 
-![](../../../assets/dpop-diagram.png)
+```mermaid
 
-```text
+sequenceDiagram
+
 title DPoP sender-constraint access_token and refresh_token
 
-autonumber 1
+autonumber
 
 note right of RP: Authorization Code Flow
 RP->AS: Request authorization with dpop_jtk
@@ -68,6 +69,7 @@ RP->RS: Request resource with access_token and DPoP JWT (with "ath" - AT hash)
 RS->RS: Validates access_token against DPoP (public key match cnf/jkt)
 RS->RS: Validates DPoP against access_token (access_token hash in DPoP "ath")
 RS->RP: Return protected resource
+
 ```
 
 ### Authorization Code Binding to DPoP Key
@@ -83,9 +85,10 @@ Authorization Endpoint supports `dpop_jkt` parameter for DPoP binding of authori
  Host: server.example.com
 ```
 
-For PAR both ways of binging are supports:
-- via `dpop_jkt`
-- via `DPoP` header where `dpop_jkt` is calculated out of `DPoP` header value
+For PAR, both ways of binging are supported:
+
+- Via `dpop_jkt`
+- Via `DPoP` header where `dpop_jkt` is calculated out of `DPoP` header value
 
 ### Using Introspection Endpoint
 
@@ -108,7 +111,7 @@ Following properties of the Janssen Server can be used to tailor the behavior co
 
 ## Have questions in the meantime?
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 

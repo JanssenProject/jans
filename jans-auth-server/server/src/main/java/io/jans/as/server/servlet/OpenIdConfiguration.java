@@ -109,6 +109,7 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(AUTHORIZATION_CHALLENGE_ENDPOINT, appConfiguration.getAuthorizationChallengeEndpoint());
             jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
             jsonObj.put(JWKS_URI, appConfiguration.getJwksUri());
+            jsonObj.put(ARCHIVED_JWKS_URI, appConfiguration.getArchivedJwksUri());
             jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
 
             if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN))
@@ -173,6 +174,10 @@ public class OpenIdConfiguration extends HttpServlet {
             Util.putArray(jsonObj, appConfiguration.getUserInfoSigningAlgValuesSupported(), USER_INFO_SIGNING_ALG_VALUES_SUPPORTED);
             Util.putArray(jsonObj, appConfiguration.getUserInfoEncryptionAlgValuesSupported(), USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED);
             Util.putArray(jsonObj, appConfiguration.getUserInfoEncryptionEncValuesSupported(), USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED);
+
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionSigningAlgValuesSupported(), INTROSPECTION_SIGNING_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionAlgValuesSupported(), INTROSPECTION_ENCRYPTION_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionEncValuesSupported(), INTROSPECTION_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getIdTokenSigningAlgValuesSupported(), ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED);
             Util.putArray(jsonObj, appConfiguration.getIdTokenEncryptionAlgValuesSupported(), ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED);

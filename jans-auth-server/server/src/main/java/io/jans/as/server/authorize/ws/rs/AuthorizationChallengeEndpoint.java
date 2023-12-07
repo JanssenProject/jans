@@ -41,6 +41,8 @@ public class AuthorizationChallengeEndpoint {
             @FormParam("prompt") String prompt,
             @FormParam("state") String state,
             @FormParam("nonce") String nonce,
+            @FormParam("code_challenge") String codeChallenge,
+            @FormParam("code_challenge_method") String codeChallengeMethod,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse) {
 
@@ -57,6 +59,8 @@ public class AuthorizationChallengeEndpoint {
         authzRequest.setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString())));
         authzRequest.setHttpRequest(httpRequest);
         authzRequest.setHttpResponse(httpResponse);
+        authzRequest.setCodeChallenge(codeChallenge);
+        authzRequest.setCodeChallengeMethod(codeChallengeMethod);
 
         return authorizationChallengeService.requestAuthorization(authzRequest);
     }

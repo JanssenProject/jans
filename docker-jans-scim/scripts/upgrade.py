@@ -207,9 +207,7 @@ class Upgrade:
 
     def invoke(self):
         logger.info("Running upgrade process (if required)")
-        # temporarily disable dynamic scopes creation
-        # see https://github.com/JanssenProject/jans/issues/2869
-        # self.update_client_scopes()
+        self.update_client_scopes()
 
     def get_all_scopes(self):
         if self.backend.type in ("sql", "spanner"):
@@ -284,8 +282,10 @@ class Upgrade:
 
 def main():
     manager = get_manager()
-    upgrade = Upgrade(manager)
-    upgrade.invoke()
+
+    with manager.lock.create_lock("scim-upgrade"):
+        upgrade = Upgrade(manager)
+        upgrade.invoke()
 
 
 if __name__ == "__main__":

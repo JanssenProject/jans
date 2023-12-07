@@ -12,7 +12,6 @@ info:
 servers:
 - url: https://jans.io/
   description: The Jans server
-  variables: {}
 tags:
 - name: Admin UI - Role
 - name: Admin UI - Permission
@@ -869,6 +868,8 @@ components:
     AdminPermission:
       type: object
       properties:
+        tag:
+          type: string
         permission:
           type: string
         description:

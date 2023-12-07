@@ -4,23 +4,23 @@ tags:
 - quick start
 ---
 
-# Gluu Casa Quick Start Guide
+# Jans Casa Quick Start Guide
 
-Gluu Casa is a self-service web portal for end-users to manage security preferences for their accounts. Gluu Casa can
-be used to with [Gluu Flex](), [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org).
+Jans Casa is a self-service web portal for end-users to manage security preferences for their accounts. Jans Casa can
+be used to with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org).
 
 Use this guide to install and configure a deployment of Casa.
 
 ## Installation
 
-Follow the Gluu Casa [installation guide](./administration/installation.md) to install Gluu Casa.
+Follow the Jans Casa [installation guide](./administration/README.md) to install Gluu Casa.
 
 ## Configuration
 
-Configuring Casa for usage requires you to enable interception scripts in the Gluu Flex Server, activate the 
+Configuring Casa for usage requires you to enable interception scripts in the Janssen Server, activate the 
 authentication methods in Casa, and install and configure the 2FA settings plugin. 
 
-- Enable authentication interception scripts using Admin-UI 
+- Enable authentication interception scripts using [TUI](../admin/config-guide/config-tools/jans-tui/README.md) 
 - Activate authentication methods in Casa Once the interception scripts have been enabled. To do this 
 Log in to Casa as an administrator and [enable the desired methods](./administration/admin-console.md#configure-casa).
 
@@ -38,10 +38,10 @@ authentication factor.
 
 ### Finish configuration
 
-Once satisfied with testing, 
-[configure the Gluu Flex Server](./administration/admin-console.md#set-default-authentication-method-gluu-flex) to log in 
-users via Casa for all applications the server protects.
+Once satisfied with testing, configure default authentication method of 
+Janssen Server using [TUI](../admin/config-guide/config-tools/jans-tui/README.md) 
+ to log in users via Casa for all applications the server protects.
 
 ### Check out available plugins
 
-Browse our [catalog of plugins](https://casa.gluu.org/plugins) to add features and expand Casa!.
+Browse our [catalog of plugins](./plugins) to add features and expand Casa!.

@@ -41,7 +41,7 @@ The System plugin supports several authentication methods:
 - OTP SMS
 - OTP (handling mobile apps and hard tokens)
 - FIDO security keys
-- Super Gluu.
+- [Super Gluu](https://super.gluu.org/)
 
 In their home page, users will see widgets for every available method. These widgets are listed in decreasing order of
 ACR level. That is, the first method shown will be that with the highest level assigned in its corresponding

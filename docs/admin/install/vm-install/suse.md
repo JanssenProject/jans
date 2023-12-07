@@ -112,6 +112,33 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 
 Full TUI documentation can be found [here](../../config-guide/config-tools/jans-tui/README.md)
 
+If you have selected casa during installation you can access casa using url ```https://<host>/jans-casa```
+
+## Enabling HTTPS
+
+To enable communication with Janssen Server over TLS (https) in a production
+environment, Janssen Server needs details about CA certificate. Update the
+HTTPS cofiguration file `https_jans.conf` as shown below:
+
+!!! Note
+    Want to use `Let's Encrypt` to get a certificate? Follow [this guide](../../../contribute/developer-faq.md#how-to-get-certificate-from-lets-encrypt).
+
+- Open `https_jans.conf`
+  ```bash
+  sudo vi /etc/apache2/vhosts.d/_https_jans.conf
+  ```
+
+- Update `SSLCertificateFile` and `SSLCertificateKeyFile` parameters values
+  ```bash
+  SSLCertificateFile location_of_fullchain.pem
+  SSLCertificateKeyFile location_of_privkey.pem
+  ```
+
+- Restart `httpd` service for changes to take effect
+  ```bash
+  sudo /usr/sbin/rcapache2 restart
+  ```
+
 ## Uninstall
 
 Uninstall process involves two steps

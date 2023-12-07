@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import io.jans.link.model.config.CacheRefreshConfiguration;
+import io.jans.link.model.config.shared.CacheRefreshConfiguration;
 import io.jans.util.ArrayHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
