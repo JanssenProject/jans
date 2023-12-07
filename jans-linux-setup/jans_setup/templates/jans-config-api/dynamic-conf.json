@@ -97,11 +97,6 @@
       "name": "saml",
       "description": "saml plugin",
       "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
-    },
-	{
-      "name": "idp",
-      "description": "idp plugin",
-      "className": "io.jans.configapi.plugin.keycloak.idp.broker.rest.IdpApiApplication"
     }
 	
   ]
