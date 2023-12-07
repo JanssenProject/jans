@@ -18,31 +18,31 @@ import jakarta.xml.bind.annotation.XmlElement;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PostgresMessageConfiguration implements Serializable {
 
-	@XmlElement(name = "db.schema.name")
+	@XmlElement(name = "db-schema-name")
 	private String dbSchemaName;
 
-	@XmlElement(name = "connection.uri")
+	@XmlElement(name = "connection-uri")
 	private String connectionUri;
 
-	@XmlElement(name = "auth.userName")
+	@XmlElement(name = "auth-userName")
 	private String authUserName;
 
-	@XmlElement(name = "auth.userPassword")
+	@XmlElement(name = "auth-userPassword")
 	private String authUserPassword;
 
-	@XmlElement(name = "connection.pool.max-total")
+	@XmlElement(name = "connection-pool-max-total")
 	private Integer connectionPoolMaxTotal;
 
-	@XmlElement(name = "connection.pool.max-idle")
+	@XmlElement(name = "connection-pool-max-idle")
 	private Integer connectionPoolMaxIdle;
 
-	@XmlElement(name = "connection.pool.min-idle")
+	@XmlElement(name = "connection-pool-min-idle")
 	private Integer connectionPoolMinIdle;
 
-	@XmlElement(name = "message.wait-millis")
+	@XmlElement(name = "message-wait-millis")
 	private Integer messageWaitMillis;
 
-	@XmlElement(name = "message.sleep-thread-millis")
+	@XmlElement(name = "message-sleep-thread-millis")
 	private Integer messageSleepThreadTime;
 
 	public String getDbSchemaName() {
