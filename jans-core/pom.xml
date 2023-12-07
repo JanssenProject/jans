@@ -46,6 +46,7 @@
 		<module>util</module>
 		<module>model</module>
 		<module>cache</module>
+		<module>message</module>
 		<module>document-store</module>
 		<module>standalone</module>
 		<module>saml</module>

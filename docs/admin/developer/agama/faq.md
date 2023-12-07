@@ -23,14 +23,19 @@ This occurs when no `Finish` statement has been found in the execution of a flow
 
 ### Serialization errors
 
-Agama engine saves the state of a flow every time an [RRF](../../../agama/language-reference.md#rrf) or [RFAC](../../../agama/language-reference.md#rfac) instruction is reached. For this purpose the [KRYO](https://github.com/EsotericSoftware/kryo) library is employed. If kryo is unable to serialize a variable in use by your flow, a serialization error will appear in the screen or in the logs. Normally the problematic (Java) class is logged and this helps reveal the variable that is causing the issue. Note variables that hold "native" Agama values like strings or maps are never troublesome; the problems may originate from values obtained via [Call](../../../agama/language-reference.md#foreign-routines).
+Agama engine saves the state of a flow every time an [RRF](../../../agama/language-reference.md#rrf) or [RFAC](../../../agama/language-reference.md#rfac) instruction is reached. The _State_ can be understood as the set of all variables defined in a flow and their associated values up to certain point. 
 
-To fix a serialization problem, try some of the following:
+Most of times, variables hold basic Agama [values](../../../agama/language-reference.md#data-types) like strings, booleans, numbers, lists or maps, however, more complex values may appear due to Java `Call`s. The engine does its best  to properly serialize these Java objects, nonetheless, this is not always feasible. In these cases, the flow crashes and errors will appear on screen as well as in the server logs.
 
-- Check if the value held by the variable is needed for RRF/RFAC or some upcoming statement. If that's not the case, simply set it to `null` before RRF/RFAC occurs
-- Adjust the given class so it is "serialization" friendlier. With kryo, classes are not required to implement the `java.io.Serializable` interface 
-- Find a replacement for the problematic class
-- As a last resort, set `serializerType` property of the [engine](./engine-bridge-config.md#engine-configuration) to `null`. Note this will switch to standard Java serialization. This setting applies globally for all your flows
+Use the information in the logs to detect the problematic Java class. This would normally allow you to identify the variable that is causing the issue. Now you have several options to proceed:
+
+- Check if the value held by the variable is needed for the given RRF/RFAC or some upcoming statement. If that's not the case, simply set it to `null` before RRF/RFAC occurs
+- Extract only the necessary pieces from the variable, that is, grab only the fields from the object which are of use for the rest of the flow. If they are simple values like strings or numbers, serialization will succeed. Ensure to nullify or overwrite the original variable
+- Adjust the given class so it is "serialization" friendlier. Sometimes, adding a no-args constructor fixes the problem. In other cases, making the class implement the `java.io.Serializable` interface will make it work. The error in the log should provide a hint 
+- Tweak the engine serialization [rules](./engine-bridge-config.md#serialization-rules) so an alternative type of serialization can be used for this particular object 
+- Modify your Java code so an alternative class is used instead
+
+In general, a good practice is to avoid handling complex variables in flows. Letting big object graphs live in the state has a negative impact on performance and also increases the risk of serialization issues.   
 
 ## Libraries and classes added on the fly
 

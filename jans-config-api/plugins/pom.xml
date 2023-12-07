@@ -21,8 +21,8 @@
 		<module>scim-plugin</module>
 		<module>user-mgt-plugin</module>
 		<module>fido2-plugin</module>
-		<module>saml-plugin</module>
-		<module>idp-plugin</module>		
+		<module>kc-saml-plugin</module>
+	
 	</modules>
 
 	<dependencies>
