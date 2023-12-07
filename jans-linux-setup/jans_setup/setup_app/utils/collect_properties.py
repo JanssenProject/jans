@@ -246,6 +246,32 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.install_casa = os.path.exists(os.path.join(Config.jetty_base, 'casa/start.d'))
         Config.install_jans_keycloak_link = os.path.exists(os.path.join(Config.jetty_base, 'jans-keycloak-link/start.d'))
 
+        # jans-idp config
+        jans_idp_config_result = dbUtils.dn_exists("ou=jans-idp,ou=configuration,o=jans")
+        if jans_idp_config_result:
+            jans_idp_config = json.loads(jans_idp_config_result.get('jansConfDyn', '{}'))
+            for config_var, json_prop in (
+                    ('jans_idp_enabled', 'enabled'),
+                    ('jans_idp_realm', 'realm'),
+                    ('jans_idp_client_id', 'clientId'),
+                    ('jans_idp_client_secret', 'clientSecret'),
+                    ('jans_idp_grant_type', 'grantType'),
+                    ('jans_idp_user_name', 'username'),
+                    ('jans_idp_user_password', 'password'),
+                    ('jans_idp_idp_root_dir', 'idpRootDir'),
+                    ('jans_idp_idp_metadata_root_dir', 'idpMetadataRootDir'),
+                    ('jans_idp_idp_metadata_temp_dir', 'idpMetadataTempDir'),
+                    ('jans_idp_idp_metadata_file_pattern', 'idpMetadataFilePattern'),
+                    ('jans_idp_idp_metadata_file', 'idpMetadataFile'),
+                    ('jans_idp_sp_metadata_root_dir', 'spMetadataRootDir'),
+                    ('jans_idp_sp_metadata_temp_dir', 'spMetadataTempDir'),
+                    ('jans_idp_ignore_validation', 'ignoreValidation')
+                    ):
+                if json_prop in jans_idp_config:
+                    print("Exsits", json_prop, jans_idp_config[json_prop])
+                    setattr(Config, config_var, jans_idp_config[json_prop])
+
+
     def save(self):
         if os.path.exists(Config.setup_properties_fn):
             self.backupFile(Config.setup_properties_fn)
