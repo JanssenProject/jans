@@ -80,7 +80,7 @@ public class PostgresMessageProvider extends AbstractMessageProvider<SqConnectio
 
 		try {
 			PostgresMessageConfiguration postgresMessageConfiguration = messageConfiguration
-					.getPostgresMessageConfiguration();
+					.getPostgresConfiguration();
 			Properties connectionProperties = toPostgresProperties(postgresMessageConfiguration);
 			log.debug("Starting PostgresMessageProvider messages ... configuration {}", postgresMessageConfiguration);
 
@@ -281,7 +281,7 @@ public class PostgresMessageProvider extends AbstractMessageProvider<SqConnectio
 
 		public void run() {
 			PostgresMessageConfiguration postgresMessageConfiguration = messageConfiguration
-					.getPostgresMessageConfiguration();
+					.getPostgresConfiguration();
 			int messageWaitMillis = postgresMessageConfiguration.getMessageWaitMillis();
 			int messageSleepThreadTime = postgresMessageConfiguration.getMessageSleepThreadTime();
 
