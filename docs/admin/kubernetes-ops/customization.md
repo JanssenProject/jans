@@ -121,11 +121,12 @@ Templates refers to the common interface layout and style. For example, a banner
       volumeMounts:
         - name: my-custom-jar-volume
           mountPath: /tmp/mycustomjar.sh
-          subPath: mymycustomjar.sh
+          subPath: mycustomjar.sh
       volumes:
         - name: my-custom-jar-volume
           configMap:
             name: my-custom-jar
+            defaultMode: 0755
       customScripts:
         - /tmp/mycustomjar.sh
     ```
