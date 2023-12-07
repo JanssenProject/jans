@@ -51,6 +51,7 @@ public class ApiConstants {
     public static final String SMTP = "/smtp";
     public static final String GRANT_TYPES = "/grant-types";
     public static final String CACHE = "/cache";
+    public static final String MESSAGE = "/message";
     public static final String PERSISTENCE = "/persistence";
     public static final String FEATURE_FLAGS = "/feature-flags";
     public static final String DATABASE = "/database";
@@ -60,6 +61,7 @@ public class ApiConstants {
     public static final String IN_MEMORY = "/in-memory";
     public static final String NATIVE_PERSISTENCE = "/native-persistence";
     public static final String MEMCACHED = "/memcached";
+    public static final String POSTGRES = "/postgres";
     public static final String TEST = "/test";
     public static final String INUM_PATH = "{inum}";
     public static final String ID_PATH = "{id}";
