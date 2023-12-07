@@ -1,0 +1,6 @@
+{
+  "realm": "${jans_idp_realm}",
+  "displayName": "Janssen Realm",
+  "displayNameHtml": "Janssen Realm",
+  "enabled": true
+}
