@@ -1,4 +1,3 @@
-import contextlib
 import json
 import logging.config
 import os
@@ -167,8 +166,20 @@ def main():
 
     configure_logging()
 
-    persistence_setup = PersistenceSetup(manager)
-    persistence_setup.import_ldif_files()
+    with manager.lock.create_lock("casa-setup"):
+        persistence_setup = PersistenceSetup(manager)
+        persistence_setup.import_ldif_files()
+
+    try:
+        manager.secret.to_file(
+            "smtp_jks_base64",
+            "/etc/certs/smtp-keys.pkcs12",
+            decode=True,
+            binary_mode=True,
+        )
+    except ValueError:
+        # likely secret is not created yet
+        logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
 
 
 class PersistenceSetup:

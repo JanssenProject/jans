@@ -25,6 +25,7 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
 
 from utils.static import DialogResult, cli_style, common_strings
+from utils.background_tasks import retrieve_enabled_scripts
 from utils.utils import DialogUtils
 from utils.utils import common_data
 from utils.multi_lang import _
@@ -85,6 +86,8 @@ class Plugin(DialogUtils):
             self.app.create_background_task(self.retrieve_sopes())
 
         self.ssa.init_cli_object()
+        self.app.create_background_task(retrieve_enabled_scripts())
+
 
     async def get_appconfiguration(self) -> None:
         'Coroutine for getting application configuration.'
@@ -987,7 +990,7 @@ class Plugin(DialogUtils):
                      ], style=cli_style.container, width=D())
 
     def save_logging(self) -> None:
-        """This method to Save the Auth Login to server
+        """This method to Save the Auth Loggin to server
         """
         mod_data = self.make_data_from_dialog({'logging':self.oauth_data_container['logging']})
         pathches = []
@@ -1003,7 +1006,8 @@ class Plugin(DialogUtils):
                 data_fn=None,
                 data=pathches
                 )
-            self.schema = response
+            self.app.app_configuration = response
+
             body = HSplit([Label(_("Jans authorization server application configuration logging properties were saved."))])
 
             buttons = [Button(_("Ok"))]

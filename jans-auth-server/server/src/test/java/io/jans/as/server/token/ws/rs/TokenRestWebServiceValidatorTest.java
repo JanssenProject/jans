@@ -11,10 +11,7 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantType;
-import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
-import io.jans.as.server.model.common.RefreshToken;
+import io.jans.as.server.model.common.*;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.mockito.InjectMocks;
@@ -55,6 +52,24 @@ public class TokenRestWebServiceValidatorTest {
 
     @InjectMocks
     private TokenRestWebServiceValidator validator;
+
+    @Test
+    public void validatePKCE_whenCodeVerifierIsValid_shouldPass() {
+        AuthorizationCodeGrant grant = new AuthorizationCodeGrant();
+        grant.setCodeChallenge("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM");
+        grant.setCodeChallengeMethod("s256");
+
+        validator.validatePKCE(grant, "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk", AUDIT_LOG);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validatePKCE_whenCodeVerifierIsNotValid_shouldFail() {
+        AuthorizationCodeGrant grant = new AuthorizationCodeGrant();
+        grant.setCodeChallenge("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM");
+        grant.setCodeChallengeMethod("s256");
+
+        validator.validatePKCE(grant, "invalid_verifier", AUDIT_LOG);
+    }
 
     @Test
     public void validateSessionForTokenExchange_whenSessionIsNull_shouldThrowError() {

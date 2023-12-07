@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.demo.cdi"},{"l":"io.jans.demo.rest"}]

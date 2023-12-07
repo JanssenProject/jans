@@ -208,6 +208,7 @@ class Config:
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
+        self.install_jans_keycloak_link = False
 
         # backward compatibility
         self.os_type = base.os_type
@@ -239,7 +240,7 @@ class Config:
         self.city = None
         self.state = None
         self.admin_email = None
-        self.encoded_ox_ldap_pw = None
+        self.ldap_bind_encoded_pw = None
         self.encode_salt = None
         self.admin_inum = None
 
@@ -298,7 +299,7 @@ class Config:
         self.ldif_agama = os.path.join(self.output_dir, 'agama.ldif')
 
         self.ldif_metric = os.path.join(self.staticFolder, 'metric/o_metric.ldif')
-        self.ldif_site = os.path.join(self.install_dir, 'static/jans-link/o_site.ldif')
+        self.ldif_site = os.path.join(self.install_dir, 'static/site/site.ldif')
         self.ldif_configuration = os.path.join(self.output_dir, 'configuration.ldif')
 
         self.system_profile_update_init = os.path.join(self.output_dir, 'system_profile_init')

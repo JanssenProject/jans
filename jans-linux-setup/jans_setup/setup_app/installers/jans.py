@@ -80,6 +80,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += get_install_string('Install Fido2 Server', 'installFido2')
                 txt += get_install_string('Install Scim Server', 'install_scim_server')
                 txt += get_install_string('Install Jans Link Server', 'install_jans_link')
+                txt += get_install_string('Install Jans KC Link Server', 'install_jans_keycloak_link')
                 txt += get_install_string('Install Jans Casa Server', 'install_casa')
                 txt += get_install_string('Install Jans SAML', 'install_jans_saml')
 
@@ -636,13 +637,15 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-fido2', 'installFido2'),
                         ('jans-link', 'install_jans_link'),
                         ('jans-scim', 'install_scim_server'),
+                        ('saml', 'install_jans_saml'),
+                        ('jans-keycloak-link', 'install_jans_keycloak_link'),
                         ]
         service_listr = service_list[:]
         service_listr.reverse()
         for i, service in enumerate(service_listr):
             order_var_str = 'order_{}_service'.format(service[0].replace('-','_'))
             for sservice in (service_listr[i+1:]):
-                if getattr(Config, sservice[1]):
+                if Config.get(sservice[1]):
                     Config.templateRenderingDict[order_var_str] = sservice[0]+'.service'
                     break
                 else:

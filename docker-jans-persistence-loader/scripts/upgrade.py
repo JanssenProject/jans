@@ -740,6 +740,23 @@ class Upgrade:
                 entry.attrs["jansScope"].append(ssa_scope)
                 should_update = True
 
+        # use token reference
+        try:
+            attrs = json.loads(entry.attrs["jansAttrs"])
+        except TypeError:
+            attrs = entry.attrs["jansAttrs"]
+        finally:
+            if attrs["runIntrospectionScriptBeforeJwtCreation"] is True:
+                attrs["runIntrospectionScriptBeforeJwtCreation"] = False
+                should_update = True
+            if "inum=2D3E.5A04,ou=scripts,o=jans" not in attrs["updateTokenScriptDns"]:
+                attrs["updateTokenScriptDns"].append("inum=2D3E.5A04,ou=scripts,o=jans")
+                should_update = True
+            if "inum=A44E-4F3D,ou=scripts,o=jans" in attrs["introspectionScripts"]:
+                attrs["introspectionScripts"].remove("inum=A44E-4F3D,ou=scripts,o=jans")
+                should_update = True
+            entry.attrs["jansAttrs"] = json.dumps(attrs)
+
         if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
@@ -800,6 +817,11 @@ class Upgrade:
                     entry.attrs["jansSmtpConf"][0] = json.dumps(new_smtp_conf)
                     should_update = True
 
+        scim_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
+        if as_boolean(entry.attrs["jansScimEnabled"]) != scim_enabled:
+            entry.attrs["jansScimEnabled"] = scim_enabled
+            should_update = True
+
         if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
@@ -843,17 +865,25 @@ def _transform_auth_errors_config(conf):
         })
         should_update = True
 
+    if "invalid_ssa_metadata" not in ssa_errors:
+        conf["ssa"].append({
+            "id": "invalid_ssa_metadata",
+            "description": "The value of one of the SSA Metadata fields is invalid and the server has rejected this request. Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter of a SSA's Metadata.",
+            "uri": None,
+        })
+        should_update = True
+
     # dpop as part of token errors
     dpop_errors = [
         {
-             "id":"use_dpop_nonce",
-             "description":"Authorization server requires nonce in DPoP proof.",
-             "uri": None
+            "id": "use_dpop_nonce",
+            "description": "Authorization server requires nonce in DPoP proof.",
+            "uri": None
         },
         {
-             "id":"use_new_dpop_nonce",
-             "description":"Authorization server requires new nonce in DPoP proof.",
-             "uri": None
+            "id": "use_new_dpop_nonce",
+            "description": "Authorization server requires new nonce in DPoP proof.",
+            "uri": None
         },
     ]
     token_err_ids = [err["id"] for err in conf["token"]]
@@ -880,9 +910,13 @@ def _transform_auth_errors_config(conf):
 def _transform_auth_static_config(conf):
     should_update = False
 
-    if "ssa" not in conf["baseDn"]:
-        conf["baseDn"]["ssa"] = "ou=ssa,o=jans"
-        should_update = True
+    for key, dn in [
+        ("ssa", "ou=ssa,o=jans"),
+        ("archivedJwks", "ou=archived_jwks,o=jans"),
+    ]:
+        if key not in conf["baseDn"]:
+            conf["baseDn"][key] = dn
+            should_update = True
     return conf, should_update
 
 

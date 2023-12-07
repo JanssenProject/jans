@@ -7,7 +7,7 @@
 package io.jans.link.test;
 
 import io.jans.link.service.config.ConfigurationFactory;
-import io.jans.link.timer.CacheRefreshTimer;
+import io.jans.link.timer.JansLinkTimer;
 import io.jans.orm.PersistenceEntryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public final class LdapSample {
 
         //gluucacherefresh
         //GluuConfiguration GluuConfiguration = new GluuConfiguration();
-        CacheRefreshTimer cacheRefreshTimer = new CacheRefreshTimer();
+        JansLinkTimer cacheRefreshTimer = new JansLinkTimer();
         cacheRefreshTimer.setLdapEntryManager(entryManager);
         ConfigurationFactory configurationFactory = new ConfigurationFactory();
         //configurationFactory.setPersistenceEntryManagerInstance(entryManager);

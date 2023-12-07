@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-casa-v1.0.19...jans-casa-v1.0.20) (2023-11-08)
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+## 1.0.19 (2023-10-11)
+
+
+### Bug Fixes
+
+* **jans-casa:** jans-casa installation issues ([#6198](https://github.com/JanssenProject/jans/issues/6198)) ([2775d6f](https://github.com/JanssenProject/jans/commit/2775d6f2b25e0bc62291b98d4db15856ff3ee48e))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
 ## [5.0.0-18](https://github.com/GluuFederation/flex/compare/casa-v5.0.0-16...casa-v5.0.0-18) (2023-09-23)
 
 

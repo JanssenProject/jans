@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.19...jans-config-api-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* adding scopes in config-api endpoint access token based on tags (admin-ui) [#6413](https://github.com/JanssenProject/jans/issues/6413) ([#6414](https://github.com/JanssenProject/jans/issues/6414)) ([643ba07](https://github.com/JanssenProject/jans/commit/643ba0780b5bf9f7383357075adb505774a39a27))
+* changing names of clients used in admin-ui [#1375](https://github.com/JanssenProject/jans/issues/1375) ([#6326](https://github.com/JanssenProject/jans/issues/6326)) ([9e63acb](https://github.com/JanssenProject/jans/commit/9e63acb28ee4354e361b6b8d3d7aabe0f5f94610))
+* **config-api:** open api spec changes for fetch custom script type endpoint ([#6290](https://github.com/JanssenProject/jans/issues/6290)) ([a8884f3](https://github.com/JanssenProject/jans/commit/a8884f39ee4eea3ef65d7cd41120343201d2b3e6))
+* **jans-config-api:** need API to fetch list containing all script-types from persistence ([#6276](https://github.com/JanssenProject/jans/issues/6276)) ([6958f7b](https://github.com/JanssenProject/jans/commit/6958f7b322e26b245e438939808f11c64c9608e3))
+
+
+### Bug Fixes
+
+* able to add duplicate role [#1432](https://github.com/JanssenProject/jans/issues/1432) ([#6465](https://github.com/JanssenProject/jans/issues/6465)) ([2ca4cc2](https://github.com/JanssenProject/jans/commit/2ca4cc2e334d7d86a1d00770d465626b1bd6dd97))
+* generate latest openApi spec from code [#6444](https://github.com/JanssenProject/jans/issues/6444) ([#6445](https://github.com/JanssenProject/jans/issues/6445)) ([23d40fa](https://github.com/JanssenProject/jans/commit/23d40fad93a58146ece961d053b1c55b525ffc23))
+* incorrect /license/details reponse (admin-ui) [#6418](https://github.com/JanssenProject/jans/issues/6418) ([#6419](https://github.com/JanssenProject/jans/issues/6419)) ([9d5212e](https://github.com/JanssenProject/jans/commit/9d5212ef7aa5efa35d00657bdacbabbc7d48b1e1))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+
+### Documentation
+
+* fixes ([#5984](https://github.com/JanssenProject/jans/issues/5984)) ([8b0cbfb](https://github.com/JanssenProject/jans/commit/8b0cbfbb4ab4731a41bdfc77321b287df3cdd805))
+
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.18...jans-config-api-v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **agama:** add support for autoconfiguration  ([#6210](https://github.com/JanssenProject/jans/issues/6210)) ([18f15da](https://github.com/JanssenProject/jans/commit/18f15da64ec4ccf453b03ada92727ef1114a2043))
+* **config-api, keycloak:** saml plugin to create trust client in DB and keycloak storage provider to jans store ([#6155](https://github.com/JanssenProject/jans/issues/6155)) ([c4f5034](https://github.com/JanssenProject/jans/commit/c4f50343ef5f991cc3c0184cef0fa83ff1d7f03c))
+* keycloak refactoring referred to Issue [#5330](https://github.com/JanssenProject/jans/issues/5330) review ([#6157](https://github.com/JanssenProject/jans/issues/6157)) ([7319120](https://github.com/JanssenProject/jans/commit/73191202f2e39bf040749b69a31d01bdfbcec8eb))
+
+
+### Bug Fixes
+
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
+
+### Documentation
+
+* update swagger descriptor [#6192](https://github.com/JanssenProject/jans/issues/6192) ([#6211](https://github.com/JanssenProject/jans/issues/6211)) ([0d34524](https://github.com/JanssenProject/jans/commit/0d3452483ea8ed011a9dd9583baac2a211e862d3))
+
 ## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.17...jans-config-api-v1.0.18) (2023-09-23)
 
 

@@ -146,8 +146,7 @@ public class ConfigurationHandler extends JobListenerSupport {
                     } else {
                         logger.warn("Retrying in {} seconds", RETRY_INTERVAL);
                     }
-                } else {
-                    computePassResetable();
+                } else {                    
                     extManager.scan();
                     computeAcrPluginMapping();
                     computeCorsOrigins();
@@ -214,15 +213,6 @@ public class ConfigurationHandler extends JobListenerSupport {
 
     private void computeLoggingLevel() {
         settings.setLogLevel(logService.updateLoggingLevel(settings.getLogLevel()));
-    }
-
-    private void computePassResetable() {
-
-        if (settings.isEnablePassReset() && persistenceService.isBackendLdapEnabled()) {
-            logger.error("Pass reset set automatically to false. Check if you are using a backend LDAP");
-            settings.setEnablePassReset(false);
-        }
-
     }
 
     private void computeAcrPluginMapping() {

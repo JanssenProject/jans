@@ -16,6 +16,15 @@
       "type": "STRING(MAX)"
     }
   },
+  "jansAttr:description": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "pgsql": {
+      "size": 768,
+      "type": "VARCHAR"
+    }
+  },
   "displayName": {
     "mysql": {
       "size": 128,

@@ -41,7 +41,7 @@ spec:
           {{- include "opendj.usr-envs" $ | indent 12 }}
           {{- include "opendj.usr-secret-envs" $ | indent 12 }}
         lifecycle:
-{{- toYaml .Values.lifecycle | nindent 10 }}        
+{{- toYaml .Values.lifecycle | nindent 10 }}
         envFrom:
         - configMapRef:
             name: {{ $.Release.Name }}-config-cm
@@ -67,6 +67,18 @@ spec:
         {{- with $.Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
         {{- end }}
+          - name: ldap-certkey
+            mountPath: {{ .Values.global.cnLdapCertFile }}
+            subPath: opendj.crt
+          - name: ldap-certkey
+            mountPath: {{ .Values.global.cnLdapKeyFile }}
+            subPath: opendj.key
+          - name: ldap-pass
+            mountPath: {{ .Values.global.cnLdapPasswordFile }}
+            subPath: ldap_password
+          - name: ldap-pass
+            mountPath: {{ .Values.global.cnLdapTruststorePasswordFile }}
+            subPath: ldap_truststore_password
         livenessProbe:
 {{- toYaml $.Values.livenessProbe | nindent 10 }}
         readinessProbe:
@@ -79,6 +91,13 @@ spec:
         resources:
 {{- toYaml $.Values.resources | nindent 10 }}
         {{- end }}
+      volumes:
+      - name: ldap-pass
+        secret:
+          secretName: {{ .Release.Name }}-ldap-pass
+      - name: ldap-certkey
+        secret:
+          secretName: {{ .Release.Name }}-ldap-certkey
   volumeClaimTemplates:
   - metadata:
       name: opendj-volume

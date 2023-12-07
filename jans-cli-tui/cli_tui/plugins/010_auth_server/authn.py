@@ -353,7 +353,7 @@ class Authn(DialogUtils):
             data = self.make_data_from_dialog({'script': dialog.body})
             auth_script['level'] = data['level']
             auth_script['description'] = data['description']
-            auth_script['configurationProperties'].clear()
+            auth_script['configurationProperties'] = []
             auth_script['revision'] += 1
             
             for prop_data in self.script_config_properties_container.data:

@@ -97,7 +97,10 @@ if 'SETUP_BRANCH' not in base.current_app.app_info:
 if argsp.java_version:
     base.current_app.app_info['AMAZON_CORRETTO_VERSION'] = argsp.java_version
 
-base.current_app.app_info['jans_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
+if base.argsp.jans_app_version:
+    base.current_app.app_info['jans_version'] = base.argsp.jans_app_version
+else:
+    base.current_app.app_info['jans_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
 
 
 # download pre-required apps
@@ -141,6 +144,7 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.fido import FidoInstaller
     from setup_app.installers.eleven import ElevenInstaller
     from setup_app.installers.jans_link import JansLinkInstaller
+    from setup_app.installers.jans_keycloak_link import JansKCLinkInstaller
     from setup_app.installers.jans_casa import CasaInstaller
 
     from setup_app.installers.jans_saml import JansSamlInstaller
@@ -265,6 +269,7 @@ if Config.profile == 'jans':
     elevenInstaller = ElevenInstaller()
     casa_installer = CasaInstaller()
     jans_link_installer = JansLinkInstaller()
+    jans_keycloak_link_installer = JansKCLinkInstaller()
     jans_saml_installer = JansSamlInstaller()
 
 jansCliInstaller = JansCliInstaller()
@@ -452,6 +457,10 @@ def main():
                         not Config.installed_instance and Config.get(jans_link_installer.install_var)):
                     jans_link_installer.start_installation()
 
+                if (Config.installed_instance and jans_keycloak_link_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jans_keycloak_link_installer.install_var)):
+                    jans_keycloak_link_installer.start_installation()
+
                 if (Config.installed_instance and jansCliInstaller.install_var in Config.addPostSetupService) or (
                             not Config.installed_instance and Config.get(jansCliInstaller.install_var)):
                         jansCliInstaller.start_installation()
@@ -460,11 +469,6 @@ def main():
                 if (Config.installed_instance and jans_saml_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jans_saml_installer.install_var)):
                     jans_saml_installer.start_installation()
-
-
-            if Config.install_jans_cli:
-                jansCliInstaller.start_installation()
-                jansCliInstaller.configure()
 
             # if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
             #    oxdInstaller.start_installation()
@@ -478,11 +482,13 @@ def main():
 
             jansInstaller.post_install_tasks()
 
+            jansInstaller.reload_daemon()
             for service in jansProgress.services:
                 if service['app_type'] == static.AppType.SERVICE:
                     jansProgress.progress(PostSetup.service_name,
                                           "Starting {}".format(service['name'].replace('-', ' ').replace('_', ' ').title()))
                     time.sleep(2)
+                    service['object'].enable()
                     service['object'].stop()
                     service['object'].start()
 
@@ -505,8 +511,8 @@ def main():
         do_installation()
         print('\n', static.colors.OKGREEN)
         if Config.install_config_api or Config.install_scim_server:
-            msg.installation_completed += "To manage your Janssen Identity Provider:\n"
             if Config.install_config_api:
+                msg.installation_completed += "To manage your Janssen Identity Provider:\n"
                 msg.installation_completed += '/opt/jans/jans-cli/config-cli-tui.py'
                 if base.current_app.profile == static.SetupProfiles.OPENBANKING:
                     ca_dir = os.path.join(Config.output_dir, 'CA')
@@ -514,8 +520,9 @@ def main():
                     key_fn = os.path.join(ca_dir, 'client.key')
                     msg.installation_completed += ' -CC {} -CK {}'.format(crt_fn, key_fn)
                 msg.installation_completed +="\n"
-            #if  Config.profile == 'jans' and Config.install_scim_server:
-            #    msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
+
+        if Config.install_casa:
+            msg.installation_completed += f"Browse https://{Config.hostname}/jans-casa\n"
 
         msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(
             Config.hostname)

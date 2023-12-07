@@ -1,5 +1,6 @@
 package io.jans.as.server.token.ws.rs;
 
+import com.google.common.base.Strings;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
@@ -15,6 +16,7 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
+import io.jans.as.server.model.common.AuthorizationCodeGrant;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.RefreshToken;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static io.jans.as.model.config.Constants.*;
+import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -56,6 +59,27 @@ public class TokenRestWebServiceValidator {
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
+
+    public void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier, OAuth2AuditLog oAuth2AuditLog) {
+        log.trace("PKCE validation, code_verifier: {}, code_challenge: {}, method: {}",
+                codeVerifier, grant.getCodeChallenge(), grant.getCodeChallengeMethod());
+
+        if (isTrue(appConfiguration.getRequirePkce()) && (Strings.isNullOrEmpty(codeVerifier) || Strings.isNullOrEmpty(grant.getCodeChallenge()))) {
+            if (log.isErrorEnabled()) {
+                log.error("PKCE is required but code_challenge or code verifier is blank, grantId: {}, codeVerifier: {}, codeChallenge: {}", grant.getGrantId(), codeVerifier, grant.getCodeChallenge());
+            }
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "PKCE check fails. Code challenge does not match to request code verifier."), oAuth2AuditLog));
+        }
+
+        if (Strings.isNullOrEmpty(grant.getCodeChallenge()) && Strings.isNullOrEmpty(codeVerifier)) {
+            return; // if no code challenge then it's valid, no PKCE check
+        }
+
+        if (!CodeVerifier.matched(grant.getCodeChallenge(), grant.getCodeChallengeMethod(), codeVerifier)) {
+            log.error("PKCE check fails. Code challenge does not match to request code verifier, grantId: {}, codeVerifier: {}", grant.getGrantId(), codeVerifier);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "PKCE check fails. Code challenge does not match to request code verifier."), oAuth2AuditLog));
+        }
+    }
 
     public void validateParams(String grantType, String code,
                                String redirectUri, String refreshToken, OAuth2AuditLog auditLog) {

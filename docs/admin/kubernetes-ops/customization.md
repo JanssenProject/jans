@@ -79,6 +79,30 @@ Templates refers to the common interface layout and style. For example, a banner
 2. Place a modified `template.xhtml` in the above location which will override the [default template file](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml) from the war
 
 
+## Custom Jar file for scripts 
+
+1.  Create a configmap with the custom jar file: 
+    `kubectl -n <namespace> create cm my-custom-jar --from-file=mycustom.jar`
+
+1.  Mount the configmap in your values.yaml under `auth-server.volumes` and `auth-server.volumeMounts`
+
+    ```
+    auth-server:
+      volumeMounts:
+        - name: my-custom-jar-volume
+          mountPath: /opt/jans/jetty/jans-auth/custom/libs/mycustom.jar
+          subPath: mycustom.jar
+      volumes:
+        - name: my-custom-jar-volume
+          configMap:
+            name: my-custom-jar
+    ```
+    
+1.  Run helm install or helm upgrade if Jans has been already installed.
+    ```bash
+    helm upgrade <helm-release-name> janssen/janssen -n <namespace> -f values.yaml --version=1.0.x
+    ```
+
 ## Customized pages examples
 
 ### Custom Login page

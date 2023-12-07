@@ -73,7 +73,7 @@ The following environment variables are supported by the container:
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 - `CN_CONFIG_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
-- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, `user-mgt`, `jans-link`). Note that unknown plugin name will be ignored.
+- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, `user-mgt`, `jans-link`, `saml`). Note that unknown plugin name will be ignored.
 - `CN_TOKEN_SERVER_CERT_FILE`: Path to token server certificate (default to `/etc/certs/token_server.crt`).
 - `CN_TOKEN_SERVER_BASE_HOSTNAME`: Hostname of token server (default to empty string).
 - `CN_ADMIN_UI_PLUGIN_LOGGERS`: Custom logging configuration for AdminUI plugin in JSON-string format with hash type (see [Configure plugin loggers](#configure-plugin-loggers) section for details).

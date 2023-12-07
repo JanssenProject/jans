@@ -48,7 +48,7 @@ public class HOTPAlgorithmService implements IOTPAlgorithm {
         String secretKeyBase32 = BaseEncoding.base32().omitPadding().encode(secretKey);
         OTPKey otpKey = new OTPKey(secretKeyBase32, OTPType.HOTP);
 
-        OTPAuthURIBuilder uribe = OTPAuthURIBuilder.fromKey(otpKey).label(displayName);
+        OTPAuthURIBuilder uribe = OTPAuthURIBuilder.fromKey(otpKey).label(displayName.replace(':', ' '));
         uribe = uribe.issuer(issuer).digits(conf.getDigits());
 
         logger.trace("Generating secret key URI");

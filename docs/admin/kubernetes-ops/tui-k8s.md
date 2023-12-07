@@ -30,8 +30,8 @@ tags:
 2. Now we can grab the FQDN, client-id, client-secret, and connect using the following commands:
     ```
     FQDN= #Add your FQDN here
-    TUI_CLIENT_ID=$(kubectl get cm cn -n <namespace> --template={{.data.jca_client_id}})
-    TUI_CLIENT_SECRET=$(kubectl get secret cn -n <namespace> --template={{.data.jca_client_pw}} | base64 -d)
+    TUI_CLIENT_ID=$(kubectl get cm cn -n <namespace> --template={{.data.tui_client_id}})
+    TUI_CLIENT_SECRET=$(kubectl get secret cn -n <namespace> --template={{.data.tui_client_pw}} | base64 -d)
     #add -noverify if your FQDN is not registered
     python3 jans-cli-tui-linux-ubuntu-X86-64.pyz --host $FQDN --client-id $TUI_CLIENT_ID --client-secret $TUI_CLIENT_SECRET
     ```

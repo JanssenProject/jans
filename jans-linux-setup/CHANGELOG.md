@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.19...jans-linux-setup-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* **jans-auth-server:** allow revoke any token - explicitly allow by config and scope [#6381](https://github.com/JanssenProject/jans/issues/6381) ([#6412](https://github.com/JanssenProject/jans/issues/6412)) ([47cbee9](https://github.com/JanssenProject/jans/commit/47cbee9cf917f0f79c53e9e0cfe1e2beab3108bc))
+* **jans-auth-server:** enabled authorization_challenge scope for dynamic registration [#6277](https://github.com/JanssenProject/jans/issues/6277) ([#6278](https://github.com/JanssenProject/jans/issues/6278)) ([f46fa69](https://github.com/JanssenProject/jans/commit/f46fa695cea73a4d98bd8076c85bf21f819e1fe6))
+* **jans-linux-setup:** display casa brwose url after setup ([#6315](https://github.com/JanssenProject/jans/issues/6315)) ([ef67b12](https://github.com/JanssenProject/jans/commit/ef67b12f1dccee6d49e7b9fa6c5a76814bb17273))
+* **jans-linux-setup:** setup Jans-keycloak-link files ([#6281](https://github.com/JanssenProject/jans/issues/6281)) ([36c8c21](https://github.com/JanssenProject/jans/commit/36c8c21191b99446676bbf21b61eb78c01adda3a))
+
+
+### Bug Fixes
+
+* **jans-linux-setup:** change oxtrust to Janssen ([#6384](https://github.com/JanssenProject/jans/issues/6384)) ([7126c1c](https://github.com/JanssenProject/jans/commit/7126c1c004a40eef415ed0c9d293a3e396caa95f))
+* **jans-linux-setup:** enable agama by default ([#6451](https://github.com/JanssenProject/jans/issues/6451)) ([3c14dd9](https://github.com/JanssenProject/jans/commit/3c14dd988d1977131e5019978b434d6fa5a569cc))
+* **jans-linux-setup:** jans-saml dependencies ([#6379](https://github.com/JanssenProject/jans/issues/6379)) ([7da86e0](https://github.com/JanssenProject/jans/commit/7da86e0f0933d626776ffad39e5077b552438a18))
+* **jans-linux-setup:** KC install fixes ([#6311](https://github.com/JanssenProject/jans/issues/6311)) ([32ad25d](https://github.com/JanssenProject/jans/commit/32ad25d144ac4010a9dbacfd8e34a28d0bd80a3c))
+* **jans-linux-setup:** kc maven urls ([#6386](https://github.com/JanssenProject/jans/issues/6386)) ([e82c3a2](https://github.com/JanssenProject/jans/commit/e82c3a2aca88d1bef047301b1402256c1772b5a2))
+* **jans-linux-setup:** saml install issues ([#6407](https://github.com/JanssenProject/jans/issues/6407)) ([2c1b94c](https://github.com/JanssenProject/jans/commit/2c1b94cf1602a0b212525c09ae570e49c2e7d7fb))
+* **jans-linux-setup:** selected idp ([#6424](https://github.com/JanssenProject/jans/issues/6424)) ([7b60262](https://github.com/JanssenProject/jans/commit/7b602628ccf96e8b7fd080a6e08ade15daa33a05))
+* **jans-linux-setup:** super gluu credentials url ([#6330](https://github.com/JanssenProject/jans/issues/6330)) ([a24cd67](https://github.com/JanssenProject/jans/commit/a24cd6712973df2aef2b9e1c46f1dfe5d9029e4c))
+* **jans-linux-setup:** super gluu credentials url for test data ([#6333](https://github.com/JanssenProject/jans/issues/6333)) ([04582fa](https://github.com/JanssenProject/jans/commit/04582fa2a7edbb8eed0805cb1fabdcd95482b83f))
+* **jans-linux-setup:** typo in filename of casa plugin twilio ([#6471](https://github.com/JanssenProject/jans/issues/6471)) ([c0549f6](https://github.com/JanssenProject/jans/commit/c0549f6ad1e6963358557047098c1f17435fb67a))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+* registration_uri for super gluu script defaults to an /identity ([#6369](https://github.com/JanssenProject/jans/issues/6369)) ([28c4714](https://github.com/JanssenProject/jans/commit/28c47141a22a1139762655e3ccab6cc34cf7798f)), closes [#6183](https://github.com/JanssenProject/jans/issues/6183)
+
+## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.18...jans-linux-setup-v1.0.19) (2023-10-11)
+
+
+### Features
+
+* **config-api, keycloak:** saml plugin to create trust client in DB and keycloak storage provider to jans store ([#6155](https://github.com/JanssenProject/jans/issues/6155)) ([c4f5034](https://github.com/JanssenProject/jans/commit/c4f50343ef5f991cc3c0184cef0fa83ff1d7f03c))
+* **jans-auth-server:** added "authorization_challenge" scope enforcement [#5856](https://github.com/JanssenProject/jans/issues/5856) ([#6216](https://github.com/JanssenProject/jans/issues/6216)) ([b3db5c8](https://github.com/JanssenProject/jans/commit/b3db5c8cba829fc3e6aec350af7c0b4e5cf068c6))
+* **jans-auth:** new lifetime attribute in ssa ([#6214](https://github.com/JanssenProject/jans/issues/6214)) ([b049e33](https://github.com/JanssenProject/jans/commit/b049e334bbe9d0c3b0214694e9fd6501019b8530))
+* **jans-linux-setup:** hide saml setup for developers ([#6225](https://github.com/JanssenProject/jans/issues/6225)) ([7b8bae6](https://github.com/JanssenProject/jans/commit/7b8bae6c746492f9bdfc18eb0c43467ac831da56))
+
+
+### Bug Fixes
+
+* **jans-casa:** jans-casa installation issues ([#6198](https://github.com/JanssenProject/jans/issues/6198)) ([2775d6f](https://github.com/JanssenProject/jans/commit/2775d6f2b25e0bc62291b98d4db15856ff3ee48e))
+* **jans-linux-setup:** casa url ([#6187](https://github.com/JanssenProject/jans/issues/6187)) ([0df0c86](https://github.com/JanssenProject/jans/commit/0df0c86a684827a2fb932c1fd80d6cf472d3b355))
+* **jans-linux-setup:** post setup fix for config-api ([#6217](https://github.com/JanssenProject/jans/issues/6217)) ([ccfd8b1](https://github.com/JanssenProject/jans/commit/ccfd8b14001ae53fdd8d1e06125c4dba9a4bbc22))
+* **jans-linux-setup:** post-setup install issues ([#6212](https://github.com/JanssenProject/jans/issues/6212)) ([9379e66](https://github.com/JanssenProject/jans/commit/9379e66d3e095cbd06180aa36016c15e398db8c0))
+* **jans-linux-setup:** script hide attribute ([#6181](https://github.com/JanssenProject/jans/issues/6181)) ([b4711cd](https://github.com/JanssenProject/jans/commit/b4711cd1074dccc0b8aad81fc4e4bd238c8a516f))
+* prepare for 1.0.19 release ([554fd43](https://github.com/JanssenProject/jans/commit/554fd434f624c4b4be3b2031c472177709da8966))
+
 ## [1.0.18](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.17...jans-linux-setup-v1.0.18) (2023-09-23)
 
 

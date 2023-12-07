@@ -12,5 +12,5 @@ package io.jans.link.model.config;
  * @author Yuriy Movchan
  * @version 04/12/2017
  */
-public interface Configuration {
+public interface Configuration extends io.jans.link.model.config.shared.Configuration {
 }
