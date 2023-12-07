@@ -672,9 +672,9 @@ paths:
       requestBody:
         description: Trust Relationship object
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TrustRelationship'
+              $ref: '#/components/schemas/TrustRelationshipForm'
             examples:
               Request example:
                 description: Request example
