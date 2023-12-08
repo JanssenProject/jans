@@ -35,6 +35,16 @@ spec:
         fsGroup: 1000
       containers:
       - name: {{ include "opendj.name" $ }}
+        {{- if .Values.customScripts }}
+        command:
+          - /bin/sh
+          - -c
+          - |
+              {{- with .Values.customScripts }}
+              {{- toYaml . | replace "- " "" | nindent 14}}
+              {{- end }}
+              /app/scripts/entrypoint.sh
+        {{- end}}
         imagePullPolicy: {{ $.Values.image.pullPolicy }}
         image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
         env:
