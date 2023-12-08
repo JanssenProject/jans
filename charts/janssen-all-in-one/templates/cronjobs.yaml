@@ -35,6 +35,16 @@ spec:
         {{- end }}
           containers:
             - name: {{ include "janssen-all-in-one.name" . }}-as-key-rotation
+              {{- if .Values.customScripts }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                    {{- with .Values.customScripts }}
+                    {{- toYaml . | replace "- " "" | nindent 20}}
+                    {{- end }}
+                    /app/bin/entrypoint.sh
+              {{- end}}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               env:
                 {{- include "janssen-all-in-one.usr-envs" . | indent 16 }}
