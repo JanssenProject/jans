@@ -110,6 +110,14 @@
       "type": "STRING(MAX)"
     }
   },
+  "jansMessageConf": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
   "jansConfApp": {
     "mysql": {
       "type": "TEXT"

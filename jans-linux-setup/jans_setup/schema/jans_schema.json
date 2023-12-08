@@ -2546,6 +2546,18 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "Message configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansMessageConf"
+      ],
+      "json": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "Path to external log4j2.xml",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3952,6 +3964,7 @@
         "jansLogViewerConfig",
         "jansLogConfigLocation",
         "jansCacheConf",
+        "jansMessageConf",
         "jansDocStoreConf",
         "jansSoftVer",
         "userPassword",

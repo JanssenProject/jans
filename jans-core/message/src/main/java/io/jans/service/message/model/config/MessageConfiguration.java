@@ -10,7 +10,6 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.jans.service.cache.RedisConfiguration;
 import jakarta.enterprise.inject.Vetoed;
 
 /**
@@ -26,9 +25,9 @@ public class MessageConfiguration implements Serializable {
 
 	private NullMessageConfiguration nullConfiguration = new NullMessageConfiguration();
 
-	private RedisConfiguration redisConfiguration;
+	private RedisMessageConfiguration redisConfiguration;
 
-	private PostgresMessageConfiguration postgresMessageConfiguration;
+	private PostgresMessageConfiguration postgresConfiguration;
 
 	public MessageProviderType getMessageProviderType() {
 		return messageProviderType;
@@ -46,26 +45,26 @@ public class MessageConfiguration implements Serializable {
 		this.nullConfiguration = nullConfiguration;
 	}
 
-	public PostgresMessageConfiguration getPostgresMessageConfiguration() {
-		return postgresMessageConfiguration;
+	public PostgresMessageConfiguration getPostgresConfiguration() {
+		return postgresConfiguration;
 	}
 
-	public void setPostgresMessageConfiguration(PostgresMessageConfiguration postgresMessageConfiguration) {
-		this.postgresMessageConfiguration = postgresMessageConfiguration;
+	public void setPostgresConfiguration(PostgresMessageConfiguration postgresMessageConfiguration) {
+		this.postgresConfiguration = postgresMessageConfiguration;
 	}
 
-	public RedisConfiguration getRedisConfiguration() {
+	public RedisMessageConfiguration getRedisConfiguration() {
 		return redisConfiguration;
 	}
 
-	public void setRedisConfiguration(RedisConfiguration redisConfiguration) {
+	public void setRedisConfiguration(RedisMessageConfiguration redisConfiguration) {
 		this.redisConfiguration = redisConfiguration;
 	}
 
 	@Override
 	public String toString() {
-		return "CacheConfiguration{" + "cacheProviderType=" + messageProviderType + ", nullConfiguration="
-				+ nullConfiguration + ", redisConfiguration=" + redisConfiguration + ", postgresMessageConfiguration="
-				+ postgresMessageConfiguration + '}';
+		return "MessageConfiguration [messageProviderType=" + messageProviderType + ", nullConfiguration="
+				+ nullConfiguration + ", redisConfiguration=" + redisConfiguration + ", postgresConfiguration="
+				+ postgresConfiguration + "]";
 	}
 }
