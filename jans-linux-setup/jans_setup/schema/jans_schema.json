@@ -3964,7 +3964,7 @@
         "jansLogViewerConfig",
         "jansLogConfigLocation",
         "jansCacheConf",
-        "jansMessageConf"
+        "jansMessageConf",
         "jansDocStoreConf",
         "jansSoftVer",
         "userPassword",
