@@ -7858,6 +7858,8 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        selected:
+          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
@@ -7871,8 +7873,6 @@ components:
         userCanAccess:
           type: boolean
         whitePagesCanView:
-          type: boolean
-        selected:
           type: boolean
         baseDn:
           type: string
@@ -8673,6 +8673,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8682,8 +8684,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8799,11 +8799,6 @@ components:
           type: string
         scriptsPath:
           type: string
-        serializerType:
-          type: string
-          enum:
-          - KRYO
-          - FST
         maxItemsLoggedInCollections:
           type: integer
           format: int32
@@ -8819,6 +8814,12 @@ components:
           type: string
         bridgeScriptPage:
           type: string
+        serializeRules:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
         defaultResponseHeaders:
           type: object
           additionalProperties:
@@ -10128,10 +10129,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

@@ -140,13 +140,11 @@ public class IdentityProvider extends Entry implements Serializable {
     @AttributeName(name = "jansValidationLog")
     private List<String> validationLog;
     
-    
+    @Hidden
     @JsonObject
     @AttributeName(name = "jansSAMLidpConfDyn")
     Map<String, String> config = new HashMap<>();
     
-    
-
     public String getInum() {
         return inum;
     }

@@ -13,7 +13,6 @@ import io.jans.service.timer.QuartzSchedulerManager;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.BeforeDestroyed;
-import jakarta.enterprise.context.Initialized;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
@@ -49,9 +48,8 @@ public class SamlAppInitializer {
     MetadataValidationTimer metadataValidationTimer;
 
 
-    public void onAppStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
+    public void onAppStart() {
         log.info("=============  Initializing SAML Plugin ========================");
-        log.debug("init:{}", init);
 
         // configuration
         this.samlConfigurationFactory.create();
