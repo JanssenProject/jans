@@ -77,7 +77,7 @@ jobs:
           DIRECTORIES_CHANGED=$(gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$DEFAULT_ALL")
           if [[ "$DIRECTORIES_CHANGED" =~ "${{ matrix.docker-images }}" ]]; then
             echo "A change in this images directory has occurred"
-            echo ::set-output name=build::${BUILD}
+            echo "build=${BUILD}" >> $GITHUB_OUTPUT
           fi
 
       - name: Install dependencies
@@ -131,9 +131,9 @@ jobs:
           else
             echo "$CN_VERSION"
           fi
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=build::${BUILD}
-          echo ::set-output name=dockerfilelocation::${DOCKER_FILE_LOCATION}
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "build=${BUILD}" >> $GITHUB_OUTPUT
+          echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
 
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
       - name: Setup Python 3.7

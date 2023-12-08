@@ -21,6 +21,7 @@ import io.jans.service.cache.RedisProvider;
 import io.jans.service.cache.RedisProviderFactory;
 import io.jans.service.message.model.config.MessageConfiguration;
 import io.jans.service.message.model.config.MessageProviderType;
+import io.jans.service.message.model.config.RedisMessageConfiguration;
 import io.jans.service.message.pubsub.PubSubInterface;
 import io.jans.service.message.pubsub.PubSubRedisAdapter;
 import io.jans.util.security.StringEncrypter;
@@ -77,7 +78,7 @@ public class RedisMessageProvider extends AbstractMessageProvider<AbstractRedisP
 		this.subscibedPubSubs = new ConcurrentHashMap<>();
 
 		try {
-			RedisConfiguration redisConfiguration = messageConfiguration.getRedisConfiguration();
+			RedisMessageConfiguration redisConfiguration = messageConfiguration.getRedisConfiguration();
 			decryptPassword(redisConfiguration);
 			log.debug("Starting RedisMessageProvider messages ... configuration {}", redisConfiguration);
 			redisProvider = RedisProviderFactory.create(redisConfiguration);
@@ -95,7 +96,7 @@ public class RedisMessageProvider extends AbstractMessageProvider<AbstractRedisP
 		this.stringEncrypter = stringEncrypter;
 	}
 
-	private void decryptPassword(RedisConfiguration redisConfiguration) {
+	private void decryptPassword(RedisMessageConfiguration redisConfiguration) {
 		try {
 			String encryptedPassword = redisConfiguration.getPassword();
 			if (StringUtils.isNotBlank(encryptedPassword)) {

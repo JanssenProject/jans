@@ -1,6 +1,10 @@
 import os
 import glob
 import shutil
+import time
+import socket
+import tempfile
+import uuid
 
 from setup_app import paths
 from setup_app.utils import base
@@ -9,6 +13,24 @@ from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.utils.ldif_utils import create_client_ldif
+
+# Config
+Config.idp_config_http_port = '8083'
+Config.idp_config_hostname = 'localhost'
+Config.jans_idp_enabled = 'true'
+Config.jans_idp_realm = 'jans-api'
+Config.jans_idp_client_id = f'jans-api-{uuid.uuid4()}'
+Config.jans_idp_client_secret = os.urandom(10).hex()
+Config.jans_idp_grant_type = 'PASSWORD'
+Config.jans_idp_user_name = 'jans-api'
+Config.jans_idp_user_password = os.urandom(10).hex()
+Config.jans_idp_idp_root_dir = os.path.join(Config.jansOptFolder, 'idp')
+Config.jans_idp_idp_metadata_file_pattern = '%s-idp-metadata.xml'
+Config.jans_idp_ignore_validation = 'true'
+Config.jans_idp_idp_metadata_file = 'idp-metadata.xml'
+
+# change this when we figure out this
+Config.keycloack_hostname = 'localhost'
 
 
 class JansSamlInstaller(JettyInstaller):
@@ -23,6 +45,7 @@ class JansSamlInstaller(JettyInstaller):
         (os.path.join(Config.dist_app_dir, 'keycloak.zip'), 'https://github.com/keycloak/keycloak/releases/download/{0}/keycloak-{0}.zip'.format(base.current_app.app_info['KC_VERSION'])),
         (os.path.join(Config.dist_jans_dir, 'kc-jans-authn-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-authn-plugin/{0}/kc-jans-authn-plugin-{0}.jar').format(base.current_app.app_info['jans_version'])),
         (os.path.join(Config.dist_jans_dir, 'kc-jans-authn-plugin-deps.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-authn-plugin/{0}/kc-jans-authn-plugin-{0}-deps.zip').format(base.current_app.app_info['jans_version'])),
+        (os.path.join(Config.dist_jans_dir, 'kc-saml-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/kc-saml-plugin/{0}/kc-saml-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
             ]
 
     def __init__(self):
@@ -49,7 +72,6 @@ class JansSamlInstaller(JettyInstaller):
         self.idp_config_data_dir = os.path.join(Config.opt_dir, self.idp_config_id)
         self.idp_config_log_dir = os.path.join(self.idp_config_data_dir, 'logs')
         self.idp_config_providers_dir = os.path.join(self.idp_config_data_dir, 'providers')
-        self.idp_config_http_port = '8083'
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
@@ -57,39 +79,20 @@ class JansSamlInstaller(JettyInstaller):
         self.idp_config_fn = os.path.join(self.templates_folder, 'keycloak.conf')
         self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
 
-        #jans-idp
-        self.jans_idp_enabled = 'true'
-        self.jans_idp_realm = 'realm:tobedefined'
-        self.jans_idp_client_id = 'client_id:tobecreated'
-        self.jans_idp_client_secret = 'client_secret:tobecreated'
-        self.jans_idp_grant_type = 'grant_type:tobedefined'
-        self.jans_idp_user_name = 'user_name:tobedefined'
-        self.jans_idp_password = 'password:tobedefined'
-        self.jans_idp_idp_root_dir = 'root_dir:tobedefined'
-        self.jans_idp_idp_metadata_file_pattern = 'metadata_file_pattern:tobedefined'
-        self.jans_idp_ignore_validation = 'true'
-        self.jans_idp_idp_metadata_file = 'metadata_file:tobedefined'
+        Config.jans_idp_idp_metadata_root_dir = os.path.join(self.idp_config_root_dir, 'idp/metadata')
+        Config.jans_idp_idp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'idp/temp_metadata')
+        Config.jans_idp_sp_metadata_root_dir = os.path.join(self.idp_config_root_dir, 'sp/metadata')
+        Config.jans_idp_sp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'sp/temp_metadata')
+        Config.jans_idp_server_url = 'jans_idp_server_url:tobedefined'
         self.jans_idp_ldif_config_fn = os.path.join(self.output_folder, 'jans-idp-configuration.ldif')
         self.jans_idp_config_json_fn = os.path.join(self.templates_folder, 'jans-idp-config.json')
-        self.jans_idp_server_url = 'server_url:tobedefined'
-        # IDP DIRS
-        self.jans_idp_idp_metadata_root_dir = os.path.join(self.idp_config_root_dir, 'idp/metadata') 
-        self.jans_idp_idp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'idp/temp_metadata')
-
-        # SP DIRS
-        self.jans_idp_sp_metadata_root_dir = os.path.join(self.idp_config_root_dir, 'sp/metadata')
-        self.jans_idp_sp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'sp/temp_metadata')
-
-
-        # change this when we figure out this
-        Config.keycloack_hostname = 'localhost'
-
+ 
 
     def install(self):
         """installation steps"""
         self.create_scim_client()
-        self.copy_files()
         self.install_keycloack()
+
 
     def render_import_templates(self):
         self.logIt("Preparing base64 encodings configuration files")
@@ -112,7 +115,7 @@ class JansSamlInstaller(JettyInstaller):
     def create_folders(self):
         for saml_dir in (self.idp_root_dir, self.idp_config_root_dir, self.idp_config_temp_meta_dir, self.idp_config_meta_dir,
                         self.idp_config_data_dir, self.idp_config_log_dir, self.idp_config_providers_dir,
-                        self.jans_idp_idp_metadata_root_dir, self.jans_idp_sp_metadata_root_dir, self.jans_idp_sp_metadata_temp_dir,
+                        Config.jans_idp_idp_metadata_root_dir, Config.jans_idp_sp_metadata_root_dir, Config.jans_idp_sp_metadata_temp_dir,
                 ):
             self.createDirs(saml_dir)
 
@@ -145,18 +148,87 @@ class JansSamlInstaller(JettyInstaller):
             self.dbUtils.import_ldif([self.clients_ldif_fn])
 
 
-    def copy_files(self):
-        self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
-        self.copyFile(self.source_files[1][0], self.idp_config_providers_dir)
-        base.unpack_zip(self.source_files[2][0], self.idp_config_providers_dir)
-
-
     def install_keycloack(self):
         self.logIt("Installing KC", pbar=self.service_name)
         base.unpack_zip(self.source_files[3][0], self.idp_config_data_dir, with_par_dir=False)
-        self.copyFile(self.source_files[4][0], self.idp_config_providers_dir)
-        base.unpack_zip(self.source_files[5][0], self.idp_config_providers_dir)
         self.update_rendering_dict()
-        self.render_unit_file()
         self.renderTemplateInOut(self.idp_config_fn, self.templates_folder, os.path.join(self.idp_config_data_dir, 'conf'))
         self.chown(self.idp_config_data_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+
+
+    def service_post_setup(self):
+        self.deploy_jans_keycloack_providers()
+        self.config_api_idp_plugin_config()
+
+
+    def deploy_jans_keycloack_providers(self):
+        self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
+        self.copyFile(self.source_files[1][0], self.idp_config_providers_dir)
+        base.unpack_zip(self.source_files[2][0], self.idp_config_providers_dir)
+        self.copyFile(self.source_files[4][0], self.idp_config_providers_dir)
+        base.unpack_zip(self.source_files[5][0], self.idp_config_providers_dir)
+
+
+    def config_api_idp_plugin_config(self):
+
+        # deploy config-api plugin
+        base.current_app.ConfigApiInstaller.source_files.append(self.source_files[6])
+        base.current_app.ConfigApiInstaller.install_plugin('kc-saml-plugin')
+
+        # Render templates
+        self.update_rendering_dict()
+        jans_api_tmp_dir = os.path.join(self.templates_folder, 'kc_jans_api')
+        jans_api_output_dir = os.path.join(self.output_folder, 'kc_jans_api')
+
+        jans_api_openid_client_fn = 'jans.api-openid-client.json'
+        jans_api_realm_fn = 'jans.api-realm.json'
+        jans_api_user_fn = 'jans.api-user.json'
+
+        self.idp_config_fn = os.path.join(self.templates_folder, 'keycloak.conf')
+
+        for tmp_fn in (jans_api_openid_client_fn, jans_api_realm_fn, jans_api_user_fn):
+            self.renderTemplateInOut(os.path.join(jans_api_tmp_dir, tmp_fn), jans_api_tmp_dir, jans_api_output_dir, pystring=True)
+
+        self.logIt("Starting KC for config api idp plugin configurations")
+        self.start()
+        #wait a while for KC to start
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        for i in range(24):
+            self.logIt("Wait 5 seconds to KC started")
+            time.sleep(5)
+            try:
+                self.logIt("Connecting KC")
+                s.connect((Config.idp_config_hostname, int(Config.idp_config_http_port)))
+                self.logIt("Successfully connected to KC")
+                break
+            except Exception:
+                self.logIt("KC not ready")
+        else:
+            self.logIt("KC did not start in 120 seconds. Giving up configuration", errorLog=True, fatal=True)
+
+        kcadm_cmd = '/opt/keycloak/bin/kcadm.sh'
+        kcm_server_url = f'http://{Config.idp_config_hostname}:{Config.idp_config_http_port}/'
+        env = {'JAVA_HOME': Config.jre_home}
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            kc_tmp_config = os.path.join(tmp_dir, 'kcadm-jans.config')
+            self.run([kcadm_cmd, 'config', 'credentials', '--server', kcm_server_url, '--realm', 'master', '--user', 'admin', '--password', 'admin', '--config', kc_tmp_config], env=env)
+
+            self.run([kcadm_cmd, 'config', 'credentials', '--server', kcm_server_url, '--realm', 'master', '--user', 'admin', '--password', Config.admin_password, '--config', kc_tmp_config], env=env)
+
+            # Change default password
+            self.run([kcadm_cmd, 'set-password', '-r', 'master', '--username', 'admin', '--new-password',  Config.admin_password, '--config', kc_tmp_config], env=env)
+
+            # create realm
+            self.run([kcadm_cmd, 'create', 'realms', '-f', os.path.join(jans_api_output_dir, jans_api_realm_fn),'--config', kc_tmp_config], env=env)
+
+
+            # create client
+            self.run([kcadm_cmd, 'create', 'clients', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_api_openid_client_fn),'--config', kc_tmp_config], env=env)
+
+            # create user and change password
+            self.run([kcadm_cmd, 'create', 'users', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_api_user_fn),'--config', kc_tmp_config], env=env)
+            self.run([kcadm_cmd, 'set-password', '-r', Config.jans_idp_realm, '--username', Config.jans_idp_user_name, '--new-password', Config.jans_idp_user_password, '--config', kc_tmp_config], env=env)
+
+            # assign roles to jans-api-user
+            self.run([kcadm_cmd, 'add-roles', '-r', Config.jans_idp_realm, '--uusername', Config.jans_idp_user_name, '--cclientid', 'realm-management', '--rolename', 'manage-identity-providers', '--rolename', 'view-identity-providers', '--rolename', 'view-identity-providers', '--config', kc_tmp_config], env=env)

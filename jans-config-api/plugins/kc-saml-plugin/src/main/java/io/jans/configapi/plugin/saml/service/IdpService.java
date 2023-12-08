@@ -138,12 +138,19 @@ public class IdpService {
             IdentityProviderRepresentation kcIdp = this.convertToIdentityProviderRepresentation(identityProvider);
             log.debug("converted kcIdp:{}", kcIdp);
 
-            log.debug("IDP Service idpMetadataStream:{}", idpMetadataStream);
+            log.debug("IDP Service idpMetadataStream:{}, identityProvider.getRealm():{}", idpMetadataStream,
+                    identityProvider.getRealm());
             kcIdp = keycloakService.createIdentityProvider(identityProvider.getRealm(), kcIdp);
             log.debug("Newly created kcIdp:{}", kcIdp);
-            identityProvider = this.convertToIdentityProvider(kcIdp);
+            identityProvider = this.convertToIdentityProvider(identityProvider, kcIdp);
             log.debug("Final created identityProvider:{}", identityProvider);
 
+            // set KC SP MetadataURL name
+            if (identityProvider != null) {
+                String spMetadataUrl = getSpMetadataUrl(identityProvider.getRealm(), identityProvider.getName());
+                log.info(" Setting KC SP Metadata URL - spMetadataUrl:{} ", spMetadataUrl);
+                identityProvider.setSpMetaDataURL(spMetadataUrl);
+            }
         }
         return identityProvider;
     }
@@ -177,7 +184,8 @@ public class IdpService {
 
         // Update IDP in Jans DB
         updateIdentityProvider(identityProvider);
-        log.debug("Updated IdentityProvider dentityProvider:{})", identityProvider);
+        log.debug("Updated IdentityProvider dentityProvider:{}, , identityProvider.getRealm():{})", identityProvider,
+                identityProvider.getRealm());
 
         if (samlConfigService.isSamlEnabled()) {
             // Update IDP in KC
@@ -186,7 +194,14 @@ public class IdpService {
 
             kcIdp = keycloakService.updateIdentityProvider(identityProvider.getRealm(), kcIdp);
             log.debug("Updated kcIdp:{}", kcIdp);
-            identityProvider = this.convertToIdentityProvider(kcIdp);
+            identityProvider = this.convertToIdentityProvider(identityProvider, kcIdp);
+
+            // set KC SP MetadataURL name
+            if (identityProvider != null) {
+                String spMetadataUrl = getSpMetadataUrl(identityProvider.getRealm(), identityProvider.getName());
+                log.info(" Updating KC SP Metadata URL - spMetadataUrl:{} ", spMetadataUrl);
+                identityProvider.setSpMetaDataURL(spMetadataUrl);
+            }
         }
         return identityProvider;
     }
@@ -229,6 +244,29 @@ public class IdpService {
         return keycloakService.validateSamlMetadata(realmName, idpMetadataStream);
     }
 
+    private IdentityProvider convertToIdentityProvider(IdentityProvider identityProvider,
+            IdentityProviderRepresentation kcIdp) {
+        log.debug("identityProvider:{}, kcIdp:{}", identityProvider, kcIdp);
+
+        IdentityProvider idp = this.convertToIdentityProvider(kcIdp);
+        log.info("convertToIdentityProvider - idp:{}", idp);
+
+        if (idp != null && identityProvider != null) {
+            idp.setRealm(identityProvider.getRealm());
+            idp.setSpMetaDataFN(identityProvider.getSpMetaDataFN());
+            idp.setSpMetaDataURL(identityProvider.getSpMetaDataURL());
+            idp.setSpMetaDataLocation(identityProvider.getSpMetaDataLocation());
+            idp.setIdpMetaDataFN(identityProvider.getIdpMetaDataFN());
+            idp.setIdpMetaDataLocation(identityProvider.getIdpMetaDataLocation());
+            idp.setIdpMetaDataURL(identityProvider.getIdpMetaDataURL());
+            idp.setStatus(identityProvider.getStatus());
+            idp.setValidationStatus(identityProvider.getValidationStatus());
+            idp.setValidationLog(identityProvider.getValidationLog());
+        }
+
+        return idp;
+    }
+
     private IdentityProvider convertToIdentityProvider(IdentityProviderRepresentation kcIdp) {
         log.debug("kcIdp:{}", kcIdp);
         IdentityProvider idp = null;
@@ -258,23 +296,31 @@ public class IdpService {
 
         return kcIdp;
     }
-    
+
     private boolean validateIdpMetadataElements(IdentityProvider identityProvider) {
-        log.info("identityProvider:{}", identityProvider);
-        boolean isValid = false;
+        log.info("identityProvider:{}, samlConfigService.getIdpMetadataMandatoryAttributes():{}", identityProvider, samlConfigService.getIdpMetadataMandatoryAttributes());
+        boolean isValid = true;
         if (identityProvider == null || identityProvider.getConfig() == null
-                || identityProvider.getConfig().isEmpty()) {
+                || identityProvider.getConfig().isEmpty() || samlConfigService.getIdpMetadataMandatoryAttributes().isEmpty()) {
             return isValid;
         }
-        List<String> idpMetadataValues = new ArrayList<>(identityProvider.getConfig().values());
-        log.info("idpMetadataValues:{}", idpMetadataValues);
 
-        List<String> missingElements = authUtil
-                .findMissingElements(samlConfigService.getIdpMetadataMandatoryAttributes(), idpMetadataValues);
+        List<String> missingElements = null;
+        for(String attribute: samlConfigService.getIdpMetadataMandatoryAttributes()) {
+            log.info("attribute:{}", attribute);
+            if(StringUtils.isBlank(identityProvider.getConfig().get(attribute))){
+                if(missingElements == null) {
+                    missingElements = new ArrayList<>();
+                }
+                missingElements.add(attribute);
+            }           
+        }
+      
         log.info("missingElements:{}", missingElements);
 
         if (missingElements != null && !missingElements.isEmpty()) {
             log.error("IDP elements are missing:{} !", missingElements);
+            throw new InvalidAttributeException("IDP mandatory attribute missing - "+missingElements+" !!!");
         }
         isValid = true;
         log.info("validateIdpMetadataElements - isValid:{}", isValid);
