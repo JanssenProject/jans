@@ -6,48 +6,26 @@
 
 package io.jans.configapi.plugin.saml.service;
 
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.service.OrganizationService;
-import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.util.AuthUtil;
-import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.plugin.saml.client.IdpClientFactory;
 import io.jans.configapi.plugin.saml.mapper.IdentityProviderMapper;
 import io.jans.configapi.plugin.saml.model.IdentityProvider;
-import io.jans.configapi.plugin.saml.service.SamlService;
-import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
-import io.jans.configapi.plugin.saml.util.Constants;
-
-import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.search.filter.Filter;
-import io.jans.util.StringHelper;
 import io.jans.util.exception.InvalidAttributeException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import java.io.File;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.AgeFileFilter;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
 
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
@@ -299,9 +277,10 @@ public class IdpService {
 
     private boolean validateIdpMetadataElements(IdentityProvider identityProvider) {
         log.info("identityProvider:{}, samlConfigService.getIdpMetadataMandatoryAttributes():{}", identityProvider, samlConfigService.getIdpMetadataMandatoryAttributes());
-        boolean isValid = true;
+        boolean isValid = false;
         if (identityProvider == null || identityProvider.getConfig() == null
                 || identityProvider.getConfig().isEmpty() || samlConfigService.getIdpMetadataMandatoryAttributes().isEmpty()) {
+            isValid = true;
             return isValid;
         }
 
@@ -319,7 +298,8 @@ public class IdpService {
         log.info("missingElements:{}", missingElements);
 
         if (missingElements != null && !missingElements.isEmpty()) {
-            log.error("IDP elements are missing:{} !", missingElements);
+            isValid = false;
+            log.error("IDP elements are missing:{}, isValid:{} !", missingElements, isValid);
             throw new InvalidAttributeException("IDP mandatory attribute missing - "+missingElements+" !!!");
         }
         isValid = true;

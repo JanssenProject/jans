@@ -7860,7 +7860,7 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
@@ -7868,11 +7868,11 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        userCanView:
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string

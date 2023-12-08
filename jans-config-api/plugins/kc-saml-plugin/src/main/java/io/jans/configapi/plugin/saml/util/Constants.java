@@ -57,8 +57,8 @@ public class Constants {
     public static final String ENCRYPTION_PUBLIC_KEY = "encryptionPublicKey";
 
     public static final List<String> SAML_IDP_CONFIG = new ArrayList<>(
-            Arrays.asList("validateSignature", "singleLogoutServiceUrl", "postBindingLogout", "postBindingResponse",
-                    "postBindingAuthnRequest", "singleSignOnServiceUrl", "wantAuthnRequestsSigned",
+            Arrays.asList(VALIDATE_SIGNATURE, SINGLE_LOGOUT_SERVICE_URL, "postBindingLogout", "postBindingResponse",
+                    "postBindingAuthnRequest", SINGLE_SIGN_ON_SERVICE_URL, "wantAuthnRequestsSigned",
                     "signingCertificate", "addExtensionsElementWithKeyInfo"));
 
     // Scopes
