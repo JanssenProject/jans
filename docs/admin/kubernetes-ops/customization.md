@@ -81,6 +81,7 @@ Templates refers to the common interface layout and style. For example, a banner
 
 ## Custom Jar file for scripts 
 
+### for JARs less than 1MB
 1.  Create a configmap with the custom jar file: 
     `kubectl -n <namespace> create cm my-custom-jar --from-file=mycustom.jar`
 
@@ -97,12 +98,43 @@ Templates refers to the common interface layout and style. For example, a banner
           configMap:
             name: my-custom-jar
     ```
-    
+        
 1.  Run helm install or helm upgrade if Jans has been already installed.
     ```bash
     helm upgrade <helm-release-name> janssen/janssen -n <namespace> -f values.yaml --version=1.0.x
     ```
+### For JARs greater than 1MB
+1.  Create a configmap or secret for a shell script that contains instructions to pull the custom jar file:
 
+    ```shell
+    #!/bin/sh
+    # This script will pull the custom jar file from a remote location
+    # and place it in the correct location for the Jans Auth server to use it
+    wget -O /opt/jans/jetty/jans-auth/custom/libs/mycustom.jar https://mydomain.com/mycustom.jar
+    ```
+    `kubectl -n <namespace> create cm my-custom-jar --from-file=mycustomjar.sh`
+
+1.  Mount the configmap or secret in your values.yaml under `auth-server.volumes` and `auth-server.volumeMounts`
+
+    ```
+    auth-server:
+      volumeMounts:
+        - name: my-custom-jar-volume
+          mountPath: /tmp/mycustomjar.sh
+          subPath: mycustomjar.sh
+      volumes:
+        - name: my-custom-jar-volume
+          configMap:
+            name: my-custom-jar
+            defaultMode: 0755
+      customScripts:
+        - /tmp/mycustomjar.sh
+    ```
+        
+1.  Run helm install or helm upgrade if Jans has been already installed.
+    ```bash
+    helm upgrade <helm-release-name> janssen/janssen -n <namespace> -f values.yaml --version=1.0.x
+    ```
 ## Customized pages examples
 
 ### Custom Login page

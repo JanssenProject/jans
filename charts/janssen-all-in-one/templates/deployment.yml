@@ -50,12 +50,17 @@ spec:
         securityContext:
           runAsUser: 1000
           runAsNonRoot: true
-        {{- if not .Values.isFqdnRegistered }}
+        {{- if or (not .Values.isFqdnRegistered) ( .Values.customScripts) }}
         command:
           - /bin/sh
           - -c
           - |
+              {{- with .Values.customScripts }}
+              {{- toYaml . | replace "- " "" | nindent 14}}
+              {{- end }}
+              {{- if not .Values.isFqdnRegistered }}
               /usr/bin/python3 /scripts/updatelbip.py &
+              {{- end}}
               /app/bin/entrypoint.sh
         {{- end}}
         ports:
