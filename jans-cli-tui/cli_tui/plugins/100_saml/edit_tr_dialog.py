@@ -1,6 +1,7 @@
 import os
 import asyncio
 import requests
+import copy
 
 from typing import Optional, Sequence, Callable
 from urllib.parse import urlparse
@@ -242,7 +243,6 @@ class EditTRDialog(JansGDialog, DialogUtils):
 
 
     def get_attribute_by_inum(self, inum: str) -> dict:
-
         for attribute in common_data.scopes:
             if attribute['inum'] == inum or attribute['dn'] == inum:
                 return attribute
@@ -270,9 +270,6 @@ class EditTRDialog(JansGDialog, DialogUtils):
             return False
 
         def add_selected_attributes(dialog):
-            if 'scopes' not in self.data:
-                self.data['scopes'] = []
-
             self.data['releasedAttributes'] += self.add_attribute_checkbox.current_values
             self.fill_tr_attributes()
 
@@ -393,10 +390,9 @@ class EditTRDialog(JansGDialog, DialogUtils):
             tr_data['spMetaDataFN'] = os.path.basename(self.metadata_file_path)
             data = {'trustRelationship': tr_data, 'metaDataFile': self.metadata_file_path}
         else:
-            data = tr_data
-            for k in self.data:
-                if k not in data:
-                    data[k] = self.data[k]
+            new_data = copy.deepcopy(self.data)
+            new_data.update(tr_data)
+            data = {'trustRelationship': new_data}
 
         async def coroutine():
             operation_id = 'post-trust-relationship-metadata-file' if self.new_tr else 'put-trust-relationship'

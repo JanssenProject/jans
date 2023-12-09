@@ -854,7 +854,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 _("TLS Subject DN"),
                 name='tlsClientAuthSubjectDn',
                 value='\n'.join(self.data.get('attributes', {}).get(
-                                'tlsClientAuthSubjectDn', [])),
+                                'tlsClientAuthSubjectDn') or []),
                 height=3, style=cli_style.check_box,
                 jans_help=self.myparent.get_help_from_schema(
                     self.myparent.cli_object.get_schema_from_reference(
