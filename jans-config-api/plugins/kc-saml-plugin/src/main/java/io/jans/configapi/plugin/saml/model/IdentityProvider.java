@@ -6,6 +6,7 @@
 
 package io.jans.configapi.plugin.saml.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.jans.model.GluuStatus;
@@ -16,21 +17,18 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 import io.swagger.v3.oas.annotations.Hidden;
 
-
-import java.util.Collections;
 import java.util.List;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansTrustedIdp")
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IdentityProvider extends Entry implements Serializable {
 
     @AttributeName(ignoreDuringUpdate = true)
@@ -61,26 +59,21 @@ public class IdentityProvider extends Entry implements Serializable {
     @AttributeName(name = "jansEnabled")
     private boolean enabled;
     
-    //@NotNull
     @AttributeName(name = "signingCertificates")
     private String signingCertificates;
     
     @AttributeName(name = "validateSignature")
     private String validateSignature;
-    
-    //@NotNull
+       
     @AttributeName(name = "singleLogoutServiceUrl")
     private String singleLogoutServiceUrl;  
     
-   //@NotNull
     @AttributeName(name = "nameIDPolicyFormat")
     private String nameIDPolicyFormat;
     
-    //@NotNull
     @AttributeName(name = "idpEntityId")
     private String idpEntityId;
     
-    //@NotNull
     @AttributeName(name = "singleSignOnServiceUrl")
     private String singleSignOnServiceUrl;
     
@@ -140,12 +133,10 @@ public class IdentityProvider extends Entry implements Serializable {
     @AttributeName(name = "jansValidationLog")
     private List<String> validationLog;
     
-    
+    @Hidden
     @JsonObject
     @AttributeName(name = "jansSAMLidpConfDyn")
-    Map<String, String> config = new HashMap<>();
-    
-    
+    private Map<String, String> config = new HashMap<>();
 
     public String getInum() {
         return inum;
@@ -394,7 +385,6 @@ public class IdentityProvider extends Entry implements Serializable {
     public void setValidationLog(List<String> validationLog) {
         this.validationLog = validationLog;
     }
-
     
     public Map<String, String> getConfig() {
         return config;
