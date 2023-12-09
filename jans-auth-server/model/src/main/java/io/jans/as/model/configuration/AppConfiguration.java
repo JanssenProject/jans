@@ -16,7 +16,8 @@ import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
 import io.jans.doc.annotation.DocProperty;
-
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import java.util.*;
 
 /**
@@ -67,6 +68,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP")
     private String jwksUri;
+
+    @DocProperty(description = "URL of the OP's Archived JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP")
+    private String archivedJwksUri;
 
     @DocProperty(description = "Registration endpoint URL")
     private String registrationEndpoint;
@@ -148,6 +152,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Sector Identifier cache lifetime in minutes", defaultValue = "1440")
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
+
+    @DocProperty(description = "Archived JWK lifetime in seconds")
+    private int archivedJwkLifetimeInSeconds;
 
     @DocProperty(description = "UMA Configuration endpoint URL")
     private String umaConfigurationEndpoint;
@@ -232,6 +239,15 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoEncryptionEncValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    private List<String> introspectionSigningAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    private List<String> introspectionEncryptionAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    private List<String> introspectionEncryptionEncValuesSupported;
 
     @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT")
     private List<String> idTokenSigningAlgValuesSupported;
@@ -838,6 +854,7 @@ public class AppConfiguration implements Configuration {
     private List<String> discoveryDenyKeys;
 
     @DocProperty(description = "List of enabled feature flags")
+    @ArraySchema(schema = @Schema(implementation = FeatureFlagType.class))
     private List<String> featureFlags;
 
     @DocProperty(description = "Enable/disable request/response logging filter")
@@ -875,6 +892,14 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
+
+    public int getArchivedJwkLifetimeInSeconds() {
+        return archivedJwkLifetimeInSeconds;
+    }
+
+    public void setArchivedJwkLifetimeInSeconds(int archivedJwkLifetimeInSeconds) {
+        this.archivedJwkLifetimeInSeconds = archivedJwkLifetimeInSeconds;
+    }
 
     public Boolean getDpopJktForceForAuthorizationCode() {
         return dpopJktForceForAuthorizationCode;
@@ -1728,6 +1753,24 @@ public class AppConfiguration implements Configuration {
     }
 
     /**
+     * Gets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @return The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public String getArchivedJwksUri() {
+        return archivedJwksUri;
+    }
+
+    /**
+     * Sets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @param archivedJwksUri The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public void setArchivedJwksUri(String archivedJwksUri) {
+        this.archivedJwksUri = archivedJwksUri;
+    }
+
+    /**
      * Returns the URL of the Dynamic Client Registration endpoint.
      *
      * @return The URL of the Dynamic Client Registration endpoint.
@@ -1906,6 +1949,30 @@ public class AppConfiguration implements Configuration {
 
     public void setAuthorizationEncryptionEncValuesSupported(List<String> authorizationEncryptionEncValuesSupported) {
         this.authorizationEncryptionEncValuesSupported = authorizationEncryptionEncValuesSupported;
+    }
+
+    public List<String> getIntrospectionSigningAlgValuesSupported() {
+        return introspectionSigningAlgValuesSupported;
+    }
+
+    public void setIntrospectionSigningAlgValuesSupported(List<String> introspectionSigningAlgValuesSupported) {
+        this.introspectionSigningAlgValuesSupported = introspectionSigningAlgValuesSupported;
+    }
+
+    public List<String> getIntrospectionEncryptionAlgValuesSupported() {
+        return introspectionEncryptionAlgValuesSupported;
+    }
+
+    public void setIntrospectionEncryptionAlgValuesSupported(List<String> introspectionEncryptionAlgValuesSupported) {
+        this.introspectionEncryptionAlgValuesSupported = introspectionEncryptionAlgValuesSupported;
+    }
+
+    public List<String> getIntrospectionEncryptionEncValuesSupported() {
+        return introspectionEncryptionEncValuesSupported;
+    }
+
+    public void setIntrospectionEncryptionEncValuesSupported(List<String> introspectionEncryptionEncValuesSupported) {
+        this.introspectionEncryptionEncValuesSupported = introspectionEncryptionEncValuesSupported;
     }
 
     public List<String> getUserInfoSigningAlgValuesSupported() {

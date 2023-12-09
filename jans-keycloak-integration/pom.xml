@@ -5,7 +5,7 @@
     <groupId>io.jans</groupId>
     <artifactId>jans-kc-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.20-SNAPSHOT</version>
+    <version>1.0.21-SNAPSHOT</version>
     <name>keycloak-integration-parent</name>
 
     <distributionManagement>
@@ -18,19 +18,19 @@
 
     <properties>
       <maven.min-version>3.3.9</maven.min-version>
-      <maven.compiler.source>11</maven.compiler.source>
-      <maven.compiler.target>11</maven.compiler.target>
-      <keycloak-server-spi.version>21.1.1</keycloak-server-spi.version>
+      <maven.compiler.source>17</maven.compiler.source>
+      <maven.compiler.target>17</maven.compiler.target>
+      <keycloak-server.version>23.0.1</keycloak-server.version>
       <nimbus.oauth-sdk.version>10.11</nimbus.oauth-sdk.version>
       <nimbus.oauth2-oidc-sdk.version>10.11</nimbus.oauth2-oidc-sdk.version>
       <jackson.coreutils.version>1.8</jackson.coreutils.version>
       <jans.version>${project.version}</jans.version>
       <jakarta.ws-rs-api.version>3.0.0</jakarta.ws-rs-api.version>
       <jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
-      <smallrye-config.version>3.0.0-RC1</smallrye-config.version>
+      <smallrye-config.version>3.4.4</smallrye-config.version>
       <log4j.version>2.19.0</log4j.version>
       <slf4j.version>1.7.36</slf4j.version>
-      <fasterxml-jackson.version>2.12.6</fasterxml-jackson.version>
+      <fasterxml-jackson.version>2.16.0</fasterxml-jackson.version>
       <commons-lang.version>3.13.0</commons-lang.version>
       <commons-collection.version>4.1</commons-collection.version>
       <swagger.version>2.2.7</swagger.version>
@@ -81,35 +81,35 @@
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-core</artifactId>
           <scope>provided</scope>
-          <version>${keycloak-server-spi.version}</version>
+          <version>${keycloak-server.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-server-spi</artifactId>
           <scope>provided</scope>
-          <version>${keycloak-server-spi.version}</version>
+          <version>${keycloak-server.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-server-spi-private</artifactId>
           <scope>provided</scope>
-          <version>${keycloak-server-spi.version}</version>
+          <version>${keycloak-server.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-services</artifactId>
           <scope>provided</scope>
-          <version>${keycloak-server-spi.version}</version>
+          <version>${keycloak-server.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-model-legacy</artifactId>
           <scope>provided</scope>
-          <version>${keycloak-server-spi.version}</version>
+          <version>${keycloak-server.version}</version>
         </dependency>
 
         <!-- end keycloak dependencies-->

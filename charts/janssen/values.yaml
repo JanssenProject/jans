@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.0.21_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -100,6 +100,10 @@ auth-server:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []
 # -- Responsible for regenerating auth-keys per x hours
 auth-server-key-rotation:
   # -- Add custom normal and secret envs to the service
@@ -120,7 +124,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.0.21_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -159,6 +163,10 @@ auth-server-key-rotation:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: {}
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []
 # -- Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 config:
   # -- Add custom normal and secret envs to the service.
@@ -173,6 +181,8 @@ config:
   adminPassword: Test1234#
   # -- City. Used for certificate creation.
   city: Austin
+  # -- Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value.
+  salt: ""
   configmap:
     # -- Jetty header size in bytes in the auth server
     cnJettyRequestHeaderSize: 8192
@@ -290,7 +300,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.0.21_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- LDAP admin password if OpenDJ is used for persistence.
@@ -333,6 +343,10 @@ config:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Config Api endpoints can be used to configure the auth-server, which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS).
 config-api:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -382,7 +396,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.0.21_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -432,6 +446,10 @@ config-api:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- FIDO 2.0 (FIDO2) is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments.
 fido2:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -481,7 +499,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.0.21_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -536,6 +554,10 @@ fido2:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Janssen Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Auth Server.
 casa:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -585,7 +607,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.0.21_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -636,6 +658,10 @@ casa:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []
 # -- Parameters used globally across all services helm charts.
 global:
   # -- Add custom normal and secret envs to the service.
@@ -713,7 +739,7 @@ global:
 
   auth-server-key-rotation:
     # -- Boolean flag to enable/disable the auth-server-key rotation cronjob chart.
-    enabled: false
+    enabled: true
   # -- Volume storage type if using AWS volumes.
   awsStorageType: io1
   # -- Volume storage type if using Azure disks.
@@ -1181,6 +1207,10 @@ opendj:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Job to generate data and initial config for Janssen Server persistence layer.
 persistence:
   # -- Add custom normal and secret envs to the service
@@ -1201,7 +1231,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.0.21_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1232,6 +1262,10 @@ persistence:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- System for Cross-domain Identity Management (SCIM) version 2.0
 scim:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -1281,7 +1315,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.0.21_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1336,7 +1370,10 @@ scim:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
-
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Link.
 link:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -1386,7 +1423,7 @@ link:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/link
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.0.21_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1440,3 +1477,7 @@ link:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]

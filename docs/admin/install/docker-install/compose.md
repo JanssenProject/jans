@@ -51,7 +51,7 @@ Installation depends on the set of environment variables shown below. These envi
 
 ## How to run
 
-Download the compose file 
+Download the compose file:
 
 ```bash
 
@@ -64,7 +64,7 @@ This docker compose file runs two containers, the janssen monolith container and
 docker compose -f jans-mysql-compose.yml up -d
 ```
 
-To view the containers running
+To view the containers running:
 
 ```bash
 

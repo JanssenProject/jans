@@ -18,7 +18,7 @@ public class RetryAnalyzer implements IRetryAnalyzer {
             retryCount++;
             return true;
         } else {
-            result.getTestContext().getFailedTests().addResult(result, result.getMethod());
+            result.getTestContext().getFailedTests().addResult(result);
         }
         return false;
     }

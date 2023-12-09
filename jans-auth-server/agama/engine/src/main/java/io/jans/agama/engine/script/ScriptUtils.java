@@ -115,17 +115,19 @@ public class ScriptUtils {
         
     }
     
-    public static Object callAction(Object instance, String actionClassName, String methodName,
+    public static Pair<Object, Exception> callAction(Object instance, String actionClassName, String methodName,
             Object[] params) throws Exception {
         
+        Object result = null;
+        Exception ex = null;
         try {
-            return CdiUtil.bean(ActionService.class).callAction(instance, actionClassName, methodName, params);
+            result = CdiUtil.bean(ActionService.class).callAction(instance, actionClassName, methodName, params);
         } catch (Exception e) {
-            LOG.warn("Exception raised when executing Call (method {}): {}. " +
-                "You can catch it in your Agama code and use the Log directive to print a stacktrace",
-                methodName, e.getMessage());                
-            throw e;
+            LOG.warn("Exception raised when executing Call - class: {}, method: {}",
+                actionClassName == null ? instance.getClass().getName() : actionClassName, methodName);
+            ex = e;
         }
+        return new Pair<>(result, ex);      //See jans#6530
 
     }
 

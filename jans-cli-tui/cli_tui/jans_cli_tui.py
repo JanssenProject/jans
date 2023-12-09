@@ -81,12 +81,13 @@ from prompt_toolkit.keys import Keys
 from cli_style import style
 from utils.multi_lang import _
 from utils.static import cli_style, common_strings
+from utils.utils import common_data
 from utils.validators import IntegerValidator
+from utils import background_tasks
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
-
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
@@ -106,6 +107,7 @@ class JansCliApp(Application):
     entries_per_page = 20 # we can make this configurable
 
     def __init__(self):
+        common_data.app = self
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
         self.set_keybindings()
         self.init_logger()
@@ -184,6 +186,7 @@ class JansCliApp(Application):
                 full_screen=True,
                 mouse_support=True, ## added
             )
+
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
         self.plugins_initialised = False
 
@@ -418,6 +421,7 @@ class JansCliApp(Application):
         """Disables plugins when cli object is ready"""
 
         if self.cli_object_ok:
+            self.create_background_task(background_tasks.get_attributes_coroutine(self))
             response = self.cli_requests({'operation_id': 'get-plugins'})
             if response.ok:
                 plugins = response.json()

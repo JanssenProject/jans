@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-alpine:17.0.8
+FROM bellsoft/liberica-openjdk-alpine:17.0.8@sha256:e82fb905ca6efffcdb1b0ed58f207b0ce91aeada78c218ae7dbb16bb31635728
 
 # ===============
 # Alpine packages
@@ -50,8 +50,8 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.20-SNAPSHOT
-ENV CN_BUILD_DATE='2023-10-11 10:17'
+ENV CN_VERSION=1.0.21-SNAPSHOT
+ENV CN_BUILD_DATE='2023-12-01 12:29'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -95,7 +95,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/ftl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
-ENV JANS_SOURCE_VERSION=a8884f39ee4eea3ef65d7cd41120343201d2b3e6
+ENV JANS_SOURCE_VERSION=00aee0c26565e8b0b574370610a75139c2155568
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
@@ -240,7 +240,7 @@ EXPOSE $CN_AUTH_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.20" \
+    org.opencontainers.image.version="1.0.21" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 

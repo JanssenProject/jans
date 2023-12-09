@@ -4,12 +4,15 @@ info:
   description: |
     Janssen SCIM 2.0 server API. Developers can think of SCIM as a REST API with endpoints exposing CRUD functionality
     (create, update, retrieve and delete) for identity management resources such as users, groups, and fido devices.
+  contact:
+    name: Contact
+    url: https://github.com/JanssenProject/jans/discussions
   license:
-    name: Janssen License
-    url: https://github.com/JanssenProject/blob/master/LICENSE
-  version: 5.0.0
+    name: License
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: "OAS Version"
 servers:
-- url: https://jenkins-ldap.jans.io/jans-scim/restv1/v2
+- url: https://jans.local.io/jans-scim/restv1/v2
 tags:
 - name: user
   description: Endpoints for management of User resources

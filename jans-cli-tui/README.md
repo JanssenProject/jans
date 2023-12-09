@@ -51,3 +51,4 @@ Click [here](https://github.com/JanssenProject/jans/blob/main/jans-cli-tui/docs/
 
  - Extensive documentation for the jans-cli-tui can be found [here](https://github.com/JanssenProject/jans/tree/main/docs/admin/config-guide/jans-tui)
  - Extensive documentation for the jans-cli can be found [here](https://github.com/JanssenProject/jans/tree/main/docs/admin/config-guide/jans-cli)
+

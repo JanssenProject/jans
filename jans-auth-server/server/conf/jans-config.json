@@ -1,4 +1,24 @@
 {
+    "featureFlags": [
+      "health_check",
+      "userinfo",
+      "clientinfo",
+      "id_generation",
+      "registration",
+      "introspection",
+      "revoke_token",
+      "revoke_session",
+      "active_session",
+      "end_session",
+      "status_session",
+      "jans_configuration",
+      "ciba",
+      "device_authz",
+      "metric",
+      "stat",
+      "par",
+      "ssa"
+    ],
     "issuer":"${config.oxauth.issuer}",
     "loginPage":"${config.oxauth.contextPath}/login.htm",
     "authorizationPage":"${config.oxauth.contextPath}/authorize.htm",
@@ -12,6 +32,7 @@
     "checkSessionIFrame":"${config.oxauth.contextPath}/opiframe.htm",
     "endSessionEndpoint":"${config.oxauth.contextPath}/restv1/end_session",
     "jwksUri":"${config.oxauth.contextPath}/restv1/jwks",
+    "archivedJwksUri":"${config.oxauth.contextPath}/restv1/jwks/archived",
     "registrationEndpoint":"${config.oxauth.contextPath}/restv1/register",
     "openIdDiscoveryEndpoint":"${config.oxauth.issuer}/.well-known/webfinger",
     "openIdConfigurationEndpoint":"${config.oxauth.issuer}/.well-known/openid-configuration",
@@ -438,12 +459,11 @@
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "agamaConfiguration": {
-        "enabled": false,
+        "enabled": true,
         "rootDir": "/opt/jans/jetty/jans-auth/agama",
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
-        "serializerType": "KRYO",
-        "maxItemsLoggedInCollections": 7,
+        "maxItemsLoggedInCollections": 9,
         "pageMismatchErrorPage": "mismatch.ftlh",
         "interruptionErrorPage": "timeout.ftlh",
         "crashErrorPage": "crash.ftlh",
@@ -451,6 +471,10 @@
         "bridgeScriptPage": "agama.xhtml",
         "defaultResponseHeaders": {
             "Cache-Control": "max-age=0, no-store"
+        },
+        "serializeRules": {
+          "JAVA": ["java", "sun", "com.sun", "jdk"],
+          "KRYO": []
         }
     },
     "blockWebviewAuthorizationEnabled": false,
