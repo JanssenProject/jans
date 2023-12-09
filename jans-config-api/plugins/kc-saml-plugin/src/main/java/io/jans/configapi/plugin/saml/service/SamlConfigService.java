@@ -91,7 +91,7 @@ public class SamlConfigService {
         }
         return selectedIdp;
     }
-    
+
     public String getServerUrl() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -101,7 +101,7 @@ public class SamlConfigService {
         }
         return serverUrl;
     }
-    
+
     public String getRealm() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -111,7 +111,7 @@ public class SamlConfigService {
         }
         return realm;
     }
-    
+
     public String getClientId() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -121,7 +121,7 @@ public class SamlConfigService {
         }
         return clientId;
     }
-    
+
     public String getClientSecret() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -131,7 +131,7 @@ public class SamlConfigService {
         }
         return clientSecret;
     }
-    
+
     public String getGrantType() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -141,7 +141,7 @@ public class SamlConfigService {
         }
         return grantType;
     }
-    
+
     public String getUsername() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -151,7 +151,7 @@ public class SamlConfigService {
         }
         return username;
     }
-    
+
     public String getPassword() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -265,7 +265,7 @@ public class SamlConfigService {
         }
         return spMetadataFile;
     }
-    
+
     public boolean isIgnoreValidation() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -274,6 +274,16 @@ public class SamlConfigService {
             ignoreValidation = samlAppConfiguration.isIgnoreValidation();
         }
         return ignoreValidation;
+    }
+
+    public List<String> getIdpMetadataMandatoryAttributes() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        List<String> idpMetadataMandatoryAttributes = null;
+        if (samlAppConfiguration != null) {
+            idpMetadataMandatoryAttributes = samlAppConfiguration.getIdpMetadataMandatoryAttributes();
+        }
+        return idpMetadataMandatoryAttributes;
     }
 
     private SamlConf getSamlConf() {

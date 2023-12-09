@@ -138,7 +138,7 @@ public class SamlConfigurationFactory {
             log.error("Failed to load SAML configuration from persistence. Please fix it!!!.");
             throw new ConfigurationException("Failed to load SAML configuration from persistence.");
         } else {
-            log.error("SAML Configuration loaded successfully - samlLoadedRevision:{}, samlAppConfiguration:{}",
+            log.info("SAML Configuration loaded successfully - samlLoadedRevision:{}, samlAppConfiguration:{}",
                     this.samlLoadedRevision, getSamlAppConfiguration());
         }
 
