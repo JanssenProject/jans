@@ -90,9 +90,6 @@ class EditTRDialog(JansGDialog, DialogUtils):
             file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.file, ok_handler=read_metadata_file)
             self.app.show_jans_dialog(file_browser_dialog)
 
-
-        metadata_file_label = Label(text='here')
-
         def get_metadata_location(value):
             if value == 'url':
                 self.matadata_type_container = HSplit([
@@ -163,16 +160,6 @@ class EditTRDialog(JansGDialog, DialogUtils):
                     jans_help=_("Description for TR"),
                     widget_style=cli_style.white_bg_widget
                 ),
-
-                #self.app.getTitledWidget(
-                #        _("Entity Type"),
-                #        name='jansEntityId',
-                #        widget=DropDownWidget(
-                #            values=[('single', 'Single'), ('federation', 'Federation')],
-                #            value=self.data.get('jansEntityId', 'single'),
-                #            select_one_option = False
-                #        )
-                #),
 
                 ]
 
@@ -284,7 +271,6 @@ class EditTRDialog(JansGDialog, DialogUtils):
         def on_text_changed(event):
             search_text = event.text
             matching_items = []
-            search_text = event.text
             for item in attribute_list:
                 if search_text in item[1]:
                     matching_items.append(item)
