@@ -1,5 +1,7 @@
 package io.jans.configapi.plugin.saml.model.config;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
 
@@ -33,6 +35,8 @@ public class SamlAppConfiguration implements Configuration {
     private String spMetadataFile;
 
     private boolean ignoreValidation;
+
+    private List<String> idpMetadataMandatoryAttributes;
 
     public String getApplicationName() {
         return applicationName;
@@ -218,6 +222,14 @@ public class SamlAppConfiguration implements Configuration {
         this.ignoreValidation = ignoreValidation;
     }
 
+    public List<String> getIdpMetadataMandatoryAttributes() {
+        return idpMetadataMandatoryAttributes;
+    }
+
+    public void setIdpMetadataMandatoryAttributes(List<String> idpMetadataMandatoryAttributes) {
+        this.idpMetadataMandatoryAttributes = idpMetadataMandatoryAttributes;
+    }
+
     @Override
     public String toString() {
         return "SamlAppConfiguration [applicationName=" + applicationName + ", samlTrustRelationshipDn="
@@ -229,7 +241,8 @@ public class SamlAppConfiguration implements Configuration {
                 + ", idpMetadataFilePattern=" + idpMetadataFilePattern + ", idpMetadataFile=" + idpMetadataFile
                 + ", spMetadataDir=" + spMetadataDir + ", spMetadataTempDir=" + spMetadataTempDir
                 + ", spMetadataFilePattern=" + spMetadataFilePattern + ", spMetadataFile=" + spMetadataFile
-                + ", ignoreValidation=" + ignoreValidation + "]";
+                + ", ignoreValidation=" + ignoreValidation + ", idpMetadataMandatoryAttributes="
+                + idpMetadataMandatoryAttributes + "]";
     }
 
 }

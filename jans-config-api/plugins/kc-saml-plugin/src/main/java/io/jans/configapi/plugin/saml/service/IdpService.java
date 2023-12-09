@@ -6,12 +6,11 @@
 
 package io.jans.configapi.plugin.saml.service;
 
-
 import io.jans.as.common.service.OrganizationService;
+import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.plugin.saml.client.IdpClientFactory;
 import io.jans.configapi.plugin.saml.mapper.IdentityProviderMapper;
 import io.jans.configapi.plugin.saml.model.IdentityProvider;
-
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
@@ -19,14 +18,16 @@ import io.jans.util.exception.InvalidAttributeException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import jakarta.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 
 @ApplicationScoped
@@ -55,6 +56,9 @@ public class IdpService {
 
     @Inject
     IdpClientFactory idpClientFactory;
+
+    @Inject
+    AuthUtil authUtil;
 
     public String getIdentityProviderDn() {
         return samlConfigService.getTrustedIdpDn();
@@ -91,14 +95,16 @@ public class IdpService {
             throw new InvalidAttributeException("IdentityProvider object is null!!!");
         }
 
-        if (idpMetadataStream == null) {
-            throw new InvalidAttributeException("Idp Metedata file is null!!!");
+        if (idpMetadataStream != null && idpMetadataStream.available() > 0) {
+            // validate metadata and set in config
+            Map<String, String> config = validateSamlMetadata(identityProvider.getRealm(), idpMetadataStream);
+            log.info("Validated metadata to create IDP - config:{}", config);
+            identityProvider.setConfig(config);
+        } else {
+            // ensure individual metadata elements are present
+            boolean validConfig = validateIdpMetadataElements(identityProvider);
+            log.info("Is metadata individual elements for IDP creation present:{}", validConfig);
         }
-
-        // validate metadata and set in config
-        Map<String, String> config = validateSamlMetadata(identityProvider.getRealm(), idpMetadataStream);
-        log.debug("Validated metadata to create IDP - config:{}", config);
-        identityProvider.setConfig(config);
 
         // Create IDP in Jans DB
         log.debug("Create IdentityProvider identityProvider:{})", identityProvider);
@@ -110,8 +116,8 @@ public class IdpService {
             IdentityProviderRepresentation kcIdp = this.convertToIdentityProviderRepresentation(identityProvider);
             log.debug("converted kcIdp:{}", kcIdp);
 
-            log.debug("IDP Service idpMetadataStream:{}, idpMetadataStream.available():{}", idpMetadataStream,
-                    idpMetadataStream.available());
+            log.debug("IDP Service idpMetadataStream:{}, identityProvider.getRealm():{}", idpMetadataStream,
+                    identityProvider.getRealm());
             kcIdp = keycloakService.createIdentityProvider(identityProvider.getRealm(), kcIdp);
             log.debug("Newly created kcIdp:{}", kcIdp);
             identityProvider = this.convertToIdentityProvider(identityProvider, kcIdp);
@@ -138,8 +144,15 @@ public class IdpService {
             throw new InvalidAttributeException("IdentityProvider object for update is null!!!");
         }
 
-        if (idpMetadataStream == null) {
-            throw new InvalidAttributeException("Idp Metedata file for update is null!!!");
+        if (idpMetadataStream != null && idpMetadataStream.available() > 0) {
+            // validate metadata and set in config
+            Map<String, String> config = validateSamlMetadata(identityProvider.getRealm(), idpMetadataStream);
+            log.debug("Validated metadata to update IDP - config:{}", config);
+            identityProvider.setConfig(config);
+        } else {
+            // ensure individual metadata elements are present
+            boolean validConfig = validateIdpMetadataElements(identityProvider);
+            log.info("Is metadata individual for update elements present:{}", validConfig);
         }
 
         // validate metadata and set in config
@@ -262,4 +275,35 @@ public class IdpService {
         return kcIdp;
     }
 
+    private boolean validateIdpMetadataElements(IdentityProvider identityProvider) {
+        log.info("identityProvider:{}, samlConfigService.getIdpMetadataMandatoryAttributes():{}", identityProvider, samlConfigService.getIdpMetadataMandatoryAttributes());
+        boolean isValid = false;
+        if (identityProvider == null || identityProvider.getConfig() == null
+                || identityProvider.getConfig().isEmpty() || samlConfigService.getIdpMetadataMandatoryAttributes().isEmpty()) {
+            isValid = true;
+            return isValid;
+        }
+
+        List<String> missingElements = null;
+        for(String attribute: samlConfigService.getIdpMetadataMandatoryAttributes()) {
+            log.info("attribute:{}", attribute);
+            if(StringUtils.isBlank(identityProvider.getConfig().get(attribute))){
+                if(missingElements == null) {
+                    missingElements = new ArrayList<>();
+                }
+                missingElements.add(attribute);
+            }           
+        }
+      
+        log.info("missingElements:{}", missingElements);
+
+        if (missingElements != null && !missingElements.isEmpty()) {
+            isValid = false;
+            log.error("IDP elements are missing:{}, isValid:{} !", missingElements, isValid);
+            throw new InvalidAttributeException("IDP mandatory attribute missing - "+missingElements+" !!!");
+        }
+        isValid = true;
+        log.info("validateIdpMetadataElements - isValid:{}", isValid);
+        return isValid;
+    }
 }
