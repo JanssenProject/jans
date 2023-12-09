@@ -21,5 +21,10 @@
   "spMetadataTempDir": "/opt/idp/configs/keycloak/sp/temp_metadata",
   "spMetadataFilePattern":"%s-sp-metadata.xml",
   "spMetadataFile":"sp-metadata.xml",
-  "ignoreValidation": "false"
+  "ignoreValidation": "false",
+  "idpMetadataMandatoryAttributes": [
+    "nameIDPolicyFormat",
+    "idpEntityId",
+    "singleSignOnServiceUrl"
+  ]
 }
