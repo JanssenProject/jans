@@ -7,13 +7,9 @@
 package io.jans.configapi.plugin.saml.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
 
-import io.jans.as.common.model.registration.Client;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.saml.model.IdentityProvider;
 import io.jans.configapi.plugin.saml.service.IdpService;
 import io.jans.configapi.plugin.saml.util.Constants;
@@ -23,10 +19,8 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
-import io.jans.util.security.StringEncrypter.EncryptionException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,7 +30,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -47,10 +40,10 @@ import static io.jans.as.model.util.Util.escapeLog;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
@@ -201,17 +194,19 @@ public class IdpResource extends BaseResource {
         List<IdentityProvider> existingIdentityProviders = idpService.getIdentityProviderByName(idp.getName());
         log.debug(" existingIdentityProviders:{} ", existingIdentityProviders);
         if (existingIdentityProviders != null && !existingIdentityProviders.isEmpty()) {
-            throwBadRequestException("SAML IDP NAME CONFLICT","SAML IDP with same name '" + idp.getName() + "' already exists!");
+            throwBadRequestException("SAML IDP NAME CONFLICT",
+                    "SAML IDP with same name '" + idp.getName() + "' already exists!");
         }
 
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
         log.debug(" Create metaDataFile:{} ", metaDataFile);
-        if (metaDataFile != null) {
-            log.error(" IDP metaDataFile.available():{}", metaDataFile.available());
-        }
+
+        populateIdpMetadataConfig(idp, metaDataFile);
+        log.info("IDP Creation checked if config to be populated idp:{}", idp);
 
         // create SAML IDP
         idp = idpService.createSamlIdentityProvider(idp, metaDataFile);
+        populateIdpMetadataElementsFromConfig(idp);
 
         log.info("Create IdentityProvider - idp:{}", idp);
         return Response.status(Response.Status.CREATED).entity(idp).build();
@@ -252,13 +247,14 @@ public class IdpResource extends BaseResource {
         checkResourceNotNull(existingIdentityProvider, SAML_IDP_CHECK_STR + idp.getInum() + "'");
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
         log.debug(" Update metaDataFile:{} ", metaDataFile);
-        if (metaDataFile != null) {
-            log.error(" IDP metaDataFile.available():{}", metaDataFile.available());
-        }
+        
+        populateIdpMetadataConfig(idp, metaDataFile);
+        log.info("IDP Creation checked if config to be populated idp:{}", idp);
 
-        // create SAML IDP
+        // update SAML IDP
         idp = idpService.updateSamlIdentityProvider(idp, metaDataFile);
-
+        populateIdpMetadataElementsFromConfig(idp);
+        
         log.info("Updated IdentityProvider idp:{}", idp);
         return Response.ok(idp).build();
     }
@@ -286,7 +282,7 @@ public class IdpResource extends BaseResource {
         idpService.deleteIdentityProvider(existingIdentityProvider);
         return Response.noContent().build();
     }
-    
+
     @Operation(summary = "Process unprocessed IDP metadata files", description = "Process unprocessed IDP metadata files", operationId = "post-idp-metadata-files", tags = {
             "SAML - Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.JANS_IDP_SAML_WRITE_ACCESS }))
@@ -304,11 +300,11 @@ public class IdpResource extends BaseResource {
 
         return Response.ok().build();
     }
-    
+
     private IdentityProviderPagedResult doSearch(SearchRequest searchReq)
             throws IllegalAccessException, InvocationTargetException {
         if (log.isInfoEnabled()) {
-            log.info("IdentityProvider search params - searchReq:{}, realm:{} ", escapeLog(searchReq));
+            log.info("IdentityProvider search params - searchReq:{} ", escapeLog(searchReq));
         }
 
         PagedResult<IdentityProvider> pagedResult = idpService.getIdentityProviders(searchReq);
@@ -328,6 +324,57 @@ public class IdpResource extends BaseResource {
 
         log.info("pagedIdentityProvider:{}", pagedIdentityProvider);
         return pagedIdentityProvider;
+    }
+
+    private IdentityProvider populateIdpMetadataConfig(IdentityProvider idp, InputStream metaDataFile)
+            throws IOException {
+        log.info("Populate IDP Metadata config - idp:{}, metaDataFile:{}", idp, metaDataFile);
+
+        if (idp == null || (metaDataFile != null && metaDataFile.available() > 0)) {
+            log.info("IDP metaDataFile for available():{}, hence no need to populate config.",
+                    metaDataFile.available());
+            return idp;
+        }
+
+        // validate required fields
+        checkNotNull(idp.getSingleSignOnServiceUrl(), Constants.SINGLE_SIGN_ON_SERVICE_URL);
+        checkNotNull(idp.getIdpEntityId(), Constants.IDP_ENTITY_ID);
+
+        Map<String, String> config = new HashMap<>();
+        config.put(Constants.SIGNING_CERTIFICATES, idp.getSigningCertificates());
+        config.put(Constants.VALIDATE_SIGNATURE, idp.getValidateSignature());
+        config.put(Constants.SINGLE_LOGOUT_SERVICE_URL, idp.getSingleLogoutServiceUrl());
+        config.put(Constants.NAME_ID_POLICY_FORMAT, idp.getNameIDPolicyFormat());
+        config.put(Constants.IDP_ENTITY_ID, idp.getIdpEntityId());
+        config.put(Constants.SINGLE_SIGN_ON_SERVICE_URL, idp.getSingleSignOnServiceUrl());
+        config.put(Constants.ENCRYPTION_PUBLIC_KEY, idp.getEncryptionPublicKey());
+        log.info("Populated- config:{}", config);
+
+        idp.setConfig(config);
+
+        return idp;
+    }
+
+    private IdentityProvider populateIdpMetadataElementsFromConfig(IdentityProvider idp) {
+        log.info("Populate IDP individual metadata elements - idp:{}", idp);
+
+        if (idp == null || idp.getConfig() == null || idp.getConfig().isEmpty()) {
+            return idp;
+        }
+
+        Map<String, String> config = idp.getConfig();
+        log.info("Populate IDP Metadata individual metadata elements - config:{}", config);
+        idp.setSigningCertificates(idp.getConfig().get(Constants.SIGNING_CERTIFICATES));
+        idp.setValidateSignature(idp.getConfig().get(Constants.VALIDATE_SIGNATURE));
+        idp.setSingleLogoutServiceUrl(idp.getConfig().get(Constants.SINGLE_LOGOUT_SERVICE_URL));
+        idp.setNameIDPolicyFormat(idp.getConfig().get(Constants.NAME_ID_POLICY_FORMAT));
+        idp.setIdpEntityId(idp.getConfig().get(Constants.IDP_ENTITY_ID));
+        idp.setSingleSignOnServiceUrl(idp.getConfig().get(Constants.SINGLE_SIGN_ON_SERVICE_URL));
+        idp.setEncryptionPublicKey(idp.getConfig().get(Constants.ENCRYPTION_PUBLIC_KEY));
+
+        log.info("Populated IDP object with individual metadata elements - idp:{}", idp);
+
+        return idp;
     }
 
 }
