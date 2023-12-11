@@ -24,7 +24,7 @@ public class SamlConfigUpdateTask implements ScheduledTask {
 
     @Override
     public void run(KeycloakSession session) {
-        // TODO Auto-generated method stub 
+        // TODO Auto-generated method stub
     }
     
 }
