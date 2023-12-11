@@ -17,10 +17,10 @@ public class SamlExtension implements Extension {
     
     @PostConstruct
     public void init() {
-        log.info("\n\n\n Initializing SamlExtension \n\n\n ");
+        log.info(" Initializing SamlExtension");
         
         samlAppInitializer.onAppStart();
         
-        log.info("\n\n\n Post Initializing SamlExtension \n\n\n ");
+        log.info("Post Initializing SamlExtension ");
     }
 }

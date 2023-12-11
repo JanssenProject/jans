@@ -34,6 +34,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -205,7 +206,16 @@ public class IdpResource extends BaseResource {
         log.info("IDP Creation checked if config to be populated idp:{}", idp);
 
         // create SAML IDP
-        idp = idpService.createSamlIdentityProvider(idp, metaDataFile);
+        try {
+            idp = idpService.createSamlIdentityProvider(idp, metaDataFile);
+        } catch (WebApplicationException ex) {
+            if (ex.getResponse() != null && ex.getResponse().getStatusInfo() != null
+                    && ex.getResponse().getStatusInfo().equals(Status.CONFLICT)) {
+                throwBadRequestException("SAML IDP NAME CONFLICT",
+                        "SAML IDP with same name '" + idp.getName() + "' already exists!");
+            }
+            throwInternalServerException(ex);
+        }
         populateIdpMetadataElementsFromConfig(idp);
 
         log.info("Create IdentityProvider - idp:{}", idp);
@@ -247,14 +257,14 @@ public class IdpResource extends BaseResource {
         checkResourceNotNull(existingIdentityProvider, SAML_IDP_CHECK_STR + idp.getInum() + "'");
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
         log.debug(" Update metaDataFile:{} ", metaDataFile);
-        
+
         populateIdpMetadataConfig(idp, metaDataFile);
         log.info("IDP Creation checked if config to be populated idp:{}", idp);
 
         // update SAML IDP
         idp = idpService.updateSamlIdentityProvider(idp, metaDataFile);
         populateIdpMetadataElementsFromConfig(idp);
-        
+
         log.info("Updated IdentityProvider idp:{}", idp);
         return Response.ok(idp).build();
     }
@@ -373,7 +383,7 @@ public class IdpResource extends BaseResource {
         idp.setEncryptionPublicKey(idp.getConfig().get(Constants.ENCRYPTION_PUBLIC_KEY));
 
         log.info("Populated IDP object with individual metadata elements - idp:{}", idp);
-
+        idp.setConfig(null); // remove redundant map from screen as individual metadata elements populated
         return idp;
     }
 
