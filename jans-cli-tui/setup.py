@@ -90,6 +90,7 @@ setup(
         "requests",
         "urllib3",
         "pyDes",
+        "requests-toolbelt"
     ],
     classifiers=[
         "Intended Audience :: Developers",
