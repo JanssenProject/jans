@@ -383,7 +383,7 @@ public class IdpResource extends BaseResource {
         idp.setEncryptionPublicKey(idp.getConfig().get(Constants.ENCRYPTION_PUBLIC_KEY));
 
         log.info("Populated IDP object with individual metadata elements - idp:{}", idp);
-        idp.setConfig(null); // remove redundant map from screen as individual metadata elements populated
+
         return idp;
     }
 
