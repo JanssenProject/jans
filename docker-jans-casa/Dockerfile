@@ -30,7 +30,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ====
 
 ENV CN_VERSION=1.0.21-SNAPSHOT
-ENV CN_BUILD_DATE='2023-10-11 10:33'
+ENV CN_BUILD_DATE='2023-12-08 12:31'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
 # Install Casa
@@ -55,7 +55,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-casa/plugins \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=c86ae0a5a703ff96fd1e69fddcc110b5b754ad71
+ENV JANS_SOURCE_VERSION=44a893b1141e34f74f809362c84e68c90eb2c05e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CASA_EXTRAS_DIR=jans-casa/extras
 
