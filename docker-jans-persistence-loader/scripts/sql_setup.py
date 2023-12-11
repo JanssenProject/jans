@@ -46,9 +46,12 @@ class SQLBackend:
 
     def get_data_type(self, attr, table=None):
         # check from SQL data types first
-        type_def = self.client.sql_data_types.get(attr)
+        for col in [f"{table}:{attr}", attr]:
+            type_def = self.client.sql_data_types.get(col)
 
-        if type_def:
+            if not type_def:
+                continue
+
             type_ = type_def.get(self.client.dialect) or type_def["mysql"]
 
             if table in type_.get("tables", {}):
@@ -111,8 +114,13 @@ class SQLBackend:
             if column_name == "doc_id" or column_name not in fields:
                 continue
 
-            if column_type.lower() != "json":
-                index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
+            index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
+
+            if column_type == "TEXT":
+                # set key length to 768 to accomodate charset utf8mb4
+                query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)} (768))"
+                self.client.create_index(query)
+            elif column_type.lower() != "json":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
@@ -261,20 +269,35 @@ class SQLBackend:
             with self.client.engine.connect() as conn:
                 conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
 
-        def change_column_type(table_name, col_name):
-            old_data_type = table_mapping[table_name][col_name]
-            data_type = self.get_data_type(col_name, table_name)
-
-            if data_type == old_data_type:
-                return
-
+        def change_column_type(table_name, col_name, old_data_type, data_type):
             if self.client.dialect == "mysql":
                 query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
                         f"MODIFY COLUMN {self.client.quoted_id(col_name)} {data_type}"
             else:
                 query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
                         f"ALTER COLUMN {self.client.quoted_id(col_name)} TYPE {data_type}"
+
             with self.client.engine.connect() as conn:
+                # mysql will raise error if changing type to text but the column already indexed without explicit key length
+                # hence the associated index must be dropped first
+                if self.client.dialect == "mysql" and old_data_type.startswith("VARCHAR") and data_type == "TEXT":
+                    for idx in conn.execute(
+                        text(
+                            "SELECT index_name "
+                            "FROM information_schema.statistics "
+                            "WHERE table_name = :table_name "
+                            "AND index_name LIKE :index_name "
+                            "AND column_name = :col_name;"
+                        ),
+                        {
+                            "table_name": table_name,
+                            "index_name": f"{table_name}_{col_name}",
+                            "col_name": col_name
+                        },
+                    ):
+                        conn.execute(f"ALTER TABLE {table_name} DROP INDEX {idx[0]}")
+
+                # change the type
                 conn.execute(query)
 
         def column_from_multivalued(table_name, col_name):
@@ -360,11 +383,13 @@ class SQLBackend:
                     if data_type != multivalued_type and old_data_type != multivalued_type:
                         # change non-multivalued type
                         logger.info(f"Converting {table_name}.{column} column type from {old_data_type} to {data_type}")
-                        change_column_type(table_name, column)
+                        change_column_type(table_name, column, old_data_type, data_type)
+
                     elif data_type == multivalued_type and old_data_type != multivalued_type:
                         # change type to multivalued (JSON type)
                         logger.info(f"Converting {table_name}.{column} column type from {old_data_type} to multivalued {data_type}")
                         column_to_multivalued(table_name, column)
+
                     elif data_type != multivalued_type and old_data_type == multivalued_type:
                         # change type from multivalued (JSON type)
                         logger.info(f"Converting {table_name}.{column} column type from multivalued {old_data_type} to {data_type}")
