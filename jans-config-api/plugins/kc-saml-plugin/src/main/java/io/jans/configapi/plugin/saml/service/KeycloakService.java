@@ -206,10 +206,7 @@ public class KeycloakService {
 
             boolean valid = verifySamlIdpConfig(identityProviderRepresentation.getConfig());
             logger.debug("Is IDP metadata config valid:{})", valid);
-            if (!valid) {
-                throw new InvalidAttributeException("Idp Metedata file is not valid !!!");
-            }
-
+           
             // create Identity Provider
             IdentityProvidersResource identityProvidersResource = this.getIdentityProvidersResource(realmName);
             if (identityProvidersResource == null) {
@@ -278,10 +275,7 @@ public class KeycloakService {
         }
 
         boolean valid = verifySamlIdpConfig(identityProviderRepresentation.getConfig());
-        logger.debug("Is IDP metadata config valid?:{})", valid);
-        if (!valid) {
-            throw new InvalidAttributeException("Idp Metedata file is not valid !!!");
-        }
+        logger.debug("Is IDP metadata update config valid?:{})", valid);
 
         // validate IDP to update
         IdentityProvidersResource identityProvidersResource = this.getIdentityProvidersResource(realmName);
@@ -371,7 +365,7 @@ public class KeycloakService {
         if (config == null || config.isEmpty()) {
             return false;
         }
-        logger.debug("config.keySet().containsAll(Constants.SAML_IDP_CONFIG):{}",
+        logger.info("config.keySet().containsAll(Constants.SAML_IDP_CONFIG):{}",
                 config.keySet().containsAll(Constants.SAML_IDP_CONFIG));
         
         return config.keySet().containsAll(Constants.SAML_IDP_CONFIG);
