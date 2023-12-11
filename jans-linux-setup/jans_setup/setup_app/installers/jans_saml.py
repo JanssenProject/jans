@@ -83,10 +83,6 @@ class JansSamlInstaller(JettyInstaller):
         Config.jans_idp_idp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'idp/temp_metadata')
         Config.jans_idp_sp_metadata_root_dir = os.path.join(self.idp_config_root_dir, 'sp/metadata')
         Config.jans_idp_sp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'sp/temp_metadata')
-        Config.jans_idp_server_url = 'jans_idp_server_url:tobedefined'
-        self.jans_idp_ldif_config_fn = os.path.join(self.output_folder, 'jans-idp-configuration.ldif')
-        self.jans_idp_config_json_fn = os.path.join(self.templates_folder, 'jans-idp-config.json')
- 
 
     def install(self):
         """installation steps"""
@@ -103,13 +99,7 @@ class JansSamlInstaller(JettyInstaller):
             )
         self.renderTemplateInOut(self.ldif_config_fn, self.templates_folder, self.output_folder)
 
-        self.renderTemplateInOut(self.jans_idp_config_json_fn, self.templates_folder, self.output_folder, pystring=True)
-        Config.templateRenderingDict['jans_idp_dynamic_conf_base64'] = self.generate_base64_ldap_file(
-                os.path.join(self.output_folder,os.path.basename(self.jans_idp_config_json_fn))
-            )
-        self.renderTemplateInOut(self.jans_idp_ldif_config_fn, self.templates_folder, self.output_folder)
-
-        self.dbUtils.import_ldif([self.ldif_config_fn, self.jans_idp_ldif_config_fn])
+        self.dbUtils.import_ldif([self.ldif_config_fn])
 
 
     def create_folders(self):
