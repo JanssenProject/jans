@@ -84,7 +84,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         # extract yaml files
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(ops_dir, 'jca', 'jans-config-api-swagger.yaml'), ren=True)
-        plugin_yamls = ['fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml']
+        plugin_yamls = ['fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml', 'kc-saml-plugin-swagger.yaml']
 
         if Config.install_jans_link:
             plugin_yamls.append('jans-link-plugin-swagger.yaml')
