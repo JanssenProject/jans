@@ -1,0 +1,51 @@
+//This flow tests if some Java variables are properly serialized/deserialized before/after RRF usage
+Flow io.jans.agama.test.vars_and_rrf.javaValues1
+    Basepath ""
+    
+t1 = Call co.Test#new
+t1.id = "QWE"
+
+RRF "ot/page.ftl"
+
+t2 = Call co.Test#new
+t2.id = "RTY"
+
+RRF "ot/page.ftl"
+
+s = Call co.Test#sum t1 t2
+When s is not "QWERTY"
+    Log "Something about variables t1 or t2 was lost"
+    Finish false
+
+list = [ t1, t2 ]
+jList = Call java.util.Arrays#asList list
+list = null
+RRF "ot/page.ftl"
+
+When jList.length is not 2
+    Finish false
+    
+s = Call co.Test#sum jList[0] jList[1]
+
+When s is not "QWERTY"
+    Log "Something about variables jList was lost"
+    Finish false
+
+jList = null
+| E = Call jList add t1
+
+RRF "ot/page.ftl"
+
+When E is null 
+    Log "Something is wrong with variable E"
+    Finish false
+
+exname = E.class.name
+E2 = Call com.nimbusds.oauth2.sdk.ParseException#new "ASDFG" null E
+RRF "ot/page.ftl"
+
+When E2 is null or E2.message is not "ASDFG" or E2.cause.class.name is not exname 
+    Log "Something is wrong with variable E2"
+    Finish false
+    
+Finish true
