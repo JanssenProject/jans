@@ -40,8 +40,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # SCIM
 # ====
 
-ENV CN_VERSION=1.0.21-SNAPSHOT
-ENV CN_BUILD_DATE='2023-10-11 10:26'
+ENV CN_VERSION=1.0.21
+ENV CN_BUILD_DATE='2023-12-09 19:36'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -59,7 +59,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=a3026d7957a1aaefa30269904744975352ae4642
+ENV JANS_SOURCE_VERSION=44a893b1141e34f74f809362c84e68c90eb2c05e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
