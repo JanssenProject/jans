@@ -23,7 +23,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.0.21-SNAPSHOT
+ENV CN_VERSION=1.0.21
 ENV CN_BUILD_DATE='2023-12-08 08:47'
 
 # @FIXME: kc-jans-storage-plugin raises error about Cookie
