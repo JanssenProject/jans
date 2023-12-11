@@ -14,7 +14,7 @@ ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:1.0.21_dev
 ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:1.0.21_dev
 
 # original Janssen version
-ARG CN_VERSION=1.0.21-SNAPSHOT
+ARG CN_VERSION=1.0.21
 
 # -----------
 # base images
