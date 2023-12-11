@@ -64,10 +64,10 @@ try {
 
     _it = _actionCall(
     <#if .node.static_call?size gt 0>
-        null, false, "${.node.static_call.qname}", "${.node.static_call.ALPHANUM}"
+        null, "${.node.static_call.qname}", "${.node.static_call.ALPHANUM}"
         , <@util_argslist node=.node.static_call />
     <#else>
-        ${.node.oo_call.variable}, true, null, "${.node.oo_call.ALPHANUM}"
+        ${.node.oo_call.variable}, null, "${.node.oo_call.ALPHANUM}"
         , <@util_argslist node=.node.oo_call />
     </#if>    
     )
