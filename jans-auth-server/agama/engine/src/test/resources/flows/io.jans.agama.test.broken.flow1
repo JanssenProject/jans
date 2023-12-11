@@ -1,0 +1,6 @@
+Flow io.jans.agama.test.broken.flow1 
+    Basepath "" 
+    
+Log "Lizard on dove"
+
+//No finish. This will crash

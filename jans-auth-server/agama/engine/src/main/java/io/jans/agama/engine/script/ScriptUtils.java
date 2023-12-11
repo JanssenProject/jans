@@ -121,7 +121,13 @@ public class ScriptUtils {
         Object result = null;
         Exception ex = null;
         try {
-            result = CdiUtil.bean(ActionService.class).callAction(instance, actionClassName, methodName, params);
+
+            if (instance == null && actionClassName == null) {
+                ex = new IllegalArgumentException("Cannot call method " + methodName + " of null");
+            } else {
+                result = CdiUtil.bean(ActionService.class)
+                            .callAction(instance, actionClassName, methodName, params);
+            }
         } catch (Exception e) {
             LOG.warn("Exception raised when executing Call - class: {}, method: {}",
                 actionClassName == null ? instance.getClass().getName() : actionClassName, methodName);
