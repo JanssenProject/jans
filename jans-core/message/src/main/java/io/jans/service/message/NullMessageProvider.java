@@ -25,7 +25,7 @@ import jakarta.inject.Inject;
  * @author Yuriy Movchan Date: 30/11/2023
  */
 @ApplicationScoped
-public class NullMessageProvider extends AbstractMessageProvider<Object> {
+public class NullMessageProvider extends AbstractMessageProvider<NullPool> {
 
 	@Inject
 	private Logger log;
@@ -58,7 +58,7 @@ public class NullMessageProvider extends AbstractMessageProvider<Object> {
 	}
 
 	@Override
-	public Object getDelegate() {
+	public NullPool getDelegate() {
 		return null;
 	}
 
