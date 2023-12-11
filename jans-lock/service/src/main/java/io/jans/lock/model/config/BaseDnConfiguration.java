@@ -21,6 +21,7 @@ public class BaseDnConfiguration {
 
 	private String people;
 	private String attributes;
+    private String sessions;
 	private String scripts;
 	private String metric;
 
@@ -38,6 +39,14 @@ public class BaseDnConfiguration {
 
 	public void setAttributes(String attributes) {
 		this.attributes = attributes;
+	}
+
+	public String getSessions() {
+		return sessions;
+	}
+
+	public void setSessions(String sessions) {
+		this.sessions = sessions;
 	}
 
 	public String getScripts() {

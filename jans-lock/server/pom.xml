@@ -97,6 +97,21 @@
 					<doUpdate>false</doUpdate>
 				</configuration>
 			</plugin>
+
+			<!-- Jetty plugin -->
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<configuration>
+					<webAppConfig>
+						<descriptor>${project.build.directory}/${project.build.finalName}/WEB-INF/web.xml</descriptor>
+						<contextPath>/jans-lock</contextPath>
+					</webAppConfig>
+
+					<webAppSourceDirectory>${project.build.directory}/${project.build.finalName}</webAppSourceDirectory>
+					<scanIntervalSeconds>3</scanIntervalSeconds>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -106,15 +121,10 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-lock-service</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-auth-common</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.jackrabbit</groupId>
-					<artifactId>jackrabbit-core</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>jans-auth-persistence-model</artifactId>
 		</dependency>
 
 		<dependency>
@@ -122,10 +132,6 @@
 			<artifactId>jans-core-timer-weld</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-core-exception-extension-cdi</artifactId>
-		</dependency>
 
 		<!-- RestEasy -->
 		<dependency>

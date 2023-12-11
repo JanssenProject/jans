@@ -60,14 +60,6 @@ public abstract class ExternalScriptService implements Serializable {
 		this.customScriptType = customScriptType;
 	}
 
-	/**
-	 * Method for standalone usage
-	 */
-	public void configure(StandaloneCustomScriptManager customScriptManager) {
-		this.customScriptManager = customScriptManager;
-		this.log = LoggerFactory.getLogger(ExternalScriptService.class);
-	}
-
 	public void reload(@Observes @ReloadScript String event) {
 		// Skip reload if global script is not enabled for this application
 		if (!customScriptManager.isSupportedType(customScriptType)) {

@@ -28,6 +28,10 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
 	public static final String METRIC_SERVICE_COMPONENT_NAME = "metricService";
 
+	public static final String PERSISTENCE_METRIC_ENTRY_MANAGER_NAME = "persistenceMetricEntryManager";
+    
+    public static final String PERSISTENCE_METRIC_CONFIG_GROUP_NAME = "metric";
+
 	private static final long serialVersionUID = 7875838160379126796L;
 
 	@Inject
@@ -43,7 +47,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
 	private NetworkService networkService;
 
 	@Inject
-	@Named(ApplicationFactory.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME)
+	@Named(MetricService.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME)
 	@ReportMetric
 	private PersistenceEntryManager persistenceEntryManager;
 

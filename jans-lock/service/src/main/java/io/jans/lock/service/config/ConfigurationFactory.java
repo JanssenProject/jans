@@ -39,6 +39,8 @@ import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRegistration;
 
 /**
  * @author Yuriy Movchan Date: 05/13/2020
@@ -114,8 +116,10 @@ public class ConfigurationFactory {
 
 	@PostConstruct
 	public void init() {
+		log.info("Initializing ConfigurationFactory ...");
 		this.isActive = new AtomicBoolean(true);
 		try {
+			log.info("---------PATH to file configuration: {}", APP_PROPERTIES_FILE);
             this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
 			loadBaseConfiguration();
 
@@ -135,8 +139,8 @@ public class ConfigurationFactory {
 
 	public void create() {
 		if (!createFromDb()) {
-			log.error("Failed to load configuration from LDAP. Please fix it!!!.");
-			throw new ConfigurationException("Failed to load configuration from LDAP.");
+			log.error("Failed to load configuration from DB. Please fix it!!!.");
+			throw new ConfigurationException("Failed to load configuration from DB.");
 		} else {
 			log.info("Configuration loaded successfully.");
 		}

@@ -145,16 +145,5 @@ class ListenerRedisSub extends JedisPubSub {
         System.out.println("Client is Unsubscribed from channel : "+ channel);
         System.out.println("Client is Subscribed to "+ subscribedChannels + " no. of channels");
     }
-
-	@Override
-	public void ping() {
-		// TODO Auto-generated method stub
-		super.ping();
-	}
-
-	@Override
-	public void onPong(String pattern) {
-		super.onPong(pattern);
-	}
          
 }

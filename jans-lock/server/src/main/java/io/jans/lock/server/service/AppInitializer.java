@@ -70,7 +70,7 @@ public class AppInitializer {
 	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
 
     @Inject
-    @Named(ApplicationFactory.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME)
+    @Named(MetricService.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME)
     @ReportMetric
     private Instance<PersistenceEntryManager> persistenceMetricEntryManagerInstance;
 
@@ -129,7 +129,7 @@ public class AppInitializer {
 		configurationFactory.initTimer();
 		loggerService.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
-		// Notify plugins about finish application initialization
+		// Notify plugins about finish application initialization 
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
 				.fire(new ApplicationInitializedEvent());
 	}
@@ -210,12 +210,29 @@ public class AppInitializer {
 		return persistenceEntryManager;
 	}
 
+	@Produces
+	@ApplicationScoped
+	@Named(MetricService.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME)
+	@ReportMetric
+	public PersistenceEntryManager createMetricPersistenceEntryManager() {
+		Properties connectionProperties = prepareCustomPersistanceProperties(
+				MetricService.PERSISTENCE_METRIC_CONFIG_GROUP_NAME);
+
+		PersistenceEntryManager persistenceEntryManager = applicationFactory.getPersistenceEntryManagerFactory()
+				.createEntryManager(connectionProperties);
+		log.info("Created {}: {} with operation service: {}",
+				new Object[] { MetricService.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME, persistenceEntryManager,
+						persistenceEntryManager.getOperationService() });
+
+		return persistenceEntryManager;
+	}
+
 	public void recreatePersistenceEntryManager(@Observes @LdapConfigurationReload String event) {
 		recreatePersistanceEntryManagerImpl(persistenceEntryManagerInstance,
 				ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
 
 		recreatePersistanceEntryManagerImpl(persistenceEntryManagerInstance,
-				ApplicationFactory.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME, ReportMetric.Literal.INSTANCE);
+				MetricService.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME, ReportMetric.Literal.INSTANCE);
 	}
 
 	protected void recreatePersistanceEntryManagerImpl(Instance<PersistenceEntryManager> instance,
