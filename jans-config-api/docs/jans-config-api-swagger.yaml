@@ -2,17 +2,15 @@ openapi: 3.0.1
 info:
   title: Jans Config API
   contact:
-    name: Gluu Support
-    url: https://support.gluu.org
-    email: xxx@gluu.org
+    name: Contact
+    url: https://github.com/JanssenProject/jans/discussions
   license:
-    name: Apache 2.0
+    name: License
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
-  version: 1.0.0
+  version: OAS Version
 servers:
-- url: https://jans.io/
+- url: https://jans.local.io
   description: The Jans server
-  variables: {}
 tags:
 - name: Attribute
 - name: Default Authentication Method
@@ -977,6 +975,29 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/properties.write
+  /api/v1/jans-auth-server/config/feature-flags:
+    get:
+      tags:
+      - Configuration – Properties
+      summary: Returns feature flags type configured for Jans authorization server.
+      description: Returns feature flags type configured for Jans authorization server.
+      operationId: get-feature-flag-type
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/properties.readonly
   /api/v1/jans-auth-server/config/persistence:
     get:
       tags:
@@ -5116,6 +5137,257 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/logging.write
+  /api/v1/config/message:
+    get:
+      tags:
+      - Message Configuration
+      summary: Returns message configuration.
+      description: Returns message configuration.
+      operationId: get-config-message
+      responses:
+        "200":
+          description: Message configuration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/message.readonly
+    patch:
+      tags:
+      - Message Configuration
+      summary: Patch message configuration.
+      description: Patch message configuration
+      operationId: patch-config-message
+      requestBody:
+        description: String representing patch-document.
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
+      responses:
+        "200":
+          description: Message configuration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/message.write
+  /api/v1/config/message/postgres:
+    get:
+      tags:
+      - Message Configuration – Postgres
+      summary: Returns Postgres message configuration.
+      description: Returns Postgres message configuration.
+      operationId: get-config-message-postgres
+      responses:
+        "200":
+          description: Native persistence configuration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresMessageConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/message.readonly
+    put:
+      tags:
+      - Message Configuration – Postgres
+      summary: Updates Postgres message configuration.
+      description: Updates Postgres message configuration
+      operationId: put-config-message-postgres
+      requestBody:
+        description: PostgresMessageConfiguration object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostgresMessageConfiguration'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
+      responses:
+        "200":
+          description: Native persistence message configuration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresMessageConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/message.write
+    patch:
+      tags:
+      - Message Configuration – Postgres
+      summary: Patch Postgres message configuration.
+      description: Patch Postgres message configuration
+      operationId: patch-config-message-postgres
+      requestBody:
+        description: String representing patch-document.
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
+      responses:
+        "200":
+          description: Native persistence message configuration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresMessageConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/message.write
+  /api/v1/config/message/redis:
+    get:
+      tags:
+      - Message Configuration – Redis
+      summary: Returns Redis message configuration.
+      description: Returns Redis message configuration
+      operationId: get-config-message-redis
+      responses:
+        "200":
+          description: Redis message configuration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedisMessageConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/message.readonly
+    put:
+      tags:
+      - Message Configuration – Redis
+      summary: Updates Redis message configuration.
+      description: Updates Redis message configuration
+      operationId: put-config-message-redis
+      requestBody:
+        description: RedisMessageConfiguration object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedisMessageConfiguration'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
+      responses:
+        "200":
+          description: Redis message configuration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedisMessageConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/message.write
+    patch:
+      tags:
+      - Message Configuration – Redis
+      summary: Patch Redis message configuration.
+      description: Patch Redis message configuration
+      operationId: patch-config-message-redis
+      requestBody:
+        description: String representing patch-document.
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
+      responses:
+        "200":
+          description: Redis message configuration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedisMessageConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/message.write
   /api/v1/org:
     get:
       tags:
@@ -7498,8 +7770,6 @@ components:
       properties:
         dn:
           type: string
-        selected:
-          type: boolean
         inum:
           type: string
         sourceAttribute:
@@ -7588,19 +7858,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanView:
+        selected:
           type: boolean
-        adminCanView:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
+          type: boolean
+        userCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -7637,6 +7909,8 @@ components:
         endSessionEndpoint:
           type: string
         jwksUri:
+          type: string
+        archivedJwksUri:
           type: string
         registrationEndpoint:
           type: string
@@ -7688,7 +7962,12 @@ components:
           type: boolean
         allowAllValueForRevokeEndpoint:
           type: boolean
+        allowRevokeForOtherClients:
+          type: boolean
         sectorIdentifierCacheLifetimeInMinutes:
+          type: integer
+          format: int32
+        archivedJwkLifetimeInSeconds:
           type: integer
           format: int32
         umaConfigurationEndpoint:
@@ -7801,6 +8080,18 @@ components:
           items:
             type: string
         userInfoEncryptionEncValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionSigningAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionEncryptionAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        introspectionEncryptionEncValuesSupported:
           type: array
           items:
             type: string
@@ -8108,6 +8399,8 @@ components:
           type: boolean
         introspectionSkipAuthorization:
           type: boolean
+        introspectionRestrictBasicAuthnToOwnTokens:
+          type: boolean
         endSessionWithAccessToken:
           type: boolean
         cookieDomain:
@@ -8327,6 +8620,28 @@ components:
           type: array
           items:
             type: string
+            enum:
+            - UNKNOWN
+            - HEALTH_CHECK
+            - USERINFO
+            - CLIENTINFO
+            - ID_GENERATION
+            - REGISTRATION
+            - INTROSPECTION
+            - REVOKE_TOKEN
+            - REVOKE_SESSION
+            - ACTIVE_SESSION
+            - END_SESSION
+            - STATUS_SESSION
+            - JANS_CONFIGURATION
+            - CIBA
+            - UMA
+            - U2F
+            - DEVICE_AUTHZ
+            - METRIC
+            - STAT
+            - PAR
+            - SSA
         httpLoggingEnabled:
           type: boolean
         httpLoggingExcludePaths:
@@ -8358,8 +8673,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8369,6 +8682,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8484,11 +8799,6 @@ components:
           type: string
         scriptsPath:
           type: string
-        serializerType:
-          type: string
-          enum:
-          - KRYO
-          - FST
         maxItemsLoggedInCollections:
           type: integer
           format: int32
@@ -8504,6 +8814,12 @@ components:
           type: string
         bridgeScriptPage:
           type: string
+        serializeRules:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
         defaultResponseHeaders:
           type: object
           additionalProperties:
@@ -9099,6 +9415,12 @@ components:
           format: int32
         evidence:
           type: string
+        introspectionSignedResponseAlg:
+          type: string
+        introspectionEncryptedResponseAlg:
+          type: string
+        introspectionEncryptedResponseEnc:
+          type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -9536,6 +9858,111 @@ components:
           type: array
           items:
             type: string
+    MessageConfiguration:
+      type: object
+      properties:
+        messageProviderType:
+          type: string
+          enum:
+          - "NULL"
+          - REDIS
+          - POSTGRES
+        nullConfiguration:
+          $ref: '#/components/schemas/NullMessageConfiguration'
+        redisConfiguration:
+          $ref: '#/components/schemas/RedisMessageConfiguration'
+        postgresConfiguration:
+          $ref: '#/components/schemas/PostgresMessageConfiguration'
+    NullMessageConfiguration:
+      type: object
+    PostgresMessageConfiguration:
+      type: object
+      properties:
+        dbSchemaName:
+          type: string
+          xml:
+            name: db-schema-name
+        connectionUri:
+          type: string
+          xml:
+            name: connection-uri
+        authUserName:
+          type: string
+          xml:
+            name: auth-userName
+        authUserPassword:
+          type: string
+          xml:
+            name: auth-userPassword
+        connectionPoolMaxTotal:
+          type: integer
+          format: int32
+          xml:
+            name: connection-pool-max-total
+        connectionPoolMaxIdle:
+          type: integer
+          format: int32
+          xml:
+            name: connection-pool-max-idle
+        connectionPoolMinIdle:
+          type: integer
+          format: int32
+          xml:
+            name: connection-pool-min-idle
+        messageWaitMillis:
+          type: integer
+          format: int32
+          xml:
+            name: message-wait-millis
+        messageSleepThreadTime:
+          type: integer
+          format: int32
+          xml:
+            name: message-sleep-thread-millis
+    RedisMessageConfiguration:
+      type: object
+      properties:
+        redisProviderType:
+          type: string
+          enum:
+          - STANDALONE
+          - CLUSTER
+          - SHARDED
+          - SENTINEL
+        servers:
+          type: string
+        defaultPutExpiration:
+          type: integer
+          format: int32
+        sentinelMasterGroupName:
+          type: string
+        password:
+          type: string
+        useSSL:
+          type: boolean
+        sslTrustStoreFilePath:
+          type: string
+        sslTrustStorePassword:
+          type: string
+        sslKeyStoreFilePath:
+          type: string
+        sslKeyStorePassword:
+          type: string
+        maxIdleConnections:
+          type: integer
+          format: int32
+        maxTotalConnections:
+          type: integer
+          format: int32
+        connectionTimeout:
+          type: integer
+          format: int32
+        soTimeout:
+          type: integer
+          format: int32
+        maxRetryAttempts:
+          type: integer
+          format: int32
     GluuOrganization:
       required:
       - description
@@ -9697,8 +10124,6 @@ components:
         creationDate:
           type: string
           format: date-time
-        persisted:
-          type: boolean
         user:
           $ref: '#/components/schemas/User'
         ttl:
@@ -9706,6 +10131,8 @@ components:
           format: int32
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

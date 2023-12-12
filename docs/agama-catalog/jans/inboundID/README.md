@@ -65,7 +65,7 @@ To start, ensure the Agama engine and bridge are enabled. More info [here](https
 
 Let's add the required libraries to the authentication server:
 
-- Visit [this](https://maven.jans.io/maven/io/jans/agama-inbound/) page, navigate to the folder matching your Janssen server version, and download the file suffixed with `jar-with-dependencies.jar`
+- Visit [this](https://maven.jans.io/maven/io/jans/agama-inbound/) page, navigate to the folder matching your Janssen server version, and download the jar file
 - SSH to the server. Transfer the file to directory `/opt/jans/jetty/jans-auth/custom/libs`
 - Navigate to `/opt/jans/jetty/jans-auth/webapps` and edit the file `jans-auth.xml` by adding `<Set name="extraClasspath">./custom/libs/*</Set>` before the root tag closes
 - Restart the server, e.g. `systemctl restart jans-auth`

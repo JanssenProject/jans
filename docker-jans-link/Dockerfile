@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.8
+FROM bellsoft/liberica-openjre-alpine:17.0.8@sha256:156b75d18d01f1a83f9a279e80dad82773c212559b20e40620ccb06b1120ce4f
 
 # ===============
 # Alpine packages
@@ -40,8 +40,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Link
 # ====
 
-ENV CN_VERSION=1.0.20-SNAPSHOT
-ENV CN_BUILD_DATE='2023-10-11 10:21'
+ENV CN_VERSION=1.0.21
+ENV CN_BUILD_DATE='2023-12-11 12:08'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-link-server/${CN_VERSION}/jans-link-server-${CN_VERSION}.war
 
 # Install Link
@@ -59,7 +59,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-link/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=04582fa2a7edbb8eed0805cb1fabdcd95482b83f
+ENV JANS_SOURCE_VERSION=a2c5d4bd3d09c9f34e79b0d24bc63ece4ca7da43
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -203,7 +203,7 @@ EXPOSE $CN_LINK_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/link" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.20" \
+    org.opencontainers.image.version="1.0.21" \
     org.opencontainers.image.title="Janssen Link" \
     org.opencontainers.image.description=""
 

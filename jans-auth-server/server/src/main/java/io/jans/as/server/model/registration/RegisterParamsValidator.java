@@ -164,6 +164,30 @@ public class RegisterParamsValidator {
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter userinfo_encrypted_response_enc is not valid.");
         }
 
+        if (registerRequest.getIntrospectionSignedResponseAlg() != null &&
+                !appConfiguration.getIntrospectionSigningAlgValuesSupported().contains(
+                        registerRequest.getIntrospectionSignedResponseAlg().toString())) {
+            log.debug("Parameter introspection_signed_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter introspection_signed_response_alg is not valid.");
+        }
+
+        if (registerRequest.getIntrospectionEncryptedResponseAlg() != null &&
+                !appConfiguration.getIntrospectionEncryptionAlgValuesSupported().contains(
+                        registerRequest.getIntrospectionEncryptedResponseAlg().toString())) {
+            log.debug("Parameter introspection_encrypted_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter introspection_encrypted_response_alg is not valid.");
+        }
+
+        if (registerRequest.getIntrospectionEncryptedResponseEnc() != null &&
+                !appConfiguration.getIntrospectionEncryptionEncValuesSupported().contains(
+                        registerRequest.getIntrospectionEncryptedResponseEnc().toString())) {
+            log.debug("Parameter introspection_encrypted_response_enc is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter introspection_encrypted_response_enc is not valid.");
+        }
+
         if (registerRequest.getRequestObjectSigningAlg() != null &&
                 !appConfiguration.getRequestObjectSigningAlgValuesSupported().contains(
                         registerRequest.getRequestObjectSigningAlg().toString())) {

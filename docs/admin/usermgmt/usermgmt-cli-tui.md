@@ -51,7 +51,7 @@ In the below example we are showing how to connect and use Jans Server's interna
 
 ## Manage data in Jans TUI
 
-We can easily add an user using Jans TUI. To manage user using Jans TUI, got to `/opt/jans/jans-cli/config-cli-tui.py` and select `Users` tab.
+We can easily add a user using Jans TUI. To do that, run the TUI using `/opt/jans/jans-cli/config-cli-tui.py` for example, and click on the `Users` tab.
 
 ![user-tab](https://github.com/JanssenProject/jans/assets/43112579/d94916ff-82c6-4d64-bd3a-9b13f3a5038d)
 

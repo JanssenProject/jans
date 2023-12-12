@@ -740,6 +740,23 @@ class Upgrade:
                 entry.attrs["jansScope"].append(ssa_scope)
                 should_update = True
 
+        # use token reference
+        try:
+            attrs = json.loads(entry.attrs["jansAttrs"])
+        except TypeError:
+            attrs = entry.attrs["jansAttrs"]
+        finally:
+            if attrs["runIntrospectionScriptBeforeJwtCreation"] is True:
+                attrs["runIntrospectionScriptBeforeJwtCreation"] = False
+                should_update = True
+            if "inum=2D3E.5A04,ou=scripts,o=jans" not in attrs["updateTokenScriptDns"]:
+                attrs["updateTokenScriptDns"].append("inum=2D3E.5A04,ou=scripts,o=jans")
+                should_update = True
+            if "inum=A44E-4F3D,ou=scripts,o=jans" in attrs["introspectionScripts"]:
+                attrs["introspectionScripts"].remove("inum=A44E-4F3D,ou=scripts,o=jans")
+                should_update = True
+            entry.attrs["jansAttrs"] = json.dumps(attrs)
+
         if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
@@ -799,6 +816,26 @@ class Upgrade:
                 if new_smtp_conf := _transform_smtp_config(default_smtp_conf, smtp_conf):
                     entry.attrs["jansSmtpConf"][0] = json.dumps(new_smtp_conf)
                     should_update = True
+
+        scim_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
+        if as_boolean(entry.attrs["jansScimEnabled"]) != scim_enabled:
+            entry.attrs["jansScimEnabled"] = scim_enabled
+            should_update = True
+
+        # set jansMessageConf if still empty
+        if not entry.attrs.get("jansMessageConf"):
+            entry.attrs["jansMessageConf"] = json.dumps({
+                "messageProviderType": "NULL",
+                "postgresConfiguration": {
+                    "db-schema-name": "public",
+                    "message-wait-millis": 100,
+                    "message-sleep-thread-millis": 200,
+                },
+                "redisConfiguration": {
+                    "servers": "localhost:6379",
+                },
+            })
+            should_update = True
 
         if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
@@ -888,9 +925,13 @@ def _transform_auth_errors_config(conf):
 def _transform_auth_static_config(conf):
     should_update = False
 
-    if "ssa" not in conf["baseDn"]:
-        conf["baseDn"]["ssa"] = "ou=ssa,o=jans"
-        should_update = True
+    for key, dn in [
+        ("ssa", "ou=ssa,o=jans"),
+        ("archivedJwks", "ou=archived_jwks,o=jans"),
+    ]:
+        if key not in conf["baseDn"]:
+            conf["baseDn"][key] = dn
+            should_update = True
     return conf, should_update
 
 
