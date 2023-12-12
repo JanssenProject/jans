@@ -35,7 +35,7 @@ public class BrokerIdentityProviderForm implements Serializable {
 	@FormParam("metaDataFile")
 	@PartType(MediaType.APPLICATION_OCTET_STREAM)
     @Schema(implementation = String.class, format="binary")
-    private transient InputStream  metaDataFile;
+    private InputStream  metaDataFile;
 
     public IdentityProvider getIdentityProvider() {
         return identityProvider;
