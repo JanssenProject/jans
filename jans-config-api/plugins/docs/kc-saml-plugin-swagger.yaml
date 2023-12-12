@@ -820,12 +820,14 @@ components:
     BrokerIdentityProviderForm:
       required:
       - identityProvider
+      - metaDataFile
       type: object
       properties:
         identityProvider:
           $ref: '#/components/schemas/IdentityProvider'
         metaDataFile:
-          type: object
+          type: string
+          format: binary
     IdentityProvider:
       required:
       - creatorId
@@ -1088,13 +1090,15 @@ components:
           type: string
     TrustRelationshipForm:
       required:
+      - metaDataFile
       - trustRelationship
       type: object
       properties:
         trustRelationship:
           $ref: '#/components/schemas/TrustRelationship'
         metaDataFile:
-          type: object
+          type: string
+          format: binary
   securitySchemes:
     oauth2:
       type: oauth2
