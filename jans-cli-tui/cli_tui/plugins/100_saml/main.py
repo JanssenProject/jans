@@ -90,20 +90,36 @@ class Plugin(DialogUtils):
                                 )
 
         self.tabs['configuration'] = HSplit([
-                        self.app.getTitledCheckBox(_("Enable SAML"), name='samlEnabled', checked=self.config.get('samlEnabled'), jans_help=self.app.get_help_from_schema(self.schema, 'samlEnabled'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
-                        self.app.getTitledWidget(
-                        _("Selected IDP"),
-                        name='selectedIdp',
-                        widget=DropDownWidget(
-                            values=[('keycloak', 'Keycloak')],
-                            value=self.config.get('selectedIdp', 'keycloak'),
-                            select_one_option = False
-                            ),
-                        jans_help=self.app.get_help_from_schema(self.schema, 'selectedIdp'),
-                        style=cli_style.titled_text
+                        self.app.getTitledCheckBox(
+                            _("Enable SAML"),
+                            name='enabled',
+                            checked=self.config.get('enabled'),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'enabled'),
+                            style=cli_style.check_box,
+                            widget_style=cli_style.black_bg_widget
                         ),
 
-                        self.app.getTitledCheckBox(_("Configuration Generation"), name='configGeneration', checked=self.config.get('configGeneration'), jans_help=self.app.get_help_from_schema(self.schema, 'configGeneration'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
+                        self.app.getTitledWidget(
+                            _("Selected IDP"),
+                            name='selectedIdp',
+                            widget=DropDownWidget(
+                                values=[('keycloak', 'Keycloak')],
+                                value=self.config.get('selectedIdp', 'keycloak'),
+                                select_one_option = False
+                            ),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'selectedIdp'),
+                            style=cli_style.titled_text
+                        ),
+
+                    self.app.getTitledText(
+                        title=_("IDP Metadata File Pattern"),
+                        name='idpMetadataFilePattern',
+                        value=self.config.get('idpMetadataFilePattern', ''),
+                        style=cli_style.edit_text,
+                        jans_help=_("Pattern for saving metadata file"),
+                        widget_style=cli_style.black_bg_widget
+                    ),
+
                         self.app.getTitledCheckBox(_("Ignore Validation"), name='ignoreValidation', checked=self.config.get('ignoreValidation'), jans_help=self.app.get_help_from_schema(self.schema, 'ignoreValidation'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
                         Window(height=1),
                         VSplit([Button(_("Save"), handler=self.save_config)], align=HorizontalAlign.CENTER),
