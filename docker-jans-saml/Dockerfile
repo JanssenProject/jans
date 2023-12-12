@@ -23,7 +23,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.0.21-SNAPSHOT
+ENV CN_VERSION=1.0.21
 ENV CN_BUILD_DATE='2023-12-08 08:47'
 
 # @FIXME: kc-jans-storage-plugin raises error about Cookie
@@ -41,7 +41,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=44a893b1141e34f74f809362c84e68c90eb2c05e
+ENV JANS_SOURCE_VERSION=a2c5d4bd3d09c9f34e79b0d24bc63ece4ca7da43
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
