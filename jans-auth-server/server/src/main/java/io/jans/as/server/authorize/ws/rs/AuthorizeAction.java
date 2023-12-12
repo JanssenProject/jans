@@ -198,6 +198,7 @@ public class AuthorizeAction {
     private String requestUri;
     private String codeChallenge;
     private String codeChallengeMethod;
+    private String authorizationDetails;
     private String claims;
 
     // CIBA Request parameter
@@ -902,6 +903,14 @@ public class AuthorizeAction {
 
     public void setCodeChallengeMethod(String codeChallengeMethod) {
         this.codeChallengeMethod = codeChallengeMethod;
+    }
+
+    public String getAuthorizationDetails() {
+        return authorizationDetails;
+    }
+
+    public void setAuthorizationDetails(String authorizationDetails) {
+        this.authorizationDetails = authorizationDetails;
     }
 
     public String getClaims() {

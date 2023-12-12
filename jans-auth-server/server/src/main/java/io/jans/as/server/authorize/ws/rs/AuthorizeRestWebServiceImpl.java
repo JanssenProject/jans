@@ -203,7 +203,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setAcrValues(acrValues);
         authzRequest.setAmrValues(amrValues);
         authzRequest.setDpopJkt(dpopJkt);
-        authzRequest.setAuthorizationDetailsString(authorizationDetails);
+        authzRequest.setAuthzDetailsString(authorizationDetails);
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
         authzRequest.setSessionId(sessionId);
@@ -250,7 +250,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
         authzRequest.setDpopJkt(dpopJkt);
-        authzRequest.setAuthorizationDetailsString(authorizationDetails);
+        authzRequest.setAuthzDetailsString(authorizationDetails);
         authzRequest.setSessionId(sessionId);
         authzRequest.setOriginHeaders(originHeaders);
         authzRequest.setCodeChallenge(codeChallenge);
@@ -950,6 +950,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, authzRequest.getCodeChallengeMethod());
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.SESSION_ID, authzRequest.getSessionId());
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.CLAIMS, authzRequest.getClaims());
+        redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.AUTHORIZATION_DETAILS, authzRequest.getAuthzDetailsString());
 
         // CIBA param
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.AUTH_REQ_ID, authzRequest.getAuthReqId());

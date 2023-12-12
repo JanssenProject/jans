@@ -6,6 +6,8 @@
 
 package io.jans.as.server.model.common;
 
+import io.jans.as.common.model.authzdetails.AuthzDetail;
+import io.jans.as.common.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
@@ -44,6 +46,8 @@ public class ExecutionContext {
     private List<SessionId> currentSessions;
 
     private AuthzRequest authzRequest;
+    private AuthzDetails authzDetails;
+    private AuthzDetail authzDetail;
 
     private AppConfiguration appConfiguration;
     private AttributeService attributeService;
@@ -91,6 +95,7 @@ public class ExecutionContext {
         executionContext.setHttpResponse(authzRequest.getHttpResponse());
         executionContext.setClient(authzRequest.getClient());
         executionContext.setAuthzRequest(authzRequest);
+        executionContext.setAuthzDetails(authzRequest.getAuthzDetails());
         return executionContext;
     }
 
@@ -105,6 +110,22 @@ public class ExecutionContext {
             }
         }
         return executionContext;
+    }
+
+    public AuthzDetails getAuthzDetails() {
+        return authzDetails;
+    }
+
+    public void setAuthzDetails(AuthzDetails authzDetails) {
+        this.authzDetails = authzDetails;
+    }
+
+    public AuthzDetail getAuthzDetail() {
+        return authzDetail;
+    }
+
+    public void setAuthzDetail(AuthzDetail authzDetail) {
+        this.authzDetail = authzDetail;
     }
 
     public AuthzRequest getAuthzRequest() {

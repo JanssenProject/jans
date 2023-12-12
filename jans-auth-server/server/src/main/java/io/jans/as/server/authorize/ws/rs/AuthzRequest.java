@@ -1,6 +1,7 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import com.google.common.collect.Sets;
+import io.jans.as.common.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.DeviceSession;
 import io.jans.as.model.common.Prompt;
@@ -27,7 +28,7 @@ import static io.jans.as.model.util.StringUtils.implode;
  */
 public class AuthzRequest {
 
-    private final static Logger log = LoggerFactory.getLogger(AuthzRequest.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthzRequest.class);
 
     private String scope;
     private String responseType;
@@ -54,7 +55,8 @@ public class AuthzRequest {
     private String claims;
     private String authReqId;
     private String dpopJkt;
-    private String authorizationDetailsString;
+    private String authzDetailsString;
+    private AuthzDetails authzDetails;
     private String httpMethod;
     private String deviceSession;
     private DeviceSession deviceSessionObject;
@@ -69,12 +71,20 @@ public class AuthzRequest {
     private OAuth2AuditLog auditLog;
     private boolean promptFromJwt;
 
-    public String getAuthorizationDetailsString() {
-        return authorizationDetailsString;
+    public String getAuthzDetailsString() {
+        return authzDetailsString;
     }
 
-    public void setAuthorizationDetailsString(String authorizationDetailsString) {
-        this.authorizationDetailsString = authorizationDetailsString;
+    public void setAuthzDetailsString(String authzDetailsString) {
+        this.authzDetailsString = authzDetailsString;
+    }
+
+    public AuthzDetails getAuthzDetails() {
+        return authzDetails;
+    }
+
+    public void setAuthzDetails(AuthzDetails authzDetails) {
+        this.authzDetails = authzDetails;
     }
 
     public String getDpopJkt() {
@@ -444,7 +454,8 @@ public class AuthzRequest {
                 ", amrValues='" + amrValues + '\'' +
                 ", request='" + request + '\'' +
                 ", requestUri='" + requestUri + '\'' +
-                ", authorizationDetailsString='" + authorizationDetailsString + '\'' +
+                ", authzDetailsString='" + authzDetailsString + '\'' +
+                ", authzDetails='" + authzDetails + '\'' +
                 ", sessionId='" + sessionId + '\'' +
                 ", originHeaders='" + originHeaders + '\'' +
                 ", codeChallenge='" + codeChallenge + '\'' +

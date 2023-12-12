@@ -1334,6 +1334,11 @@ paths:
                 client_name:
                   type: string
                   description: Name of the Client to be presented to the user.
+                authorization_details_types:
+                  type: array
+                    description: authorization details types (RFC9396). Fine-graned access.
+                    items:
+                      type: string
                 logo_uri:
                   type: string
                   description: URL that references a logo for the Client application
@@ -1754,6 +1759,11 @@ paths:
                   description: e-mail addresses of people responsible for this Client.
                   items:
                     type: string
+                authorization_details_types:
+                  type: array
+                    description: authorization details types (RFC9396). Fine-graned access.
+                    items:
+                      type: string
                 client_name:
                   type: string
                   description: Name of the Client to be presented to the user.
@@ -2150,6 +2160,11 @@ paths:
                     description: e-mail addresses of people responsible for this Client.
                     items:
                       type: string
+                  authorization_details_types:
+                    type: array
+                      description: authorization details types (RFC9396). Fine-graned access.
+                      items:
+                        type: string
                   client_name:
                     type: string
                     description: Name of the Client to be presented to the user.
