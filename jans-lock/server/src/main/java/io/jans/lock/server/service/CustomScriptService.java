@@ -16,7 +16,7 @@ import jakarta.interceptor.Interceptor;
 /**
  * Operations with custom scripts
  *
- * @author Yuriy Movchan Date: 09/07/2023
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @ApplicationScoped
 @Alternative

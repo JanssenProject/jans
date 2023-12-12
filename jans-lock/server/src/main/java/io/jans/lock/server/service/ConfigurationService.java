@@ -8,7 +8,6 @@ package io.jans.lock.server.service;
 
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.lock.model.config.StaticConfiguration;
-import io.jans.lock.service.EncryptionService;
 import io.jans.model.SmtpConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
@@ -20,7 +19,7 @@ import jakarta.inject.Inject;
 
 /**
  *
- * @author Yuriy Movchan Date: 11/12/2023
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @ApplicationScoped
 public class ConfigurationService {

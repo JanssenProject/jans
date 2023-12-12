@@ -15,14 +15,13 @@ import org.slf4j.Logger;
 import com.google.common.collect.Lists;
 
 import io.jans.exception.ConfigurationException;
-import io.jans.lock.service.EncryptionService;
-import io.jans.lock.service.MetricService;
 import io.jans.lock.service.config.ApplicationFactory;
 import io.jans.lock.service.config.ConfigurationFactory;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.util.properties.FileConfiguration;
+import io.jans.service.ApplicationConfigurationFactory;
 import io.jans.service.PythonService;
 import io.jans.service.cdi.event.ApplicationInitialized;
 import io.jans.service.cdi.event.ApplicationInitializedEvent;
@@ -38,6 +37,7 @@ import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.BeforeDestroyed;
 import jakarta.enterprise.context.Initialized;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
@@ -46,12 +46,13 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.servlet.ServletContext;
 
 /**
  * 
- * Офты  refresh server initializer
- * @author Yuriy Movchan
- * @version Nov 11, 2023
+ * Lock server initializer
+ *
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @ApplicationScoped
 public class AppInitializer {
@@ -74,8 +75,14 @@ public class AppInitializer {
     @ReportMetric
     private Instance<PersistenceEntryManager> persistenceMetricEntryManagerInstance;
 
-	@Inject
-	private ApplicationFactory applicationFactory;
+    @Inject
+    private Instance<ApplicationConfigurationFactory> applicationConfigurationFactory;
+
+    @Inject
+    private ConfigurationFactory configurationFactory;
+
+    @Inject
+    private ApplicationFactory applicationFactory;
 
 	@Inject
 	private Instance<EncryptionService> encryptionServiceInstance;
@@ -88,9 +95,6 @@ public class AppInitializer {
 
 	@Inject
 	private CustomScriptManager customScriptManager;
-
-	@Inject
-	private ConfigurationFactory configurationFactory;
 
 	@Inject
 	private QuartzSchedulerManager quartzSchedulerManager;
@@ -110,7 +114,14 @@ public class AppInitializer {
 	public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
 		log.debug("Initializing application services");
 
-		configurationFactory.create();
+		// Start timer
+		initSchedulerService();
+
+		// Initialize plugins configurations
+		for (ApplicationConfigurationFactory configurationFactory : applicationConfigurationFactory) {
+			configurationFactory.create();
+			configurationFactory.initTimer();
+		}
 
 		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
 		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
@@ -122,11 +133,7 @@ public class AppInitializer {
 		
 		// Initialize script manager
 		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.LOCK_EXTENSION);
-		
-		// Start timer
-		initSchedulerService();
 
-		configurationFactory.initTimer();
 		loggerService.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
 		// Notify plugins about finish application initialization 
@@ -263,4 +270,15 @@ public class AppInitializer {
 					oldPersistenceEntryManager, oldPersistenceEntryManager.getOperationService());
 		}
 	}
+	
+
+    public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
+        log.info("Stopping services and closing DB connections at server shutdown...");
+        log.debug("Checking who intiated destory", new Throwable());
+
+        metricService.close();
+
+        PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
+        closePersistenceEntryManager(persistenceEntryManager, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
+    }
 }

@@ -43,14 +43,20 @@
 	</build>
 
 	<dependencies>
-		<!-- jans -->
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-core-service</artifactId>
-		</dependency>
+		<!-- Jans -->
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-lock-model</artifactId>
+		</dependency>
+<!--
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-message</artifactId>
+		</dependency>
+-->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-service</artifactId>
 		</dependency>
 
 		<!-- CDI -->

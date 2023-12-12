@@ -7,10 +7,9 @@
 package io.jans.lock.model.config;
 
 /**
- * base interface for all Jans Auth configurations
+ * Base interface for all Jans Auth configurations
  *
- * @author Yuriy Movchan
- * @version 04/12/2017
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 public interface Configuration {
 }

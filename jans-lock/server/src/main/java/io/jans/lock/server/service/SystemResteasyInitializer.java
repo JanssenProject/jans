@@ -17,8 +17,7 @@ import jakarta.ws.rs.core.Application;
 /**
  * Integration with Resteasy
  * 
- * @author Yuriy Movchan
- * @version 0.1, 11/13/2020
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @ApplicationPath("/sys")
 public class SystemResteasyInitializer extends Application {	

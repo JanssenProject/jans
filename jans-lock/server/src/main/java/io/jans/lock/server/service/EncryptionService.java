@@ -4,7 +4,7 @@
  * Copyright (c) 2023, Janssen Project
  */
 
-package io.jans.lock.service;
+package io.jans.lock.server.service;
 
 import java.io.Serializable;
 import java.util.Properties;
@@ -18,7 +18,7 @@ import jakarta.inject.Inject;
 /**
  * Allows to decrypted properties with passwords
  *
- * @author Yuriy Movchan Date: 09/23/2014
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @ApplicationScoped
 public class EncryptionService implements Serializable {

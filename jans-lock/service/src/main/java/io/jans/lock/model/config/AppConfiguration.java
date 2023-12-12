@@ -14,8 +14,7 @@ import jakarta.enterprise.inject.Vetoed;
 /**
  * Janssen Project configuration
  *
- * @author Yuriy Movchan
- * @version 0.1, 05/15/2013
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @Vetoed
 @JsonIgnoreProperties(ignoreUnknown = true)

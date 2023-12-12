@@ -15,7 +15,7 @@ import jakarta.inject.Inject;
 /**
  * Logger service
  *
- * @author Yuriy Movchan Date: 08/19/2018
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @ApplicationScoped
 public class LoggerService extends io.jans.service.logger.LoggerService {

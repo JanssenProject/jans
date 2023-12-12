@@ -14,8 +14,8 @@ import io.jans.orm.annotation.ObjectClass;
 import jakarta.enterprise.inject.Vetoed;
 
 /**
- * @author Yuriy Movchan
- * @version 0.1, 04/05/2023
+ * 
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @Vetoed
 @DataEntry

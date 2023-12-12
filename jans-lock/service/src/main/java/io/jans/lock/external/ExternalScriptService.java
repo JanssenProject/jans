@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -23,7 +22,6 @@ import io.jans.model.custom.script.type.BaseExternalType;
 import io.jans.orm.util.StringHelper;
 import io.jans.service.custom.inject.ReloadScript;
 import io.jans.service.custom.script.CustomScriptManager;
-import io.jans.service.custom.script.StandaloneCustomScriptManager;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -31,7 +29,7 @@ import jakarta.inject.Inject;
 /**
  * Provides factory methods needed to create external extension
  *
- * @author Yuriy Movchan Date: 01/08/2015
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 public abstract class ExternalScriptService implements Serializable {
 

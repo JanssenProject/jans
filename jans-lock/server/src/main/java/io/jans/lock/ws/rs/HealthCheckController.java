@@ -18,8 +18,7 @@ import jakarta.ws.rs.core.MediaType;
 /**
  * Health check controller
  * 
- * @author Yuriy Movchan
- * @version Jul 24, 2020
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @ApplicationScoped
 @Path("/")

@@ -11,7 +11,7 @@ import io.jans.service.custom.script.AbstractCustomScriptService;
 /**
  * Operations with custom scripts
  *
- * @author Yuriy Movchan Date: 12/03/2014
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 public abstract class CustomScriptService extends AbstractCustomScriptService {
 

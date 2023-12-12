@@ -28,7 +28,7 @@ import jakarta.inject.Inject;
 /**
  * Holds factory methods to create services
  *
- * @author Yuriy Movchan Date: 02/14/2017
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @ApplicationScoped
 public class ApplicationFactory {

@@ -4,7 +4,7 @@
  * Copyright (c) 2023, Janssen Project
  */
 
-package io.jans.lock.service;
+package io.jans.lock.server.service;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.StaticConfiguration;
@@ -20,7 +20,7 @@ import jakarta.inject.Named;
 /**
  * Store and retrieve metric
  *
- * @author Yuriy Movchan Date: 05/13/2020
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @ApplicationScoped
 @Named(MetricService.METRIC_SERVICE_COMPONENT_NAME)
@@ -72,7 +72,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
 	@Override
 	public ApplicationType getApplicationType() {
-		return ApplicationType.FIDO2;
+		return ApplicationType.JANS_LOCK;
 	}
 
 	@Override

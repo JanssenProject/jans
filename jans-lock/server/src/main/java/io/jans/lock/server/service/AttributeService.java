@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.lock.service;
+package io.jans.lock.server.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,8 +16,8 @@ import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
 
 /**
- * @author Javier Rojas Blum
- * @version May 30, 2018
+ * 
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @ApplicationScoped
 public class AttributeService extends io.jans.service.AttributeService {

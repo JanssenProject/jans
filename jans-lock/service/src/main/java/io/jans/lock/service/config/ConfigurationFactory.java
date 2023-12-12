@@ -22,6 +22,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.service.ApplicationConfigurationFactory;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.BaseConfigurationReload;
 import io.jans.service.cdi.event.ConfigurationEvent;
@@ -39,14 +40,12 @@ import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletRegistration;
 
 /**
- * @author Yuriy Movchan Date: 05/13/2020
+ * @author Yuriy Movchan Date: 12/12/2023
  */
 @ApplicationScoped
-public class ConfigurationFactory {
+public class ConfigurationFactory extends ApplicationConfigurationFactory {
 
 	@Inject
 	private Logger log;
@@ -137,15 +136,6 @@ public class ConfigurationFactory {
 		}
 	}
 
-	public void create() {
-		if (!createFromDb()) {
-			log.error("Failed to load configuration from DB. Please fix it!!!.");
-			throw new ConfigurationException("Failed to load configuration from DB.");
-		} else {
-			log.info("Configuration loaded successfully.");
-		}
-	}
-
 	public void initTimer() {
 		log.debug("Initializing Configuration Timer");
 
@@ -228,8 +218,6 @@ public class ConfigurationFactory {
 		return baseConfiguration;
 	}
 
-	@Produces
-    @ApplicationScoped
     public PersistenceConfiguration getPersistenceConfiguration() {
         return persistenceConfiguration;
     }
@@ -259,10 +247,11 @@ public class ConfigurationFactory {
             return false;
         }
 
-        return createFromDb();
+        return createFromDB(false);
     }
 
-	private boolean createFromDb() {
+	@Override
+	protected boolean createFromDB(boolean recoverFromFiles) {
 		log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
 		try {
 			final Conf c = loadConfigurationFromDB();
@@ -283,6 +272,10 @@ public class ConfigurationFactory {
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
 		}
+
+        if (recoverFromFiles) {
+            log.error("Unable to find configuration in DB, load configuration from file system is not implemented... ");
+        }
 
 		throw new ConfigurationException("Unable to find configuration in DB... ");
 	}
@@ -352,6 +345,5 @@ public class ConfigurationFactory {
 
 		return null;
 	}
-
 
 }
