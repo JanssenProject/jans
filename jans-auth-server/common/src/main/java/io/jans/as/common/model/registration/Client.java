@@ -323,6 +323,7 @@ public class Client extends DeletableEntity implements Serializable {
         this.accessTokenSigningAlg = accessTokenSigningAlg;
     }
 
+	@Hidden
     public AuthenticationMethod getAuthenticationMethod() {
         return AuthenticationMethod.fromString(tokenEndpointAuthMethod);
     }
