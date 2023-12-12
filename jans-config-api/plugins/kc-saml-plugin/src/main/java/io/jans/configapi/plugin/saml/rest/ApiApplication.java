@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.saml.rest;
 
+import io.jans.configapi.core.rest.BaseApiApplication;
 import io.jans.configapi.plugin.saml.util.Constants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -9,7 +10,6 @@ import io.swagger.v3.oas.annotations.security.*;
 import io.swagger.v3.oas.annotations.servers.*;
 
 import jakarta.ws.rs.ApplicationPath;
-import jakarta.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,12 +32,15 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 @OAuthScope(name = Constants.SAML_CONFIG_WRITE_ACCESS, description = "Manage SAML configuration related information")
 }
 )))
-public class ApiApplication extends Application {
+public class ApiApplication extends BaseApiApplication {
 
     @Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
 
+        // General
+        classes = (HashSet) addCommonClasses((classes));
+        
         classes.add(SamlConfigResource.class);
         classes.add(TrustRelationshipResource.class);
         classes.add(IdpResource.class);

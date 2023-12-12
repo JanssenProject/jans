@@ -341,12 +341,12 @@ public class IdentityProviderService {
             idpMetaDataFN = getIdpNewMetadataFileName(identityProvider);
             log.debug("Final idpMetaDataFN:{}", idpMetaDataFN);
             identityProvider.setIdpMetaDataFN(idpMetaDataFN);
-
+            identityProvider.setIdpMetaDataLocation(getIdpMetadataTempDirFilePath());
         }
         InputStream targetStream = file;
         log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
 
-        String result = samlIdpService.saveMetadataFile(samlConfigService.getIdpMetadataTempDir(),
+        String result = samlIdpService.saveMetadataFile(getIdpMetadataTempDirFilePath(),
                 idpMetaDataFN, Constants.IDP_MODULE, targetStream);
         log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
         if (StringHelper.isNotEmpty(result)) {

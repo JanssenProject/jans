@@ -911,10 +911,6 @@ components:
           type: array
           items:
             type: string
-        config:
-          type: object
-          additionalProperties:
-            type: string
         baseDn:
           type: string
     IdentityProviderPagedResult:
@@ -984,6 +980,10 @@ components:
           type: string
         ignoreValidation:
           type: boolean
+        idpMetadataMandatoryAttributes:
+          type: array
+          items:
+            type: string
     JsonPatch:
       type: object
     ProfileConfiguration:

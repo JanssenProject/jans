@@ -682,6 +682,9 @@ class JansCliApp(Application):
             next_widget = None
             ) -> AnyContainer:
 
+        if value is None:
+            value = ''
+
         ta = TextArea(
                 text=str(value),
                 multiline=height > 1,
