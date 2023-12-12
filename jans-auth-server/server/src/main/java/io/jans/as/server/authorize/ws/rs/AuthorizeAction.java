@@ -250,6 +250,11 @@ public class AuthorizeAction {
             return;
         }
 
+        if (log.isTraceEnabled()) {
+            log.trace("checkPermissionGrantedInternal - scope: {}, client_id: {}, prompts: {}, responseType: {}, authorization_details: {}",
+                    scope, clientId, prompt, responseType, authorizationDetails);
+        }
+
         Client client = null;
         try {
             client = clientService.getClient(clientId);
