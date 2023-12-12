@@ -7862,11 +7862,11 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
+        userCanEdit:
+          type: boolean
         adminCanView:
           type: boolean
         userCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
@@ -8673,6 +8673,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8682,8 +8684,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10129,10 +10129,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
