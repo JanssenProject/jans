@@ -258,7 +258,7 @@ class Plugin(DialogUtils):
 
         def do_delete_tr():
             async def coroutine():
-                cli_args = {'operation_id': 'put-trust-relationship', 'url_suffix':'id:{}'.format(kwargs['selected'][0])}
+                cli_args = {'operation_id': 'delete-trust-relationship', 'url_suffix':'id:{}'.format(kwargs['selected'][0])}
                 self.app.start_progressing(_("Deleting trust relationship {}").format(kwargs['selected'][1]))
                 response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
