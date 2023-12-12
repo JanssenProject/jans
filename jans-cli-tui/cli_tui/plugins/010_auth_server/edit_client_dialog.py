@@ -131,7 +131,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.data['attributes']['redirectUrisRegex'] = self.data.pop('redirectUrisRegex')
         self.data['attributes']['parLifetime'] = self.data.pop('parLifetime')
         self.data['attributes']['requirePar'] = self.data.pop('requirePar')
-        self.data['attributes']['requirePkce'] = self.data.pop('requirePkce', False)
+        #self.data['attributes']['requirePkce'] = self.data.pop('requirePkce', False)
 
         for list_key in (
             'backchannelLogoutUri',
@@ -257,9 +257,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         client_secret_next_widget.handler = partial(change_view_hide, client_secret_widget)
 
-        require_pkce = self.data.get('attributes', {}).get('redirectUrisRegex')
-        if require_pkce is None:
-            require_pkce = self.myparent.app_configuration.get('requirePkce', False)
+        #require_pkce = self.data.get('attributes', {}).get('redirectUrisRegex')
+        #if require_pkce is None:
+        #    require_pkce = self.myparent.app_configuration.get('requirePkce', False)
 
         basic_tab_widgets = [
             self.myparent.getTitledText(
@@ -349,12 +349,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 jans_help=self.myparent.get_help_from_schema(schema, 'trustedClient'),
                 style=cli_style.check_box),
 
-            self.myparent.getTitledCheckBox(
-                _("Require PKCE"),
-                name='requirePkce',
-                checked=require_pkce,
-                jans_help=self.myparent.get_help_from_schema(schema, 'requirePkce'),
-                style=cli_style.check_box),
+            #self.myparent.getTitledCheckBox(
+            #    _("Require PKCE"),
+            #    name='requirePkce',
+            #    checked=require_pkce,
+            #    jans_help=self.myparent.get_help_from_schema(schema, 'requirePkce'),
+            #    style=cli_style.check_box),
 
             self.myparent.getTitledRadioButton(
                 _("Application Type"),
