@@ -21,34 +21,10 @@
 
     <!-- keycloak dependencies -->
     <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-core</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-server-spi</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-server-spi-private</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-services</artifactId>
-    </dependency>
-    
-    <!--
-    <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-admin-client</artifactId>
     </dependency>
-    -->
     <!-- end keycloak dependencies-->
-
-    
   </dependencies>
 
   <build>
@@ -70,6 +46,9 @@
                 <outputDirectory>${project.build.directory}/deps</outputDirectory>
                 <includeScope>runtime</includeScope>
                 <excludeTransitive>false</excludeTransitive>
+                <excludeArtifactIds>
+                  keycloak-common
+                </excludeArtifactIds>
             </configuration>
         </execution>
       </executions>
