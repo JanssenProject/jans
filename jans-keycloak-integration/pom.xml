@@ -54,7 +54,7 @@
     <modules>
       <module>authenticator</module>
       <module>storage-spi</module>
-      <module>task-scheduling</module>
+      <module>job-scheduler</module>
     </modules>
 
     <repositories>
