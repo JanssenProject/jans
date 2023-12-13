@@ -111,6 +111,8 @@ public abstract class UserService {
 
     public User updateUser(User user) {
         user.setUpdatedAt(new Date());
+        
+        log.debug("Auth Common service - user: {}, user.getCustomObjectClasses():{}", user, user.getCustomObjectClasses());
         persistenceEntryManager.merge(user);
 
         return getUserByDn(user.getDn());

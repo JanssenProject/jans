@@ -350,6 +350,7 @@ public class UserMgmtService {
     }
 
     public User updateUser(User user) {
+        logger.debug("Config API Service getPersistenceType(): {}, user.getCustomObjectClasses():{}", getPersistenceType(), user.getCustomObjectClasses());
         return userService.updateUser(user);
     }
 }

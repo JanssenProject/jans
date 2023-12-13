@@ -424,7 +424,7 @@ public class UserResource extends BaseResource {
     }
 
     private User ignoreCustomAttributes(User user, boolean removeNonLDAPAttributes) {
-        logger.debug(
+        logger.error(
                 "** validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
                 user, removeNonLDAPAttributes, user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(),
                 userMgmtSrv.isLDAP());
@@ -432,6 +432,10 @@ public class UserResource extends BaseResource {
         if (removeNonLDAPAttributes) {
             return userMgmtSrv.ignoreCustomObjectClassesForNonLDAP(user);
         }
+        
+        logger.error("** After removeNonLDAPAttributes - user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
+                user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(), userMgmtSrv.isLDAP());
+
 
         return user;
     }
