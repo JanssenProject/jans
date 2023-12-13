@@ -207,7 +207,6 @@ public class AppInitializer {
 
         // Start timer
         initSchedulerService();
-		configurationFactory.create();
 
 		// Initialize plugins configurations
 		for (ApplicationConfigurationFactory configurationFactory : applicationConfigurationFactory) {
