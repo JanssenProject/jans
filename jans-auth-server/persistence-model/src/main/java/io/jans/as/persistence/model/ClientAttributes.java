@@ -128,6 +128,39 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("evidence")
     private String evidence;
 
+    @JsonProperty("introspectionSignedResponseAlg")
+    private String introspectionSignedResponseAlg;
+
+    @JsonProperty("introspectionEncryptedResponseAlg")
+    private String introspectionEncryptedResponseAlg;
+
+    @JsonProperty("introspectionEncryptedResponseEnc")
+    private String introspectionEncryptedResponseEnc;
+
+    public String getIntrospectionSignedResponseAlg() {
+        return introspectionSignedResponseAlg;
+    }
+
+    public void setIntrospectionSignedResponseAlg(String introspectionSignedResponseAlg) {
+        this.introspectionSignedResponseAlg = introspectionSignedResponseAlg;
+    }
+
+    public String getIntrospectionEncryptedResponseAlg() {
+        return introspectionEncryptedResponseAlg;
+    }
+
+    public void setIntrospectionEncryptedResponseAlg(String introspectionEncryptedResponseAlg) {
+        this.introspectionEncryptedResponseAlg = introspectionEncryptedResponseAlg;
+    }
+
+    public String getIntrospectionEncryptedResponseEnc() {
+        return introspectionEncryptedResponseEnc;
+    }
+
+    public void setIntrospectionEncryptedResponseEnc(String introspectionEncryptedResponseEnc) {
+        this.introspectionEncryptedResponseEnc = introspectionEncryptedResponseEnc;
+    }
+
     public String getEvidence() {
         return evidence;
     }
@@ -468,6 +501,9 @@ public class ClientAttributes implements Serializable {
                 ", requirePar=" + requirePar +
                 ", evidence=" + evidence +
                 ", dpopBoundAccessToken=" + dpopBoundAccessToken +
+                ", introspectionSignedResponseAlg=" + introspectionSignedResponseAlg +
+                ", introspectionEncryptedResponseAlg=" + introspectionEncryptedResponseAlg +
+                ", introspectionEncryptedResponseEnc=" + introspectionEncryptedResponseEnc +
                 '}';
     }
 }

@@ -46,9 +46,12 @@ class SQLBackend:
 
     def get_data_type(self, attr, table=None):
         # check from SQL data types first
-        type_def = self.client.sql_data_types.get(attr)
+        for col in [f"{table}:{attr}", attr]:
+            type_def = self.client.sql_data_types.get(col)
 
-        if type_def:
+            if not type_def:
+                continue
+
             type_ = type_def.get(self.client.dialect) or type_def["mysql"]
 
             if table in type_.get("tables", {}):
@@ -79,43 +82,7 @@ class SQLBackend:
         return data_type
 
     def create_tables(self):
-        schemas = {}
-        attrs = {}
-        # cached schemas that holds table's column and its type
-        table_columns = defaultdict(dict)
-
-        for fn in self.client.schema_files:
-            with open(fn) as f:
-                schema = json.loads(f.read())
-
-            for oc in schema["objectClasses"]:
-                schemas[oc["names"][0]] = oc
-
-            for attr in schema["attributeTypes"]:
-                attrs[attr["names"][0]] = attr
-
-        for table, oc in schemas.items():
-            if oc.get("sql", {}).get("ignore"):
-                continue
-
-            # ``oc["may"]`` contains list of attributes
-            if "sql" in oc:
-                oc["may"] += oc["sql"].get("include", [])
-
-                for inc_oc in oc["sql"].get("includeObjectClass", []):
-                    oc["may"] += schemas[inc_oc]["may"]
-
-            doc_id_type = self.get_data_type("doc_id", table)
-            table_columns[table].update({
-                "doc_id": doc_id_type,
-                "objectClass": "VARCHAR(48)",
-                "dn": "VARCHAR(128)",
-            })
-
-            # make sure ``oc["may"]`` doesn't have duplicate attribute
-            for attr in set(oc["may"]):
-                data_type = self.get_data_type(attr, table)
-                table_columns[table].update({attr: data_type})
+        table_columns = self.table_mapping_from_schema()
 
         for table, attr_mapping in table_columns.items():
             self.client.create_table(table, attr_mapping, "doc_id")
@@ -147,8 +114,13 @@ class SQLBackend:
             if column_name == "doc_id" or column_name not in fields:
                 continue
 
-            if column_type.lower() != "json":
-                index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
+            index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
+
+            if column_type == "TEXT":
+                # set key length to 768 to accomodate charset utf8mb4
+                query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)} (768))"
+                self.client.create_index(query)
+            elif column_type.lower() != "json":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
@@ -256,7 +228,7 @@ class SQLBackend:
 
         table_mapping = self.client.get_table_mapping()
 
-        def column_to_json(table_name, col_name):
+        def column_to_multivalued(table_name, col_name):
             old_data_type = table_mapping[table_name][col_name]
             data_type = self.get_data_type(col_name, table_name)
 
@@ -281,10 +253,13 @@ class SQLBackend:
             # pre-populate the modified column
             for doc_id, value in values.items():
                 if not value:
-                    value_list = []
+                    new_value = []
                 else:
-                    value_list = [value]
-                self.client.update(table_name, doc_id, {col_name: {"v": value_list}})
+                    new_value = [value]
+
+                if self.client.dialect == "mysql":
+                    new_value = {"v": new_value}
+                self.client.update(table_name, doc_id, {col_name: new_value})
 
         def add_column(table_name, col_name):
             if col_name in table_mapping[table_name]:
@@ -294,23 +269,38 @@ class SQLBackend:
             with self.client.engine.connect() as conn:
                 conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
 
-        def change_column_type(table_name, col_name):
-            old_data_type = table_mapping[table_name][col_name]
-            data_type = self.get_data_type(col_name, table_name)
-
-            if data_type == old_data_type:
-                return
-
+        def change_column_type(table_name, col_name, old_data_type, data_type):
             if self.client.dialect == "mysql":
                 query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
                         f"MODIFY COLUMN {self.client.quoted_id(col_name)} {data_type}"
             else:
                 query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
                         f"ALTER COLUMN {self.client.quoted_id(col_name)} TYPE {data_type}"
+
             with self.client.engine.connect() as conn:
+                # mysql will raise error if changing type to text but the column already indexed without explicit key length
+                # hence the associated index must be dropped first
+                if self.client.dialect == "mysql" and old_data_type.startswith("VARCHAR") and data_type == "TEXT":
+                    for idx in conn.execute(
+                        text(
+                            "SELECT index_name "
+                            "FROM information_schema.statistics "
+                            "WHERE table_name = :table_name "
+                            "AND index_name LIKE :index_name "
+                            "AND column_name = :col_name;"
+                        ),
+                        {
+                            "table_name": table_name,
+                            "index_name": f"{table_name}_{col_name}",
+                            "col_name": col_name
+                        },
+                    ):
+                        conn.execute(f"ALTER TABLE {table_name} DROP INDEX {idx[0]}")
+
+                # change the type
                 conn.execute(query)
 
-        def column_from_json(table_name, col_name):
+        def column_from_multivalued(table_name, col_name):
             old_data_type = table_mapping[table_name][col_name]
             data_type = self.get_data_type(col_name, table_name)
 
@@ -361,119 +351,49 @@ class SQLBackend:
                     new_value = ""
                 self.client.update(table_name, doc_id, {col_name: new_value})
 
-        # TODO: run the function with connection context?
+        table_columns = self.table_mapping_from_schema()
 
-        # the following columns are changed to multivalued (JSON type)
-        for mod in [
-            ("jansClnt", "jansDefAcrValues"),
-            ("jansClnt", "jansLogoutURI"),
-            ("jansPerson", "role"),
-            ("jansPerson", "mobile"),
-            ("jansPerson", "jansPersistentJWT"),
-            ("jansCustomScr", "jansAlias"),
-            ("jansClnt", "jansReqURI"),
-            ("jansClnt", "jansClaimRedirectURI"),
-            ("jansClnt", "jansAuthorizedOrigins"),
-            ("jansSessId", "deviceSecret"),
-        ]:
-            column_to_json(mod[0], mod[1])
+        if self.client.dialect == "mysql":
+            multivalued_type = "JSON"
+        else:
+            multivalued_type = "JSONB"
 
-        # the following columns must be added to respective tables
-        for mod in [
-            ("jansToken", "jansUsrDN"),
-            ("jansPerson", "jansTrustedDevices"),
-            ("jansUmaRPT", "dpop"),
-            ("jansUmaPCT", "dpop"),
-            ("jansClnt", "o"),
-            ("jansClnt", "jansGrp"),
-            ("jansScope", "creatorId"),
-            ("jansScope", "creatorTyp"),
-            ("jansScope", "creatorAttrs"),
-            ("jansScope", "creationDate"),
-            ("jansStatEntry", "jansData"),
-            ("jansSessId", "deviceSecret"),
-            ("jansSsa", "jansState"),
-            ("jansClnt", "jansClntURILocalized"),
-            ("jansClnt", "jansLogoURILocalized"),
-            ("jansClnt", "jansPolicyURILocalized"),
-            ("jansClnt", "jansTosURILocalized"),
-            ("jansClnt", "displayNameLocalized"),
-            ("jansFido2AuthnEntry", "jansApp"),
-            ("jansFido2AuthnEntry", "jansCodeChallengeHash"),
-            ("jansFido2AuthnEntry", "exp"),
-            ("jansFido2AuthnEntry", "del"),
-            ("jansFido2RegistrationEntry", "jansApp"),
-            ("jansFido2RegistrationEntry", "jansPublicKeyIdHash"),
-            ("jansFido2RegistrationEntry", "jansDeviceData"),
-            ("jansFido2RegistrationEntry", "exp"),
-            ("jansFido2RegistrationEntry", "del"),
-        ]:
-            add_column(mod[0], mod[1])
+        for table_name, columns in table_columns.items():
+            for column, data_type in columns.items():
+                if column not in table_mapping[table_name]:
+                    logger.info(f"Adding new column {table_name}.{column}")
+                    add_column(table_name, column)
 
-        # change column type (except from/to multivalued)
-        for mod in [
-            ("jansPerson", "givenName"),
-            ("jansPerson", "sn"),
-            ("jansPerson", "userPassword"),
-            ("jansAppConf", "userPassword"),
-            ("jansPerson", "jansStatus"),
-            ("jansPerson", "cn"),
-            ("jansPerson", "secretAnswer"),
-            ("jansPerson", "secretQuestion"),
-            ("jansPerson", "street"),
-            ("jansPerson", "address"),
-            ("jansPerson", "picture"),
-            ("jansPerson", "mail"),
-            ("jansPerson", "gender"),
-            ("jansPerson", "jansNameFormatted"),
-            ("jansPerson", "jansExtId"),
-            ("jansGrp", "jansStatus"),
-            ("jansOrganization", "jansStatus"),
-            ("jansOrganization", "street"),
-            ("jansOrganization", "postalCode"),
-            ("jansOrganization", "mail"),
-            ("jansAppConf", "jansStatus"),
-            ("jansAttr", "jansStatus"),
-            ("jansUmaResourcePermission", "jansStatus"),
-            ("jansUmaResourcePermission", "jansUmaScope"),
-            ("jansDeviceRegistration", "jansStatus"),
-            ("jansFido2AuthnEntry", "jansStatus"),
-            ("jansFido2RegistrationEntry", "jansStatus"),
-            ("jansCibaReq", "jansStatus"),
-            ("jansInumMap", "jansStatus"),
-            ("jansDeviceRegistration", "jansDeviceKeyHandle"),
-            ("jansUmaResource", "jansUmaScope"),
-            ("jansU2fReq", "jansReq"),
-            ("jansFido2AuthnEntry", "jansAuthData"),
-            ("jansFido2RegistrationEntry", "jansCodeChallengeHash"),
-            ("agmFlowRun", "agFlowEncCont"),
-            ("agmFlowRun", "agFlowSt"),
-            ("agmFlowRun", "jansCustomMessage"),
-            ("agmFlow", "agFlowMeta"),
-            ("agmFlow", "agFlowTrans"),
-            ("agmFlow", "jansCustomMessage"),
-            ("jansOrganization", "jansCustomMessage"),
-            ("jansDeviceRegistration", "jansApp"),
-            ("jansFido2AuthnEntry", "jansApp"),
-            ("jansFido2RegistrationEntry", "jansApp"),
-            ("adsPrjDeployment", "adsPrjDeplDetails"),
-            ("jansFido2RegistrationEntry", "jansDeviceData"),
-            ("jansDeviceRegistration", "jansDeviceData"),
-            ("jansFido2RegistrationEntry", "jansDeviceNotificationConf"),
-            ("jansDeviceRegistration", "jansDeviceNotificationConf"),
-        ]:
-            change_column_type(mod[0], mod[1])
+                else:
+                    old_data_type = table_mapping[table_name][column]
 
-        # columns are changed from multivalued
-        for mod in [
-            ("jansPerson", "jansMobileDevices"),
-            ("jansPerson", "jansOTPDevices"),
-            ("jansToken", "clnId"),
-            ("jansUmaRPT", "clnId"),
-            ("jansUmaPCT", "clnId"),
-            ("jansCibaReq", "clnId"),
-        ]:
-            column_from_json(mod[0], mod[1])
+                    if any([
+                        # same type
+                        data_type == old_data_type,
+                        # same type (different alias)
+                        data_type == "INT" and old_data_type == "INTEGER",
+                        # same type (different alias) in Postgres
+                        data_type == "TIMESTAMP" and old_data_type == "TIMESTAMP WITHOUT TIME ZONE",
+                        # builtin columns
+                        column in ("doc_id", "objectClass", "dn"),
+                    ]):
+                        # no-ops
+                        continue
+
+                    if data_type != multivalued_type and old_data_type != multivalued_type:
+                        # change non-multivalued type
+                        logger.info(f"Converting {table_name}.{column} column type from {old_data_type} to {data_type}")
+                        change_column_type(table_name, column, old_data_type, data_type)
+
+                    elif data_type == multivalued_type and old_data_type != multivalued_type:
+                        # change type to multivalued (JSON type)
+                        logger.info(f"Converting {table_name}.{column} column type from {old_data_type} to multivalued {data_type}")
+                        column_to_multivalued(table_name, column)
+
+                    elif data_type != multivalued_type and old_data_type == multivalued_type:
+                        # change type from multivalued (JSON type)
+                        logger.info(f"Converting {table_name}.{column} column type from multivalued {old_data_type} to {data_type}")
+                        column_from_multivalued(table_name, column)
 
     def import_custom_ldif(self, ctx):
         custom_dir = Path("/app/custom_ldif")
@@ -484,3 +404,43 @@ class SQLBackend:
     def _import_ldif(self, path, ctx):
         logger.info(f"Importing {path} file")
         self.client.create_from_ldif(path, ctx)
+
+    def table_mapping_from_schema(self):
+        schemas = {}
+        attrs = {}
+        # cached schemas that holds table's column and its type
+        table_mapping = defaultdict(dict)
+
+        for fn in self.client.schema_files:
+            with open(fn) as f:
+                schema = json.loads(f.read())
+
+            for oc in schema["objectClasses"]:
+                schemas[oc["names"][0]] = oc
+
+            for attr in schema["attributeTypes"]:
+                attrs[attr["names"][0]] = attr
+
+        for table, oc in schemas.items():
+            if oc.get("sql", {}).get("ignore"):
+                continue
+
+            # ``oc["may"]`` contains list of attributes
+            if "sql" in oc:
+                oc["may"] += oc["sql"].get("include", [])
+
+                for inc_oc in oc["sql"].get("includeObjectClass", []):
+                    oc["may"] += schemas[inc_oc]["may"]
+
+            doc_id_type = self.get_data_type("doc_id", table)
+            table_mapping[table].update({
+                "doc_id": doc_id_type,
+                "objectClass": "VARCHAR(48)",
+                "dn": "VARCHAR(128)",
+            })
+
+            # make sure ``oc["may"]`` doesn't have duplicate attribute
+            for attr in set(oc["may"]):
+                data_type = self.get_data_type(attr, table)
+                table_mapping[table].update({attr: data_type})
+        return table_mapping

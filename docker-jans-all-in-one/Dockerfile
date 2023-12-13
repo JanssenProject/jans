@@ -4,17 +4,17 @@
 
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
-ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:1.0.20_dev
-ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:1.0.20_dev
-ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:1.0.20_dev
-ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:1.0.20_dev
-ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:1.0.20_dev
-ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:1.0.20_dev
-ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:1.0.20_dev
-ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:1.0.20_dev
+ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:1.0.21_dev
+ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:1.0.21_dev
+ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:1.0.21_dev
+ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:1.0.21_dev
+ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:1.0.21_dev
+ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:1.0.21_dev
+ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:1.0.21_dev
+ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:1.0.21_dev
 
 # original Janssen version
-ARG CN_VERSION=1.0.20-SNAPSHOT
+ARG CN_VERSION=1.0.21
 
 # -----------
 # base images
@@ -40,7 +40,7 @@ FROM ${JANS_LINK_IMAGE} AS jans-link-src
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.8
+FROM bellsoft/liberica-openjdk-alpine:17.0.8@sha256:e82fb905ca6efffcdb1b0ed58f207b0ce91aeada78c218ae7dbb16bb31635728
 
 # hadolint ignore=DL3018
 RUN apk update \
@@ -181,7 +181,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.20" \
+    org.opencontainers.image.version="1.0.21" \
     org.opencontainers.image.title="Janssen All-in-One" \
     org.opencontainers.image.description=""
 

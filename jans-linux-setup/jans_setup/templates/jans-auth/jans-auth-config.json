@@ -1,4 +1,24 @@
 {
+    "featureFlags": [
+      "health_check",
+      "userinfo",
+      "clientinfo",
+      "id_generation",
+      "registration",
+      "introspection",
+      "revoke_token",
+      "revoke_session",
+      "active_session",
+      "end_session",
+      "status_session",
+      "jans_configuration",
+      "ciba",
+      "device_authz",
+      "metric",
+      "stat",
+      "par",
+      "ssa"
+    ],
     "issuer":"https://%(hostname)s",
     "baseEndpoint":"https://%(hostname)s/jans-auth/restv1",
     "authorizationEndpoint":"https://%(hostname)s/jans-auth/restv1/authorize",
@@ -10,6 +30,7 @@
     "checkSessionIFrame":"https://%(hostname)s/jans-auth/opiframe.htm",
     "endSessionEndpoint":"https://%(hostname)s/jans-auth/restv1/end_session",
     "jwksUri":"https://%(hostname)s/jans-auth/restv1/jwks",
+    "archivedJwksUri":"https://%(hostname)s/jans-auth/restv1/jwks/archived",
     "registrationEndpoint":"https://%(hostname)s/jans-auth/restv1/register",
     "openIdDiscoveryEndpoint":"https://%(hostname)s/.well-known/webfinger",
     "openIdConfigurationEndpoint":"https://%(hostname)s/.well-known/openid-configuration",
@@ -486,11 +507,10 @@
     "redirectUrisRegexEnabled": true,
     "useHighestLevelScriptIfAcrScriptNotFound": false,
     "agamaConfiguration": {
-        "enabled": false,
+        "enabled": true,
         "rootDir": "/opt/jans/jetty/jans-auth/agama",
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
-        "serializerType": "KRYO",
         "maxItemsLoggedInCollections": 9,
         "pageMismatchErrorPage": "mismatch.ftlh",
         "interruptionErrorPage": "timeout.ftlh",
@@ -499,6 +519,10 @@
         "bridgeScriptPage": "agama.xhtml",
         "defaultResponseHeaders": {
             "Cache-Control": "max-age=0, no-store"
+        },
+        "serializeRules": {
+          "JAVA": ["java", "sun", "com.sun", "jdk"],
+          "KRYO": []
         }
     },
     "blockWebviewAuthorizationEnabled": false,

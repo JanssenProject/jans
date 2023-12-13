@@ -33,7 +33,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 ## Installation Steps
 
-Start a fresh Ubuntu `18.04`/`20.04`/`22.04` 4 CPU, 16 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Then execute the following
+Start a fresh Ubuntu `18.04`/`20.04`/`22.04` 4 CPU, 8 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Then execute the following
 
 ```bash
 sudo su -

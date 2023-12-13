@@ -65,6 +65,16 @@ public class BaseDnConfiguration {
 	private String fido2Attestation;
 	@XmlElement(name = "fido2Assertion")
 	private String fido2Assertion;
+    @XmlElement(name = "archivedJwks")
+    private String archivedJwks;
+
+    public String getArchivedJwks() {
+        return archivedJwks;
+    }
+
+    public void setArchivedJwks(String archivedJwks) {
+        this.archivedJwks = archivedJwks;
+    }
 
     public String getStat() {
         return stat;

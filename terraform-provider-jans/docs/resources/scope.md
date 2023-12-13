@@ -99,7 +99,7 @@ Optional:
 							of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a 
 							request to the token endpoint to obtain the tokens.
 - `backchannel_token_delivery_mode` (String) specifies how backchannel token will be delivered.
-- `backchannel_user_code_parameter` (String) Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.
+- `backchannel_user_code_parameter` (Boolean) Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.
 - `claim_redirect_uris` (List of String) Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the 
 						requesting party's user agent after completing its interaction.
 - `claims` (List of String) Provide list of claims granted to the client.

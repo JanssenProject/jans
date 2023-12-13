@@ -140,7 +140,7 @@ class Config:
         self.cmd_java = os.path.join(self.jre_home, 'bin/java')
         self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
         self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
-        os.environ['OPENDJ_JAVA_HOME'] =  self.jre_home
+        os.environ['OPENDJ_JAVA_HOME'] = self.jre_home
 
         if self.profile == OPENBANKING_PROFILE:
             self.use_external_key = True
@@ -156,7 +156,6 @@ class Config:
 
         #passwords
         self.ldapPass = None
-        self.admin_password = None
         self.admin_password = ''
         self.cb_password = None
         self.encoded_cb_password = ''
