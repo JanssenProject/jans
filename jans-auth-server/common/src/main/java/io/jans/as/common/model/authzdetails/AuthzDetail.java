@@ -8,6 +8,7 @@ import org.json.JSONObject;
 public class AuthzDetail {
 
     private final JSONObject jsonObject;
+    private String uiRepresentation;
 
     public AuthzDetail(String json) {
         this(new JSONObject(json));
@@ -25,10 +26,19 @@ public class AuthzDetail {
         return jsonObject.optString("type");
     }
 
+    public String getUiRepresentation() {
+        return uiRepresentation;
+    }
+
+    public void setUiRepresentation(String uiRepresentation) {
+        this.uiRepresentation = uiRepresentation;
+    }
+
     @Override
     public String toString() {
         return "AuthzDetail{" +
                 "jsonObject=" + jsonObject +
+                "uiRepresentation=" + uiRepresentation +
                 '}';
     }
 }

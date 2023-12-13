@@ -296,6 +296,7 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required
@@ -444,6 +445,7 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required
@@ -1072,6 +1074,7 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required
@@ -1198,6 +1201,7 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required

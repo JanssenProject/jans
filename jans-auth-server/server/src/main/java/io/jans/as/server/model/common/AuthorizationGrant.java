@@ -174,6 +174,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         if (nonce != null) {
             token.setNonce(nonce);
         }
+
+        token.getAttributes().setAuthorizationDetails(getAuthzDetailsAsString());
         token.setScope(getScopesAsString());
         token.setAuthMode(getAcrValues());
         token.setSessionDn(getSessionDn());

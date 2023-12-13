@@ -6,6 +6,7 @@
 
 package io.jans.as.server.model.common;
 
+import io.jans.as.common.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.UserService;
@@ -340,6 +341,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                     result.setGrantId(grantId);
                 }
                 result.setScopes(Util.splittedStringAsList(tokenEntity.getScope(), " "));
+                result.setAuthzDetails(AuthzDetails.ofSilently(tokenEntity.getAttributes().getAuthorizationDetails()));
 
                 result.setCodeChallenge(tokenEntity.getCodeChallenge());
                 result.setCodeChallengeMethod(tokenEntity.getCodeChallengeMethod());

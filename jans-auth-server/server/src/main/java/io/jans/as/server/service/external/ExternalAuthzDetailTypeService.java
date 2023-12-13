@@ -86,7 +86,21 @@ public class ExternalAuthzDetailTypeService extends ExternalScriptService {
         }
     }
 
-    public String externalUiRepresentation(ExecutionContext executionContext, CustomScriptConfiguration script) {
+    public String externalGetUiRepresentation(ExecutionContext executionContext, AuthzDetail detail) {
+        executionContext.setAuthzDetail(detail);
+
+        final String type = detail.getType();
+        final CustomScriptConfiguration script = getCustomScriptConfigurationByName(type);
+        if (script == null) {
+            log.error("Unable to find 'AuthzDetailType' custom script by name {}", type);
+
+            return detail.getJsonObject().toString();
+        }
+
+        return externalGetUiRepresentation(executionContext, script);
+    }
+
+    public String externalGetUiRepresentation(ExecutionContext executionContext, CustomScriptConfiguration script) {
         log.trace("Executing python 'getUiRepresentation' method, script name: {}, clientId: {}, authzDetail: {}",
                 script.getName(), executionContext.getAuthzRequest().getClientId(), executionContext.getAuthzDetail());
 

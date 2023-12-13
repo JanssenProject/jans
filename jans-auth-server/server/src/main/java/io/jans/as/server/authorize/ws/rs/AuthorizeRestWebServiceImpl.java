@@ -7,6 +7,7 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import com.google.common.collect.Maps;
+import io.jans.as.common.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
@@ -399,6 +400,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             authorizationGrant.setJwtAuthorizationRequest(authzRequest.getJwtRequest());
             authorizationGrant.setTokenBindingHash(TokenBindingMessage.getTokenBindingIdHashFromTokenBindingMessage(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
             authorizationGrant.setScopes(scopes);
+            authorizationGrant.setAuthzDetails(authzRequest.getAuthzDetails());
             authorizationGrant.setCodeChallenge(authzRequest.getCodeChallenge());
             authorizationGrant.setCodeChallengeMethod(authzRequest.getCodeChallengeMethod());
             authorizationGrant.setClaims(authzRequest.getClaims());
@@ -422,6 +424,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authorizationGrant.setNonce(authzRequest.getNonce());
                 authorizationGrant.setJwtAuthorizationRequest(authzRequest.getJwtRequest());
                 authorizationGrant.setScopes(scopes);
+                authorizationGrant.setAuthzDetails(authzRequest.getAuthzDetails());
                 authorizationGrant.setClaims(authzRequest.getClaims());
 
                 // Store acr_values
@@ -448,6 +451,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authorizationGrant.setNonce(authzRequest.getNonce());
                 authorizationGrant.setJwtAuthorizationRequest(authzRequest.getJwtRequest());
                 authorizationGrant.setScopes(scopes);
+                authorizationGrant.setAuthzDetails(authzRequest.getAuthzDetails());
                 authorizationGrant.setClaims(authzRequest.getClaims());
 
                 // Store authentication acr values
@@ -630,6 +634,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (prompts.contains(Prompt.CONSENT)) {
             log.debug("Redirect to authorization page, request {}", authzRequest);
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
+        }
+
+        // when authorization_details are present we do not allow to use persisted client authorization
+        final AuthzDetails authzDetails = authzRequest.getAuthzDetails();
+        if (authzDetails != null && authzDetails.getDetails() != null && !authzDetails.getDetails().isEmpty()) {
+            return new Pair<>(clientAuthorization, clientAuthorizationFetched);
         }
 
         // There is no need to present the consent page:
@@ -816,6 +826,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         executionContext.setClient(client);
         executionContext.setCertAsPem(authzRequest.getHttpRequest().getHeader("X-ClientCert"));
         executionContext.setScopes(StringUtils.isNotBlank(authzRequest.getScope()) ? new HashSet<>(Arrays.asList(authzRequest.getScope().split(" "))) : new HashSet<>());
+        executionContext.setAuthzRequest(authzRequest);
+        executionContext.setAuthzDetails(authzRequest.getAuthzDetails());
 
         AccessToken accessToken = cibaGrant.createAccessToken(executionContext);
         log.debug("Issuing access token: {}", accessToken.getCode());

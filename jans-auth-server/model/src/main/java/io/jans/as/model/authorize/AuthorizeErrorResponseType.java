@@ -73,6 +73,18 @@ public enum AuthorizeErrorResponseType implements IErrorType {
     INVALID_REQUEST_REDIRECT_URI("invalid_request_redirect_uri"),
 
     /**
+     * invalid_authorization_details is returned to the client if any of the
+     * following are true of the objects in the authorization_details structure:
+     *
+     * - contains an unknown authorization details type value,
+     * - is an object of known type but containing unknown fields,
+     * - contains fields of the wrong type for the authorization details type,
+     * - contains fields with invalid values for the authorization details type, or
+     * - is missing required fields for the authorization details type.
+     */
+    INVALID_AUTHORIZATION_DETAILS("invalid_authorization_details "),
+
+    /**
      * The Authorization Server requires End-User authentication. This error MAY
      * be returned when the prompt parameter in the Authorization Request is set
      * to none to request that the Authorization Server should not display any

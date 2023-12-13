@@ -1,11 +1,13 @@
 package io.jans.as.common.model.authzdetails;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Yuriy Z
@@ -36,6 +38,31 @@ public class AuthzDetails {
         return result;
     }
 
+    public static boolean similar(String authorizationDetails1, String authorizationDetails2) {
+        if (StringUtils.equals(authorizationDetails1, authorizationDetails2)) {
+            return true;
+        }
+        if (authorizationDetails1 == null || authorizationDetails2 == null) {
+            return false;
+        }
+        JSONArray array1 = new JSONArray(authorizationDetails1);
+        JSONArray array2 = new JSONArray(authorizationDetails2);
+        return array1.similar(array2);
+    }
+
+    public static String simpleMerge(String authorizationDetails1, String authorizationDetails2) {
+        final AuthzDetails details1 = AuthzDetails.of(authorizationDetails1);
+        final AuthzDetails details2 = AuthzDetails.of(authorizationDetails2);
+        details1.getDetails().addAll(details2.getDetails());
+        return details1.asJsonArray().toString();
+    }
+
+    public JSONArray asJsonArray() {
+        JSONArray array = new JSONArray();
+        array.putAll(details.stream().map(AuthzDetail::getJsonObject).collect(Collectors.toList()));
+        return array;
+    }
+
     public List<AuthzDetail> getDetails() {
         return details;
     }
@@ -46,5 +73,12 @@ public class AuthzDetails {
             result.add(d.getType());
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "AuthzDetails{" +
+                "details=" + details +
+                '}';
     }
 }

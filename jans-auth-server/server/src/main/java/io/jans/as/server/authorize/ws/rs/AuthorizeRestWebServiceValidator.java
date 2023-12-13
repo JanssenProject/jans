@@ -484,7 +484,7 @@ public class AuthorizeRestWebServiceValidator {
         final AuthzDetails authzDetails = AuthzDetails.ofSilently(authorizationDetailsString);
         if (authzDetails == null) {
             log.debug("Unable to parse 'authorization_details' {}", authorizationDetailsString);
-            throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
+            throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.INVALID_AUTHORIZATION_DETAILS,
                     "Unable to parse 'authorization_details'");
         }
         authzRequest.setAuthzDetails(authzDetails);
@@ -500,7 +500,7 @@ public class AuthorizeRestWebServiceValidator {
         if (!supportedAuthzDetailsTypes.containsAll(requestAuthzDetailsTypes)) {
             log.debug("Not all authorization_details type are supported. Requested {}. AS supports: {}", requestAuthzDetailsTypes, supportedAuthzDetailsTypes);
 
-            throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
+            throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.INVALID_AUTHORIZATION_DETAILS,
                     "Found not supported 'authorization_details' type.");
         }
 
