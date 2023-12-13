@@ -96,7 +96,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
                     self.app.getTitledText(title=_("Metadata URL"),
                         name='metadataURL',
                         value='',
-                        style=cli_style.edit_text_required,
+                        style=cli_style.edit_text,
                         jans_help=_("URL of metadata"),
                         widget_style=cli_style.white_bg_widget
                     )
@@ -107,7 +107,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
                         _("Metadata File"),
                         name='jansEntityId',
                         widget=Button(_('Browse'), handler=upload_file),
-                        style=cli_style.edit_text_required,
+                        style=cli_style.edit_text,
                         other_widgets=VSplit([Window(width=2), Window(FormattedTextControl(lambda: self.metadata_file_path))])
                 )
                 ], width=D())
@@ -361,18 +361,11 @@ class EditTRDialog(JansGDialog, DialogUtils):
                 self.metadata_file_path = os.path.join(self.app.cli_object.tmp_dir, metadata_fn)
                 with open(self.metadata_file_path, 'w') as w:
                     w.write(metadata_response.text)
-            else:
-                if not self.metadata_file_path:
-                    self.app.show_message(_(common_strings.error), _("Please locate metadata file."), tobefocused=self.edit_tr_container)
-                    return
-
-        tr_data['spMetaDataSourceType'] = 'FILE'
 
         tr_data['releasedAttributes'] = [entry[0] for entry in self.released_attributes_container.entries]
 
-
-
-        if self.new_tr:
+        if self.new_tr and self.metadata_file_path:
+            tr_data['spMetaDataSourceType'] = 'FILE'
             tr_data['spMetaDataFN'] = os.path.basename(self.metadata_file_path)
             data = {'trustRelationship': tr_data, 'metaDataFile': self.metadata_file_path}
         else:
