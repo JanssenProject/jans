@@ -214,10 +214,6 @@ public class AppInitializer {
 			configurationFactory.create();
 		}
 
-//		for (ApplicationConfigurationFactory configurationFactory : applicationConfigurationFactory) {
-//	        configurationFactory.initTimer();
-//		}
-
         PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
         log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
 
