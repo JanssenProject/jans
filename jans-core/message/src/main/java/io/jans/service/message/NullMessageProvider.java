@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 
 import org.slf4j.Logger;
 
-import io.jans.service.cache.RedisConfiguration;
 import io.jans.service.message.model.config.MessageConfiguration;
 import io.jans.service.message.model.config.MessageProviderType;
 import io.jans.service.message.pubsub.PubSubInterface;
@@ -26,7 +25,7 @@ import jakarta.inject.Inject;
  * @author Yuriy Movchan Date: 30/11/2023
  */
 @ApplicationScoped
-public class NullMessageProvider extends AbstractMessageProvider<Object> {
+public class NullMessageProvider extends AbstractMessageProvider<NullPool> {
 
 	@Inject
 	private Logger log;
@@ -39,8 +38,8 @@ public class NullMessageProvider extends AbstractMessageProvider<Object> {
 	public void create(ExecutorService executorService) {
 	}
 
-	public void create(RedisConfiguration redisConfiguration) {
-		log.debug("Starting NullProvider messages ... configuration {}", redisConfiguration);
+	public void create() {
+		log.debug("Starting NullProvider messages ... configuration");
 		log.debug("NullProvider message started.");
 	}
 
@@ -59,7 +58,7 @@ public class NullMessageProvider extends AbstractMessageProvider<Object> {
 	}
 
 	@Override
-	public Object getDelegate() {
+	public NullPool getDelegate() {
 		return null;
 	}
 

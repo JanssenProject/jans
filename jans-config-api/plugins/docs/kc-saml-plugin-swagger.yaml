@@ -672,9 +672,9 @@ paths:
       requestBody:
         description: Trust Relationship object
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TrustRelationship'
+              $ref: '#/components/schemas/TrustRelationshipForm'
             examples:
               Request example:
                 description: Request example
@@ -820,12 +820,14 @@ components:
     BrokerIdentityProviderForm:
       required:
       - identityProvider
+      - metaDataFile
       type: object
       properties:
         identityProvider:
           $ref: '#/components/schemas/IdentityProvider'
         metaDataFile:
-          type: object
+          type: string
+          format: binary
     IdentityProvider:
       required:
       - creatorId
@@ -911,10 +913,6 @@ components:
           type: array
           items:
             type: string
-        config:
-          type: object
-          additionalProperties:
-            type: string
         baseDn:
           type: string
     IdentityProviderPagedResult:
@@ -984,6 +982,10 @@ components:
           type: string
         ignoreValidation:
           type: boolean
+        idpMetadataMandatoryAttributes:
+          type: array
+          items:
+            type: string
     JsonPatch:
       type: object
     ProfileConfiguration:
@@ -1088,13 +1090,15 @@ components:
           type: string
     TrustRelationshipForm:
       required:
+      - metaDataFile
       - trustRelationship
       type: object
       properties:
         trustRelationship:
           $ref: '#/components/schemas/TrustRelationship'
         metaDataFile:
-          type: object
+          type: string
+          format: binary
   securitySchemes:
     oauth2:
       type: oauth2

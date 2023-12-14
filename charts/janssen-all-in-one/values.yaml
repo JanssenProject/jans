@@ -210,7 +210,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.21_dev
+    tag: 1.0.21-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -251,7 +251,10 @@ auth-server-key-rotation:
   additionalAnnotations: {}
   # -- Boolean flag to enable/disable the auth-server-key rotation cronjob.
   enabled: true
-
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 casa:
   # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
   appLoggers:
@@ -594,7 +597,7 @@ image:
   # -- Image  to use for deploying.
   repository: ghcr.io/janssenproject/jans/all-in-one
   # -- Image  tag to use for deploying.
-  tag: 1.0.21_dev
+  tag: 1.0.21-1
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
@@ -647,3 +650,7 @@ lifecycle: {}
 additionalLabels: { }
 # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
 additionalAnnotations: { }
+# -- Add custom scripts that have been mounted to run before the entrypoint.
+# - /tmp/custom.sh
+# - /tmp/custom2.sh
+customScripts: [ ]
