@@ -44,7 +44,7 @@
 		<rest-assured.version>5.0.1</rest-assured.version>
 		<karate.version>0.9.5</karate.version>
 		<snake.version>2.0</snake.version>
-		<jupiter.version>5.7.0</jupiter.version>
+		<jupiter.version>5.10.1</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.10</jacoco.version>
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
