@@ -85,7 +85,7 @@ RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSIO
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://jenkins.jans.io/maven/io/jans/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
     && wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
-    && wget -q https://jenkins.jans.io/maven/io/jans/agama-inbound/${AGAMA_INBOUND_VERSION}/agama-inbound-${AGAMA_INBOUND_VERSION}-jar-with-dependencies.jar -P ${JETTY_BASE}/jans-auth/_libs
+    && wget -q https://jenkins.jans.io/maven/io/jans/agama-inbound/${AGAMA_INBOUND_VERSION}/agama-inbound-${AGAMA_INBOUND_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
 
 # =====================
 # jans-linux-setup sync
