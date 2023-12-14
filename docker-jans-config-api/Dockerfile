@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.0.21
-ENV CN_BUILD_DATE='2023-12-11 12:29'
+ENV CN_BUILD_DATE='2023-12-14 08:59'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -70,18 +70,18 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 RUN mkdir -p /usr/share/java \
     ${JETTY_BASE}/jans-config-api/_plugins
 
-ENV SCIM_PLUGIN_BUILD_DATE='2023-12-11 12:33'
+ENV SCIM_PLUGIN_BUILD_DATE='2023-12-14 09:03'
 ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2023-12-11 12:32'
+ENV ADMIN_UI_PLUGIN_BUILD_DATE='2023-12-14 09:01'
 ENV ADMIN_UI_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
-ENV FIDO2_PLUGIN_BUILD_DATE='2023-12-11 12:35'
+ENV FIDO2_PLUGIN_BUILD_DATE='2023-12-14 09:04'
 ENV FIDO2_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/fido2-plugin/${CN_VERSION}/fido2-plugin-${CN_VERSION}-distribution.jar
-ENV USER_MGT_PLUGIN_BUILD_DATE='2023-12-11 12:34'
+ENV USER_MGT_PLUGIN_BUILD_DATE='2023-12-14 09:04'
 ENV USER_MGT_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/${CN_VERSION}/user-mgt-plugin-${CN_VERSION}-distribution.jar
 ENV JANS_LINK_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
 ENV JANS_LINK_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/jans-link-plugin/${CN_VERSION}/jans-link-plugin-${CN_VERSION}-distribution.jar
 ENV SAML_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
-ENV SAML_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/saml-plugin/${CN_VERSION}/saml-plugin-${CN_VERSION}-distribution.jar
+ENV SAML_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/kc-saml-plugin/${CN_VERSION}/kc-saml-plugin-${CN_VERSION}-distribution.jar
 
 RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/scim-plugin.jar \
     && wget -q ${ADMIN_UI_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/admin-ui-plugin.jar \

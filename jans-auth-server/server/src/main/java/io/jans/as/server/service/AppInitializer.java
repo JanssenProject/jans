@@ -47,6 +47,7 @@ import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.util.properties.FileConfiguration;
+import io.jans.service.ApplicationConfigurationFactory;
 import io.jans.service.PythonService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ApplicationInitialized;
@@ -127,6 +128,9 @@ public class AppInitializer {
     private ApplicationFactory applicationFactory;
 
     @Inject
+    private Instance<ApplicationConfigurationFactory> applicationConfigurationFactory;
+
+    @Inject
     private Instance<AuthenticationMode> authenticationModeInstance;
 
     @Inject
@@ -201,7 +205,13 @@ public class AppInitializer {
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.debug("Initializing application services");
 
-        configurationFactory.create();
+        // Start timer
+        initSchedulerService();
+
+		// Initialize plugins configurations
+		for (ApplicationConfigurationFactory configurationFactory : applicationConfigurationFactory) {
+			configurationFactory.create();
+		}
 
         PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
         log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
@@ -225,12 +235,8 @@ public class AppInitializer {
 
         statService.init();
 
-        // Start timer
-        initSchedulerService();
-
         // Schedule timer tasks
         metricService.initTimer();
-        configurationFactory.initTimer();
         loggerService.initTimer(true);
         ldapStatusTimer.initTimer();
         cleanerTimer.initTimer();
