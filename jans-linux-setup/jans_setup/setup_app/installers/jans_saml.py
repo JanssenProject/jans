@@ -16,7 +16,6 @@ from setup_app.utils.ldif_utils import create_client_ldif
 
 # Config
 Config.idp_config_http_port = '8083'
-Config.idp_config_hostname = 'localhost'
 Config.jans_idp_enabled = 'true'
 Config.jans_idp_realm = 'jans-api'
 Config.jans_idp_client_id = f'jans-api-{uuid.uuid4()}'
@@ -28,10 +27,6 @@ Config.jans_idp_idp_root_dir = os.path.join(Config.jansOptFolder, 'idp')
 Config.jans_idp_idp_metadata_file_pattern = '%s-idp-metadata.xml'
 Config.jans_idp_ignore_validation = 'true'
 Config.jans_idp_idp_metadata_file = 'idp-metadata.xml'
-
-# change this when we figure out this
-Config.keycloack_hostname = 'localhost'
-
 
 class JansSamlInstaller(JettyInstaller):
 
@@ -83,6 +78,10 @@ class JansSamlInstaller(JettyInstaller):
         Config.jans_idp_idp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'idp/temp_metadata')
         Config.jans_idp_sp_metadata_root_dir = os.path.join(self.idp_config_root_dir, 'sp/metadata')
         Config.jans_idp_sp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'sp/temp_metadata')
+
+        Config.idp_config_hostname = Config.hostname
+        Config.keycloack_hostname = Config.hostname
+
 
     def install(self):
         """installation steps"""
@@ -188,7 +187,7 @@ class JansSamlInstaller(JettyInstaller):
             time.sleep(5)
             try:
                 self.logIt("Connecting KC")
-                s.connect((Config.idp_config_hostname, int(Config.idp_config_http_port)))
+                s.connect(('localhost', int(Config.idp_config_http_port)))
                 self.logIt("Successfully connected to KC")
                 break
             except Exception:
@@ -197,7 +196,7 @@ class JansSamlInstaller(JettyInstaller):
             self.logIt("KC did not start in 120 seconds. Giving up configuration", errorLog=True, fatal=True)
 
         kcadm_cmd = '/opt/keycloak/bin/kcadm.sh'
-        kcm_server_url = f'http://{Config.idp_config_hostname}:{Config.idp_config_http_port}/'
+        kcm_server_url = f'http://localhost:{Config.idp_config_http_port}/kc'
         env = {'JAVA_HOME': Config.jre_home}
 
         with tempfile.TemporaryDirectory() as tmp_dir:
