@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.20...jans-cli-tui-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* **jans-cli-tui:** JWT Response for OAuth Token Introspection ([#6574](https://github.com/JanssenProject/jans/issues/6574)) ([aef08c1](https://github.com/JanssenProject/jans/commit/aef08c1beaf42c0b8d9ef6a214c612c4209925ee))
+* **jans-cli-tui:** provide list of enabled scripts for client scripts ([#6621](https://github.com/JanssenProject/jans/issues/6621)) ([f798b32](https://github.com/JanssenProject/jans/commit/f798b32e9b92af54fef683615cd17e4e688c16d4))
+* **jans-cli-tui:** replace list by label container for scope claims ([#6521](https://github.com/JanssenProject/jans/issues/6521)) ([4f37aa2](https://github.com/JanssenProject/jans/commit/4f37aa2de920a4f5532f27dcde99edd64ef1d362))
+* **jans-cli-tui:** SAML configuration interface ([#6591](https://github.com/JanssenProject/jans/issues/6591)) ([254fbdc](https://github.com/JanssenProject/jans/commit/254fbdcd3123bcef4ba80922dfcfc1c22cd0cbc5))
+* **jans-linux-tui:** tag field for endpoint adminUIPermissions ([#6556](https://github.com/JanssenProject/jans/issues/6556)) ([8eb7ac0](https://github.com/JanssenProject/jans/commit/8eb7ac00d61e16553f96d5bdb9af75ef010de268))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** fix saving acr script ([#6593](https://github.com/JanssenProject/jans/issues/6593)) ([396576d](https://github.com/JanssenProject/jans/commit/396576dc5f201489a6563757d4f422def12e244a))
+* **jans-cli-tui:** hide attrbiute requirePkce for clients ([#7066](https://github.com/JanssenProject/jans/issues/7066)) ([ff44f9c](https://github.com/JanssenProject/jans/commit/ff44f9c21332d7ccc64baf5e3629545d9a592a90))
+* **jans-cli-tui:** import error ([#6786](https://github.com/JanssenProject/jans/issues/6786)) ([a71bd2a](https://github.com/JanssenProject/jans/commit/a71bd2ad9e93b886af468cf3d5db63aa6064186f))
+* **jans-cli-tui:** saml tr issues ([#7068](https://github.com/JanssenProject/jans/issues/7068)) ([16c32b4](https://github.com/JanssenProject/jans/commit/16c32b43b1e5b13cba2c550ce6da8c1ebfccc3bd))
+* **jans-cli-tui:** search attribute ([#6630](https://github.com/JanssenProject/jans/issues/6630)) ([361f52b](https://github.com/JanssenProject/jans/commit/361f52b4ed30a58c98363adee3bdf2f71e1226ff))
+* **jans-linux-setup:** python requests-toolbelt library for tui ([#7052](https://github.com/JanssenProject/jans/issues/7052)) ([f0ecba7](https://github.com/JanssenProject/jans/commit/f0ecba7f75ee3f697ee5e0436a32b208f1a7bc0c))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
 ## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.19...jans-cli-tui-v1.0.20) (2023-11-08)
 
 
