@@ -13,6 +13,7 @@ on:
       - 'jans-keycloak-integration/**'
       - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
+      - 'jans-lock/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
       - 'jans-scim/**'
@@ -40,6 +41,7 @@ on:
       - 'jans-keycloak-integration/**'
       - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
+      - 'jans-lock/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
       - 'jans-scim/**'
@@ -63,13 +65,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-keycloak-link, jans-keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, jans-link, jans-casa]
+        module: [jans-keycloak-link, jans-keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, jans-link, jans-casa, jans-lock]
     env:
       JVM_PROJECTS: |
         jans-keycloak-integration
         jans-keycloak-link
         jans-link
         jans-auth-server
+        jans-lock
         jans-orm
         jans-config-api
         jans-scim
@@ -154,6 +157,8 @@ jobs:
           case ${{ matrix.module }} in
             "jans-auth-server")
                     ;&
+            "jans-lock")
+                    ;&          
             "jans-scim")
                     ;&
             "jans-eleven")

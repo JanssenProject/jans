@@ -30,7 +30,7 @@ database, and push it into the PDP's memory or cache. You could say that Lock
 aggressively initializes the PDP with token data. A Lock Client can also push
 policies and keys into a PDP (if necessary).
 
-## Authz Components
+## Definitions: Authz Components
 
 Centralized policy management is a best practice for authorization for distributed
 networks. If security policies are buried in the code of numerous applications,
@@ -64,7 +64,7 @@ has all the data it needs to make a decision. This aligns with a principle that
 each microservice has all logic and data encapsulated into a single
 deployment unit.
 
-![Jans Lock Toplogy](../../assets/lock-design-diagram-02.png)
+![1990s WAM v. 2020s Cloud Native](../../assets/lock-wam-v-cloud-native-authz.png)
 
 ## Choose your PDP or use OPA
 
@@ -92,7 +92,7 @@ message queue and leverages cloud database topologies. Lock Clients can
 optionally retrieve policies from Github or public keys from one or more JWKS
 endpoints.
 
-![Jans Lock Toplogy](../../assets/lock-design-diagram-01.png)
+![Lock Data Flow Communication Overview](../../assets/lock-design-diagram-01.png)
 
 This architecture results in the best of three worlds. First, authorization is  
 blazing fast, because OAuth access and transaction tokens are in OPA's memory--
@@ -112,13 +112,14 @@ The diagram below illustrates a Jans Lock topology where the OPA PDP is used to
 control course grain authorization in an API gateway, fine grain authorization
 in First Party API code, and the issuance of access token scopes.
 
-![Jans Lock sample toplogy](../../assets/lock-design-diagram-00.png)
+![North-South API Gateway Authz with Lock](../../assets/lock-north-south-api-gateway-diagram.png)
 
 This authorization model is also useful for East-West service mesh authorization
 because it avoids the "hairpin" inefficiency of routing all traffic through
 and API gateway (which is better for North-South web ingress). TLS is required
-to protect the bearer token. MTLS is even better.
+to protect the bearer token. MTLS is better if the extra effort for additional
+transport security is justified.
 
-![Jans Lock sample toplogy](../../assets/lock-east-west-service-mesh-diagram.png)
+![East-West Service Mesh Authz with Lock](../../assets/lock-east-west-service-mesh-diagram.png)
 
 [Next](./lock_auth_server_config.md)
