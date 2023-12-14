@@ -268,7 +268,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('jans_idp_ignore_validation', 'ignoreValidation')
                     ):
                 if json_prop in jans_idp_config:
-                    print("Exsits", json_prop, jans_idp_config[json_prop])
                     setattr(Config, config_var, jans_idp_config[json_prop])
 
 
