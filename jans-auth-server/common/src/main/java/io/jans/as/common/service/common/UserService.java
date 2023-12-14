@@ -110,9 +110,15 @@ public abstract class UserService {
     }
 
     public User updateUser(User user) {
-        user.setUpdatedAt(new Date());
+        user.setUpdatedAt(new Date());        
+        log.debug("\n\n\n Auth Common service - user: {}", user);
+        log.debug("\n Auth Common service -  user.getCustomObjectClasses():{}",  user.getCustomObjectClasses());
+        if(user.getCustomAttributes()!=null && !user.getCustomAttributes().isEmpty()) {
+            for(CustomObjectAttribute  customObjectAttribute :user.getCustomAttributes()) {
+                log.debug("\n Auth Common service - customObjectAttribute.getName():{} ,customObjectAttribute.getDisplayValue():{} ,customObjectAttribute.getValues():{}, customObjectAttribute.getValue():{}",customObjectAttribute.getName(),customObjectAttribute.getDisplayValue(),customObjectAttribute.getValues(), customObjectAttribute.getValue());
+            }
+        }
         
-        log.debug("Auth Common service - user: {}, user.getCustomObjectClasses():{}", user, user.getCustomObjectClasses());
         persistenceEntryManager.merge(user);
 
         return getUserByDn(user.getDn());
