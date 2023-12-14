@@ -4105,6 +4105,7 @@ paths:
                   - config_api_auth
                   - modify_ssa_response
                   - fido2_extension
+                  - lock_extension
               examples:
                 Response json example:
                   description: Response json example
@@ -7860,7 +7861,7 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
@@ -7868,11 +7869,11 @@ components:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
-          type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9635,6 +9636,7 @@ components:
           - config_api_auth
           - modify_ssa_response
           - fido2_extension
+          - lock_extension
         programmingLanguage:
           type: string
           enum:
@@ -10118,10 +10120,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
