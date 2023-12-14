@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-all-in-one-v1.0.20-1...docker-jans-all-in-one-v1.0.21-1) (2023-12-14)
+
+
+### Bug Fixes
+
+* **docker-jans:** allow custom salt ([#6551](https://github.com/JanssenProject/jans/issues/6551)) ([b099469](https://github.com/JanssenProject/jans/commit/b099469cd69ce958ae89945a8aecab1f0f446322))
+
 ## 1.0.20-1 (2023-11-08)
 
 
