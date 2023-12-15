@@ -1,0 +1,16 @@
+title Jans Config API - Sample request flow
+
+participant Admin
+participant Admin-ui
+participant Config-api
+participant Auth-Server
+participant Jans Persistence
+
+Admin->Admin-ui:Create Client
+note over Admin-ui:Click on (+) Create Client and Save button to create new client
+Config-api->Auth-Server: Introspect Token
+Config-api<--Auth-Server:Returns Introspection Response
+Config-api<--Config-api: Sucessful validation of token claim with Introspection Response
+Config-api<--Config-api: Validate token claim with Introspection Response
+Config-api->Jans Persistence: Validate and persist client data
+Admin-ui<--Config-api: Returns persistence status
