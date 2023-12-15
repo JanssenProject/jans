@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.20-1...docker-jans-config-api-v1.0.21-1) (2023-12-14)
+
+
+### Features
+
+* **docker-jans-config-api:** change the location of admin-ui log files ([#6578](https://github.com/JanssenProject/jans/issues/6578)) ([7efe882](https://github.com/JanssenProject/jans/commit/7efe882fb21a8eb795b106d17e91e8734a46399d))
+* **docker-jans-saml:** add image for jans-saml ([#6436](https://github.com/JanssenProject/jans/issues/6436)) ([b6bd145](https://github.com/JanssenProject/jans/commit/b6bd145b909dcce29be9cbf0fccf02109feba8d3))
+* **docker-jans:** add archived jwks ([#6564](https://github.com/JanssenProject/jans/issues/6564)) ([119d9ad](https://github.com/JanssenProject/jans/commit/119d9ade7cb4ce60b08825e6cda2f43fd153eadf))
+* **docker-jans:** use mixed strategy for Agama serialization ([#6889](https://github.com/JanssenProject/jans/issues/6889)) ([289cf26](https://github.com/JanssenProject/jans/commit/289cf26ec6e2e019187346fb6aea05b135edbf8b))
+* **docker-jans:** use reference token for TUI client ([#6600](https://github.com/JanssenProject/jans/issues/6600)) ([3c5c0e9](https://github.com/JanssenProject/jans/commit/3c5c0e98a6e8cfc8171aaab3084d953238772fe3))
+
+
+### Bug Fixes
+
+* location for saml plugin ([#7097](https://github.com/JanssenProject/jans/issues/7097)) ([c57ba6c](https://github.com/JanssenProject/jans/commit/c57ba6c5f8133e73189c51368711d8a37c766751))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
 ## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.19-1...docker-jans-config-api-v1.0.20-1) (2023-11-08)
 
 

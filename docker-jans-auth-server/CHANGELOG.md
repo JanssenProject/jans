@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.20-1...docker-jans-auth-server-v1.0.21-1) (2023-12-14)
+
+
+### Features
+
+* **docker-jans:** add archived jwks ([#6564](https://github.com/JanssenProject/jans/issues/6564)) ([119d9ad](https://github.com/JanssenProject/jans/commit/119d9ade7cb4ce60b08825e6cda2f43fd153eadf))
+* **docker-jans:** use mixed strategy for Agama serialization ([#6889](https://github.com/JanssenProject/jans/issues/6889)) ([289cf26](https://github.com/JanssenProject/jans/commit/289cf26ec6e2e019187346fb6aea05b135edbf8b))
+
+
+### Bug Fixes
+
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+* remove agama inbound jar dependency ([#7095](https://github.com/JanssenProject/jans/issues/7095)) ([c58c55c](https://github.com/JanssenProject/jans/commit/c58c55cca0a88872d791941c9f7abca45a09813c))
+
 ## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.19-1...docker-jans-auth-server-v1.0.20-1) (2023-11-08)
 
 

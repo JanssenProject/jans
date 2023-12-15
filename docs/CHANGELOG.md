@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/docs-v1.0.20...docs-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* add support for custom scripts ([#6970](https://github.com/JanssenProject/jans/issues/6970)) ([37b171d](https://github.com/JanssenProject/jans/commit/37b171d69d835573800d3765957c7eb4ce78b43a))
+* **agama:** use a mixed strategy for serialization ([#6883](https://github.com/JanssenProject/jans/issues/6883)) ([00aee0c](https://github.com/JanssenProject/jans/commit/00aee0c26565e8b0b574370610a75139c2155568))
+* **jans-auth-server:** archived jwks ([#6503](https://github.com/JanssenProject/jans/issues/6503)) ([c86ae0a](https://github.com/JanssenProject/jans/commit/c86ae0a5a703ff96fd1e69fddcc110b5b754ad71))
+* **jans-linux-setup:** use reference token for TUI ([#6585](https://github.com/JanssenProject/jans/issues/6585)) ([2918c11](https://github.com/JanssenProject/jans/commit/2918c11a25b50a395c71ad5dc252cf49d319a407))
+
+
+### Bug Fixes
+
+* **docs:** add more clarity to triage labels ([#6995](https://github.com/JanssenProject/jans/issues/6995)) ([5f93e2f](https://github.com/JanssenProject/jans/commit/5f93e2fb1e5595cc31fc4ab84fe8935c07c06a63))
+* **docs:** fix dynamic install docs ([#6913](https://github.com/JanssenProject/jans/issues/6913)) ([2d1d7b9](https://github.com/JanssenProject/jans/commit/2d1d7b92de20cc60d07c2d4748fc232e08cac973))
+* **jans-auth-server:** UpdateToken script is not invoked during Implicit Flow [#6561](https://github.com/JanssenProject/jans/issues/6561) ([#6573](https://github.com/JanssenProject/jans/issues/6573)) ([3ca1b24](https://github.com/JanssenProject/jans/commit/3ca1b24ecca8dacc2b9a53e862c49291c5c20c2c))
+* **jans-auth:** [#6527](https://github.com/JanssenProject/jans/issues/6527) ([#6532](https://github.com/JanssenProject/jans/issues/6532)) ([87ed3d6](https://github.com/JanssenProject/jans/commit/87ed3d6e65b1c5cafe9a979b43a42c7bbab6dd08))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
 ## [1.0.20](https://github.com/JanssenProject/jans/compare/docs-v1.0.19...docs-v1.0.20) (2023-11-08)
 
 

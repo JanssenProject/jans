@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.20...jans-linux-setup-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* add message configuration api to config-api [#6982](https://github.com/JanssenProject/jans/issues/6982) ([#6983](https://github.com/JanssenProject/jans/issues/6983)) ([945ba76](https://github.com/JanssenProject/jans/commit/945ba767da90d2c6c376b5b6cca6313c0851bbca))
+* **agama:** use a mixed strategy for serialization ([#6883](https://github.com/JanssenProject/jans/issues/6883)) ([00aee0c](https://github.com/JanssenProject/jans/commit/00aee0c26565e8b0b574370610a75139c2155568))
+* **idp-plugin:** inbound SAML with Keycloak as SP and external SAML IDP ([#6793](https://github.com/JanssenProject/jans/issues/6793)) ([bc5eaad](https://github.com/JanssenProject/jans/commit/bc5eaade348d74d93da25c7494975b9aa35cded4))
+* **jans-auth-server:** archived jwks ([#6503](https://github.com/JanssenProject/jans/issues/6503)) ([c86ae0a](https://github.com/JanssenProject/jans/commit/c86ae0a5a703ff96fd1e69fddcc110b5b754ad71))
+* **jans-auth-server:** set feature flags state according to list discussed in [#6611](https://github.com/JanssenProject/jans/issues/6611) ([#6769](https://github.com/JanssenProject/jans/issues/6769)) ([fa98c32](https://github.com/JanssenProject/jans/commit/fa98c326cb8d8a51c36053e44363fdf6ddcef4b9))
+* **jans-config:** changes to merge config-idp-plugin merged with config-saml-plugin ([#6921](https://github.com/JanssenProject/jans/issues/6921)) ([86e71c9](https://github.com/JanssenProject/jans/commit/86e71c944ee002f3ddda96280123a6aef36f2554))
+* **jans-linux-setup:** config-api idp-plugin ([#6613](https://github.com/JanssenProject/jans/issues/6613)) ([291fe84](https://github.com/JanssenProject/jans/commit/291fe846fc654aeeb1e8c25882a3f97b21bed338))
+* **jans-linux-setup:** config-idp-plugin related changes ([#6895](https://github.com/JanssenProject/jans/issues/6895)) ([caea056](https://github.com/JanssenProject/jans/commit/caea05603676f82c7f08ee81076664de3327f323))
+* **jans-linux-setup:** put KC behind apache ([#7092](https://github.com/JanssenProject/jans/issues/7092)) ([2c545c3](https://github.com/JanssenProject/jans/commit/2c545c3ce7bdef03f548b0248f9505c1c34566a6))
+* **jans-linux-setup:** table based col size for rdbm ([#6920](https://github.com/JanssenProject/jans/issues/6920)) ([29a58cd](https://github.com/JanssenProject/jans/commit/29a58cd2893ed646940102c2546124984a4264e7))
+* **jans-linux-setup:** use reference token for TUI ([#6585](https://github.com/JanssenProject/jans/issues/6585)) ([2918c11](https://github.com/JanssenProject/jans/commit/2918c11a25b50a395c71ad5dc252cf49d319a407))
+* **kc-saml-plugin:** saml enhancement for validation ([#6949](https://github.com/JanssenProject/jans/issues/6949)) ([ba07f32](https://github.com/JanssenProject/jans/commit/ba07f32edc6210fc3ad64d35338e5b7a642cb16a))
+
+
+### Bug Fixes
+
+* add missing attribute name [#6624](https://github.com/JanssenProject/jans/issues/6624) ([#6631](https://github.com/JanssenProject/jans/issues/6631)) ([86bbfa9](https://github.com/JanssenProject/jans/commit/86bbfa98a58fb187ed45ba52b34dc702aa07ed38))
+* avoid crash when variables at the top of util.js are serialized ([#6614](https://github.com/JanssenProject/jans/issues/6614)) ([d1a10da](https://github.com/JanssenProject/jans/commit/d1a10dadc97bc887f9563995cc3168a436d48419))
+* **jans-linux-setup:** jans saml installation ([#7002](https://github.com/JanssenProject/jans/issues/7002)) ([70e4c54](https://github.com/JanssenProject/jans/commit/70e4c54fcd1e64e6143f69f62887571b0f97c7a9))
+* **jans-linux-setup:** postgresql permission ([#6890](https://github.com/JanssenProject/jans/issues/6890)) ([45ce059](https://github.com/JanssenProject/jans/commit/45ce0590e3eee3a729a560e1945c56513832831f))
+* **jans-linux-setup:** python requests-toolbelt library for tui ([#7052](https://github.com/JanssenProject/jans/issues/7052)) ([f0ecba7](https://github.com/JanssenProject/jans/commit/f0ecba7f75ee3f697ee5e0436a32b208f1a7bc0c))
+* **jans-linux-setup:** remove keycloak-storage-api.properties and render keycloak.conf ([#6529](https://github.com/JanssenProject/jans/issues/6529)) ([cc9d64f](https://github.com/JanssenProject/jans/commit/cc9d64f830ac3a07c7dbcbaafe920386e6fdcb7f))
+* **jans-linux-setup:** sql key regeneration ([#7004](https://github.com/JanssenProject/jans/issues/7004)) ([a926d75](https://github.com/JanssenProject/jans/commit/a926d751904ac99b9aaffd880d07f7106366d622))
+* **kc-saml-plugin:** error while updating SAML TR  ([#6974](https://github.com/JanssenProject/jans/issues/6974)) ([ad3041d](https://github.com/JanssenProject/jans/commit/ad3041d35134c7eca49379267c7fa1835e11a989))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+* update transpiled code of test flows [#6624](https://github.com/JanssenProject/jans/issues/6624) ([#6625](https://github.com/JanssenProject/jans/issues/6625)) ([9481c53](https://github.com/JanssenProject/jans/commit/9481c53f18e0e9625bd5d4f77ca60c7714774158))
+
 ## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.19...jans-linux-setup-v1.0.20) (2023-11-08)
 
 

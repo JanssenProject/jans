@@ -50,8 +50,8 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.21
-ENV CN_BUILD_DATE='2023-12-11 12:01'
+ENV CN_VERSION=1.0.22-SNAPSHOT
+ENV CN_BUILD_DATE='2023-12-14 08:38'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -85,7 +85,7 @@ RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSIO
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://jenkins.jans.io/maven/io/jans/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
     && wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
-    && wget -q https://jenkins.jans.io/maven/io/jans/agama-inbound/${AGAMA_INBOUND_VERSION}/agama-inbound-${AGAMA_INBOUND_VERSION}-jar-with-dependencies.jar -P ${JETTY_BASE}/jans-auth/_libs
+    && wget -q https://jenkins.jans.io/maven/io/jans/agama-inbound/${AGAMA_INBOUND_VERSION}/agama-inbound-${AGAMA_INBOUND_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
 
 # =====================
 # jans-linux-setup sync
@@ -240,7 +240,7 @@ EXPOSE $CN_AUTH_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.version="1.0.22" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 

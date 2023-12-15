@@ -23,7 +23,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.0.21
+ENV CN_VERSION=1.0.22-SNAPSHOT
 ENV CN_BUILD_DATE='2023-12-08 08:47'
 
 # @FIXME: kc-jans-storage-plugin raises error about Cookie
@@ -179,7 +179,7 @@ EXPOSE $CN_SAML_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.version="1.0.22" \
     org.opencontainers.image.title="Janssen SAML" \
     org.opencontainers.image.description=""
 

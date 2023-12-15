@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-scim-v1.0.20-1...docker-jans-scim-v1.0.21-1) (2023-12-14)
+
+
+### Bug Fixes
+
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
 ## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-scim-v1.0.19-1...docker-jans-scim-v1.0.20-1) (2023-11-08)
 
 

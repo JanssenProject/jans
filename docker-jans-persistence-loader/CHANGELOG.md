@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.20-1...docker-jans-persistence-loader-v1.0.21-1) (2023-12-14)
+
+
+### Features
+
+* **docker-jans-persistence-loader:** set feature flags state ([#6833](https://github.com/JanssenProject/jans/issues/6833)) ([13ef9c2](https://github.com/JanssenProject/jans/commit/13ef9c24ab443f457bede1d47e914b9ee0d69813))
+* **docker-jans:** add archived jwks ([#6564](https://github.com/JanssenProject/jans/issues/6564)) ([119d9ad](https://github.com/JanssenProject/jans/commit/119d9ade7cb4ce60b08825e6cda2f43fd153eadf))
+* **docker-jans:** automatically update schema of sql/spanner tables ([#6634](https://github.com/JanssenProject/jans/issues/6634)) ([2d86835](https://github.com/JanssenProject/jans/commit/2d868351ec9d8a8649ac804e2584aa7447e6c36f))
+* **docker-jans:** use mixed strategy for Agama serialization ([#6889](https://github.com/JanssenProject/jans/issues/6889)) ([289cf26](https://github.com/JanssenProject/jans/commit/289cf26ec6e2e019187346fb6aea05b135edbf8b))
+* **docker-jans:** use reference token for TUI client ([#6600](https://github.com/JanssenProject/jans/issues/6600)) ([3c5c0e9](https://github.com/JanssenProject/jans/commit/3c5c0e98a6e8cfc8171aaab3084d953238772fe3))
+
+
+### Bug Fixes
+
+* **docker-jans-persistence-loader:** passing CN_SCIM_ENABLED doesn't toggle jansScimEnabled config ([#6952](https://github.com/JanssenProject/jans/issues/6952)) ([30f901a](https://github.com/JanssenProject/jans/commit/30f901a044bb83aa1296757f334958d571317e5a))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
 ## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.19-1...docker-jans-persistence-loader-v1.0.20-1) (2023-11-08)
 
 

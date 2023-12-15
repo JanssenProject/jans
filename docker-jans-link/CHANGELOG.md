@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-link-v1.0.20-1...docker-jans-link-v1.0.21-1) (2023-12-14)
+
+
+### Features
+
+* **docker-jans:** add archived jwks ([#6564](https://github.com/JanssenProject/jans/issues/6564)) ([119d9ad](https://github.com/JanssenProject/jans/commit/119d9ade7cb4ce60b08825e6cda2f43fd153eadf))
+
+
+### Bug Fixes
+
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
 ## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-link-v1.0.19-1...docker-jans-link-v1.0.20-1) (2023-11-08)
 
 

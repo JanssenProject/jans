@@ -1,6 +1,6 @@
 [Unit]
 Description=Janssen Casa service
-After=%(order_casa_service)s
+After=%(order_jans_casa_service)s
 
 [Service]
 Type=forking
