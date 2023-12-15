@@ -13,10 +13,16 @@ import java.util.stream.Collectors;
  * @author Yuriy Z
  */
 public class AuthzDetails {
-    private AuthzDetails() {
+
+    private final List<AuthzDetail> details;
+
+    public AuthzDetails(List<AuthzDetail> details) {
+        this.details = details;
     }
 
-    private final List<AuthzDetail> details = new ArrayList<>();
+    public AuthzDetails() {
+        this(new ArrayList<>());
+    }
 
     public static AuthzDetails of(String jsonArray) {
         return of(new JSONArray(jsonArray));

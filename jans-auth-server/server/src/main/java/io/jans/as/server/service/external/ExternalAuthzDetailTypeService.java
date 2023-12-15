@@ -33,8 +33,11 @@ public class ExternalAuthzDetailTypeService extends ExternalScriptService {
 
     public void externalValidateAuthzDetails(AuthzRequest authzRequest) {
         ExecutionContext executionContext = ExecutionContext.of(authzRequest);
+        externalValidateAuthzDetails(executionContext);
+    }
 
-        final AuthzDetails authzDetails = authzRequest.getAuthzDetails();
+    public void externalValidateAuthzDetails(ExecutionContext executionContext) {
+        final AuthzDetails authzDetails = executionContext.getAuthzDetails();
         for (AuthzDetail authzDetail : authzDetails.getDetails()) {
             validateSingleAuthzDetail(executionContext, authzDetail);
         }

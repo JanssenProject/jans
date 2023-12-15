@@ -199,6 +199,11 @@
              "uri":null
         },
         {
+            "id":"invalid_authorization_details",
+            "description":"The authorization_details in the request does not pass AS validation.",
+            "uri":null
+        },
+        {
              "id":"use_new_dpop_nonce",
              "description":"Authorization server requires new nonce in DPoP proof.",
              "uri":null

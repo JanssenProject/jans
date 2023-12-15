@@ -6,6 +6,7 @@
 
 package io.jans.as.server.token.ws.rs;
 
+import io.jans.as.common.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
@@ -21,6 +22,7 @@ import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.auth.DpopService;
+import io.jans.as.server.authorize.ws.rs.AuthzDetailsService;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.*;
@@ -141,9 +143,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private DpopService dPoPService;
 
+    @Inject
+    private AuthzDetailsService authzDetailsService;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
+                                       String authorizationDetails,
                                        String assertion, String refreshToken,
                                        String clientId, String clientSecret, String codeVerifier,
                                        String ticket, String claimToken, String claimTokenFormat, String pctCode,
@@ -151,9 +157,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                        HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.debug(
                 "Attempting to request access token: grantType = {}, code = {}, redirectUri = {}, username = {}, refreshToken = {}, " +
-                        "clientId = {}, ExtraParams = {}, isSecure = {}, codeVerifier = {}, ticket = {}",
+                        "clientId = {}, ExtraParams = {}, isSecure = {}, codeVerifier = {}, ticket = {}, authorizationDetails = {}",
                 grantType, code, redirectUri, username, refreshToken, clientId, request.getParameterMap(),
-                sec.isSecure(), codeVerifier, ticket);
+                sec.isSecure(), codeVerifier, ticket, authorizationDetails);
 
         boolean isUma = StringUtils.isNotBlank(ticket);
         if (isUma) {
@@ -192,6 +198,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             executionContext.setAttributeService(attributeService);
             executionContext.setAuditLog(auditLog);
             executionContext.setScopes(StringUtils.isNotBlank(scope) ? new HashSet<>(Arrays.asList(scope.split(" "))) : new HashSet<>());
+
+            final AuthzDetails authzDetails = authzDetailsService.validateAuthorizationDetails(authorizationDetails, executionContext);
+            executionContext.setAuthzDetails(authzDetails);
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
                 return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, executionContext);
@@ -256,6 +265,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         RefreshToken reToken = tokenCreatorService.createRefreshToken(executionContext, scope);
 
         scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
+        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), resourceOwnerPasswordCredentialsGrant);
 
         AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(executionContext); // create token after scopes are checked
 
@@ -282,13 +292,14 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 accessToken.getExpiresIn(),
                 reToken,
                 scope,
-                idToken)), executionContext.getAuditLog());
+                idToken, checkedAuthzDetails)), executionContext.getAuditLog());
     }
 
     private Response processClientGredentials(String scope, HttpServletRequest request, OAuth2AuditLog auditLog, Client client, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) {
         ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client);
 
         scope = clientCredentialsGrant.checkScopesPolicy(scope);
+        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), clientCredentialsGrant);
 
         executionContext.setGrant(clientCredentialsGrant);
         AccessToken accessToken = clientCredentialsGrant.createAccessToken(executionContext); // create token after scopes are checked
@@ -315,7 +326,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 accessToken.getExpiresIn(),
                 null,
                 scope,
-                idToken)), auditLog);
+                idToken, checkedAuthzDetails)), auditLog);
     }
 
     private Response processRefreshTokenGrant(String scope, String refreshToken, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) {
@@ -345,6 +356,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         authorizationGrant.checkScopesPolicy(scope);
         scope = authorizationGrant.getScopesAsString();
+        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), authorizationGrant);
 
         AccessToken accToken = authorizationGrant.createAccessToken(executionContext); // create token after scopes are checked
 
@@ -378,7 +390,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 accToken.getExpiresIn(),
                 reToken,
                 scope,
-                idToken)), auditLog);
+                idToken, checkedAuthzDetails)), auditLog);
     }
 
     private Response processAuthorizationCode(String code, String scope, String codeVerifier, SessionId sessionIdObj, ExecutionContext executionContext) {
@@ -400,6 +412,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         RefreshToken reToken = tokenCreatorService.createRefreshToken(executionContext, scope);
 
         scope = authorizationCodeGrant.checkScopesPolicy(scope);
+        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), authorizationCodeGrant);
 
         AccessToken accToken = authorizationCodeGrant.createAccessToken(executionContext); // create token after scopes are checked
         final String deviceSecret = tokenExchangeService.createNewDeviceSecret(authorizationCodeGrant.getSessionDn(), client, authorizationCodeGrant.getScopesAsString());
@@ -434,7 +447,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         JSONObject jsonObj = new JSONObject();
         try {
-            fillJsonObject(jsonObj, accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
+            fillJsonObject(jsonObj, accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken, checkedAuthzDetails);
             if (StringUtils.isNotBlank(deviceSecret)) {
                 jsonObj.put("device_token", deviceSecret);
             }
@@ -514,6 +527,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     null, null, accessToken, refToken, null, executionContext);
 
             deviceCodeGrant.checkScopesPolicy(scope);
+            AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), deviceCodeGrant);
 
             log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
 
@@ -522,7 +536,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             grantService.removeByCode(deviceCodeGrant.getDeviceCode());
 
             return Response.ok().entity(getJSonResponse(accessToken, accessToken.getTokenType(),
-                    accessToken.getExpiresIn(), refToken, scope, idToken)).build();
+                    accessToken.getExpiresIn(), refToken, scope, idToken, checkedAuthzDetails)).build();
         } else {
             final DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByDeviceCode(deviceCode);
             log.trace("DeviceAuthorizationCacheControl data : '{}'", cacheData);
@@ -575,10 +589,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
      */
     public String getJSonResponse(AccessToken accessToken, TokenType tokenType,
                                   Integer expiresIn, RefreshToken refreshToken, String scope,
-                                  IdToken idToken) {
+                                  IdToken idToken, AuthzDetails checkedAuthzDetails) {
         JSONObject jsonObj = new JSONObject();
         try {
-            fillJsonObject(jsonObj, accessToken, tokenType, expiresIn, refreshToken, scope, idToken);
+            fillJsonObject(jsonObj, accessToken, tokenType, expiresIn, refreshToken, scope, idToken, checkedAuthzDetails);
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
         }
@@ -588,7 +602,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     public static void fillJsonObject(JSONObject jsonObj, AccessToken accessToken, TokenType tokenType,
                                      Integer expiresIn, RefreshToken refreshToken, String scope,
-                                     IdToken idToken) {
+                                     IdToken idToken, AuthzDetails checkedAuthzDetails) {
         jsonObj.put("access_token", accessToken.getCode()); // Required
         jsonObj.put("token_type", tokenType.toString()); // Required
         if (expiresIn != null) { // Optional
@@ -602,6 +616,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         }
         if (idToken != null) {
             jsonObj.put("id_token", idToken.getCode());
+        }
+        if (checkedAuthzDetails != null && checkedAuthzDetails.getDetails() != null && !checkedAuthzDetails.getDetails().isEmpty()) {
+            jsonObj.put("authorization_details", checkedAuthzDetails.asJsonArray());
         }
     }
 
@@ -644,6 +661,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     }
 
                     scope = cibaGrant.checkScopesPolicy(scope);
+                    AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), cibaGrant);
 
                     executionContext.getAuditLog().updateOAuth2AuditLog(cibaGrant, true);
 
@@ -652,7 +670,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             accessToken.getExpiresIn(),
                             reToken,
                             scope,
-                            idToken)), executionContext.getAuditLog());
+                            idToken,
+                            checkedAuthzDetails)), executionContext.getAuditLog());
                 } else {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available."), executionContext.getAuditLog());
                 }
