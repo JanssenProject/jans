@@ -39,7 +39,7 @@ class Plugin(DialogUtils):
         """
         self.app = app
         self.pid = 'saml'
-        self.name = 'Jans Sa[m]l'
+        self.name = 'Jans SA[M]L'
         self.server_side_plugin = True
         self.page_entered = False
 
