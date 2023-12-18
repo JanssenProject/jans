@@ -894,7 +894,6 @@ class JCA_CLI:
                 else:
                     multi_part_fields[prop] = (None, json.dumps(data_js[prop]), 'application/json')
             data = MultipartEncoder(fields=multi_part_fields)
-
             headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': data.content_type})
             mime_type = data.content_type
         else:

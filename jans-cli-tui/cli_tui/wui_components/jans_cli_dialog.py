@@ -11,8 +11,8 @@ class JansGDialog:
     """This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
     """
     def __init__(
-        self, 
-        parent, 
+        self,
+        parent,
         body: Optional[AnyContainer] = None,
         title: Optional[str] = '',
         buttons: Optional[Sequence[Button]] = None,
