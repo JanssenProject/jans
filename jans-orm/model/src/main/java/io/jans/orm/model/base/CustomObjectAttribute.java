@@ -10,9 +10,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * @author Yuriy Movchan Date: 09/16/2019
 */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomObjectAttribute implements Serializable, Comparable<CustomObjectAttribute> {
 
     private static final long serialVersionUID = -1238450094325306154L;
