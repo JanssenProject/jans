@@ -6,7 +6,7 @@
 
 package io.jans.service;
 
-import io.jans.service.message.MessageProvider;
+import io.jans.service.message.provider.MessageProvider;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
