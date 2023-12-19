@@ -14,8 +14,13 @@ public class VariableSurvivalTest extends BaseTest {
     }
     
     @Test
-    public void javaValues() {
+    public void javaValues1() {
         run("io.jans.agama.test.vars_and_rrf.javaValues1", 5);
+    }
+    
+    @Test
+    public void javaValues2() {
+        run("io.jans.agama.test.vars_and_rrf.javaValues2", 3);
     }
     
     private void run(String qname, int submissions) {

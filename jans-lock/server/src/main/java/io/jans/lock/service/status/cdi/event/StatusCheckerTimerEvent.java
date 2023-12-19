@@ -13,7 +13,6 @@ package io.jans.lock.service.status.cdi.event;
  */
 public class StatusCheckerTimerEvent {
 
-	public StatusCheckerTimerEvent() {
-	}
+	public StatusCheckerTimerEvent() {}
 
 }

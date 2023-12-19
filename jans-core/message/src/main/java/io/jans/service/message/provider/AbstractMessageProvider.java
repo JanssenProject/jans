@@ -4,7 +4,7 @@
  * Copyright (c) 2023, Janssen Project
  */
 
-package io.jans.service.message;
+package io.jans.service.message.provider;
 
 import java.util.concurrent.ExecutorService;
 

@@ -114,7 +114,7 @@ This can be configured in the project's [metadata file](../../../agama/gama-form
 
 ### Updates in a flow's code are not reflected in its execution
 
-When a project is re-deployed, a flow remains unchanged if it comes with errors in the provided `.gama` file. The response obtained by the deployment API will let you know which flows have errors and their descriptions. 
+When a project is re-deployed, a flow remains unchanged if it comes with errors in the provided `.gama` file. The tool used for deployment will let you know which flows have errors and their descriptions. 
 
 ### Why are the contents of a list or map logged partially?
 
