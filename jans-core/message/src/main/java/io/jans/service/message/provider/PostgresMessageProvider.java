@@ -4,7 +4,7 @@
  * Copyright (c) 2023, Janssen Project
  */
 
-package io.jans.service.message;
+package io.jans.service.message.provider;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -29,6 +29,7 @@ import io.jans.service.message.model.config.MessageConfiguration;
 import io.jans.service.message.model.config.MessageProviderType;
 import io.jans.service.message.model.config.PostgresMessageConfiguration;
 import io.jans.service.message.pubsub.PubSubInterface;
+import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -106,36 +107,41 @@ public class PostgresMessageProvider extends AbstractMessageProvider<SqConnectio
 
 	private Properties toPostgresProperties(PostgresMessageConfiguration postgresMessageConfiguration) {
 		Properties connectionProperties = new Properties();
-		connectionProperties.setProperty("db.schema.name", postgresMessageConfiguration.getDbSchemaName());
-		connectionProperties.setProperty("connection.uri", postgresMessageConfiguration.getConnectionUri());
-		connectionProperties.setProperty("auth.userName", postgresMessageConfiguration.getAuthUserName());
-
+		setProperty(connectionProperties, "jdbc.driver.class-name", postgresMessageConfiguration.getDriverClassName());
+		setProperty(connectionProperties, "db.schema.name", postgresMessageConfiguration.getDbSchemaName());
+		setProperty(connectionProperties, "connection.uri", postgresMessageConfiguration.getConnectionUri());
+		setProperty(connectionProperties, "auth.userName", postgresMessageConfiguration.getAuthUserName());
+	
+		String password = postgresMessageConfiguration.getAuthUserPassword();
 		try {
-			String encryptedPassword = postgresMessageConfiguration.getAuthUserPassword();
-			if (StringUtils.isNotBlank(encryptedPassword)) {
-				connectionProperties.setProperty("auth.userPassword", stringEncrypter.decrypt(encryptedPassword));
+			if (StringUtils.isNotBlank(password)) {
+				password = stringEncrypter.decrypt(password);
 				log.trace("Decrypted Postgres password successfully.");
 			}
 		} catch (StringEncrypter.EncryptionException e) {
 			log.error("Error during Postgres password decryption", e);
 		}
+		setProperty(connectionProperties, "auth.userPassword", password);
 
 		if (postgresMessageConfiguration.getConnectionPoolMaxTotal() != null) {
-			connectionProperties.setProperty("connection.pool.max-total",
-					postgresMessageConfiguration.getConnectionPoolMaxTotal().toString());
+			setProperty(connectionProperties, "connection.pool.max-total", postgresMessageConfiguration.getConnectionPoolMaxTotal().toString());
 		}
 
 		if (postgresMessageConfiguration.getConnectionPoolMaxIdle() != null) {
-			connectionProperties.setProperty("connection.pool.max-idle",
-					postgresMessageConfiguration.getConnectionPoolMaxIdle().toString());
+			setProperty(connectionProperties, "connection.pool.max-idle", postgresMessageConfiguration.getConnectionPoolMaxIdle().toString());
 		}
 
 		if (postgresMessageConfiguration.getConnectionPoolMinIdle() != null) {
-			connectionProperties.setProperty("connection.pool.min-idle",
-					postgresMessageConfiguration.getConnectionPoolMinIdle().toString());
+			setProperty(connectionProperties, "connection.pool.min-idle", postgresMessageConfiguration.getConnectionPoolMinIdle().toString());
 		}
 
 		return connectionProperties;
+	}
+
+	public void setProperty(Properties connectionProperties, String propertyName, String propertyValue) {
+		if (StringHelper.isNotEmpty(propertyValue)) {
+			connectionProperties.setProperty(propertyName, propertyValue);
+		}
 	}
 
 	public boolean isConnected() {
