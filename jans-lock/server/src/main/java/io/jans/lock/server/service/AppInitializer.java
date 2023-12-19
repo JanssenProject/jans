@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
 import io.jans.exception.ConfigurationException;
 import io.jans.lock.service.config.ApplicationFactory;
 import io.jans.lock.service.config.ConfigurationFactory;
+import io.jans.lock.service.status.StatusCheckerTimer;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PersistenceConfiguration;
@@ -93,6 +94,9 @@ public class AppInitializer {
     @Inject
     private MetricService metricService;
 
+    @Inject
+    private StatusCheckerTimer statusCheckerTimer;
+
 	@Inject
 	private CustomScriptManager customScriptManager;
 
@@ -114,13 +118,12 @@ public class AppInitializer {
 	public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
 		log.debug("Initializing application services");
 
-		// Start timer
-		initSchedulerService();
+        // Load main app configuration first
+        configurationFactory.create();
 
 		// Initialize plugins configurations
 		for (ApplicationConfigurationFactory configurationFactory : applicationConfigurationFactory) {
 			configurationFactory.create();
-			configurationFactory.initTimer();
 		}
 
 		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
@@ -134,8 +137,14 @@ public class AppInitializer {
 		// Initialize script manager
 		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.LOCK_EXTENSION);
 
+		// Start timer
+		initSchedulerService();
+
+        // Schedule timer tasks
 		loggerService.initTimer();
+		statusCheckerTimer.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
+
 		// Notify plugins about finish application initialization 
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
 				.fire(new ApplicationInitializedEvent());
