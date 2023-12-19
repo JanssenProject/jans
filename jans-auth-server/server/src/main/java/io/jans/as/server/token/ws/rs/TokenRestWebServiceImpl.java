@@ -6,7 +6,7 @@
 
 package io.jans.as.server.token.ws.rs;
 
-import io.jans.as.common.model.authzdetails.AuthzDetails;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
@@ -265,7 +265,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         RefreshToken reToken = tokenCreatorService.createRefreshToken(executionContext, scope);
 
         scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
-        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), resourceOwnerPasswordCredentialsGrant);
+        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), resourceOwnerPasswordCredentialsGrant);
 
         AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(executionContext); // create token after scopes are checked
 
@@ -299,7 +299,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client);
 
         scope = clientCredentialsGrant.checkScopesPolicy(scope);
-        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), clientCredentialsGrant);
+        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), clientCredentialsGrant);
 
         executionContext.setGrant(clientCredentialsGrant);
         AccessToken accessToken = clientCredentialsGrant.createAccessToken(executionContext); // create token after scopes are checked
@@ -356,7 +356,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         authorizationGrant.checkScopesPolicy(scope);
         scope = authorizationGrant.getScopesAsString();
-        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), authorizationGrant);
+        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), authorizationGrant);
 
         AccessToken accToken = authorizationGrant.createAccessToken(executionContext); // create token after scopes are checked
 
@@ -412,7 +412,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         RefreshToken reToken = tokenCreatorService.createRefreshToken(executionContext, scope);
 
         scope = authorizationCodeGrant.checkScopesPolicy(scope);
-        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), authorizationCodeGrant);
+        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), authorizationCodeGrant);
 
         AccessToken accToken = authorizationCodeGrant.createAccessToken(executionContext); // create token after scopes are checked
         final String deviceSecret = tokenExchangeService.createNewDeviceSecret(authorizationCodeGrant.getSessionDn(), client, authorizationCodeGrant.getScopesAsString());
@@ -527,7 +527,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     null, null, accessToken, refToken, null, executionContext);
 
             deviceCodeGrant.checkScopesPolicy(scope);
-            AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), deviceCodeGrant);
+            AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), deviceCodeGrant);
 
             log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
 
@@ -661,7 +661,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     }
 
                     scope = cibaGrant.checkScopesPolicy(scope);
-                    AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetails(executionContext.getAuthzDetails(), cibaGrant);
+                    AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), cibaGrant);
 
                     executionContext.getAuditLog().updateOAuth2AuditLog(cibaGrant, true);
 

@@ -1,7 +1,7 @@
 package io.jans.as.server.service.external;
 
-import io.jans.as.common.model.authzdetails.AuthzDetail;
-import io.jans.as.common.model.authzdetails.AuthzDetails;
+import io.jans.as.model.authzdetails.AuthzDetail;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.server.authorize.ws.rs.AuthzRequest;
 import io.jans.as.server.model.common.ExecutionContext;
@@ -60,7 +60,7 @@ public class ExternalAuthzDetailTypeService extends ExternalScriptService {
 
     public void externalValidateDetail(ExecutionContext executionContext, CustomScriptConfiguration script) {
         log.trace("Executing python 'validateDetail' method, script name: {}, clientId: {}, authzDetail: {}",
-                script.getName(), executionContext.getAuthzRequest().getClientId(), executionContext.getAuthzDetail());
+                script.getName(), executionContext.getClient().getClientId(), executionContext.getAuthzDetail());
 
         executionContext.setScript(script);
 
@@ -81,7 +81,7 @@ public class ExternalAuthzDetailTypeService extends ExternalScriptService {
             saveScriptError(script.getCustomScript(), ex);
         }
 
-        log.trace("Finished 'validateDetail' method, script name: {}, clientId: {}, result: {}", script.getName(), executionContext.getAuthzRequest().getClientId(), result);
+        log.trace("Finished 'validateDetail' method, script name: {}, clientId: {}, result: {}", script.getName(), executionContext.getClient().getClientId(), result);
 
         if (!result) {
             throw executionContext.getAuthzRequest().getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.ACCESS_DENIED,

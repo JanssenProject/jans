@@ -6,7 +6,7 @@
 
 package io.jans.as.server.service;
 
-import io.jans.as.common.model.authzdetails.AuthzDetails;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
