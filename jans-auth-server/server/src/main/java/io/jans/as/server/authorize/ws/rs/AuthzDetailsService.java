@@ -1,7 +1,7 @@
 package io.jans.as.server.authorize.ws.rs;
 
-import io.jans.as.common.model.authzdetails.AuthzDetail;
-import io.jans.as.common.model.authzdetails.AuthzDetails;
+import io.jans.as.model.authzdetails.AuthzDetail;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.error.IErrorType;
@@ -86,13 +86,8 @@ public class AuthzDetailsService {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 
-    public static boolean isEmpty(AuthzDetails authzDetails) {
-        return authzDetails == null || authzDetails.getDetails() == null || authzDetails.getDetails().isEmpty();
-    }
-
-    public AuthzDetails checkAuthzDetails(AuthzDetails requestedAuthzDetails, AuthorizationGrant authorizationCodeGrant) {
-        final AuthzDetails authorizedDetails = authorizationCodeGrant.getAuthzDetails();
-        if (isEmpty(authorizedDetails) || isEmpty(requestedAuthzDetails)) {
+    public AuthzDetails checkAuthzDetails(AuthzDetails requestedAuthzDetails, final AuthzDetails authorizedDetails) {
+        if (AuthzDetails.isEmpty(authorizedDetails) || AuthzDetails.isEmpty(requestedAuthzDetails)) {
             return null;
         }
 
@@ -107,9 +102,13 @@ public class AuthzDetailsService {
             }
         }
 
-        final AuthzDetails granted = new AuthzDetails(grantedDetails);
-        authorizationCodeGrant.setAuthzDetails(granted);
-        authorizationCodeGrant.save();
+        return new AuthzDetails(grantedDetails);
+    }
+
+    public AuthzDetails checkAuthzDetailsAndSave(AuthzDetails requestedAuthzDetails, AuthorizationGrant authorizationGrant) {
+        final AuthzDetails granted = checkAuthzDetails(requestedAuthzDetails, authorizationGrant.getAuthzDetails());
+        authorizationGrant.setAuthzDetails(granted);
+        authorizationGrant.save();
 
         return granted;
     }

@@ -1,7 +1,7 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import com.google.common.collect.Sets;
-import io.jans.as.common.model.authzdetails.AuthzDetails;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.DeviceSession;
 import io.jans.as.model.common.Prompt;

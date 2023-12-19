@@ -1,4 +1,4 @@
-package io.jans.as.common.model.authzdetails;
+package io.jans.as.model.authzdetails;
 
 import org.json.JSONObject;
 

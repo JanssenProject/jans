@@ -1,4 +1,4 @@
-package io.jans.as.common.model.authzdetails;
+package io.jans.as.model.authzdetails;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -69,6 +69,17 @@ public class AuthzDetails {
         return array;
     }
 
+    public String asJsonString() {
+        return asJsonArray().toString();
+    }
+
+    public boolean similar(String authorizationDetails) {
+        if (StringUtils.isBlank(authorizationDetails)) {
+            return false;
+        }
+        return asJsonArray().similar(new JSONArray(authorizationDetails));
+    }
+
     public List<AuthzDetail> getDetails() {
         return details;
     }
@@ -79,6 +90,10 @@ public class AuthzDetails {
             result.add(d.getType());
         }
         return result;
+    }
+
+    public static boolean isEmpty(AuthzDetails authzDetails) {
+        return authzDetails == null || authzDetails.getDetails() == null || authzDetails.getDetails().isEmpty();
     }
 
     @Override

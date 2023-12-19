@@ -6,7 +6,7 @@
 
 package io.jans.as.server.model.common;
 
-import io.jans.as.common.model.authzdetails.AuthzDetails;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.GrantType;
 import io.jans.service.CacheService;
 
