@@ -230,8 +230,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
         acr_values_supported_list = [ (acr, acr) for acr in acr_values_supported ]
 
 
-        schema = self.myparent.cli_object.get_schema_from_reference(
-            '', '#/components/schemas/Client')
+        schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Client')
+
+        import json
+        open("/tmp/cl.json", "w").write(json.dumps(schema, indent=2))
 
         self.tabs = OrderedDict()
 
@@ -260,6 +262,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
         #require_pkce = self.data.get('attributes', {}).get('redirectUrisRegex')
         #if require_pkce is None:
         #    require_pkce = self.myparent.app_configuration.get('requirePkce', False)
+
+        token_endpoint_authmethods = [('none', 'none')]
+        for method in schema['properties']['tokenEndpointAuthMethod']['enum']:
+            if method == 'none':
+                continue
+            token_endpoint_authmethods.append((method, method))
+
 
         basic_tab_widgets = [
             self.myparent.getTitledText(
@@ -296,15 +305,18 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     schema, 'description'),
                 style=cli_style.check_box),
 
-            self.myparent.getTitledRadioButton(
+
+            self.myparent.getTitledWidget(
                 _("Authn Method token endpoint"),
                 name='tokenEndpointAuthMethod',
-                values=[('none', 'none'), ('client_secret_basic', 'client_secret_basic'), ('client_secret_post',
-                                                                                           'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
-                current_value=self.data.get('tokenEndpointAuthMethod'),
+                widget=DropDownWidget(
+                    values=token_endpoint_authmethods,
+                    value=self.data.get('tokenEndpointAuthMethod')
+                ),
                 jans_help=self.myparent.get_help_from_schema(
                     schema, 'tokenEndpointAuthMethod'),
-                style=cli_style.radio_button),
+                style=cli_style.drop_down),
+
 
             self.myparent.getTitledRadioButton(
                 _("Subject Type"),
