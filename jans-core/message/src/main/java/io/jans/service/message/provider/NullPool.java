@@ -1,4 +1,4 @@
-package io.jans.service.message;
+package io.jans.service.message.provider;
 
 /**
  * Null pool

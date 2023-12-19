@@ -6,6 +6,9 @@
 
 package io.jans.lock.model.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.doc.annotation.DocProperty;
@@ -22,6 +25,8 @@ public class AppConfiguration implements Configuration {
 
 	private String baseDN;
 
+	private List<String> tokenChannels;
+
 	@DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
 	private Boolean disableJdkLogger = true;
 
@@ -36,12 +41,26 @@ public class AppConfiguration implements Configuration {
 	// Period in seconds
 	private int cleanServiceInterval;
 
+	private String messageConsumerType;
+
 	public String getBaseDN() {
 		return baseDN;
 	}
 
 	public void setBaseDN(String baseDN) {
 		this.baseDN = baseDN;
+	}
+
+	public List<String> getTokenChannels() {
+		if (tokenChannels == null) {
+			tokenChannels = new ArrayList<>();
+		}
+
+		return tokenChannels;
+	}
+
+	public void setTokenChannels(List<String> tokenChannels) {
+		this.tokenChannels = tokenChannels;
 	}
 
 	public Boolean getDisableJdkLogger() {
@@ -106,6 +125,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setCleanServiceInterval(int cleanServiceInterval) {
 		this.cleanServiceInterval = cleanServiceInterval;
+	}
+
+	public String getMessageConsumerType() {
+		return messageConsumerType;
+	}
+
+	public void setMessageConsumerType(String messageConsumerType) {
+		this.messageConsumerType = messageConsumerType;
 	}
 
 }
