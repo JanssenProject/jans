@@ -261,11 +261,11 @@
   },
   "jansPublicKeyId": {
     "mysql": {
-      "size": 96,
+      "size": 256,
       "type": "VARCHAR"
     },
     "spanner": {
-      "size": 96,
+      "size": 256,
       "type": "STRING"
     }
   },
