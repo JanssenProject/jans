@@ -8,8 +8,8 @@ package io.jans.service;
 
 import org.slf4j.Logger;
 
-import io.jans.service.message.MessageInterface;
-import io.jans.service.message.MessageProvider;
+import io.jans.service.message.provider.MessageInterface;
+import io.jans.service.message.provider.MessageProvider;
 import io.jans.service.message.pubsub.PubSubInterface;
 import jakarta.inject.Inject;
 

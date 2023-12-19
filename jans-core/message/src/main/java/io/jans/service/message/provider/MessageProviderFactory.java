@@ -4,7 +4,7 @@
  * Copyright (c) 2023, Janssen Project
  */
 
-package io.jans.service.message;
+package io.jans.service.message.provider;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,12 +68,12 @@ public class MessageProviderFactory {
 	public MessageProvider getMessageProvider() {
 		log.debug("Started to create message provider");
 
-		messageProvider = getCacheProvider(messageConfiguration);
+		messageProvider = getMessageProvider(messageConfiguration);
 
 		return messageProvider;
 	}
 
-	public MessageProvider getCacheProvider(MessageConfiguration messageConfiguration) {
+	public MessageProvider getMessageProvider(MessageConfiguration messageConfiguration) {
 		MessageProviderType messageProviderType = messageConfiguration.getMessageProviderType();
 
 		// Create proxied bean
@@ -95,7 +95,14 @@ public class MessageProviderFactory {
 					"Failed to initialize messageProvider, messageProvider is unsupported: " + messageProviderType);
 		}
 
-		messageProvider.create(executorService);
+		// Call message provider from context class loader to load JDBC driver
+		ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+		try {
+			messageProvider.create(executorService);
+		} finally {
+			Thread.currentThread().setContextClassLoader(oldClassLoader);
+		}
 
 		return messageProvider;
 	}
