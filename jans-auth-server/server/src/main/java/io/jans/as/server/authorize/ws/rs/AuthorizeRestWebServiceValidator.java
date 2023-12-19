@@ -7,7 +7,7 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import com.google.common.base.Strings;
-import io.jans.as.common.model.authzdetails.AuthzDetails;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
