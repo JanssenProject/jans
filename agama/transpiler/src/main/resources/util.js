@@ -43,7 +43,7 @@ function _equals(a, b) {
 }
 
 function _actionCall(instance, clsName, method, args) {
-    return _scriptUtils.callAction(instance, clsName, method, args.map(_scan))
+    return _scriptUtils.callAction(_scan(instance), clsName, method, args.map(_scan))
 }
 
 function _flowCall(flowName, basePath, urlOverrides, args) {
