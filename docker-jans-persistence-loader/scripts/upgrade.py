@@ -590,14 +590,7 @@ class Upgrade:
         if not entry:
             return
 
-        # calculate new permissions for api-admin
         role_mapping = get_role_scope_mappings()
-        api_admin_perms = []
-
-        for api_role in role_mapping["rolePermissionMapping"]:
-            if api_role["role"] == "api-admin":
-                api_admin_perms = api_role["permissions"]
-                break
 
         try:
             conf = json.loads(entry.attrs["jansConfDyn"])
@@ -606,46 +599,16 @@ class Upgrade:
 
         should_update = False
 
-        # check for rolePermissionMapping
-        #
-        # - compare role permissions for api-admin
-        for i, api_role in enumerate(conf["rolePermissionMapping"]):
-            if api_role["role"] == "api-admin":
-                # compare permissions between the ones from persistence (current) and newer permissions
-                if sorted(api_role["permissions"]) != sorted(api_admin_perms):
-                    conf["rolePermissionMapping"][i]["permissions"] = api_admin_perms
-                    should_update = True
-                break
-
-        # check for permissions
-        #
-        # - add new permission if not exist
-        # - add defaultPermissionInToken (if not exist) in each permission
-
-        # determine current permission with index/position
-        current_perms = {
-            permission["permission"]: {"index": i}
-            for i, permission in enumerate(conf["permissions"])
-        }
-
-        for perm in role_mapping["permissions"]:
-            if perm["permission"] not in current_perms:
-                # add missing permission
-                conf["permissions"].append(perm)
-                should_update = True
-            else:
-                # add missing defaultPermissionInToken
-                index = current_perms[perm["permission"]]["index"]
-                if "defaultPermissionInToken" in conf["permissions"][index]:
-                    continue
-                conf["permissions"][index]["defaultPermissionInToken"] = perm["defaultPermissionInToken"]
-                should_update = True
+        if conf != role_mapping:
+            conf = role_mapping
+            should_update = True
 
         # licenseSpringCredentials must be removed in favor of SCAN license credentials
         if "licenseSpringCredentials" in conf:
             conf.pop("licenseSpringCredentials", None)
             should_update = True
 
+        # should_update = False
         if should_update:
             entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1

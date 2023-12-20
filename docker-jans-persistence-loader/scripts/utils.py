@@ -235,12 +235,13 @@ def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.j
     scope_list = get_config_api_scopes()
 
     for i, api_role in enumerate(role_mapping["rolePermissionMapping"]):
+        permissions = role_mapping["rolePermissionMapping"][i]["permissions"]
+
         if api_role["role"] == "api-admin":
-            # merge scopes without duplication
-            role_mapping["rolePermissionMapping"][i]["permissions"] = sorted(set(
-                role_mapping["rolePermissionMapping"][i]["permissions"] + scope_list
-            ))
-            break
+            permissions += scope_list
+
+        # merge scopes without duplication
+        role_mapping["rolePermissionMapping"][i]["permissions"] = sorted(set(permissions))
     return role_mapping
 
 
