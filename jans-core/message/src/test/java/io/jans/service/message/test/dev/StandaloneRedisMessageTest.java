@@ -6,11 +6,11 @@
 
 package io.jans.service.message.test.dev;
 
-import io.jans.service.message.MessageProvider;
-import io.jans.service.message.StandaloneMessageProviderFactory;
 import io.jans.service.message.model.config.MessageConfiguration;
 import io.jans.service.message.model.config.MessageProviderType;
 import io.jans.service.message.model.config.RedisMessageConfiguration;
+import io.jans.service.message.provider.MessageProvider;
+import io.jans.service.message.provider.StandaloneMessageProviderFactory;
 import io.jans.service.message.pubsub.PubSubInterface;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;

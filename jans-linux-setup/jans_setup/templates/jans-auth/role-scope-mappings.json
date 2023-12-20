@@ -199,6 +199,18 @@
       "tag": "fido2"
     },
     {
+      "permission": "https://jans.io/oauth/config/message.readonly",
+      "description": null,
+      "defaultPermissionInToken": false,
+      "tag": "cache"
+    },
+    {
+      "permission": "https://jans.io/oauth/config/message.write",
+      "description": null,
+      "defaultPermissionInToken": false,
+      "tag": "cache"
+    },
+    {
       "permission": "https://jans.io/oauth/config/cache.readonly",
       "description": null,
       "defaultPermissionInToken": false,
@@ -472,6 +484,7 @@
         "https://jans.io/oauth/config/database/ldap.readonly",
         "https://jans.io/oauth/config/jwks.readonly",
         "https://jans.io/oauth/config/fido2.readonly",
+        "https://jans.io/oauth/config/message.readonly",
         "https://jans.io/oauth/config/cache.readonly",
         "https://jans.io/oauth/jans-auth-server/config/properties.readonly",
         "https://jans.io/oauth/config/database/couchbase.readonly",
@@ -504,6 +517,8 @@
         "https://jans.io/oauth/config/jwks.write",
         "https://jans.io/oauth/config/fido2.readonly",
         "https://jans.io/oauth/config/fido2.write",
+        "https://jans.io/oauth/config/message.readonly",
+        "https://jans.io/oauth/config/message.write",
         "https://jans.io/oauth/config/cache.readonly",
         "https://jans.io/oauth/config/cache.write",
         "https://jans.io/oauth/config/database/couchbase.readonly",
@@ -548,6 +563,8 @@
         "https://jans.io/oauth/config/jwks.write",
         "https://jans.io/oauth/config/fido2.readonly",
         "https://jans.io/oauth/config/fido2.write",
+        "https://jans.io/oauth/config/message.readonly",
+        "https://jans.io/oauth/config/message.write",
         "https://jans.io/oauth/config/cache.readonly",
         "https://jans.io/oauth/config/cache.write",
         "https://jans.io/oauth/config/database/couchbase.readonly",
@@ -592,6 +609,8 @@
         "https://jans.io/oauth/config/jwks.write",
         "https://jans.io/oauth/config/fido2.readonly",
         "https://jans.io/oauth/config/fido2.write",
+        "https://jans.io/oauth/config/message.readonly",
+        "https://jans.io/oauth/config/message.write",
         "https://jans.io/oauth/config/cache.readonly",
         "https://jans.io/oauth/config/cache.write",
         "https://jans.io/oauth/config/database/couchbase.readonly",

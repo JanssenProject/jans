@@ -1,0 +1,21 @@
+{
+   "tokenChannels":[
+         "code_token",
+         "id_token"
+      ]
+   },
+
+   "cleanServiceInterval":60,
+   "cleanServiceBatchChunkSize":10000,
+
+   "disableJdkLogger":true,
+
+   "loggingLevel":"INFO",
+   "loggingLayout":"text",
+   "externalLoggerConfiguration":"",
+
+   "metricReporterInterval":300,
+   "metricReporterKeepDataDays":15,
+   "metricReporterEnabled":true,
+   "errorReasonEnabled": false
+}

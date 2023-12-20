@@ -1,19 +1,18 @@
 /*
  * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Janssen Project
+ * Copyright (c) 2023, Janssen Project
  */
 
 package io.jans.lock.server.service;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.StaticConfiguration;
 import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * 
@@ -21,9 +20,6 @@ import io.jans.util.StringHelper;
  */
 @ApplicationScoped
 public class AttributeService extends io.jans.service.AttributeService {
-
-	@Inject
-	private AppConfiguration appConfiguration;
 
 	@Inject
 	private StaticConfiguration staticConfiguration;
