@@ -297,6 +297,8 @@ class Plugin(DialogUtils):
                 with open(path, "w") as w:
                     client_data = self.clients_container.all_data[self.clients_container.selectes]
                     for key in client_data:
+                        if key in ('clientSecret',):
+                            continue
                         val = client_data[key]
                         if key == 'scopes':
                             val = [get_scope_by_inum(scope).get('id') for scope in val]
