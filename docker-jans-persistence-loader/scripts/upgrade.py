@@ -608,7 +608,6 @@ class Upgrade:
             conf.pop("licenseSpringCredentials", None)
             should_update = True
 
-        # should_update = False
         if should_update:
             entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
