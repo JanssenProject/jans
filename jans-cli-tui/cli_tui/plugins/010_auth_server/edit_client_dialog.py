@@ -54,6 +54,14 @@ URL_SUFFIX_FORMATTER = 'inum:{}'
 INTROSPECTION_ALG_PROPERTIES = ('introspectionSignedResponseAlg', 'introspectionEncryptedResponseAlg', 'introspectionEncryptedResponseEnc')
 APP = get_app()
 
+
+def get_scope_by_inum(inum: str) -> dict:
+    for scope in common_data.scopes:
+        if scope['inum'] == inum or scope['dn'] == inum:
+            return scope
+    return {}
+
+
 class EditClientDialog(JansGDialog, DialogUtils):
     """The Main Client Dialog that contain every thing related to The Client
     """
@@ -93,12 +101,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.prepare_tabs()
         self.create_window()
 
-    def get_scope_by_inum(self, inum: str) -> dict:
-
-        for scope in common_data.scopes:
-            if scope['inum'] == inum or scope['dn'] == inum:
-                return scope
-        return {}
 
     def save(self) -> None:
         """method to invoked when saving the dialog (Save button is pressed)
@@ -212,7 +214,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
     def fill_client_scopes(self):
         for scope_dn in self.data.get('scopes', []):
-            scope = self.get_scope_by_inum(scope_dn)
+            scope = get_scope_by_inum(scope_dn)
             if scope:
                 label = scope['id']
                 if [scope_dn, label] not in self.client_scopes_entries:
@@ -231,9 +233,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
 
         schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Client')
-
-        import json
-        open("/tmp/cl.json", "w").write(json.dumps(schema, indent=2))
 
         self.tabs = OrderedDict()
 
