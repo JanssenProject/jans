@@ -659,17 +659,20 @@ class PropertiesUtils(SetupUtils):
         
 
         if prompt == 'y':
-            prompt = self.getPrompt("Install Jans Lock as Server?",
+            prompt = self.getPrompt("  Install Jans Lock as Server?",
                                             self.getDefaultOption(Config.install_jans_lock)
                                             )[0].lower()
             if prompt == 'y':
                 Config.install_jans_lock = True
                 Config.install_jans_lock_as_server = True
             else:
-                prompt = self.getPrompt("Install Jans Lock as Auth Service?", self.getDefaultOption(True))[0].lower()
+                prompt = self.getPrompt("  Install Jans Lock as Auth Service?", self.getDefaultOption(True))[0].lower()
                 if prompt == 'y':
                     Config.install_jans_lock = True
 
+            if Config.install_jans_lock:
+                prompt = self.getPrompt("  Install OPA?", self.getDefaultOption(Config.install_opa))[0].lower()
+                Config.install_opa = prompt == 'y'
 
         if Config.installed_instance and Config.install_jans_lock:
             Config.addPostSetupService.append('install_jans_lock')
