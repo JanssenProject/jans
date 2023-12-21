@@ -4101,6 +4101,7 @@ paths:
                   - persistence_extension
                   - idp
                   - discovery
+                  - authz_detail
                   - update_token
                   - config_api_auth
                   - modify_ssa_response
@@ -7861,9 +7862,9 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanEdit:
-          type: boolean
         adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
@@ -9194,16 +9195,6 @@ components:
           type: string
         tokenEndpointAuthMethod:
           type: string
-          format: enum
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         tokenEndpointAuthSigningAlg:
           type: string
         defaultMaxAge:
@@ -9642,6 +9633,7 @@ components:
           - persistence_extension
           - idp
           - discovery
+          - authz_detail
           - update_token
           - config_api_auth
           - modify_ssa_response
@@ -9868,58 +9860,38 @@ components:
           - "NULL"
           - REDIS
           - POSTGRES
-        nullConfiguration:
-          $ref: '#/components/schemas/NullMessageConfiguration'
         redisConfiguration:
           $ref: '#/components/schemas/RedisMessageConfiguration'
         postgresConfiguration:
           $ref: '#/components/schemas/PostgresMessageConfiguration'
-    NullMessageConfiguration:
-      type: object
     PostgresMessageConfiguration:
       type: object
       properties:
-        dbSchemaName:
+        jdbc.driver.class-name:
           type: string
-          xml:
-            name: db-schema-name
-        connectionUri:
+        db-schema-name:
           type: string
-          xml:
-            name: connection-uri
-        authUserName:
+        connection-uri:
           type: string
-          xml:
-            name: auth-userName
-        authUserPassword:
+        auth-user-name:
           type: string
-          xml:
-            name: auth-userPassword
-        connectionPoolMaxTotal:
+        auth-user-password:
+          type: string
+        connection-pool-max-total:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-max-total
-        connectionPoolMaxIdle:
+        connection-pool-max-idle:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-max-idle
-        connectionPoolMinIdle:
+        connection-pool-min-idle:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-min-idle
-        messageWaitMillis:
+        message-wait-millis:
           type: integer
           format: int32
-          xml:
-            name: message-wait-millis
-        messageSleepThreadTime:
+        message-sleep-thread-millis:
           type: integer
           format: int32
-          xml:
-            name: message-sleep-thread-millis
     RedisMessageConfiguration:
       type: object
       properties:
