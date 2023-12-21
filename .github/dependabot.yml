@@ -237,6 +237,16 @@ updates:
       interval: daily
 
   - package-ecosystem: maven
+    directory: /jans-lock
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
     directory: /jans-scim
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-linux-setup/jans_setup/templates/jans-keycloak-link/idp-broker-api
     schedule:
       interval: daily

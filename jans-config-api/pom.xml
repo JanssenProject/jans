@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-config-api-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.21-SNAPSHOT</version>
+	<version>1.0.22-SNAPSHOT</version>
 	<name>jans-config-api-parent</name>
 
 	<distributionManagement>
@@ -26,7 +26,7 @@
 		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 
 		<jans.version>${project.version}</jans.version>
-
+		
 		<resteasy.version>6.0.3.Final</resteasy.version>
 		<jackson.version>2.13.2</jackson.version>
 		<jetty.version>11.0.15</jetty.version>
@@ -47,6 +47,7 @@
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.10</jacoco.version>
+		<mapstruct.version>1.5.3.Final</mapstruct.version>
 		<swagger.version>2.2.7</swagger.version>
 
 		<sonar.projectKey>JanssenProject_jans-config-api</sonar.projectKey>
@@ -244,16 +245,6 @@
 
 			<!-- Security -->
 			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.70</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.70</version>
-			</dependency>
-			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
 				<version>9.28</version>
@@ -406,7 +397,15 @@
             	<groupId>org.apache.james</groupId>
             	<artifactId>apache-mime4j-core</artifactId>
             	<version>${apache.james.version}</version>
-            </dependency>      			
+            </dependency>  
+			
+            <!-- mapstruct-->
+            <dependency>
+            	<groupId>org.mapstruct</groupId>
+            	<artifactId>mapstruct</artifactId>
+				<version>${mapstruct.version}</version> 
+            </dependency>
+  			
 
 			<!-- Swagger -->
 			<dependency>
@@ -432,6 +431,13 @@
 					<version>${compiler-plugin.version}</version>
 					<configuration>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
+						<annotationProcessorPaths>  
+				            <path>  
+				                <groupId>org.mapstruct</groupId>  
+				                <artifactId>mapstruct-processor</artifactId>  
+				                <version>${mapstruct.version}</version>  
+				            </path>  
+                        </annotationProcessorPaths>  
 					</configuration>
 				</plugin>
 				<plugin>

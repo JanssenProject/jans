@@ -817,6 +817,26 @@ class Upgrade:
                     entry.attrs["jansSmtpConf"][0] = json.dumps(new_smtp_conf)
                     should_update = True
 
+        scim_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
+        if as_boolean(entry.attrs["jansScimEnabled"]) != scim_enabled:
+            entry.attrs["jansScimEnabled"] = scim_enabled
+            should_update = True
+
+        # set jansMessageConf if still empty
+        if not entry.attrs.get("jansMessageConf"):
+            entry.attrs["jansMessageConf"] = json.dumps({
+                "messageProviderType": "NULL",
+                "postgresConfiguration": {
+                    "db-schema-name": "public",
+                    "message-wait-millis": 100,
+                    "message-sleep-thread-millis": 200,
+                },
+                "redisConfiguration": {
+                    "servers": "localhost:6379",
+                },
+            })
+            should_update = True
+
         if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 

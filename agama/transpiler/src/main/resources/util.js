@@ -42,10 +42,8 @@ function _equals(a, b) {
     return _scriptUtils.testEquality(_scan(a), _scan(b))
 }
 
-function _actionCall(instance, instanceRequired, clsName, method, args) {
-    if (instanceRequired && _isNil(instance))
-        throw new TypeError("Cannot call method " + method + " of null")
-    return _scriptUtils.callAction(instance, clsName, method, args.map(_scan))
+function _actionCall(instance, clsName, method, args) {
+    return _scriptUtils.callAction(_scan(instance), clsName, method, args.map(_scan))
 }
 
 function _flowCall(flowName, basePath, urlOverrides, args) {
@@ -78,7 +76,7 @@ function _flowCall(flowName, basePath, urlOverrides, args) {
 }
 
 function _flowCallErr(e) {
-    return { value: _makeJavaException(e), bubbleUp: false }
+    return { value: _makeJavaException(null, e), bubbleUp: false }
 }
 
 function _makeJavaException(qname, e) {
