@@ -9,7 +9,7 @@ package io.jans.lock.service.message;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.service.consumer.MessageConsumerFactory;
+import io.jans.lock.service.consumer.message.MessageConsumerFactory;
 import io.jans.service.message.consumer.MessageConsumer;
 import io.jans.service.message.provider.MessageProvider;
 import jakarta.enterprise.context.ApplicationScoped;
