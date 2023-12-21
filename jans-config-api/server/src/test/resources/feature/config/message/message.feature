@@ -118,7 +118,7 @@ Feature: Verify Message configuration endpoint
   	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
-    And request "[ {\"op\":\"replace\", \"path\": \"/servers\", \"value\":"+response.servers+"} ]"
+    And request "[ {\"op\":\"replace\", \"path\": \"/servers\", \"value\":\""+response.servers+"\"} ]"
     And path 'redis'
 	Then print request
     When method PATCH
@@ -166,7 +166,7 @@ Feature: Verify Message configuration endpoint
   	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
-    And request "[ {\"op\":\"replace\", \"path\": \"/dbSchemaName\", \"value\":"+response.dbSchemaName+"} ]"
+    And request "[ {\"op\":\"replace\", \"path\": \"/db-schema-name\", \"value\":\""+response.db-schema-name+"\"} ]"
     And path 'postgres'
 	Then print request
     When method PATCH
