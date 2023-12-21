@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.enterprise.inject.Vetoed;
 
 /**
@@ -37,6 +38,7 @@ public class MessageConfiguration implements Serializable {
 		this.messageProviderType = messageProviderType;
 	}
 
+	@Hidden
 	public NullMessageConfiguration getNullConfiguration() {
 		return nullConfiguration;
 	}
