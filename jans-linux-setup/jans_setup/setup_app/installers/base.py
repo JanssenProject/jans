@@ -49,7 +49,8 @@ class BaseInstaller:
 
     def render_unit_file(self, unit=None):
         # render unit file
-
+        if getattr(self, 'no_unit_file', False):
+            return
         units = self.get_systemd_service_list(unit)
 
         for unit in units:
