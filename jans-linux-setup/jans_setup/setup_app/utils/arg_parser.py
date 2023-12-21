@@ -102,6 +102,7 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('--with-casa', help="Install Jans Casa Server", action='store_true')
     parser.add_argument('--install-jans-saml', help="Install Jans SAML", action='store_true')
     parser.add_argument('--install-jans-lock', help="Install Jans Lock", action='store_true')
+    parser.add_argument('--install-opa', help="Install OPA", action='store_true')
 
     #parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
     parser.add_argument('--load-config-api-test', help="Load Config Api Test Data", action='store_true')
