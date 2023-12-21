@@ -1,4 +1,4 @@
-package io.jans.lock.service.consumer;
+package io.jans.lock.service.consumer.message;
 
 import org.slf4j.Logger;
 
@@ -10,7 +10,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class NullMessageConsumer extends MessageConsumer {
 	
-	public static String CONSUMER_TYPE = "NULL";
+	public static String MESSAGE_CONSUMER_TYPE = "NULL";
 
 	@Inject
 	private Logger log;
@@ -33,7 +33,7 @@ public class NullMessageConsumer extends MessageConsumer {
 
 	@Override
 	public String getMessageConsumerType() {
-		return CONSUMER_TYPE;
+		return MESSAGE_CONSUMER_TYPE;
 	}
 
 }

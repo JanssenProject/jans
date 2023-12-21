@@ -42,6 +42,7 @@ public class AppConfiguration implements Configuration {
 	private int cleanServiceInterval;
 
 	private String messageConsumerType;
+	private String policyConsumerType;
 
 	public String getBaseDN() {
 		return baseDN;
@@ -133,6 +134,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setMessageConsumerType(String messageConsumerType) {
 		this.messageConsumerType = messageConsumerType;
+	}
+
+	public String getPolicyConsumerType() {
+		return policyConsumerType;
+	}
+
+	public void setPolicyConsumerType(String policyConsumerType) {
+		this.policyConsumerType = policyConsumerType;
 	}
 
 }

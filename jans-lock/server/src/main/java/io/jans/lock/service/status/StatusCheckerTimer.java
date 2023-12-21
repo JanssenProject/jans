@@ -99,9 +99,8 @@ public class StatusCheckerTimer {
     private void processInt() {
         log.debug("Starting update of sever status");
 
-        StatsData statsData = new StatsData();
-        Date currentDateTime = new Date();
-        statsData.setLastUpdate(currentDateTime);
+        statsData = new StatsData();
+        statsData.setLastUpdate(new Date());
         statsData.setFacterData(getFacterData());
         statsData.setDbType(configurationFactory.getBaseConfiguration().getString("persistence.type"));
         
