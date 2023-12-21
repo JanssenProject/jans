@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service;
 
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -14,11 +15,12 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -94,8 +96,9 @@ public class ClientAuthorizationsService {
         }
     }
 
-    public void add(String userInum, String clientId, Set<String> scopes) {
-        log.trace("Attempting to add client authorization, scopes:" + scopes + ", clientId: " + clientId + ", userInum: " + userInum);
+    public void add(String userInum, String clientId, Set<String> scopes, String authorizationDetails) {
+        log.trace("Attempting to add client authorization, scopes: {}, clientId: {}, userInum: {}, authorizationDetails: {}",
+                scopes, clientId , userInum, authorizationDetails);
         Client client = clientService.getClient(clientId);
 
 
@@ -116,6 +119,7 @@ public class ClientAuthorizationsService {
             clientAuthorization.setClientId(clientId);
             clientAuthorization.setUserId(userInum);
             clientAuthorization.setScopes(scopes.toArray(new String[scopes.size()]));
+            clientAuthorization.getAttributes().setAuthorizationDetails(authorizationDetails);
             clientAuthorization.setDeletable(!client.getAttributes().getKeepClientAuthorizationAfterExpiration());
             clientAuthorization.setExpirationDate(client.getExpirationDate());
             clientAuthorization.setTtl(appConfiguration.getDynamicRegistrationExpirationTime());
@@ -125,8 +129,27 @@ public class ClientAuthorizationsService {
             Set<String> set = new HashSet<>(scopes);
             set.addAll(Arrays.asList(clientAuthorization.getScopes()));
 
+            boolean changed = false;
+
             if (set.size() != clientAuthorization.getScopes().length) {
                 clientAuthorization.setScopes(set.toArray(new String[set.size()]));
+                changed = true;
+            }
+
+            if (StringUtils.isNotBlank(authorizationDetails)) {
+                if (StringUtils.isBlank(clientAuthorization.getAttributes().getAuthorizationDetails())) {
+                    clientAuthorization.getAttributes().setAuthorizationDetails(authorizationDetails);
+                    changed = true;
+                } else {
+                    boolean isAuthorizationDetailsChanged = !AuthzDetails.similar(authorizationDetails, clientAuthorization.getAttributes().getAuthorizationDetails());
+                    if (isAuthorizationDetailsChanged) {
+                        clientAuthorization.getAttributes().setAuthorizationDetails(AuthzDetails.simpleMerge(authorizationDetails, clientAuthorization.getAttributes().getAuthorizationDetails()));
+                        changed = true;
+                    }
+                }
+            }
+
+            if (changed) {
                 ldapEntryManager.merge(clientAuthorization);
             }
         }

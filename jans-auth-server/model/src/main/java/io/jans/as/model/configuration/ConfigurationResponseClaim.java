@@ -39,6 +39,7 @@ public final class ConfigurationResponseClaim {
     public static final String RESPONSE_MODES_SUPPORTED = "response_modes_supported";
     public static final String GRANT_TYPES_SUPPORTED = "grant_types_supported";
     public static final String ACR_VALUES_SUPPORTED = "acr_values_supported";
+    public static final String AUTHORIZATION_DETAILS_TYPES_SUPPORTED = "authorization_details_types_supported";
     public static final String SUBJECT_TYPES_SUPPORTED = "subject_types_supported";
     public static final String AUTHORIZATION_SIGNING_ALG_VALUES_SUPPORTED = "authorization_signing_alg_values_supported";
     public static final String AUTHORIZATION_ENCRYPTION_ALG_VALUES_SUPPORTED = "authorization_encryption_alg_values_supported";
