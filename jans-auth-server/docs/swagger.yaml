@@ -4215,7 +4215,7 @@ paths:
                   default: true
                 lifetime:
                   type: integer
-                  description: SSA lifetime in milliseconds.
+                  description: SSA lifetime in seconds.
                   example: 86400
       responses:
         201:
