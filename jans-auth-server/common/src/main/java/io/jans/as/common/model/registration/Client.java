@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * @author Javier Rojas Blum
@@ -159,6 +160,7 @@ public class Client extends DeletableEntity implements Serializable {
     private String requestObjectEncryptionEnc;
 
     @AttributeName(name = "jansTknEndpointAuthMethod")
+    @Schema(implementation = AuthenticationMethod.class, format="enum")
     private String tokenEndpointAuthMethod;
 
     @AttributeName(name = "jansTknEndpointAuthSigAlg")
@@ -323,6 +325,7 @@ public class Client extends DeletableEntity implements Serializable {
         this.accessTokenSigningAlg = accessTokenSigningAlg;
     }
 
+	@Hidden
     public AuthenticationMethod getAuthenticationMethod() {
         return AuthenticationMethod.fromString(tokenEndpointAuthMethod);
     }
@@ -1184,6 +1187,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @return The authentication type for the Token Endpoint.
      */
+    @Schema(implementation = AuthenticationMethod.class, format="enum")
     public String getTokenEndpointAuthMethod() {
         return tokenEndpointAuthMethod;
     }

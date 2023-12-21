@@ -27,6 +27,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.service.ApplicationConfigurationFactory;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.BaseConfigurationReload;
 import io.jans.service.cdi.event.ConfigurationEvent;
@@ -69,7 +70,7 @@ import static io.jans.as.model.config.Constants.SERVER_KEY_OF_CONFIGURATION_ENTR
  * @version June 15, 2016
  */
 @ApplicationScoped
-public class ConfigurationFactory {
+public class ConfigurationFactory extends ApplicationConfigurationFactory {
 
     @Inject
     private Logger log;
@@ -201,15 +202,6 @@ public class ConfigurationFactory {
         this.facesMapping = mappings[0].replaceAll("\\*", "");
     }
 
-    public void create() {
-        if (!createFromLdap(true)) {
-            log.error("Failed to load configuration from DB. Please fix it!!!.");
-            throw new ConfigurationException("Failed to load configuration from DB.");
-        } else {
-            log.info("Configuration loaded successfully.");
-        }
-    }
-
     public void initTimer() {
         log.debug("Initializing Configuration Timer");
 
@@ -269,7 +261,7 @@ public class ConfigurationFactory {
             return;
         }
 
-        createFromLdap(false);
+        createFromDB(false);
     }
 
     private boolean isRevisionIncreased() {
@@ -393,10 +385,11 @@ public class ConfigurationFactory {
         if (!isRevisionIncreased()) {
             return false;
         }
-        return createFromLdap(false);
+        return createFromDB(false);
     }
 
-    private boolean createFromLdap(boolean recoverFromFiles) {
+	@Override
+    protected boolean createFromDB(boolean recoverFromFiles) {
         log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
         try {
             final io.jans.as.model.config.Conf c = loadConfigurationFromPersistence();

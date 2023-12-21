@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-config-api-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.21-SNAPSHOT</version>
+	<version>1.0.22-SNAPSHOT</version>
 	<name>jans-config-api-parent</name>
 
 	<distributionManagement>
@@ -244,16 +244,6 @@
 			</dependency>
 
 			<!-- Security -->
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.70</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.70</version>
-			</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>

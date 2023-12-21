@@ -7,6 +7,7 @@
 package io.jans.configapi.plugin.saml.form;
 
 import io.jans.configapi.plugin.saml.model.IdentityProvider;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.io.Serializable;
 
@@ -33,7 +34,8 @@ public class BrokerIdentityProviderForm implements Serializable {
     @NotNull
 	@FormParam("metaDataFile")
 	@PartType(MediaType.APPLICATION_OCTET_STREAM)
-    private transient InputStream  metaDataFile;
+    @Schema(implementation = String.class, format="binary")
+    private InputStream  metaDataFile;
 
     public IdentityProvider getIdentityProvider() {
         return identityProvider;

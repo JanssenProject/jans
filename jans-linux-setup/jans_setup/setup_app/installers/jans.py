@@ -633,7 +633,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-eleven', 'installEleven'),
                         ('jans-auth', 'installOxAuth'),
                         ('jans-config-api', 'install_config_api'),
-                        ('casa', 'install_casa'),
+                        ('jans-casa', 'install_casa'),
                         ('jans-fido2', 'installFido2'),
                         ('jans-link', 'install_jans_link'),
                         ('jans-scim', 'install_scim_server'),

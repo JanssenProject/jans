@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.20-1...docker-jans-configurator-v1.0.21-1) (2023-12-14)
+
+
+### Bug Fixes
+
+* **docker-jans-configurator:** add missing salt field ([#6560](https://github.com/JanssenProject/jans/issues/6560)) ([af1c31c](https://github.com/JanssenProject/jans/commit/af1c31ca5020d86ebea4b8914656ef5074a7e2cd))
+* **docker-jans:** allow custom salt ([#6551](https://github.com/JanssenProject/jans/issues/6551)) ([b099469](https://github.com/JanssenProject/jans/commit/b099469cd69ce958ae89945a8aecab1f0f446322))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
 ## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.19-1...docker-jans-configurator-v1.0.20-1) (2023-11-08)
 
 

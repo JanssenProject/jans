@@ -127,7 +127,7 @@ public class TrustRelationshipResource extends BaseResource {
     @Operation(summary = "Update TrustRelationship", description = "Update TrustRelationship", operationId = "put-trust-relationship", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
-    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-put.json")))
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationshipForm.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-put.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),

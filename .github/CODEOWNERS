@@ -20,6 +20,7 @@
 /jans-eleven/ @yuriyz
 /jans-auth-server/ @yurem @yuriyz
 /jans-fido2/ @yurem
+/jans-lock/ @yurem
 /jans-scim/ @jgomer2001
 /jans-config-api/ @pujavs @yuriyz @yurem
 /jans-cli-tui/ @devrimyatar

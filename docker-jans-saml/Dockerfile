@@ -23,8 +23,8 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.0.21-SNAPSHOT
-ENV CN_BUILD_DATE='2023-11-14 08:13'
+ENV CN_VERSION=1.0.22-SNAPSHOT
+ENV CN_BUILD_DATE='2023-12-08 08:47'
 
 # @FIXME: kc-jans-storage-plugin raises error about Cookie
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
@@ -41,7 +41,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=cc9d64f830ac3a07c7dbcbaafe920386e6fdcb7f
+ENV JANS_SOURCE_VERSION=a2c5d4bd3d09c9f34e79b0d24bc63ece4ca7da43
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -179,7 +179,7 @@ EXPOSE $CN_SAML_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.version="1.0.22" \
     org.opencontainers.image.title="Janssen SAML" \
     org.opencontainers.image.description=""
 
