@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.server.service.net;
+package io.jans.lock.service.net;
 
 
 import io.jans.service.net.BaseHttpService;
@@ -13,9 +13,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 /**
  * Provides operations with http/https requests
  *
- * @author Yuriy Movchan Date: 04/10/2023
+ * @author Yuriy Movchan Date: 21/12/2023
  */
 @ApplicationScoped
-public class HttpService2 extends BaseHttpService {
+public class HttpService extends BaseHttpService {
 
 }
