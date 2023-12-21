@@ -60,6 +60,18 @@ public enum TokenErrorResponseType implements IErrorType {
     INVALID_SCOPE("invalid_scope"),
 
     /**
+     * invalid_authorization_details is returned to the client if any of the
+     * following are true of the objects in the authorization_details structure:
+     *
+     * - contains an unknown authorization details type value,
+     * - is an object of known type but containing unknown fields,
+     * - contains fields of the wrong type for the authorization details type,
+     * - contains fields with invalid values for the authorization details type, or
+     * - is missing required fields for the authorization details type.
+     */
+    INVALID_AUTHORIZATION_DETAILS("invalid_authorization_details "),
+
+    /**
      * CIBA. The authorization request is still pending as the end-user hasn't yet been authenticated.
      */
     AUTHORIZATION_PENDING("authorization_pending"),
