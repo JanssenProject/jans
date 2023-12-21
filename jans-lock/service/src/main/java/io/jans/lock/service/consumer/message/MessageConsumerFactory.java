@@ -4,7 +4,7 @@
  * Copyright (c) 2023, Janssen Project
  */
 
-package io.jans.lock.service.consumer;
+package io.jans.lock.service.consumer.message;
 
 import org.slf4j.Logger;
 
@@ -28,17 +28,17 @@ public class MessageConsumerFactory {
 
 	@Inject
 	@Any
-	private Instance<MessageConsumer> consumerProviderInstances;
+	private Instance<MessageConsumer> messageConsumerProviderInstances;
 
 	public MessageConsumer getMessageConsumer(String messageConsumerType) {
-		for (MessageConsumer consumerProvider : consumerProviderInstances) {
-			String serviceMessageConsumerType = consumerProvider.getMessageConsumerType();
+		for (MessageConsumer messageConsumerProvider : messageConsumerProviderInstances) {
+			String serviceMessageConsumerType = messageConsumerProvider.getMessageConsumerType();
 			if (StringHelper.equalsIgnoreCase(serviceMessageConsumerType, messageConsumerType)) {
-				return consumerProvider;
+				return messageConsumerProvider;
 			}
 		}
 		
-		return consumerProviderInstances.select(NullMessageConsumer.class).get();
+		return messageConsumerProviderInstances.select(NullMessageConsumer.class).get();
 	}
 
 }
