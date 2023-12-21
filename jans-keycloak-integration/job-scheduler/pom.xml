@@ -25,6 +25,20 @@
       <artifactId>keycloak-admin-client</artifactId>
     </dependency>
     <!-- end keycloak dependencies-->
+
+    <!-- logback dependencies -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+    <!-- end logback dependencies -->
+
+    <!-- typesafe config dependencies -->
+    <dependency>
+      <groupId>com.typesafe</groupId>
+      <artifactId>config</artifactId>
+    </dependency>
+    <!-- end typesafe config dependencies -->
   </dependencies>
 
   <build>
