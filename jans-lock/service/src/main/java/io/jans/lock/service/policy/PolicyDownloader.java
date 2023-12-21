@@ -6,40 +6,17 @@
 
 package io.jans.lock.service.policy;
 
-import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import io.jans.exception.ConfigurationException;
-import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.model.config.BaseDnConfiguration;
-import io.jans.lock.model.config.Conf;
-import io.jans.lock.model.config.Configuration;
-import io.jans.lock.model.config.StaticConfiguration;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.BasePersistenceException;
-import io.jans.orm.model.PersistenceConfiguration;
-import io.jans.orm.service.PersistanceFactoryService;
-import io.jans.service.ApplicationConfigurationFactory;
 import io.jans.service.cdi.async.Asynchronous;
-import io.jans.service.cdi.event.BaseConfigurationReload;
 import io.jans.service.cdi.event.ConfigurationEvent;
-import io.jans.service.cdi.event.ConfigurationUpdate;
-import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.net.BaseHttpService;
-import io.jans.service.timer.event.TimerEvent;
-import io.jans.service.timer.schedule.TimerSchedule;
-import io.jans.util.StringHelper;
-import io.jans.util.properties.FileConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 
 /**
