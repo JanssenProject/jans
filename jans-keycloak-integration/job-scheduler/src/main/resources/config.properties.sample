@@ -1,0 +1,5 @@
+# scheduler configuration file
+
+# log level
+scheduler.loglevel.root=DEBUG
+scheduler.loghistory=180
