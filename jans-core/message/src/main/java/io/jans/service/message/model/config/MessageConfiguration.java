@@ -24,6 +24,7 @@ public class MessageConfiguration implements Serializable {
 
 	private MessageProviderType messageProviderType = MessageProviderType.NULL;
 
+	@Hidden
 	private NullMessageConfiguration nullConfiguration = new NullMessageConfiguration();
 
 	private RedisMessageConfiguration redisConfiguration;
@@ -38,7 +39,6 @@ public class MessageConfiguration implements Serializable {
 		this.messageProviderType = messageProviderType;
 	}
 
-	@Hidden
 	public NullMessageConfiguration getNullConfiguration() {
 		return nullConfiguration;
 	}
