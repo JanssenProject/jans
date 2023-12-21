@@ -229,6 +229,7 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
             addFormParameterIfNotBlank(USERNAME, getRequest().getUsername());
             addFormParameterIfNotBlank(PASSWORD, getRequest().getPassword());
             addFormParameterIfNotBlank(SCOPE, getRequest().getScope());
+            addFormParameterIfNotBlank(AUTHORIZATION_DETAILS, getRequest().getAuthorizationDetails());
             addFormParameterIfNotBlank(ASSERTION, getRequest().getAssertion());
             addFormParameterIfNotBlank(REFRESH_TOKEN, getRequest().getRefreshToken());
             addFormParameterIfNotBlank(AUTH_REQ_ID, getRequest().getAuthReqId());
