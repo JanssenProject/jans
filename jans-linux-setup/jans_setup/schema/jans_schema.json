@@ -4593,7 +4593,8 @@
         "jansUsrId",
         "exp",
         "del",
-        "jansScope"
+        "jansScope",
+        "jansAttrs"
       ],
       "must": [
         "objectclass"
