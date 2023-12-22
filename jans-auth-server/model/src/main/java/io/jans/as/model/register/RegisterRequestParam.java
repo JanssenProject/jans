@@ -68,6 +68,11 @@ public enum RegisterRequestParam {
     CONTACTS("contacts"),
 
     /**
+     * Authorization Details Types (RFC9396). Fine-grained access.
+     */
+    AUTHORIZATION_DETAILS_TYPES("authorization_details_types"),
+
+    /**
      * Name of the Client to be presented to the user.
      */
     CLIENT_NAME("client_name"),

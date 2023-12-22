@@ -8,6 +8,7 @@ package io.jans.as.server.model.common;
 
 import com.google.common.collect.Lists;
 import io.jans.as.common.claims.Audience;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
@@ -174,6 +175,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         if (nonce != null) {
             token.setNonce(nonce);
         }
+
+        token.getAttributes().setAuthorizationDetails(getAuthzDetailsAsString());
         token.setScope(getScopesAsString());
         token.setAuthMode(getAcrValues());
         token.setSessionDn(getSessionDn());
@@ -264,6 +267,11 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
         jwt.getClaims().setSubjectIdentifier(getSub());
         jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
+
+        final AuthzDetails authzDetails = getAuthzDetails();
+        if (!AuthzDetails.isEmpty(authzDetails)) {
+            jwt.getClaims().setClaim("authorization_details", authzDetails.asJsonArray());
+        }
 
         // DPoP
         final String dpop = context.getDpop();

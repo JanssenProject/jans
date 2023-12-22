@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service.external.context;
 
+import io.jans.as.model.authzdetails.AuthzDetail;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.authorize.ws.rs.AuthzRequest;
 import io.jans.as.server.model.common.ExecutionContext;
@@ -59,6 +60,10 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
 
     public AuthzRequest getAuthzRequest() {
         return executionContext != null ? executionContext.getAuthzRequest() : null;
+    }
+
+    public AuthzDetail getAuthzDetail() {
+        return executionContext != null ? executionContext.getAuthzDetail() : null;
     }
 
     public PersistenceEntryManager getPersistenceEntryManager() {
