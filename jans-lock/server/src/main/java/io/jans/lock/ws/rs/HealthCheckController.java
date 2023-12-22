@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -39,6 +40,7 @@ public class HealthCheckController {
     Logger logger;
 
     @Inject
+    @RequestScoped
     private StatsData statsData;
 
     @Operation(summary = "Returns application server status", description = "Returns application server status", operationId = "get-server-stat", tags = {

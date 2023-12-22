@@ -137,6 +137,18 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("introspectionEncryptedResponseEnc")
     private String introspectionEncryptedResponseEnc;
 
+    @JsonProperty("authorizationDetailsTypes")
+    private List<String> authorizationDetailsTypes;
+
+    public List<String> getAuthorizationDetailsTypes() {
+        if (authorizationDetailsTypes == null) authorizationDetailsTypes = new ArrayList<>();
+        return authorizationDetailsTypes;
+    }
+
+    public void setAuthorizationDetailsTypes(List<String> authorizationDetailsTypes) {
+        this.authorizationDetailsTypes = authorizationDetailsTypes;
+    }
+
     public String getIntrospectionSignedResponseAlg() {
         return introspectionSignedResponseAlg;
     }
@@ -504,6 +516,7 @@ public class ClientAttributes implements Serializable {
                 ", introspectionSignedResponseAlg=" + introspectionSignedResponseAlg +
                 ", introspectionEncryptedResponseAlg=" + introspectionEncryptedResponseAlg +
                 ", introspectionEncryptedResponseEnc=" + introspectionEncryptedResponseEnc +
+                ", authorizationDetailsTypes=" + authorizationDetailsTypes +
                 '}';
     }
 }

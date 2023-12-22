@@ -15,6 +15,8 @@ import io.jans.model.custom.script.type.authz.ConsentGatheringType;
 import io.jans.model.custom.script.type.authz.DummyConsentGatheringType;
 import io.jans.model.custom.script.type.authzchallenge.AuthorizationChallengeType;
 import io.jans.model.custom.script.type.authzchallenge.DummyAuthorizationChallengeType;
+import io.jans.model.custom.script.type.authzdetails.AuthzDetailType;
+import io.jans.model.custom.script.type.authzdetails.DummyAuthzDetail;
 import io.jans.model.custom.script.type.ciba.DummyEndUserNotificationType;
 import io.jans.model.custom.script.type.ciba.EndUserNotificationType;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
@@ -105,6 +107,7 @@ public enum CustomScriptType implements AttributeEnum {
     PERSISTENCE_EXTENSION("persistence_extension", "Persistence Extension", PersistenceType.class, CustomScript.class, "PersistenceExtension", new DummyPeristenceType()),
     IDP("idp", "Idp Extension", IdpType.class, CustomScript.class, "IdpExtension", new DummyIdpType()),
     DISCOVERY("discovery", "Discovery", DiscoveryType.class, CustomScript.class, "Discovery", new DummyDiscoveryType()),
+    AUTHZ_DETAIL("authz_detail", "Authorization Detail", AuthzDetailType.class, CustomScript.class, "AuthzDetail", new DummyAuthzDetail()),
     UPDATE_TOKEN("update_token", "Update Token", UpdateTokenType.class, CustomScript.class, "UpdateToken", new DummyUpdateTokenType()),
     CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType()),
     MODIFY_SSA_RESPONSE("modify_ssa_response", "Modify SSA Response", ModifySsaResponseType.class, CustomScript.class, "ModifySsaResponse", new DummyModifySsaResponseType()),

@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.enterprise.inject.Vetoed;
 
 /**
@@ -23,6 +24,7 @@ public class MessageConfiguration implements Serializable {
 
 	private MessageProviderType messageProviderType = MessageProviderType.NULL;
 
+	@Hidden
 	private NullMessageConfiguration nullConfiguration = new NullMessageConfiguration();
 
 	private RedisMessageConfiguration redisConfiguration;
