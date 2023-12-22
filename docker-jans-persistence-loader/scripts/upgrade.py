@@ -789,9 +789,9 @@ class Upgrade:
             entry.attrs["jansMessageConf"] = json.dumps({
                 "messageProviderType": "NULL",
                 "postgresConfiguration": {
-                    "db-schema-name": "public",
-                    "message-wait-millis": 100,
-                    "message-sleep-thread-millis": 200,
+                    "dbSchemaName": "public",
+                    "messageWaitMillis": 100,
+                    "messageSleepThreadTime": 200,
                 },
                 "redisConfiguration": {
                     "servers": "localhost:6379",
