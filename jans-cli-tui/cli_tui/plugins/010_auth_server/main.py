@@ -42,6 +42,7 @@ from edit_scope_dialog import EditScopeDialog
 from ssa import SSA
 from agama import Agama
 from authn import Authn
+from message import Message
 from attributes import Attributes
 
 from prompt_toolkit.widgets import (
@@ -70,6 +71,7 @@ class Plugin(DialogUtils):
         self.ssa = SSA(app)
         self.agama = Agama(app)
         self.authn = Authn(app)
+        self.message = Message()
         self.attributes = Attributes(app)
         self.oauth_containers = {}
 
@@ -245,6 +247,7 @@ class Plugin(DialogUtils):
         self.oauth_containers['authn'] = self.authn.main_container
         self.oauth_containers['attributes'] = self.attributes.main_container
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
+        self.oauth_containers['message'] = self.message.main_container
 
         self.oauth_main_container = HSplit([
                                         Box(self.nav_bar.nav_window, style='class:sub-navbar', height=1),
@@ -259,7 +262,18 @@ class Plugin(DialogUtils):
         """
         self.nav_bar = JansNavBar(
                     self.app,
-                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('authn', 'Au[t]hn'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging'), ('ssa', '[S]SA'), ('agama', 'Aga[m]a'), ('attributes', 'Attri[b]utes')],
+                    entries=[
+                        ('clients', 'C[l]ients'),
+                        ('scopes', 'Sc[o]pes'),
+                        ('keys', '[K]eys'),
+                        ('authn', 'Au[t]hn'),
+                        ('properties', 'Properti[e]s'),
+                        ('logging', 'Lo[g]ging'),
+                        ('ssa', '[S]SA'),
+                        ('agama', 'Aga[m]a'),
+                        ('attributes', 'Attri[b]utes'),
+                        ('message', 'Message')
+                        ],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
                     jans_name='oauth:nav_bar'
