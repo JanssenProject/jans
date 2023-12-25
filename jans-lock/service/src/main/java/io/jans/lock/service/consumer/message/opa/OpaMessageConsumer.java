@@ -1,4 +1,4 @@
-package io.jans.lock.service.consumer.message;
+package io.jans.lock.service.consumer.message.opa;
 
 import org.slf4j.Logger;
 
@@ -8,14 +8,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
- * Null message consumer
+ * OPA message consumer
  *
  * @author Yuriy Movchan Date: 12/25/2023
  */
 @ApplicationScoped
-public class NullMessageConsumer extends MessageConsumer {
+public class OpaMessageConsumer extends MessageConsumer {
 	
-	public static String MESSAGE_CONSUMER_TYPE = "NULL";
+	public static String MESSAGE_CONSUMER_TYPE = "OPA";
 
 	@Inject
 	private Logger log;

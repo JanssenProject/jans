@@ -8,6 +8,15 @@ package io.jans.model.custom.script.type.lock;
 
 import io.jans.model.custom.script.type.BaseExternalType;
 
+/**
+ * Base interface for external lock python script
+ *
+ * @author Yuriy Movchan Date: 12/25/2023
+ */
 public interface LockExtensionType extends BaseExternalType {
+	
+	void beforeDataPut(Object context, Object jsonData);
+
+	void beforePolicyPut(Object context, Object jsonPolicy);
 
 }

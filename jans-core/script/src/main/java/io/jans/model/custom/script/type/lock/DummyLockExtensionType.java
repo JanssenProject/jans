@@ -11,6 +11,11 @@ import java.util.Map;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
 
+/**
+ * Base interface for external lock python script
+ *
+ * @author Yuriy Movchan Date: 12/25/2023
+ */
 public class DummyLockExtensionType implements LockExtensionType {
     @Override
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
@@ -31,5 +36,13 @@ public class DummyLockExtensionType implements LockExtensionType {
     public int getApiVersion() {
         return 1;
     }
+
+	@Override
+	public void beforeDataPut(Object context, Object jsonData) {
+	}
+
+	@Override
+	public void beforePolicyPut(Object context, Object jsonPolicy) {
+	}
 
 }

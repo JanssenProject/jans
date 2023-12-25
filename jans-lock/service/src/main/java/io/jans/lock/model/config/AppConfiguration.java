@@ -44,6 +44,8 @@ public class AppConfiguration implements Configuration {
 	private String messageConsumerType;
 	private String policyConsumerType;
 
+	private String policyDecisionPointType;
+
 	public String getBaseDN() {
 		return baseDN;
 	}
@@ -142,6 +144,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setPolicyConsumerType(String policyConsumerType) {
 		this.policyConsumerType = policyConsumerType;
+	}
+
+	public String getPolicyDecisionPointType() {
+		return policyDecisionPointType;
+	}
+
+	public void setPolicyDecisionPointType(String policyDecisionPointType) {
+		this.policyDecisionPointType = policyDecisionPointType;
 	}
 
 }
