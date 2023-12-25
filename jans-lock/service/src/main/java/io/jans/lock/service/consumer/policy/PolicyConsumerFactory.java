@@ -30,14 +30,15 @@ public class PolicyConsumerFactory {
 	@Any
 	private Instance<PolicyConsumer> policyConsumerProviderInstances;
 
-	public PolicyConsumer getMessageConsumer(String messageConsumerType) {
+	public PolicyConsumer getMessageConsumer(String policyConsumerType) {
 		for (PolicyConsumer policyConsumerProvider : policyConsumerProviderInstances) {
 			String serviceMessageConsumerType = policyConsumerProvider.getPolicyConsumerType();
-			if (StringHelper.equalsIgnoreCase(serviceMessageConsumerType, messageConsumerType)) {
+			if (StringHelper.equalsIgnoreCase(serviceMessageConsumerType, policyConsumerType)) {
 				return policyConsumerProvider;
 			}
 		}
 		
+		log.error("Failed to find policy consumer with type '{}'. Using null policy consumer", policyConsumerType);
 		return policyConsumerProviderInstances.select(NullPolicyConsumer.class).get();
 	}
 

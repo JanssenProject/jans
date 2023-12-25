@@ -17,5 +17,6 @@
    "metricReporterInterval":300,
    "metricReporterKeepDataDays":15,
    "metricReporterEnabled":true,
-   "errorReasonEnabled": false
+   "errorReasonEnabled": false,
+   "policyDecisionPointType": "NULL"
 }

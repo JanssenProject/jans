@@ -38,6 +38,7 @@ public class MessageConsumerFactory {
 			}
 		}
 		
+		log.error("Failed to find message consumer with type '{}'. Using null message consumer", messageConsumerType);
 		return messageConsumerProviderInstances.select(NullMessageConsumer.class).get();
 	}
 

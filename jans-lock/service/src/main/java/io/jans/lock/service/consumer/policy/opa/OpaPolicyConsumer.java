@@ -1,4 +1,4 @@
-package io.jans.lock.service.consumer.policy;
+package io.jans.lock.service.consumer.policy.opa;
 
 import org.json.JSONArray;
 import org.slf4j.Logger;
@@ -8,14 +8,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
- * Null policy consumer
+ * OPA policy consumer
  *
  * @author Yuriy Movchan Date: 12/25/2023
  */
 @ApplicationScoped
-public class NullPolicyConsumer extends PolicyConsumer {
+public class OpaPolicyConsumer extends PolicyConsumer {
 	
-	public static String POLICY_CONSUMER_TYPE = "NULL";
+	public static String POLICY_CONSUMER_TYPE = "OPA";
 
 	@Inject
 	private Logger log;
