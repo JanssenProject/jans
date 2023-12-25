@@ -991,6 +991,9 @@ class JCA_CLI:
         response = requests.patch(**patch_params)
         self.log_response(response)
 
+        if self.wrapped:
+            return response
+
         try:
             return response.json()
         except:
