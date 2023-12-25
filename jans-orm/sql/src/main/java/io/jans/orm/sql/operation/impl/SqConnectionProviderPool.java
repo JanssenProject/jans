@@ -172,13 +172,21 @@ public class SqConnectionProviderPool {
 		}
 	}
 
-	private void open() {
+	private void open() throws ClassNotFoundException {
+		preloadJdbcDriver();
+
 		ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(connectionUri, connectionProperties);
 		PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, null);
 		ObjectPool<PoolableConnection> objectPool = new GenericObjectPool<>(poolableConnectionFactory, objectPoolConfig);
+		poolableConnectionFactory.setPool(objectPool);
 
 		this.poolingDataSource = new PoolingDataSource<>(objectPool);
-		poolableConnectionFactory.setPool(objectPool);
+	}
+
+	public void preloadJdbcDriver() throws ClassNotFoundException {
+		if (props.containsKey("jdbc.driver.class-name")) {
+			Class.forName(props.getProperty("jdbc.driver.class-name"));
+		}
 	}
 
 	public int getCreationResultCode() {

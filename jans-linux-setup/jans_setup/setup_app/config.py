@@ -208,6 +208,8 @@ class Config:
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
         self.install_jans_keycloak_link = False
+        self.install_jans_lock = False
+        self.install_opa = False
 
         # backward compatibility
         self.os_type = base.os_type

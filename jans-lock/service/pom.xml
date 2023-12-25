@@ -48,12 +48,17 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-lock-model</artifactId>
 		</dependency>
-<!--
+
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-model</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-message</artifactId>
 		</dependency>
--->
+
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-service</artifactId>
