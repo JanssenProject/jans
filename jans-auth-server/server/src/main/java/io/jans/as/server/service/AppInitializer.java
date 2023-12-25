@@ -205,8 +205,8 @@ public class AppInitializer {
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.debug("Initializing application services");
 
-        // Start timer
-        initSchedulerService();
+        // Load main app configuration first
+        configurationFactory.create();
 
 		// Initialize plugins configurations
 		for (ApplicationConfigurationFactory configurationFactory : applicationConfigurationFactory) {
@@ -234,6 +234,9 @@ public class AppInitializer {
         supportedCustomScriptTypes.remove(CustomScriptType.FIDO2_EXTENSION);
 
         statService.init();
+
+        // Start timer
+        initSchedulerService();
 
         // Schedule timer tasks
         metricService.initTimer();
