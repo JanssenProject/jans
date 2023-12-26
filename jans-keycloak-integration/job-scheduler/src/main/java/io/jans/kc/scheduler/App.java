@@ -1,10 +1,10 @@
-package io.jans.kc.job.scheduler;
+package io.jans.kc.scheduler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jans.kc.job.scheduler.config.Configuration;
-import io.jans.kc.job.scheduler.config.ConfigurationException;
+import io.jans.kc.scheduler.config.Configuration;
+import io.jans.kc.scheduler.config.ConfigurationException;
 /**
  * Background scheduler application 
  * This application runs and monitors various background jobs that are 

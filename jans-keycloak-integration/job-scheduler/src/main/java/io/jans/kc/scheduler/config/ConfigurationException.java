@@ -1,4 +1,4 @@
-package io.jans.kc.job.scheduler.config;
+package io.jans.kc.scheduler.config;
 
 public class ConfigurationException extends RuntimeException {
     

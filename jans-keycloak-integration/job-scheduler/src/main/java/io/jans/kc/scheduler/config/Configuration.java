@@ -1,4 +1,4 @@
-package io.jans.kc.job.scheduler.config;
+package io.jans.kc.scheduler.config;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
