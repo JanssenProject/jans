@@ -6,6 +6,8 @@
 
 package io.jans.model.custom.script.type.lock;
 
+import java.util.List;
+
 import io.jans.model.custom.script.type.BaseExternalType;
 
 /**
@@ -15,8 +17,10 @@ import io.jans.model.custom.script.type.BaseExternalType;
  */
 public interface LockExtensionType extends BaseExternalType {
 	
-	void beforeDataPut(Object context, Object jsonData);
+	void beforeDataPut(Object messageNode, Object dataNode, Object context);
+	void beforeDataRemoval(Object messageNode, Object context);
 
-	void beforePolicyPut(Object context, Object jsonPolicy);
+	void beforePolicyPut(String sourceUri, List<String> policies, Object context);
+	void beforePolicyRemoval(String sourceUri, Object context);
 
 }

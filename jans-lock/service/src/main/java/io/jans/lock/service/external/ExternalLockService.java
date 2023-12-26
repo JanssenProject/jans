@@ -1,5 +1,7 @@
 package io.jans.lock.service.external;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.lock.service.external.context.ExternalLockContext;
@@ -23,37 +25,58 @@ public class ExternalLockService extends ExternalScriptService {
         super(CustomScriptType.LOCK_EXTENSION);
     }
 
-    public boolean beforeDataPut(JsonNode params, ExternalLockContext context) {
+    public ExternalLockContext beforeDataPut(JsonNode messageNode, JsonNode dataNode, ExternalLockContext context) {
         for (CustomScriptConfiguration script : customScriptConfigurations) {
-            if (!beforeDataPut(params, script, context)) {
-                return false;
+            if (!beforeDataPut(messageNode, dataNode, script, context)) {
+                break;
             }
         }
 
         log.debug("Executed (beforeDataPut) from external lock script");
-        return true;
+        return context;
     }
 
-
-    public boolean beforePolicyPut(JsonNode params, ExternalLockContext context) {
+    public ExternalLockContext beforeDataRemoval(JsonNode messageNode, ExternalLockContext context) {
         for (CustomScriptConfiguration script : customScriptConfigurations) {
-            if (!beforePolicyPut(params, script, context)) {
-                return false;
+            if (!beforeDataRemoval(messageNode, script, context)) {
+                break;
+            }
+        }
+
+        log.debug("Executed (beforeDataRemoval) from external lock script");
+        return context;
+    }
+
+    public ExternalLockContext beforePolicyPut(String sourceUri, List<String> policies, ExternalLockContext context) {
+        for (CustomScriptConfiguration script : customScriptConfigurations) {
+            if (!beforePolicyPut(sourceUri, policies, script, context)) {
+                break;
             }
         }
 
         log.debug("Executed (beforePolicyPut) from external lock script");
-        return true;
+        return context;
     }
 
-    private boolean beforeDataPut(JsonNode params, CustomScriptConfiguration scriptConfiguration, ExternalLockContext context) {
+    public ExternalLockContext beforePolicyRemoval(String sourceUri, ExternalLockContext context) {
+        for (CustomScriptConfiguration script : customScriptConfigurations) {
+            if (!beforePolicyRemoval(sourceUri, script, context)) {
+                break;
+            }
+        }
+
+        log.debug("Executed (beforePolicyRemoval) from external lock script");
+        return context;
+    }
+
+    private boolean beforeDataPut(JsonNode messageNode, JsonNode dataNode, CustomScriptConfiguration scriptConfiguration, ExternalLockContext context) {
         try {
             log.trace("Executing external 'beforeDataPut' method, script name: {}, context: {}", scriptConfiguration.getName(), context);
 
             LockExtensionType script = (LockExtensionType) scriptConfiguration.getExternalType();
             context.setScript(scriptConfiguration);
-            script.beforeDataPut(params, context);
-            return context.isCancelOperation();
+            script.beforeDataPut(messageNode, dataNode, context);
+            return context.isCancelNextScriptOperation();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(scriptConfiguration.getCustomScript(), ex);
@@ -61,14 +84,44 @@ public class ExternalLockService extends ExternalScriptService {
         }
     }
 
-    private boolean beforePolicyPut(JsonNode params, CustomScriptConfiguration scriptConfiguration, ExternalLockContext context) {
+    private boolean beforeDataRemoval(JsonNode messageNode, CustomScriptConfiguration scriptConfiguration, ExternalLockContext context) {
+        try {
+            log.trace("Executing external 'beforeDataRemoval' method, script name: {}, context: {}", scriptConfiguration.getName(), context);
+
+            LockExtensionType script = (LockExtensionType) scriptConfiguration.getExternalType();
+            context.setScript(scriptConfiguration);
+            script.beforeDataRemoval(messageNode, context);
+            return context.isCancelNextScriptOperation();
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(scriptConfiguration.getCustomScript(), ex);
+            return false;
+        }
+    }
+
+    private boolean beforePolicyPut(String sourceUri, List<String> policies, CustomScriptConfiguration scriptConfiguration, ExternalLockContext context) {
         try {
             log.trace("Executing external 'beforePolicyPut' method, script name: {}, context: {}", scriptConfiguration.getName(), context);
 
             LockExtensionType script = (LockExtensionType) scriptConfiguration.getExternalType();
             context.setScript(scriptConfiguration);
-            script.beforePolicyPut(params, context);
-            return context.isCancelOperation();
+            script.beforePolicyPut(sourceUri, policies, context);
+            return context.isCancelNextScriptOperation();
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(scriptConfiguration.getCustomScript(), ex);
+            return false;
+        }
+    }
+
+    private boolean beforePolicyRemoval(String sourceUri, CustomScriptConfiguration scriptConfiguration, ExternalLockContext context) {
+        try {
+            log.trace("Executing external 'beforePolicyRemoval' method, script name: {}, context: {}", scriptConfiguration.getName(), context);
+
+            LockExtensionType script = (LockExtensionType) scriptConfiguration.getExternalType();
+            context.setScript(scriptConfiguration);
+            script.beforePolicyRemoval(sourceUri, context);
+            return context.isCancelNextScriptOperation();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(scriptConfiguration.getCustomScript(), ex);

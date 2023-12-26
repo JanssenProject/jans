@@ -6,6 +6,7 @@
 
 package io.jans.model.custom.script.type.lock;
 
+import java.util.List;
 import java.util.Map;
 
 import io.jans.model.SimpleCustomProperty;
@@ -38,11 +39,19 @@ public class DummyLockExtensionType implements LockExtensionType {
     }
 
 	@Override
-	public void beforeDataPut(Object context, Object jsonData) {
+	public void beforeDataPut(Object messageNode, Object dataNode, Object context) {
 	}
 
 	@Override
-	public void beforePolicyPut(Object context, Object jsonPolicy) {
+	public void beforeDataRemoval(Object messageNode, Object context) {
+	}
+
+	@Override
+	public void beforePolicyPut(String sourceUri, List<String> policies, Object context) {
+	}
+
+	@Override
+	public void beforePolicyRemoval(String sourceUri, Object context) {
 	}
 
 }
