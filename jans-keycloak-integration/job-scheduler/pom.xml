@@ -33,12 +33,10 @@
     </dependency>
     <!-- end logback dependencies -->
 
-    <!-- typesafe config dependencies -->
     <dependency>
-      <groupId>com.typesafe</groupId>
-      <artifactId>config</artifactId>
+      <groupId>org.quartz-scheduler</groupId>
+      <artifactId>quartz</artifactId>
     </dependency>
-    <!-- end typesafe config dependencies -->
   </dependencies>
 
   <build>

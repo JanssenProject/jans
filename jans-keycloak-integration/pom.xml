@@ -233,6 +233,14 @@
           <version>${logback.version}</version>
         </dependency>
         <!-- end logback dependencies -->
+
+        <!-- quartz scheduler dependencies -->
+        <dependency>
+          <groupId>org.quartz-scheduler</groupId>
+          <artifactId>quartz</artifactId>
+          <version>${quartz-scheduler.version}</version>
+        </dependency>
+        <!-- end quartz scheduler dependencies -->
       </dependencies>
 
     </dependencyManagement>
