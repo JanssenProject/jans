@@ -1,6 +1,7 @@
 package io.jans.lock.service.consumer.policy;
 
-import org.json.JSONArray;
+import java.util.List;
+
 import org.slf4j.Logger;
 
 import io.jans.service.policy.consumer.PolicyConsumer;
@@ -21,8 +22,8 @@ public class NullPolicyConsumer extends PolicyConsumer {
 	private Logger log;
 
 	@Override
-	public boolean putPolicies(String sourceUri, JSONArray policies) {
-		log.debug("putPolicies from {}, count {}", sourceUri, policies.length());
+	public boolean putPolicies(String sourceUri, List<String> policies) {
+		log.debug("putPolicies from {}, count {}", sourceUri, policies.size());
 		return true;
 	}
 

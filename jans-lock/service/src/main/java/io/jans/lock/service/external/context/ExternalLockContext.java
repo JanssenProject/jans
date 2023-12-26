@@ -10,10 +10,12 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 public class ExternalLockContext {
 
     private CustomScriptConfiguration script;
-    private boolean cancelOperation;
+    private boolean cancelPdpOperation;
+    private boolean cancelNextScriptOperation;
 
     public ExternalLockContext() {
-    	this.cancelOperation = false;
+    	this.cancelNextScriptOperation = false;
+    	this.cancelPdpOperation = false;
     }
 
     public CustomScriptConfiguration getScript() {
@@ -24,17 +26,26 @@ public class ExternalLockContext {
         this.script = script;
     }
 
-	public boolean isCancelOperation() {
-		return cancelOperation;
+	public boolean isCancelPdpOperation() {
+		return cancelPdpOperation;
 	}
 
-	public void setCancelOperation(boolean cancelOperation) {
-		this.cancelOperation = cancelOperation;
+	public void setCancelPdpOperation(boolean cancelPdpOperation) {
+		this.cancelPdpOperation = cancelPdpOperation;
+	}
+
+	public boolean isCancelNextScriptOperation() {
+		return cancelNextScriptOperation;
+	}
+
+	public void setCancelNextScriptOperation(boolean cancelNextScriptOperation) {
+		this.cancelNextScriptOperation = cancelNextScriptOperation;
 	}
 
 	@Override
 	public String toString() {
-		return "ExternalLockContext [script=" + script + ", cancelOperation=" + cancelOperation + "]";
+		return "ExternalLockContext [script=" + script + ", cancelPdpOperation=" + cancelPdpOperation
+				+ ", cancelNextScriptOperation=" + cancelNextScriptOperation + "]";
 	}
 
 }
