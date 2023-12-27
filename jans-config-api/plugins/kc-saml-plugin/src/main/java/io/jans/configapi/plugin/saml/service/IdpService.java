@@ -6,6 +6,7 @@
 
 package io.jans.configapi.plugin.saml.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.plugin.saml.client.IdpClientFactory;
@@ -59,6 +60,9 @@ public class IdpService {
 
     @Inject
     AuthUtil authUtil;
+    
+    @Inject
+    KeycloakClientService keycloakClientService;
 
     public String getIdentityProviderDn() {
         return samlConfigService.getTrustedIdpDn();
@@ -68,7 +72,8 @@ public class IdpService {
         return samlConfigService.getSpMetadataUrl(realm, name);
     }
 
-    public List<IdentityProvider> getAllIdentityProviders() {
+    public List<IdentityProvider> getAllIdentityProviders() throws JsonProcessingException{
+        keycloakClientService.findAllIdentityProviders(null);
         return this.identityProviderService.getAllIdentityProvider(0);
     }
 
@@ -80,7 +85,11 @@ public class IdpService {
         return identityProviderService.getIdentityProviderByName(name);
     }
 
-    public PagedResult<IdentityProvider> getIdentityProviders(SearchRequest searchRequest) {
+    public PagedResult<IdentityProvider> getIdentityProviders(SearchRequest searchRequest) throws JsonProcessingException {
+         //to-do-test
+        keycloakClientService.findAllIdentityProviders(samlConfigService.getRealm());
+//end to test
+
         return identityProviderService.getIdentityProvider(searchRequest);
     }
 
@@ -96,6 +105,10 @@ public class IdpService {
         }
 
         if (idpMetadataStream != null && idpMetadataStream.available() > 0) {
+            //to-do-test
+            Map<String, String> configData = keycloakClientService.importSamlMetadata(null, identityProvider.getRealm(), idpMetadataStream);
+            //end to test
+            
             // validate metadata and set in config
             Map<String, String> config = validateSamlMetadata(identityProvider.getRealm(), idpMetadataStream);
             log.info("Validated metadata to create IDP - config:{}", config);

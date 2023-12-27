@@ -956,11 +956,17 @@ components:
           type: string
         grantType:
           type: string
+        scope:
+          type: string
         username:
           type: string
         password:
           type: string
         spMetadataUrl:
+          type: string
+        tokenUrl:
+          type: string
+        idpUrl:
           type: string
         idpRootDir:
           type: string

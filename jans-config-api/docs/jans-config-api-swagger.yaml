@@ -7868,9 +7868,9 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -8675,8 +8675,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8686,6 +8684,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9195,6 +9195,16 @@ components:
           type: string
         tokenEndpointAuthMethod:
           type: string
+          format: enum
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         tokenEndpointAuthSigningAlg:
           type: string
         defaultMaxAge:
@@ -9412,6 +9422,10 @@ components:
           type: string
         introspectionEncryptedResponseEnc:
           type: string
+        authorizationDetailsTypes:
+          type: array
+          items:
+            type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -10102,10 +10116,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

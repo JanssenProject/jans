@@ -8,6 +8,7 @@ package io.jans.configapi.plugin.saml.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.saml.model.IdentityProvider;
@@ -313,26 +314,31 @@ public class IdpResource extends BaseResource {
 
     private IdentityProviderPagedResult doSearch(SearchRequest searchReq)
             throws IllegalAccessException, InvocationTargetException {
+
         if (log.isInfoEnabled()) {
             log.info("IdentityProvider search params - searchReq:{} ", escapeLog(searchReq));
         }
+        IdentityProviderPagedResult pagedIdentityProvider = null;
+        try {
+            PagedResult<IdentityProvider> pagedResult = idpService.getIdentityProviders(searchReq);
+            if (log.isTraceEnabled()) {
+                log.debug("IdentityProvider PagedResult - pagedResult:{}", pagedResult);
+            }
 
-        PagedResult<IdentityProvider> pagedResult = idpService.getIdentityProviders(searchReq);
-        if (log.isTraceEnabled()) {
-            log.debug("IdentityProvider PagedResult - pagedResult:{}", pagedResult);
+            pagedIdentityProvider = new IdentityProviderPagedResult();
+            if (pagedResult != null) {
+                log.debug("IdentityProviders fetched - pagedResult.getEntries():{}", pagedResult.getEntries());
+                List<IdentityProvider> identityProviderList = pagedResult.getEntries();
+                pagedIdentityProvider.setStart(pagedResult.getStart());
+                pagedIdentityProvider.setEntriesCount(pagedResult.getEntriesCount());
+                pagedIdentityProvider.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
+                pagedIdentityProvider.setEntries(identityProviderList);
+            }
+
+            log.info("pagedIdentityProvider:{}", pagedIdentityProvider);
+        } catch (JsonProcessingException jpe) {
+            throwInternalServerException(jpe.getMessage());
         }
-
-        IdentityProviderPagedResult pagedIdentityProvider = new IdentityProviderPagedResult();
-        if (pagedResult != null) {
-            log.debug("IdentityProviders fetched - pagedResult.getEntries():{}", pagedResult.getEntries());
-            List<IdentityProvider> identityProviderList = pagedResult.getEntries();
-            pagedIdentityProvider.setStart(pagedResult.getStart());
-            pagedIdentityProvider.setEntriesCount(pagedResult.getEntriesCount());
-            pagedIdentityProvider.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
-            pagedIdentityProvider.setEntries(identityProviderList);
-        }
-
-        log.info("pagedIdentityProvider:{}", pagedIdentityProvider);
         return pagedIdentityProvider;
     }
 

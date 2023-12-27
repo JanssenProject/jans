@@ -1,5 +1,12 @@
 package io.jans.configapi.plugin.saml.rest;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+
+import io.jans.configapi.core.configuration.ObjectMapperContextResolver;
 import io.jans.configapi.core.rest.BaseApiApplication;
 import io.jans.configapi.plugin.saml.util.Constants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -9,7 +16,9 @@ import io.swagger.v3.oas.annotations.tags.*;
 import io.swagger.v3.oas.annotations.security.*;
 import io.swagger.v3.oas.annotations.servers.*;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.ApplicationPath;
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,6 +42,22 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 }
 )))
 public class ApiApplication extends BaseApiApplication {
+    
+    
+    private static final ObjectMapper mapper = ObjectMapperContextResolver.createDefaultMapper();
+    static {
+        mapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        mapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
+        mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+        mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING); 
+    }
 
     @Override
     public Set<Class<?>> getClasses() {
@@ -41,6 +66,9 @@ public class ApiApplication extends BaseApiApplication {
         // General
         classes = (HashSet) addCommonClasses((classes));
         
+        System.out.println("\n\n\n KC-Plugin mapper = "+mapper+" \n\n");
+        classes.stream().forEach(e -> System.out.println("\n KC-Plugin e.getName() :{}"+e.getName()+" ,e.getCanonicalName() = "+e.getCanonicalName()));
+                              
         classes.add(SamlConfigResource.class);
         classes.add(TrustRelationshipResource.class);
         classes.add(IdpResource.class);

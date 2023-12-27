@@ -339,12 +339,7 @@ public class KeycloakService {
         return;
     }
 
-    public void getSAMLServiceProviderMetadata(String realmName, String alias) {
-        // To-do
-
-    }
-
-    private static String getCreatedId(Response response) {
+     private static String getCreatedId(Response response) {
         URI location = response.getLocation();
         if (!response.getStatusInfo().equals(Status.CREATED)) {
             StatusType statusInfo = response.getStatusInfo();

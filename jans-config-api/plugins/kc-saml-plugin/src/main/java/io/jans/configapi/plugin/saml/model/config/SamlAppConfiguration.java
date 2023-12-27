@@ -19,9 +19,13 @@ public class SamlAppConfiguration implements Configuration {
     private String clientId;
     private String clientSecret;
     private String grantType;
+    private String scope;
     private String username;
     private String password;
     private String spMetadataUrl;
+    private String tokenUrl;
+    private String idpUrl;
+    private String idpSamlImportUrl; //to-do
 
     private String idpRootDir;
     private String idpMetadataDir;
@@ -94,6 +98,22 @@ public class SamlAppConfiguration implements Configuration {
         this.realm = realm;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public String getClientId() {
         return clientId;
     }
@@ -118,20 +138,12 @@ public class SamlAppConfiguration implements Configuration {
         this.grantType = grantType;
     }
 
-    public String getUsername() {
-        return username;
+    public String getScope() {
+        return scope;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
     public String getSpMetadataUrl() {
@@ -140,6 +152,22 @@ public class SamlAppConfiguration implements Configuration {
 
     public void setSpMetadataUrl(String spMetadataUrl) {
         this.spMetadataUrl = spMetadataUrl;
+    }
+
+    public String getTokenUrl() {
+        return tokenUrl;
+    }
+
+    public void setTokenUrl(String tokenUrl) {
+        this.tokenUrl = tokenUrl;
+    }
+
+    public String getIdpUrl() {
+        return idpUrl;
+    }
+
+    public void setIdpUrl(String idpUrl) {
+        this.idpUrl = idpUrl;
     }
 
     public String getIdpRootDir() {
@@ -234,14 +262,14 @@ public class SamlAppConfiguration implements Configuration {
     public String toString() {
         return "SamlAppConfiguration [applicationName=" + applicationName + ", samlTrustRelationshipDn="
                 + samlTrustRelationshipDn + ", trustedIdpDn=" + trustedIdpDn + ", enabled=" + enabled + ", selectedIdp="
-                + selectedIdp + ", serverUrl=" + serverUrl + ", realm=" + realm + ", clientId=" + clientId
-                + ", clientSecret=" + clientSecret + ", grantType=" + grantType + ", username=" + username
-                + ", password=" + password + ", spMetadataUrl=" + spMetadataUrl + ", idpRootDir=" + idpRootDir
-                + ", idpMetadataDir=" + idpMetadataDir + ", idpMetadataTempDir=" + idpMetadataTempDir
-                + ", idpMetadataFilePattern=" + idpMetadataFilePattern + ", idpMetadataFile=" + idpMetadataFile
-                + ", spMetadataDir=" + spMetadataDir + ", spMetadataTempDir=" + spMetadataTempDir
-                + ", spMetadataFilePattern=" + spMetadataFilePattern + ", spMetadataFile=" + spMetadataFile
-                + ", ignoreValidation=" + ignoreValidation + ", idpMetadataMandatoryAttributes="
+                + selectedIdp + ", serverUrl=" + serverUrl + ", realm=" + realm + ", username=" + username
+                + ", password=" + password + ", clientId=" + clientId + ", clientSecret=" + clientSecret
+                + ", grantType=" + grantType + ", scope=" + scope + ", spMetadataUrl=" + spMetadataUrl + ", tokenUrl="
+                + tokenUrl + ", idpUrl=" + idpUrl + ", idpRootDir=" + idpRootDir + ", idpMetadataDir=" + idpMetadataDir
+                + ", idpMetadataTempDir=" + idpMetadataTempDir + ", idpMetadataFilePattern=" + idpMetadataFilePattern
+                + ", idpMetadataFile=" + idpMetadataFile + ", spMetadataDir=" + spMetadataDir + ", spMetadataTempDir="
+                + spMetadataTempDir + ", spMetadataFilePattern=" + spMetadataFilePattern + ", spMetadataFile="
+                + spMetadataFile + ", ignoreValidation=" + ignoreValidation + ", idpMetadataMandatoryAttributes="
                 + idpMetadataMandatoryAttributes + "]";
     }
 

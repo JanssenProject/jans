@@ -141,6 +141,16 @@ public class SamlConfigService {
         }
         return grantType;
     }
+    
+    public String getScope() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String scope = null;
+        if (samlAppConfiguration != null) {
+            scope = samlAppConfiguration.getScope();
+        }
+        return scope;
+    }
 
     public String getUsername() {
         final SamlConf samlConf = getSamlConf();
@@ -176,6 +186,34 @@ public class SamlConfigService {
         return spMetadataUrl;
     }
 
+    public String getTokenUrl(String realm) {
+        logger.debug("Get SAML Token Url - realm:{}", realm);
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String tokenUrl = null;
+        if (samlAppConfiguration != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(samlAppConfiguration.getServerUrl()).append(samlAppConfiguration.getTokenUrl());
+            tokenUrl = String.format(sb.toString(), realm);
+        }
+        logger.debug("SAML Token Url - tokenUrl:{}", tokenUrl);
+        return tokenUrl;
+    }
+    
+    public String getIdpUrl(String realm) {
+        logger.debug("Get SAML IDP Url - realm:{}", realm);
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String idpUrl = null;
+        if (samlAppConfiguration != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(samlAppConfiguration.getServerUrl()).append(samlAppConfiguration.getIdpUrl());
+            idpUrl = String.format(sb.toString(), realm);
+        }
+        logger.debug("SAML IDP Url - idpUrl:{}", idpUrl);
+        return idpUrl;
+    }
+    
     public String getIdpRootDir() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
