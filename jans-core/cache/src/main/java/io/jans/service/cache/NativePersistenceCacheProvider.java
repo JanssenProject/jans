@@ -289,14 +289,14 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     }
 
     public void cleanup(final Date now, int batchSize) {
-        log.debug("Start NATIVE_PERSISTENCE clean up");
+//        log.debug("Start NATIVE_PERSISTENCE clean up");
         try {
             Filter filter = Filter.createANDFilter(
                     Filter.createEqualityFilter("del", true),
                     Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn, now)));
             final int removedCount = entryManager.remove(baseDn, NativePersistenceCacheEntity.class, filter, batchSize);
 
-            log.debug("End NATIVE_PERSISTENCE clean up, items removed: " + removedCount);
+//            log.debug("End NATIVE_PERSISTENCE clean up, items removed: " + removedCount);
         } catch (Exception e) {
             log.error("Failed to perform clean up.", e);
         }

@@ -3,11 +3,11 @@
 <Configuration packages="io.jans.log">
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="${date:HHmm} %-5p %4.4t %-25.25c{6}#%L ➔ %m%n" />
         </Console>
 
         <RollingFile name="FILE" fileName="${sys:log.base}/logs/fido2.log" filePattern="${sys:log.base}/logs/fido2-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="${date:HHmm} %-5p %4.4t %-25.25c{6}#%L ➔ %m%n" />
 
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -18,7 +18,7 @@
         </RollingFile>
 
 		<RollingFile name="FIDO2_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/fido2_persistence.log" filePattern="${sys:log.base}/logs/fido2_persistence-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="${date:HHmm} %-5p %4.4t %-25.25c{6}#%L ➔ %m%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -28,7 +28,7 @@
 		</RollingFile>
 
 		<RollingFile name="FIDO2_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/fido2_persistence_duration.log" filePattern="${sys:log.base}/logs/fido2_persistence_duration-%d{yyyy-MM-dd}-%i.log">
-			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="${date:HHmm} %-5p %4.4t %-25.25c{6}#%L ➔ %m%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -38,7 +38,7 @@
 		</RollingFile>
 
 		<RollingFile name="FIDO2_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/fido2_script.log" filePattern="${sys:log.base}/logs/fido2_script-%d{yyyy-MM-dd}-%i.log">
-			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="${date:HHmm} %-5p %4.4t %-25.25c{6}#%L ➔ %m%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />

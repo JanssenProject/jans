@@ -56,7 +56,7 @@ public class DeployerTimer {
 
         try {
             deployer.process();
-            logger.debug("ADS deployer timer has run.");
+//            logger.debug("ADS deployer timer has run.");
         } catch (Exception e) {
             logger.error("An error occurred while running ADS deployer timer", e);
         } finally {

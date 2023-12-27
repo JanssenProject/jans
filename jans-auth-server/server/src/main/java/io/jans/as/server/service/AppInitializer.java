@@ -331,7 +331,7 @@ public class AppInitializer {
 
     private void reloadConfiguration() {
         PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
-        log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
+//        log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
 
         GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "jansDbAuth", "jansAuthMode");
 

@@ -78,7 +78,7 @@ public class CleanerTimer {
 	private AtomicBoolean isActive;
 
 	public void initTimer() {
-		log.debug("Initializing Cleaner Timer");
+		log.trace("Initializing Cleaner Timer");
 		this.isActive = new AtomicBoolean(false);
 
 		// Schedule to start cleaner every 1 minute
@@ -143,27 +143,27 @@ public class CleanerTimer {
                 processedBaseDns.add(processedKey);
 
                 if (log.isDebugEnabled())
-                    log.debug("Start clean up for baseDn: {}, class: {}", baseDn.getValue(), baseDn.getValue());
+                    log.trace("Start clean up for baseDn: {}, class: {}", baseDn.getValue(), baseDn.getValue());
 
                 final Stopwatch started = Stopwatch.createStarted();
 
                 int removed = cleanup(baseDn, now, chunkSize);
 
                 if (log.isDebugEnabled())
-                    log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
+                    log.trace("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
             }
 
             // Process sub-branches
             String baseDn = staticConfiguration.getBaseDn().getPeople();
             if (log.isDebugEnabled())
-                log.debug("Start clean up for baseDn: {}", baseDn);
+                log.trace("Start clean up for baseDn: {}", baseDn);
 
             final Stopwatch started = Stopwatch.createStarted();
 
             int removed = cleanupBranches(baseDn, now, chunkSize);
 
             if (log.isDebugEnabled())
-                log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
+                log.trace("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
 
 			this.lastFinishedTime = System.currentTimeMillis();
         } catch (Exception e) {

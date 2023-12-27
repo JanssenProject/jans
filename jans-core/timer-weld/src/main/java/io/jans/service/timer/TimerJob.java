@@ -39,8 +39,8 @@ public class TimerJob implements Job {
                 return;
             }
 
-            log.debug("Fire timer event [{}] with qualifiers {} from instance {}", timerEvent.getTargetEvent().getClass().getName(),
-                    timerEvent.getQualifiers(), System.identityHashCode(this));
+//            log.debug("Fire timer event [{}] with qualifiers {} from instance {}", timerEvent.getTargetEvent().getClass().getName(),
+//                    timerEvent.getQualifiers(), System.identityHashCode(this));
 
             beanManager.fireEvent(timerEvent.getTargetEvent(), timerEvent.getQualifiers());
         } catch (Exception ex) {

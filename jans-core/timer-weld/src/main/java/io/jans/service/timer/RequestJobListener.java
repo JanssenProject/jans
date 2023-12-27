@@ -56,7 +56,7 @@ public class RequestJobListener implements JobListener {
         requestContext.associate(requestDataStore);
         requestContext.activate();
 
-        log.debug("Bound request started");
+//        log.debug("Bound request started");
     }
 
     protected void endRequest(JobExecutionContext context) {
@@ -66,7 +66,7 @@ public class RequestJobListener implements JobListener {
         } finally {
             requestContext.dissociate((Map<String, Object>) context.get(REQUEST_DATA_STORE_KEY));
         }
-        log.debug("Bound request ended");
+//        log.debug("Bound request ended");
     }
 
 }

@@ -223,7 +223,7 @@ public abstract class LoggerService {
             }
 
             if (count > 0) {
-                log.info("Updated log level of '{}' loggers to {}", count, level.toString());
+//                log.info("Updated log level of '{}' loggers to {}", count, level.toString());
             }
         }
 //    	boolean runLoggersUpdate = false;

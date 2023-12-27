@@ -62,7 +62,7 @@ public class FlowRunsCleaner {
 
         try {
             int count = clean();
-            logger.info("Flows cleaner timer has run. {} runs removed", count);
+//            logger.info("Flows cleaner timer has run. {} runs removed", count);
         } catch (Exception e) {
             logger.error("An error occurred while running flows cleaner timer", e);
         } finally {
@@ -82,7 +82,7 @@ public class FlowRunsCleaner {
                 DEL_BATCH_SIZE);
 
             total += removed;
-            logger.trace("{} entries removed", removed);
+//            logger.trace("{} entries removed", removed);
         } while (removed > 0);
         return total;
         

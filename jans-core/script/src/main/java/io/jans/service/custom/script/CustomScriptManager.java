@@ -121,7 +121,7 @@ public class CustomScriptManager {
 		} finally {
 			this.isActive.set(false);
 			this.lastFinishedTime = System.currentTimeMillis();
-			log.trace("Last finished time '{}'", new Date(this.lastFinishedTime));
+//			log.trace("Last finished time '{}'", new Date(this.lastFinishedTime));
 		}
 	}
 

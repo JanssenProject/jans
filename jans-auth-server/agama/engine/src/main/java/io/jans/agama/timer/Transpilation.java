@@ -81,7 +81,7 @@ public class Transpilation {
 
         try {
             process();
-            logger.debug("Transpilation timer has run.");
+//            logger.debug("Transpilation timer has run.");
         } catch (Exception e) {
             logger.error("An error occurred while running transpilation timer", e);
         } finally {

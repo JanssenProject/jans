@@ -100,7 +100,7 @@ public class CibaRequestsProcessorJob {
                 processImpl();
                 this.lastFinishedTime = System.currentTimeMillis();
             } else {
-                log.trace("Starting conditions aren't reached for CIBA requestes processor");
+//                log.trace("Starting conditions aren't reached for CIBA requestes processor");
             }
         } finally {
             this.isActive.set(false);

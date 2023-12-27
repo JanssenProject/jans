@@ -406,13 +406,13 @@ public class Deployer {
 
     private void updateFlowsAndAssets(List<Deployment> deployments) {
 
-        logger.info("Syncing in-memory state with DB state");
+//        logger.info("Syncing in-memory state with DB state");
         Set<String> actualPrjIds = new HashSet<>();
         
         //Retrieve all finished, successfully processed deployments
         List<Deployment> depls = deployments.stream().filter(d -> d.getFinishedAt() != null && 
                 d.getDetails().getError() == null).collect(Collectors.toList());
-        logger.info("{} successful deployments found", depls.size());                
+//        logger.info("{} successful deployments found", depls.size());
 
         for (Deployment d : depls) {
             //In this case d only has id, start date, and end date populated
@@ -446,7 +446,7 @@ public class Deployer {
                 }
 
             } else {
-                logger.info("Assets of project {} are already synced to disk", name);
+//                logger.info("Assets of project {} are already synced to disk", name);
             }
         }
 
