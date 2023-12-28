@@ -146,6 +146,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private AuthzDetailsService authzDetailsService;
 
+    @Inject
+    private TxTokenService txTokenService;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
@@ -201,6 +204,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             final AuthzDetails authzDetails = authzDetailsService.validateAuthorizationDetails(authorizationDetails, executionContext);
             executionContext.setAuthzDetails(authzDetails);
+
+            if (txTokenService.isTxTokenFlow(request)) {
+                return txTokenService.processTxToken(executionContext);
+            }
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
                 return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, executionContext);
