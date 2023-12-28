@@ -7,9 +7,13 @@
 package io.jans.configapi.plugin.saml.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.util.exception.InvalidAttributeException;
 import io.jans.util.exception.ConfigurationException;
+import io.jans.configapi.plugin.saml.model.IdentityProvider;
+import io.jans.configapi.plugin.saml.util.Constants;
 
 import io.jans.configapi.core.util.Jackson;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,23 +24,13 @@ import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
@@ -51,77 +45,50 @@ public class IdpClientFactory {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String APPLICATION_JSON = "application/json";
 
-    public String getAccessToken(final String tokenUrl, final String clientId, final String clientSecret,
+    public static String getAccessToken(final String tokenUrl, final String clientId, final String clientSecret,
             final String grantType, final String scope, final String username, final String password,
-            final String serverUrl) {
+            final String serverUrl) throws JsonProcessingException {
+        logger.error(
+                "Get  tokenUrl:{}, clientId:{}, clientSecret:{}, grantType:{}, scope:{}, username:{}, password:{}, serverUrl:{}",
+                tokenUrl, clientId, clientSecret, grantType, scope, username, password, serverUrl);
+
+        Builder request = getClientBuilder(tokenUrl);
+        logger.error("request:{}", request);
+        request.header("Authorization", "Basic " + clientId + ":" + clientSecret);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+
+        final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>();
+        multivaluedHashMap.add("client_id", clientId);
+        multivaluedHashMap.add("client_secret", clientSecret);
+        multivaluedHashMap.add("grant_type", "password");
+        multivaluedHashMap.add("scope", scope);
+        multivaluedHashMap.add("username", username);
+        multivaluedHashMap.add("password", password);
+        multivaluedHashMap.add("redirect_uri", serverUrl);
+        logger.error("Request for Access Token -  multivaluedHashMap:{}", multivaluedHashMap);
+
+        Response response = request.post(Entity.form(multivaluedHashMap));
+        logger.error("Response for Access Token -  response:{}", response);
         String token = null;
-        try {
+        if (response != null) {
             logger.error(
-                    "Get  tokenUrl:{}, clientId:{}, clientSecret:{}, grantType:{}, scope:{}, username:{}, password:{}, serverUrl:{}",
-                    tokenUrl, clientId, clientSecret, grantType, scope, username, password, serverUrl);
-
-            Response response = requestAccessToken(tokenUrl, clientId, clientSecret, grantType, scope, username,
-                    password, serverUrl);
-            logger.error("Access Token -  response:{}", response);
-
-            if (response != null) {
-                token = getElement(response.getEntity().toString(), "access_token");
-                logger.error("Access Token -  token:{}", token);
-            }
-        } catch (Exception ex) {
-            logger.error(" Error while getting access token - ex:{}", ex);
-            throw new InvalidAttributeException("Error while getting access token - ex:{}", ex);
+                    "Response for Access Token -  response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
+                    response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass());
+            String entity = response.readEntity(String.class);
+            logger.error("Access Token -  entity:{}", entity);
+            token = Jackson.getElement(entity, Constants.ACCESS_TOKEN);
+            logger.error("Access Token -  token:{}", token);
         }
 
         return token;
     }
 
-    public static Response requestAccessToken(final String tokenUrl, final String clientId, final String clientSecret,
-            final String grantType, final String scope, final String username, final String password,
-            final String serverUrl) {
-        logger.error(
-                "Get  tokenUrl:{}, clientId:{}, clientSecret:{}, grantType:{}, scope:{}, username:{}, password:{}, serverUrl:{}",
-                tokenUrl, clientId, clientSecret, grantType, scope, username, password, serverUrl);
-        Response response = null;
+    public Map<String, String> extractSamlMetadata(final String idpMetadataConfigUrl, final String token,
+            final String providerId, String realmName, InputStream idpMetadataStream) throws JsonProcessingException {
+        Map<String, String> config = null;
         try {
-            Builder request = getClientBuilder(tokenUrl);
-            logger.error("request:{}", request);
-            request.header("Authorization", "Basic " + clientId + ":" + clientSecret);
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
-
-            final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>();
-            multivaluedHashMap.add("client_id", clientId);
-            multivaluedHashMap.add("client_secret", clientSecret);
-            multivaluedHashMap.add("grant_type", grantType);
-            multivaluedHashMap.add("scope", scope);
-            multivaluedHashMap.add("username", username);
-            multivaluedHashMap.add("password", password);
-            multivaluedHashMap.add("redirect_uri", serverUrl);
-            logger.error("Request for Access Token -  multivaluedHashMap:{}", multivaluedHashMap);
-
-            response = request.post(Entity.form(multivaluedHashMap));
-            logger.error("Response for Access Token -  response:{}", response);
-            if (response.getStatus() == 200) {
-                String entity = response.readEntity(String.class);
-                logger.error("Access Token -  entity:{}", entity);
-            }
-        } catch (Exception ex) {
-            logger.error("IdpClientFactory Exception  requestAccessToken is - ", ex);
-        } finally {
-
-            /*
-             * if (response != null) { response.close(); }
-             */
-        }
-        return response;
-    }
-
-    public Response importSamlMetadata(final String idpMetadataConfigUrl, final String token, final String providerId,
-            String realmName, InputStream idpMetadataStream) {
-        Response response = null;
-        try {
-            logger.info(
-                    "Import Saml Idp Metadata idpMetadataConfigUrl:{}, token:{}, providerId:{}, realmName:{}, idpMetadataStream:{}",
+            logger.error(
+                    "Saml Idp Metadata idpMetadataConfigUrl:{}, token:{}, providerId:{}, realmName:{}, idpMetadataStream:{}",
                     idpMetadataConfigUrl, token, providerId, realmName, idpMetadataStream);
 
             if (StringUtils.isBlank(token)) {
@@ -138,28 +105,39 @@ public class IdpClientFactory {
 
             MultipartFormDataOutput formData = new MultipartFormDataOutput();
             formData.addFormData("providerId", "saml", MediaType.TEXT_PLAIN_TYPE);
-            logger.debug("SAML idpMetadataStream.available():{}", idpMetadataStream.available());
+            logger.error("SAML idpMetadataStream.available():{}", idpMetadataStream.available());
 
             byte[] content = idpMetadataStream.readAllBytes();
-            logger.debug("content:{}", content);
+            logger.error("content:{}", content);
             String body = new String(content, Charset.forName("utf-8"));
             formData.addFormData("file", body, MediaType.APPLICATION_XML_TYPE, "saml-idp-metadata.xml");
 
             logger.error("Request for SAML metadata import - formData:{}", formData);
             Entity<MultipartFormDataOutput> formDataEntity = Entity.entity(formData, MediaType.MULTIPART_FORM_DATA);
             logger.error("Request for SAML metadata import - formDataEntity:{}", formDataEntity);
-            response = request.post(formDataEntity);
+            Response response = request.post(formDataEntity);
             logger.error("Response for SAML metadata  import-  response:{}", response);
-            if (response.getStatus() == 200) {
-                String entity = response.readEntity(String.class);
-                logger.error("Access Token -  entity:{}", entity);
+
+            if (response != null) {
+                logger.error(
+                        "extract Saml Metadata -  response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
+                        response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass());
+                if (response.getStatusInfo().equals(Status.OK)) {
+                    String entity = response.readEntity(String.class);
+                    logger.error("entity:{}", entity);
+                    ObjectMapper mapper = Jackson.createJsonMapper();
+                    config = mapper.readValue(entity, Map.class);
+                    logger.error("config:{}", config);
+
+                }
             }
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             throw new ConfigurationException("Error while validating SAML IDP Metadata", ex);
         }
 
-        return response;
+        return config;
     }
 
     public Response getSpMetadata(String metadataEndpoint) {
@@ -178,21 +156,29 @@ public class IdpClientFactory {
         return response;
     }
 
-    public Response getAllIdp(String idpUrl, String token) {
-        logger.info(" All IDP - idpUrl:{}", idpUrl);
+    public List<IdentityProvider> getAllIdp(String idpUrl, String token) throws JsonProcessingException, JsonMappingException {
+        logger.error(" All IDP - idpUrl:{}", idpUrl);
         Builder client = getClientBuilder(idpUrl);
         client.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         client.header(AUTHORIZATION, token);
         Response response = client.get();
         logger.debug("SpMetadata- response:{}", response);
-
+        List<IdentityProvider> identityProviderList = null;
         if (response != null) {
-            logger.trace(
-                    "SP metadata response.getStatusInfo():{}, response.getEntity():{}, response.getEntity().getClass():{}",
-                    response.getStatusInfo(), response.getEntity(), response.getEntity().getClass());
+            logger.error(
+                    "extract Saml Metadata -  response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
+                    response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass());
+            if (response.getStatusInfo().equals(Status.OK)) {
+                String entity = response.readEntity(String.class);
+                logger.error("entity:{}", entity);
+                ObjectMapper mapper = Jackson.createJsonMapper();
+                identityProviderList = mapper.readValue(entity, List.class);
+                logger.error("identityProviderList:{}", identityProviderList);
+
+            }
         }
 
-        return response;
+        return identityProviderList;
     }
 
     private String getElement(String jsonString, String name) throws JsonProcessingException {

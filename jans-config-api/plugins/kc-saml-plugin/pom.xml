@@ -144,24 +144,6 @@
 			<version>7.5.2</version>
 		</dependency>
 		
-		<!-- keycloak dependencies -->
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-admin-client-jakarta</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>		
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-core</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>		
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-common</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-		<!-- end keycloak dependencies-->
-
 		<!-- mapstruct-->
 		<dependency>
 			<groupId>org.mapstruct</groupId>

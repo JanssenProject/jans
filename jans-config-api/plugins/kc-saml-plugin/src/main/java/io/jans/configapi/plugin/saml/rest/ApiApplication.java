@@ -66,6 +66,9 @@ public class ApiApplication extends BaseApiApplication {
         // General
         classes = (HashSet) addCommonClasses((classes));
         
+        // General Application level class
+        classes.add(ObjectMapperContextResolver.class);
+        
         System.out.println("\n\n\n KC-Plugin mapper = "+mapper+" \n\n");
         classes.stream().forEach(e -> System.out.println("\n KC-Plugin e.getName() :{}"+e.getName()+" ,e.getCanonicalName() = "+e.getCanonicalName()));
                               

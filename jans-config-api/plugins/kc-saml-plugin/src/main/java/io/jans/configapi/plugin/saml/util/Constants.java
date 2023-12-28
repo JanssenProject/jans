@@ -47,6 +47,7 @@ public class Constants {
     public static final String OIDC = "oidc";
     public static final String SAML = "saml";
     public static final String REALM = "realm";
+    public static final String ACCESS_TOKEN = "access_token";
 
     public static final String SIGNING_CERTIFICATES = "signingCertificates";
     public static final String VALIDATE_SIGNATURE = "validateSignature";
