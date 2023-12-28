@@ -11,6 +11,7 @@ import io.jans.as.common.service.OrganizationService;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.plugin.saml.client.IdpClientFactory;
 import io.jans.configapi.plugin.saml.model.IdentityProvider;
+import io.jans.configapi.plugin.saml.util.Constants;
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
@@ -63,9 +64,8 @@ public class IdpService {
         return samlConfigService.getSpMetadataUrl(realm, name);
     }
 
-    public List<IdentityProvider> getAllIdentityProviders() throws JsonProcessingException {
-        keycloakService.findAllIdentityProviders(null);
-        return this.identityProviderService.getAllIdentityProvider(0);
+    public List<IdentityProvider> getAllIdentityProviders(String realmName) throws IOException {
+        return keycloakService.findAllIdentityProviders(realmName);
     }
 
     public IdentityProvider getIdentityProviderByInum(String inum) {
@@ -76,13 +76,13 @@ public class IdpService {
         return identityProviderService.getIdentityProviderByName(name);
     }
 
-    public PagedResult<IdentityProvider> getIdentityProviders(SearchRequest searchRequest)
-            throws JsonProcessingException {
-        // to-do-test
-        keycloakService.findAllIdentityProviders(samlConfigService.getRealm());
-//end to test
-
+    public PagedResult<IdentityProvider> getIdentityProviders(SearchRequest searchRequest) {
         return identityProviderService.getIdentityProvider(searchRequest);
+    }
+
+    public List<IdentityProvider> getAllIdp(String realmName) throws IOException {
+        return keycloakService.findAllIdentityProviders(realmName);
+
     }
 
     public IdentityProvider createSamlIdentityProvider(IdentityProvider identityProvider, InputStream idpMetadataStream)
@@ -96,14 +96,19 @@ public class IdpService {
             throw new InvalidAttributeException("IdentityProvider object is null!!!");
         }
 
-        if (idpMetadataStream != null && idpMetadataStream.available() > 0) {
-            // to-do-test
-            Map<String, String> configData = keycloakService.importSamlMetadata(null, identityProvider.getRealm(),
-                    idpMetadataStream);
-            // end to test
+        // Set Inum
+        String inum = identityProviderService.generateInumForIdentityProvider();
+        identityProvider.setInum(inum);
+        identityProvider.setDn(identityProviderService.getDnForIdentityProvider(inum));
 
-            // validate metadata and set in config
-            Map<String, String> config = validateSamlMetadata(identityProvider.getRealm(), idpMetadataStream);
+        // Set default Value for SAML IDP
+        setSamlIdentityProviderDefaultValue(identityProvider, false);
+
+        // SAML IDP Metadata handling
+        if (idpMetadataStream != null && idpMetadataStream.available() > 0) {
+
+            Map<String, String> config = keycloakService.importSamlMetadata(Constants.SAML, identityProvider.getRealm(),
+                    idpMetadataStream);
             log.info("Validated metadata to create IDP - config:{}", config);
             identityProvider.setConfig(config);
         } else {
@@ -112,24 +117,13 @@ public class IdpService {
             log.info("Is metadata individual elements for IDP creation present:{}", validConfig);
         }
 
-        // Create IDP in Jans DB
-        log.debug("Create IdentityProvider identityProvider:{})", identityProvider);
-        identityProviderService.addSamlIdentityProvider(identityProvider, idpMetadataStream);
-        log.debug("Created IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
-
         if (samlConfigService.isSamlEnabled()) {
             // Create IDP in KC
-            // IdentityProviderRepresentation kcIdp =
-            // this.convertToIdentityProviderRepresentation(identityProvider);
-            // log.debug("converted kcIdp:{}", kcIdp);
-
             log.debug("IDP Service idpMetadataStream:{}, identityProvider.getRealm():{}", idpMetadataStream,
                     identityProvider.getRealm());
-            // kcIdp = keycloakService.createIdentityProvider(identityProvider.getRealm(),
-            // kcIdp);
+            identityProvider = keycloakService.createIdentityProvider(identityProvider.getRealm(), identityProvider);
+
             // log.debug("Newly created kcIdp:{}", kcIdp);
-            // identityProvider = this.convertToIdentityProvider(identityProvider, kcIdp);
-            log.debug("Final created identityProvider:{}", identityProvider);
 
             // set KC SP MetadataURL name
             if (identityProvider != null) {
@@ -138,6 +132,12 @@ public class IdpService {
                 identityProvider.setSpMetaDataURL(spMetadataUrl);
             }
         }
+
+        // Create IDP in Jans DB
+        log.debug("Create IdentityProvider identityProvider:{})", identityProvider);
+        identityProviderService.addSamlIdentityProvider(identityProvider, idpMetadataStream);
+        log.debug("Created IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
+
         return identityProvider;
     }
 
@@ -152,6 +152,10 @@ public class IdpService {
             throw new InvalidAttributeException("IdentityProvider object for update is null!!!");
         }
 
+        // Set default Value for SAML IDP
+        setSamlIdentityProviderDefaultValue(identityProvider, true);
+
+        // SAML IDP Metadata handling
         if (idpMetadataStream != null && idpMetadataStream.available() > 0) {
             // validate metadata and set in config
             Map<String, String> config = validateSamlMetadata(identityProvider.getRealm(), idpMetadataStream);
@@ -168,21 +172,11 @@ public class IdpService {
         log.debug("Validated metadata to update config:{}", config);
         identityProvider.setConfig(config);
 
-        // Update IDP in Jans DB
-        updateIdentityProvider(identityProvider);
-        log.debug("Updated IdentityProvider dentityProvider:{}, , identityProvider.getRealm():{})", identityProvider,
-                identityProvider.getRealm());
-
         if (samlConfigService.isSamlEnabled()) {
             // Update IDP in KC
-            // IdentityProviderRepresentation kcIdp =
-            // this.convertToIdentityProviderRepresentation(identityProvider);
-            // log.debug("converted kcIdp:{}", kcIdp);
 
-            // kcIdp = keycloakService.updateIdentityProvider(identityProvider.getRealm(),
-            // kcIdp);
-            // log.debug("Updated kcIdp:{}", kcIdp);
-            // identityProvider = this.convertToIdentityProvider(identityProvider, kcIdp);
+            identityProvider = keycloakService.updateIdentityProvider(identityProvider.getRealm(), identityProvider);
+            log.debug("Updated identityProvider:{}", identityProvider);
 
             // set KC SP MetadataURL name
             if (identityProvider != null) {
@@ -191,6 +185,11 @@ public class IdpService {
                 identityProvider.setSpMetaDataURL(spMetadataUrl);
             }
         }
+
+        // Update IDP in Jans DB
+        updateIdentityProvider(identityProvider);
+        log.debug("Updated IdentityProvider dentityProvider:{}, , identityProvider.getRealm():{})", identityProvider,
+                identityProvider.getRealm());
         return identityProvider;
     }
 
@@ -226,6 +225,23 @@ public class IdpService {
         identityProviderService.updateIdentityProvider(identityProvider);
         log.debug("Updated IdentityProvider in Jans DB -  identityProvider:{})", identityProvider);
 
+        return identityProvider;
+    }
+
+    private IdentityProvider setSamlIdentityProviderDefaultValue(IdentityProvider identityProvider, boolean update) {
+        log.info("setting default value for identityProvider:{}, update:{}", identityProvider, update);
+        if (identityProvider == null) {
+            return identityProvider;
+        }
+
+        // Set default Realm in-case null
+        if (StringUtils.isBlank(identityProvider.getRealm())) {
+            identityProvider.setRealm(Constants.REALM_MASTER);
+        }
+
+        if (!update) {
+            identityProvider.setProviderId(Constants.SAML);
+        }
         return identityProvider;
     }
 

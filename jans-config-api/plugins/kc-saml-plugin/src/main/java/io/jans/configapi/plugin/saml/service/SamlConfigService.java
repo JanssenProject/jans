@@ -214,6 +214,20 @@ public class SamlConfigService {
         return idpUrl;
     }
     
+    public String getIdpMetadataImportUrl(String realm) {
+        logger.debug("Get SAML IDP Metadata Import Url - realm:{}", realm);
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String idpMetadataImportUrl = null;
+        if (samlAppConfiguration != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(samlAppConfiguration.getServerUrl()).append(samlAppConfiguration.getIdpUrl());
+            idpMetadataImportUrl = String.format(sb.toString(), realm);
+        }
+        logger.debug("SAML IDP Metadata Import Url - idpMetadataImportUrl:{}", idpMetadataImportUrl);
+        return idpMetadataImportUrl;
+    }
+    
     public String getIdpRootDir() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();

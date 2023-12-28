@@ -15,7 +15,7 @@
   "spMetadataUrl":"/realms/%s/broker/%s/endpoint/descriptor",
   "tokenUrl":"/realms/%s/protocol/openid-connect/token",
   "idpUrl":"/admin/realms/%s/identity-provider/instances",
-  "idpSamlImportUrl":"/admin/realms/%s/identity-provider/import-config",
+  "idpMetadataImportUrl":"/admin/realms/%s/identity-provider/import-config",
   "idpRootDir": "/opt/jans/idp/",
   "idpMetadataDir": "/opt/idp/configs/keycloak/idp/metadata",
   "idpMetadataTempDir": "/opt/idp/configs/keycloak/idp/temp_metadata",

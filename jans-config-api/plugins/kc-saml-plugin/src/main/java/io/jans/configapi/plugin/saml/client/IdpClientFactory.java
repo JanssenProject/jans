@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.util.exception.InvalidAttributeException;
 import io.jans.util.exception.ConfigurationException;
-import io.jans.configapi.plugin.saml.model.IdentityProvider;
 import io.jans.configapi.plugin.saml.util.Constants;
 
 import io.jans.configapi.core.util.Jackson;
@@ -83,6 +82,59 @@ public class IdpClientFactory {
         return token;
     }
 
+    public String getAllIdp(String idpUrl, String token) throws JsonProcessingException, JsonMappingException {
+        logger.error(" All IDP - idpUrl:{}", idpUrl);
+        Builder client = getClientBuilder(idpUrl);
+        client.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        client.header(AUTHORIZATION, token);
+        Response response = client.get();
+        logger.debug("All IDP - response:{}", response);
+        String identityProviderJsonList = null;
+        // List<IdentityProvider> identityProviderList = null;
+        if (response != null) {
+            logger.error(
+                    "Fetch all IDP response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
+                    response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass());
+            if (response.getStatusInfo().equals(Status.OK)) {
+                String entity = response.readEntity(String.class);
+                logger.error("entity:{}", entity);
+                identityProviderJsonList = entity;
+                // ObjectMapper mapper = Jackson.createJsonMapper();
+                // identityProviderList = mapper.readValue(entity, List.class);
+                // logger.error("identityProviderList:{}", identityProviderList);
+
+            }
+        }
+
+        return identityProviderJsonList;
+    }
+
+    public String getIdp(String idpUrl, String token) throws JsonProcessingException, JsonMappingException {
+        logger.error(" Fetch IDP - idpUrl:{}", idpUrl);
+        Builder client = getClientBuilder(idpUrl);
+        client.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        client.header(AUTHORIZATION, token);
+        Response response = client.get();
+        logger.debug("Fetch IDP - response:{}", response);
+        String identityProviderJson = null;
+        if (response != null) {
+            logger.error(
+                    "IDP -  response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
+                    response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass());
+            if (response.getStatusInfo().equals(Status.OK)) {
+                String entity = response.readEntity(String.class);
+                logger.error("entity:{}", entity);
+                identityProviderJson = entity;
+                // ObjectMapper mapper = Jackson.createJsonMapper();
+                // identityProvider = mapper.readValue(entity, IdentityProvider.class);
+                // logger.error("identityProvider:{}", identityProvider);
+
+            }
+        }
+
+        return identityProviderJson;
+    }
+
     public Map<String, String> extractSamlMetadata(final String idpMetadataConfigUrl, final String token,
             final String providerId, String realmName, InputStream idpMetadataStream) throws JsonProcessingException {
         Map<String, String> config = null;
@@ -140,6 +192,102 @@ public class IdpClientFactory {
         return config;
     }
 
+    public String createIdp(final String idpUrl, final String token, String identityProviderJson) {
+        String idpJson = null;
+        try {
+            logger.error("Create new IDP idpUrl:{}, token:{}, identityProviderJson:{}", idpUrl, token,
+                    identityProviderJson);
+
+            if (StringUtils.isBlank(idpUrl)) {
+                throw new InvalidAttributeException("IDP URL is null!!!");
+            }
+            if (StringUtils.isBlank(token)) {
+                throw new InvalidAttributeException("Access Token is null!!!");
+            }
+            if (StringUtils.isBlank(identityProviderJson)) {
+                throw new InvalidAttributeException("Idp json is null!!!");
+            }
+
+            Builder request = getClientBuilder(idpUrl);
+            logger.error("request:{}", request);
+            request.header("Authorization", "Bearer  " + token);
+            request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+
+            String objectJson = Jackson.getJsonString(identityProviderJson);
+            logger.error(" SAML IDP - objectJson:{}", objectJson);
+
+            Response response = request.post(Entity.json(objectJson));
+            logger.error("Response for SAML IDP Creation -  response:{}", response);
+
+            if (response != null) {
+                logger.error(
+                        "IDP creation  -  response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
+                        response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass());
+                if (response.getStatusInfo().equals(Status.OK)) {
+                    String entity = response.readEntity(String.class);
+                    logger.error("Newly created IDP entity:{}", entity);
+                    String internalId = Jackson.getElement(identityProviderJson, Constants.INTERNAL_ID);
+                    logger.error("Newly created IDP Id -  internalId:{}", internalId);
+                    idpJson = getIdp(idpUrl + "/" + internalId, token);
+                }
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new ConfigurationException("Error while creating SAML IDP", ex);
+        }
+
+        return idpJson;
+    }
+    
+    public String updateIdp(final String idpUrl, final String token, String identityProviderJson) {
+        String idpJson = null;
+        try {
+            logger.error("Update IDP idpUrl:{}, token:{}, identityProviderJson:{}", idpUrl, token,
+                    identityProviderJson);
+
+            if (StringUtils.isBlank(idpUrl)) {
+                throw new InvalidAttributeException("IDP URL is null!!!");
+            }
+            if (StringUtils.isBlank(token)) {
+                throw new InvalidAttributeException("Access Token is null!!!");
+            }
+            if (StringUtils.isBlank(identityProviderJson)) {
+                throw new InvalidAttributeException("Idp json is null!!!");
+            }
+
+            Builder request = getClientBuilder(idpUrl);
+            logger.error("request:{}", request);
+            request.header("Authorization", "Bearer  " + token);
+            request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+
+            String objectJson = Jackson.getJsonString(identityProviderJson);
+            logger.error(" SAML IDP for update - objectJson:{}", objectJson);
+
+            Response response = request.post(Entity.json(objectJson));
+            logger.error("Response for SAML IDP Update -  response:{}", response);
+
+            if (response != null) {
+                logger.error(
+                        "IDP Update  -  response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
+                        response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass());
+                if (response.getStatusInfo().equals(Status.OK)) {
+                    String entity = response.readEntity(String.class);
+                    logger.error("Updated IDP entity:{}", entity);
+                    String internalId = Jackson.getElement(identityProviderJson, Constants.INTERNAL_ID);
+                    logger.error("Updated IDP Id -  internalId:{}", internalId);
+                    idpJson = getIdp(idpUrl + "/" + internalId, token);
+                }
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new ConfigurationException("Error while updating SAML IDP", ex);
+        }
+
+        return idpJson;
+    }
+
     public Response getSpMetadata(String metadataEndpoint) {
         logger.info(" SP Metadata - metadataEndpoint:{}", metadataEndpoint);
         Builder metadataClient = getClientBuilder(metadataEndpoint);
@@ -154,39 +302,6 @@ public class IdpClientFactory {
         }
 
         return response;
-    }
-
-    public List<IdentityProvider> getAllIdp(String idpUrl, String token) throws JsonProcessingException, JsonMappingException {
-        logger.error(" All IDP - idpUrl:{}", idpUrl);
-        Builder client = getClientBuilder(idpUrl);
-        client.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        client.header(AUTHORIZATION, token);
-        Response response = client.get();
-        logger.debug("SpMetadata- response:{}", response);
-        List<IdentityProvider> identityProviderList = null;
-        if (response != null) {
-            logger.error(
-                    "extract Saml Metadata -  response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
-                    response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass());
-            if (response.getStatusInfo().equals(Status.OK)) {
-                String entity = response.readEntity(String.class);
-                logger.error("entity:{}", entity);
-                ObjectMapper mapper = Jackson.createJsonMapper();
-                identityProviderList = mapper.readValue(entity, List.class);
-                logger.error("identityProviderList:{}", identityProviderList);
-
-            }
-        }
-
-        return identityProviderList;
-    }
-
-    private String getElement(String jsonString, String name) throws JsonProcessingException {
-        logger.error("Json element -  jsonString:{}, name:{}", jsonString, name);
-        if (StringUtils.isBlank(jsonString) || StringUtils.isBlank(name)) {
-            return null;
-        }
-        return Jackson.getElement(name, name);
     }
 
     private static Builder getClientBuilder(String url) {

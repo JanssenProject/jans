@@ -336,8 +336,8 @@ public class IdpResource extends BaseResource {
             }
 
             log.info("pagedIdentityProvider:{}", pagedIdentityProvider);
-        } catch (JsonProcessingException jpe) {
-            throwInternalServerException(jpe.getMessage());
+        } catch (Exception ex) {
+            throwInternalServerException(ex.getMessage());
         }
         return pagedIdentityProvider;
     }

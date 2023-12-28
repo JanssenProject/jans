@@ -25,7 +25,7 @@ public class SamlAppConfiguration implements Configuration {
     private String spMetadataUrl;
     private String tokenUrl;
     private String idpUrl;
-    private String idpSamlImportUrl; //to-do
+    private String idpMetadataImportUrl;
 
     private String idpRootDir;
     private String idpMetadataDir;
@@ -98,22 +98,6 @@ public class SamlAppConfiguration implements Configuration {
         this.realm = realm;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getClientId() {
         return clientId;
     }
@@ -146,6 +130,22 @@ public class SamlAppConfiguration implements Configuration {
         this.scope = scope;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public String getSpMetadataUrl() {
         return spMetadataUrl;
     }
@@ -168,6 +168,14 @@ public class SamlAppConfiguration implements Configuration {
 
     public void setIdpUrl(String idpUrl) {
         this.idpUrl = idpUrl;
+    }
+
+    public String getIdpMetadataImportUrl() {
+        return idpMetadataImportUrl;
+    }
+
+    public void setIdpMetadataImportUrl(String idpMetadataImportUrl) {
+        this.idpMetadataImportUrl = idpMetadataImportUrl;
     }
 
     public String getIdpRootDir() {
@@ -262,14 +270,15 @@ public class SamlAppConfiguration implements Configuration {
     public String toString() {
         return "SamlAppConfiguration [applicationName=" + applicationName + ", samlTrustRelationshipDn="
                 + samlTrustRelationshipDn + ", trustedIdpDn=" + trustedIdpDn + ", enabled=" + enabled + ", selectedIdp="
-                + selectedIdp + ", serverUrl=" + serverUrl + ", realm=" + realm + ", username=" + username
-                + ", password=" + password + ", clientId=" + clientId + ", clientSecret=" + clientSecret
-                + ", grantType=" + grantType + ", scope=" + scope + ", spMetadataUrl=" + spMetadataUrl + ", tokenUrl="
-                + tokenUrl + ", idpUrl=" + idpUrl + ", idpRootDir=" + idpRootDir + ", idpMetadataDir=" + idpMetadataDir
-                + ", idpMetadataTempDir=" + idpMetadataTempDir + ", idpMetadataFilePattern=" + idpMetadataFilePattern
-                + ", idpMetadataFile=" + idpMetadataFile + ", spMetadataDir=" + spMetadataDir + ", spMetadataTempDir="
-                + spMetadataTempDir + ", spMetadataFilePattern=" + spMetadataFilePattern + ", spMetadataFile="
-                + spMetadataFile + ", ignoreValidation=" + ignoreValidation + ", idpMetadataMandatoryAttributes="
+                + selectedIdp + ", serverUrl=" + serverUrl + ", realm=" + realm + ", clientId=" + clientId
+                + ", clientSecret=" + clientSecret + ", grantType=" + grantType + ", scope=" + scope + ", username="
+                + username + ", password=" + password + ", spMetadataUrl=" + spMetadataUrl + ", tokenUrl=" + tokenUrl
+                + ", idpUrl=" + idpUrl + ", idpMetadataImportUrl=" + idpMetadataImportUrl + ", idpRootDir=" + idpRootDir
+                + ", idpMetadataDir=" + idpMetadataDir + ", idpMetadataTempDir=" + idpMetadataTempDir
+                + ", idpMetadataFilePattern=" + idpMetadataFilePattern + ", idpMetadataFile=" + idpMetadataFile
+                + ", spMetadataDir=" + spMetadataDir + ", spMetadataTempDir=" + spMetadataTempDir
+                + ", spMetadataFilePattern=" + spMetadataFilePattern + ", spMetadataFile=" + spMetadataFile
+                + ", ignoreValidation=" + ignoreValidation + ", idpMetadataMandatoryAttributes="
                 + idpMetadataMandatoryAttributes + "]";
     }
 

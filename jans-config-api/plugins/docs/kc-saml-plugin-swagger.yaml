@@ -968,6 +968,8 @@ components:
           type: string
         idpUrl:
           type: string
+        idpMetadataImportUrl:
+          type: string
         idpRootDir:
           type: string
         idpMetadataDir:
