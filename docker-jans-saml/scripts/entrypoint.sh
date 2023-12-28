@@ -20,14 +20,32 @@ get_max_ram_percentage() {
     fi
 }
 
+# # export_keycloak_admin_creds() {
+# admin_username=${KEYCLOAK_ADMIN:-admin}
+# # export KEYCLOAK_ADMIN="${admin_username}"
+
+# if [ -f /etc/jans/conf/keycloak_admin_password ]; then
+#     admin_password="$(cat /etc/jans/conf/keycloak_admin_password)"
+# else
+#     admin_password="admin"
+# fi
+#     # export KEYCLOAK_ADMIN_PASSWORD="${admin_password}"
+# # }
+
+# export_keycloak_admin_creds
 python3 "$basedir/wait.py"
 python3 "$basedir/bootstrap.py"
+python3 "$basedir/configure_kc.py" &
 
 java_opts="$(get_max_ram_percentage) $(get_java_options)"
 export JAVA_OPTS_APPEND="$java_opts"
 
+# default admin credentials (will be changed)
+export KEYCLOAK_ADMIN=admin
+export KEYCLOAK_ADMIN_PASSWORD=admin
+
 # shellcheck disable=SC2046
-exec bash /opt/keycloak/bin/kc.sh start \
+exec /opt/keycloak/bin/kc.sh start \
     -Dlog.base=/opt/keycloak/logs/ \
     -Djans.config.prop.path=/opt/keycloak/providers \
     --health-enabled=true \
@@ -35,10 +53,13 @@ exec bash /opt/keycloak/bin/kc.sh start \
     --http-host="${CN_SAML_HOST}" \
     --http-port="${CN_SAML_PORT}" \
     --http-enabled=true \
+    --http-relative-path=/kc \
     --hostname="localhost" \
+    --hostname-admin="localhost" \
+    --hostname-path=/kc \
     --hostname-strict-https=false \
     --log=console \
-    --log-console-format="'jans-saml - %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n'" \
+    --log-console-format='jans-saml - %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n' \
     --log-file=/opt/keycloak/logs/keycloak.log \
     --log-level=INFO
     # --db=dev-mem \
