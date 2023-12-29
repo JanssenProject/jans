@@ -86,7 +86,8 @@ public class IdpClientFactory {
     }
 
     public String getAllIdp(String idpUrl, String token) throws JsonProcessingException, JsonMappingException {
-        logger.error(" All IDP - idpUrl:{}", idpUrl);
+        logger.error(" All IDP - idpUrl:{}, token:{}", idpUrl, token);
+        
         Builder client = getClientBuilder(idpUrl);
         client.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         client.header(AUTHORIZATION, token);

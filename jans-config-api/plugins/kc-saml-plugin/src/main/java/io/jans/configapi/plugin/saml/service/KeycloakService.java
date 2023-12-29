@@ -52,7 +52,8 @@ public class KeycloakService {
 
         // Get token
         String token = this.getKcAccessToken(realmName);
-
+        logger.error("Fetch all IdentityProvider for token:{}", token);
+        
         String idpUrl = getIdpUrl(realmName);
         logger.error("Fetch all IdentityProvider for idpUrl:{}", idpUrl);
 

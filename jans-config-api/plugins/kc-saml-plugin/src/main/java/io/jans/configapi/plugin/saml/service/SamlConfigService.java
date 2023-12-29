@@ -221,7 +221,7 @@ public class SamlConfigService {
         String idpMetadataImportUrl = null;
         if (samlAppConfiguration != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(samlAppConfiguration.getServerUrl()).append(samlAppConfiguration.getIdpUrl());
+            sb.append(samlAppConfiguration.getServerUrl()).append(samlAppConfiguration.getIdpMetadataImportUrl());
             idpMetadataImportUrl = String.format(sb.toString(), realm);
         }
         logger.debug("SAML IDP Metadata Import Url - idpMetadataImportUrl:{}", idpMetadataImportUrl);
