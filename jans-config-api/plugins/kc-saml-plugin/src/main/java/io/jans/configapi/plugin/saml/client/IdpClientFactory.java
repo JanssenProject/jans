@@ -90,7 +90,7 @@ public class IdpClientFactory {
         
         Builder client = getClientBuilder(idpUrl);
         client.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        client.header(AUTHORIZATION, token);
+        client.header(AUTHORIZATION,"Bearer  " + token);
         Response response = client.get();
         logger.debug("All IDP - response:{}", response);
         String identityProviderJsonList = null;
@@ -120,7 +120,7 @@ public class IdpClientFactory {
         logger.error(" Fetch IDP - idpUrl:{}", idpUrl);
         Builder client = getClientBuilder(idpUrl);
         client.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        client.header(AUTHORIZATION, token);
+        client.header(AUTHORIZATION,"Bearer  " + token);
         Response response = client.get();
         logger.debug("Fetch IDP - response:{}", response);
         String identityProviderJson = null;
