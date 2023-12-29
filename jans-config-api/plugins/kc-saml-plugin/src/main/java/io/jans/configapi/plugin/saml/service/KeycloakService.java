@@ -138,10 +138,13 @@ public class KeycloakService {
                 logger.error("Final URL for update IDP idpUrl:{}", idpUrl);
             }
 
-            String idpJson = this.createIdentityProviderJsonString(identityProvider);
-            logger.error("IdentityProvider JSON idpJson:{}", idpJson);
-
-            idpJson = idpClientFactory.createUpdateIdp(idpUrl, token, isUpdate, idpJson);
+            // String idpJson = this.createIdentityProviderJsonString(identityProvider);
+            // idpJson = idpClientFactory.createUpdateIdp(idpUrl, token, isUpdate, idpJson);
+            // logger.error("IdentityProvider response idpJson:{}", idpJson);
+            
+            JSONObject jsonObject = createIdentityProviderJson(identityProvider);
+            logger.error("IdentityProvider JSON jsonObject:{}", jsonObject);
+            String idpJson = idpClientFactory.createUpdateIdp(idpUrl, token, isUpdate, jsonObject);
             logger.error("IdentityProvider response idpJson:{}", idpJson);
 
             idp = this.createIdentityProvider(idpJson);
@@ -268,6 +271,25 @@ public class KeycloakService {
         logger.error("idpList:{}", idpList);
         return idpList;
     }
+    
+    private JSONObject createIdentityProviderJson(IdentityProvider identityProvider) throws IOException {
+        logger.error("identityProvider:{}", identityProvider);
+        JSONObject jsonObj = null;
+        if (identityProvider == null) {
+            return jsonObj;
+        }
+        String json = Jackson.asJson(identityProvider);
+                
+        jsonObj = new JSONObject(json);
+        jsonObj.put(Constants.INTERNAL_ID, identityProvider.getInum());
+        jsonObj.put(Constants.ALIAS, identityProvider.getName());     
+        logger.error("jsonObj:{}", jsonObj);
+        
+        logger.error("jsonObj:{}", jsonObj);
+
+        return jsonObj;
+
+    }
 
     private String createIdentityProviderJsonString(IdentityProvider identityProvider) throws IOException {
         logger.error("identityProvider:{}", identityProvider);
@@ -278,13 +300,11 @@ public class KeycloakService {
         String json = Jackson.asJson(identityProvider);
         logger.error("json:{}", json);
 
-        //JSONArray jsonArray = new JSONArray(json);
-        //logger.error("jsonArray:{}", jsonArray);
-        
+       
         JSONObject jsonObj = new JSONObject(json);
         jsonObj.put(Constants.INTERNAL_ID, identityProvider.getInum());
         jsonObj.put(Constants.ALIAS, identityProvider.getName());
-        //jsonArray.put(jsonObj);        
+    
         logger.error("jsonObj:{}", jsonObj);
         
         identityProviderJson = jsonObj.toString();
@@ -300,14 +320,13 @@ public class KeycloakService {
         if (StringUtils.isBlank(jsonIdentityProvider)) {
             return identityProvider;
         }
-        //JSONArray jsonArray = new JSONArray(jsonIdentityProvider);
+       
         JSONObject jsonObj = new JSONObject(jsonIdentityProvider);
         jsonObj.put(Constants.INUM, Jackson.getElement(jsonIdentityProvider, Constants.INTERNAL_ID));
         jsonObj.put(Constants.NAME, Jackson.getElement(jsonIdentityProvider, Constants.ALIAS));
-        //jsonArray.put(jsonObj);
-
+      
         ObjectMapper mapper = Jackson.createJsonMapper();
-        identityProvider = mapper.readValue(jsonIdentityProvider.toString(), IdentityProvider.class);
+        identityProvider = mapper.readValue(jsonObj.toString(), IdentityProvider.class);
         logger.error("identityProvider:{}", identityProvider);
 
         return identityProvider;

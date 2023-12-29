@@ -31,7 +31,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
-
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -246,6 +246,65 @@ public class IdpClientFactory {
                 if (response.getStatusInfo().equals(Status.OK)) {
 
                     String name = Jackson.getElement(identityProviderJson, Constants.ALIAS);
+                    logger.error("Add/Update IDP Id -  name:{}", name);
+                    idpJson = getIdp(idpUrl + "/" + name, token);
+                }else {
+                    throw new WebApplicationException("Error while Adding/Updating IDP "+response.getStatusInfo()+" - "+entity);
+                }
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new ConfigurationException("Error while add/updating SAML IDP", ex);
+        }
+
+        return idpJson;
+    }
+    
+    
+    public String createUpdateIdp(final String idpUrl, final String token, boolean isUpdate,
+            JSONObject identityProviderJson) {
+        String idpJson = null;
+        try {
+            logger.error("Add/modify IDP idpUrl:{}, token:{}, isUpdate:{}, identityProviderJson:{}", idpUrl, token,
+                    isUpdate, identityProviderJson);
+
+            if (StringUtils.isBlank(idpUrl)) {
+                throw new InvalidAttributeException("IDP URL is null!!!");
+            }
+            if (StringUtils.isBlank(token)) {
+                throw new InvalidAttributeException("Access Token is null!!!");
+            }
+            if (identityProviderJson == null) {
+                throw new InvalidAttributeException("IDP Json object is null!!!");
+            }
+
+            Builder request = getClientBuilder(idpUrl);
+            logger.error("request:{}", request);
+            request.header("Authorization", "Bearer  " + token);
+            request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+
+            String objectJson = Jackson.getJsonString(identityProviderJson);
+            logger.error(" SAML IDP JSON - objectJson:{}", objectJson);
+
+            Response response = null;
+            if (isUpdate) {
+                response = request.put(Entity.json(objectJson));
+            } else {
+                response = request.post(Entity.json(objectJson));
+            }
+
+            logger.error("Response for SAML IDP -  response:{}", response);
+
+            if (response != null) {
+                logger.error(
+                        "IDP Add/Update - response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
+                        response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass());
+                String entity = response.readEntity(String.class);
+                logger.error("Add/Update IDP entity:{}", entity);
+                if (response.getStatusInfo().equals(Status.OK)) {
+
+                    String name = identityProviderJson.getString(Constants.ALIAS);
                     logger.error("Add/Update IDP Id -  name:{}", name);
                     idpJson = getIdp(idpUrl + "/" + name, token);
                 }else {
