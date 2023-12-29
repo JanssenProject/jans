@@ -8,7 +8,6 @@ package io.jans.configapi.plugin.saml.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.saml.model.IdentityProvider;
@@ -54,6 +53,7 @@ import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 @Produces(MediaType.APPLICATION_JSON)
 public class IdpResource extends BaseResource {
 
+    private static final String SAML_IDP = "SAML IDP ";
     private static final String SAML_IDP_DATA = "SAML IDP Data";
     private static final String SAML_IDP_DATA_FORM = "SAML IDP Data From";
     private static final String SAML_IDP_CHECK_STR = "IdentityProvider identified by '";
@@ -77,24 +77,20 @@ public class IdpResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS })
     public Response getAllSamlIdentityProvider(
-            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
-            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair)
+                 @Parameter(description = "Realm Name") @DefaultValue(Constants.REALM_MASTER) @QueryParam(value = Constants.REALM) String realmName )
             throws IllegalAccessException, InvocationTargetException {
         if (log.isDebugEnabled()) {
-            log.debug(
-                    "Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
-                    escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
-                    escapeLog(sortOrder), escapeLog(fieldValuePair));
+            log.debug("Serach param - realmName:{}", escapeLog(realmName));
         }
-
-        SearchRequest searchReq = createSearchRequest(idpService.getIdentityProviderDn(), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null, ApiConstants.DEFAULT_MAX_COUNT, fieldValuePair, IdentityProvider.class);
-
-        return Response.ok(this.doSearch(searchReq)).build();
+        List<IdentityProvider> identityProviderList = null;
+        try{
+            identityProviderList = idpService.getAllIdp(realmName);idpService.getAllIdp(realmName);
+       
+        log.debug("Fetched - identityProviderList", identityProviderList);
+        }catch(Exception ex) {
+            throwInternalServerException(SAML_IDP, ex.getMessage());
+        }
+        return Response.ok(identityProviderList).build();
     }
 
     @Operation(summary = "Get SAML Identity Provider by Inum", description = "Get SAML Identity Provider by Inum", operationId = "get-saml-identity-provider-by-inum", tags = {
@@ -132,13 +128,17 @@ public class IdpResource extends BaseResource {
         if (log.isInfoEnabled()) {
             log.info("Fetch SAML SP Metadata for IDP by inum:{}", escapeLog(inum));
         }
+        String json = null;
+        try {
         IdentityProvider identityProvider = idpService.getIdentityProviderByInum(inum);
         log.debug(" identityProvider:{} ", identityProvider);
         checkResourceNotNull(identityProvider, SAML_IDP_CHECK_STR + inum + "'");
-        Response response = idpService.getSpMetadata(identityProvider);
-        log.info(" response:{} ", response);
-
-        return Response.ok(response.getEntity()).build();
+         json = idpService.getSpMetadata(identityProvider);
+        log.info(" json:{} ", json);
+        }catch(Exception ex) {
+            throwInternalServerException("SAML_SP_METADATA", ex.getMessage());
+        }
+        return Response.ok(json).build();
     }
 
     @Operation(summary = "Get SAML SP Metadata Endpoint URL", description = "Get SAML SP Metadata Endpoint URL", operationId = "get-saml-sp-metadata-url", tags = {
@@ -152,7 +152,7 @@ public class IdpResource extends BaseResource {
     @Path(Constants.SP_METADATA_FILE_PATH + Constants.INUM_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS })
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response getSamlSPMetadataFile(
+    public Response getSamlSPMetadataURL(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (log.isInfoEnabled()) {
             log.info("Fetch SAML SP Metadata URL IDP by inum:{}", escapeLog(inum));

@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.configapi.core.util.Jackson;
-import io.jans.configapi.plugin.saml.service.SamlConfigService;
 import io.jans.configapi.plugin.saml.client.IdpClientFactory;
 import io.jans.configapi.plugin.saml.model.IdentityProvider;
 import io.jans.configapi.plugin.saml.util.Constants;
@@ -24,19 +23,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedHashMap;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.Response.StatusType;
-import jakarta.ws.rs.WebApplicationException;
-
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 
 @ApplicationScoped
 public class KeycloakService {
@@ -57,12 +47,11 @@ public class KeycloakService {
         logger.error("Fetch all IdentityProvider for realmName:{}, samlConfigService:{}", realmName, samlConfigService);
 
         if (StringUtils.isBlank(realmName)) {
-            realmName = Constants.REALM_MASTER;
+            throw new InvalidAttributeException("IDP Realm name file is null!!!");
         }
 
         // Get token
         String token = this.getKcAccessToken(realmName);
-        logger.error(" token:{}", token);
 
         String idpUrl = getIdpUrl(realmName);
         logger.error("Fetch all IdentityProvider for idpUrl:{}", idpUrl);
@@ -81,15 +70,15 @@ public class KeycloakService {
                 idpMetadataStream);
 
         if (StringUtils.isBlank(providerId)) {
-            providerId = "saml";
+            throw new InvalidAttributeException("IDP ProviderId is null!!!");
         }
 
         if (StringUtils.isBlank(realmName)) {
-            realmName = Constants.REALM_MASTER;
+            throw new InvalidAttributeException("IDP Realm name file is null!!!");
         }
 
         if (idpMetadataStream == null) {
-            throw new InvalidAttributeException("Idp Metedata file is null!!!");
+            throw new InvalidAttributeException("IDP Metedata file is null!!!");
         }
 
         // Get token
@@ -112,11 +101,12 @@ public class KeycloakService {
         return config;
     }
 
-    public IdentityProvider createIdentityProvider(String realmName, IdentityProvider identityProvider) {
+    public IdentityProvider createUpdateIdentityProvider(String realmName, boolean isUpdate,
+            IdentityProvider identityProvider) {
         IdentityProvider idp = null;
         try {
-            logger.info("Create new IdentityProvider under realmName:{}, identityProvider:{})", realmName,
-                    identityProvider);
+            logger.error("Add/Update IdentityProvider under realmName:{}, isUpdate:{}, identityProvider:{})", realmName,
+                    isUpdate, identityProvider);
 
             if (StringUtils.isBlank(realmName)) {
                 throw new InvalidAttributeException("Realm name is null!!!");
@@ -140,67 +130,79 @@ public class KeycloakService {
             logger.error(" token:{}", token);
 
             String idpUrl = getIdpUrl(realmName);
-            logger.error("URL to create IDP idpUrl:{}", idpUrl);
+            logger.error("IDP URL idpUrl:{}", idpUrl);
+
+            if (isUpdate) {
+                idpUrl = idpUrl + "/" + identityProvider.getName();
+                logger.error("Final URL for update IDP idpUrl:{}", idpUrl);
+            }
 
             String idpJson = this.createIdentityProviderJsonString(identityProvider);
-            logger.error("IdentityProvider json for creation idpJson:{}", idpJson);
-            idpJson = idpClientFactory.createIdp(idpUrl, token, idpJson);
-            logger.error("IdentityProvider created idpJson:{}", idpJson);
+            logger.error("IdentityProvider JSON idpJson:{}", idpJson);
+
+            idpJson = idpClientFactory.createUpdateIdp(idpUrl, token, isUpdate, idpJson);
+            logger.error("IdentityProvider response idpJson:{}", idpJson);
 
             idp = this.createIdentityProvider(idpJson);
-            logger.error("IdentityProvider creation idp:{}", idp);
+            logger.error("IdentityProvider idp:{}", idp);
 
         } catch (Exception ex) {
-            throw new ConfigurationException("Error while creating SAML IDP ", ex);
+            throw new ConfigurationException("Error while Add/Update SAML IDP ", ex);
         }
 
         return idp;
     }
 
-    public IdentityProvider updateIdentityProvider(String realmName, IdentityProvider identityProvider) {
-        IdentityProvider idp = null;
+    public boolean deleteIdentityProvider(String realmName, String idpName) {
+        boolean deleteStatus = false;
         try {
-            logger.info("Update IdentityProvider under realmName:{}, identityProvider:{})", realmName,
-                    identityProvider);
+            logger.error("Delete IdentityProvider under realmName:{}, idpName:{})", realmName, idpName);
 
             if (StringUtils.isBlank(realmName)) {
                 throw new InvalidAttributeException("Realm name is null!!!");
             }
 
-            if (identityProvider == null) {
-                throw new InvalidAttributeException("IdentityProvider object is null!!!");
+            if (StringUtils.isBlank(idpName)) {
+                throw new InvalidAttributeException("Name of IdentityProvider to be deleted is null!!!");
             }
-
-            // validate IDP metadata
-            logger.debug("IDP metadata config identityProvider.getConfig():{})", identityProvider.getConfig());
-            if (identityProvider.getConfig() == null || identityProvider.getConfig().isEmpty()) {
-                throw new InvalidAttributeException("Idp Metedata config is null!!!");
-            }
-
-            boolean valid = verifySamlIdpConfig(identityProvider.getConfig());
-            logger.debug("Is IDP metadata config valid:{})", valid);
 
             // Get token
             String token = this.getKcAccessToken(realmName);
             logger.error(" token:{}", token);
 
-            String idpUrl = getIdpUrl(realmName);
-            logger.error("URL to create IDP idpUrl:{}", idpUrl);
+            String idpUrl = getIdpUrl(realmName) + "/" + idpName;
+            logger.error("IDP URL for delete is idpUrl:{}", idpUrl);
 
-            String idpJson = this.createIdentityProviderJsonString(identityProvider);
-            logger.error("IdentityProvider for update idpJson:{}", idpJson);
-
-            idpJson = idpClientFactory.createIdp(idpUrl + "/" + identityProvider.getName(), token, idpJson);
-            logger.error("IdentityProvider updated idpJson:{}", idpJson);
-
-            idp = this.createIdentityProvider(idpJson);
-            logger.error("IdentityProvider creation idp:{}", idp);
+            deleteStatus = idpClientFactory.deleteIdp(idpUrl, token);
+            logger.error("IdentityProvider delete response deleteStatus:{}", deleteStatus);
 
         } catch (Exception ex) {
-            throw new ConfigurationException("Error while creating SAML IDP ", ex);
+            throw new ConfigurationException("Error while Deleting SAML IDP ", ex);
         }
 
-        return idp;
+        return deleteStatus;
+    }
+
+    public String getSpMetadata(String realmName, String idpName) throws JsonProcessingException {
+        String spMetadataJson = null;
+        if (StringUtils.isBlank(realmName)) {
+            throw new InvalidAttributeException("Realm name is null!!!");
+        }
+
+        if (StringUtils.isBlank(idpName)) {
+            throw new InvalidAttributeException("Name of IdentityProvider is null!!!");
+        }
+
+        // Get token
+        String token = this.getKcAccessToken(realmName);
+        logger.error(" token:{}", token);
+
+        String idpUrl = getSpMetadataUrl(realmName, idpName);
+        logger.error("IDP URL for delete is idpUrl:{}", idpUrl);
+
+        spMetadataJson = idpClientFactory.getSpMetadata(idpUrl, token);
+        logger.error("IdentityProvider delete response spMetadataJson:{}", spMetadataJson);
+        return spMetadataJson;
     }
 
     private String getKcAccessToken(String realmName) throws JsonProcessingException {
@@ -209,7 +211,7 @@ public class KeycloakService {
         String tokenUrl = getTokenUrl(realmName);
         logger.error("tokenUrl:{}", tokenUrl);
 
-        String token = idpClientFactory.getAccessToken(tokenUrl, samlConfigService.getClientId(),
+        String token = IdpClientFactory.getAccessToken(tokenUrl, samlConfigService.getClientId(),
                 samlConfigService.getClientSecret(), samlConfigService.getGrantType(), samlConfigService.getScope(),
                 samlConfigService.getUsername(), samlConfigService.getPassword(), samlConfigService.getServerUrl());
         logger.error(" token:{}", token);
@@ -226,6 +228,10 @@ public class KeycloakService {
 
     private String getSamlMetadataImportUrl(String realmName) {
         return samlConfigService.getIdpMetadataImportUrl(realmName);
+    }
+
+    private String getSpMetadataUrl(String realm, String name) {
+        return samlConfigService.getSpMetadataUrl(realm, name);
     }
 
     private boolean verifySamlIdpConfig(Map<String, String> config) {
@@ -251,14 +257,12 @@ public class KeycloakService {
         JSONArray jsonArray = new JSONArray(jsonIdentityProviderList);
         int count = jsonArray.length(); // get totalCount of all jsonObjects
         idpList = new ArrayList<>();
-        IdentityProvider idp = null;
         for (int i = 0; i < count; i++) { // iterate through jsonArray
             JSONObject jsonObject = jsonArray.getJSONObject(i); // get jsonObject @ i position
             logger.error(" i:{},{}", i, jsonObject);
             if (jsonObject != null) {
                 idpList.add(createIdentityProvider(jsonObject.toString()));
             }
-
         }
         logger.error("idpList:{}", idpList);
         return idpList;
