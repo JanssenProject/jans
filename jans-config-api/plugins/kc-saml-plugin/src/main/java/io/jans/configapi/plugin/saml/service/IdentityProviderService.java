@@ -112,7 +112,7 @@ public class IdentityProviderService {
         try {
             result = persistenceEntryManager.find(IdentityProvider.class, getDnForIdentityProvider(inum));
         } catch (Exception ex) {
-            log.error("Failed to load IdentityProvider entry", ex);
+             log.error("Failed to load IdentityProvider entry", ex);
         }
         return result;
     }

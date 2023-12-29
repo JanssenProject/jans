@@ -31,6 +31,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,20 +161,20 @@ public class IdpClientFactory {
             Builder request = getClientBuilder(idpMetadataConfigUrl);
             logger.error("request:{}", request);
             request.header("Authorization", "Bearer  " + token);
-           // request.header(CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
+            //request.header(CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
 
             MultipartFormDataOutput formData = new MultipartFormDataOutput();
             formData.addFormData("providerId", providerId, MediaType.TEXT_PLAIN_TYPE);
-            logger.error("SAML idpMetadataStream.available():{}", idpMetadataStream.available());
+            logger.debug("SAML idpMetadataStream.available():{}", idpMetadataStream.available());
 
             byte[] content = idpMetadataStream.readAllBytes();
-            logger.error("content:{}", content);
+            logger.debug("content:{}", content);
             String body = new String(content, Charset.forName("utf-8"));
-            formData.addFormData("file", body, MediaType.APPLICATION_OCTET_STREAM_TYPE, "saml-idp-metadata.xml");
+            formData.addFormData("file", body, MediaType.APPLICATION_OCTET_STREAM_TYPE);
 
             logger.error("Request for SAML metadata import - formData:{}", formData);
             Entity<MultipartFormDataOutput> formDataEntity = Entity.entity(formData, MediaType.MULTIPART_FORM_DATA);
-            logger.error("Request for SAML metadata import - formDataEntity:{}", formDataEntity);
+            logger.error("Request for SAML metadata import - formDataEntity:{}", formDataEntity.toString());
             Response response = request.post(formDataEntity);
             logger.error("Response for SAML metadata  import-  response:{}", response);
 
@@ -189,7 +190,7 @@ public class IdpClientFactory {
                     logger.error("config:{}", config);
 
                 }else {
-                    throw new WebApplicationException("Error while validating SAML IDP Metadata "+response.getStatusInfo()+" - "+entity);
+                          throw new WebApplicationException("Error while validating SAML IDP Metadata "+response.getStatusInfo()+" - "+entity);
                 }
             }
 
