@@ -72,6 +72,21 @@ public enum TokenErrorResponseType implements IErrorType {
     INVALID_AUTHORIZATION_DETAILS("invalid_authorization_details "),
 
     /**
+     * Indicates invalid requested token type.
+     *
+     * For transaction token value must be: urn:ietf:params:oauth:token-type:txn_token
+     */
+    INVALID_REQUESTED_TOKEN_TYPE("invalid_requested_token_type"),
+
+    /**
+     * Indicates invalid subject token type.
+     *
+     * For transaction token value must be: urn:ietf:params:oauth:token-type:id_token or
+     * urn:ietf:params:oauth:token-type:access_token.
+     */
+    INVALID_SUBJECT_TOKEN_TYPE("invalid_subject_token_type"),
+
+    /**
      * CIBA. The authorization request is still pending as the end-user hasn't yet been authenticated.
      */
     AUTHORIZATION_PENDING("authorization_pending"),
