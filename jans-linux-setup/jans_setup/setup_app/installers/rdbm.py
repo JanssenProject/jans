@@ -6,6 +6,7 @@ import time
 import sqlalchemy
 import shutil
 import zipfile
+import random
 
 from string import Template
 from schema import AttributeType
@@ -107,9 +108,14 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 self.writeFile(unit_fn, '\n'.join(unit_file_content_list))
                 self.run(['systemctl', 'daemon-reload'])
 
+
+    def get_rdbm_pw(self):
+        return str(random.randint(10,99)) + random.choice('*_.<->') + self.getPW()
+
+
     def local_install(self):
         if not Config.rdbm_password:
-            Config.rdbm_password = self.getPW()
+            Config.rdbm_password = self.get_rdbm_pw()
         if not Config.rdbm_user:
             Config.rdbm_user = 'jans'
 
@@ -119,10 +125,17 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
             if Config.rdbm_type == 'mysql':
                 if base.os_type == 'suse':
-                    self.restart('mariadb')
-                    self.fix_unit_file('mariadb')
-                    self.enable('mariadb')
-                    Config.backend_service = 'mariadb.service'
+                    self.restart('mysql')
+                    self.fix_unit_file('mysql')
+                    self.enable('mysql')
+                    Config.backend_service = 'mysql.service'
+                    for l in open('/var/log/mysql/mysqld.log'):
+                        if 'A temporary password is generated for' in l:
+                            n = l.find('root@localhost:')
+                            mysql_tmp_root_passwd = l[n+15:].strip()
+                            break
+                    Config.mysql_root_password = self.get_rdbm_pw()
+                    self.run(f'''mysql -u root -p'{mysql_tmp_root_passwd}' -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{Config.mysql_root_password}'" --connect-expired-password''', shell=True)
 
                 elif base.clone_type == 'rpm':
                     self.restart('mysqld')
@@ -133,14 +146,15 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     Config.backend_service = 'mysql.service'
 
                 result, conn = self.dbUtils.mysqlconnection(log=False)
+                user_passwd_str = f"-u root -p'{Config.mysql_root_password}' " if base.os_type == 'suse' else ''
                 if not result:
                     sql_cmd_list = [
-                        "CREATE DATABASE {};\n".format(Config.rdbm_db),
-                        "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}';\n".format(Config.rdbm_user, Config.rdbm_password),
-                        "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost';\n".format(Config.rdbm_db, Config.rdbm_user),
+                        "CREATE DATABASE {}".format(Config.rdbm_db),
+                        "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}'".format(Config.rdbm_user, Config.rdbm_password),
+                        "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost'".format(Config.rdbm_db, Config.rdbm_user),
                         ]
                     for cmd in sql_cmd_list:
-                        self.run("echo \"{}\" | mysql".format(cmd), shell=True)
+                        self.run(f'mysql {user_passwd_str}-e "{cmd}"', shell=True)
 
             elif Config.rdbm_type == 'pgsql':
                 if base.clone_type == 'rpm':
