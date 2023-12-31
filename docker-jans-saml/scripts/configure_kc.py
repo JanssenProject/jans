@@ -1,3 +1,4 @@
+import base64
 import os
 import json
 import logging.config
@@ -18,7 +19,7 @@ logger = logging.getLogger("jans-saml")
 
 def _on_backoff(details):
     error = sys.exc_info()[1]
-    logger.warning(f"{error}; retrying in {details['wait']:0.1f} seconds")
+    logger.warning(f"Unable to connect to Keycloak; reason={error}; retrying in {details['wait']:0.1f} seconds")
 
 
 @backoff.on_exception(
@@ -65,8 +66,10 @@ class KC:
         out, err, code = exec_cmd(
             f"{self.kcadm_script} config credentials --server {self.server_url} --realm master --user {self.admin_username!r} --password {self.admin_password!r} --config {self.config_file}"
         )
+
         if code != 0:
             logger.warning(f"Unable to login to Keycloak; reason={err.decode()}")
+            sys.exit(1)
 
     def _maybe_realm_exists(self):
         # check if realm exists
@@ -81,7 +84,10 @@ class KC:
         if self._maybe_realm_exists():
             return
 
+        logger.info(f"Creating realm {self.ctx['jans_idp_realm']}")
+
         realm_config = f"{self.base_dir}/jans.api-realm.json"
+
         out, err, code = exec_cmd(f"{self.kcadm_script} create realms -f {realm_config} --config {self.config_file}")
 
         if code != 0:
@@ -106,8 +112,12 @@ class KC:
         if self._maybe_client_exists():
             return
 
+        logger.info(f"Creating client {self.ctx['jans_idp_client_id']} in realm {self.ctx['jans_idp_realm']}")
+
         client_config = f"{self.base_dir}/jans.api-openid-client.json"
+
         out, err, code = exec_cmd(f"{self.kcadm_script} create clients -r {self.ctx['jans_idp_realm']} -f {client_config} --config {self.config_file}")
+
         if code != 0:
             logger.warning(f"Unable to create client specified in {client_config}; reason={err.decode()}")
 
@@ -129,6 +139,7 @@ class KC:
         out, err, code = exec_cmd(
             f"{self.kcadm_script} set-password -r {self.ctx['jans_idp_realm']} --username {username} --new-password {new_password} --config {self.config_file}"
         )
+
         if code != 0:
             logger.warning(f"Unable to re-set password for  user {username}; reason={err.decode()}")
 
@@ -136,12 +147,15 @@ class KC:
         out, err, code = exec_cmd(
             f"{self.kcadm_script} add-roles -r {self.ctx['jans_idp_realm']} --uusername {username} --cclientid realm-management --rolename manage-identity-providers --rolename view-identity-providers --config {self.config_file}"
         )
+
         if code != 0:
             logger.warning(f"Unable to assign roles for  user {username}; reason={err.decode()}")
 
     def create_user(self):
         if self._maybe_user_exists():
             return
+
+        logger.info(f"Creating user {self.ctx['jans_idp_user_name']} in realm {self.ctx['jans_idp_realm']}")
 
         user_config = f"{self.base_dir}/jans.api-user.json"
 
@@ -158,9 +172,13 @@ class KC:
 def main():
     manager = get_manager()
 
-    # @FIXME: pre-populate username+password
-    admin_username = manager.config.get("kc_admin_username") or "admin"
-    admin_password = manager.secret.get("kc_admin_password") or "admin"
+    if os.path.isfile("/etc/jans/conf/kc_admin_creds"):
+        with open("/etc/jans/conf/kc_admin_creds") as f:
+            creds = f.read().strip()
+            admin_username, admin_password = base64.b64decode(creds).decode().strip().split(":")
+    else:
+        admin_username = os.environ.get("KEYCLOAK_ADMIN", "")
+        admin_password = os.environ.get("KEYCLOAK_ADMIN_PASSWORD", "")
 
     ctx = {
         "jans_idp_realm": "jans-api",

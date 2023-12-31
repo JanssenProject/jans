@@ -20,29 +20,26 @@ get_max_ram_percentage() {
     fi
 }
 
-# # export_keycloak_admin_creds() {
-# admin_username=${KEYCLOAK_ADMIN:-admin}
-# # export KEYCLOAK_ADMIN="${admin_username}"
+export_keycloak_admin_creds() {
+    if [ -f /etc/jans/conf/kc_admin_creds ]; then
+        creds="$(base64 -d < /etc/jans/conf/kc_admin_creds)"
+        admin_username=$(echo "$creds" | awk -F ":" '{print $1}')
+        admin_password=$(echo "$creds" | awk -F ":" '{print $2}')
+    else
+        admin_username=${KEYCLOAK_ADMIN:-}
+        admin_password=${KEYCLOAK_ADMIN_PASSWORD:-}
+    fi
+    export KEYCLOAK_ADMIN="$admin_username"
+    export KEYCLOAK_ADMIN_PASSWORD="$admin_password"
+}
 
-# if [ -f /etc/jans/conf/keycloak_admin_password ]; then
-#     admin_password="$(cat /etc/jans/conf/keycloak_admin_password)"
-# else
-#     admin_password="admin"
-# fi
-#     # export KEYCLOAK_ADMIN_PASSWORD="${admin_password}"
-# # }
-
-# export_keycloak_admin_creds
+export_keycloak_admin_creds
 python3 "$basedir/wait.py"
 python3 "$basedir/bootstrap.py"
 python3 "$basedir/configure_kc.py" &
 
 java_opts="$(get_max_ram_percentage) $(get_java_options)"
 export JAVA_OPTS_APPEND="$java_opts"
-
-# default admin credentials (will be changed)
-export KEYCLOAK_ADMIN=admin
-export KEYCLOAK_ADMIN_PASSWORD=admin
 
 # shellcheck disable=SC2046
 exec /opt/keycloak/bin/kc.sh start \
