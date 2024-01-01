@@ -2,8 +2,7 @@
    "tokenChannels":[
          "code_token",
          "id_token"
-      ]
-   },
+      ],
 
    "cleanServiceInterval":60,
    "cleanServiceBatchChunkSize":10000,
@@ -22,5 +21,6 @@
    "opaConfiguration": {
    		"baseUrl" : "http://localhost:8181/v1/"
    },
-   "policyDecisionPointType": "NULL"
+   "messageConsumerType": "DISABLED",
+   "policyDecisionPointType": "DISABLED"
 }
