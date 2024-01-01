@@ -957,6 +957,14 @@ components:
           type: array
           items:
             type: string
+        nonKcAttributes:
+          type: array
+          items:
+            type: string
+        kcSamlConfig:
+          type: array
+          items:
+            type: string
     JsonPatch:
       type: object
     ProfileConfiguration:

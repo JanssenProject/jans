@@ -8,7 +8,9 @@ package io.jans.configapi.plugin.saml.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jans.as.common.service.OrganizationService;
+import io.jans.configapi.core.util.DataUtil;
 import io.jans.configapi.util.AuthUtil;
+
 import io.jans.configapi.plugin.saml.client.IdpClientFactory;
 import io.jans.configapi.plugin.saml.model.IdentityProvider;
 import io.jans.configapi.plugin.saml.util.Constants;
@@ -22,6 +24,7 @@ import jakarta.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -199,7 +202,7 @@ public class IdpService {
 
     private IdentityProvider processIdentityProvider(IdentityProvider identityProvider, InputStream idpMetadataStream,
             boolean isUpdate) throws IOException {
-        log.info("Common processing for identityProvider:{}, idpMetadataStream:{}, isUpdate:{}", identityProvider,
+        log.error("Common processing for identityProvider:{}, idpMetadataStream:{}, isUpdate:{}", identityProvider,
                 idpMetadataStream, isUpdate);
 
         if (identityProvider == null) {
@@ -213,27 +216,27 @@ public class IdpService {
         if (idpMetadataStream != null && idpMetadataStream.available() > 0) {
             Map<String, String> config = validateSamlMetadata(identityProvider.getProviderId(),
                     identityProvider.getRealm(), idpMetadataStream);
-            log.info("Validated metadata to create IDP - config:{}", config);
-            identityProvider.setConfig(config);
-        } else {
-            // ensure individual metadata elements are present
-            boolean validConfig = validateIdpMetadataElements(identityProvider);
-            log.info("Is metadata individual elements for IDP creation present:{}", validConfig);
+            log.error("Validated metadata to create IDP - config:{}", config);
+            populateIdpMetadataElements(identityProvider, config);
         }
+
+        // ensure individual metadata elements are present
+        boolean validConfig = validateIdpMetadataElements(identityProvider);
+        log.error("Is metadata individual elements for IDP creation present:{}", validConfig);
 
         if (samlConfigService.isSamlEnabled()) {
             // Create IDP in KC
-            log.debug("Create/Update IDP Service idpMetadataStream:{}, identityProvider.getRealm():{}",
+            log.error("Create/Update IDP Service idpMetadataStream:{}, identityProvider.getRealm():{}",
                     idpMetadataStream, identityProvider.getRealm());
             identityProvider = keycloakService.createUpdateIdentityProvider(identityProvider.getRealm(), isUpdate,
                     identityProvider);
 
-            log.debug("Newly created identityProvider:{}", identityProvider);
+            log.error("Newly created identityProvider:{}", identityProvider);
 
             // set KC SP MetadataURL name
             if (identityProvider != null) {
                 String spMetadataUrl = getSpMetadataUrl(identityProvider.getRealm(), identityProvider.getName());
-                log.info(" Setting KC SP Metadata URL - spMetadataUrl:{} ", spMetadataUrl);
+                log.error(" Setting KC SP Metadata URL - spMetadataUrl:{} ", spMetadataUrl);
                 identityProvider.setSpMetaDataURL(spMetadataUrl);
             }
         }
@@ -246,19 +249,19 @@ public class IdpService {
     }
 
     private boolean validateIdpMetadataElements(IdentityProvider identityProvider) {
-        log.info("identityProvider:{}, samlConfigService.getIdpMetadataMandatoryAttributes():{}", identityProvider,
+        log.error("identityProvider:{}, samlConfigService.getIdpMetadataMandatoryAttributes():{}", identityProvider,
                 samlConfigService.getIdpMetadataMandatoryAttributes());
         boolean isValid = false;
-        if (identityProvider == null || identityProvider.getConfig() == null || identityProvider.getConfig().isEmpty()
-                || samlConfigService.getIdpMetadataMandatoryAttributes().isEmpty()) {
+        if (identityProvider == null || samlConfigService.getIdpMetadataMandatoryAttributes().isEmpty()) {
             isValid = true;
             return isValid;
         }
 
         List<String> missingElements = null;
         for (String attribute : samlConfigService.getIdpMetadataMandatoryAttributes()) {
-            log.info("attribute:{}", attribute);
-            if (StringUtils.isBlank(identityProvider.getConfig().get(attribute))) {
+            log.error("attribute:{}, getValue(identityProvider, attribute):{}", attribute,
+                    getValue(identityProvider, attribute));
+            if (StringUtils.isBlank(getValue(identityProvider, attribute))) {
                 if (missingElements == null) {
                     missingElements = new ArrayList<>();
                 }
@@ -276,6 +279,37 @@ public class IdpService {
         isValid = true;
         log.info("validateIdpMetadataElements - isValid:{}", isValid);
         return isValid;
+    }
+
+    private IdentityProvider populateIdpMetadataElements(IdentityProvider identityProvider,
+            Map<String, String> config) {
+        log.error("identityProvider:{}, config:{}, samlConfigService.getKcSamlConfig():{}", identityProvider, config,
+                samlConfigService.getKcSamlConfig());
+
+        if (identityProvider == null || config == null || samlConfigService.getKcSamlConfig().isEmpty()) {
+            return identityProvider;
+        }
+
+        for (String attribute : samlConfigService.getKcSamlConfig()) {
+            log.error("attribute:{}, config.get(attribute):{}", attribute,
+                    config.get(attribute));
+                DataUtil.invokeReflectionSetter(identityProvider, attribute, config.get(attribute));        
+        }
+
+        log.error("validateIdpMetadataElements - identityProvider:{}", identityProvider);
+        return identityProvider;
+    }
+
+    private String getValue(IdentityProvider identityProvider, String property) {
+        log.error("Get Field Value - identityProvider:{}, property:{}", identityProvider, property);
+        String value = null;
+        try {
+            value = (String) DataUtil.getValue(identityProvider, property);
+            log.error("Field Value - property:{}, value:{}", property, value);
+        } catch (Exception ex) {
+            log.error("Error while getting value of config ", ex);
+        }
+        return value;
     }
 
 }

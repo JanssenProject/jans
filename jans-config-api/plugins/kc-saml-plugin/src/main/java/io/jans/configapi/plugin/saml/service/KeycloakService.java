@@ -18,7 +18,6 @@ import io.jans.util.exception.InvalidAttributeException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -115,16 +114,7 @@ public class KeycloakService {
 
             if (identityProvider == null) {
                 throw new InvalidAttributeException("IdentityProvider object is null!!!");
-            }
-
-            // validate IDP metadata
-            logger.debug("IDP metadata config identityProvider.getConfig():{})", identityProvider.getConfig());
-            if (identityProvider.getConfig() == null || identityProvider.getConfig().isEmpty()) {
-                throw new InvalidAttributeException("Idp Metedata config is null!!!");
-            }
-
-            boolean valid = verifySamlIdpConfig(identityProvider.getConfig());
-            logger.debug("Is IDP metadata config valid:{})", valid);
+            }          
 
             // Get token
             String token = this.getKcAccessToken(realmName);
@@ -138,11 +128,14 @@ public class KeycloakService {
                 logger.error("Final URL for update IDP idpUrl:{}", idpUrl);
             }
 
-            // String idpJson = this.createIdentityProviderJsonString(identityProvider);
-            // idpJson = idpClientFactory.createUpdateIdp(idpUrl, token, isUpdate, idpJson);
-            // logger.error("IdentityProvider response idpJson:{}", idpJson);
-            
             JSONObject jsonObject = createIdentityProviderJson(identityProvider);
+            
+            //Populate KC SAML config
+            populateKcConfig(jsonObject);
+            
+            //Remove Non-kc attribute
+            removeNonKcAttributes(jsonObject);
+            
             logger.error("IdentityProvider JSON jsonObject:{}", jsonObject);
             String idpJson = idpClientFactory.createUpdateIdp(idpUrl, token, isUpdate, jsonObject);
             logger.error("IdentityProvider response idpJson:{}", idpJson);
@@ -154,7 +147,7 @@ public class KeycloakService {
             throw new ConfigurationException("Error while Add/Update SAML IDP ", ex);
         }
 
-        return idp;
+        return identityProvider;
     }
 
     public boolean deleteIdentityProvider(String realmName, String idpName) {
@@ -229,14 +222,23 @@ public class KeycloakService {
     private String getTokenUrl(String realmName) {
         return samlConfigService.getTokenUrl(realmName);
     }
-
+    
+    private String getSpMetadataUrl(String realm, String name) {
+        return samlConfigService.getSpMetadataUrl(realm, name);
+    }
+    
     private String getSamlMetadataImportUrl(String realmName) {
         return samlConfigService.getIdpMetadataImportUrl(realmName);
     }
 
-    private String getSpMetadataUrl(String realm, String name) {
-        return samlConfigService.getSpMetadataUrl(realm, name);
-    }
+    private List<String> getNonKcAttributes() {
+        return samlConfigService.getNonKcAttributes();
+    }    
+
+    private List<String> getKcSamlConfig() {
+        return samlConfigService.getKcSamlConfig();
+    } 
+
 
     private boolean verifySamlIdpConfig(Map<String, String> config) {
         // import endpoint simply converts IDPSSODescriptor into key value pairs.
@@ -331,5 +333,53 @@ public class KeycloakService {
 
         return identityProvider;
     }
+    
+    private JSONObject populateKcConfig(JSONObject jsonObject){
+        logger.error("jsonObject:{}", jsonObject);
+        List<String> kcSamlConfig = getKcSamlConfig();
+        
+        if (jsonObject==null || kcSamlConfig==null || kcSamlConfig.isEmpty()) {
+            return jsonObject;
+        }
+        
+        Map<String, String> config = new HashMap<>();
+        for(String name : kcSamlConfig) {
+            logger.error("name:{}, jsonObject.getString(name):{}", name, jsonObject.getString(name));
+            config.put(name, jsonObject.getString(name));
+        }
+        
+        logger.error("config:{}", config);        
+        jsonObject.put("config", config);
+        
+        // validate IDP metadata
+        logger.debug("IDP metadata config config:{})", config);
+        if (config == null || config.isEmpty()) {
+            throw new InvalidAttributeException("Idp Metedata config is null!!!");
+        }
 
+        boolean valid = verifySamlIdpConfig(config);
+        logger.debug("Is IDP metadata config valid:{})", valid);
+        
+        logger.error("jsonObject:{}", jsonObject);
+        
+        return jsonObject;
+    }
+
+    private JSONObject removeNonKcAttributes(JSONObject jsonObject){
+        logger.error("jsonObject:{}", jsonObject);
+        List<String> nonKcAttributes = getNonKcAttributes();
+        
+        if (jsonObject==null || nonKcAttributes==null || nonKcAttributes.isEmpty()) {
+            return jsonObject;
+        }
+        
+        for(String name : nonKcAttributes) {
+            logger.error("name:{}, jsonObject.getString(name):{}", name, jsonObject.getString(name));
+            jsonObject.remove(name);
+        }
+       
+        logger.error("jsonObject:{}", jsonObject);
+        
+        return jsonObject;
+    }
 }

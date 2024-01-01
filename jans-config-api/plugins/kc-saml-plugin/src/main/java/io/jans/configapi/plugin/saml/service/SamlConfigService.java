@@ -141,7 +141,7 @@ public class SamlConfigService {
         }
         return grantType;
     }
-    
+
     public String getScope() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -199,7 +199,7 @@ public class SamlConfigService {
         logger.debug("SAML Token Url - tokenUrl:{}", tokenUrl);
         return tokenUrl;
     }
-    
+
     public String getIdpUrl(String realm) {
         logger.debug("Get SAML IDP Url - realm:{}", realm);
         final SamlConf samlConf = getSamlConf();
@@ -213,7 +213,7 @@ public class SamlConfigService {
         logger.debug("SAML IDP Url - idpUrl:{}", idpUrl);
         return idpUrl;
     }
-    
+
     public String getIdpMetadataImportUrl(String realm) {
         logger.debug("Get SAML IDP Metadata Import Url - realm:{}", realm);
         final SamlConf samlConf = getSamlConf();
@@ -227,7 +227,7 @@ public class SamlConfigService {
         logger.debug("SAML IDP Metadata Import Url - idpMetadataImportUrl:{}", idpMetadataImportUrl);
         return idpMetadataImportUrl;
     }
-    
+
     public String getIdpRootDir() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -336,6 +336,26 @@ public class SamlConfigService {
             idpMetadataMandatoryAttributes = samlAppConfiguration.getIdpMetadataMandatoryAttributes();
         }
         return idpMetadataMandatoryAttributes;
+    }
+
+    public List<String> getNonKcAttributes() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        List<String> nonKcAttributes = null;
+        if (samlAppConfiguration != null) {
+            nonKcAttributes = samlAppConfiguration.getNonKcAttributes();
+        }
+        return nonKcAttributes;
+    }
+
+    public List<String> getKcSamlConfig() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        List<String> kcSamlConfig = null;
+        if (samlAppConfiguration != null) {
+            kcSamlConfig = samlAppConfiguration.getKcSamlConfig();
+        }
+        return kcSamlConfig;
     }
 
     private SamlConf getSamlConf() {

@@ -203,9 +203,6 @@ public class IdpResource extends BaseResource {
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
         log.debug(" Create metaDataFile:{} ", metaDataFile);
 
-        populateIdpMetadataConfig(idp, metaDataFile);
-        log.info("IDP Creation checked if config to be populated idp:{}", idp);
-
         // create SAML IDP
         try {
             idp = idpService.createSamlIdentityProvider(idp, metaDataFile);
@@ -217,7 +214,6 @@ public class IdpResource extends BaseResource {
             }
             throwInternalServerException(ex);
         }
-        populateIdpMetadataElementsFromConfig(idp);
 
         log.info("Create IdentityProvider - idp:{}", idp);
         return Response.status(Response.Status.CREATED).entity(idp).build();
@@ -259,12 +255,8 @@ public class IdpResource extends BaseResource {
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
         log.debug(" Update metaDataFile:{} ", metaDataFile);
 
-        populateIdpMetadataConfig(idp, metaDataFile);
-        log.info("IDP Creation checked if config to be populated idp:{}", idp);
-
         // update SAML IDP
         idp = idpService.updateSamlIdentityProvider(idp, metaDataFile);
-        populateIdpMetadataElementsFromConfig(idp);
 
         log.info("Updated IdentityProvider idp:{}", idp);
         return Response.ok(idp).build();
@@ -342,55 +334,6 @@ public class IdpResource extends BaseResource {
         return pagedIdentityProvider;
     }
 
-    private IdentityProvider populateIdpMetadataConfig(IdentityProvider idp, InputStream metaDataFile)
-            throws IOException {
-        log.info("Populate IDP Metadata config - idp:{}, metaDataFile:{}", idp, metaDataFile);
-
-        if (idp == null || (metaDataFile != null && metaDataFile.available() > 0)) {
-            log.info("IDP metaDataFile for available():{}, hence no need to populate config.",
-                    metaDataFile.available());
-            return idp;
-        }
-
-        // validate required fields
-        checkNotNull(idp.getSingleSignOnServiceUrl(), Constants.SINGLE_SIGN_ON_SERVICE_URL);
-        checkNotNull(idp.getIdpEntityId(), Constants.IDP_ENTITY_ID);
-
-        Map<String, String> config = new HashMap<>();
-        config.put(Constants.SIGNING_CERTIFICATES, idp.getSigningCertificates());
-        config.put(Constants.VALIDATE_SIGNATURE, idp.getValidateSignature());
-        config.put(Constants.SINGLE_LOGOUT_SERVICE_URL, idp.getSingleLogoutServiceUrl());
-        config.put(Constants.NAME_ID_POLICY_FORMAT, idp.getNameIDPolicyFormat());
-        config.put(Constants.IDP_ENTITY_ID, idp.getIdpEntityId());
-        config.put(Constants.SINGLE_SIGN_ON_SERVICE_URL, idp.getSingleSignOnServiceUrl());
-        config.put(Constants.ENCRYPTION_PUBLIC_KEY, idp.getEncryptionPublicKey());
-        log.info("Populated- config:{}", config);
-
-        idp.setConfig(config);
-
-        return idp;
-    }
-
-    private IdentityProvider populateIdpMetadataElementsFromConfig(IdentityProvider idp) {
-        log.info("Populate IDP individual metadata elements - idp:{}", idp);
-
-        if (idp == null || idp.getConfig() == null || idp.getConfig().isEmpty()) {
-            return idp;
-        }
-
-        Map<String, String> config = idp.getConfig();
-        log.info("Populate IDP Metadata individual metadata elements - config:{}", config);
-        idp.setSigningCertificates(idp.getConfig().get(Constants.SIGNING_CERTIFICATES));
-        idp.setValidateSignature(idp.getConfig().get(Constants.VALIDATE_SIGNATURE));
-        idp.setSingleLogoutServiceUrl(idp.getConfig().get(Constants.SINGLE_LOGOUT_SERVICE_URL));
-        idp.setNameIDPolicyFormat(idp.getConfig().get(Constants.NAME_ID_POLICY_FORMAT));
-        idp.setIdpEntityId(idp.getConfig().get(Constants.IDP_ENTITY_ID));
-        idp.setSingleSignOnServiceUrl(idp.getConfig().get(Constants.SINGLE_SIGN_ON_SERVICE_URL));
-        idp.setEncryptionPublicKey(idp.getConfig().get(Constants.ENCRYPTION_PUBLIC_KEY));
-
-        log.info("Populated IDP object with individual metadata elements - idp:{}", idp);
-
-        return idp;
-    }
+    
 
 }
