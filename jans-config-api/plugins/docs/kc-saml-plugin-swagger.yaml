@@ -820,7 +820,7 @@ components:
           type: string
         enabled:
           type: boolean
-        signingCertificates:
+        signingCertificate:
           type: string
         validateSignature:
           type: string
@@ -957,7 +957,7 @@ components:
           type: array
           items:
             type: string
-        nonKcAttributes:
+        kcAttributes:
           type: array
           items:
             type: string

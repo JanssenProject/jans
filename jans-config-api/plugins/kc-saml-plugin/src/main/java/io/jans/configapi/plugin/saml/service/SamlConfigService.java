@@ -338,14 +338,14 @@ public class SamlConfigService {
         return idpMetadataMandatoryAttributes;
     }
 
-    public List<String> getNonKcAttributes() {
+    public List<String> getKcAttributes() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
-        List<String> nonKcAttributes = null;
+        List<String> kcAttributes = null;
         if (samlAppConfiguration != null) {
-            nonKcAttributes = samlAppConfiguration.getNonKcAttributes();
+            kcAttributes = samlAppConfiguration.getKcAttributes();
         }
-        return nonKcAttributes;
+        return kcAttributes;
     }
 
     public List<String> getKcSamlConfig() {

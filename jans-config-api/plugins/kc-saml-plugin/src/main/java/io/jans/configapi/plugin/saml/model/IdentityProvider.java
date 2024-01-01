@@ -56,8 +56,8 @@ public class IdentityProvider extends Entry implements Serializable {
     @AttributeName(name = "jansEnabled")
     private boolean enabled;
     
-    @AttributeName(name = "signingCertificates")
-    private String signingCertificates;
+    @AttributeName(name = "signingCertificate")
+    private String signingCertificate;
     
     @AttributeName(name = "validateSignature")
     private String validateSignature;
@@ -184,14 +184,14 @@ public class IdentityProvider extends Entry implements Serializable {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }   
+
+    public String getSigningCertificate() {
+        return signingCertificate;
     }
 
-    public String getSigningCertificates() {
-        return signingCertificates;
-    }
-
-    public void setSigningCertificates(String signingCertificates) {
-        this.signingCertificates = signingCertificates;
+    public void setSigningCertificate(String signingCertificate) {
+        this.signingCertificate = signingCertificate;
     }
 
     public String getValidateSignature() {
@@ -382,7 +382,7 @@ public class IdentityProvider extends Entry implements Serializable {
     public String toString() {
         return "IdentityProvider [inum=" + inum + ", creatorId=" + creatorId + ", name=" + name + ", displayName="
                 + displayName + ", description=" + description + ", realm=" + realm + ", enabled=" + enabled
-                + ", signingCertificates=" + signingCertificates + ", validateSignature=" + validateSignature
+                + ", signingCertificate=" + signingCertificate + ", validateSignature=" + validateSignature
                 + ", singleLogoutServiceUrl=" + singleLogoutServiceUrl + ", nameIDPolicyFormat=" + nameIDPolicyFormat
                 + ", idpEntityId=" + idpEntityId + ", singleSignOnServiceUrl=" + singleSignOnServiceUrl
                 + ", encryptionPublicKey=" + encryptionPublicKey + ", providerId=" + providerId + ", trustEmail="
