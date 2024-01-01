@@ -17,34 +17,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PostgresMessageConfiguration implements Serializable {
 
-	@JsonProperty("jdbc.driver.class-name")
 	private String driverClassName;
 	
-	@JsonProperty("db-schema-name")
 	private String dbSchemaName;
 
-	@JsonProperty( "connection-uri")
 	private String connectionUri;
 
-	@JsonProperty("auth-user-name")
 	private String authUserName;
 
-	@JsonProperty("auth-user-password")
 	private String authUserPassword;
 
-	@JsonProperty("connection-pool-max-total")
 	private Integer connectionPoolMaxTotal;
 
-	@JsonProperty("connection-pool-max-idle")
 	private Integer connectionPoolMaxIdle;
 
-	@JsonProperty("connection-pool-min-idle")
 	private Integer connectionPoolMinIdle;
 
-	@JsonProperty("message-wait-millis")
 	private Integer messageWaitMillis;
 
-	@JsonProperty("message-sleep-thread-millis")
 	private Integer messageSleepThreadTime;
 
 	public String getDriverClassName() {
