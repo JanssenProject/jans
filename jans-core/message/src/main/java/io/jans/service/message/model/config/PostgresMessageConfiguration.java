@@ -9,7 +9,6 @@ package io.jans.service.message.model.config;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Yuriy Movchan Date: 30/11/2023

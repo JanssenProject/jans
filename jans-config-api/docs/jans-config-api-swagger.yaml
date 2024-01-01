@@ -7862,7 +7862,7 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
         userCanView:
           type: boolean
@@ -7870,11 +7870,11 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9867,29 +9867,29 @@ components:
     PostgresMessageConfiguration:
       type: object
       properties:
-        jdbc.driver.class-name:
+        driverClassName:
           type: string
-        db-schema-name:
+        dbSchemaName:
           type: string
-        connection-uri:
+        connectionUri:
           type: string
-        auth-user-name:
+        authUserName:
           type: string
-        auth-user-password:
+        authUserPassword:
           type: string
-        connection-pool-max-total:
+        connectionPoolMaxTotal:
           type: integer
           format: int32
-        connection-pool-max-idle:
+        connectionPoolMaxIdle:
           type: integer
           format: int32
-        connection-pool-min-idle:
+        connectionPoolMinIdle:
           type: integer
           format: int32
-        message-wait-millis:
+        messageWaitMillis:
           type: integer
           format: int32
-        message-sleep-thread-millis:
+        messageSleepThreadTime:
           type: integer
           format: int32
     RedisMessageConfiguration:
@@ -10102,10 +10102,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
