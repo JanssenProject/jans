@@ -392,13 +392,11 @@
         </dependency>
 
 		<!-- lock -->
-		<!--
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-lock-service</artifactId>
             <version>${project.version}</version>
         </dependency>
-		-->
 
 		<!-- Weld -->
 		<dependency>

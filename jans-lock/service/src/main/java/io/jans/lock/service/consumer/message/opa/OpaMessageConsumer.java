@@ -14,9 +14,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.external.ExternalLockService;
 import io.jans.lock.service.external.context.ExternalLockContext;
 import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.qualifier.Implementation;
 import io.jans.service.message.consumer.MessageConsumer;
 import io.jans.service.net.BaseHttpService;
 import io.jans.util.StringHelper;
@@ -29,13 +31,17 @@ import jakarta.inject.Inject;
  *
  * @author Yuriy Movchan Date: 12/25/2023
  */
+@Implementation
 @ApplicationScoped
 public class OpaMessageConsumer extends MessageConsumer {
-	
+
 	public static String MESSAGE_CONSUMER_TYPE = "OPA";
 
 	@Inject
 	private Logger log;
+
+    @Inject
+	private AppConfiguration appConfiguration;
 
 	@Inject
 	private ExternalLockService externalLockService;
@@ -113,8 +119,10 @@ public class OpaMessageConsumer extends MessageConsumer {
 		// Send rest request to OPA
 		String tknTyp = messageNode.get("tknTyp").asText();
 		String tknCde = messageNode.get("tknCde").asText();
+		
+		String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
 
-		HttpPut request = new HttpPut(String.format("http://localhost:8181/v1/data/%s/%s", tknTyp, tknCde));
+		HttpPut request = new HttpPut(String.format("%s/data/%s/%s", baseUrl, tknTyp, tknCde));
 //		request.addHeader("Content-Type", "application/json");
 		request.addHeader("If-None-Match", "*");
 		
@@ -147,7 +155,9 @@ public class OpaMessageConsumer extends MessageConsumer {
 		String tknTyp = messageNode.get("tknTyp").asText();
 		String tknCde = messageNode.get("tknCde").asText();
 
-		HttpDelete request = new HttpDelete(String.format("http://localhost:8181/v1/data/%s/%s", tknTyp, tknCde));
+		String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
+
+		HttpDelete request = new HttpDelete(String.format("%s/data/%s/%s", baseUrl, tknTyp, tknCde));
 
 		try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {
 			HttpResponse httpResponse = httpClient.execute(request);

@@ -18,7 +18,6 @@ import jakarta.enterprise.context.ApplicationScoped;
  * @author Yuriy Movchan Date: 12/25/2023
  */
 @ApplicationScoped
-@DependsOn("appInitializer")
 public class ExternalLockService extends ExternalScriptService {
 
     public ExternalLockService() {

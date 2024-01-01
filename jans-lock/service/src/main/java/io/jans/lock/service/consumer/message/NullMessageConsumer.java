@@ -3,6 +3,7 @@ package io.jans.lock.service.consumer.message;
 import org.slf4j.Logger;
 
 import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.qualifier.Implementation;
 import io.jans.service.message.consumer.MessageConsumer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -12,6 +13,7 @@ import jakarta.inject.Inject;
  *
  * @author Yuriy Movchan Date: 12/25/2023
  */
+@Implementation
 @ApplicationScoped
 public class NullMessageConsumer extends MessageConsumer {
 	

@@ -18,5 +18,9 @@
    "metricReporterKeepDataDays":15,
    "metricReporterEnabled":true,
    "errorReasonEnabled": false,
+   
+   "opaConfiguration": {
+   		"baseUrl" : "http://localhost:8181/v1/"
+   },
    "policyDecisionPointType": "NULL"
 }
