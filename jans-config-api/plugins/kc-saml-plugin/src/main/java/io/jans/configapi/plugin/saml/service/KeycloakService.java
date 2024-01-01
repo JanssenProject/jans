@@ -24,6 +24,7 @@ import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -373,12 +374,17 @@ public class KeycloakService {
 
         JSONObject kcJSONObject = new JSONObject();
         for (String name : kcAttributes) {
-            logger.error("name:{}, jsonObject.get(name):{}", name, jsonObject.get(name));
-            kcJSONObject.put(name, jsonObject.get(name));
+            try {
+                logger.error("name:{}, jsonObject.get(name):{}", name, jsonObject.get(name));
+                kcJSONObject.put(name, jsonObject.get(name));
+            } catch (JSONException jex) {
+                logger.error("JSONException for attribute:{}, is:{}", name, jex);
+            }
         }
 
         logger.error("kcJSONObject:{}", kcJSONObject);
 
         return kcJSONObject;
     }
+
 }
