@@ -1,6 +1,12 @@
 package io.jans.lock.service.consumer.policy.opa;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,8 +20,10 @@ import org.slf4j.Logger;
 
 import com.unboundid.util.Base64;
 
+import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.external.ExternalLockService;
 import io.jans.lock.service.external.context.ExternalLockContext;
+import io.jans.service.cdi.qualifier.Implementation;
 import io.jans.service.net.BaseHttpService;
 import io.jans.service.policy.consumer.PolicyConsumer;
 import jakarta.annotation.PostConstruct;
@@ -27,10 +35,16 @@ import jakarta.inject.Inject;
  *
  * @author Yuriy Movchan Date: 12/25/2023
  */
+@Implementation
 @ApplicationScoped
 public class OpaPolicyConsumer extends PolicyConsumer {
 
+	private static final String LOCAL_POLICY_BASE_URI = "http://localhost:8181/v1/policies";
+
 	public static String POLICY_CONSUMER_TYPE = "OPA";
+
+    @Inject
+	private AppConfiguration appConfiguration;
 
 	@Inject
 	private ExternalLockService externalLockService;
@@ -41,11 +55,19 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 	@Inject
 	private Logger log;
 	
+	private MessageDigest sha256Digest;
+	
 	private Map<String, List<String>> loadedPolicies;
 	
 	@PostConstruct
 	public void init() {
 		this.loadedPolicies = new ConcurrentHashMap<String, List<String>>();
+		try {
+			this.sha256Digest = MessageDigest.getInstance("SHA-256", "BC");
+		} catch (NoSuchAlgorithmException ex) {
+		} catch (NoSuchProviderException ex) {
+			log.error("Failed to prepare SHA256 digister", ex);
+		}
 	}
 
 	@Override
@@ -62,11 +84,26 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 
 		// Send rest request to OPA
 		String baseId = Base64.urlEncode(sourceUri, false);
+
+		if (!loadedPolicies.containsKey(baseId)) {
+			loadedPolicies.put(baseId, new ArrayList<>(policies.size()));
+		}
 		
-		int idx = 0;
+		List<String> policyIds = loadedPolicies.get(baseId);
+		
+		List<String> cleanPolicyIds= new ArrayList<>(policyIds);
 		for (String policy : policies) {
-			String policyId = String.format("%s_%d", baseId, idx);
-			HttpPut request = new HttpPut(String.format("http://localhost:8181/v1/policies/%s", policyId));
+			byte[] digest = sha256Digest.digest(policy.getBytes(StandardCharsets.UTF_8));
+			String policyId = new BigInteger(1, digest).toString();
+			
+			if (policyIds.contains(policyId)) {
+				cleanPolicyIds.remove(policyId);
+				log.debug("Policy with digiest '{}' is already downloaded", policyId);
+				continue;
+			}
+
+			String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
+			HttpPut request = new HttpPut(String.format("%s/policies/%s", baseUrl, policyId));
 			
 			StringEntity stringEntity = new StringEntity(policy, "text/plain");
 			request.setEntity(stringEntity);
@@ -76,9 +113,16 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 				System.out.println(httpResponse);
 				System.out.println(httpResponse.getStatusLine());
 			} catch (IOException ex) {
-		    	log.error("Failed to execute put data request", ex);
-		    	return false;
+		    	log.error("Failed to add policy to OPA", ex);
 			}
+
+			policyIds.add(policyId);
+		}
+		
+		// Remove old policies after processing currentPoliciesDigests
+		for (String policyId : cleanPolicyIds) {
+			sendRemovePolicyRequest(policyId);
+			policyIds.remove(policyId);
 		}
 
 		return true;
@@ -106,19 +150,25 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 		}
 
 		for (String policyId : policyIds) {
-			HttpDelete request = new HttpDelete(String.format("http://localhost:8181/v1/policies/%s", policyId));
-
-			try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {
-				HttpResponse httpResponse = httpClient.execute(request);
-				System.out.println(httpResponse);
-				System.out.println(httpResponse.getStatusLine());
-			} catch (IOException ex) {
-		    	log.error("Failed to execute put data request", ex);
-		    	return false;
-			}
+			sendRemovePolicyRequest(policyId);
 		}
 
 		return true;
+	}
+
+	public void sendRemovePolicyRequest(String policyId) {
+		log.debug("Remove policy '{}'", policyId);
+		
+		String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
+		HttpDelete request = new HttpDelete(String.format("%s/policies/%s", baseUrl, policyId));
+
+		try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {
+			HttpResponse httpResponse = httpClient.execute(request);
+			System.out.println(httpResponse);
+			System.out.println(httpResponse.getStatusLine());
+		} catch (IOException ex) {
+			log.error("Failed to remove policy from OPA", ex);
+		}
 	}
 
 	@Override

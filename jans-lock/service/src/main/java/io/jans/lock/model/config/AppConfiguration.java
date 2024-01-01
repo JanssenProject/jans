@@ -40,11 +40,15 @@ public class AppConfiguration implements Configuration {
 
 	// Period in seconds
 	private int cleanServiceInterval;
+	
+	private OpaConfiguration opaConfiguration;
 
 	private String messageConsumerType;
 	private String policyConsumerType;
 
 	private String policyDecisionPointType;
+	
+	private List<String> policiesJsonUris;
 
 	public String getBaseDN() {
 		return baseDN;
@@ -130,6 +134,14 @@ public class AppConfiguration implements Configuration {
 		this.cleanServiceInterval = cleanServiceInterval;
 	}
 
+	public OpaConfiguration getOpaConfiguration() {
+		return opaConfiguration;
+	}
+
+	public void setOpaConfiguration(OpaConfiguration opaConfiguration) {
+		this.opaConfiguration = opaConfiguration;
+	}
+
 	public String getMessageConsumerType() {
 		return messageConsumerType;
 	}
@@ -153,5 +165,14 @@ public class AppConfiguration implements Configuration {
 	public void setPolicyDecisionPointType(String policyDecisionPointType) {
 		this.policyDecisionPointType = policyDecisionPointType;
 	}
+
+	public List<String> getPoliciesJsonUris() {
+		return policiesJsonUris;
+	}
+
+	public void setPoliciesJsonUris(List<String> policiesJsonUris) {
+		this.policiesJsonUris = policiesJsonUris;
+	}
+
 
 }
