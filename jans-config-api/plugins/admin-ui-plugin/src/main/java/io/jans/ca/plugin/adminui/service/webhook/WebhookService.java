@@ -123,6 +123,28 @@ public class WebhookService {
         }
     }
 
+    public List<WebhookEntry> getWebhooksByFeatureId(String featureId) {
+        try {
+            Filter filter = Filter.createSubstringFilter("auiFeatureId", null, new String[]{featureId}, null);
+            List<AuiFeature> features = entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, filter);
+            if (features == null || features.size() == 0) {
+                log.error(ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
+            }
+            List<String> webhooksIds = features.stream().findFirst().get().getWebhookIdsMapped();
+            if(webhooksIds == null || webhooksIds.size() == 0){
+                log.error(ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
+            }
+
+            List<WebhookEntry> webhooks = getWebhookByIds(Sets.newHashSet(webhooksIds));
+
+            return webhooks;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     /**
      * The function `getAuiFeaturesByIds` retrieves a list of AuiFeature objects based on a list of IDs.
      *

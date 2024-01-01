@@ -109,6 +109,33 @@ public class WebhookResource extends BaseResource {
         }
     }
 
+    @Operation(summary = "Gets list of Admin UI Webhooks mapped to featureId", description = "Gets list of Admin UI Webhooks mapped to featureId", operationId = "get-webhooks-by-feature-id", tags = {
+            "Admin UI - Webhooks"}, security = @SecurityRequirement(name = "oauth2", scopes = {SCOPE_WEBHOOK_READ}))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebhookEntry.class), examples = @ExampleObject(name = "Response json example", value = "example/webhook/get-webhook-by-feature-id.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+    @GET
+    @Path(WEBHOOK_PATH + FEATURE_ID_PATH_VARIABLE)
+    @ProtectedApi(scopes = {SCOPE_WEBHOOK_READ})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllWebhooksByFeatureId(@Parameter(description = "Feature identifier") @PathParam(AppConstants.ADMIN_UI_FEATURE_ID) @NotNull String featureId) {
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Fetching all Admin UI webhooks by featureId");
+            }
+            List<WebhookEntry> webhooks = webhookService.getWebhooksByFeatureId(featureId);
+
+            return Response.ok(webhooks).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.FETCH_DATA_ERROR.getDescription(), e);
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.FETCH_DATA_ERROR.getDescription()))
+                    .build();
+        }
+    }
+
     @Operation(summary = "Gets list of webhooks", description = "Gets list of webhooks", operationId = "get-all-webhooks", tags = {
             "Admin UI - Webhooks"}, security = @SecurityRequirement(name = "oauth2", scopes = {SCOPE_WEBHOOK_READ}))
     @ApiResponses(value = {

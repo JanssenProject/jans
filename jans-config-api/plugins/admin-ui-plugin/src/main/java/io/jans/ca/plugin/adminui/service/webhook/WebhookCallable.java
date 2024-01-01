@@ -61,6 +61,8 @@ public class WebhookCallable implements Callable<GenericResponse> {
             case "GET":
                 invocation = request.buildGet();
                 break;
+            case "DELETE":
+                invocation = request.buildDelete();
             case "POST":
             case "PUT":
             case "PATCH":

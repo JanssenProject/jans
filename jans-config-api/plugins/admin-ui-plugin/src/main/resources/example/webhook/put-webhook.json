@@ -8,6 +8,6 @@
   "httpMethod": "POST",
   "jansEnabled": true,
   "httpHeaders": [
-    "{\"Content-Type\":\"application/json\"}"
+    {"Content-Type":"application/json"}
   ]
 }
