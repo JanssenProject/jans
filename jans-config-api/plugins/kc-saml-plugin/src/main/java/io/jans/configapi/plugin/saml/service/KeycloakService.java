@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 public class KeycloakService {
-    
+
     public static final String REALM_NAME_NULL = "Realm name is null!!!";
 
     @Inject
@@ -129,7 +129,7 @@ public class KeycloakService {
             // Create KC JsonObject
             JSONObject kcJsonObject = createKcJSONObject(jsonObject);
             logger.info("Create new IdentityProvider - kcJsonObject:{}", kcJsonObject);
-            
+
             String idpJson = idpClientFactory.createUpdateIdp(idpUrl, token, isUpdate, kcJsonObject);
             logger.debug("IdentityProvider response idpJson:{}", idpJson);
 
@@ -196,10 +196,9 @@ public class KeycloakService {
 
         String tokenUrl = getTokenUrl(realmName);
 
-        String token = IdpClientFactory.getAccessToken(tokenUrl, samlConfigService.getClientId(),
+        return IdpClientFactory.getAccessToken(tokenUrl, samlConfigService.getClientId(),
                 samlConfigService.getClientSecret(), samlConfigService.getGrantType(), samlConfigService.getScope(),
                 samlConfigService.getUsername(), samlConfigService.getPassword(), samlConfigService.getServerUrl());
-        return token;
     }
 
     private String getIdpUrl(String realmName) {
@@ -273,28 +272,6 @@ public class KeycloakService {
         jsonObj.put(Constants.ALIAS, identityProvider.getName());
         logger.info("jsonObj:{}", jsonObj);
         return jsonObj;
-
-    }
-
-    private String createIdentityProviderJsonString(IdentityProvider identityProvider) throws IOException {
-        logger.info("Create IDP Json String - identityProvider:{}", identityProvider);
-        String identityProviderJson = null;
-        if (identityProvider == null) {
-            return identityProviderJson;
-        }
-        String json = Jackson.asJson(identityProvider);
-        logger.debug("json:{}", json);
-
-        JSONObject jsonObj = new JSONObject(json);
-        jsonObj.put(Constants.INTERNAL_ID, identityProvider.getInum());
-        jsonObj.put(Constants.ALIAS, identityProvider.getName());
-
-        logger.trace("jsonObj:{}", jsonObj);
-
-        identityProviderJson = jsonObj.toString();
-        logger.info("identityProviderJson:{}", identityProviderJson);
-
-        return identityProviderJson;
 
     }
 

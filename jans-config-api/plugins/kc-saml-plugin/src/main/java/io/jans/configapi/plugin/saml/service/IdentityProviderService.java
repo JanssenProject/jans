@@ -279,14 +279,14 @@ public class IdentityProviderService {
         if ((file == null)) {
             log.debug("File is null");
             if (emptyidpMetaDataFN) {
-                log.error("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
+                log.debug("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
                 return false;
             }
             String filePath = getIdpMetadataTempDirFilePath(idpMetaDataFN);
             log.debug("filePath:{}", filePath);
 
             if (filePath == null) {
-                log.error("The trust relationship {} has an invalid Metadata file storage path",
+                log.debug("The trust relationship {} has an invalid Metadata file storage path",
                         identityProvider.getInum());
                 return false;
             }
@@ -297,7 +297,7 @@ public class IdentityProviderService {
                 log.trace("newFile:{}", newFile);
 
                 if (!newFile.exists()) {
-                    log.error(
+                    log.info(
                             "The trust relationship {} metadata used local storage but the IDP metadata file `{}` was not found",
                             identityProvider.getInum(), filePath);
                     return false;

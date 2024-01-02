@@ -1,11 +1,5 @@
 package io.jans.configapi.plugin.saml.rest;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-
 import io.jans.configapi.core.configuration.ObjectMapperContextResolver;
 import io.jans.configapi.core.rest.BaseApiApplication;
 import io.jans.configapi.plugin.saml.util.Constants;
@@ -17,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.*;
 import io.swagger.v3.oas.annotations.servers.*;
 
 import jakarta.ws.rs.ApplicationPath;
-import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Set;
 
