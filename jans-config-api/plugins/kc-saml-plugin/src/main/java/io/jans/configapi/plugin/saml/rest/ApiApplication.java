@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.tags.*;
 import io.swagger.v3.oas.annotations.security.*;
 import io.swagger.v3.oas.annotations.servers.*;
 
-import jakarta.inject.Inject;
 import jakarta.ws.rs.ApplicationPath;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
@@ -68,10 +67,7 @@ public class ApiApplication extends BaseApiApplication {
         
         // General Application level class
         classes.add(ObjectMapperContextResolver.class);
-        
-        System.out.println("\n\n\n KC-Plugin mapper = "+mapper+" \n\n");
-        classes.stream().forEach(e -> System.out.println("\n KC-Plugin e.getName() :{}"+e.getName()+" ,e.getCanonicalName() = "+e.getCanonicalName()));
-                              
+                
         classes.add(SamlConfigResource.class);
         classes.add(TrustRelationshipResource.class);
         classes.add(IdpResource.class);

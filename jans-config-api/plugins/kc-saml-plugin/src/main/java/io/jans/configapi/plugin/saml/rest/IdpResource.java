@@ -41,9 +41,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
@@ -53,7 +51,6 @@ import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 @Produces(MediaType.APPLICATION_JSON)
 public class IdpResource extends BaseResource {
 
-    private static final String SAML_IDP = "SAML IDP ";
     private static final String SAML_IDP_DATA = "SAML IDP Data";
     private static final String SAML_IDP_DATA_FORM = "SAML IDP Data From";
     private static final String SAML_IDP_CHECK_STR = "IdentityProvider identified by '";
@@ -134,12 +131,12 @@ public class IdpResource extends BaseResource {
         }
         String json = null;
         try {
-        IdentityProvider identityProvider = idpService.getIdentityProviderByInum(inum);
-        log.debug(" identityProvider:{} ", identityProvider);
-        checkResourceNotNull(identityProvider, SAML_IDP_CHECK_STR + inum + "'");
-         json = idpService.getSpMetadata(identityProvider);
-        log.info(" json:{} ", json);
-        }catch(Exception ex) {
+            IdentityProvider identityProvider = idpService.getIdentityProviderByInum(inum);
+            log.debug(" identityProvider:{} ", identityProvider);
+            checkResourceNotNull(identityProvider, SAML_IDP_CHECK_STR + inum + "'");
+            json = idpService.getSpMetadata(identityProvider);
+            log.info(" json:{} ", json);
+        } catch (Exception ex) {
             throwInternalServerException("SAML_SP_METADATA", ex.getMessage());
         }
         return Response.ok(json).build();
@@ -218,7 +215,7 @@ public class IdpResource extends BaseResource {
             }
             throwInternalServerException(ex);
         }
-        
+
         log.info("Create IdentityProvider - idp:{}", idp);
         return Response.status(Response.Status.CREATED).entity(idp).build();
     }
@@ -308,8 +305,7 @@ public class IdpResource extends BaseResource {
         return Response.ok().build();
     }
 
-    private IdentityProviderPagedResult doSearch(SearchRequest searchReq)
-            throws IllegalAccessException, InvocationTargetException {
+    private IdentityProviderPagedResult doSearch(SearchRequest searchReq) {
 
         if (log.isInfoEnabled()) {
             log.info("IdentityProvider search params - searchReq:{} ", escapeLog(searchReq));
@@ -337,5 +333,5 @@ public class IdpResource extends BaseResource {
         }
         return pagedIdentityProvider;
     }
-   
+
 }

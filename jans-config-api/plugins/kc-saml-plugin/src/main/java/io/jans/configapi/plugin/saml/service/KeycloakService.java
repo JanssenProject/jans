@@ -30,9 +30,8 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 public class KeycloakService {
-
-    // private String KC_IMPORT_CONFIG =
-    // "/admin/realms/%s/identity-provider/import-config";
+    
+    public static final String REALM_NAME_NULL = "Realm name is null!!!";
 
     @Inject
     Logger logger;
@@ -44,7 +43,7 @@ public class KeycloakService {
     SamlConfigService samlConfigService;
 
     public List<IdentityProvider> findAllIdentityProviders(String realmName) throws IOException {
-        logger.error("Fetch all IdentityProvider for realmName:{}, samlConfigService:{}", realmName, samlConfigService);
+        logger.info("Fetch all IdentityProvider for realmName:{}, samlConfigService:{}", realmName, samlConfigService);
 
         if (StringUtils.isBlank(realmName)) {
             throw new InvalidAttributeException("IDP Realm name file is null!!!");
@@ -52,13 +51,11 @@ public class KeycloakService {
 
         // Get token
         String token = this.getKcAccessToken(realmName);
-        logger.error("Fetch all IdentityProvider for token:{}", token);
-
         String idpUrl = getIdpUrl(realmName);
-        logger.error("Fetch all IdentityProvider for idpUrl:{}", idpUrl);
+        logger.debug("Fetch all IdentityProvider for idpUrl:{}", idpUrl);
 
         String idpListAsString = idpClientFactory.getAllIdp(idpUrl, token);
-        logger.error("Fetch all IdentityProvider for idpListAsString:{}", idpListAsString);
+        logger.info("Fetch all IdentityProvider for idpListAsString:{}", idpListAsString);
 
         List<IdentityProvider> identityProvider = createIdentityProviderList(idpListAsString);
         logger.info("Fetch all IdentityProvider for realmName:{}, identityProvider:{}", realmName, identityProvider);
@@ -67,7 +64,7 @@ public class KeycloakService {
 
     public Map<String, String> importSamlMetadata(String providerId, String realmName, InputStream idpMetadataStream)
             throws JsonProcessingException {
-        logger.error("Import config providerId:{}, realmName:{}, idpMetadataStream:{} ", providerId, realmName,
+        logger.info("Import config providerId:{}, realmName:{}, idpMetadataStream:{} ", providerId, realmName,
                 idpMetadataStream);
 
         if (StringUtils.isBlank(providerId)) {
@@ -84,10 +81,8 @@ public class KeycloakService {
 
         // Get token
         String token = this.getKcAccessToken(realmName);
-        logger.error(" token:{}", token);
-
         String samlMetadataImportUrl = this.getSamlMetadataImportUrl(realmName);
-        logger.error(" samlMetadataImportUrl:{}", samlMetadataImportUrl);
+        logger.info(" samlMetadataImportUrl:{}", samlMetadataImportUrl);
 
         Map<String, String> config = idpClientFactory.extractSamlMetadata(samlMetadataImportUrl, token, providerId,
                 realmName, idpMetadataStream);
@@ -106,11 +101,11 @@ public class KeycloakService {
             IdentityProvider identityProvider) {
         IdentityProvider idp = null;
         try {
-            logger.error("Add/Update IdentityProvider under realmName:{}, isUpdate:{}, identityProvider:{})", realmName,
+            logger.info("Add/Update IdentityProvider under realmName:{}, isUpdate:{}, identityProvider:{})", realmName,
                     isUpdate, identityProvider);
 
             if (StringUtils.isBlank(realmName)) {
-                throw new InvalidAttributeException("Realm name is null!!!");
+                throw new InvalidAttributeException(REALM_NAME_NULL);
             }
 
             if (identityProvider == null) {
@@ -119,14 +114,11 @@ public class KeycloakService {
 
             // Get token
             String token = this.getKcAccessToken(realmName);
-            logger.error(" token:{}", token);
-
             String idpUrl = getIdpUrl(realmName);
-            logger.error("IDP URL idpUrl:{}", idpUrl);
 
             if (isUpdate) {
                 idpUrl = idpUrl + "/" + identityProvider.getName();
-                logger.error("Final URL for update IDP idpUrl:{}", idpUrl);
+                logger.info("Final URL for update IDP idpUrl:{}", idpUrl);
             }
 
             JSONObject jsonObject = createIdentityProviderJson(identityProvider);
@@ -136,13 +128,13 @@ public class KeycloakService {
 
             // Create KC JsonObject
             JSONObject kcJsonObject = createKcJSONObject(jsonObject);
-
-            logger.error("Create new IdentityProvider - kcJsonObject:{}", kcJsonObject);
+            logger.info("Create new IdentityProvider - kcJsonObject:{}", kcJsonObject);
+            
             String idpJson = idpClientFactory.createUpdateIdp(idpUrl, token, isUpdate, kcJsonObject);
-            logger.error("IdentityProvider response idpJson:{}", idpJson);
+            logger.debug("IdentityProvider response idpJson:{}", idpJson);
 
             idp = this.createIdentityProvider(idpJson);
-            logger.error("IdentityProvider idp:{}", idp);
+            logger.debug("IdentityProvider idp:{}", idp);
 
         } catch (Exception ex) {
             throw new ConfigurationException("Error while Add/Update SAML IDP ", ex);
@@ -154,10 +146,10 @@ public class KeycloakService {
     public boolean deleteIdentityProvider(String realmName, String idpName) {
         boolean deleteStatus = false;
         try {
-            logger.error("Delete IdentityProvider under realmName:{}, idpName:{})", realmName, idpName);
+            logger.info("Delete IdentityProvider under realmName:{}, idpName:{})", realmName, idpName);
 
             if (StringUtils.isBlank(realmName)) {
-                throw new InvalidAttributeException("Realm name is null!!!");
+                throw new InvalidAttributeException(REALM_NAME_NULL);
             }
 
             if (StringUtils.isBlank(idpName)) {
@@ -166,13 +158,11 @@ public class KeycloakService {
 
             // Get token
             String token = this.getKcAccessToken(realmName);
-            logger.error(" token:{}", token);
-
             String idpUrl = getIdpUrl(realmName) + "/" + idpName;
-            logger.error("IDP URL for delete is idpUrl:{}", idpUrl);
+            logger.info("IDP URL for delete is idpUrl:{}", idpUrl);
 
             deleteStatus = idpClientFactory.deleteIdp(idpUrl, token);
-            logger.error("IdentityProvider delete response deleteStatus:{}", deleteStatus);
+            logger.info("IdentityProvider delete response deleteStatus:{}", deleteStatus);
 
         } catch (Exception ex) {
             throw new ConfigurationException("Error while Deleting SAML IDP ", ex);
@@ -184,7 +174,7 @@ public class KeycloakService {
     public String getSpMetadata(String realmName, String idpName) throws JsonProcessingException {
         String spMetadataJson = null;
         if (StringUtils.isBlank(realmName)) {
-            throw new InvalidAttributeException("Realm name is null!!!");
+            throw new InvalidAttributeException(REALM_NAME_NULL);
         }
 
         if (StringUtils.isBlank(idpName)) {
@@ -193,26 +183,22 @@ public class KeycloakService {
 
         // Get token
         String token = this.getKcAccessToken(realmName);
-        logger.error(" token:{}", token);
-
         String idpUrl = getSpMetadataUrl(realmName, idpName);
-        logger.error("IDP URL for delete is idpUrl:{}", idpUrl);
+        logger.info("IDP URL for delete is idpUrl:{}", idpUrl);
 
         spMetadataJson = idpClientFactory.getSpMetadata(idpUrl, token);
-        logger.error("IdentityProvider delete response spMetadataJson:{}", spMetadataJson);
+        logger.info("IdentityProvider delete response spMetadataJson:{}", spMetadataJson);
         return spMetadataJson;
     }
 
     private String getKcAccessToken(String realmName) throws JsonProcessingException {
-        logger.error(" realmName:{}", realmName);
+        logger.info(" realmName:{}", realmName);
 
         String tokenUrl = getTokenUrl(realmName);
-        logger.error("tokenUrl:{}", tokenUrl);
 
         String token = IdpClientFactory.getAccessToken(tokenUrl, samlConfigService.getClientId(),
                 samlConfigService.getClientSecret(), samlConfigService.getGrantType(), samlConfigService.getScope(),
                 samlConfigService.getUsername(), samlConfigService.getPassword(), samlConfigService.getServerUrl());
-        logger.error(" token:{}", token);
         return token;
     }
 
@@ -254,7 +240,7 @@ public class KeycloakService {
     }
 
     private List<IdentityProvider> createIdentityProviderList(String jsonIdentityProviderList) throws IOException {
-        logger.error("jsonIdentityProviderList:{}", jsonIdentityProviderList);
+        logger.info("jsonIdentityProviderList:{}", jsonIdentityProviderList);
         List<IdentityProvider> idpList = null;
         if (StringUtils.isBlank(jsonIdentityProviderList)) {
             return idpList;
@@ -265,17 +251,17 @@ public class KeycloakService {
         idpList = new ArrayList<>();
         for (int i = 0; i < count; i++) { // iterate through jsonArray
             JSONObject jsonObject = jsonArray.getJSONObject(i); // get jsonObject @ i position
-            logger.error(" i:{},{}", i, jsonObject);
+            logger.trace(" i:{},{}", i, jsonObject);
             if (jsonObject != null) {
                 idpList.add(createIdentityProvider(jsonObject.toString()));
             }
         }
-        logger.error("idpList:{}", idpList);
+        logger.info("idpList:{}", idpList);
         return idpList;
     }
 
     private JSONObject createIdentityProviderJson(IdentityProvider identityProvider) throws IOException {
-        logger.error("identityProvider:{}", identityProvider);
+        logger.info("Create Json - identityProvider:{}", identityProvider);
         JSONObject jsonObj = null;
         if (identityProvider == null) {
             return jsonObj;
@@ -285,38 +271,35 @@ public class KeycloakService {
         jsonObj = new JSONObject(json);
         jsonObj.put(Constants.INTERNAL_ID, identityProvider.getInum());
         jsonObj.put(Constants.ALIAS, identityProvider.getName());
-        logger.error("jsonObj:{}", jsonObj);
-
-        logger.error("jsonObj:{}", jsonObj);
-
+        logger.info("jsonObj:{}", jsonObj);
         return jsonObj;
 
     }
 
     private String createIdentityProviderJsonString(IdentityProvider identityProvider) throws IOException {
-        logger.error("identityProvider:{}", identityProvider);
+        logger.info("Create IDP Json String - identityProvider:{}", identityProvider);
         String identityProviderJson = null;
         if (identityProvider == null) {
             return identityProviderJson;
         }
         String json = Jackson.asJson(identityProvider);
-        logger.error("json:{}", json);
+        logger.debug("json:{}", json);
 
         JSONObject jsonObj = new JSONObject(json);
         jsonObj.put(Constants.INTERNAL_ID, identityProvider.getInum());
         jsonObj.put(Constants.ALIAS, identityProvider.getName());
 
-        logger.error("jsonObj:{}", jsonObj);
+        logger.trace("jsonObj:{}", jsonObj);
 
         identityProviderJson = jsonObj.toString();
-        logger.error("identityProviderJson:{}", identityProviderJson);
+        logger.info("identityProviderJson:{}", identityProviderJson);
 
         return identityProviderJson;
 
     }
 
     private IdentityProvider createIdentityProvider(String jsonIdentityProvider) throws IOException {
-        logger.error("jsonIdentityProvider:{}", jsonIdentityProvider);
+        logger.info("jsonIdentityProvider:{}", jsonIdentityProvider);
         IdentityProvider identityProvider = null;
         if (StringUtils.isBlank(jsonIdentityProvider)) {
             return identityProvider;
@@ -328,13 +311,13 @@ public class KeycloakService {
 
         ObjectMapper mapper = Jackson.createJsonMapper();
         identityProvider = mapper.readValue(jsonObj.toString(), IdentityProvider.class);
-        logger.error("identityProvider:{}", identityProvider);
+        logger.info("IDP - identityProvider:{}", identityProvider);
 
         return identityProvider;
     }
 
     private JSONObject populateKcConfig(JSONObject jsonObject) {
-        logger.error("jsonObject:{}", jsonObject);
+        logger.info("jsonObject:{}", jsonObject);
         List<String> kcSamlConfig = getKcSamlConfig();
 
         if (jsonObject == null || kcSamlConfig == null || kcSamlConfig.isEmpty()) {
@@ -343,13 +326,13 @@ public class KeycloakService {
 
         Map<String, String> config = new HashMap<>();
         for (String name : kcSamlConfig) {
-            logger.error("name:{}, jsonObject.has(name):{}", name, jsonObject.has(name));
+            logger.trace("name:{}, jsonObject.has(name):{}", name, jsonObject.has(name));
             if (jsonObject.has(name)) {
                 config.put(name, jsonObject.getString(name));
             }
         }
 
-        logger.error("config:{}", config);
+        logger.info("config:{}", config);
         jsonObject.put("config", config);
 
         // validate IDP metadata
@@ -361,13 +344,13 @@ public class KeycloakService {
         boolean valid = verifySamlIdpConfig(config);
         logger.debug("Is IDP metadata config valid:{})", valid);
 
-        logger.error("jsonObject:{}", jsonObject);
+        logger.info("jsonObject:{}", jsonObject);
 
         return jsonObject;
     }
 
     private JSONObject createKcJSONObject(JSONObject jsonObject) {
-        logger.error("jsonObject:{}", jsonObject);
+        logger.info("jsonObject:{}", jsonObject);
         List<String> kcAttributes = getKcAttributes();
 
         if (jsonObject == null || kcAttributes == null || kcAttributes.isEmpty()) {
@@ -377,14 +360,14 @@ public class KeycloakService {
         JSONObject kcJSONObject = new JSONObject();
         for (String name : kcAttributes) {
             try {
-                logger.error("name:{}, jsonObject.get(name):{}", name, jsonObject.get(name));
+                logger.trace("name:{}, jsonObject.get(name):{}", name, jsonObject.get(name));
                 kcJSONObject.put(name, jsonObject.get(name));
             } catch (JSONException jex) {
                 logger.error("JSONException for attribute:{}, is:{}", name, jex);
             }
         }
 
-        logger.error("kcJSONObject:{}", kcJSONObject);
+        logger.info("kcJSONObject:{}", kcJSONObject);
 
         return kcJSONObject;
     }

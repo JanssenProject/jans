@@ -368,7 +368,6 @@ public class IdentityProviderService {
             log.trace("IDP Metadata directory:{} does exists)", directory);
             File folder = new File(directory);
             File[] files = folder.listFiles();
-            log.trace("IDP Metadata files:{}", files);
             if (files != null && files.length > 0) {
 
                 for (File file : files) {
