@@ -7862,19 +7862,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9195,16 +9195,6 @@ components:
           type: string
         tokenEndpointAuthMethod:
           type: string
-          format: enum
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         tokenEndpointAuthSigningAlg:
           type: string
         defaultMaxAge:
@@ -9422,10 +9412,6 @@ components:
           type: string
         introspectionEncryptedResponseEnc:
           type: string
-        authorizationDetailsTypes:
-          type: array
-          items:
-            type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -9871,7 +9857,7 @@ components:
         messageProviderType:
           type: string
           enum:
-          - "NULL"
+          - DISABLED
           - REDIS
           - POSTGRES
         redisConfiguration:
@@ -10116,10 +10102,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
