@@ -136,7 +136,7 @@ public class KeycloakService {
 
             // Create KC JsonObject
             JSONObject kcJsonObject = createKcJSONObject(jsonObject);
-
+            
             logger.error("Create new IdentityProvider - kcJsonObject:{}", kcJsonObject);
             String idpJson = idpClientFactory.createUpdateIdp(idpUrl, token, isUpdate, kcJsonObject);
             logger.error("IdentityProvider response idpJson:{}", idpJson);

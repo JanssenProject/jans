@@ -283,15 +283,15 @@ public class IdpClientFactory {
             logger.error("request:{}", request);
             request.header("Authorization", "Bearer  " + token);
             request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-
-            //String objectJson = Jackson.getJsonString(identityProviderJson);
-            //logger.error(" SAML IDP JSON - objectJson:{}", objectJson);
-
             Response response = null;
+            
+            
             if (isUpdate) {
-                response = request.put(Entity.json(identityProviderJson));
+                logger.error(" Update SAML IDP in KC server -  identityProviderJson.toMap()", identityProviderJson.toMap());
+                response = request.put(Entity.json(identityProviderJson.toMap()));
             } else {
-                response = request.post(Entity.json(identityProviderJson));
+                logger.error(" Create SAML IDP in KC server -  identityProviderJson.toMap()",  identityProviderJson.toMap());
+                response = request.post(Entity.json(identityProviderJson.toMap()));
             }
 
             logger.error("Response for SAML IDP -  response:{}", response);
