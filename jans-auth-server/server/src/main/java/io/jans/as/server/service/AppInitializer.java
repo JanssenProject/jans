@@ -56,6 +56,7 @@ import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.lib.CustomLibrariesLoader;
+import io.jans.service.custom.script.CustomScriptActivator;
 import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.external.ExternalPersistenceExtensionService;
 import io.jans.service.metric.inject.ReportMetric;
@@ -146,6 +147,9 @@ public class AppInitializer {
     private CustomScriptManager customScriptManager;
 
     @Inject
+    private Instance<CustomScriptActivator> customScriptActivatorInstance;
+
+    @Inject
     private ExternalPersistenceExtensionService externalPersistenceExtensionService;
 
     @Inject
@@ -232,6 +236,9 @@ public class AppInitializer {
         supportedCustomScriptTypes.remove(CustomScriptType.IDP);
         supportedCustomScriptTypes.remove(CustomScriptType.CONFIG_API);
         supportedCustomScriptTypes.remove(CustomScriptType.FIDO2_EXTENSION);
+        supportedCustomScriptTypes.remove(CustomScriptType.LOCK_EXTENSION);
+        
+        addPluginSupportedScripts(supportedCustomScriptTypes);
 
         statService.init();
 
@@ -259,7 +266,16 @@ public class AppInitializer {
 
     }
 
-    protected void initSchedulerService() {
+    private void addPluginSupportedScripts(List<CustomScriptType> supportedCustomScriptTypes) {
+    	for (CustomScriptActivator customScriptActivator : customScriptActivatorInstance) {
+    		List<CustomScriptType> additionalActiveCustomScripts = customScriptActivator.getActiveCustomScripts();
+
+    		log.info("Addting plugin custom scripts: {}", additionalActiveCustomScripts);
+    		supportedCustomScriptTypes.addAll(additionalActiveCustomScripts);
+    	}
+	}
+
+	protected void initSchedulerService() {
         quartzSchedulerManager.start();
 
         String disableScheduler = System.getProperties().getProperty("gluu.disable.scheduler");
