@@ -105,14 +105,14 @@ public class WebhookCallable implements Callable<GenericResponse> {
                             JSONObject reqBody = new JSONObject(webhook.getHttpRequestBody());
                             Iterator<String> reqBodyIte = reqBody.keys();
                             while (reqBodyIte.hasNext()) {
-                                String key = reqBodyIte.next().toString();
+                                String key = reqBodyIte.next();
                                 body.put(key, reqBody.get(key));
                             }
                         }
                     });
             return body;
         } catch (Exception ex) {
-            log.error("Error in parsing request-body: {}", ex);
+            log.error("Error in parsing request-body.", ex);
             return Maps.newHashMap();
         }
     }

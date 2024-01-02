@@ -42,17 +42,17 @@ public class WebhookEntry extends Entry implements Serializable {
     public WebhookEntry() {
     }
 
-    public WebhookEntry(String webhookId, String displayName, String description, String url, String httpRequestBody, String httpMethod, boolean jansEnabled, List<KeyValuePair> httpHeaders, Set<String> auiFeatureIds) {
+    public WebhookEntry(WebhookEntry webhookEntry) {
         super();
-        this.webhookId = webhookId;
-        this.displayName = displayName;
-        this.description = description;
-        this.url = url;
-        this.httpRequestBody = httpRequestBody;
-        this.httpMethod = httpMethod;
-        this.jansEnabled = jansEnabled;
-        this.httpHeaders = httpHeaders;
-        this.auiFeatureIds = auiFeatureIds;
+        this.webhookId = webhookEntry.getWebhookId();
+        this.displayName = webhookEntry.getDisplayName();
+        this.description = webhookEntry.getDescription();
+        this.url = webhookEntry.getUrl();
+        this.httpRequestBody = webhookEntry.getHttpRequestBody();
+        this.httpMethod = webhookEntry.getHttpMethod();
+        this.jansEnabled = webhookEntry.isJansEnabled();
+        this.httpHeaders = webhookEntry.getHttpHeaders();
+        this.auiFeatureIds = webhookEntry.getAuiFeatureIds();
     }
 
     public String getWebhookId() {

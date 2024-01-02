@@ -134,7 +134,7 @@ public class WebhookService {
             }
             AuiFeature feature = features.get(0);
             List<String> webhooksIds = feature.getWebhookIdsMapped();
-            if(CommonUtils.isEmptyOrNullCollection(webhooksIds)){
+            if (CommonUtils.isEmptyOrNullCollection(webhooksIds)) {
                 log.error(ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
             }
@@ -318,22 +318,21 @@ public class WebhookService {
      * @param webhookIds A set of webhook IDs.
      * @return The method is returning a List of Strings.
      */
-    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds) {
+    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds) throws ApplicationException {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         List<GenericResponse> responseList = new ArrayList<>();
         List<Callable<GenericResponse>> callables = new ArrayList<>();
         List<WebhookEntry> webhooks = getWebhookByIds(webhookIds);
-        webhooks.stream().forEach(webhook -> {
+        for (WebhookEntry webhook : webhooks) {
             try {
-                log.info("Webhook found. Name: {}, URL : {}, HttpMethod: {}", webhook.getDisplayName(), webhook.getUrl(), webhook.getHttpMethod());
                 validateWebhookEntry(webhook);
                 Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
                 callables.add(callable);
             } catch (ApplicationException e) {
-                throw new RuntimeException(e);
+                throw e;
             }
+        }
 
-        });
         for (Callable<GenericResponse> callable : callables) {
             Future<GenericResponse> future = executor.submit(callable);
             try {

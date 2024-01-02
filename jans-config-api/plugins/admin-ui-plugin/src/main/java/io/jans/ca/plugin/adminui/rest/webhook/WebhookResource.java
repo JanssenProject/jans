@@ -295,7 +295,7 @@ public class WebhookResource extends BaseResource {
             log.error(ErrorResponse.WEBHOOK_DELETE_ERROR.getDescription(), e);
             return Response
                     .serverError()
-                    .entity(CommonUtils.createGenericResponse(false, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()))
+                    .entity(CommonUtils.createGenericResponse(false, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.WEBHOOK_DELETE_ERROR.getDescription()))
                     .build();
         }
     }
@@ -330,6 +330,12 @@ public class WebhookResource extends BaseResource {
             List<GenericResponse> responseList = webhookService.triggerEnabledWebhooks(Sets.newHashSet(featureObj.getWebhookIdsMapped()));
 
             return Response.ok(responseList).build();
+        } catch (ApplicationException e) {
+            log.error(e.getMessage(), e);
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.FETCH_DATA_ERROR.getDescription(), e);
             return Response
