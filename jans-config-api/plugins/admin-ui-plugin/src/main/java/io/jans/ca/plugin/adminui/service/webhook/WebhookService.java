@@ -324,13 +324,9 @@ public class WebhookService {
         List<Callable<GenericResponse>> callables = new ArrayList<>();
         List<WebhookEntry> webhooks = getWebhookByIds(webhookIds);
         for (WebhookEntry webhook : webhooks) {
-            try {
-                validateWebhookEntry(webhook);
-                Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
-                callables.add(callable);
-            } catch (ApplicationException e) {
-                throw e;
-            }
+            validateWebhookEntry(webhook);
+            Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
+            callables.add(callable);
         }
 
         for (Callable<GenericResponse> callable : callables) {
