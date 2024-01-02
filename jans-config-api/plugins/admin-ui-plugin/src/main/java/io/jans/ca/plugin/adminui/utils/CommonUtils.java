@@ -69,4 +69,8 @@ public class CommonUtils {
         genericResponse.setResponseObject(node);
         return genericResponse;
     }
+
+    public static boolean isEmptyOrNullCollection(Collection<?> collection) {
+        return (collection == null || collection.isEmpty());
+    }
 }

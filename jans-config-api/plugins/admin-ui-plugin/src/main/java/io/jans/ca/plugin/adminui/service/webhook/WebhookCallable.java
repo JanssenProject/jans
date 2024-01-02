@@ -1,6 +1,9 @@
 package io.jans.ca.plugin.adminui.service.webhook;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.webhook.WebhookEntry;
@@ -39,18 +42,25 @@ public class WebhookCallable implements Callable<GenericResponse> {
                     request.header(header.getKey(), header.getValue());
                 });
         //Call rest endpoint
-        Response response = checkHttpMethod(request).invoke();
-
-        log.info("Webhook (Name: {}, Id: {}) request status code: {}", webhook.getDisplayName(), webhook.getWebhookId(), response.getStatus());
+        Invocation invocation = checkHttpMethod(request);
+        if(invocation == null) {
+            log.error("Error in creating invocation object for rest call (Name: {}, Id: {})", webhook.getDisplayName(), webhook.getWebhookId());
+        }
+        Response response = invocation.invoke();
+        ObjectMapper objectMapper = new ObjectMapper();
+        log.info("Webhook (Name: {}, Id: {}) response status code: {}", webhook.getDisplayName(), webhook.getWebhookId(), response.getStatus());
         if (response.getStatus() == Response.Status.OK.getStatusCode() ||
                 response.getStatus() == Response.Status.CREATED.getStatusCode() ||
                 response.getStatus() == Response.Status.ACCEPTED.getStatusCode()) {
             String responseData = response.readEntity(String.class);
-            log.info("Webhook (Name: {}, Id: {}) responseData", webhook.getDisplayName(), webhook.getWebhookId(), responseData);
-            return CommonUtils.createGenericResponse(true, response.getStatus(), responseData);
+            log.info("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getWebhookId(), responseData);
+            JsonNode jsonNode = objectMapper.createObjectNode();
+            ((ObjectNode) jsonNode).put("webhookId", webhook.getWebhookId());
+            ((ObjectNode) jsonNode).put("webhookName", webhook.getDisplayName());
+            return CommonUtils.createGenericResponse(true, response.getStatus(), responseData, jsonNode);
         } else {
             String responseData = response.readEntity(String.class);
-            log.error("Webhook (Name: {}, Id: {}) responseData", webhook.getDisplayName(), webhook.getWebhookId(), responseData);
+            log.error("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getWebhookId(), responseData);
             return CommonUtils.createGenericResponse(false, response.getStatus(), responseData);
         }
     }

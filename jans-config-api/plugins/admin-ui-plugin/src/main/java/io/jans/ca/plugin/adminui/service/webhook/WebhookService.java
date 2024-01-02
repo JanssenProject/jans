@@ -8,6 +8,7 @@ import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.webhook.AuiFeature;
 import io.jans.ca.plugin.adminui.model.webhook.WebhookEntry;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
+import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.util.ApiConstants;
@@ -21,6 +22,7 @@ import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -106,7 +108,7 @@ public class WebhookService {
      * @param ids A list of webhook IDs to search for.
      * @return The method is returning a List of WebhookEntry objects.
      */
-    public List<WebhookEntry> getWebhookByIds(Set<String> ids) {
+    public List<WebhookEntry> getWebhookByIds(Set<String> ids) throws ApplicationException {
         try {
             Filter searchFilter = null;
             List<WebhookEntry> webhooks = Lists.newArrayList();
@@ -119,7 +121,8 @@ public class WebhookService {
             log.info("Webhooks searchFilter:{}", searchFilter);
             return entryManager.findEntries(AppConstants.WEBHOOK_DN, WebhookEntry.class, searchFilter);
         } catch (Exception e) {
-            return null;
+            log.error(ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription(), e);
+            return Lists.newArrayList();
         }
     }
 
@@ -127,11 +130,12 @@ public class WebhookService {
         try {
             Filter filter = Filter.createSubstringFilter("auiFeatureId", null, new String[]{featureId}, null);
             List<AuiFeature> features = entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, filter);
-            if (features == null || features.size() == 0) {
+            if (CommonUtils.isEmptyOrNullCollection(features)) {
                 log.error(ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
             }
-            List<String> webhooksIds = features.stream().findFirst().get().getWebhookIdsMapped();
+            AuiFeature feature = features.get(0);
+            List<String> webhooksIds = feature.getWebhookIdsMapped();
             if(webhooksIds == null || webhooksIds.size() == 0){
                 log.error(ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
@@ -141,7 +145,8 @@ public class WebhookService {
 
             return webhooks;
         } catch (Exception e) {
-            return null;
+            log.error(ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription(), e);
+            return Lists.newArrayList();
         }
     }
 
@@ -164,7 +169,8 @@ public class WebhookService {
             log.info("Features searchFilter:{}", searchFilter);
             return entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, searchFilter);
         } catch (Exception e) {
-            return null;
+            log.error(ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription(), e);
+            return Lists.newArrayList();
         }
     }
 
@@ -320,7 +326,7 @@ public class WebhookService {
      * @param webhookIds A set of webhook IDs.
      * @return The method is returning a List of Strings.
      */
-    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds) {
+    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds) throws ApplicationException {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         List<GenericResponse> responseList = new ArrayList<>();
         List<Callable<GenericResponse>> callables = new ArrayList<>();
@@ -341,6 +347,8 @@ public class WebhookService {
             try {
                 responseList.add(future.get());
             } catch (InterruptedException | ExecutionException e) {
+                log.warn("Interrupted!", e);
+                Thread.currentThread().interrupt();
                 e.printStackTrace();
             }
         }

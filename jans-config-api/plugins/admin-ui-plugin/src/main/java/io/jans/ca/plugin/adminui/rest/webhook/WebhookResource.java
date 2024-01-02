@@ -33,6 +33,7 @@ import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -323,16 +324,16 @@ public class WebhookResource extends BaseResource {
             HashSet<String> featureIdSet = Sets.newHashSet();
             featureIdSet.add(featureId);
             List<AuiFeature> featureList = webhookService.getAuiFeaturesByIds(featureIdSet);
-            if (featureList == null || featureList.isEmpty()) {
+            if (CommonUtils.isEmptyOrNullCollection(featureList)) {
                 log.error(ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
             }
-            AuiFeature featureObj = featureList.stream().findFirst().get();
-            if (featureObj.getWebhookIdsMapped() == null || featureObj.getWebhookIdsMapped().isEmpty()) {
+            AuiFeature featureObj = featureList.get(0);
+            if (CommonUtils.isEmptyOrNullCollection(featureObj.getWebhookIdsMapped())) {
                 log.error(ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
             }
-            List<GenericResponse> responseList = webhookService.triggerEnabledWebhooks(Sets.newHashSet(featureList.stream().findFirst().get().getWebhookIdsMapped()));
+            List<GenericResponse> responseList = webhookService.triggerEnabledWebhooks(Sets.newHashSet(featureObj.getWebhookIdsMapped()));
 
             return Response.ok(responseList).build();
         } catch (Exception e) {
@@ -361,6 +362,6 @@ public class WebhookResource extends BaseResource {
         }
         log.debug("Webhook  - pagedResult:{}", pagedResult);
         return pagedResult;
-
     }
+
 }

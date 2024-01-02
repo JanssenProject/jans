@@ -932,17 +932,20 @@ paths:
                 description: Request json example
                 value: |
                   {
-                    "dn": "webhookId=57ebb7bc-ebb6-3f0c-8633-63a4f453cc11,ou=auiWebhooks,ou=admin-ui,o=jans",
-                    "webhookId": "57ebb7bc-ebb6-3f0c-8633-63a4f453cc11",
-                    "displayName": "test125",
-                    "description": "test1",
+                    "dn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
+                    "webhookId": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
+                    "displayName": "posts-webhook-1",
+                    "description": "posts-webhook description",
                     "url": "https://jsonplaceholder.typicode.com/posts",
-                    "requestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
+                    "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
                     "httpMethod": "POST",
                     "jansEnabled": true,
-                    "httpHeaders": [
-                      {"Content-Type":"application/json"}
-                    ]
+                    "httpHeaders": [{
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }],
+                    "auiFeatureIds": ["jans_link_write"],
+                    "baseDn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
                   }
       responses:
         "200":
@@ -956,17 +959,20 @@ paths:
                   description: Response json example
                   value: |
                     {
-                      "dn": "webhookId=57ebb7bc-ebb6-3f0c-8633-63a4f453cc11,ou=auiWebhooks,ou=admin-ui,o=jans",
-                      "webhookId": "57ebb7bc-ebb6-3f0c-8633-63a4f453cc11",
-                      "displayName": "test125",
-                      "description": "test1",
+                      "dn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
+                      "webhookId": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
+                      "displayName": "posts-webhook-1",
+                      "description": "posts-webhook description",
                       "url": "https://jsonplaceholder.typicode.com/posts",
-                      "requestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
+                      "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
                       "httpMethod": "POST",
                       "jansEnabled": true,
-                      "httpHeaders": [
-                        {"Content-Type":"application/json"}
-                      ]
+                      "httpHeaders": [{
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }],
+                      "auiFeatureIds": ["jans_link_write"],
+                      "baseDn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
                     }
         "401":
           description: Unauthorized
@@ -994,13 +1000,13 @@ paths:
                 description: Request json example
                 value: |
                   {
-                    "displayName": "posts-webhook",
+                    "displayName": "posts-webhook-1",
                     "description": "posts-webhook description",
                     "url": "https://jsonplaceholder.typicode.com/posts",
-                    "requestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
+                    "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
                     "httpMethod": "POST",
                     "jansEnabled": true,
-                    "httpHeaders":[{"Content-Type":"application/json"}],
+                    "httpHeaders":[{"key":"Content-Type", "value":"application/json"}],
                     "auiFeatureIds":["jans_link_write"]
                   }
       responses:
@@ -1015,16 +1021,20 @@ paths:
                   description: Response json example
                   value: |
                     {
-                      "dn": "webhookId=9fba4bf0-390f-3b7a-a570-d4da0149950a,ou=auiWebhooks,ou=admin-ui,o=jans",
-                      "webhookId": "9fba4bf0-390f-3b7a-a570-d4da0149950a",
-                      "displayName": "posts-webhook",
+                      "dn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
+                      "webhookId": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
+                      "displayName": "posts-webhook-1",
                       "description": "posts-webhook description",
                       "url": "https://jsonplaceholder.typicode.com/posts",
-                      "requestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
+                      "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
                       "httpMethod": "POST",
                       "jansEnabled": true,
-                      "httpHeaders": [{"Content-Type":"application/json"}],
-                      "auiFeatureIds": ["jans_link_write"]
+                      "httpHeaders": [{
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }],
+                      "auiFeatureIds": ["jans_link_write"],
+                      "baseDn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
                     }
         "401":
           description: Unauthorized
