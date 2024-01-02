@@ -308,6 +308,8 @@ use the command below:
   mvn -Dcfg=janssen.op.io test
   ```
 
+## Setup Janssen Schema with Test data
+
 ## Useful Tools 
 
 While working with Janssen Server, either as developer or administrator,
