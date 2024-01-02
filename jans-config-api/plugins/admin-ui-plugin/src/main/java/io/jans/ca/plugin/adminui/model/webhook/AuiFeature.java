@@ -1,7 +1,6 @@
 package io.jans.ca.plugin.adminui.model.webhook;
 
 import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
@@ -10,7 +9,7 @@ import org.python.google.common.collect.Sets;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 
 @DataEntry(sortBy = { "auiFeatureId" })
 @ObjectClass(value = "auiFeatures")
@@ -57,6 +56,20 @@ public class AuiFeature extends Entry implements Serializable {
         if(webhookIdsMapped != null) {
             this.webhookIdsMapped = Lists.newArrayList(Sets.newHashSet(webhookIdsMapped));
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        AuiFeature that = (AuiFeature) o;
+        return auiFeatureId.equals(that.auiFeatureId) && displayName.equals(that.displayName) && jansScope.equals(that.jansScope) && Objects.equals(webhookIdsMapped, that.webhookIdsMapped);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), auiFeatureId, displayName, jansScope);
     }
 
     @Override

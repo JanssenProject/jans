@@ -6,7 +6,6 @@ import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 import jakarta.validation.constraints.NotNull;
-import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;

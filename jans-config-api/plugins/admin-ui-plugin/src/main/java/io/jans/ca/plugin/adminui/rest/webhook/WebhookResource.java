@@ -33,19 +33,17 @@ import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
-@Path("/admin-ui")
+@Path("/admin-ui/webhook")
 public class WebhookResource extends BaseResource {
     public static final String SCOPE_WEBHOOK_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly";
     public static final String SCOPE_WEBHOOK_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write";
     public static final String SCOPE_WEBHOOK_DELETE = "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete";
     public static final String WEBHOOK = "webhook";
-    public static final String WEBHOOK_PATH = "/webhook";
     public static final String WEBHOOK_ID_PATH_VARIABLE = "/{webhookId}";
     public static final String FEATURE_ID_PATH_VARIABLE = "/{featureId}";
     public static final String TRIGGER_PATH = "/trigger";
@@ -90,7 +88,7 @@ public class WebhookResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError")})
     @GET
-    @Path(WEBHOOK_PATH + ADMIN_UI_FEATURES + WEBHOOK_ID_PATH_VARIABLE)
+    @Path(ADMIN_UI_FEATURES + WEBHOOK_ID_PATH_VARIABLE)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllAuiFeaturesByWebhookId(@Parameter(description = "Webhook identifier") @PathParam(AppConstants.WEBHOOK_ID) @NotNull String webhookId) {
@@ -117,7 +115,7 @@ public class WebhookResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError")})
     @GET
-    @Path(WEBHOOK_PATH + FEATURE_ID_PATH_VARIABLE)
+    @Path(FEATURE_ID_PATH_VARIABLE)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllWebhooksByFeatureId(@Parameter(description = "Feature identifier") @PathParam(AppConstants.ADMIN_UI_FEATURE_ID) @NotNull String featureId) {
@@ -144,7 +142,6 @@ public class WebhookResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError")})
     @GET
-    @Path(WEBHOOK_PATH)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getWebhooks(
@@ -153,13 +150,12 @@ public class WebhookResource extends BaseResource {
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(AppConstants.WEBHOOK_ID) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
-            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "scopeType=spontaneous,defaultScope=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair)
-            throws IllegalAccessException, InvocationTargetException {
+            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "scopeType=spontaneous,defaultScope=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) {
         try {
             if (log.isInfoEnabled()) {
                 log.info("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
                         escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
-                        escapeLog(sortOrder));
+                        escapeLog(sortOrder), escapeLog(fieldValuePair));
             }
 
             SearchRequest searchReq = createSearchRequest(AppConstants.WEBHOOK_DN, pattern, sortBy, sortOrder,
@@ -189,12 +185,11 @@ public class WebhookResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError")})
     @POST
-    @Path(WEBHOOK_PATH)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response addWebhook(@Valid WebhookEntry webhook) {
         try {
-            log.debug("Webhook to be added - webhookEntry:{}", webhook.toString());
+            log.debug("Webhook to be added - webhookEntry:{}", webhook.getDisplayName());
 
             WebhookEntry result = webhookService.addWebhook(webhook);
             log.debug("Id of newly added is {}", result.getWebhookId());
@@ -223,7 +218,6 @@ public class WebhookResource extends BaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError")})
     @PUT
-    @Path(WEBHOOK_PATH)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateWebhook(@Valid WebhookEntry webhook) {
@@ -269,7 +263,7 @@ public class WebhookResource extends BaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError")})
     @DELETE
-    @Path(WEBHOOK_PATH + WEBHOOK_ID_PATH_VARIABLE)
+    @Path(WEBHOOK_ID_PATH_VARIABLE)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_DELETE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteWebhook(@Parameter(description = "Webhook identifier") @PathParam(AppConstants.WEBHOOK_ID) @NotNull String webhookId) {
@@ -313,7 +307,7 @@ public class WebhookResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError")})
     @GET
-    @Path(WEBHOOK_PATH + TRIGGER_PATH + FEATURE_ID_PATH_VARIABLE)
+    @Path(TRIGGER_PATH + FEATURE_ID_PATH_VARIABLE)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response triggerWebhook(@Parameter(description = "Admin UI feature identifier") @PathParam(AppConstants.ADMIN_UI_FEATURE_ID) @NotNull String featureId) {

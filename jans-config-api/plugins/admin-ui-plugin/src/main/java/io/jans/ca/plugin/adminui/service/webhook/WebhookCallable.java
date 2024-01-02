@@ -4,6 +4,7 @@ package io.jans.ca.plugin.adminui.service.webhook;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Maps;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.webhook.WebhookEntry;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 public class WebhookCallable implements Callable<GenericResponse> {
@@ -37,14 +39,15 @@ public class WebhookCallable implements Callable<GenericResponse> {
         Invocation.Builder request = ClientFactory.instance().getClientBuilder(webhook.getUrl());
         //getting all headers
         webhook.getHttpHeaders().stream()
-                .filter(header -> header != null)
-                .forEach(header -> {
-                    request.header(header.getKey(), header.getValue());
-                });
+                .filter(Objects::nonNull)
+                .forEach(header -> request.header(header.getKey(), header.getValue()));
         //Call rest endpoint
         Invocation invocation = checkHttpMethod(request);
-        if(invocation == null) {
+        if (invocation == null) {
             log.error("Error in creating invocation object for rest call (Name: {}, Id: {})", webhook.getDisplayName(), webhook.getWebhookId());
+            return CommonUtils.createGenericResponse(false,
+                    Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                    "Error in creating invocation object for rest call (Name: " + webhook.getDisplayName() + ", Id: " + webhook.getWebhookId() + ")");
         }
         Response response = invocation.invoke();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -73,6 +76,7 @@ public class WebhookCallable implements Callable<GenericResponse> {
                 break;
             case "DELETE":
                 invocation = request.buildDelete();
+                break;
             case "POST":
             case "PUT":
             case "PATCH":
@@ -80,8 +84,8 @@ public class WebhookCallable implements Callable<GenericResponse> {
                     break;
                 }
                 Map<String, Object> requestBody = setRequestBody(webhook);
-                if (requestBody == null) {
-                    log.error("Webhook (Name: {}, Id: {}) . Error in parsing request-body", webhook.getDisplayName(), webhook.getWebhookId());
+                if (requestBody.isEmpty()) {
+                    log.error("Webhook (Name: {}, Id: {}) . Error in parsing request-body or the request-body is empty.", webhook.getDisplayName(), webhook.getWebhookId());
                 }
                 invocation = request.buildPost(Entity.entity(setRequestBody(webhook), MediaType.APPLICATION_JSON));
                 break;
@@ -95,11 +99,11 @@ public class WebhookCallable implements Callable<GenericResponse> {
         try {
             Map<String, Object> body = new HashMap<>();
             webhook.getHttpHeaders().stream()
-                    .filter(header -> header != null)
+                    .filter(Objects::nonNull)
                     .forEach(header -> {
                         if (header.getKey().equalsIgnoreCase(AppConstants.CONTENT_TYPE) && header.getKey().equalsIgnoreCase(AppConstants.APPLICATION_JSON)) {
                             JSONObject reqBody = new JSONObject(webhook.getHttpRequestBody());
-                            Iterator reqBodyIte = reqBody.keys();
+                            Iterator<String> reqBodyIte = reqBody.keys();
                             while (reqBodyIte.hasNext()) {
                                 String key = reqBodyIte.next().toString();
                                 body.put(key, reqBody.get(key));
@@ -109,7 +113,7 @@ public class WebhookCallable implements Callable<GenericResponse> {
             return body;
         } catch (Exception ex) {
             ex.printStackTrace();
-            return null;
+            return Maps.newHashMap();
         }
     }
 

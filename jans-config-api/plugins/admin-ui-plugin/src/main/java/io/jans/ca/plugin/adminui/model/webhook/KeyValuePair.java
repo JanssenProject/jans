@@ -3,11 +3,13 @@ package io.jans.ca.plugin.adminui.model.webhook;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import java.io.Serializable;
+
 @JsonPropertyOrder({"key", "value"})
 @JsonIgnoreProperties(
         ignoreUnknown = true
 )
-public class KeyValuePair {
+public class KeyValuePair implements Serializable {
     private String key;
     private String value;
 

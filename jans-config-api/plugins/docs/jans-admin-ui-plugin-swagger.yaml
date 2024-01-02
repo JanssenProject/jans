@@ -1069,7 +1069,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete
-  /admin-ui/features:
+  /admin-ui/webhook/features:
     get:
       tags:
       - Admin UI - Webhooks

@@ -52,6 +52,7 @@ public enum ErrorResponse {
     WEBHOOK_HTTP_METHOD_EMPTY("HTTP method for webhook is required."),
     WEBHOOK_REQUEST_BODY_EMPTY("HTTP request-body for webhook is required for POST/PUT/PATCH request."),
     WEBHOOK_SAVE_ERROR("Error in saving webhook."),
+    WEBHOOK_SEARCH_ERROR("Error in fetching webhook."),
     WEBHOOK_UPDATE_ERROR("Error in updating webhook."),
     WEBHOOK_ID_MISSING("Webhook Id is missing in request."),
     WEBHOOK_DELETE_ERROR("Error in removing webhook."),

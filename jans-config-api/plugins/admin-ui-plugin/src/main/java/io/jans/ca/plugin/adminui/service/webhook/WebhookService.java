@@ -22,7 +22,6 @@ import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
-import org.slf4j.event.Level;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -97,8 +96,8 @@ public class WebhookService {
                     searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
         } catch (Exception e) {
-            log.error(ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription(), e);
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+            log.error(ErrorResponse.WEBHOOK_SEARCH_ERROR.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.WEBHOOK_SEARCH_ERROR.getDescription());
         }
     }
 
@@ -108,10 +107,9 @@ public class WebhookService {
      * @param ids A list of webhook IDs to search for.
      * @return The method is returning a List of WebhookEntry objects.
      */
-    public List<WebhookEntry> getWebhookByIds(Set<String> ids) throws ApplicationException {
+    public List<WebhookEntry> getWebhookByIds(Set<String> ids) {
         try {
             Filter searchFilter = null;
-            List<WebhookEntry> webhooks = Lists.newArrayList();
             List<Filter> filters = new ArrayList<>();
             for (String id : ids) {
                 Filter filter = Filter.createSubstringFilter("webhookId", null, new String[]{id}, null);
@@ -121,7 +119,7 @@ public class WebhookService {
             log.info("Webhooks searchFilter:{}", searchFilter);
             return entryManager.findEntries(AppConstants.WEBHOOK_DN, WebhookEntry.class, searchFilter);
         } catch (Exception e) {
-            log.error(ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription(), e);
+            log.error(ErrorResponse.WEBHOOK_SEARCH_ERROR.getDescription(), e);
             return Lists.newArrayList();
         }
     }
@@ -136,16 +134,14 @@ public class WebhookService {
             }
             AuiFeature feature = features.get(0);
             List<String> webhooksIds = feature.getWebhookIdsMapped();
-            if(webhooksIds == null || webhooksIds.size() == 0){
+            if(CommonUtils.isEmptyOrNullCollection(webhooksIds)){
                 log.error(ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
             }
 
-            List<WebhookEntry> webhooks = getWebhookByIds(Sets.newHashSet(webhooksIds));
-
-            return webhooks;
+            return getWebhookByIds(Sets.newHashSet(webhooksIds));
         } catch (Exception e) {
-            log.error(ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription(), e);
+            log.error(ErrorResponse.WEBHOOK_SEARCH_ERROR.getDescription(), e);
             return Lists.newArrayList();
         }
     }
@@ -159,7 +155,6 @@ public class WebhookService {
     public List<AuiFeature> getAuiFeaturesByIds(Set<String> ids) {
         try {
             Filter searchFilter = null;
-            List<AuiFeature> features = Lists.newArrayList();
             List<Filter> filters = new ArrayList<>();
             for (String id : ids) {
                 Filter filter = Filter.createSubstringFilter("auiFeatureId", null, new String[]{id}, null);
@@ -169,7 +164,7 @@ public class WebhookService {
             log.info("Features searchFilter:{}", searchFilter);
             return entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, searchFilter);
         } catch (Exception e) {
-            log.error(ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription(), e);
+            log.error(ErrorResponse.FETCH_DATA_ERROR.getDescription(), e);
             return Lists.newArrayList();
         }
     }
@@ -185,7 +180,7 @@ public class WebhookService {
     public WebhookEntry addWebhook(WebhookEntry webhook) throws ApplicationException {
         try {
             validateWebhookEntry(webhook);
-            String id = idFromName(webhook.getDisplayName() + webhook.getUrl() + webhook.getHttpMethod());//UUID.randomUUID().toString();
+            String id = idFromName(webhook.getDisplayName() + webhook.getUrl() + webhook.getHttpMethod());
             webhook.setWebhookId(id);
             webhook.setDn(dnOfWebhook(id, AppConstants.WEBHOOK_DN));
             entryManager.persist(webhook);
@@ -200,11 +195,10 @@ public class WebhookService {
 
             return webhook;
         } catch (ApplicationException e) {
-            log.error(e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription(), e);
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription());
         }
     }
 
@@ -244,11 +238,10 @@ public class WebhookService {
             //removing webhook
             entryManager.remove(webhook);
         } catch (ApplicationException e) {
-            log.error(e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error(ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription(), e);
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+            log.error(ErrorResponse.WEBHOOK_DELETE_ERROR.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.WEBHOOK_DELETE_ERROR.getDescription());
         }
     }
 
@@ -282,11 +275,10 @@ public class WebhookService {
 
             return webhook;
         } catch (ApplicationException e) {
-            log.error(e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.WEBHOOK_UPDATE_ERROR.getDescription(), e);
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.WEBHOOK_UPDATE_ERROR.getDescription());
         }
     }
 
@@ -312,7 +304,7 @@ public class WebhookService {
                 log.error(ErrorResponse.WEBHOOK_REQUEST_BODY_EMPTY.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_REQUEST_BODY_EMPTY.getDescription());
             }
-            if (!webhookEntry.getHttpHeaders().stream().anyMatch(header -> header.getKey().equals(AppConstants.CONTENT_TYPE))) {
+            if (webhookEntry.getHttpHeaders().stream().noneMatch(header -> header.getKey().equals(AppConstants.CONTENT_TYPE))) {
                 log.error(ErrorResponse.WEBHOOK_CONTENT_TYPE_REQUIRED.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_CONTENT_TYPE_REQUIRED.getDescription());
             }
@@ -335,19 +327,19 @@ public class WebhookService {
             try {
                 log.info("Webhook found. Name: {}, URL : {}, HttpMethod: {}", webhook.getDisplayName(), webhook.getUrl(), webhook.getHttpMethod());
                 validateWebhookEntry(webhook);
-                Callable callable = new WebhookCallable(webhook, log);
+                Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
                 callables.add(callable);
             } catch (ApplicationException e) {
                 e.printStackTrace();
             }
 
         });
-        for (Callable callable : callables) {
+        for (Callable<GenericResponse> callable : callables) {
             Future<GenericResponse> future = executor.submit(callable);
             try {
                 responseList.add(future.get());
             } catch (InterruptedException | ExecutionException e) {
-                log.warn("Interrupted!", e);
+                log.warn("Webhook execution interrupted!", e);
                 Thread.currentThread().interrupt();
                 e.printStackTrace();
             }
@@ -366,9 +358,6 @@ public class WebhookService {
         return String.format("webhookId=%s,%s", id, baseDn);
     }
 
-    private static String dnOfAuiFeature(String id, String baseDn) {
-        return String.format("auiFeatureId=%s,%s", id, baseDn);
-    }
 
     public int getRecordMaxCount() {
         log.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",
