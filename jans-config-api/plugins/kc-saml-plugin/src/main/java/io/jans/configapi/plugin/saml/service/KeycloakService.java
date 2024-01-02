@@ -136,7 +136,7 @@ public class KeycloakService {
 
             // Create KC JsonObject
             JSONObject kcJsonObject = createKcJSONObject(jsonObject);
-            
+
             logger.error("Create new IdentityProvider - kcJsonObject:{}", kcJsonObject);
             String idpJson = idpClientFactory.createUpdateIdp(idpUrl, token, isUpdate, kcJsonObject);
             logger.error("IdentityProvider response idpJson:{}", idpJson);
@@ -343,8 +343,10 @@ public class KeycloakService {
 
         Map<String, String> config = new HashMap<>();
         for (String name : kcSamlConfig) {
-            logger.error("name:{}, jsonObject.getString(name):{}", name, jsonObject.getString(name));
-            config.put(name, jsonObject.getString(name));
+            logger.error("name:{}, jsonObject.has(name):{}", name, jsonObject.has(name));
+            if (jsonObject.has(name)) {
+                config.put(name, jsonObject.getString(name));
+            }
         }
 
         logger.error("config:{}", config);

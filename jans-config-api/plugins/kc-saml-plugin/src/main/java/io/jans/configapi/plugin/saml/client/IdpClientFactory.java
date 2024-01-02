@@ -298,18 +298,20 @@ public class IdpClientFactory {
 
             if (response != null) {
                 logger.error(
-                        "IDP Add/Update - response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
-                        response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass());
+                        "IDP Add/Update - isUpdate:{}, response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{},response.getStatusInfo().equals(Status.OK):{},  response.getStatusInfo().equals(Status.CREATED):{}",
+                        isUpdate,response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass(), response.getStatusInfo().equals(Status.OK), response.getStatusInfo().equals(Status.CREATED));
                 String entity = response.readEntity(String.class);
                 logger.error("Add/Update IDP entity:{}", entity);
-                if (response.getStatusInfo().equals(Status.OK)) {
-
-                    String name = identityProviderJson.getString(Constants.ALIAS);
-                    logger.error("Add/Update IDP Id -  name:{}", name);
-                    idpJson = getIdp(idpUrl + "/" + name, token);
-                }else {
-                    throw new WebApplicationException("Error while Adding/Updating IDP "+response.getStatusInfo()+" - "+entity);
+                if (isUpdate && !response.getStatusInfo().toString().equalsIgnoreCase(Status.OK.toString())) {
+                    throw new WebApplicationException("Error while updating IDP"+ identityProviderJson+", Status is "+response.getStatusInfo()+" - "+entity);
                 }
+                if(!isUpdate && response.getStatusInfo().toString().equalsIgnoreCase(Status.CREATED.toString()))  {
+                    throw new WebApplicationException("Error while creating IDP"+ identityProviderJson+", Status is "+response.getStatusInfo()+" - "+entity);
+                }
+                String name = identityProviderJson.getString(Constants.ALIAS);
+                logger.error("Add/Update IDP Id -  name:{}", name);
+                idpJson = getIdp(idpUrl + "/" + name, token);
+                logger.error("Added/Updated IDP -  idpJson:{}", idpJson);
             }
 
         } catch (Exception ex) {

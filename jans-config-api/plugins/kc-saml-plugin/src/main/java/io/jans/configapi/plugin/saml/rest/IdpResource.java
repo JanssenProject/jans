@@ -77,20 +77,24 @@ public class IdpResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS })
     public Response getAllSamlIdentityProvider(
-                 @Parameter(description = "Realm Name") @DefaultValue(Constants.REALM_MASTER) @QueryParam(value = Constants.REALM) String realmName )
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair)
             throws IllegalAccessException, InvocationTargetException {
         if (log.isDebugEnabled()) {
-            log.debug("Serach param - realmName:{}", escapeLog(realmName));
+            log.debug(
+                    "Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
+                    escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
+                    escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
-        List<IdentityProvider> identityProviderList = null;
-        try{
-            identityProviderList = idpService.getAllIdp(realmName);idpService.getAllIdp(realmName);
-       
-        log.debug("Fetched - identityProviderList", identityProviderList);
-        }catch(Exception ex) {
-            throwInternalServerException(SAML_IDP, ex.getMessage());
-        }
-        return Response.ok(identityProviderList).build();
+
+        SearchRequest searchReq = createSearchRequest(idpService.getIdentityProviderDn(), pattern, sortBy, sortOrder,
+                startIndex, limit, null, null, ApiConstants.DEFAULT_MAX_COUNT, fieldValuePair, IdentityProvider.class);
+
+        return Response.ok(this.doSearch(searchReq)).build();
     }
 
     @Operation(summary = "Get SAML Identity Provider by Inum", description = "Get SAML Identity Provider by Inum", operationId = "get-saml-identity-provider-by-inum", tags = {
@@ -214,7 +218,7 @@ public class IdpResource extends BaseResource {
             }
             throwInternalServerException(ex);
         }
-
+        
         log.info("Create IdentityProvider - idp:{}", idp);
         return Response.status(Response.Status.CREATED).entity(idp).build();
     }
@@ -333,7 +337,5 @@ public class IdpResource extends BaseResource {
         }
         return pagedIdentityProvider;
     }
-
-    
-
+   
 }
