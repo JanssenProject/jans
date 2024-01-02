@@ -1696,11 +1696,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/reference/database/mariadb/</loc>
-         <lastmod>2024-01-02</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/reference/database/mysql-config/</loc>
          <lastmod>2024-01-02</lastmod>
          <changefreq>daily</changefreq>
