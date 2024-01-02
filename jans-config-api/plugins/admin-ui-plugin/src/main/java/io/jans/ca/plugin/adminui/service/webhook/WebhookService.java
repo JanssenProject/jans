@@ -318,7 +318,7 @@ public class WebhookService {
      * @param webhookIds A set of webhook IDs.
      * @return The method is returning a List of Strings.
      */
-    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds) throws ApplicationException {
+    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds) {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         List<GenericResponse> responseList = new ArrayList<>();
         List<Callable<GenericResponse>> callables = new ArrayList<>();
@@ -330,7 +330,7 @@ public class WebhookService {
                 Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
                 callables.add(callable);
             } catch (ApplicationException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
 
         });
@@ -339,9 +339,8 @@ public class WebhookService {
             try {
                 responseList.add(future.get());
             } catch (InterruptedException | ExecutionException e) {
-                log.warn("Webhook execution interrupted!", e);
+                log.error("Webhook execution interrupted!", e);
                 Thread.currentThread().interrupt();
-                e.printStackTrace();
             }
         }
         //shut down the executor service

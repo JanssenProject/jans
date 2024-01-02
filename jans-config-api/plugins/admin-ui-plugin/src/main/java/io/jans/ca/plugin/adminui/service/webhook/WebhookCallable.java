@@ -112,7 +112,7 @@ public class WebhookCallable implements Callable<GenericResponse> {
                     });
             return body;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Error in parsing request-body: {}", ex);
             return Maps.newHashMap();
         }
     }
