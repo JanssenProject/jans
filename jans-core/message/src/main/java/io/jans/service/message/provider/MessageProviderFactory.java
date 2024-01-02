@@ -79,7 +79,7 @@ public class MessageProviderFactory {
 		// Create proxied bean
 		AbstractMessageProvider<?> messageProvider = null;
 		switch (messageProviderType) {
-		case NULL:
+		case DISABLED:
 			messageProvider = instance.select(NullMessageProvider.class).get();
 			break;
 		case REDIS:
