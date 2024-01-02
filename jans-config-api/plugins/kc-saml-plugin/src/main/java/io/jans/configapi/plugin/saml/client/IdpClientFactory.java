@@ -239,8 +239,8 @@ public class IdpClientFactory {
 
             if (response != null) {
                 logger.error(
-                        "IDP Add/Update - response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
-                        response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass());
+                        "IDP Add/Update - response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity():{}",
+                        response.getStatus(), response.getStatusInfo().toString(), response.getEntity());
                 String entity = response.readEntity(String.class);
                 logger.error("Add/Update IDP entity:{}", entity);
                 if (response.getStatusInfo().equals(Status.OK)) {
@@ -298,14 +298,14 @@ public class IdpClientFactory {
 
             if (response != null) {
                 logger.error(
-                        "IDP Add/Update - isUpdate:{}, response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{},response.getStatusInfo().equals(Status.OK):{},  response.getStatusInfo().equals(Status.CREATED):{}",
-                        isUpdate,response.getStatus(), response.getStatusInfo().toString(), response.getEntity().getClass(), response.getStatusInfo().equals(Status.OK), response.getStatusInfo().equals(Status.CREATED));
+                        "IDP Add/Update - isUpdate:{}, response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity():{},response.getStatusInfo().equals(Status.OK):{},  response.getStatusInfo().equals(Status.CREATED):{}, , response.getStatusInfo().equals(Status.NO_CONTENT):{}",
+                        isUpdate,response.getStatus(), response.getStatusInfo().toString(), response.getEntity(), response.getStatusInfo().equals(Status.OK), response.getStatusInfo().equals(Status.CREATED), response.getStatusInfo().equals(Status.NO_CONTENT));
                 String entity = response.readEntity(String.class);
                 logger.error("Add/Update IDP entity:{}", entity);
-                if (isUpdate && !response.getStatusInfo().toString().equalsIgnoreCase(Status.OK.toString())) {
+                if (isUpdate && response.getStatusInfo().equals(Status.OK)) {
                     throw new WebApplicationException("Error while updating IDP"+ identityProviderJson+", Status is "+response.getStatusInfo()+" - "+entity);
                 }
-                if(!isUpdate && response.getStatusInfo().toString().equalsIgnoreCase(Status.CREATED.toString()))  {
+                if(!isUpdate && response.getStatusInfo().equals(Status.CREATED))  {
                     throw new WebApplicationException("Error while creating IDP"+ identityProviderJson+", Status is "+response.getStatusInfo()+" - "+entity);
                 }
                 String name = identityProviderJson.getString(Constants.ALIAS);
@@ -344,14 +344,14 @@ public class IdpClientFactory {
 
             if (response != null) {
                 logger.error(
-                        "Delete IDP  -  response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity().getClass():{}",
-                        response.getStatus(), response.getStatusInfo(), response.getEntity().getClass());
+                        "Delete IDP  -  response.getStatus():{}, response.getStatusInfo().toString():{}, response.getEntity():{}",
+                        response.getStatus(), response.getStatusInfo(), response.getEntity());
                 String entity = response.readEntity(String.class);
                 logger.error("Delete IDP entity:{}", entity);
-                if (response.getStatusInfo().equals(Status.OK)) {                   
+                if (response.getStatusInfo().equals(Status.NO_CONTENT)) {                   
                     isDeleted = true;
                 }else {
-                    throw new WebApplicationException("Error while deleting SP Metadata "+response.getStatusInfo()+" - "+entity);
+                    throw new WebApplicationException("Error while deleting IDP "+response.getStatusInfo()+" - "+entity);
                 }
             }
 
