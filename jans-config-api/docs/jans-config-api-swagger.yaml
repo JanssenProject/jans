@@ -7862,7 +7862,7 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
@@ -7870,11 +7870,11 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanEdit:
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8675,8 +8675,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8686,6 +8684,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9857,7 +9857,7 @@ components:
         messageProviderType:
           type: string
           enum:
-          - "NULL"
+          - DISABLED
           - REDIS
           - POSTGRES
         redisConfiguration:

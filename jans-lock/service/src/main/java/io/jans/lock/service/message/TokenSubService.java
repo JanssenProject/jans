@@ -9,7 +9,6 @@ package io.jans.lock.service.message;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.service.consumer.message.MessageConsumerFactory;
 import io.jans.service.message.consumer.MessageConsumer;
 import io.jans.service.message.provider.MessageProvider;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -31,13 +30,11 @@ public class TokenSubService {
 	private MessageProvider messageProvider;
 
     @Inject
-	private MessageConsumerFactory messageConsumerFactory;
+	private MessageConsumer messageConsumer;
 
 	public void subscribe() {
 		log.info("Use message provider type: {}", messageProvider.getProviderType());
 		
-		MessageConsumer messageConsumer = messageConsumerFactory.getMessageConsumer(appConfiguration.getMessageConsumerType());
-
 		messageProvider.subscribe(messageConsumer, appConfiguration.getTokenChannels().toArray(new String[0]));
 
 		log.info("Subscribed to channels: {}", appConfiguration.getTokenChannels());
