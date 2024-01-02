@@ -184,67 +184,10 @@ public class IdpClientFactory {
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
             throw new WebApplicationException("Error while validating SAML IDP Metadata", ex);
         }
 
         return config;
-    }
-
-    public String createUpdateIdp(final String idpUrl, final String token, boolean isUpdate,
-            String identityProviderJson) {
-        String idpJson = null;
-        try {
-            logger.info("Add/modify IDP idpUrl:{}, isUpdate:{}, identityProviderJson:{}", idpUrl, isUpdate,
-                    identityProviderJson);
-
-            if (StringUtils.isBlank(idpUrl)) {
-                throw new InvalidAttributeException(IDP_URL_NULL);
-            }
-            if (StringUtils.isBlank(token)) {
-                throw new InvalidAttributeException(ACCESS_TOKEN_NULL);
-            }
-            if (StringUtils.isBlank(identityProviderJson)) {
-                throw new InvalidAttributeException("Idp json is null!!!");
-            }
-
-            Builder request = getClientBuilder(idpUrl);
-            request.header(AUTHORIZATION, BEARER + token);
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-            String objectJson = Jackson.getJsonString(identityProviderJson);
-            logger.debug(" SAML IDP JSON - objectJson:{}", objectJson);
-
-            Response response = null;
-            if (isUpdate) {
-                response = request.put(Entity.json(objectJson));
-            } else {
-                response = request.post(Entity.json(objectJson));
-            }
-
-            logger.debug("Response for SAML IDP -  response:{}", response);
-
-            if (response != null) {
-                logger.trace(
-                        "IDP Add/Update - response.getStatus():{}, response.getStatusInfo():{}, response.getEntity():{}",
-                        response.getStatus(), response.getStatusInfo(), response.getEntity());
-                String entity = response.readEntity(String.class);
-                logger.trace("Add/Update IDP entity:{}", entity);
-                if (response.getStatusInfo().equals(Status.OK)) {
-
-                    String name = Jackson.getElement(identityProviderJson, Constants.ALIAS);
-                    idpJson = getIdp(idpUrl + "/" + name, token);
-                } else {
-                    throw new WebApplicationException(
-                            "Error while Adding/Updating IDP " + response.getStatusInfo() + " - " + entity);
-                }
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            throw new ConfigurationException("Error while add/updating SAML IDP", ex);
-        }
-
-        return idpJson;
     }
 
     public String createUpdateIdp(final String idpUrl, final String token, boolean isUpdate,
@@ -307,7 +250,6 @@ public class IdpClientFactory {
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
             throw new ConfigurationException("Error while add/updating SAML IDP", ex);
         }
 
@@ -347,7 +289,6 @@ public class IdpClientFactory {
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
             throw new ConfigurationException("Error while deleting SAML IDP", ex);
         }
 

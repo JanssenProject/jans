@@ -251,6 +251,7 @@ public class SamlService {
     }
 
     private TrustRelationship setTrustRelationshipDefaultValue(TrustRelationship trustRelationship, boolean update) {
+        log.debug("trustRelationship:{}, update:{}",trustRelationship, update);
         return trustRelationship;
     }
 

@@ -317,7 +317,7 @@ public class KeycloakService {
     }
 
     private JSONObject populateKcConfig(JSONObject jsonObject) {
-        logger.info("jsonObject:{}", jsonObject);
+        logger.info("IDP - jsonObject:{}", jsonObject);
         List<String> kcSamlConfig = getKcSamlConfig();
 
         if (jsonObject == null || kcSamlConfig == null || kcSamlConfig.isEmpty()) {
@@ -344,13 +344,13 @@ public class KeycloakService {
         boolean valid = verifySamlIdpConfig(config);
         logger.debug("Is IDP metadata config valid:{})", valid);
 
-        logger.info("jsonObject:{}", jsonObject);
+        logger.info("Post config IDP jsonObject:{}", jsonObject);
 
         return jsonObject;
     }
 
     private JSONObject createKcJSONObject(JSONObject jsonObject) {
-        logger.info("jsonObject:{}", jsonObject);
+        logger.info("For KC - jsonObject:{}", jsonObject);
         List<String> kcAttributes = getKcAttributes();
 
         if (jsonObject == null || kcAttributes == null || kcAttributes.isEmpty()) {

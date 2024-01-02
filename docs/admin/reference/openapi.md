@@ -21,6 +21,7 @@ Follow the links below to access respective documentation.
 | Jans Core        | NA                                                                                                                                                                                    |  
 | Jans FIDO 2      | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)                      |  
 | Jans SCIM API    | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-scim/server/src/main/resources/jans-scim-openapi.yaml) |
+| Jans KC SAML API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/plugins/docs/kc-saml-plugin-swagger.yaml)                       |
 
 ## Javadocs 
 
