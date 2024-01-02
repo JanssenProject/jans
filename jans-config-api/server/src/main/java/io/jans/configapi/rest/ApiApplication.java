@@ -123,6 +123,7 @@ public class ApiApplication extends BaseApiApplication {
         classes.add(AcrsResource.class);
         classes.add(AttributesResource.class);
         classes.add(CacheConfigurationResource.class);
+        classes.add(MessageConfigurationResource.class);
         classes.add(ClientsResource.class);
         classes.add(AuthConfigResource.class);
         classes.add(ConfigSmtpResource.class);

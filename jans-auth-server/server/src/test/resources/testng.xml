@@ -35,6 +35,7 @@
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeActionTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizationChallengeValidatorTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthzRequestTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthzDetailsServiceTest" />
 
             <!-- REVOKE -->
             <class name="io.jans.as.server.revoke.RevokeRestWebServiceImplTest" />

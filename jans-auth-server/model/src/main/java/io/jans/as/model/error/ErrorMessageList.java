@@ -10,6 +10,8 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
+import io.jans.model.error.ErrorMessage;
+
 
 /**
  * Represents an error message list in a configuration XML file.

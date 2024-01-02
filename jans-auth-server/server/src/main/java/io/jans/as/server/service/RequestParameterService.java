@@ -56,6 +56,7 @@ public class RequestParameterService {
             AuthorizeRequestParam.MAX_AGE,
             AuthorizeRequestParam.UI_LOCALES,
             AuthorizeRequestParam.ID_TOKEN_HINT,
+            AuthorizeRequestParam.AUTHORIZATION_DETAILS,
             AuthorizeRequestParam.LOGIN_HINT,
             AuthorizeRequestParam.ACR_VALUES,
             AuthorizeRequestParam.REQUEST,

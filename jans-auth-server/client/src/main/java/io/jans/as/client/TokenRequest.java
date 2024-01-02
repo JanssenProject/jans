@@ -33,6 +33,7 @@ public class TokenRequest extends ClientAuthnRequest {
     private String username;
     private String password;
     private String scope;
+    private String authorizationDetails;
     private String assertion;
     private String refreshToken;
     private String codeVerifier;
@@ -235,6 +236,24 @@ public class TokenRequest extends ClientAuthnRequest {
     }
 
     /**
+     * Gets authorization details
+     *
+     * @return authorization details
+     */
+    public String getAuthorizationDetails() {
+        return authorizationDetails;
+    }
+
+    /**
+     * Sets authorization details
+     *
+     * @param authorizationDetails authorization details
+     */
+    public void setAuthorizationDetails(String authorizationDetails) {
+        this.authorizationDetails = authorizationDetails;
+    }
+
+    /**
      * Returns the assertion.
      *
      * @return The assertion.
@@ -308,6 +327,7 @@ public class TokenRequest extends ClientAuthnRequest {
         builder.append("code", code);
         builder.append("redirect_uri", redirectUri);
         builder.append("scope", scope);
+        builder.append("authorizationDetails", authorizationDetails);
         builder.append("username", username);
         builder.append("password", password);
         builder.append("assertion", assertion);
@@ -372,6 +392,9 @@ public class TokenRequest extends ClientAuthnRequest {
         }
         if (scope != null && !scope.isEmpty()) {
             parameters.put("scope", scope);
+        }
+        if (authorizationDetails != null && !authorizationDetails.isEmpty()) {
+            parameters.put("authorization_details", authorizationDetails);
         }
         if (assertion != null && !assertion.isEmpty()) {
             parameters.put("assertion", assertion);

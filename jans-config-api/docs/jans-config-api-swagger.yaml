@@ -4101,6 +4101,7 @@ paths:
                   - persistence_extension
                   - idp
                   - discovery
+                  - authz_detail
                   - update_token
                   - config_api_auth
                   - modify_ssa_response
@@ -7861,17 +7862,17 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
         userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanAccess:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8674,8 +8675,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8685,6 +8684,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9194,16 +9195,6 @@ components:
           type: string
         tokenEndpointAuthMethod:
           type: string
-          format: enum
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         tokenEndpointAuthSigningAlg:
           type: string
         defaultMaxAge:
@@ -9642,6 +9633,7 @@ components:
           - persistence_extension
           - idp
           - discovery
+          - authz_detail
           - update_token
           - config_api_auth
           - modify_ssa_response
@@ -9865,61 +9857,41 @@ components:
         messageProviderType:
           type: string
           enum:
-          - "NULL"
+          - DISABLED
           - REDIS
           - POSTGRES
-        nullConfiguration:
-          $ref: '#/components/schemas/NullMessageConfiguration'
         redisConfiguration:
           $ref: '#/components/schemas/RedisMessageConfiguration'
         postgresConfiguration:
           $ref: '#/components/schemas/PostgresMessageConfiguration'
-    NullMessageConfiguration:
-      type: object
     PostgresMessageConfiguration:
       type: object
       properties:
+        driverClassName:
+          type: string
         dbSchemaName:
           type: string
-          xml:
-            name: db-schema-name
         connectionUri:
           type: string
-          xml:
-            name: connection-uri
         authUserName:
           type: string
-          xml:
-            name: auth-userName
         authUserPassword:
           type: string
-          xml:
-            name: auth-userPassword
         connectionPoolMaxTotal:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-max-total
         connectionPoolMaxIdle:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-max-idle
         connectionPoolMinIdle:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-min-idle
         messageWaitMillis:
           type: integer
           format: int32
-          xml:
-            name: message-wait-millis
         messageSleepThreadTime:
           type: integer
           format: int32
-          xml:
-            name: message-sleep-thread-millis
     RedisMessageConfiguration:
       type: object
       properties:
@@ -10130,10 +10102,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
