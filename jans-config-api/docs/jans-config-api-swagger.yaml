@@ -7866,15 +7866,15 @@ components:
           type: boolean
         userCanView:
           type: boolean
+        userCanEdit:
+          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanEdit:
+        userCanAccess:
           type: boolean
         adminCanAccess:
-          type: boolean
-        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8675,8 +8675,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8686,6 +8684,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9857,7 +9857,7 @@ components:
         messageProviderType:
           type: string
           enum:
-          - "NULL"
+          - DISABLED
           - REDIS
           - POSTGRES
         redisConfiguration:
@@ -9867,29 +9867,29 @@ components:
     PostgresMessageConfiguration:
       type: object
       properties:
-        driverClassName:
+        jdbc.driver.class-name:
           type: string
-        dbSchemaName:
+        db-schema-name:
           type: string
-        connectionUri:
+        connection-uri:
           type: string
-        authUserName:
+        auth-user-name:
           type: string
-        authUserPassword:
+        auth-user-password:
           type: string
-        connectionPoolMaxTotal:
+        connection-pool-max-total:
           type: integer
           format: int32
-        connectionPoolMaxIdle:
+        connection-pool-max-idle:
           type: integer
           format: int32
-        connectionPoolMinIdle:
+        connection-pool-min-idle:
           type: integer
           format: int32
-        messageWaitMillis:
+        message-wait-millis:
           type: integer
           format: int32
-        messageSleepThreadTime:
+        message-sleep-thread-millis:
           type: integer
           format: int32
     RedisMessageConfiguration:
@@ -10102,10 +10102,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
