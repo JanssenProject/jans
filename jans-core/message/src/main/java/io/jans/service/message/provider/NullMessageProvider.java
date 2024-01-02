@@ -64,7 +64,7 @@ public class NullMessageProvider extends AbstractMessageProvider<NullPool> {
 
 	@Override
 	public MessageProviderType getProviderType() {
-		return MessageProviderType.NULL;
+		return MessageProviderType.DISABLED;
 	}
 
 	@Override
