@@ -26,7 +26,7 @@
       <append>true</append>
       <rollingPolicy class="TimeBasedRollingPolicy">
         <fileNamePattern>${app.logdir}/scheduler-%d{yyyy-mm-dd}.log.gz</fileNamePattern>
-        <maxHistory>${scheduler.loghistory:-180}</maxHistory>
+        <maxHistory>${app.logging.loghistory:-180}</maxHistory>
       </rollingPolicy>
 
       <encoder class="PatternLayoutEncoder">
@@ -35,7 +35,7 @@
       </encoder>
     </appender>
 
-    <root level="${scheduler.loglevel.root:-INFO}">
+    <root level="${app.logging.level.root:-INFO}">
       <appender-ref ref="STDOUT"/>
       <appender-ref ref="FILE"/>
     </root>

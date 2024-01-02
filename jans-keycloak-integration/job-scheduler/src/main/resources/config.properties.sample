@@ -1,5 +1,11 @@
 # scheduler configuration file
 
-# log level
-scheduler.loglevel.root=DEBUG
-scheduler.loghistory=180
+# logging configuration 
+app.logging.level.root=DEBUG
+app.logging.loghistory=180
+
+
+# quartz scheduler configuration
+app.scheduler.quartz.name=kc-jans-scheduler
+app.scheduler.quartz.instanceid=AUTO
+app.scheduler.quartz.threadpoolsize=3
