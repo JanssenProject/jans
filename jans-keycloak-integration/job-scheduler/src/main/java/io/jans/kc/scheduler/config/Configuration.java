@@ -11,6 +11,9 @@ public class Configuration {
     private static final String SYS_PROP_APP_VERSION = "app.version";
 
     private static final String CFG_PROP_APP_VERSION = SYS_PROP_APP_VERSION;
+    private static final String CFG_PROP_QUARTZ_SCHEDULER_NAME = "app.scheduler.quartz.name";
+    private static final String CFG_PROP_QUARTZ_SCHEDULER_INSTANCEID = "app.scheduler.quartz.instanceid";
+    private static final String CFG_PROP_QUARTZ_SCHEDULER_THREAD_POOL_SIZE = "app.scheduler.quartz.threadpoolsize";
 
     private final Properties configProperties;
 
@@ -19,10 +22,44 @@ public class Configuration {
         this.configProperties = configProperties;
     }
 
-    public final String getAppVersion() {
+    public String appVersion() {
 
-        return configProperties.getProperty(CFG_PROP_APP_VERSION);
+        return getStringEntry(CFG_PROP_APP_VERSION);
     }
+
+    public String quatzSchedulerName() {
+
+        return getStringEntry(CFG_PROP_QUARTZ_SCHEDULER_NAME);
+    }
+
+    public String quartzSchedulerInstanceId() {
+
+        return getStringEntry(CFG_PROP_QUARTZ_SCHEDULER_INSTANCEID);
+    }
+
+    public Integer quartzSchedulerThreadPoolSize() {
+
+        return getIntEntry(CFG_PROP_QUARTZ_SCHEDULER_THREAD_POOL_SIZE);
+    }
+
+    private String getStringEntry(String entry) {
+
+        return configProperties.getProperty(entry);
+    }
+
+    private Integer getIntEntry(String entry) {
+
+        String strvalue = configProperties.getProperty(entry);
+        if(strvalue == null || strvalue.isEmpty() ) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(strvalue);
+        }catch(NumberFormatException e) {
+            throw new ConfigurationException("Unable to get specified configuration entryQue Dor",e);
+        }
+    }
+
 
     @Override
     public String toString() {
@@ -34,7 +71,7 @@ public class Configuration {
         StringBuilder sb = new StringBuilder();
         sb.append(newline);
         sb.append(header+newline);
-        sb.append("+ Application version: " + getAppVersion()+" "+newline);
+        sb.append("+ Application version: " + appVersion()+" "+newline);
         sb.append(footer);
         
         return sb.toString();
