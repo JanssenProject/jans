@@ -9,6 +9,7 @@ package io.jans.as.server.service;
 import com.google.common.collect.Lists;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.LockMessageConfig;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.CacheGrant;
 import io.jans.as.server.util.TokenHashUtil;
@@ -17,7 +18,9 @@ import io.jans.model.token.TokenType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
+import io.jans.service.MessageService;
 import io.jans.service.cache.CacheConfiguration;
+import io.jans.util.StringHelper;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -48,6 +51,9 @@ public class GrantService {
 
     @Inject
     private ClientService clientService;
+    
+    @Inject
+    private MessageService messageService;
 
     @Inject
     private CacheService cacheService;
@@ -87,12 +93,28 @@ public class GrantService {
 
     public void persist(TokenEntity token) {
         persistenceEntryManager.persist(token);
+        
+        publishIdTokenLockMessage(token, "add");
     }
 
     public void remove(TokenEntity token) {
         persistenceEntryManager.remove(token);
         log.trace("Removed token from LDAP, code: {}", token.getTokenCode());
+
+        publishIdTokenLockMessage(token, "del");
     }
+
+	protected void publishIdTokenLockMessage(TokenEntity token, String opearation) {
+		LockMessageConfig lockMessageConfig = appConfiguration.getLockMessageConfig();
+        if (lockMessageConfig == null) {
+        	return;
+        }
+        
+        if (Boolean.TRUE.equals(lockMessageConfig.getEnableIdTokenMessages()) && StringHelper.isNotEmpty(lockMessageConfig.getIdTokenMessagesChannel())) {
+        	String jsonMessage = String.format("{\"tknTyp\" : %s, \"tknCde\" : %s, \"tknOp\" : %s}", token.getTokenType(), token.getTokenCode(), opearation);
+            messageService.publish(lockMessageConfig.getIdTokenMessagesChannel(), jsonMessage);
+        }
+	}
 
     public void removeSilently(TokenEntity token) {
         try {

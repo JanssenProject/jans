@@ -26,7 +26,9 @@ import io.jans.orm.annotation.ObjectClass;
 @ObjectClass(value = "jansToken")
 public class TokenEntity implements Serializable {
 
-    @DN
+	private static final long serialVersionUID = 8230052124866144708L;
+
+	@DN
     private String dn;
     @AttributeName(name = "grtId", consistency = true)
     private String grantId;
