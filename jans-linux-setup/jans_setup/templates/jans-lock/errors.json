@@ -1,0 +1,9 @@
+{
+  "common": [
+    {
+      "id": "unknown_error",
+      "description": "Unknown or not found error",
+      "uri": null
+    }
+  ]
+}

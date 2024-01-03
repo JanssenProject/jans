@@ -54,6 +54,14 @@ URL_SUFFIX_FORMATTER = 'inum:{}'
 INTROSPECTION_ALG_PROPERTIES = ('introspectionSignedResponseAlg', 'introspectionEncryptedResponseAlg', 'introspectionEncryptedResponseEnc')
 APP = get_app()
 
+
+def get_scope_by_inum(inum: str) -> dict:
+    for scope in common_data.scopes:
+        if scope['inum'] == inum or scope['dn'] == inum:
+            return scope
+    return {}
+
+
 class EditClientDialog(JansGDialog, DialogUtils):
     """The Main Client Dialog that contain every thing related to The Client
     """
@@ -93,12 +101,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.prepare_tabs()
         self.create_window()
 
-    def get_scope_by_inum(self, inum: str) -> dict:
-
-        for scope in common_data.scopes:
-            if scope['inum'] == inum or scope['dn'] == inum:
-                return scope
-        return {}
 
     def save(self) -> None:
         """method to invoked when saving the dialog (Save button is pressed)
@@ -212,7 +214,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
     def fill_client_scopes(self):
         for scope_dn in self.data.get('scopes', []):
-            scope = self.get_scope_by_inum(scope_dn)
+            scope = get_scope_by_inum(scope_dn)
             if scope:
                 label = scope['id']
                 if [scope_dn, label] not in self.client_scopes_entries:
@@ -230,8 +232,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         acr_values_supported_list = [ (acr, acr) for acr in acr_values_supported ]
 
 
-        schema = self.myparent.cli_object.get_schema_from_reference(
-            '', '#/components/schemas/Client')
+        schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Client')
 
         self.tabs = OrderedDict()
 
@@ -260,6 +261,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
         #require_pkce = self.data.get('attributes', {}).get('redirectUrisRegex')
         #if require_pkce is None:
         #    require_pkce = self.myparent.app_configuration.get('requirePkce', False)
+
+        token_endpoint_authmethods = [('none', 'none')]
+        for method in schema['properties']['tokenEndpointAuthMethod']['enum']:
+            if method == 'none':
+                continue
+            token_endpoint_authmethods.append((method, method))
+
 
         basic_tab_widgets = [
             self.myparent.getTitledText(
@@ -296,15 +304,18 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     schema, 'description'),
                 style=cli_style.check_box),
 
-            self.myparent.getTitledRadioButton(
+
+            self.myparent.getTitledWidget(
                 _("Authn Method token endpoint"),
                 name='tokenEndpointAuthMethod',
-                values=[('none', 'none'), ('client_secret_basic', 'client_secret_basic'), ('client_secret_post',
-                                                                                           'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
-                current_value=self.data.get('tokenEndpointAuthMethod'),
+                widget=DropDownWidget(
+                    values=token_endpoint_authmethods,
+                    value=self.data.get('tokenEndpointAuthMethod')
+                ),
                 jans_help=self.myparent.get_help_from_schema(
                     schema, 'tokenEndpointAuthMethod'),
-                style=cli_style.radio_button),
+                style=cli_style.drop_down),
+
 
             self.myparent.getTitledRadioButton(
                 _("Subject Type"),

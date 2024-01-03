@@ -77,12 +77,15 @@ class JansInstaller(BaseInstaller, SetupUtils):
             txt += get_install_string('Install Auth Server', 'installOxAuth')
             txt += get_install_string('Install Jans Config API', 'install_config_api')
             if Config.profile == 'jans':
-                txt += get_install_string('Install Fido2 Server', 'installFido2')
-                txt += get_install_string('Install Scim Server', 'install_scim_server')
-                txt += get_install_string('Install Jans Link Server', 'install_jans_link')
-                txt += get_install_string('Install Jans KC Link Server', 'install_jans_keycloak_link')
-                txt += get_install_string('Install Jans Casa Server', 'install_casa')
-                txt += get_install_string('Install Jans SAML', 'install_jans_saml')
+                for prompt_str, install_var in (
+                        ('Install Fido2 Server', 'installFido2'),
+                        ('Install Scim Server', 'install_scim_server'),
+                        ('Install Jans Link Server', 'install_jans_link'),
+                        ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
+                        ('Install Jans Casa Server', 'install_casa'),
+                        ('Install Jans Lock', 'install_jans_lock'),
+                        ('Install Jans SAML', 'install_jans_saml')):
+                    txt += get_install_string(prompt_str, install_var)
 
 
             if Config.profile == 'jans' and Config.installEleven:
@@ -633,10 +636,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-eleven', 'installEleven'),
                         ('jans-auth', 'installOxAuth'),
                         ('jans-config-api', 'install_config_api'),
-                        ('casa', 'install_casa'),
+                        ('jans-casa', 'install_casa'),
                         ('jans-fido2', 'installFido2'),
                         ('jans-link', 'install_jans_link'),
                         ('jans-scim', 'install_scim_server'),
+                        ('jans-lock', 'install_jans_lock_as_server'),
                         ('saml', 'install_jans_saml'),
                         ('jans-keycloak-link', 'install_jans_keycloak_link'),
                         ]

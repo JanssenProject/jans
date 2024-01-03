@@ -9,13 +9,13 @@ tags:
 
 ## Common errors
 
-### Unable to find a constructor with arity ... in class ...
+### Unable to find a suitable constructor with arity ... in class ...
 
-A Java invocation of the form `Call package.className#new ...` is passing a number of parameters that does not match any of the existing constructors for that class. 
+A Java invocation of the form `Call package.className#new ...` is passing an incorrect number of arguments or their data types do not match the signature of any of the constructors for that class. 
 
-### Unable to find a method called ... with arity ... in class ...
+### Unable to find a suitable method called ... with arity ... in class ...
 
-A java invocation is attempting to call a method that is not part of the given class or the number of parameters passed for the method is not correct.
+A java invocation is attempting to call a method that is not part of the given class, the number of arguments passed for the method is not correct, or the arguments could not be converted to make a successful call.
 
 ### No Finish instruction was reached
 
@@ -25,7 +25,7 @@ This occurs when no `Finish` statement has been found in the execution of a flow
 
 Agama engine saves the state of a flow every time an [RRF](../../../agama/language-reference.md#rrf) or [RFAC](../../../agama/language-reference.md#rfac) instruction is reached. The _State_ can be understood as the set of all variables defined in a flow and their associated values up to certain point. 
 
-Most of times, variables hold basic Agama [values](../../../agama/language-reference.md#data-types) like strings, booleans, numbers, lists or maps, however, more complex values may appear due to Java `Call`s. The engine does its best  to properly serialize these Java objects, nonetheless, this is not always feasible. In these cases, the flow crashes and errors will appear on screen as well as in the server logs.
+Most of times, variables hold basic Agama [values](../../../agama/language-reference.md#data-types) like strings, booleans, numbers, lists or maps, however, more complex values may appear due to Java `Call`s. The engine does its best  to properly serialize these Java objects, nonetheless, this is not always possible. In these cases, the flow crashes and errors will appear on screen as well as in the server logs.
 
 Use the information in the logs to detect the problematic Java class. This would normally allow you to identify the variable that is causing the issue. Now you have several options to proceed:
 
@@ -41,7 +41,7 @@ In general, a good practice is to avoid handling complex variables in flows. Let
 
 ### What Groovy and Java versions are supported?
 
-Groovy 4.0 and Java 11. The runtime is Amazon Corretto 17.
+Groovy 4.0 and Java 8 or higher. The runtime is Amazon Corretto 17.
 
 ### How to add third party libraries?
 
@@ -114,7 +114,7 @@ This can be configured in the project's [metadata file](../../../agama/gama-form
 
 ### Updates in a flow's code are not reflected in its execution
 
-When a project is re-deployed, a flow remains unchanged if it comes with errors in the provided `.gama` file. The response obtained by the deployment API will let you know which flows have errors and their descriptions. 
+When a project is re-deployed, a flow remains unchanged if it comes with errors in the provided `.gama` file. The tool used for deployment will let you know which flows have errors and their descriptions. 
 
 ### Why are the contents of a list or map logged partially?
 
@@ -122,9 +122,9 @@ This is to avoid traversing big structures fully. You can increase the value of 
 
 ### How to add two numbers or compare numeric values in Agama?
 
-Agama only provides operators for equality check in conditional statements. The structure of an authentication flow will rarely have to deal with computations/comparisons of numbers, strings, etc. In case this is needed, developers have to resort to Java.
+Agama only provides operators for equality/inequality check in conditional statements. Comparisons like "less-than", "greater-than-or-equal", etc. require Java usage, however, the structure of an authentication flow will rarely have to deal with this kind of computations.
 
-_Hint_: some methods like `addExact`, `incrementExact`, etc. in `java.lang.Math` might help.  
+_Hint_: methods like `addExact`, `incrementExact`, etc. in `java.lang.Math` may help you to do some arithmetic.  
 
 ### How to concatenate strings in Agama?
 

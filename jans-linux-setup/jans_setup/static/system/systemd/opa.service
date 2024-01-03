@@ -1,0 +1,13 @@
+[Unit]
+Description=Open Policy Agent Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=%(opa_bin_dir)s/opa run --server --addr %(opa_addr)s
+
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target

@@ -6,6 +6,9 @@
 
 package io.jans.lock.model.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.doc.annotation.DocProperty;
@@ -22,6 +25,8 @@ public class AppConfiguration implements Configuration {
 
 	private String baseDN;
 
+	private List<String> tokenChannels;
+
 	@DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
 	private Boolean disableJdkLogger = true;
 
@@ -35,6 +40,15 @@ public class AppConfiguration implements Configuration {
 
 	// Period in seconds
 	private int cleanServiceInterval;
+	
+	private OpaConfiguration opaConfiguration;
+
+	private String messageConsumerType;
+	private String policyConsumerType;
+
+	private String policyDecisionPointType;
+	
+	private List<String> policiesJsonUris;
 
 	public String getBaseDN() {
 		return baseDN;
@@ -42,6 +56,18 @@ public class AppConfiguration implements Configuration {
 
 	public void setBaseDN(String baseDN) {
 		this.baseDN = baseDN;
+	}
+
+	public List<String> getTokenChannels() {
+		if (tokenChannels == null) {
+			tokenChannels = new ArrayList<>();
+		}
+
+		return tokenChannels;
+	}
+
+	public void setTokenChannels(List<String> tokenChannels) {
+		this.tokenChannels = tokenChannels;
 	}
 
 	public Boolean getDisableJdkLogger() {
@@ -107,5 +133,46 @@ public class AppConfiguration implements Configuration {
 	public void setCleanServiceInterval(int cleanServiceInterval) {
 		this.cleanServiceInterval = cleanServiceInterval;
 	}
+
+	public OpaConfiguration getOpaConfiguration() {
+		return opaConfiguration;
+	}
+
+	public void setOpaConfiguration(OpaConfiguration opaConfiguration) {
+		this.opaConfiguration = opaConfiguration;
+	}
+
+	public String getMessageConsumerType() {
+		return messageConsumerType;
+	}
+
+	public void setMessageConsumerType(String messageConsumerType) {
+		this.messageConsumerType = messageConsumerType;
+	}
+
+	public String getPolicyConsumerType() {
+		return policyConsumerType;
+	}
+
+	public void setPolicyConsumerType(String policyConsumerType) {
+		this.policyConsumerType = policyConsumerType;
+	}
+
+	public String getPolicyDecisionPointType() {
+		return policyDecisionPointType;
+	}
+
+	public void setPolicyDecisionPointType(String policyDecisionPointType) {
+		this.policyDecisionPointType = policyDecisionPointType;
+	}
+
+	public List<String> getPoliciesJsonUris() {
+		return policiesJsonUris;
+	}
+
+	public void setPoliciesJsonUris(List<String> policiesJsonUris) {
+		this.policiesJsonUris = policiesJsonUris;
+	}
+
 
 }

@@ -56,7 +56,13 @@ class PackageUtils(SetupUtils):
 
         if not Config.installed_instance:
             if base.argsp.local_rdbm == 'mysql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'mysql'):
-                package_list[os_type_version]['mandatory'] += ' mysql-server'
+                if base.os_type == 'suse':
+                    self.run(['rpm', '-i', f'https://dev.mysql.com/get/mysql80-community-release-sl{base.os_version}-{base.os_subversion}.noarch.rpm'])
+                    self.run(['rpm', '--import', '/etc/RPM-GPG-KEY-mysql'])
+                    self.run(['zypper', '--gpg-auto-import-keys', 'refresh'])
+                    package_list[os_type_version]['mandatory'] += ' mysql-community-server'
+                else:
+                    package_list[os_type_version]['mandatory'] += ' mysql-server'
             if base.argsp.local_rdbm == 'pgsql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'pgsql'):
                 package_list[os_type_version]['mandatory'] += ' postgresql python3-psycopg2 postgresql-contrib'
                 if base.clone_type == 'deb':

@@ -22,6 +22,7 @@ def get_setup_options():
         'install_jans_keycloak_link': False,
         'install_casa': False,
         'install_jans_saml': False,
+        'install_jans_lock': False,
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
@@ -115,6 +116,8 @@ def get_setup_options():
             setupOptions['install_casa'] = True
         if base.argsp.install_jans_saml:
             setupOptions['install_jans_saml'] = True
+        if base.argsp.install_jans_lock:
+            setupOptions['install_jans_lock'] = True
 
         if base.argsp.jans_max_mem:
             setupOptions['jans_max_mem'] = base.argsp.jans_max_mem
