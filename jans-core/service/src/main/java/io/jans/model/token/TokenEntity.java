@@ -6,17 +6,15 @@
 
 package io.jans.model.token;
 
-import io.jans.as.model.common.GrantType;
+import java.io.Serializable;
+import java.util.Date;
+
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
-import org.apache.commons.lang.StringUtils;
-
-import java.io.Serializable;
-import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -287,10 +285,6 @@ public class TokenEntity implements Serializable {
 
     public void setSessionDn(String sessionDn) {
         this.sessionDn = sessionDn;
-    }
-
-    public boolean isImplicitFlow() {
-        return StringUtils.isBlank(grantType) || grantType.equals(GrantType.IMPLICIT.getValue());
     }
 
     public String getDpop() {
