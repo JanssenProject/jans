@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.0.22-SNAPSHOT
-ENV CN_BUILD_DATE='2023-12-14 08:59'
+ENV CN_BUILD_DATE='2023-12-27 10:22'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -67,34 +67,17 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 # Plugins
 # =======
 
-RUN mkdir -p /usr/share/java \
-    ${JETTY_BASE}/jans-config-api/_plugins
-
-ENV SCIM_PLUGIN_BUILD_DATE='2023-12-14 09:03'
-ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2023-12-14 09:01'
-ENV ADMIN_UI_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
-ENV FIDO2_PLUGIN_BUILD_DATE='2023-12-14 09:04'
-ENV FIDO2_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/fido2-plugin/${CN_VERSION}/fido2-plugin-${CN_VERSION}-distribution.jar
-ENV USER_MGT_PLUGIN_BUILD_DATE='2023-12-14 09:04'
-ENV USER_MGT_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/${CN_VERSION}/user-mgt-plugin-${CN_VERSION}-distribution.jar
-ENV JANS_LINK_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
-ENV JANS_LINK_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/jans-link-plugin/${CN_VERSION}/jans-link-plugin-${CN_VERSION}-distribution.jar
-ENV SAML_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
-ENV SAML_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/kc-saml-plugin/${CN_VERSION}/kc-saml-plugin-${CN_VERSION}-distribution.jar
-
-RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/scim-plugin.jar \
-    && wget -q ${ADMIN_UI_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/admin-ui-plugin.jar \
-    && wget -q ${FIDO2_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/fido2-plugin.jar \
-    && wget -q ${USER_MGT_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/user-mgt-plugin.jar \
-    && wget -q ${JANS_LINK_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/jans-link-plugin.jar \
-    && wget -q ${SAML_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/saml-plugin.jar
+RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
+    && for plugin in scim admin-ui fido2 user-mgt jans-link kc-saml; \
+    do \
+        wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
+    done
 
 # =====================
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=a2c5d4bd3d09c9f34e79b0d24bc63ece4ca7da43
+ENV JANS_SOURCE_VERSION=ef2943edbc728d55041175c6467a22395545ec58
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -110,7 +93,8 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
 RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
     /app/schema \
-    /app/templates/jans-config-api
+    /app/templates/jans-config-api \
+    /usr/share/java
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
