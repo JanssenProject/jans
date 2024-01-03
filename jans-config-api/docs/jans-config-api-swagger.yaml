@@ -4101,10 +4101,12 @@ paths:
                   - persistence_extension
                   - idp
                   - discovery
+                  - authz_detail
                   - update_token
                   - config_api_auth
                   - modify_ssa_response
                   - fido2_extension
+                  - lock_extension
               examples:
                 Response json example:
                   description: Response json example
@@ -7860,13 +7862,13 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
@@ -8673,8 +8675,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8684,6 +8684,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9631,10 +9633,12 @@ components:
           - persistence_extension
           - idp
           - discovery
+          - authz_detail
           - update_token
           - config_api_auth
           - modify_ssa_response
           - fido2_extension
+          - lock_extension
         programmingLanguage:
           type: string
           enum:
@@ -9662,14 +9666,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -9853,61 +9857,41 @@ components:
         messageProviderType:
           type: string
           enum:
-          - "NULL"
+          - DISABLED
           - REDIS
           - POSTGRES
-        nullConfiguration:
-          $ref: '#/components/schemas/NullMessageConfiguration'
         redisConfiguration:
           $ref: '#/components/schemas/RedisMessageConfiguration'
         postgresConfiguration:
           $ref: '#/components/schemas/PostgresMessageConfiguration'
-    NullMessageConfiguration:
-      type: object
     PostgresMessageConfiguration:
       type: object
       properties:
-        dbSchemaName:
+        jdbc.driver.class-name:
           type: string
-          xml:
-            name: db-schema-name
-        connectionUri:
+        db-schema-name:
           type: string
-          xml:
-            name: connection-uri
-        authUserName:
+        connection-uri:
           type: string
-          xml:
-            name: auth-userName
-        authUserPassword:
+        auth-user-name:
           type: string
-          xml:
-            name: auth-userPassword
-        connectionPoolMaxTotal:
+        auth-user-password:
+          type: string
+        connection-pool-max-total:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-max-total
-        connectionPoolMaxIdle:
+        connection-pool-max-idle:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-max-idle
-        connectionPoolMinIdle:
+        connection-pool-min-idle:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-min-idle
-        messageWaitMillis:
+        message-wait-millis:
           type: integer
           format: int32
-          xml:
-            name: message-wait-millis
-        messageSleepThreadTime:
+        message-sleep-thread-millis:
           type: integer
           format: int32
-          xml:
-            name: message-sleep-thread-millis
     RedisMessageConfiguration:
       type: object
       properties:

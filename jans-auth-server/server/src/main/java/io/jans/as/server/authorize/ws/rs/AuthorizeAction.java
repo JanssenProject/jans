@@ -6,6 +6,8 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.model.authzdetails.AuthzDetail;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
@@ -37,10 +39,7 @@ import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
-import io.jans.as.server.service.external.ExternalAuthenticationService;
-import io.jans.as.server.service.external.ExternalConsentGatheringService;
-import io.jans.as.server.service.external.ExternalPostAuthnService;
-import io.jans.as.server.service.external.ExternalSelectAccountService;
+import io.jans.as.server.service.external.*;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
@@ -176,6 +175,9 @@ public class AuthorizeAction {
     @Inject
     private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
 
+    @Inject
+    private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
+
     // OAuth 2.0 request parameters
     private String scope;
     private String responseType;
@@ -198,6 +200,7 @@ public class AuthorizeAction {
     private String requestUri;
     private String codeChallenge;
     private String codeChallengeMethod;
+    private String authorizationDetails;
     private String claims;
 
     // CIBA Request parameter
@@ -207,6 +210,7 @@ public class AuthorizeAction {
     private String sessionId;
 
     private String allowedScope;
+    private AuthzDetails authzDetails;
 
     public void checkUiLocales() {
         List<String> uiLocalesList = null;
@@ -235,6 +239,8 @@ public class AuthorizeAction {
 
     public void checkPermissionGranted() {
         try {
+            log.trace("checkPermissionGranted clientId={}", clientId);
+
             checkPermissionGrantedInternal();
         } catch (Exception e) {
             log.error("Failed to perform checkPermissionGranted()", e);
@@ -247,6 +253,11 @@ public class AuthorizeAction {
             log.debug("Permission denied. client_id should be not empty.");
             permissionDenied();
             return;
+        }
+
+        if (log.isTraceEnabled()) {
+            log.trace("checkPermissionGrantedInternal - scope: {}, client_id: {}, prompts: {}, responseType: {}, authorization_details: {}",
+                    scope, clientId, prompt, responseType, authorizationDetails);
         }
 
         Client client = null;
@@ -264,9 +275,18 @@ public class AuthorizeAction {
             return;
         }
 
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setHttpRequest((HttpServletRequest) externalContext.getRequest());
+        authzRequest.setHttpResponse((HttpServletResponse) externalContext.getResponse());
+        authzRequest.setClient(client);
+        authzRequest.setAuthzDetailsString(authorizationDetails);
+        authzRequest.setScope(scope);
+        authzRequest.setPrompt(prompt);
+
         // Fix the list of scopes in the authorization page. Jans Auth #739
         Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
         allowedScope = io.jans.as.model.util.StringUtils.implode(grantedScopes, " ");
+        authzDetails = prepareAuthzDetails(authorizationDetails, authzRequest);
 
         SessionId session = getSession();
         List<io.jans.as.model.common.Prompt> prompts = io.jans.as.model.common.Prompt.fromString(prompt, " ");
@@ -411,10 +431,6 @@ public class AuthorizeAction {
             return;
         }
 
-        AuthzRequest authzRequest = new AuthzRequest();
-        authzRequest.setHttpRequest((HttpServletRequest) externalContext.getRequest());
-        authzRequest.setHttpResponse((HttpServletResponse) externalContext.getResponse());
-        authzRequest.setClient(client);
         authzRequest.setSessionId(sessionId);
 
         ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, authzRequest, prompts);
@@ -467,6 +483,26 @@ public class AuthorizeAction {
                 return;
             }
         }
+    }
+
+    private AuthzDetails prepareAuthzDetails(String authorizationDetails, AuthzRequest authzRequest) {
+        authzDetails = AuthzDetails.ofSilently(authorizationDetails);
+
+        if (authzDetails == null || authzDetails.getDetails() == null || authzDetails.getDetails().isEmpty()) {
+            return null;
+        }
+
+        authzRequest.setAuthzDetails(authzDetails);
+
+        ExecutionContext executionContext = ExecutionContext.of(authzRequest);
+        executionContext.setAuthzDetails(authzDetails);
+
+        for (AuthzDetail detail : authzDetails.getDetails()) {
+            final String uiRepresentation = externalAuthzDetailTypeService.externalGetUiRepresentation(executionContext, detail);
+            detail.setUiRepresentation(uiRepresentation);
+        }
+
+        return authzDetails;
     }
 
     private String getSelectAccountPage(Client client) {
@@ -902,6 +938,33 @@ public class AuthorizeAction {
 
     public void setCodeChallengeMethod(String codeChallengeMethod) {
         this.codeChallengeMethod = codeChallengeMethod;
+    }
+
+    /**
+     * Returns parsed authz details with ui representation (which is shown on authorize page).
+     *
+     * @return parsed authz details with ui representation (which is shown on authorize page).
+     */
+    public List<AuthzDetail> getAuthzDetails() {
+        return authzDetails != null ? authzDetails.getDetails() : Collections.emptyList();
+    }
+
+    /**
+     * Returns authorization details as string json.
+     *
+     * @return authorization details as string json
+     */
+    public String getAuthorizationDetails() {
+        return authorizationDetails;
+    }
+
+    /**
+     * Sets authorization details string json.
+     *
+     * @param authorizationDetails authorization details string json
+     */
+    public void setAuthorizationDetails(String authorizationDetails) {
+        this.authorizationDetails = authorizationDetails;
     }
 
     public String getClaims() {

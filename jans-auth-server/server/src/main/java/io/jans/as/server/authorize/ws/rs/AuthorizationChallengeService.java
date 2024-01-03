@@ -131,6 +131,7 @@ public class AuthorizationChallengeService {
         authorizationChallengeValidator.validateGrantType(client, state);
         authorizationChallengeValidator.validateAccess(client);
         Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
+        authorizeRestWebServiceValidator.validateAuthorizationDetails(authzRequest, client);
 
         final ExecutionContext executionContext = ExecutionContext.of(authzRequest);
 
@@ -161,6 +162,7 @@ public class AuthorizationChallengeService {
         authorizationGrant.setJwtAuthorizationRequest(authzRequest.getJwtRequest());
         authorizationGrant.setTokenBindingHash(TokenBindingMessage.getTokenBindingIdHashFromTokenBindingMessage(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
         authorizationGrant.setScopes(scopes);
+        authorizationGrant.setAuthzDetails(authzRequest.getAuthzDetails());
         authorizationGrant.setCodeChallenge(authzRequest.getCodeChallenge());
         authorizationGrant.setCodeChallengeMethod(authzRequest.getCodeChallengeMethod());
         authorizationGrant.setClaims(authzRequest.getClaims());

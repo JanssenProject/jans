@@ -647,6 +647,36 @@ class PropertiesUtils(SetupUtils):
 
         return True
 
+
+    def pompt_for_jans_lock(self):
+        if not self.prompt_to_install('install_jans_lock'):
+            return
+
+        prompt = self.getPrompt("Install Jans Lock?",
+                                            self.getDefaultOption(Config.install_jans_lock)
+                                            )[0].lower()
+
+        
+
+        if prompt == 'y':
+            prompt = self.getPrompt("  Install Jans Lock as Server?",
+                                            self.getDefaultOption(Config.install_jans_lock)
+                                            )[0].lower()
+            if prompt == 'y':
+                Config.install_jans_lock = True
+                Config.install_jans_lock_as_server = True
+            else:
+                prompt = self.getPrompt("  Install Jans Lock as Auth Service?", self.getDefaultOption(True))[0].lower()
+                if prompt == 'y':
+                    Config.install_jans_lock = True
+
+            if Config.install_jans_lock:
+                prompt = self.getPrompt("  Install OPA?", self.getDefaultOption(Config.install_opa))[0].lower()
+                Config.install_opa = prompt == 'y'
+
+        if Config.installed_instance and Config.install_jans_lock:
+            Config.addPostSetupService.append('install_jans_lock')
+
     def prompt_for_jans_saml(self):
         if not self.prompt_to_install('install_jans_saml'):
             return
@@ -710,7 +740,11 @@ class PropertiesUtils(SetupUtils):
 
                 if result[0]:
                     print("  {}Successfully connected to {} server{}".format(colors.OKGREEN, Config.rdbm_type.upper(), colors.ENDC))
-                    break
+                    dbUtils.set_mysql_version()
+                    if dbUtils.mariadb:
+                        print("  {}MariaDB is not supported. Please use MySQL Server. {}".format(colors.FAIL, colors.ENDC))
+                    else:
+                        break
                 else:
                     print("  {}Can't connect to {} server with provided credidentals.{}".format(colors.FAIL, Config.rdbm_type.upper(), colors.ENDC))
                     print("  ERROR:", result[1])
@@ -851,7 +885,10 @@ class PropertiesUtils(SetupUtils):
 
                 try:
                     if Config.rdbm_type == 'mysql':
-                        pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port)
+                        conn = pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port)
+                        if 'mariadb' in conn.server_version.lower():
+                            print("  {}MariaDB is not supported. Please use MySQL Server. {}".format(colors.FAIL, colors.ENDC))
+                            continue
                     else:
                         psycopg2.connect(dbname=Config.rdbm_db, user=Config.rdbm_user, password=Config.rdbm_password, host=Config.rdbm_host, port=Config.rdbm_port)
                     print("  {}{} connection was successful{}".format(colors.OKGREEN, Config.rdbm_type.upper(), colors.ENDC))
@@ -1016,7 +1053,7 @@ class PropertiesUtils(SetupUtils):
             self.prompt_for_jans_link()
             self.prompt_for_jans_keycloak_link()
             self.prompt_for_casa()
-
+            self.pompt_for_jans_lock()
             self.prompt_for_jans_saml()
             #self.promptForEleven()
             #if (not Config.installOxd) and Config.oxd_package:
