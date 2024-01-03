@@ -14,13 +14,13 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.ldap.TokenEntity;
-import io.jans.as.server.model.ldap.TokenType;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.GrantService;
 import io.jans.as.server.service.MetricService;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
+import io.jans.model.token.TokenEntity;
+import io.jans.model.token.TokenType;
 import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
 
@@ -209,9 +209,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode) {
         if (isFalse(appConfiguration.getPersistRefreshToken())) {
-            return assertTokenType((TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), io.jans.as.server.model.ldap.TokenType.REFRESH_TOKEN, clientId);
+            return assertTokenType((TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), io.jans.model.token.TokenType.REFRESH_TOKEN, clientId);
         }
-        return assertTokenType(grantService.getGrantByCode(refreshTokenCode), io.jans.as.server.model.ldap.TokenType.REFRESH_TOKEN, clientId);
+        return assertTokenType(grantService.getGrantByCode(refreshTokenCode), io.jans.model.token.TokenType.REFRESH_TOKEN, clientId);
     }
 
     public AuthorizationGrant assertTokenType(TokenEntity tokenEntity, TokenType tokenType, String clientId) {
@@ -247,7 +247,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken) {
         final TokenEntity tokenEntity = grantService.getGrantByCode(accessToken);
-        if (tokenEntity != null && (tokenEntity.getTokenTypeEnum() == io.jans.as.server.model.ldap.TokenType.ACCESS_TOKEN || tokenEntity.getTokenTypeEnum() == io.jans.as.server.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
+        if (tokenEntity != null && (tokenEntity.getTokenTypeEnum() == io.jans.model.token.TokenType.ACCESS_TOKEN || tokenEntity.getTokenTypeEnum() == io.jans.model.token.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
             return asGrant(tokenEntity);
         }
         return null;
@@ -259,7 +259,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
             return null;
         }
         final TokenEntity tokenEntity = grantService.getGrantByCode(idToken);
-        if (tokenEntity != null && (tokenEntity.getTokenTypeEnum() == io.jans.as.server.model.ldap.TokenType.ID_TOKEN)) {
+        if (tokenEntity != null && (tokenEntity.getTokenTypeEnum() == io.jans.model.token.TokenType.ID_TOKEN)) {
             return asGrant(tokenEntity);
         }
         return null;
