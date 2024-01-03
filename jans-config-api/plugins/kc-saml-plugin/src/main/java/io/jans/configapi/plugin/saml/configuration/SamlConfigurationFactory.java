@@ -217,8 +217,7 @@ public class SamlConfigurationFactory {
                 this.samlAppConfiguration, samlLoadedRevision);
 
     }
-
-   
+    
     private <T> T loadConfigurationFromDb(String dn, T obj, String... returnAttributes) {
         log.debug("loadConfigurationFromDb dn:{}, clazz:{}, returnAttributes:{}", dn, obj, returnAttributes);
         final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();

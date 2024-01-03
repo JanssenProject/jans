@@ -7862,19 +7862,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
-          type: boolean
         userCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8675,6 +8675,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8684,8 +8686,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9195,6 +9195,16 @@ components:
           type: string
         tokenEndpointAuthMethod:
           type: string
+          format: enum
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         tokenEndpointAuthSigningAlg:
           type: string
         defaultMaxAge:
@@ -9412,6 +9422,10 @@ components:
           type: string
         introspectionEncryptedResponseEnc:
           type: string
+        authorizationDetailsTypes:
+          type: array
+          items:
+            type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -9867,29 +9881,29 @@ components:
     PostgresMessageConfiguration:
       type: object
       properties:
-        jdbc.driver.class-name:
+        driverClassName:
           type: string
-        db-schema-name:
+        dbSchemaName:
           type: string
-        connection-uri:
+        connectionUri:
           type: string
-        auth-user-name:
+        authUserName:
           type: string
-        auth-user-password:
+        authUserPassword:
           type: string
-        connection-pool-max-total:
+        connectionPoolMaxTotal:
           type: integer
           format: int32
-        connection-pool-max-idle:
+        connectionPoolMaxIdle:
           type: integer
           format: int32
-        connection-pool-min-idle:
+        connectionPoolMinIdle:
           type: integer
           format: int32
-        message-wait-millis:
+        messageWaitMillis:
           type: integer
           format: int32
-        message-sleep-thread-millis:
+        messageSleepThreadTime:
           type: integer
           format: int32
     RedisMessageConfiguration:

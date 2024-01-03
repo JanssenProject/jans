@@ -142,6 +142,16 @@ public class SamlConfigService {
         return grantType;
     }
 
+    public String getScope() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String scope = null;
+        if (samlAppConfiguration != null) {
+            scope = samlAppConfiguration.getScope();
+        }
+        return scope;
+    }
+
     public String getUsername() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -174,6 +184,48 @@ public class SamlConfigService {
         }
         logger.debug("SP Metadata Url - spMetadataUrl:{}", spMetadataUrl);
         return spMetadataUrl;
+    }
+
+    public String getTokenUrl(String realm) {
+        logger.debug("Get SAML Token Url - realm:{}", realm);
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String tokenUrl = null;
+        if (samlAppConfiguration != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(samlAppConfiguration.getServerUrl()).append(samlAppConfiguration.getTokenUrl());
+            tokenUrl = String.format(sb.toString(), realm);
+        }
+        logger.debug("SAML Token Url - tokenUrl:{}", tokenUrl);
+        return tokenUrl;
+    }
+
+    public String getIdpUrl(String realm) {
+        logger.debug("Get SAML IDP Url - realm:{}", realm);
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String idpUrl = null;
+        if (samlAppConfiguration != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(samlAppConfiguration.getServerUrl()).append(samlAppConfiguration.getIdpUrl());
+            idpUrl = String.format(sb.toString(), realm);
+        }
+        logger.debug("SAML IDP Url - idpUrl:{}", idpUrl);
+        return idpUrl;
+    }
+
+    public String getIdpMetadataImportUrl(String realm) {
+        logger.debug("Get SAML IDP Metadata Import Url - realm:{}", realm);
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String idpMetadataImportUrl = null;
+        if (samlAppConfiguration != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(samlAppConfiguration.getServerUrl()).append(samlAppConfiguration.getIdpMetadataImportUrl());
+            idpMetadataImportUrl = String.format(sb.toString(), realm);
+        }
+        logger.debug("SAML IDP Metadata Import Url - idpMetadataImportUrl:{}", idpMetadataImportUrl);
+        return idpMetadataImportUrl;
     }
 
     public String getIdpRootDir() {
@@ -284,6 +336,26 @@ public class SamlConfigService {
             idpMetadataMandatoryAttributes = samlAppConfiguration.getIdpMetadataMandatoryAttributes();
         }
         return idpMetadataMandatoryAttributes;
+    }
+
+    public List<String> getKcAttributes() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        List<String> kcAttributes = null;
+        if (samlAppConfiguration != null) {
+            kcAttributes = samlAppConfiguration.getKcAttributes();
+        }
+        return kcAttributes;
+    }
+
+    public List<String> getKcSamlConfig() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        List<String> kcSamlConfig = null;
+        if (samlAppConfiguration != null) {
+            kcSamlConfig = samlAppConfiguration.getKcSamlConfig();
+        }
+        return kcSamlConfig;
     }
 
     private SamlConf getSamlConf() {
