@@ -31,19 +31,19 @@ logger = logging.getLogger("jans-saml")
 manager = get_manager()
 
 
-# def render_keycloak_storage_api_props(ctx):
-#     with open("/app/templates/jans-saml/jans-keycloak-storage-api.properties") as f:
-#         tmpl = Template(f.read())
+def render_keycloak_conf(ctx):
+    with open("/app/templates/jans-saml/keycloak.conf") as f:
+        tmpl = f.read()
 
-#     with open("/opt/keycloak/providers/jans-keycloak-storage-api.properties", "w") as f:
-#         f.write(tmpl.safe_substitute(ctx))
+    with open("/opt/keycloak/conf/keycloak.conf", "w") as f:
+        f.write(tmpl % ctx)
 
 
 def main():
     with manager.lock.create_lock("jans-saml-setup"):
         persistence_setup = PersistenceSetup(manager)
         persistence_setup.import_ldif_files()
-        # render_keycloak_storage_api_props(persistence_setup.ctx)
+        render_keycloak_conf(persistence_setup.ctx)
 
 
 class PersistenceSetup:
@@ -71,18 +71,29 @@ class PersistenceSetup:
 
         ctx = {
             "hostname": hostname,
-            "saml_enabled": "true",
-            "idp_root_dir": "/opt/idp/configs",
-            "config_generation": "true",
-            "ignore_validation": "true",
-            "idp_config_id": "keycloak",
-            "idp_config_root_dir": "/opt/idp/configs/keycloak",
-            "idp_config_enabled": "true",
-            "idp_config_temp_meta_dir": "/opt/idp/configs/keycloak/temp_metadata",
-            "idp_config_meta_dir": "/opt/idp/configs/keycloak/metadata",
+            "keycloack_hostname": hostname,
+            "jans_idp_realm": "jans-api",
+            "jans_idp_grant_type": "PASSWORD",
+            "jans_idp_user_name": "jans-api",
         }
 
-        # pre-populate jans_link_config_base64
+        # jans-idp contexts
+        ctx["jans_idp_client_id"] = self.manager.config.get("jans_idp_client_id")
+        if not ctx["jans_idp_client_id"]:
+            ctx["jans_idp_client_id"] = f"jans-api-{uuid4()}"
+            self.manager.config.set("jans_idp_client_id", ctx["jans_idp_client_id"])
+
+        ctx["jans_idp_client_secret"] = self.manager.secret.get("jans_idp_client_secret")
+        if not ctx["jans_idp_client_secret"]:
+            ctx["jans_idp_client_secret"] = os.urandom(10).hex()
+            self.manager.secret.set("jans_idp_client_secret", ctx["jans_idp_client_secret"])
+
+        ctx["jans_idp_user_password"] = self.manager.secret.get("jans_idp_user_password")
+        if not ctx["jans_idp_user_password"]:
+            ctx["jans_idp_user_password"] = os.urandom(10).hex()
+            self.manager.secret.set("jans_idp_user_password", ctx["jans_idp_user_password"])
+
+        # pre-populate saml_dynamic_conf_base64
         with open("/app/templates/jans-saml/jans-saml-config.json") as f:
             tmpl = Template(f.read())
             ctx["saml_dynamic_conf_base64"] = generate_base64_contents(tmpl.safe_substitute(ctx))
@@ -104,13 +115,6 @@ class PersistenceSetup:
                 ctx["saml_scim_client_pw"], self.manager.secret.get("encoded_salt"),
             ).decode()
             self.manager.secret.set("saml_scim_client_encoded_pw", ctx["saml_scim_client_encoded_pw"])
-
-        # scopes for client
-        ctx["scim_users_read_scope"] = "inum=1200.2B7428,ou=scopes,o=jans"
-        ctx["scim_users_write_scope"] = "inum=1200.0A0198,ou=scopes,o=jans"
-
-        # storage-api properties
-        ctx["keycloack_hostname"] = "localhost"  # @FIXME: parametrize
 
         # finalized ctx
         return ctx
