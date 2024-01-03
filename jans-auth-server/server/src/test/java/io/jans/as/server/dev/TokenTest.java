@@ -3,7 +3,7 @@ package io.jans.as.server.dev;
 import java.util.List;
 import java.util.Properties;
 
-import io.jans.as.server.model.ldap.TokenEntity;
+import io.jans.model.token.TokenEntity;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.sql.impl.SqlEntryManager;
 import io.jans.orm.sql.impl.SqlEntryManagerFactory;
