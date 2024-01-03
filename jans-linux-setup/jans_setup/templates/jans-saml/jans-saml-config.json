@@ -6,9 +6,9 @@
   "selectedIdp": "keycloak",
   "serverUrl":"https://${keycloack_hostname}",
   "realm": "${jans_idp_realm}",
-  "clientId": "${jans_idp_client_id}",,
+  "clientId": "${jans_idp_client_id}",
   "clientSecret": "${jans_idp_client_secret}",
-  "grantType": "${jans_idp_grant_type}"
+  "grantType": "${jans_idp_grant_type}",
   "scope": "openid",
   "username": "${jans_idp_user_name}",
   "password": "${jans_idp_user_password}",  
