@@ -19,6 +19,7 @@ import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
@@ -54,6 +55,13 @@ public class WebhookService {
         }
     }
 
+    /**
+     * The function retrieves a list of AuiFeatures that are associated with a specific webhookId.
+     *
+     * @param webhookId The parameter "webhookId" is a String that represents the ID of a webhook.
+     * @return The method is returning a list of AuiFeature objects that have a webhookId matching the provided webhookId
+     * parameter.
+     */
     public List<AuiFeature> getAllAuiFeaturesByWebhookId(String webhookId) throws ApplicationException {
         try {
             List<AuiFeature> features = getAllAuiFeatures();
@@ -84,13 +92,13 @@ public class WebhookService {
                     String[] targetArray = new String[]{assertionValue};
                     Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
                             targetArray, null);
-                    Filter webhookIdFilter = Filter.createSubstringFilter("webhookId", null, targetArray, null);
+                    Filter webhookIdFilter = Filter.createSubstringFilter(AppConstants.WEBHOOK_ID, null, targetArray, null);
                     Filter urlFilter = Filter.createSubstringFilter("url", null, targetArray, null);
                     filters.add(Filter.createORFilter(displayNameFilter, webhookIdFilter, urlFilter));
                 }
                 searchFilter = Filter.createORFilter(filters);
             }
-            log.info("Webhook searchFilter:{}", searchFilter);
+            log.debug("Webhook searchFilter:{}", searchFilter);
             return entryManager.findPagedEntries(AppConstants.WEBHOOK_DN, WebhookEntry.class, searchFilter, null,
                     searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                     searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
@@ -112,11 +120,11 @@ public class WebhookService {
             Filter searchFilter = null;
             List<Filter> filters = new ArrayList<>();
             for (String id : ids) {
-                Filter filter = Filter.createSubstringFilter("webhookId", null, new String[]{id}, null);
+                Filter filter = Filter.createSubstringFilter(AppConstants.WEBHOOK_ID, null, new String[]{id}, null);
                 filters.add(filter);
             }
             searchFilter = Filter.createORFilter(filters);
-            log.info("Webhooks searchFilter:{}", searchFilter);
+            log.debug("Webhooks searchFilter:{}", searchFilter);
             return entryManager.findEntries(AppConstants.WEBHOOK_DN, WebhookEntry.class, searchFilter);
         } catch (Exception e) {
             log.error(ErrorResponse.WEBHOOK_SEARCH_ERROR.getDescription(), e);
@@ -161,7 +169,7 @@ public class WebhookService {
                 filters.add(filter);
             }
             searchFilter = Filter.createORFilter(filters);
-            log.info("Features searchFilter:{}", searchFilter);
+            log.debug("Features searchFilter:{}", searchFilter);
             return entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, searchFilter);
         } catch (Exception e) {
             log.error(ErrorResponse.FETCH_DATA_ERROR.getDescription(), e);

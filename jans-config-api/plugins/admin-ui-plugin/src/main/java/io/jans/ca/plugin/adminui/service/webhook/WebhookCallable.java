@@ -35,7 +35,7 @@ public class WebhookCallable implements Callable<GenericResponse> {
 
     @Override
     public GenericResponse call() throws ApplicationException {
-        log.info("Webhook processing started. Id: {}. Name: {}, URL : {}, HttpMethod: {}", webhook.getWebhookId(), webhook.getDisplayName(), webhook.getUrl(), webhook.getHttpMethod());
+        log.debug("Webhook processing started. Id: {}. Name: {}, URL : {}, HttpMethod: {}", webhook.getWebhookId(), webhook.getDisplayName(), webhook.getUrl(), webhook.getHttpMethod());
         Invocation.Builder request = ClientFactory.instance().getClientBuilder(webhook.getUrl());
         //getting all headers
         webhook.getHttpHeaders().stream()
@@ -51,12 +51,12 @@ public class WebhookCallable implements Callable<GenericResponse> {
         }
         Response response = invocation.invoke();
         ObjectMapper objectMapper = new ObjectMapper();
-        log.info("Webhook (Name: {}, Id: {}) response status code: {}", webhook.getDisplayName(), webhook.getWebhookId(), response.getStatus());
+        log.debug("Webhook (Name: {}, Id: {}) response status code: {}", webhook.getDisplayName(), webhook.getWebhookId(), response.getStatus());
         if (response.getStatus() == Response.Status.OK.getStatusCode() ||
                 response.getStatus() == Response.Status.CREATED.getStatusCode() ||
                 response.getStatus() == Response.Status.ACCEPTED.getStatusCode()) {
             String responseData = response.readEntity(String.class);
-            log.info("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getWebhookId(), responseData);
+            log.debug("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getWebhookId(), responseData);
             JsonNode jsonNode = objectMapper.createObjectNode();
             ((ObjectNode) jsonNode).put("webhookId", webhook.getWebhookId());
             ((ObjectNode) jsonNode).put("webhookName", webhook.getDisplayName());

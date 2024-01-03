@@ -32,7 +32,6 @@ import jakarta.ws.rs.core.Response;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.List;
 
@@ -189,7 +188,9 @@ public class WebhookResource extends BaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addWebhook(@Valid WebhookEntry webhook) {
         try {
-            log.debug("Webhook to be added - webhookEntry:{}", escapeLog(webhook.getDisplayName()));
+            if (log.isDebugEnabled()) {
+                log.debug("Webhook to be added - webhookEntry:{}", escapeLog(webhook.getDisplayName()));
+            }
 
             WebhookEntry result = webhookService.addWebhook(webhook);
             log.debug("Id of newly added is {}", result.getWebhookId());
@@ -222,7 +223,9 @@ public class WebhookResource extends BaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateWebhook(@Valid WebhookEntry webhook) {
         try {
-            log.debug("Webhook to be updated :{}", escapeLog(webhook.getWebhookId()));
+            if (log.isDebugEnabled()) {
+                log.debug("Webhook to be updated :{}", escapeLog(webhook.getWebhookId()));
+            }
             HashSet<String> webhookIdSet = Sets.newHashSet();
             webhookIdSet.add(webhook.getWebhookId());
             List<WebhookEntry> existingWebhooks = webhookService.getWebhookByIds(webhookIdSet);
