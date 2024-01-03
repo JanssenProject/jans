@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
 	margin: 0;
 	padding: 10,10;
@@ -339,7 +340,7 @@ login-panel {
 	background: #e7e7e7;
 }
 
-.body{font-family: 'Open Sans', sans-serif;}
+.body{font-family: 'Lato', 'Open Sans', sans-serif;}
 .bs-docs-section {
 	padding: 30px 0px;
 }
@@ -650,28 +651,42 @@ input.btn.btn-done {
     padding: 0 19px;
 }
 
+.device-authz-form {
+    background-color: #110000;
+}
+
 .device-authz-container {
-    padding: 20px 20px 40px;
-    max-width: 500px;
+    padding: 40px 40px 50px 40px;
+    max-width: 60%;
     margin: 0 auto;
-    border-radius: 10px;
-    background: white;
-    border: 1px solid #008b8b;
+    border-radius: 12px;
+    background: #2C1A1A;
+    box-shadow: 10px 20px 20px 0px rgba(0, 0, 0, 0.28);
+    color: #fff;
+}
+
+@media only screen and (max-width: 780px){
+    .device-authz-container {
+        max-width: 100%;
+        padding: 20px 20px 25px 20px;
+    }
 }
 
 .device-authz-title {
     font-weight: bold;
-    font-size: 18px;
-    text-align: center;
-    padding: 10px 0;
+    font-size: 38px;
+    text-align: left;
 }
 
 .device-authz-subtitle {
-    padding: 10px 0;
+    font-size: 20px;
+    text-align: left;
+    max-width: 90%;
+    font-weight: normal !important;
 }
 
 .device-authz-button {
-    margin: 30px 0 0;
+    margin-top: 32px;
 }
 
 .device-authz-init-btn {
@@ -683,8 +698,10 @@ input.btn.btn-done {
 }
 
 .device-authz-label {
-    margin-top: 20px;
-    text-align: center;
+    margin-top: 32px;
+    text-align: left;
+    font-size: 20px;
+    font-weight: normal !important;
 }
 
 .device-authz-static-code {
@@ -695,16 +712,28 @@ input.btn.btn-done {
 }
 
 .device-authz-input-container {
-    margin-top: 10px !important;
+    margin-top: 20px !important;
     text-align: center;
     font-weight: bold;
     font-size: 25px !important;
+}
+
+.device-authz-continue-btn {
+    background-color: #00BE79;
+    color:white;
+    font-size: 20px !important;
+    width: 100%; 
+    font-weight: bold !important;
+    padding: 8px 0 !important;
+    border-radius: 7px !important;
 }
 
 .device-authz-input-code {
     text-align: center;
     font-weight: bold !important;
     font-size: 25px !important;
-    height: 45px !important;
-    width: 40% !important;
+    height: 50px !important;
+    background-color: transparent !important;
+    border: 2px solid #fff !important;
+    color: #fff !important;
 }
