@@ -189,7 +189,7 @@ public class WebhookResource extends BaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addWebhook(@Valid WebhookEntry webhook) {
         try {
-            log.debug("Webhook to be added - webhookEntry:{}", webhook.getDisplayName());
+            log.debug("Webhook to be added - webhookEntry:{}", escapeLog(webhook.getDisplayName()));
 
             WebhookEntry result = webhookService.addWebhook(webhook);
             log.debug("Id of newly added is {}", result.getWebhookId());
@@ -204,7 +204,7 @@ public class WebhookResource extends BaseResource {
             log.error(ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription(), e);
             return Response
                     .serverError()
-                    .entity(CommonUtils.createGenericResponse(false, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()))
+                    .entity(CommonUtils.createGenericResponse(false, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription()))
                     .build();
         }
     }
@@ -222,7 +222,7 @@ public class WebhookResource extends BaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateWebhook(@Valid WebhookEntry webhook) {
         try {
-            log.debug("Webhook to be updated :{}", webhook.getWebhookId());
+            log.debug("Webhook to be updated :{}", escapeLog(webhook.getWebhookId()));
             HashSet<String> webhookIdSet = Sets.newHashSet();
             webhookIdSet.add(webhook.getWebhookId());
             List<WebhookEntry> existingWebhooks = webhookService.getWebhookByIds(webhookIdSet);
@@ -251,7 +251,7 @@ public class WebhookResource extends BaseResource {
             log.error(ErrorResponse.WEBHOOK_UPDATE_ERROR.getDescription(), e);
             return Response
                     .serverError()
-                    .entity(CommonUtils.createGenericResponse(false, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()))
+                    .entity(CommonUtils.createGenericResponse(false, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.WEBHOOK_SAVE_ERROR.getDescription()))
                     .build();
         }
     }
@@ -269,7 +269,7 @@ public class WebhookResource extends BaseResource {
     public Response deleteWebhook(@Parameter(description = "Webhook identifier") @PathParam(AppConstants.WEBHOOK_ID) @NotNull String webhookId) {
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Webhook to be deleted - webhookId:{}", webhookId);
+                log.debug("Webhook to be deleted - webhookId:{}", escapeLog(webhookId));
             }
             HashSet<String> webhookIdSet = Sets.newHashSet();
             webhookIdSet.add(webhookId);
@@ -313,7 +313,7 @@ public class WebhookResource extends BaseResource {
     public Response triggerWebhook(@Parameter(description = "Admin UI feature identifier") @PathParam(AppConstants.ADMIN_UI_FEATURE_ID) @NotNull String featureId) {
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Triggering all webhooks for Admin UI feature - featureId: {}", featureId);
+                log.debug("Triggering all webhooks for Admin UI feature - featureId: {}", escapeLog(featureId));
             }
             HashSet<String> featureIdSet = Sets.newHashSet();
             featureIdSet.add(featureId);
