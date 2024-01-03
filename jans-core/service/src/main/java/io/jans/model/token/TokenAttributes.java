@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.server.model.ldap;
+package io.jans.model.token;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,7 +21,8 @@ import java.util.Map;
 )
 public class TokenAttributes implements Serializable {
 
-    @JsonProperty("x5cs256")
+	private static final long serialVersionUID = -3069575637747538483L;
+	@JsonProperty("x5cs256")
     private String x5cs256;
     @JsonProperty("online_access")
     private boolean onlineAccess;
