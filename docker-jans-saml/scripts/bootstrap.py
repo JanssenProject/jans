@@ -40,7 +40,7 @@ def render_keycloak_conf(ctx):
 
 
 def main():
-    with manager.lock.create_lock("jans-saml-setup"):
+    with manager.lock.create_lock("saml-setup"):
         persistence_setup = PersistenceSetup(manager)
         persistence_setup.import_ldif_files()
         render_keycloak_conf(persistence_setup.ctx)
