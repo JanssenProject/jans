@@ -611,7 +611,7 @@ def get_password_from_file(password_file: str) -> str:
     3. Plain text
 
     Note that to decode using AES CBC, salt/key is loaded from file specified by
-    `CN_LOCK_SALT_FILE` environment variable (default to `/etc/jans/conf/oci_lock_salt`).
+    `CN_OCI_LOCK_SALT_FILE` environment variable (default to `/etc/jans/conf/oci_lock_salt`).
 
     Args:
         password_file: Path to file contains password.
@@ -622,7 +622,7 @@ def get_password_from_file(password_file: str) -> str:
     with open(password_file) as f:
         raw_passwd = f.read().strip()
 
-    salt_file = os.environ.get("CN_LOCK_SALT_FILE", "/etc/jans/conf/oci_lock_salt")
+    salt_file = os.environ.get("CN_OCI_LOCK_SALT_FILE", "/etc/jans/conf/oci_lock_salt")
 
     # probably sprig-aes format
     if os.path.isfile(salt_file):

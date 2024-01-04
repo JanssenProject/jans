@@ -188,7 +188,7 @@ class CouchbaseLock(BaseLock):
     def _resolve_auth(self):
         # list of possible password files
         password_files = [
-            os.environ.get("CN_LOCK_PASSWORD_FILE", "/etc/jans/conf/oci_lock_password")
+            os.environ.get("CN_OCI_LOCK_PASSWORD_FILE", "/etc/jans/conf/oci_lock_password")
         ]
 
         # check which user is accessing couchbase
