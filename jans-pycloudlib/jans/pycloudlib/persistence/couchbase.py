@@ -26,6 +26,7 @@ from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import safe_render
+from jans.pycloudlib.utils import get_password_from_file
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -53,9 +54,8 @@ def _get_cb_password(manager: Manager, password_file: str, secret_name: str) -> 
         Plaintext password.
     """
     if os.path.isfile(password_file):
-        with open(password_file) as f:
-            password = f.read().strip()
-            manager.secret.set(secret_name, password)
+        password = get_password_from_file(password_file)
+        manager.secret.set(secret_name, password)
     else:
         # get from secrets (if any)
         password = manager.secret.get(secret_name)
