@@ -296,10 +296,6 @@ def test_get_password_from_file_invalid_aes(monkeypatch, tmpdir):
 def test_get_password_from_file_invalid_b64(monkeypatch, tmpdir):
     from jans.pycloudlib.utils import get_password_from_file
 
-    # salt_file = tmpdir.join("oci_lock_salt")
-    # salt_file.write("6Jsv61H7fbkeIkRvUpnZ98fu")
-    # monkeypatch.setenv("CN_OCI_LOCK_SALT_FILE", str(salt_file))
-
     passwd_file = tmpdir.join("oci_lock_password")
     passwd_file.write("ow1Ty1OZWcOm8NRF49J07F1J1+fEQNLT5BKnCGqauvU=")
 
