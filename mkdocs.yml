@@ -8804,9 +8804,8 @@ nav:
     - 'casa/index.md'
     - Quick Start: 'casa/quick-start.md'
     - Administration Guide:
-        - 'casa/administration/README.md'
-        - 'About 2FA': 'casa/administration/2fa-basics.md'
         - 'Admin console': 'casa/administration/admin-console.md'
+        - 'About 2FA': 'casa/administration/2fa-basics.md'
         - 'Credentials storage': 'casa/administration/credentials-stored.md'
         - 'Custom branding': 'casa/administration/custom-branding.md'
         - 'URL path customization': 'casa/administration/change-context-path.md'
