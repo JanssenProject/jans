@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import io.jans.lock.service.config.ConfigurationFactory;
 import io.jans.lock.service.message.TokenSubService;
 import io.jans.lock.service.policy.PolicyDownloadService;
-import io.jans.lock.service.policy.event.PolicyDownloadEvent;
 import io.jans.service.cdi.event.ApplicationInitializedEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
