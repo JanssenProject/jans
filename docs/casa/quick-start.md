@@ -6,14 +6,11 @@ tags:
 
 # Jans Casa Quick Start Guide
 
-Jans Casa is a self-service web portal for end-users to manage security preferences for their accounts. Jans Casa can
-be used to with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org).
-
-Use this guide to install and configure a deployment of Casa.
+Use this guide to install and configure your Casa deployment.
 
 ## Installation
 
-Follow the Jans Casa [installation guide](./administration/README.md) to install Gluu Casa.
+Jans Casa can be used with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org). At [installation](https://docs.jans.io/head/admin/install/) time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.
 
 ## Configuration
 
