@@ -31,7 +31,7 @@ class Message(DialogUtils):
                     _("Message Provider Type"),
                     name='messageProviderType',
                     values=[(mtype, mtype) for mtype in self.schema['properties']['messageProviderType']['enum']],
-                    current_value='NULL',
+                    current_value='DISABLED',
                     jans_help="Message provider Type",
                     on_selection_changed=self.display_message_provider_type,
                     style=cli_style.radio_button)
@@ -47,7 +47,7 @@ class Message(DialogUtils):
 
         save_button = Button(text=_("Save"), handler=self.save)
 
-        if provider_type == 'NULL':
+        if provider_type == 'DISABLED':
             widgets = []
             self.provider_widgets = []
         else:
@@ -93,7 +93,7 @@ class Message(DialogUtils):
             else:
                 self.data = response.json()
 
-        if provider_type != 'NULL':
+        if provider_type != 'DISABLED':
             data = {}
             for widget in self.provider_widgets:
                 item_data = self.get_item_data(widget)
@@ -121,7 +121,7 @@ class Message(DialogUtils):
                 common_data.app.show_message(common_strings.error, str(e), tobefocused=self.main_container)
                 return
 
-            self.message_provider_type_widget.me.current_value = self.data.get('messageProviderType', 'NULL')
+            self.message_provider_type_widget.me.current_value = self.data.get('messageProviderType', 'DISABLED')
             self.display_message_provider_type(self.message_provider_type_widget.me)
 
         asyncio.ensure_future(coroutine())
