@@ -32,9 +32,9 @@ the admin console. See the [Admin console page](./admin-console.md#enabled-metho
 all the following authentication methods are supported:
 
 - FIDO 2 security keys
-- [Super Gluu](https://super.gluu.org/) for push notifications 
-- HOTP/TOTP apps, cards, "dongles"
-- OTP via SMS (using Twilio or an SMPP server)
+- [Super Gluu](https://docs.gluu.org/head/supergluu/) for push notifications 
+- HOTP/TOTP apps, cards, "dongles", etc
+- OTP via SMS (using Twilio)
 
 Other methods may be supported via [plugins](../index.md#existing-plugins).
 
