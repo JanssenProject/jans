@@ -37,6 +37,7 @@ export_keycloak_admin_creds
 python3 "$basedir/wait.py"
 python3 "$basedir/bootstrap.py"
 python3 "$basedir/configure_kc.py" &
+python3 "$basedir/upgrade.py"
 
 java_opts="$(get_max_ram_percentage) $(get_java_options)"
 export JAVA_OPTS_APPEND="$java_opts"
