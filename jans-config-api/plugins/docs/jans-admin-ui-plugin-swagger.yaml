@@ -1421,6 +1421,9 @@ components:
         webhookId:
           type: string
         displayName:
+          maxLength: 60
+          minLength: 2
+          pattern: "^[a-zA-Z0-9_\\-\\:\\/\\.]+$"
           type: string
         description:
           type: string

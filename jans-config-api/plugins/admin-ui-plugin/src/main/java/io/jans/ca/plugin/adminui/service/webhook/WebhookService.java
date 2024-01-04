@@ -24,6 +24,7 @@ import jakarta.ws.rs.core.Response;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
 
+import javax.validation.Valid;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -185,7 +186,7 @@ public class WebhookService {
      *                to be added.
      * @return The method is returning a WebhookEntry object.
      */
-    public WebhookEntry addWebhook(WebhookEntry webhook) throws ApplicationException {
+    public WebhookEntry addWebhook(@Valid WebhookEntry webhook) throws ApplicationException {
         try {
             validateWebhookEntry(webhook);
             String id = idFromName(webhook.getDisplayName() + webhook.getUrl() + webhook.getHttpMethod());

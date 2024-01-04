@@ -6,6 +6,8 @@ import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -21,6 +23,15 @@ public class WebhookEntry extends Entry implements Serializable {
     private String webhookId;
     @NotNull
     @AttributeName(name = "displayName")
+    @Pattern(
+            regexp = "^[a-zA-Z0-9_\\-\\:\\/\\.]+$",
+            message = "Name should contain only letters, digits and underscores"
+    )
+    @Size(
+            min = 2,
+            max = 60,
+            message = "Length of the Name should be between 1 and 30"
+    )
     private String displayName;
     @AttributeName(name = "description")
     private String description;
