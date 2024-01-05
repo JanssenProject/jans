@@ -15,15 +15,11 @@
 		<h:outputText value="#{msgs['login.pageTitle']}" />
 	</ui:define>
 	<ui:define name="body">
-		<div class="container">
-			<h:panelGroup rendered="true">
-				<div class="login_bx_1"
-					style="border-radius: 10px; margin-top: 0px; background: white; border: 1px solid #008b8b;">
-					<div class="row">
-						<h:messages class="text-center"
-							style="color:#8b0000;margin:5px;margin-left:20px; font-size:2vw;"
-							infoClass="text-center" errorClass="text-center" />
-					</div>
+		<div class="row">
+			<div class="jans_base_page_logo col-sm-12 col-md-12" align="center" >
+				<img id="AppLogo" src="https://jans-opensuse/jans-auth/servlet/logo"/>
+			</div>
+		</div>
 					<h:form id="loginForm" style="padding:30px;">
 						<div class="row">
 							<div class="col-sm-3 col-md-3">
@@ -111,9 +107,7 @@
 							</div>
 						</h:panelGroup>
 					</div>
-				</div>
-			</h:panelGroup>
-		</div>
+
 		<script type="text/javascript">
     		$(document).ready(function () {
     			$('.other').click(function(){
