@@ -6,6 +6,7 @@
 
 package io.jans.orm.sql.impl;
 
+import java.sql.JDBCType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,11 +67,21 @@ public class SqlFilterConverter {
 	private Path<Object> objectDocAlias = ExpressionUtils.path(Object.class, "doc");
 	
 	public static String[] SPECIAL_REGEX_CHARACTERS = new String[] { "\\", "/", ".", "*", "+", "?", "|", "(", ")", "[", "]", "{", "}" };
+	
+	private Map<String, JDBCType> jdbcEnumTypesMap;
 
 
     public SqlFilterConverter(SqlOperationService operationService) {
     	this.operationService = operationService;
     	this.dbType = operationService.getConnectionProvider().getDbType();
+    	initJdbcEnumTypesMap();
+	}
+
+	private void initJdbcEnumTypesMap() {
+		jdbcEnumTypesMap = new HashMap<>();
+        for( JDBCType sqlType : JDBCType.class.getEnumConstants()) {
+        	jdbcEnumTypesMap.put(StringHelper.toLowerCase(sqlType.name()) , sqlType);
+        }
 	}
 
 	public ConvertedExpression convertToSqlFilter(TableMapping tableMapping, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
@@ -493,29 +504,31 @@ public class SqlFilterConverter {
 					assertionValue = dateValue;
 				}
 			}
-			try {
-				if (attributeType != null) {
-					String columnType = attributeType.getType();
 
-					java.sql.JDBCType jdbcType;
-					// Fix for PostgreSQL 
-					if (StringHelper.equalsIgnoreCase(columnType, "bool")) { 
-						jdbcType = java.sql.JDBCType.BOOLEAN;
+			if (attributeType != null) {
+				String columnType = attributeType.getType();
+
+				java.sql.JDBCType jdbcType = null;
+				// Fix for PostgreSQL 
+				if (StringHelper.equalsIgnoreCase(columnType, "bool")) { 
+					jdbcType = java.sql.JDBCType.BOOLEAN;
+				} else {
+					String lowerCaseColumnType = StringHelper.toLowerCase(columnType);
+					if (jdbcEnumTypesMap.containsKey(lowerCaseColumnType)) {
+						jdbcType = jdbcEnumTypesMap.get(lowerCaseColumnType);
 					} else {
-						jdbcType = java.sql.JDBCType.valueOf(StringHelper.toUpperCase(columnType));
-					}
-	
-					if (jdbcType == java.sql.JDBCType.SMALLINT) {
-						boolean res = StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1");
-						assertionValue = res ? 1 : 0;
-					} else if (jdbcType == java.sql.JDBCType.BOOLEAN) {
-						boolean res = StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1");
-						assertionValue = res;
+						LOG.trace("Failed to determine JDBC type '{}' ", attributeType.getType());
+						// Do nothing. Type is not defined in enum
 					}
 				}
-			} catch (java.lang.IllegalArgumentException ex) {
-				LOG.trace("Failed to determine JDBC type '{}' ", attributeType.getType(), ex);
-				// Do nothing. Type is not defined in enum
+
+				if (jdbcType == java.sql.JDBCType.SMALLINT) {
+					boolean res = StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1");
+					assertionValue = res ? 1 : 0;
+				} else if (jdbcType == java.sql.JDBCType.BOOLEAN) {
+					boolean res = StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1");
+					assertionValue = res;
+				}
 			}
 		}
 

@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
@@ -105,7 +106,7 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 			String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
 			HttpPut request = new HttpPut(String.format("%s/policies/%s", baseUrl, policyId));
 			
-			StringEntity stringEntity = new StringEntity(policy, "text/plain");
+			StringEntity stringEntity = new StringEntity(policy, ContentType.TEXT_PLAIN);
 			request.setEntity(stringEntity);
 
 			try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {

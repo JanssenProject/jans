@@ -1,10 +1,12 @@
 package io.jans.lock.service.consumer.message.opa;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
@@ -135,7 +137,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 //		request.addHeader("Content-Type", "application/json");
 		request.addHeader("If-None-Match", "*");
 		
-		StringEntity stringEntity = new StringEntity("{}", "application/json");
+		StringEntity stringEntity = new StringEntity("{}", ContentType.APPLICATION_JSON);
 		request.setEntity(stringEntity);
 
 		try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {
