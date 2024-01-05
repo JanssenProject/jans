@@ -8802,8 +8802,8 @@ nav:
   - gama format: agama/gama-format.md
 - 'Jans Casa':
     - 'casa/index.md'
-    - Quick Start: 'casa/quick-start.md'
     - Administration Guide:
+        - 'Quick Start': 'casa/administration/quick-start.md'
         - 'Admin console': 'casa/administration/admin-console.md'
         - 'About 2FA': 'casa/administration/2fa-basics.md'
         - 'Credentials storage': 'casa/administration/credentials-stored.md'
