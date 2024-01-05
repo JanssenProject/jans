@@ -1,6 +1,7 @@
 package io.jans.lock.service.external.context;
 
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.token.TokenEntity;
 
 /**
  * External lock context
@@ -10,6 +11,9 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 public class ExternalLockContext {
 
     private CustomScriptConfiguration script;
+    
+    private TokenEntity tokenEntity;
+
     private boolean cancelPdpOperation;
     private boolean cancelNextScriptOperation;
 
@@ -25,6 +29,14 @@ public class ExternalLockContext {
     public void setScript(CustomScriptConfiguration script) {
         this.script = script;
     }
+
+	public TokenEntity getTokenEntity() {
+		return tokenEntity;
+	}
+
+	public void setTokenEntity(TokenEntity tokenEntity) {
+		this.tokenEntity = tokenEntity;
+	}
 
 	public boolean isCancelPdpOperation() {
 		return cancelPdpOperation;
@@ -44,8 +56,8 @@ public class ExternalLockContext {
 
 	@Override
 	public String toString() {
-		return "ExternalLockContext [script=" + script + ", cancelPdpOperation=" + cancelPdpOperation
-				+ ", cancelNextScriptOperation=" + cancelNextScriptOperation + "]";
+		return "ExternalLockContext [script=" + script + ", tokenEntity=" + tokenEntity + ", cancelPdpOperation="
+				+ cancelPdpOperation + ", cancelNextScriptOperation=" + cancelNextScriptOperation + "]";
 	}
 
 }
