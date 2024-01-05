@@ -6,6 +6,7 @@
 
 package io.jans.service.message.provider;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -297,7 +298,7 @@ public class PostgresMessageProvider extends AbstractMessageProvider<SqConnectio
 
 					if (notifications != null) {
 						for (int i = 0; i < notifications.length; i++) {
-							pubSub.onMessage(notifications[i].getName(), notifications[i].getParameter());
+							pubSub.onMessage(notifications[i].getName(), new String(Base64.decodeBase64(notifications[i].getParameter()), StandardCharsets.UTF_8));
 						}
 					}
 
