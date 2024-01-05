@@ -70,8 +70,9 @@ public class MessageConsumerFactory {
         // Force to create new bean
 		for (MessageConsumer messageConsumer : messageConsumerProviderInstances) {
 			messageConsumerProviderInstances.destroy(messageConsumer);
-	        log.info("Recreated messageConsumer instance '{}'", messageConsumer);
+	        log.info("Destroyed messageConsumer instance '{}'", messageConsumer);
 		}
+		produceMessageConsumer();
 	}
 
 	@Produces
