@@ -230,11 +230,19 @@ public class IdpClientFactory {
                         isUpdate, response.getStatus(), response.getStatusInfo(), response.getEntity(),
                         response.getStatusInfo().equals(Status.OK), response.getStatusInfo().equals(Status.CREATED),
                         response.getStatusInfo().equals(Status.NO_CONTENT));
+                
                 String entity = response.readEntity(String.class);
                 logger.debug("Add/Update IDP entity:{}", entity);
-                if (response.getStatusInfo().equals(Status.OK) || response.getStatusInfo().equals(Status.CREATED)) {
+                
+                if (isUpdate && (response.getStatusInfo().equals(Status.OK)
+                        || response.getStatusInfo().equals(Status.NO_CONTENT))) {
                     logger.debug(
-                            "Successful response for Add/Update IDP - identityProviderJson:{}, status:{}, entity:{}",
+                            "Successful response for Update IDP request - identityProviderJson:{}, status:{}, entity:{}",
+                            identityProviderJson, response.getStatusInfo(), entity);
+                } else if (!isUpdate && (response.getStatusInfo().equals(Status.OK)
+                        || response.getStatusInfo().equals(Status.CREATED))) {
+                    logger.debug(
+                            "Successful response for Add IDP request - identityProviderJson:{}, status:{}, entity:{}",
                             identityProviderJson, response.getStatusInfo(), entity);
 
                 } else {
@@ -275,7 +283,7 @@ public class IdpClientFactory {
             logger.debug("Response for SAML IDP deletion -  response:{}", response);
 
             if (response != null) {
-                logger.trace(
+                logger.debug(
                         "Delete IDP  -  response.getStatus():{}, response.getStatusInfo():{}, response.getEntity():{}",
                         response.getStatus(), response.getStatusInfo(), response.getEntity());
                 String entity = response.readEntity(String.class);

@@ -7860,13 +7860,11 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        selected:
-          type: boolean
-        userCanView:
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanView:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
@@ -7875,6 +7873,8 @@ components:
         userCanAccess:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        selected:
           type: boolean
         baseDn:
           type: string
@@ -8675,6 +8675,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        lockMessageConfig:
+          $ref: '#/components/schemas/LockMessageConfig'
         fapi:
           type: boolean
         allResponseTypesSupported:
@@ -8828,6 +8830,13 @@ components:
             type: string
     JsonNode:
       type: object
+    LockMessageConfig:
+      type: object
+      properties:
+        enableIdTokenMessages:
+          type: boolean
+        idTokenMessagesChannel:
+          type: string
     SsaConfiguration:
       type: object
       properties:
@@ -9437,10 +9446,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
