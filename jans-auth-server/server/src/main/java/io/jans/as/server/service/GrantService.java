@@ -96,7 +96,7 @@ public class GrantService {
     public void persist(TokenEntity token) {
         persistenceEntryManager.persist(token);
         
-        if (TokenType.ID_TOKEN.equals(token.getTokenType())) {
+        if (TokenType.ID_TOKEN.getValue().equals(token.getTokenType())) {
         	publishIdTokenLockMessage(token, "add");
         }
     }
