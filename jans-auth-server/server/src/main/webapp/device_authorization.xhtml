@@ -22,12 +22,9 @@
 		<h:outputText value="#{msgs['device.authorization.pageTitle']}" />
 	</ui:define>
 	<ui:define name="body">
-		<h:form id="deviceAuthzForm" class="min-vh-100 h-100 bg-highlight d-flex flex-column align-items-center jans-page-backgrond-color" style="justify-content: space-evenly;">
-			<div class="text-white">
-				<!-- TODO load janssen-logo -->
-				<img style="max-height: 70px; padding-bottom: 2px;" id="AppLogo"
-				src="#{request.contextPath}/servlet/janssen-logo" alt="janssen-logo" />
-			</div>
+		<h:form id="deviceAuthzForm" class="bg-highlight position-relative d-flex flex-column align-items-center jans-page-backgrond-color" style="justify-content: space-evenly; height: 100vh;">
+			<img style="max-height: 70px;" id="AppLogo"
+				src="#{request.contextPath}/servlet/logo" alt="janssen-logo" class="absolute-logo" />
 			<div class="container">
 				<h:panelGroup rendered="#{deviceAuthorizationAction.newRequest}">
 					<div class="device-authz-container">

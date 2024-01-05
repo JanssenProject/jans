@@ -737,3 +737,10 @@ input.btn.btn-done {
     border: 2px solid #fff !important;
     color: #fff !important;
 }
+
+.absolute-logo {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, 100%);
+}
