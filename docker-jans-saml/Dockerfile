@@ -24,9 +24,8 @@ RUN mkdir -p /opt/keycloak/logs \
 # ==============
 
 ENV CN_VERSION=1.0.22-SNAPSHOT
-ENV CN_BUILD_DATE='2023-12-08 08:47'
+ENV CN_BUILD_DATE='2024-01-03 08:47'
 
-# @FIXME: kc-jans-storage-plugin raises error about Cookie
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
     && unzip /tmp/kc-storage-deps.zip -d /opt/keycloak/providers \
@@ -41,7 +40,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=a2c5d4bd3d09c9f34e79b0d24bc63ece4ca7da43
+ENV JANS_SOURCE_VERSION=d3401e3b695f21a61c5ddc5675d242a30839ef06
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -65,9 +64,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/configuration.ldif /app/templates/jans-saml/ \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/jans-saml-config.json /app/templates/jans-saml/ \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/keycloak.conf /app/templates/jans-saml/
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-saml/* /app/templates/jans-saml
 
 # ======
 # Python
@@ -166,8 +163,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_SAML_PORT=8083 \
     CN_SAML_HOST=0.0.0.0 \
-    CN_SAML_JAVA_OPTIONS=""
-    # KC_HEALTH_ENABLED=true \
+    CN_SAML_JAVA_OPTIONS="" \
+    KC_HEALTH_ENABLED=true
     # KC_METRICS_ENABLED=true
 
 # ==========
@@ -187,6 +184,10 @@ RUN mkdir -p /etc/certs \
     /etc/jans/conf \
     /opt/idp/configs/keycloak/metadata \
     /opt/idp/configs/keycloak/temp_metadata \
+    /opt/idp/configs/keycloak/idp/metadata \
+    /opt/idp/configs/keycloak/idp/temp_metadata \
+    /opt/idp/configs/keycloak/sp/metadata \
+    /opt/idp/configs/keycloak/sp/temp_metadata \
     /usr/share/java
 
 COPY templates /app/templates/
