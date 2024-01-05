@@ -344,6 +344,7 @@ It returns all the information of the Jans Authorization server.
   "opTosUri": "https://example.jans.io/tos",
   "authorizationCodeLifetime": 60,
   "refreshTokenLifetime": 14400,
+  "txTokenLifetime": 180,
   "idTokenLifetime": 3600,
   "idTokenFilterClaimsBasedOnAccessToken": false,
   "accessTokenLifetime": 300,

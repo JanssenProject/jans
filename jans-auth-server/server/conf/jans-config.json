@@ -162,6 +162,60 @@
         "A128GCM",
         "A256GCM"
     ],
+    "txTokenSigningAlgValuesSupported":[
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "txTokenEncryptionAlgValuesSupported":[
+        "RSA1_5",
+        "RSA-OAEP",
+        "A128KW",
+        "A256KW"
+    ],
+    "txTokenEncryptionEncValuesSupported":[
+        "A128CBC+HS256",
+        "A256CBC+HS512",
+        "A128GCM",
+        "A256GCM"
+    ],
+    "introspectionSigningAlgValuesSupported":[
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "introspectionEncryptionAlgValuesSupported":[
+        "RSA1_5",
+        "RSA-OAEP",
+        "A128KW",
+        "A256KW"
+    ],
+    "introspectionEncryptionEncValuesSupported":[
+        "A128CBC+HS256",
+        "A256CBC+HS512",
+        "A128GCM",
+        "A256GCM"
+    ],
     "idTokenSigningAlgValuesSupported":[
         "none",
         "HS256",
@@ -295,6 +349,7 @@
     "authorizationCodeLifetime":${config.client.authorization-code-lifetime},
     "refreshTokenLifetime":14400,
     "idTokenLifetime":3600,
+    "txTokenLifetime":180,
     "accessTokenLifetime":300,
     "grantTypesAndResponseTypesAutofixEnabled":true,
     "umaRptLifetime":${config.uma.requester-permission-token-lifetime},
