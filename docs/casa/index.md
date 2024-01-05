@@ -17,7 +17,7 @@ For example, as people interact with an organization's digital services, they ma
 - View and manage which external apps have been authorized to access what personal data
 - View trusted devices
 
-Casa provides a platform for people to perform these account security functions and more in an friendly, straightforward manner. 
+Casa provides a platform for people to perform these account security functions and more in a friendly, straightforward manner. 
 
 ## Two-factor authentication
 
@@ -30,7 +30,7 @@ Out-of-the-box, Casa can be used to enroll and manage the following authenticato
 - OTP hardware cards like [these](https://www.ftsafe.com/Products/Power_Card/Standard) or dongles like [these](https://www.ftsafe.com/Products/OTP/Single_Button_OTP)      
 - OTP mobile apps like Google Authenticator, FreeOTP, etc.       
 - Mobile phone numbers able to receive OTPs via SMS   
-- Passwords (if stored in the corresponding Janssen Server's local database, i.e. not a backend LDAP like AD)      
+- Passwords      
 
 Additional authenticators and use cases can be supported via [custom plugins](#existing-plugins).
 
@@ -44,7 +44,7 @@ To facilitate 2FA device enrollment during account registration, or elsewhere in
 
 ## Configuration via APIs
 
-Besides a comprehensive graphical admin console, application settings can also be manipulated by means of a configuration API.
+Besides a comprehensive graphical [admin console](./administration/admin-console.md), application settings can also be manipulated by means of a configuration API.
 
 ## Existing plugins
 
