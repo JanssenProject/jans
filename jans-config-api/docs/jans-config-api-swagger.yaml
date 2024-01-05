@@ -7862,17 +7862,17 @@ components:
           type: string
         selected:
           type: boolean
+        userCanEdit:
+          type: boolean
         userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
+        userCanAccess:
           type: boolean
         adminCanAccess:
-          type: boolean
-        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8675,6 +8675,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        lockMessageConfig:
+          $ref: '#/components/schemas/LockMessageConfig'
         fapi:
           type: boolean
         allResponseTypesSupported:
@@ -8828,6 +8830,13 @@ components:
             type: string
     JsonNode:
       type: object
+    LockMessageConfig:
+      type: object
+      properties:
+        enableIdTokenMessages:
+          type: boolean
+        idTokenMessagesChannel:
+          type: string
     SsaConfiguration:
       type: object
       properties:
@@ -10116,10 +10125,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

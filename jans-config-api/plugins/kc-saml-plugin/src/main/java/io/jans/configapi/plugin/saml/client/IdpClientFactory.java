@@ -223,6 +223,9 @@ public class IdpClientFactory {
             }
 
             logger.debug("Response for SAML IDP -  response:{}", response);
+            String url = idpUrl;
+            String name = identityProviderJson.getString(Constants.ALIAS);
+            logger.debug("Add/Update IDP Id -  name:{}", name);
 
             if (response != null) {
                 logger.debug(
@@ -230,12 +233,22 @@ public class IdpClientFactory {
                         isUpdate, response.getStatus(), response.getStatusInfo(), response.getEntity(),
                         response.getStatusInfo().equals(Status.OK), response.getStatusInfo().equals(Status.CREATED),
                         response.getStatusInfo().equals(Status.NO_CONTENT));
+
                 String entity = response.readEntity(String.class);
                 logger.debug("Add/Update IDP entity:{}", entity);
-                if (response.getStatusInfo().equals(Status.OK) || response.getStatusInfo().equals(Status.CREATED)) {
+
+                if (isUpdate && (response.getStatusInfo().equals(Status.OK)
+                        || response.getStatusInfo().equals(Status.NO_CONTENT))) {
                     logger.debug(
-                            "Successful response for Add/Update IDP - identityProviderJson:{}, status:{}, entity:{}",
+                            "Successful response for Update IDP request - identityProviderJson:{}, status:{}, entity:{}",
                             identityProviderJson, response.getStatusInfo(), entity);
+
+                } else if (!isUpdate && (response.getStatusInfo().equals(Status.OK)
+                        || response.getStatusInfo().equals(Status.CREATED))) {
+                    url = idpUrl + "/" + name;
+                    logger.debug(
+                            "Successful response for Add IDP request - identityProviderJson:{}, status:{}, entity:{}, url:{}",
+                            identityProviderJson, response.getStatusInfo(), entity, url);
 
                 } else {
                     logger.error("Error while creating/updating IDP - identityProviderJson:{}, status:{}, entity:{}",
@@ -243,9 +256,8 @@ public class IdpClientFactory {
                     throw new WebApplicationException("Error while creating/updating IDP" + identityProviderJson
                             + ", Status is " + response.getStatusInfo() + " - " + entity);
                 }
-                String name = identityProviderJson.getString(Constants.ALIAS);
-                logger.debug("Add/Update IDP Id -  name:{}", name);
-                idpJson = getIdp(idpUrl + "/" + name, token);
+
+                idpJson = getIdp(url, token);
                 logger.debug("Added/Updated IDP -  idpJson:{}", idpJson);
             }
 
@@ -275,7 +287,7 @@ public class IdpClientFactory {
             logger.debug("Response for SAML IDP deletion -  response:{}", response);
 
             if (response != null) {
-                logger.trace(
+                logger.debug(
                         "Delete IDP  -  response.getStatus():{}, response.getStatusInfo():{}, response.getEntity():{}",
                         response.getStatus(), response.getStatusInfo(), response.getEntity());
                 String entity = response.readEntity(String.class);
