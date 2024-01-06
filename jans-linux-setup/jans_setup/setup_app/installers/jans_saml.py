@@ -101,7 +101,8 @@ class JansSamlInstaller(JettyInstaller):
 
     def create_folders(self):
         for saml_dir in (self.idp_root_dir, self.idp_config_root_dir, self.idp_config_data_dir,
-                        self.idp_config_log_dir, self.idp_config_providers_dir, Config.jans_idp_idp_metadata_root_dir,
+                        self.idp_config_log_dir, self.idp_config_providers_dir,
+                        Config.jans_idp_idp_metadata_temp_dir, Config.jans_idp_idp_metadata_root_dir,
                         Config.jans_idp_sp_metadata_root_dir, Config.jans_idp_sp_metadata_temp_dir,
                 ):
             self.createDirs(saml_dir)
