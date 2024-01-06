@@ -64,7 +64,7 @@ for vendor in ('gluu', 'jans'):
         salt = read_prop(salt_fn)['encodeSalt']
         ldap_prop_fn = f'/etc/{vendor}/conf/{vendor}-ldap.properties'
         ldap_prop = read_prop(ldap_prop_fn)
-        ldap_prop['bindPassword'] = os.popen('/opt/gluu/bin/encode.py -D ' + ldap_prop['bindPassword']).read().strip()
+        ldap_prop['bindPassword'] = os.popen(f'/opt/{vendor}/bin/encode.py -D ' + ldap_prop['bindPassword']).read().strip()
         break
 
 
