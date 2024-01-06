@@ -21,4 +21,4 @@
    2.4 Install a fresh Janssen Instance with salt of Gluu Instance, for example: `python3 install.py --args="-encode-salt=0xZ6nwAjvZlz8nOovDIZFSJT"`
       NOTE!!: Replace your salt
 
-   2.5 Execute migratin script: 
+   2.5 Execute migratin script: `python3 jans-jans-linux-setup-gluu2flex-migration/jans-linux-setup/tools/gluu2flex-migration/gluu2flex.py`
