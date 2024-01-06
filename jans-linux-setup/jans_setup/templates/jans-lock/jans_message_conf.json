@@ -1,5 +1,5 @@
 {
-  "messageProviderType": "DISABLED",
+  "messageProviderType": "%(lock_message_provider_type)s",
   "postgresConfiguration": {
     "connectionUri": "jdbc:postgresql://%(rdbm_host)s:%(rdbm_port)s/%(rdbm_db)s",
     "dbSchemaName": "public",
