@@ -19,7 +19,7 @@
    "errorReasonEnabled": false,
    
    "opaConfiguration": {
-   		"baseUrl" : "http://localhost:8181/v1/"
+        "baseUrl" : "http://localhost:8181/v1/"
    },
    "messageConsumerType": "OPA",
    "policyDecisionPointType": "OPA"
