@@ -7653,6 +7653,11 @@ components:
           type: string
         load_average:
           type: string
+    JSONObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
     StatsData:
       type: object
       properties:
@@ -7663,6 +7668,8 @@ components:
           format: date-time
         facterData:
           $ref: '#/components/schemas/FacterData'
+        versionData:
+          $ref: '#/components/schemas/JSONObject'
     AuthenticationMethod:
       type: object
       properties:
@@ -7862,17 +7869,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
-          type: boolean
         userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanEdit:
+          type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -9689,14 +9696,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
