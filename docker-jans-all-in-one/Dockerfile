@@ -102,6 +102,7 @@ COPY --from=jans-config-api-src /opt/jans/jetty/jans-config-api /opt/jans/jetty/
 COPY --from=jans-config-api-src /app/templates/jans-config-api /app/templates/jans-config-api
 COPY --from=jans-config-api-src /usr/bin/facter /usr/local/bin/facter
 COPY --from=jans-config-api-src /app/scripts /app/jans_aio/jans_config_api
+COPY --from=jans-config-api-src /var/log/adminui /var/log/adminui
 RUN ln -sf /app/jans_aio/jans_config_api/entrypoint.sh /app/bin/jans-config-api-entrypoint.sh
 
 COPY --from=jans-fido2-src /opt/jans/jetty/jans-fido2 /opt/jans/jetty/jans-fido2
@@ -230,6 +231,7 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     /app \
     /var/lib/nginx \
     /var/log/nginx \
+    /var/log/adminui \
     /etc/nginx/jans-aio \
     /usr/share/java
 
@@ -262,6 +264,7 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     /app \
     /var/lib/nginx \
     /var/log/nginx \
+    /var/log/adminui \
     /etc/nginx/jans-aio \
     /usr/share/java
 
