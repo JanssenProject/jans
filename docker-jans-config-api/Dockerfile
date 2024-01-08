@@ -239,7 +239,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase \
     ${JETTY_HOME}/temp \
     /usr/share/java \
-    /var/log
+    /var/log/adminui
 
 RUN touch /etc/hosts.back
 COPY templates /app/templates/
@@ -252,7 +252,7 @@ RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans
 
 RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
 
-RUN sed -i 's/\${sys:log.base}\/logs/\/var\/log/g' /app/templates/jans-config-api/log4j2-adminui.xml
+RUN sed -i 's/\${sys:log.base}\/logs/\/var\/log\/adminui/g' /app/templates/jans-config-api/log4j2-adminui.xml
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
 
@@ -274,7 +274,7 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/_plugins \
     && chown 1000:0 ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.xml \
     && chown -R 1000:0 ${JETTY_HOME}/temp \
-    && chown -R 1000:0 /var/log
+    && chown -R 1000:0 /var/log/adminui
 
 USER 1000
 
