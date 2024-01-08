@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
@@ -39,8 +40,6 @@ import jakarta.inject.Inject;
 @Implementation
 @ApplicationScoped
 public class OpaPolicyConsumer extends PolicyConsumer {
-
-	private static final String LOCAL_POLICY_BASE_URI = "http://localhost:8181/v1/policies";
 
 	public static String POLICY_CONSUMER_TYPE = "OPA";
 
@@ -92,6 +91,7 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 		
 		List<String> policyIds = loadedPolicies.get(baseId);
 		
+		boolean result = true;
 		List<String> cleanPolicyIds= new ArrayList<>(policyIds);
 		for (String policy : policies) {
 			byte[] digest = sha256Digest.digest(policy.getBytes(StandardCharsets.UTF_8));
@@ -109,10 +109,14 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 			StringEntity stringEntity = new StringEntity(policy, ContentType.TEXT_PLAIN);
 			request.setEntity(stringEntity);
 
-			try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {
+			try {
+				CloseableHttpClient httpClient = httpService.getHttpsClient();
 				HttpResponse httpResponse = httpClient.execute(request);
-				System.out.println(httpResponse);
-				System.out.println(httpResponse.getStatusLine());
+				
+				int statusCode = httpResponse.getStatusLine().getStatusCode();
+				log.debug("Get OPA add policy for policyId '{}' response with status code '{}'", policyId, statusCode);
+
+				result &= statusCode == HttpStatus.SC_OK;
 			} catch (IOException ex) {
 		    	log.error("Failed to add policy to OPA", ex);
 			}
@@ -122,11 +126,11 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 		
 		// Remove old policies after processing currentPoliciesDigests
 		for (String policyId : cleanPolicyIds) {
-			sendRemovePolicyRequest(policyId);
+			result &= sendRemovePolicyRequest(policyId);
 			policyIds.remove(policyId);
 		}
 
-		return true;
+		return result;
 	}
 
 	@Override
@@ -147,29 +151,37 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 		
 		if (policyIds == null) {
 	    	log.warn("There is no loadeed policies from sourceUri: '{}'", sourceUri);
-	    	return false;
+	    	return true;
 		}
 
+		boolean result = true;
 		for (String policyId : policyIds) {
-			sendRemovePolicyRequest(policyId);
+			result &= sendRemovePolicyRequest(policyId);
 		}
 
-		return true;
+		return result;
 	}
 
-	public void sendRemovePolicyRequest(String policyId) {
+	public boolean sendRemovePolicyRequest(String policyId) {
 		log.debug("Remove policy '{}'", policyId);
 		
 		String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
 		HttpDelete request = new HttpDelete(String.format("%s/policies/%s", baseUrl, policyId));
 
-		try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {
+		boolean result = true;
+		try {
+			CloseableHttpClient httpClient = httpService.getHttpsClient();
 			HttpResponse httpResponse = httpClient.execute(request);
-			System.out.println(httpResponse);
-			System.out.println(httpResponse.getStatusLine());
+			
+			int statusCode = httpResponse.getStatusLine().getStatusCode();
+			log.debug("Get OPA remove policy for policyId '{}' response with status code '{}'", policyId, statusCode);
+
+			result &= statusCode == HttpStatus.SC_OK;
 		} catch (IOException ex) {
 			log.error("Failed to remove policy from OPA", ex);
 		}
+		
+		return result;
 	}
 
 	@Override
