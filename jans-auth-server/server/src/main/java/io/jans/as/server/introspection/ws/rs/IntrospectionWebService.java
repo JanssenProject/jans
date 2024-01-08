@@ -199,8 +199,8 @@ public class IntrospectionWebService {
             return Response.status(Response.Status.OK).entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
 
         } catch (WebApplicationException e) {
-            if (log.isErrorEnabled()) {
-                log.error(e.getMessage(), e);
+            if (log.isTraceEnabled()) {
+                log.trace(e.getMessage(), e);
             }
             throw e;
         } catch (Exception e) {
