@@ -197,8 +197,9 @@ public class ParRestWebService {
                 throw errorResponseFactory.createBadRequestException(createErrorResponseFromRedirectErrorUri(e.getResponse().getLocation()));
             }
 
-            if (log.isErrorEnabled())
-                log.error(e.getMessage(), e);
+            if (log.isTraceEnabled()) {
+                log.trace(e.getMessage(), e);
+            }
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
