@@ -1,10 +1,12 @@
 package io.jans.lock.service.consumer.message.opa;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
@@ -15,8 +17,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.service.TokenService;
 import io.jans.lock.service.external.ExternalLockService;
 import io.jans.lock.service.external.context.ExternalLockContext;
+import io.jans.model.token.TokenEntity;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.qualifier.Implementation;
 import io.jans.service.message.consumer.MessageConsumer;
@@ -48,6 +52,9 @@ public class OpaMessageConsumer extends MessageConsumer {
 
 	@Inject
 	private BaseHttpService httpService;
+	
+	@Inject
+	private TokenService tokenService;
 
 	private ObjectMapper objectMapper;
 	
@@ -103,6 +110,12 @@ public class OpaMessageConsumer extends MessageConsumer {
 	private boolean putData(JsonNode messageNode) {
 		ExternalLockContext lockContext = new ExternalLockContext();
 
+		String tknTyp = messageNode.get("tknTyp").asText();
+		String tknCde = messageNode.get("tknCde").asText();
+		
+		TokenEntity tokenEntity = tokenService.findToken(tknCde);
+		log.debug("Token {} loaded successfully", tokenEntity);
+
 		/*
 		 * Data: {token_entry_as_json}
 		 */
@@ -117,8 +130,6 @@ public class OpaMessageConsumer extends MessageConsumer {
 		}
 
 		// Send rest request to OPA
-		String tknTyp = messageNode.get("tknTyp").asText();
-		String tknCde = messageNode.get("tknCde").asText();
 		
 		String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
 
@@ -126,7 +137,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 //		request.addHeader("Content-Type", "application/json");
 		request.addHeader("If-None-Match", "*");
 		
-		StringEntity stringEntity = new StringEntity("{}", "application/json");
+		StringEntity stringEntity = new StringEntity("{}", ContentType.APPLICATION_JSON);
 		request.setEntity(stringEntity);
 
 		try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {
