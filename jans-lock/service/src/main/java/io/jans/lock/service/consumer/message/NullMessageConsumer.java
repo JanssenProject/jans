@@ -17,7 +17,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class NullMessageConsumer extends MessageConsumer {
 	
-	public static String MESSAGE_CONSUMER_TYPE = "NULL";
+	public static String MESSAGE_CONSUMER_TYPE = "DISABLED";
 
 	@Inject
 	private Logger log;
