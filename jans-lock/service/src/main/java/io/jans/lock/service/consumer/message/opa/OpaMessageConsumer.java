@@ -1,9 +1,12 @@
 package io.jans.lock.service.consumer.message.opa;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
@@ -12,6 +15,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -29,6 +34,9 @@ import io.jans.util.StringHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import net.jodah.expiringmap.ExpirationListener;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
 
 /**
  * OPA message consumer
@@ -57,10 +65,15 @@ public class OpaMessageConsumer extends MessageConsumer {
 	private TokenService tokenService;
 
 	private ObjectMapper objectMapper;
-	
+
+    private ExpiringMap<String, String> loadedTokens;
+	private OpaExpirationListener expirationListener;
+
 	@PostConstruct
 	public void init() {
-        this.objectMapper = new ObjectMapper();		
+        this.objectMapper = new ObjectMapper();
+        this.expirationListener = new OpaExpirationListener();
+        this.loadedTokens = ExpiringMap.builder().expirationPolicy(ExpirationPolicy.CREATED).variableExpiration().expirationListener(expirationListener).build();
 	}
 
 	/*
@@ -70,7 +83,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 	@Asynchronous
 	public void onMessage(String channel, String message) {
 		log.info("onMessage {} : {}", channel, message);
-
+		
 		try {
 			JsonNode messageNode = objectMapper.readTree(message);
 			
@@ -81,7 +94,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 
 			String tknOp = messageNode.get("tknOp").asText();
 			if (StringHelper.equalsIgnoreCase(tknOp, "add")) {
-				putData(messageNode);
+				putData(message, messageNode);
 			} else if (StringHelper.equalsIgnoreCase(tknOp, "del")) {
 				removeData(messageNode);
 			} else {
@@ -107,7 +120,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 		return MESSAGE_CONSUMER_TYPE;
 	}
 
-	private boolean putData(JsonNode messageNode) {
+	private boolean putData(String message, JsonNode messageNode) {
 		ExternalLockContext lockContext = new ExternalLockContext();
 
 		String tknTyp = messageNode.get("tknTyp").asText();
@@ -120,7 +133,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 		 * Data: {token_entry_as_json}
 		 */
 		ObjectNode dataNode = objectMapper.createObjectNode();
-		dataNode.put("entry", "{}");
+		dataNode.put("entry", "{\"test\" : 1}");
 		
 		externalLockService.beforeDataPut(messageNode, dataNode, lockContext);
 		
@@ -134,25 +147,33 @@ public class OpaMessageConsumer extends MessageConsumer {
 		String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
 
 		HttpPut request = new HttpPut(String.format("%s/data/%s/%s", baseUrl, tknTyp, tknCde));
-//		request.addHeader("Content-Type", "application/json");
+		request.addHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
 		request.addHeader("If-None-Match", "*");
 		
 		StringEntity stringEntity = new StringEntity("{}", ContentType.APPLICATION_JSON);
 		request.setEntity(stringEntity);
 
-		try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {
+		boolean result = false;
+		try {
+			CloseableHttpClient httpClient = httpService.getHttpsClient();
 			HttpResponse httpResponse = httpClient.execute(request);
-			System.out.println(httpResponse);
-			System.out.println(httpResponse.getStatusLine());
+			
+			int statusCode = httpResponse.getStatusLine().getStatusCode();
+			log.debug("Get OPA add data for token '{}' response with status code '{}'", tknCde, statusCode);
+
+			result = statusCode == HttpStatus.SC_NO_CONTENT;
 		} catch (IOException ex) {
 	    	log.error("Failed to execute put data request", ex);
-	    	return false;
 		}
 
-		return true;
+		if (result) {
+			loadedTokens.put(tknCde, message, ExpirationPolicy.CREATED, getExpirationInSeconds(tokenEntity), TimeUnit.SECONDS);
+		}
+		
+		return result;
 	}
 
-	public boolean removeData(JsonNode messageNode) {
+	private boolean removeData(JsonNode messageNode) {
 		ExternalLockContext lockContext = new ExternalLockContext();
 
 		externalLockService.beforeDataRemoval(messageNode, lockContext);
@@ -170,17 +191,41 @@ public class OpaMessageConsumer extends MessageConsumer {
 
 		HttpDelete request = new HttpDelete(String.format("%s/data/%s/%s", baseUrl, tknTyp, tknCde));
 
-		try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {
+		boolean result = false;
+		try {
+			CloseableHttpClient httpClient = httpService.getHttpsClient();
 			HttpResponse httpResponse = httpClient.execute(request);
-			System.out.println(httpResponse);
-			System.out.println(httpResponse.getStatusLine());
+
+			int statusCode = httpResponse.getStatusLine().getStatusCode();
+			log.debug("Get OPA remove data for token '{}' response with status code '{}'", tknCde, statusCode);
+
+			result = statusCode == HttpStatus.SC_NO_CONTENT;
 		} catch (IOException ex) {
 	    	log.error("Failed to execute delete data request", ex);
-	    	return false;
 		}
 
-		// Sent rest request to OPA
-		return true;
+		loadedTokens.remove(tknCde);
+		
+		return result;
+	}
+
+	public long getExpirationInSeconds(TokenEntity tokenEntity) {
+        final Long duration = Duration.between(new Date().toInstant(), tokenEntity.getExpirationDate().toInstant()).getSeconds();
+
+        return duration;
+    }
+	private class OpaExpirationListener implements ExpirationListener<String, String> {
+
+		public void expired(String key, String message) {
+	    	log.debug("Deleting expired token {}", key);
+			JsonNode messageNode;
+			try {
+				messageNode = objectMapper.readTree(message);
+				removeData(messageNode);
+			} catch (JacksonException ex) {
+				log.error("Failed to parse messge: '{}'", message, ex);
+			}
+		}
 	}
 
 }
