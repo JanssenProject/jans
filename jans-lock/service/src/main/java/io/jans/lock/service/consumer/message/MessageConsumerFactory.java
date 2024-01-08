@@ -70,7 +70,9 @@ public class MessageConsumerFactory {
         // Force to create new bean
 		for (MessageConsumer messageConsumer : messageConsumerProviderInstances) {
 			messageConsumerProviderInstances.destroy(messageConsumer);
-	        log.info("Destroyed messageConsumer instance '{}'", messageConsumer);
+	        log.info("Destroyed messageConsumer instance '{}'", System.identityHashCode(messageConsumer));
+	        MessageConsumer newMessageConsumer = messageConsumerProviderInstances.get();
+	        log.info("Created messageConsumer instance '{}'", System.identityHashCode(newMessageConsumer));
 		}
 		produceMessageConsumer();
 	}
