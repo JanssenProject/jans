@@ -795,11 +795,14 @@ class Upgrade:
         # set jansMessageConf if still empty
         if not entry.attrs.get("jansMessageConf"):
             entry.attrs["jansMessageConf"] = json.dumps({
-                "messageProviderType": "NULL",
+                "messageProviderType": "DISABLED",
                 "postgresConfiguration": {
+                    "connectionUri": "jdbc:postgresql://localhost:5432/postgres",
                     "dbSchemaName": "public",
+                    "authUserName": "postgres",
+                    "authUserPassword": "",
                     "messageWaitMillis": 100,
-                    "messageSleepThreadTime": 200,
+                    "messageSleepThreadTime": 200
                 },
                 "redisConfiguration": {
                     "servers": "localhost:6379",
