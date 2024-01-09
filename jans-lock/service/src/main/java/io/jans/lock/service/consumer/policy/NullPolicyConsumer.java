@@ -18,7 +18,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class NullPolicyConsumer extends PolicyConsumer {
 	
-	public static String POLICY_CONSUMER_TYPE = "NULL";
+	public static String POLICY_CONSUMER_TYPE = "DISABLED";
 
 	@Inject
 	private Logger log;

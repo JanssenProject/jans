@@ -65,5 +65,6 @@ exec java \
     -jar /opt/jetty/start.jar \
         jetty.http.host="${CN_FIDO2_JETTY_HOST}" \
         jetty.http.port="${CN_FIDO2_JETTY_PORT}" \
+        jetty.http.idleTimeout="${CN_JETTY_IDLE_TIMEOUT}" \
         jetty.deploy.scanInterval=0 \
         jetty.httpConfig.sendServerVersion=false
