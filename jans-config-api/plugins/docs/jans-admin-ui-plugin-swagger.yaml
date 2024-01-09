@@ -908,10 +908,20 @@ paths:
                         "baseDn": "webhookId=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans"
                       }]
                     }
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
@@ -974,12 +984,20 @@ paths:
                       "auiFeatureIds": ["jans_link_write"],
                       "baseDn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
                     }
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
-        "404":
-          description: Not Found
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write
@@ -1036,10 +1054,20 @@ paths:
                       "auiFeatureIds": ["jans_link_write"],
                       "baseDn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
                     }
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write
@@ -1060,12 +1088,22 @@ paths:
       responses:
         "204":
           description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "404":
           description: Not Found
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete
@@ -1159,10 +1197,20 @@ paths:
                       "displayName": "Users - Add/Edit",
                       "jansScope": "https://jans.io/oauth/config/user.write"
                     }]
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
@@ -1198,10 +1246,20 @@ paths:
                       "jansScope": "https://jans.io/oauth/config/jans-link.write",
                       "webhookIdsMapped": ["dd6e0e18-231e-3a47-8cbf-d7dc07018158", "5ea5829b-322f-33ec-acc7-17a89165d4fb", "57ebb7bc-ebb6-3f0c-8633-63a4f453cc11", "7d5295d2-0b88-3fa1-8ea1-f4ec93dea2fb"]
                     }]
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
@@ -1259,10 +1317,20 @@ paths:
                       }],
                       "baseDn": "webhookId=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans"
                     }]
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
@@ -1312,10 +1380,22 @@ paths:
                       "responseMessage": "{\n  \"id\": 105\n}",
                       "responseCode": 201
                     }]
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly

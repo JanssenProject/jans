@@ -57,8 +57,9 @@ public class WebhookResource extends BaseResource {
             "Admin UI - Webhooks"}, security = @SecurityRequirement(name = "oauth2", scopes = {SCOPE_WEBHOOK_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AuiFeature.class), examples = @ExampleObject(name = "Response json example", value = "example/webhook/get-all-features.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(ADMIN_UI_FEATURES)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_READ})
@@ -84,8 +85,9 @@ public class WebhookResource extends BaseResource {
             "Admin UI - Webhooks"}, security = @SecurityRequirement(name = "oauth2", scopes = {SCOPE_WEBHOOK_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AuiFeature.class), examples = @ExampleObject(name = "Response json example", value = "example/webhook/get-features-by-webhook-id.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(ADMIN_UI_FEATURES + WEBHOOK_ID_PATH_VARIABLE)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_READ})
@@ -111,8 +113,9 @@ public class WebhookResource extends BaseResource {
             "Admin UI - Webhooks"}, security = @SecurityRequirement(name = "oauth2", scopes = {SCOPE_WEBHOOK_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebhookEntry.class), examples = @ExampleObject(name = "Response json example", value = "example/webhook/get-webhook-by-feature-id.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(FEATURE_ID_PATH_VARIABLE)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_READ})
@@ -138,8 +141,9 @@ public class WebhookResource extends BaseResource {
             "Admin UI - Webhooks"}, security = @SecurityRequirement(name = "oauth2", scopes = {SCOPE_WEBHOOK_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/webhook/get-all-webhooks.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_READ})
     @Produces(MediaType.APPLICATION_JSON)
@@ -181,8 +185,9 @@ public class WebhookResource extends BaseResource {
     @RequestBody(description = "Webhook object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebhookEntry.class), examples = @ExampleObject(name = "Request json example", value = "example/webhook/post-webhook-request.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Scope.class), examples = @ExampleObject(name = "Response json example", value = "example/webhook/post-webhook-response.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @POST
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
@@ -215,9 +220,9 @@ public class WebhookResource extends BaseResource {
     @RequestBody(description = "Webhook object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebhookEntry.class), examples = @ExampleObject(name = "Request json example", value = "example/webhook/put-webhook.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = WebhookEntry.class), examples = @ExampleObject(name = "Response json example", value = "example/webhook/put-webhook.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Not Found"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @PUT
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
@@ -262,9 +267,10 @@ public class WebhookResource extends BaseResource {
     @Operation(summary = "Delete Webhook", description = "Delete Webhook", operationId = "delete-Webhook-by-inum", tags = {"Admin UI - Webhooks"},
             security = @SecurityRequirement(name = "oauth2", scopes = {SCOPE_WEBHOOK_DELETE}))
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "No Content"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @DELETE
     @Path(WEBHOOK_ID_PATH_VARIABLE)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_DELETE})
@@ -307,8 +313,10 @@ public class WebhookResource extends BaseResource {
             "Admin UI - Webhooks"}, security = @SecurityRequirement(name = "oauth2", scopes = {SCOPE_WEBHOOK_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AuiFeature.class), examples = @ExampleObject(name = "Response json example", value = "example/webhook/trigger-webooks.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(TRIGGER_PATH + FEATURE_ID_PATH_VARIABLE)
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_READ})
