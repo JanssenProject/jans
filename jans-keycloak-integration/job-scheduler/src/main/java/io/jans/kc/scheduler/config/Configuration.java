@@ -3,7 +3,10 @@ package io.jans.kc.scheduler.config;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.regex.PatternSyntaxException;
 
 public class Configuration {
     
@@ -14,6 +17,13 @@ public class Configuration {
     private static final String CFG_PROP_QUARTZ_SCHEDULER_NAME = "app.scheduler.quartz.name";
     private static final String CFG_PROP_QUARTZ_SCHEDULER_INSTANCEID = "app.scheduler.quartz.instanceid";
     private static final String CFG_PROP_QUARTZ_SCHEDULER_THREAD_POOL_SIZE = "app.scheduler.quartz.threadpoolsize";
+
+    private static final String CFG_PROP_CFGAPI_URL = "app.config-api.url";
+    private static final String CFG_PROP_CFGAPI_AUTH_URL = "app.config-api.auth.url";
+    private static final String CFG_PROP_CFGAPI_AUTH_CLIENT_ID = "app.config-api.auth.client.id";
+    private static final String CFG_PROP_CFGAPI_AUTH_CLIENT_SECRET = "app.config-api.auth.client.secret";
+    private static final String CFG_PROP_CFGAPI_AUTH_SCOPES = "app.config-api.client.auth.scopes";
+    private static final String CFG_PROP_CFGAPI_AUTH_METHOD = "app.config-api.auth.method";
 
     private final Properties configProperties;
 
@@ -40,6 +50,51 @@ public class Configuration {
     public Integer quartzSchedulerThreadPoolSize() {
 
         return getIntEntry(CFG_PROP_QUARTZ_SCHEDULER_THREAD_POOL_SIZE);
+    }
+
+    public String configApiUrl() {
+
+        return getStringEntry(CFG_PROP_CFGAPI_URL);
+    }
+
+    public String configApiAuthUrl() {
+
+        return getStringEntry(CFG_PROP_CFGAPI_AUTH_URL);
+    }
+
+    public String configApiAuthClientId() {
+
+        return getStringEntry(CFG_PROP_CFGAPI_AUTH_CLIENT_ID);
+    }
+
+    public String configApiAuthClientSecret() {
+
+        return getStringEntry(CFG_PROP_CFGAPI_AUTH_CLIENT_SECRET);
+    }
+
+    public List<String> configApiAuthScopes() {
+
+        String scopes = getStringEntry(CFG_PROP_CFGAPI_AUTH_SCOPES);
+        if(scopes == null) {
+            return new ArrayList<String>();
+        }
+
+        try {
+
+            String [] individualscopes = scopes.split(",");
+            List<String> ret = new ArrayList<String>();
+            for(String scope: individualscopes) {
+                ret.add(scope.trim());
+            }
+            return ret;
+        }catch(PatternSyntaxException e) {
+            throw new ConfigurationException("Could not get config api scopes",e);
+        }
+    }
+
+    public ConfigApiAuthnMethod configApiAuthMethod() {
+
+        return ConfigApiAuthnMethod.fromString(getStringEntry(CFG_PROP_CFGAPI_AUTH_METHOD));
     }
 
     private String getStringEntry(String entry) {

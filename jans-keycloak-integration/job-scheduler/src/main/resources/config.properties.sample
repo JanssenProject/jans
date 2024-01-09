@@ -9,3 +9,10 @@ app.logging.loghistory=180
 app.scheduler.quartz.name=kc-jans-scheduler
 app.scheduler.quartz.instanceid=AUTO
 app.scheduler.quartz.threadpoolsize=3
+
+# config api configuration
+app.config-api.url=%{api_url}
+app.config-api.auth.url=%{token_endpoint}
+app.config-api.auth.client.id=%{client_id}
+app.config-api.auth.client.secret=%{client_secret}
+app.config-api.auth.client.scopes=%{scopes}
