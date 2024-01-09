@@ -77,7 +77,7 @@ public class IdpClientFactory {
                 token = Jackson.getElement(entity, Constants.ACCESS_TOKEN);
             } else {
                 throw new WebApplicationException(
-                        "Error while Access Token is " + response.getStatusInfo() + " - " + entity);
+                        "Error while Access Token is " + response.getStatusInfo() + " - " + entity,response.getStatusInfo().getStatusCode());
             }
         }
 
@@ -254,7 +254,7 @@ public class IdpClientFactory {
                     logger.error("Error while creating/updating IDP - identityProviderJson:{}, status:{}, entity:{}",
                             identityProviderJson, response.getStatusInfo(), entity);
                     throw new WebApplicationException("Error while creating/updating IDP" + identityProviderJson
-                            + ", Status is " + response.getStatusInfo() + " - " + entity);
+                            + ", Status is " + response.getStatusInfo() + " - " + entity, response.getStatusInfo().getStatusCode());
                 }
 
                 idpJson = getIdp(url, token);

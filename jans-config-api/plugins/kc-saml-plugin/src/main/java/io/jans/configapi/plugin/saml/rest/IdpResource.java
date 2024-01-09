@@ -54,6 +54,13 @@ public class IdpResource extends BaseResource {
     private static final String SAML_IDP_DATA = "SAML IDP Data";
     private static final String SAML_IDP_DATA_FORM = "SAML IDP Data From";
     private static final String SAML_IDP_CHECK_STR = "IdentityProvider identified by '";
+    private static final String NAME_CONFLICT = "NAME_CONFLICT";
+    private static final String NAME_CONFLICT_MSG = "SAML IDP with same name %s already exists!";
+    private static final String UNAUTHORIZED = "Unauthorized";
+    private static final String UNAUTHORIZED_MSG = "Realm client authorization failed while creating IDP.";
+    private static final String APPLICATION_ERROR = "Application Error";
+    private static final String SERVER_ERROR = "Server Error";
+    
 
     private class IdentityProviderPagedResult extends PagedResult<IdentityProvider> {
     };
@@ -80,7 +87,7 @@ public class IdpResource extends BaseResource {
             @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
             @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair)
-            throws IllegalAccessException, InvocationTargetException {
+             {
         if (log.isDebugEnabled()) {
             log.debug(
                     "Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
@@ -197,8 +204,7 @@ public class IdpResource extends BaseResource {
         List<IdentityProvider> existingIdentityProviders = idpService.getIdentityProviderByName(idp.getName());
         log.debug(" existingIdentityProviders:{} ", existingIdentityProviders);
         if (existingIdentityProviders != null && !existingIdentityProviders.isEmpty()) {
-            throwBadRequestException("SAML IDP NAME CONFLICT",
-                    "SAML IDP with same name '" + idp.getName() + "' already exists!");
+            throwBadRequestException(NAME_CONFLICT,String.format(NAME_CONFLICT_MSG, idp.getName()));
         }
 
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
@@ -207,13 +213,19 @@ public class IdpResource extends BaseResource {
         // create SAML IDP
         try {
             idp = idpService.createSamlIdentityProvider(idp, metaDataFile);
-        } catch (WebApplicationException ex) {
-            if (ex.getResponse() != null && ex.getResponse().getStatusInfo() != null
-                    && ex.getResponse().getStatusInfo().equals(Status.CONFLICT)) {
-                throwBadRequestException("SAML IDP NAME CONFLICT",
-                        "SAML IDP with same name '" + idp.getName() + "' already exists!");
+        } catch (WebApplicationException wex) {
+            log.error("Application Error while creating IDP is - status:{}, message:{}",wex.getResponse().getStatus(), wex.getMessage());
+            if (wex.getResponse() != null && wex.getResponse().getStatusInfo() != null
+                    && wex.getResponse().getStatusInfo().equals(Status.CONFLICT)) {
+                throwBadRequestException(NAME_CONFLICT,String.format(NAME_CONFLICT_MSG, idp.getName()));
+            }else if (wex.getResponse() != null && wex.getResponse().getStatusInfo() != null
+                    && wex.getResponse().getStatusInfo().equals(Status.UNAUTHORIZED)) {
+                throwBadRequestException(UNAUTHORIZED,UNAUTHORIZED_MSG);
             }
-            throwInternalServerException(ex);
+            throwInternalServerException(APPLICATION_ERROR, wex.getMessage());
+        }catch(Exception ex) {
+            log.error(" Error while creating IDP is - message:{}", ex.getMessage());
+            throwInternalServerException(SERVER_ERROR, ex.getMessage());
         }
 
         log.info("Create IdentityProvider - idp:{}", idp);
@@ -253,12 +265,30 @@ public class IdpResource extends BaseResource {
 
         log.debug(" existingIdentityProvider:{} ", existingIdentityProvider);
         checkResourceNotNull(existingIdentityProvider, SAML_IDP_CHECK_STR + idp.getInum() + "'");
+        
+    
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
         log.debug(" Update metaDataFile:{} ", metaDataFile);
 
         // update SAML IDP
+        try {
         idp = idpService.updateSamlIdentityProvider(idp, metaDataFile);
-
+        } catch (WebApplicationException wex) {
+            log.error("Application Error while updating IDP is - status:{}, message:{}",wex.getResponse().getStatus(), wex.getMessage());
+            if (wex.getResponse() != null && wex.getResponse().getStatusInfo() != null
+                    && wex.getResponse().getStatusInfo().equals(Status.CONFLICT)) {
+                throwBadRequestException(NAME_CONFLICT,
+                        "SAML IDP with same name '" + idp.getName() + "' already exists!");
+            }else if (wex.getResponse() != null && wex.getResponse().getStatusInfo() != null
+                    && wex.getResponse().getStatusInfo().equals(Status.UNAUTHORIZED)) {
+                throwBadRequestException("UNAUTHORIZED", UNAUTHORIZED_MSG);
+            }
+            throwInternalServerException(APPLICATION_ERROR, wex.getMessage());
+        }catch(Exception ex) {
+            log.error(" Error while updating IDP is -  message:{}", ex.getMessage());
+            throwInternalServerException(SERVER_ERROR, ex.getMessage());
+        }
+        
         log.info("Updated IdentityProvider idp:{}", idp);
         return Response.ok(idp).build();
     }
@@ -333,5 +363,5 @@ public class IdpResource extends BaseResource {
         }
         return pagedIdentityProvider;
     }
-
+    
 }
