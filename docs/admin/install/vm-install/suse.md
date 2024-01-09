@@ -15,7 +15,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 ## Supported versions
 
 - SUSE Linux Enterprise Server (SLES) 15
-- openSUSE Leap 15.4,15.5
+- openSUSE Leap 15.5
 
 ## Install the Package
 
