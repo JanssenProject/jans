@@ -6,13 +6,15 @@
 
 package io.jans.configapi.service.status;
 
-import io.jans.configapi.model.status.StatsData;
-import io.jans.configapi.model.status.FacterData;
 import io.jans.util.process.ProcessHelper;
 
+import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.model.status.StatsData;
+import io.jans.configapi.model.status.FacterData;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.cdi.event.StatusCheckerTimerEvent;
+
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
@@ -45,7 +47,7 @@ public class StatusCheckerTimer {
 
     private static final int DEFAULT_INTERVAL = 5 * 60; // 1 minute
     public static final String PROGRAM_FACTER = "facter";
-    public static final String PROGRAM_SHOW_VERSION = "show_version";
+    public static final String PROGRAM_SHOW_VERSION = "/opt/jans/bin/show_version.py";
 
     @Inject
     private Logger log;
@@ -122,6 +124,7 @@ public class StatusCheckerTimer {
         if (!isLinux()) {
             return facterData;
         }
+        printDirectory();
         CommandLine commandLine = new CommandLine(PROGRAM_FACTER);
         commandLine.addArgument("-j");
         String resultOutput;
@@ -143,12 +146,13 @@ public class StatusCheckerTimer {
     }
     
     private JSONObject getAppVersionData() {
-        log.debug("Getting application version");
+        log.error("Getting application version");
         JSONObject appVersion = new JSONObject();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = Jackson.createJsonMapper();
         if (!isLinux()) {
             return appVersion;
         }
+        printDirectory();
         CommandLine commandLine = new CommandLine(PROGRAM_SHOW_VERSION);
         commandLine.addArgument("-json");
         String resultOutput;
@@ -158,7 +162,10 @@ public class StatusCheckerTimer {
                 return appVersion;
             }
             resultOutput = new String(bos.toByteArray(), UTF_8);
+            log.error("\n resultOutput:{}", resultOutput);
             appVersion = mapper.readValue(resultOutput, JSONObject.class);
+            log.error("\n appVersion:{}", appVersion);
+            
         } catch (UnsupportedEncodingException ex) {
             log.error("Failed to parse program {} output", PROGRAM_SHOW_VERSION, ex);
             return appVersion;
@@ -167,6 +174,34 @@ public class StatusCheckerTimer {
         }
         log.debug("Server application version - appVersion:{}", appVersion);
         return appVersion;
+    }
+    
+    private void printDirectory() {
+        log.error("\n\n printDirectory");
+
+        if (!isLinux()) {
+            return;
+        }
+        CommandLine commandLine = new CommandLine("pwd");
+  
+        String resultOutput = null;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
+            boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
+            if (!result) {
+                return;
+            }
+            resultOutput = new String(bos.toByteArray(), UTF_8);
+            log.error("\n Directory:{}", resultOutput);
+    
+            
+        } catch (UnsupportedEncodingException ex) {
+            log.error("\n\n Failed to parse Directory program {} output", "Directory", ex);
+            return ;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        log.error("\n\n Server Directory found is resultOutput:{}",resultOutput);
+        return;
     }
 
     private boolean isLinux() {
