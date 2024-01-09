@@ -65,5 +65,6 @@ exec java \
     -jar /opt/jetty/start.jar \
         jetty.http.host="${CN_KEYCLOAK_LINK_JETTY_HOST}" \
         jetty.http.port="${CN_KEYCLOAK_LINK_JETTY_PORT}" \
+        jetty.http.idleTimeout="${CN_JETTY_IDLE_TIMEOUT}" \
         jetty.deploy.scanInterval=0 \
         jetty.httpConfig.sendServerVersion=false

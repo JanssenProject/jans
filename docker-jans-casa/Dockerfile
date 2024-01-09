@@ -30,7 +30,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ====
 
 ENV CN_VERSION=1.0.22-SNAPSHOT
-ENV CN_BUILD_DATE='2023-12-14 09:07'
+ENV CN_BUILD_DATE='2024-01-05 13:55'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
 # Install Casa
@@ -200,7 +200,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_CASA_JWKS_SIZE_LIMIT=100000 \
     CN_CASA_JETTY_PORT=8080 \
     CN_CASA_JETTY_HOST=0.0.0.0 \
-    CN_SHARE_AUTH_CONF=true
+    CN_SHARE_AUTH_CONF=true \
+    CN_JETTY_IDLE_TIMEOUT=30000
 
 # ==========
 # misc stuff

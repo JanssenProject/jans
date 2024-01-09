@@ -71,7 +71,7 @@ public class MessageConsumerFactory {
 		for (MessageConsumer messageConsumer : messageConsumerProviderInstances) {
 			messageConsumerProviderInstances.destroy(messageConsumer);
 			messageConsumer.destroy();
-	        log.info("Destroyed messageConsumer instance '{}'", System.identityHashCode(messageConsumer));
+	    log.info("Destroyed messageConsumer instance '{}'", System.identityHashCode(messageConsumer));
 		}
 		produceMessageConsumer();
 	}
