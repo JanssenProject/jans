@@ -11,6 +11,7 @@ package io.jans.kc.scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.jans.kc.scheduler.config.ConfigApiAuthnMethod;
 import io.jans.kc.scheduler.config.Configuration;
 import io.jans.kc.scheduler.config.ConfigurationException;
 
@@ -18,6 +19,9 @@ import io.jans.kc.scheduler.job.*;
 import io.jans.kc.scheduler.job.service.JobScheduler;
 import io.jans.kc.scheduler.job.service.JobSchedulerException;
 import io.jans.kc.scheduler.job.service.impl.QuartzJobScheduler;
+
+import io.jans.kc.api.config.client.*;
+import io.jans.kc.api.config.client.impl.*;
 
 public class App {
     
@@ -27,6 +31,7 @@ public class App {
     private static final Logger log = LoggerFactory.getLogger(App.class);
 
     private static JobScheduler jobScheduler = null;
+    private static ApiCredentialsProvider configApiCredentialsProvider = null;
     private static boolean running = false;
     /*
      * Entry point 
@@ -40,6 +45,11 @@ public class App {
             config = loadApplicationConfiguration();
             log.debug("Application configuration loaded successfully. {}",config.toString());
 
+
+            log.debug("Setting up access to external apis");
+            log.debug("Client ID: "+ config.configApiAuthClientId());
+            configApiCredentialsProvider = createConfigApiCredentialsProvider(config);
+
             log.debug("Initializing scheduler ");
             jobScheduler = createJobScheduler(config);
             startJobScheduler(jobScheduler);
@@ -52,8 +62,8 @@ public class App {
                 Thread.sleep(1000);
             }
             log.debug("Application shutting down");
-        }catch(ConfigurationException e) {
-            log.error("Application startup failed. ",e);
+        }catch(StartupError e) {
+            log.error("Application startup failed",e);
             System.exit(-1);
             return;
         }
@@ -65,15 +75,19 @@ public class App {
         return System.getProperty(PROP_APP_CFG_FILE);
     }
 
-    private static final Configuration loadApplicationConfiguration() throws ConfigurationException {
+    private static final Configuration loadApplicationConfiguration() {
 
-        String config_file_name = getAppConfigFileName();
-        if(config_file_name == null) {
-            log.debug("No application configuration specified in environment variable. Using default");
-            config_file_name =  DEFAULT_APP_CFG_FILEPATH;
+        try {
+            String config_file_name = getAppConfigFileName();
+            if(config_file_name == null) {
+                log.debug("No application configuration specified in environment variable. Using default");
+                config_file_name =  DEFAULT_APP_CFG_FILEPATH;
+            }
+            log.debug("Application configuration file: {} ",config_file_name);
+            return Configuration.fromFile(config_file_name);
+        }catch(ConfigurationException e) {
+            throw new StartupError("Application startup failed",e);
         }
-        log.debug("Application configuration file: {} ",config_file_name);
-        return Configuration.fromFile(config_file_name);
     }
 
     private static final JobScheduler createJobScheduler(Configuration configuration) {
@@ -86,13 +100,35 @@ public class App {
         jobScheduler.start();
     }
 
-    private static final JobScheduler createQuartzJobSchedulerFromConfiguration(Configuration configuration) {
+    private static final ApiCredentialsProvider createConfigApiCredentialsProvider(Configuration config) {
+
+        try {
+            TokenEndpointAuthnParams authparams = null;
+            if(config.configApiAuthMethod() == ConfigApiAuthnMethod.BASIC_AUTHN) {
+                authparams = TokenEndpointAuthnParams.basicAuthn(
+                   config.configApiAuthClientId(),config.configApiAuthClientSecret(),config.configApiAuthScopes());
+            }else if(config.configApiAuthMethod() == ConfigApiAuthnMethod.POST_AUTHN) {
+                authparams = TokenEndpointAuthnParams.postAuthn(
+                   config.configApiAuthClientId(),config.configApiAuthClientSecret(),config.configApiAuthScopes());
+            }else {
+                throw new StartupError("Unsupported API authentication method specified");
+            }
+            return OAuthApiCredentialsProvider.create(config.configApiAuthUrl(),authparams);
+            
+        }catch(CredentialsProviderError e) {
+            throw new StartupError("Unable to create config-api credentials provider",e);
+        }catch(TokenEndpointAuthnParamError e) {
+            throw new StartupError("Unable to create config-api credentials provider",e);
+        }
+    }
+
+    private static final JobScheduler createQuartzJobSchedulerFromConfiguration(Configuration config) {
         
         try {
             return QuartzJobScheduler.builder()
-                .name(configuration.quatzSchedulerName())
-                .instanceId(configuration.quartzSchedulerInstanceId())
-                .threadPoolSize(configuration.quartzSchedulerThreadPoolSize())
+                .name(config.quatzSchedulerName())
+                .instanceId(config.quartzSchedulerInstanceId())
+                .threadPoolSize(config.quartzSchedulerThreadPoolSize())
                 .build();
         }catch(ConfigurationException e) {
             throw new StartupError("Could not create quartz job scheduler",e);
