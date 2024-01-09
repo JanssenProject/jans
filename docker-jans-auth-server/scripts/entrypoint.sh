@@ -59,6 +59,14 @@ get_max_ram_percentage() {
     fi
 }
 
+get_jetty_args() {
+    if [ -n "${CN_AUTH_JETTY_ARGS}" ]; then
+        echo " ${CN_AUTH_JETTY_ARGS} "
+    else
+        echo " ${CN_JETTY_ARGS} "
+    fi
+}
+
 move_builtin_jars
 get_prometheus_lib
 python3 "$basedir/wait.py"
@@ -86,7 +94,7 @@ exec java \
     -jar /opt/jetty/start.jar \
         jetty.http.host="${CN_AUTH_JETTY_HOST}" \
         jetty.http.port="${CN_AUTH_JETTY_PORT}" \
-        jetty.http.idleTimeout="${CN_JETTY_IDLE_TIMEOUT}" \
         jetty.deploy.scanInterval=0 \
         jetty.httpConfig.sendServerVersion=false \
-        jetty.httpConfig.requestHeaderSize="${CN_JETTY_REQUEST_HEADER_SIZE}"
+        jetty.httpConfig.requestHeaderSize="${CN_JETTY_REQUEST_HEADER_SIZE}" \
+        $(get_jetty_args)
