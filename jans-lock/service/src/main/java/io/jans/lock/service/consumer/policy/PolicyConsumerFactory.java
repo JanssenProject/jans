@@ -58,7 +58,9 @@ public class PolicyConsumerFactory {
 		// Force to create new bean
 		for (PolicyConsumer policyConsumer : policyConsumerProviderInstances) {
 			policyConsumerProviderInstances.destroy(policyConsumer);
-	        log.info("Destroyed policyConsumer instance '{}'", policyConsumer);
+	        log.info("Destroyed policyConsumer instance '{}'", System.identityHashCode(policyConsumer));
+	        PolicyConsumer newPolicyConsumer = policyConsumerProviderInstances.get();
+	        log.info("Created policyConsumer instance '{}'", System.identityHashCode(newPolicyConsumer));
 		}
 		
 		producePolicyConsumer();

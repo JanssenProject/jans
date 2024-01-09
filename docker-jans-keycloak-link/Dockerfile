@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # =======
 
 ENV CN_VERSION=1.0.22-SNAPSHOT
-ENV CN_BUILD_DATE='2023-12-14 09:08'
+ENV CN_BUILD_DATE='2024-01-05 13:56'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-keycloak-link-server/${CN_VERSION}/jans-keycloak-link-server-${CN_VERSION}.war
 
 # Install Link
@@ -192,7 +192,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
-    CN_KEYCLOAK_LINK_JETTY_HOST=0.0.0.0
+    CN_KEYCLOAK_LINK_JETTY_HOST=0.0.0.0 \
+    CN_JETTY_IDLE_TIMEOUT=30000
 
 # ==========
 # misc stuff
