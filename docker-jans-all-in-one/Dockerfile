@@ -231,7 +231,8 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     /var/lib/nginx \
     /var/log/nginx \
     /etc/nginx/jans-aio \
-    /usr/share/java
+    /usr/share/java \
+    /var/log
 
 RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \
@@ -263,7 +264,8 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     /var/lib/nginx \
     /var/log/nginx \
     /etc/nginx/jans-aio \
-    /usr/share/java
+    /usr/share/java \
+    /var/log
 
 RUN chown 1000:1000 /opt/java/lib/security/cacerts \
     /run/nginx/nginx.pid \
