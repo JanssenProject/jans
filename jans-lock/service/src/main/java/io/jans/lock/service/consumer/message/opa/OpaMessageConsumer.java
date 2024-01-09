@@ -1,5 +1,7 @@
 package io.jans.lock.service.consumer.message.opa;
 
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Date;
@@ -15,8 +17,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -120,7 +120,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 		return MESSAGE_CONSUMER_TYPE;
 	}
 
-	private boolean putData(String message, JsonNode messageNode) {
+	protected boolean putData(String message, JsonNode messageNode) {
 		ExternalLockContext lockContext = new ExternalLockContext();
 
 		String tknTyp = messageNode.get("tknTyp").asText();
@@ -128,12 +128,10 @@ public class OpaMessageConsumer extends MessageConsumer {
 		
 		TokenEntity tokenEntity = tokenService.findToken(tknCde);
 		log.debug("Token {} loaded successfully", tokenEntity);
+		lockContext.setTokenEntity(tokenEntity);
 
-		/*
-		 * Data: {token_entry_as_json}
-		 */
 		ObjectNode dataNode = objectMapper.createObjectNode();
-		dataNode.put("entry", "{\"test\" : 1}");
+		buildBaseTokenObject(tokenEntity, dataNode);
 		
 		externalLockService.beforeDataPut(messageNode, dataNode, lockContext);
 		
@@ -150,7 +148,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 		request.addHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
 		request.addHeader("If-None-Match", "*");
 		
-		StringEntity stringEntity = new StringEntity("{}", ContentType.APPLICATION_JSON);
+		StringEntity stringEntity = new StringEntity(dataNode.toString(), ContentType.APPLICATION_JSON);
 		request.setEntity(stringEntity);
 
 		boolean result = false;
@@ -161,7 +159,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 			int statusCode = httpResponse.getStatusLine().getStatusCode();
 			log.debug("Get OPA add data for token '{}' response with status code '{}'", tknCde, statusCode);
 
-			result = statusCode == HttpStatus.SC_NO_CONTENT;
+			result = (statusCode == HttpStatus.SC_NO_CONTENT) || (statusCode == HttpStatus.SC_NOT_MODIFIED);
 		} catch (IOException ex) {
 	    	log.error("Failed to execute put data request", ex);
 		}
@@ -173,7 +171,15 @@ public class OpaMessageConsumer extends MessageConsumer {
 		return result;
 	}
 
-	private boolean removeData(JsonNode messageNode) {
+	public void buildBaseTokenObject(TokenEntity tokenEntity, ObjectNode dataNode) {
+		dataNode.put("scope", tokenEntity.getScope());
+		dataNode.put("creationDate", ISO_INSTANT.format(tokenEntity.getCreationDate().toInstant()));
+		dataNode.put("expirationDate", ISO_INSTANT.format(tokenEntity.getExpirationDate().toInstant()));
+		dataNode.put("userId", tokenEntity.getUserId());
+		dataNode.put("clientId", tokenEntity.getClientId());
+	}
+
+	protected boolean removeData(JsonNode messageNode) {
 		ExternalLockContext lockContext = new ExternalLockContext();
 
 		externalLockService.beforeDataRemoval(messageNode, lockContext);
@@ -203,18 +209,17 @@ public class OpaMessageConsumer extends MessageConsumer {
 		} catch (IOException ex) {
 	    	log.error("Failed to execute delete data request", ex);
 		}
-
-		loadedTokens.remove(tknCde);
 		
 		return result;
 	}
 
-	public long getExpirationInSeconds(TokenEntity tokenEntity) {
+	protected long getExpirationInSeconds(TokenEntity tokenEntity) {
         final Long duration = Duration.between(new Date().toInstant(), tokenEntity.getExpirationDate().toInstant()).getSeconds();
 
         return duration;
     }
-	private class OpaExpirationListener implements ExpirationListener<String, String> {
+
+	protected class OpaExpirationListener implements ExpirationListener<String, String> {
 
 		public void expired(String key, String message) {
 	    	log.debug("Deleting expired token {}", key);
@@ -226,6 +231,11 @@ public class OpaMessageConsumer extends MessageConsumer {
 				log.error("Failed to parse messge: '{}'", message, ex);
 			}
 		}
+	}
+
+	@Override
+	public void destroy() {
+		log.debug("Destory Messages");
 	}
 
 }
