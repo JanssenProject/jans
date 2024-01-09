@@ -33,10 +33,27 @@
     </dependency>
     <!-- end logback dependencies -->
 
+    <!-- quartz scheduler dependencies -->
     <dependency>
       <groupId>org.quartz-scheduler</groupId>
       <artifactId>quartz</artifactId>
     </dependency>
+    <!-- end quartz scheduler dependencies -->
+
+    <!-- jackson datatype dependencies -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+    <!-- end jackson datatype dependencies -->
+
+    <!-- nimbus oidc sdk dependencies -->
+    <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>oauth2-oidc-sdk</artifactId>
+    </dependency>
+    <!-- end nimbus oidc sdk dependencies -->
+    
   </dependencies>
 
   <build>
@@ -101,6 +118,34 @@
        </configuration>
      </plugin>
      <!-- end maven compiler plugin -->
+
+     <!-- openapi generator plugin -->
+     <plugin>
+      <groupId>org.openapitools</groupId>
+      <artifactId>openapi-generator-maven-plugin</artifactId> 
+      <version>${openapi-generator-plugin.version}</version>
+      <executions>
+        <execution>
+          <goals>
+            <goal>generate</goal>
+          </goals>
+          <configuration>
+            <generatorName>java</generatorName>
+            <inputSpec>${project.basedir}/../../jans-config-api/plugins/docs/kc-saml-plugin-swagger.yaml</inputSpec>
+            <configOptions>
+              <sourceFolder>src/main/java/</sourceFolder>
+              <library>resteasy</library>
+              <useJakartaEe>true</useJakartaEe>
+              <openApiNullable>false</openApiNullable>
+              <apiPackage>io.jans.config.api.client.saml</apiPackage>
+              <modelPackage>io.jans.config.api.client.saml.model</modelPackage>
+              <invokerPackage>io.jans.config.api.client.saml</invokerPackage>
+            </configOptions>
+          </configuration>
+        </execution>
+      </executions>
+     </plugin>
+     <!-- end openapi generator plugin-->
     </plugins>
   </build>
 </project>
