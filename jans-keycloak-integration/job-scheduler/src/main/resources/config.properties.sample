@@ -16,3 +16,4 @@ app.config-api.auth.url=%{token_endpoint}
 app.config-api.auth.client.id=%{client_id}
 app.config-api.auth.client.secret=%{client_secret}
 app.config-api.auth.client.scopes=%{scopes}
+app.config-api.auth.method=%{auth_method}
