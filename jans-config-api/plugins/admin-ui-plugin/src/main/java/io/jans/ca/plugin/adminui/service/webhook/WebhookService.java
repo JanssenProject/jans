@@ -333,8 +333,10 @@ public class WebhookService {
         List<WebhookEntry> webhooks = getWebhookByIds(webhookIds);
         for (WebhookEntry webhook : webhooks) {
             validateWebhookEntry(webhook);
-            Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
-            callables.add(callable);
+            if(webhook.isJansEnabled()) {
+                Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
+                callables.add(callable);
+            }
         }
 
         for (Callable<GenericResponse> callable : callables) {
