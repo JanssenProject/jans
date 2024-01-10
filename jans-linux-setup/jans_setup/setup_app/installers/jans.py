@@ -641,6 +641,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-link', 'install_jans_link'),
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),
+                        ('opa', 'install_opa'),
                         ('saml', 'install_jans_saml'),
                         ('jans-keycloak-link', 'install_jans_keycloak_link'),
                         ]

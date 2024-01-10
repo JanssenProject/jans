@@ -128,7 +128,11 @@ class BaseInstaller:
     def get_systemd_service_list(self, service):
         if service:
             return [service]
-        return getattr(self, 'systemd_units', None) or [self.service_name]
+
+        if hasattr(self, 'systemd_units'):
+            return self.systemd_units
+
+        return [self.service_name]
 
     def run_service_command(self, operation, service):
 
