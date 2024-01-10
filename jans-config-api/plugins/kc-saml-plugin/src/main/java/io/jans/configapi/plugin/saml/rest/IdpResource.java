@@ -44,6 +44,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.slf4j.Logger;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 @Path(Constants.SAML_PATH + Constants.IDENTITY_PROVIDER)
@@ -266,7 +267,11 @@ public class IdpResource extends BaseResource {
         log.debug(" existingIdentityProvider:{} ", existingIdentityProvider);
         checkResourceNotNull(existingIdentityProvider, SAML_IDP_CHECK_STR + idp.getInum() + "'");
         
-    
+        //if realm not provided use existing one
+        if (StringUtils.isBlank(idp.getRealm())) {
+            idp.setRealm(existingIdentityProvider.getRealm());
+        }
+        
         InputStream metaDataFile = brokerIdentityProviderForm.getMetaDataFile();
         log.debug(" Update metaDataFile:{} ", metaDataFile);
 
@@ -305,7 +310,7 @@ public class IdpResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_DELETE_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteIdentityProvider(
-            @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+            @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) throws Exception {
         if (log.isDebugEnabled()) {
             log.debug("IdentityProvider to be deleted - inum:{} ", escapeLog(inum));
         }
