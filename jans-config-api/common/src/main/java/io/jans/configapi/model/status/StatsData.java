@@ -21,9 +21,6 @@ public class StatsData {
     @JsonProperty("facterData")
     private FacterData facterData;
     
-    @JsonObject
-    private JSONObject versionData;
-
     public String getDbType() {
         return dbType;
     }
@@ -46,20 +43,11 @@ public class StatsData {
 
     public void setFacterData(FacterData facterData) {
         this.facterData = facterData;
-    }       
-
-    public JSONObject getVersionData() {
-        return versionData;
-    }
-
-    public void setVersionData(JSONObject versionData) {
-        this.versionData = versionData;
     }
 
     @Override
     public String toString() {
-        return "StatsData [dbType=" + dbType + ", lastUpdate=" + lastUpdate + ", facterData=" + facterData
-                + ", versionData=" + versionData + "]";
-    }
+        return "StatsData [dbType=" + dbType + ", lastUpdate=" + lastUpdate + ", facterData=" + facterData + "]";
+    }       
 
 }

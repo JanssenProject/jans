@@ -23,7 +23,6 @@ import io.jans.util.StringHelper;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,7 +46,7 @@ public class StatusCheckerTimer {
 
     private static final int DEFAULT_INTERVAL = 5 * 60; // 1 minute
     public static final String PROGRAM_FACTER = "facter";
-    public static final String PROGRAM_SHOW_VERSION = "show_version.py";
+    public static final String PROGRAM_SHOW_VERSION = "show_version";
 
     @Inject
     private Logger log;
@@ -111,9 +110,10 @@ public class StatusCheckerTimer {
         statsData.setLastUpdate(currentDateTime);
         statsData.setFacterData(getFacterData());
         statsData.setDbType(configurationService.getPersistenceType());
-        statsData.setVersionData(getAppVersionData());
         
         configurationService.setStatsData(statsData);
+        
+        getAppVersionData();
         log.debug("Configuration status update finished");
     }
 
@@ -135,55 +135,56 @@ public class StatusCheckerTimer {
             }
             resultOutput = new String(bos.toByteArray(), UTF_8);
             facterData = mapper.readValue(resultOutput, FacterData.class);
-        } catch (UnsupportedEncodingException ex) {
-            log.error("Failed to parse program {} output", PROGRAM_FACTER, ex);
+        } catch (UnsupportedEncodingException uex) {
+            log.error("Failed to parse program {} output", PROGRAM_FACTER, uex);
             return facterData;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            log.error("Failed to execute program {} output:{}", PROGRAM_FACTER, ex);
         }
         log.debug("Server status - facterData:{}", facterData);
         return facterData;
     }
     
     private JSONObject getAppVersionData() {
-        log.error("Getting application version");
+        log.debug("Getting application version");
         JSONObject appVersion = new JSONObject();
-        ObjectMapper mapper = Jackson.createJsonMapper();
+
         if (!isLinux()) {
             return appVersion;
         }
+        
         printDirectory();
         CommandLine commandLine = new CommandLine(PROGRAM_SHOW_VERSION);
         commandLine.addArgument("-json");
-        String resultOutput;
+        String resultOutput = null;
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
             boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
             if (!result) {
                 return appVersion;
             }
             resultOutput = new String(bos.toByteArray(), UTF_8);
-            log.error("\n resultOutput:{}", resultOutput);
-            appVersion = mapper.readValue(resultOutput, JSONObject.class);
-            log.error("\n appVersion:{}", appVersion);
-            
-        } catch (UnsupportedEncodingException ex) {
-            log.error("Failed to parse program {} output", PROGRAM_SHOW_VERSION, ex);
+            log.debug("resultOutput:{}", resultOutput);
+            Jackson.asJsonNode(resultOutput);
+            log.debug("appVersion:{}", appVersion);
+
+        } catch (UnsupportedEncodingException uex) {
+            log.debug("Failed to parse program {} output", PROGRAM_SHOW_VERSION, uex);
             return appVersion;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            log.error("Failed to execute program {} output", PROGRAM_SHOW_VERSION, ex);
         }
         log.debug("Server application version - appVersion:{}", appVersion);
         return appVersion;
     }
-    
+
     private void printDirectory() {
-        log.error("\n\n printDirectory");
+        log.debug("printDirectory");
 
         if (!isLinux()) {
             return;
         }
         CommandLine commandLine = new CommandLine("pwd");
-  
+
         String resultOutput = null;
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
             boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
@@ -191,17 +192,15 @@ public class StatusCheckerTimer {
                 return;
             }
             resultOutput = new String(bos.toByteArray(), UTF_8);
-            log.error("\n Directory:{}", resultOutput);
-    
-            
-        } catch (UnsupportedEncodingException ex) {
-            log.error("\n\n Failed to parse Directory program {} output", "Directory", ex);
-            return ;
-        } catch (IOException e) {
-            e.printStackTrace();
+            log.debug("Directory:{}", resultOutput);
+
+        } catch (UnsupportedEncodingException uex) {
+            log.debug("Failed to parse Directory program {} output", "Directory", uex);
+            return;
+        } catch (Exception ex) {
+            log.error("Failed to execute program {} output", PROGRAM_SHOW_VERSION, ex);
         }
-        log.error("\n\n Server Directory found is resultOutput:{}",resultOutput);
-        return;
+        log.debug(" Server Directory:{}", resultOutput);
     }
 
     private boolean isLinux() {
