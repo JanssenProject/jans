@@ -264,6 +264,10 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionAlgValuesSupported(), INTROSPECTION_ENCRYPTION_ALG_VALUES_SUPPORTED);
             Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionEncValuesSupported(), INTROSPECTION_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
+            Util.putArray(jsonObj, appConfiguration.getTxTokenSigningAlgValuesSupported(), TX_TOKEN_SIGNING_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getTxTokenEncryptionAlgValuesSupported(), TX_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getTxTokenEncryptionEncValuesSupported(), TX_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED);
+
             JSONArray userInfoSigningAlgValuesSupported = new JSONArray();
             for (String userInfoSigningAlg : appConfiguration.getUserInfoSigningAlgValuesSupported()) {
                 userInfoSigningAlgValuesSupported.put(userInfoSigningAlg);
