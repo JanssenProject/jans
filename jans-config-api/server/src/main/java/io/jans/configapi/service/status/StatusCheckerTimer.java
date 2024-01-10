@@ -47,7 +47,7 @@ public class StatusCheckerTimer {
 
     private static final int DEFAULT_INTERVAL = 5 * 60; // 1 minute
     public static final String PROGRAM_FACTER = "facter";
-    public static final String PROGRAM_SHOW_VERSION = "/opt/jans/bin/show_version.py";
+    public static final String PROGRAM_SHOW_VERSION = "show_version.py";
 
     @Inject
     private Logger log;

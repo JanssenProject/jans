@@ -60,6 +60,15 @@ public class IdpService {
     public String getIdentityProviderDn() {
         return samlConfigService.getTrustedIdpDn();
     }
+    
+    public String getRealm() {
+        String realm = samlConfigService.getRealm();
+        log.debug("realm:{}",realm);
+        if(StringUtils.isBlank(realm)) {
+            realm = Constants.REALM_MASTER;
+        }
+        return realm;
+    }
 
     public String getSpMetadataUrl(String realm, String name) {
         return samlConfigService.getSpMetadataUrl(realm, name);
@@ -84,7 +93,7 @@ public class IdpService {
     public List<IdentityProvider> getAllIdp(String realmName) throws IOException {
         log.info("Fetch all IDP from realm:{}", realmName);
         if (StringUtils.isBlank(realmName)) {
-            realmName = Constants.REALM_MASTER;
+            realmName = getRealm();
         }
         return keycloakService.findAllIdentityProviders(realmName);
 
@@ -189,7 +198,7 @@ public class IdpService {
 
         // Set default Realm in-case null
         if (StringUtils.isBlank(identityProvider.getRealm())) {
-            identityProvider.setRealm(Constants.REALM_MASTER);
+            identityProvider.setRealm(getRealm());
         }
 
         if (StringUtils.isBlank(identityProvider.getProviderId())) {
