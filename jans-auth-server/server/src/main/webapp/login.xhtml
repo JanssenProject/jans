@@ -1,118 +1,116 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:f="http://xmlns.jcp.org/jsf/core"
-	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-	xmlns:h="http://xmlns.jcp.org/jsf/html"
-	template="/WEB-INF/incl/layout/login-template.xhtml">
-	<f:metadata>
-		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" />
-	</f:metadata>
-	<ui:define name="head">
-		<meta name="description" content="Janssen Project" />
-	</ui:define>
-	<ui:define name="pageTitle">
-		<h:outputText value="#{msgs['login.pageTitle']}" />
-	</ui:define>
-	<ui:define name="body">
-		<div class="row">
-			<div class="jans_base_page_logo col-sm-12 col-md-12" align="center" >
-				<img id="AppLogo" src="https://jans-opensuse/jans-auth/servlet/logo"/>
-			</div>
-		</div>
-					<h:form id="loginForm" style="padding:30px;">
-						<div class="row">
-							<div class="col-sm-3 col-md-3">
-								<h:outputText value="#{msgs['login.username']}" />
-							</div>
-							<div class="col-sm-9 col-md-9">
-								<h:inputText placeholder="#{msgs['login.username']}"
-									id="username" name="username" required="true" colMd="10"
-									labelColMd="2" autocomplete="off"
-									value="#{credentials.username}" styleClass="form-control"
-									style="width:100%">
-								</h:inputText>
-							</div>
-						</div>
-						<div class="form-group row"></div>
-						<div class="row">
-							<div class="col-sm-3 col-md-3">
-								<h:outputText value="#{msgs['login.password']}" />
-							</div>
-							<div class="col-sm-9 col-md-9">
-								<h:inputSecret placeholder="#{msgs['login.password']}"
-									colMd="10" id="password" name="password" labelColMd="2"
-									value="#{credentials.password}" autocomplete="off"
-									styleClass="form-control" tyle="width:100%">
-								</h:inputSecret>
-							</div>
-						</div>
-						<div class="form-group row"></div>
-						<div class="row">
-							<div class="col-sm-5 col-md-5">
-								<h:outputLabel styleClass="col-form-label" for="rememberme"
-									value="#{msgs['login.rememberMe']}" />
-							</div>
-							<div class="col-sm-2 col-md-2" style="padding-top: 15px">
-								<input type="checkbox" value="rememberme" id="rememberme"
-									name="rememberme" />
-							</div>
-						</div>
-						<div class="form-group row">
-							<div class="col-sm-offset-2 offset-md-2 col-sm-8 col-md-8">
-								<h:commandButton id="loginButton"
-									style="background-color: #00BE79; color:white;"
-									styleClass="btn col-sm-12" value="    #{msgs['login.login']}"
-									onclick="checkRemembeMe()" iconAwesome="fa-sign-in"
-									action="#{authenticator.authenticate}" />
-							</div>
-						</div>
-						<div class="form-group row">
-							<div class="col-sm-offset-3 offset-md-3 col-sm-7 col-md-7">
-								<div class="forgot_link">
-									<a href="/identity/person/passwordReminder.htm"
-										style="color: blue;"> <h:outputText
-											value="#{msgs['login.forgotYourPassword']}" />
-									</a>
-								</div>
-							</div>
-						</div>
-						<h:panelGroup layout="block" rendered="#{not empty facesContext.messageList and cookie['X-Correlation-Id'] != null}">
-							<br/>
-							<p style="font-size: 0.7em">
-								<strong>Correlation Id: </strong> <h:outputText value="#{cookie['X-Correlation-Id'].value}" />
-							</p>
-						</h:panelGroup>
-						<h:inputHidden id="platform" />
-					</h:form>
-					<div class="row">
-						<div align="center" class="col-sm-offset-4 col-sm-9">
-							<ui:repeat
-								value="#{identity.getWorkingParameter('download_url').entrySet().toArray()}"
-								var="_entry">
-								<ui:param name="app_name" value="#{_entry.key}" />
-								<ui:param name="app_link" value="#{_entry.value}" />
-								<h:outputLink style="margin-right:5px;" value="#{app_link}"
-									title="#{app_name}">
-									<h:graphicImage value="img/#{app_name}.png" />
-								</h:outputLink>
-							</ui:repeat>
-						</div>
-						<h:panelGroup layout="block"
-							rendered="#{external_registration_uri != Null}">
-							<div class="reg_link">
-								<a href="#{external_registration_uri}"> <h:outputText
-										value="Register Now " />
-								</a>
-							</div>
-						</h:panelGroup>
-					</div>
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/WEB-INF/incl/layout/login-template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}"/>
+    </f:metadata>
+    <ui:define name="head">
+        <meta name="description" content="Janssen Project"/>
+    </ui:define>
+    <ui:define name="pageTitle">
+        <h:outputText value="#{msgs['login.pageTitle']}"/>
+    </ui:define>
+    <ui:define name="body">
+        <h:form id="loginForm" name="loginForm" method="post"
+                action="/jans-auth/login.htm"
+                class="bg-highlight position-relative d-flex flex-column align-items-center" style="justify-content: space-evenly; height: 100vh;"
+                enctype="application/x-www-form-urlencoded">
+            <img style="max-height: 70px;" id="AppLogo"
+                 src="#{request.contextPath}/servlet/logo" alt="janssen-logo"
+                 class="absolute-logo"/>
 
-		<script type="text/javascript">
-    		$(document).ready(function () {
-    			$('.other').click(function(){
-    				$('#social_new').toggle();
-    			});
+            <div class="frame-6">
+                <div class="frame-7">
+                    <div class="col-sm-6 col-md-6 sign-in-text">Sign in
+                    </div>
+                </div>
+
+                <input type="hidden" name="loginForm" value="loginForm"/>
+                <div class="row frame-8 col-sm-12 col-md-12">
+                    <div class="row frame-1 col-sm-12 col-md-12">
+                        <input id="loginForm:username"
+                               type="text"
+                               name="loginForm:username"
+                               autocomplete="off"
+                               placeholder="Email address"
+                               class="email-address-text col-sm-12 col-md-12"/>
+                    </div>
+                    <div class="row frame-2">
+                        <input id="loginForm:password"
+                               type="password"
+                               name="loginForm:password"
+                               autocomplete="off" value=""
+                               placeholder="Password"
+                               class="password-text col-sm-12 col-md-12"/>
+                    </div>
+                </div>
+                <div class="form-group row"></div>
+                <div class="row">
+                    <div class="frame-4">
+                        <input type="checkbox" value="rememberme"
+                               id="rememberme"
+                               name="rememberme"
+                               class="form-control frame-3 col-sm-1 col-md-1"/>
+                        <label
+                                class="remember-me-text col-sm-11 col-md-11">Remember
+                            Me</label>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-offset-2 offset-md-2 col-sm-8 col-md-8">
+                        <h:commandButton id="loginButton"
+                                         style="background-color: #00BE79; color:white;"
+                                         styleClass="btn col-sm-12"
+                                         value="    #{msgs['login.login']}"
+                                         onclick="checkRemembeMe()"
+                                         iconAwesome="fa-sign-in"
+                                         action="#{authenticator.authenticate}"/>
+                    </div>
+                </div>
+            </div>
+            <h:panelGroup layout="block"
+                          rendered="#{not empty facesContext.messageList and cookie['X-Correlation-Id'] != null}">
+                <br/>
+                <p style="font-size: 0.7em">
+                    <strong>Correlation Id: </strong>
+                    <h:outputText value="#{cookie['X-Correlation-Id'].value}"/>
+                </p>
+            </h:panelGroup>
+            <h:inputHidden id="platform"/>
+        </h:form>
+        <div class="row">
+            <div align="center" class="col-sm-offset-4 col-sm-9">
+                <ui:repeat
+                        value="#{identity.getWorkingParameter('download_url').entrySet().toArray()}"
+                        var="_entry">
+                    <ui:param name="app_name" value="#{_entry.key}"/>
+                    <ui:param name="app_link" value="#{_entry.value}"/>
+                    <h:outputLink style="margin-right:5px;" value="#{app_link}"
+                                  title="#{app_name}">
+                        <h:graphicImage value="img/#{app_name}.png"/>
+                    </h:outputLink>
+                </ui:repeat>
+            </div>
+            <h:panelGroup layout="block"
+                          rendered="#{external_registration_uri != Null}">
+                <div class="reg_link">
+                    <a href="#{external_registration_uri}">
+                        <h:outputText
+                                value="Register Now "/>
+                    </a>
+                </div>
+            </h:panelGroup>
+        </div>
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $('.other').click(function(){
+                    $('#social_new').toggle();
+                });
                 if (localStorage.chkbx &amp;&amp; localStorage.chkbx != '') {
                     $('#rememberme').attr('checked', 'checked')
                     document.getElementById("loginForm:username").value = localStorage.usrname;
@@ -127,28 +125,28 @@
 
                 fillPlatformField();
 
-				var userNameField = document.getElementById("loginForm:username");
-				var passwordField = document.getElementById("loginForm:password");
+                var userNameField = document.getElementById("loginForm:username");
+                var passwordField = document.getElementById("loginForm:password");
 
-				passwordField.value = "";
-				var userName = '#{!empty authorizeAction.loginHint ? authorizeAction.loginHint : ""}';
-				if (userName) {
-					userNameField.value = userName;
-					passwordField.focus();
-				} else {
-					userNameField.focus();
-				}
+                passwordField.value = "";
+                var userName = '#{!empty authorizeAction.loginHint ? authorizeAction.loginHint : ""}';
+                if (userName) {
+                    userNameField.value = userName;
+                    passwordField.focus();
+                } else {
+                    userNameField.focus();
+                }
 
-				var displayRegister = #{display_register_action or identity.sessionId.sessionAttributes['display_register_action']};
-				if (displayRegister) {
-					var registerButton = document.getElementById("loginForm:registerId");
-					if (registerButton != null) {
-						registerButton.style.display = 'inline';
-					}
-				}
-    		});
+                var displayRegister = #{display_register_action or identity.sessionId.sessionAttributes['display_register_action']};
+                if (displayRegister) {
+                    var registerButton = document.getElementById("loginForm:registerId");
+                    if (registerButton != null) {
+                        registerButton.style.display = 'inline';
+                    }
+                }
+            });
 
-    		function checkRemembeMe() {
+            function checkRemembeMe() {
                 if ($('#rememberme').is(':checked')) {
                     localStorage.usrname = document.getElementById("loginForm:username").value;
                     localStorage.chkbx = $('#rememberme').val();
@@ -156,7 +154,7 @@
                     localStorage.usrname = '';
                     localStorage.chkbx = '';
                 }
-			}
+            }
 
             function fillPlatformField() {
                 try {
@@ -165,10 +163,11 @@
                     if (result != null) {
                         platform.version=result[1];
                     }
-    			    document.getElementById("loginForm:platform").value = JSON.stringify(platform);
+                    document.getElementById("loginForm:platform").value = JSON.stringify(platform);
                 } catch (e) {
                 }
             }
         </script>
-	</ui:define>
+
+    </ui:define>
 </ui:composition>

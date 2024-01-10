@@ -744,3 +744,240 @@ input.btn.btn-done {
     left: 50%;
     transform: translate(-50%, 100%);
 }
+
+.frame-6{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 40px 40px 50px;
+    gap: 32px;
+
+    position: absolute;
+    width: 610px;
+    height: 460px;
+    left: 495px;
+    top: 241px;
+
+    background: #2C1A1A;
+    box-shadow: 10px 20px 20px rgba(0, 0, 0, 0.28);
+    border-radius: 12px;
+}
+
+.frame-7{
+    /* Auto layout */
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 10px;
+
+    width: 530px;
+    height: 46px;
+
+
+    /* Inside auto layout */
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+
+}
+
+.sign-in-text{
+    width: 112px;
+    height: 46px;
+
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 38px;
+    line-height: 46px;
+    /* identical to box height */
+
+    color: #FFFFFF;
+
+
+    /* Inside auto layout */
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+}
+
+.frame-8{
+    /* Auto layout */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 28px;
+
+    width: 530px;
+    height: 148px;
+
+
+    /* Inside auto layout */
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+}
+
+.frame-1{
+    box-sizing: border-box;
+
+    width: 530px;
+    height: 60px;
+
+    border: 1.2px solid #FFFFFF;
+    border-radius: 7px;
+
+    /* Inside auto layout */
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+
+}
+
+.email-address-text{
+    position: absolute;
+    /*width: 120px;
+    height: 24px;
+    left: 73px;
+    top: 18px; */
+
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    /* identical to box height */
+
+    color: #D6D6D6;
+    background: transparent !important
+}
+
+.frame-2{
+    box-sizing: border-box;
+
+    width: 530px;
+    height: 60px;
+
+    border: 1.2px solid #FFFFFF;
+    border-radius: 7px;
+
+    /* Inside auto layout */
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+}
+
+.password-text{
+    position: absolute;
+    /*width: 85px;
+    height: 24px;
+    left: 73px;
+    top: 18px;*/
+
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    /* identical to box height */
+
+    color: #D6D6D6;
+    background: transparent !important
+}
+
+.frame-4{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+    gap: 10px;
+
+    width: 530px;
+    height: 20px;
+
+
+    /* Inside auto layout */
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+}
+
+.frame-3{
+    /* Auto layout */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+
+    width: 19px;
+    height: 19px;
+
+    background: #01BA77;
+    border-radius: 4px;
+
+    /* Inside auto layout */
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+}
+
+.remember-me-text{
+    /*width: 109px;
+    height: 20px;*/
+
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 20px;
+
+    color: #FFFFFF;
+
+
+    /* Inside auto layout */
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+}
+
+.button{
+    /* Auto layout */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 40px;
+
+    width: 530px;
+    height: 60px;
+
+    background: #01BA77;
+    border-radius: 7px;
+
+    /* Inside auto layout */
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+}
+
+.jans_base_text_box{
+    display: flex;
+    width: 530px;
+    padding: 14px 337px 14px 21px;
+    align-items: center;
+    gap: 20px;
+    border-radius: 7px;
+    border: 1.2px solid #FFF;
+    color: #D6D6D6;
+    font-family: Lato;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
