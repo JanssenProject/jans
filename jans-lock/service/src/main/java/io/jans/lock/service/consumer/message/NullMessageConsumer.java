@@ -43,4 +43,9 @@ public class NullMessageConsumer extends MessageConsumer {
 		return MESSAGE_CONSUMER_TYPE;
 	}
 
+	@Override
+	public void destroy() {
+		log.debug("Destory Messages");
+	}
+
 }

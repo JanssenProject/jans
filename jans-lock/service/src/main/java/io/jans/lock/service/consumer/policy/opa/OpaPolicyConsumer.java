@@ -7,6 +7,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +31,7 @@ import io.jans.service.net.BaseHttpService;
 import io.jans.service.policy.consumer.PolicyConsumer;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
 /**
@@ -54,9 +56,13 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 
 	@Inject
 	private Logger log;
+
+	@Inject
+	@Implementation
+	private Instance<PolicyConsumer> policyConsumerProviderInstance;
 	
 	private MessageDigest sha256Digest;
-	
+
 	private Map<String, List<String>> loadedPolicies;
 	
 	@PostConstruct
@@ -92,7 +98,7 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 		List<String> policyIds = loadedPolicies.get(baseId);
 		
 		boolean result = true;
-		List<String> cleanPolicyIds= new ArrayList<>(policyIds);
+		List<String> cleanPolicyIds = new ArrayList<>(policyIds);
 		for (String policy : policies) {
 			byte[] digest = sha256Digest.digest(policy.getBytes(StandardCharsets.UTF_8));
 			String policyId = new BigInteger(1, digest).toString();
@@ -126,7 +132,7 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 		
 		// Remove old policies after processing currentPoliciesDigests
 		for (String policyId : cleanPolicyIds) {
-			result &= sendRemovePolicyRequest(policyId);
+			result &= sendRemovePolicyRequest(sourceUri, policyId);
 			policyIds.remove(policyId);
 		}
 
@@ -136,14 +142,6 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 	@Override
 	public boolean removePolicies(String sourceUri) {
 		log.debug("RemovePolicies from {}", sourceUri);
-
-		ExternalLockContext lockContext = new ExternalLockContext();
-		externalLockService.beforePolicyRemoval(sourceUri, lockContext);
-		
-		if (lockContext.isCancelPdpOperation()) {
-			log.debug("RemovePolicies was canceled by script");
-			return true;
-		}
 		
 		// Sent rest request to OPA
 		String baseId = Base64.urlEncode(sourceUri, false);
@@ -156,15 +154,34 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 
 		boolean result = true;
 		for (String policyId : policyIds) {
-			result &= sendRemovePolicyRequest(policyId);
+			result &= sendRemovePolicyRequest(sourceUri, policyId);
 		}
 
 		return result;
 	}
 
-	public boolean sendRemovePolicyRequest(String policyId) {
+	@Override
+	public void destroy() {
+		Map<String, List<String>> clonedLoadedPolicies = new HashMap<>(loadedPolicies);
+		loadedPolicies.clear();
+
+		log.debug("Destory Policies");
+		for (String sourceUri : clonedLoadedPolicies.keySet()) {
+			removePolicies(sourceUri);
+		}
+	}
+
+	public boolean sendRemovePolicyRequest(String sourceUri, String policyId) {
 		log.debug("Remove policy '{}'", policyId);
+
+		ExternalLockContext lockContext = new ExternalLockContext();
+		externalLockService.beforePolicyRemoval(sourceUri, lockContext);
 		
+		if (lockContext.isCancelPdpOperation()) {
+			log.debug("RemovePolicies was canceled by script");
+			return true;
+		}
+
 		String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
 		HttpDelete request = new HttpDelete(String.format("%s/policies/%s", baseUrl, policyId));
 

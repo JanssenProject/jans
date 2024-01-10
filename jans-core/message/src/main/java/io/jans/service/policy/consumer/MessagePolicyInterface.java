@@ -8,8 +8,6 @@ package io.jans.service.policy.consumer;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 /**
  * Interface for each policy consumer
  * 
