@@ -751,13 +751,6 @@ input.btn.btn-done {
     align-items: flex-start;
     padding: 40px 40px 50px;
     gap: 32px;
-
-    position: absolute;
-    width: 610px;
-    height: 460px;
-    left: 495px;
-    top: 241px;
-
     background: #2C1A1A;
     box-shadow: 10px 20px 20px rgba(0, 0, 0, 0.28);
     border-radius: 12px;
