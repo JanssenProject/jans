@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import io.jans.service.cdi.qualifier.Implementation;
 import io.jans.service.policy.consumer.PolicyConsumer;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
 /**
@@ -23,6 +24,10 @@ public class NullPolicyConsumer extends PolicyConsumer {
 	@Inject
 	private Logger log;
 
+	@Inject
+	@Implementation
+	private Instance<PolicyConsumer> policyConsumerProviderInstance;
+
 	@Override
 	public boolean putPolicies(String sourceUri, List<String> policies) {
 		log.debug("PutPolicies from {}, count {}", sourceUri, policies.size());
@@ -38,6 +43,11 @@ public class NullPolicyConsumer extends PolicyConsumer {
 	@Override
 	public String getPolicyConsumerType() {
 		return POLICY_CONSUMER_TYPE;
+	}
+
+	@Override
+	public void destroy() {
+		log.debug("Destory Policies");
 	}
 
 }
