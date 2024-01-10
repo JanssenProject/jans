@@ -61,14 +61,17 @@ public class PolicyDownloadService {
 
 	private ObjectMapper objectMapper;
 
+	private List<String> loadedPolicyUris;
+
 	private AtomicBoolean isActive;
 
 	@PostConstruct
 	public void init() {
 		log.info("Initializing Policy Download Service ...");
-		this.isActive = new AtomicBoolean(true);
+		this.isActive = new AtomicBoolean(false);
 
-		this.objectMapper = new ObjectMapper();		
+		this.objectMapper = new ObjectMapper();	
+		this.loadedPolicyUris = new ArrayList<>();
 	}
 
 	public void initTimer() {
@@ -107,6 +110,7 @@ public class PolicyDownloadService {
 			return;
 		}
 
+		List<String> newPoliciesJsonUris = new ArrayList<>();
 		for (String policiesJsonUri : policiesJsonUris) {
 			if (StringHelper.isEmpty(policiesJsonUri)) {
 				continue;
@@ -115,36 +119,57 @@ public class PolicyDownloadService {
 			List<String> downloadedPolicies = new ArrayList<>();
 
 			HttpGet request = new HttpGet(policiesJsonUri);
-			try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {
+			try {
+				CloseableHttpClient httpClient = httpService.getHttpsClient();
 				HttpResponse httpResponse = httpClient.execute(request);
-				
-				String policiesJson = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
-				
-				JsonNode policiesArray = objectMapper.readTree(policiesJson);
-				if (!policiesArray.isArray()) {
-					log.error(String.format("Policies URI should provides json array. Skipping it...", policiesJsonUri));
-					continue;
-				}
-				
-				for (JsonNode policyUri : policiesArray) {
-					String downloadedPolicy = downloadPolicy(policyUri.asText());
-					if (StringHelper.isNotEmpty(downloadedPolicy)) {
-						downloadedPolicies.add(downloadedPolicy);
+
+				boolean result = httpService.isResponseStastusCodeOk(httpResponse);
+				if (result) {
+					String policiesJson = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+					
+					JsonNode policiesArray = objectMapper.readTree(policiesJson);
+					if (!policiesArray.isArray()) {
+						log.error(String.format("Policies URI should provides json array. Skipping it...", policiesJsonUri));
+						continue;
 					}
+					
+					for (JsonNode policyUri : policiesArray) {
+						String downloadedPolicy = downloadPolicy(policyUri.asText());
+						if (StringHelper.isNotEmpty(downloadedPolicy)) {
+							downloadedPolicies.add(downloadedPolicy);
+						}
+					}
+				} else {
+			    	log.error("Get invalid response from URI {}", policiesJsonUri);
 				}
 			} catch (IOException ex) {
 		    	log.error("Failed to execute load policies list from URI {}", policiesJsonUri, ex);
 			}
 			
 			policyConsumer.putPolicies(policiesJsonUri, downloadedPolicies);
+			newPoliciesJsonUris.add(policiesJsonUri);
 		}
+		
+		// Remove policies from unloaded policy Uris 
+		loadedPolicyUris.removeAll(newPoliciesJsonUris);
+		for (String policiesJsonUri : loadedPolicyUris) {
+			policyConsumer.removePolicies(policiesJsonUri);
+		}
+		
+		loadedPolicyUris = newPoliciesJsonUris;
 	}
 
 	private String downloadPolicy(String policyUri) {
 		HttpGet request = new HttpGet(policyUri);
 
-		try (CloseableHttpClient httpClient = httpService.getHttpsClient();) {
+		try {
+			CloseableHttpClient httpClient = httpService.getHttpsClient();
 			HttpResponse httpResponse = httpClient.execute(request);
+			boolean result = httpService.isResponseStastusCodeOk(httpResponse);
+			if (!result) {
+		    	log.error("Get invalid response from policy URI {}", policyUri);
+				return null;
+			}
 			
 			String policy = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
 			
