@@ -15,6 +15,8 @@ except:
     from urllib2 import urlopen
 
 def get_latest_commit(service):
+    if service == 'jans-auth':
+        service = 'jans-auth-server'
     url = f'https://api.github.com/repos/JanssenProject/jans/commits?path={service}&per_page=1'
     try:
         f = urlopen(url)
