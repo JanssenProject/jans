@@ -14,7 +14,7 @@ import io.jans.configapi.model.status.StatsData;
 import io.jans.configapi.model.status.FacterData;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.cdi.event.StatusCheckerTimerEvent;
-
+import io.jans.configapi.util.ApiConstants;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
@@ -35,7 +35,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import org.apache.commons.exec.CommandLine;
-import org.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +46,7 @@ public class StatusCheckerTimer {
 
     private static final int DEFAULT_INTERVAL = 5 * 60; // 1 minute
     public static final String PROGRAM_FACTER = "facter";
-    public static final String PROGRAM_SHOW_VERSION = "show_version";
+    public static final String PROGRAM_SHOW_VERSION = "printVersion.py";
 
     @Inject
     private Logger log;
@@ -111,9 +111,8 @@ public class StatusCheckerTimer {
         statsData.setFacterData(getFacterData());
         statsData.setDbType(configurationService.getPersistenceType());
         
-        configurationService.setStatsData(statsData);
-        
-        getAppVersionData();
+        configurationService.setStatsData(statsData);        
+
         log.debug("Configuration status update finished");
     }
 
@@ -127,6 +126,8 @@ public class StatusCheckerTimer {
         printDirectory();
         CommandLine commandLine = new CommandLine(PROGRAM_FACTER);
         commandLine.addArgument("-j");
+        log.debug("Getting server status for commandLine:{}", commandLine);
+        
         String resultOutput;
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
             boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
@@ -145,26 +146,29 @@ public class StatusCheckerTimer {
         return facterData;
     }
     
-    private JSONObject getAppVersionData() {
-        log.debug("Getting application version");
-        JSONObject appVersion = new JSONObject();
-
+    public String getAppVersionData(String artifact) {
+        log.debug("Getting application version for artifact:{}", artifact);
+       
+        String appVersion = null;
         if (!isLinux()) {
             return appVersion;
         }
         
         printDirectory();
         CommandLine commandLine = new CommandLine(PROGRAM_SHOW_VERSION);
+        if(StringUtils.isNotBlank(artifact) && !artifact.equalsIgnoreCase(ApiConstants.ALL)) {
+            commandLine.addArgument("-artifact="+artifact);
+        }
         commandLine.addArgument("-json");
-        String resultOutput = null;
+        log.debug("Getting application version for commandLine:{}", commandLine);
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
+            
             boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
             if (!result) {
                 return appVersion;
             }
-            resultOutput = new String(bos.toByteArray(), UTF_8);
-            log.debug("resultOutput:{}", resultOutput);
-            Jackson.asJsonNode(resultOutput);
+
+            appVersion = new String(bos.toByteArray(), UTF_8);
             log.debug("appVersion:{}", appVersion);
 
         } catch (UnsupportedEncodingException uex) {

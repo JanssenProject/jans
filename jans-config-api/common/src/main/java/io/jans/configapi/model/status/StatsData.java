@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.jans.orm.annotation.JsonObject;
-import org.json.JSONObject;
 import java.util.Date;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -20,7 +18,7 @@ public class StatsData {
 
     @JsonProperty("facterData")
     private FacterData facterData;
-    
+
     public String getDbType() {
         return dbType;
     }
@@ -48,6 +46,6 @@ public class StatsData {
     @Override
     public String toString() {
         return "StatsData [dbType=" + dbType + ", lastUpdate=" + lastUpdate + ", facterData=" + facterData + "]";
-    }       
+    }
 
 }
