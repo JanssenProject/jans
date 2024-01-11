@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.policy.event.PolicyDownloadEvent;
+import io.jans.service.EncryptionService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.net.BaseHttpService;
@@ -61,6 +62,9 @@ public class PolicyDownloadService {
 	
 	@Inject
 	private PolicyConsumer policyConsumer;
+
+    @Inject
+    private EncryptionService encryptionService;
 
 	private ObjectMapper objectMapper;
 
@@ -115,7 +119,7 @@ public class PolicyDownloadService {
 
 	private void reloadUrisPolicies() {
 		log.debug("Starting URIs policies reload");
-		String policiesJsonUrisAccessToken = appConfiguration.getPoliciesJsonUrisAccessToken();
+		String policiesJsonUrisAccessToken = encryptionService.decrypt(appConfiguration.getPoliciesJsonUrisAccessToken(), true);
 		List<String> policiesJsonUris = appConfiguration.getPoliciesJsonUris();
 		if (policiesJsonUris == null) {
 			return;
@@ -176,7 +180,7 @@ public class PolicyDownloadService {
 
 	private void reloadZipPolicies() {
 		log.debug("Starting Zip policies reload");
-		String policiesZipUrisAccessToken = appConfiguration.getPoliciesZipUrisAccessToken();
+		String policiesZipUrisAccessToken = encryptionService.decrypt(appConfiguration.getPoliciesZipUrisAccessToken(), true);
 		List<String> policiesZipUris = appConfiguration.getPoliciesZipUris();
 		if (policiesZipUris == null) {
 			return;
