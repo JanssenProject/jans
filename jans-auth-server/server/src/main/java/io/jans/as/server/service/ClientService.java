@@ -6,9 +6,24 @@
 
 package io.jans.as.server.service;
 
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+
+import org.apache.commons.lang3.BooleanUtils;
+import org.json.JSONArray;
+import org.slf4j.Logger;
+
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -21,6 +36,7 @@ import io.jans.orm.model.base.CustomEntry;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
+import io.jans.service.EncryptionService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
@@ -28,15 +44,6 @@ import io.jans.util.security.StringEncrypter.EncryptionException;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.apache.commons.lang3.BooleanUtils;
-import org.json.JSONArray;
-import com.google.common.base.Preconditions;
-import org.slf4j.Logger;
-
-import java.util.*;
-
-import static org.apache.commons.lang3.BooleanUtils.isFalse;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * Provides operations with clients.
