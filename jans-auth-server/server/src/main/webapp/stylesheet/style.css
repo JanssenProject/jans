@@ -193,7 +193,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#21c87a', end
 	.container{
 		width: auto;
 	}
-	
+
 }
 
 
@@ -237,7 +237,7 @@ login-panel {
     margin-top: 12px;
 	display:none;
 	float: left;
-	
+
 }
 .not_body li .pop_tog p {
     color: #777;
@@ -405,7 +405,7 @@ login-panel {
 	padding-top: 23px;
 	padding-bottom: 20px;
 }
-	
+
 #pbar_outerdiv{
 	width: 100%;
     height: 20px;
@@ -417,10 +417,10 @@ login-panel {
 	overflow: hidden;
 	}
 #pbar_innerdiv{
-	background-color: #e1e1e1; z-index: 2; height: 100%; 
+	background-color: #e1e1e1; z-index: 2; height: 100%;
 	}
-	
-	
+
+
 .forgot_link a{color:#777}
 
 .login_bx {
@@ -430,7 +430,7 @@ login-panel {
     max-width: 800px;
     margin: 0 auto;
 	margin-top:50px;
-}	
+}
 .login_bx .paddin_bx {
     padding: 0;
 }
@@ -507,15 +507,15 @@ login-panel {
 
 .pin{background:#b9191c}
 .git{background:#3a586a}
-.pay{background:#2e508f}	
+.pay{background:#2e508f}
 .fsquare{background:#2852cd}
-.other{background:#d5d5d5}	
+.other{background:#d5d5d5}
 
 .wk{background:#13557d}
 .yout{background:#f52d24}
-.wind{background:#0f69b0}	
+.wind{background:#0f69b0}
 .wordp{background:#226a88}
-.insta{background:#497394}	
+.insta{background:#497394}
 
 
 .button_social ul.sm-social li {
@@ -571,7 +571,7 @@ login-panel {
 }
 .paddin_bx p{text-align: center;}
 .button a.android {margin-bottom: 16px;}
-}	
+}
 
 @media (max-width:320px){
 .button_social li a
@@ -722,7 +722,7 @@ input.btn.btn-done {
     background-color: #00BE79;
     color:white;
     font-size: 20px !important;
-    width: 100%; 
+    width: 100%;
     font-weight: bold !important;
     padding: 8px 0 !important;
     border-radius: 7px !important;
@@ -773,16 +773,11 @@ input.btn.btn-done {
 }
 
 .sign-in-text{
-    width: 112px;
-    height: 46px;
-
     font-family: 'Lato';
     font-style: normal;
     font-weight: 700;
     font-size: 38px;
     line-height: 46px;
-    /* identical to box height */
-
     color: #FFFFFF;
 
 
