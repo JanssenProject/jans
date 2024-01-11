@@ -28,7 +28,7 @@
                  class="absolute-logo"/>
 
 
-            <div class="container">
+            <div class="container jans-form-container">
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="col-sm-6 col-md-6 sign-in-text">Sign in
@@ -52,6 +52,25 @@
                                autocomplete="off" value=""
                                placeholder="Password"/>
                     </div>
+                </div>
+                <div class="row">
+                        <input type="checkbox" value="rememberme"
+                               id="rememberme"
+                               name="rememberme"
+                               class="col-sm-1 col-md-1"/>
+                        <label
+                                class="col-sm-11 col-md-11">Remember
+                            Me</label>
+                </div>
+                <div class="row">
+                        <h:commandButton id="loginButton"
+                                         style="background-color: #00BE79; color:white;"
+                                         styleClass="btn col-sm-12"
+                                         value="    #{msgs['login.login']}"
+                                         onclick="checkRemembeMe()"
+                                         iconAwesome="fa-sign-in"
+                                         action="#{authenticator.authenticate}"/>
+
                 </div>
             </div>
 
