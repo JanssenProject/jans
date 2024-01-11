@@ -11,7 +11,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -61,7 +64,8 @@ public class PolicyDownloadService {
 
 	private ObjectMapper objectMapper;
 
-	private List<String> loadedPolicyUris;
+	private List<String> loadedPoliciesJsonUris;
+	private List<String> loadedPoliciesZipUris;
 
 	private AtomicBoolean isActive;
 
@@ -71,7 +75,8 @@ public class PolicyDownloadService {
 		this.isActive = new AtomicBoolean(false);
 
 		this.objectMapper = new ObjectMapper();	
-		this.loadedPolicyUris = new ArrayList<>();
+		this.loadedPoliciesJsonUris = new ArrayList<>();
+		this.loadedPoliciesZipUris = new ArrayList<>();
 	}
 
 	public void initTimer() {
@@ -104,7 +109,13 @@ public class PolicyDownloadService {
 	}
 
 	private void reloadPolicies() {
-		log.debug("Starting policies reload");
+		reloadUrisPolicies();
+		reloadZipPolicies();
+	}
+
+	private void reloadUrisPolicies() {
+		log.debug("Starting URIs policies reload");
+		String policiesJsonUrisAccessToken = appConfiguration.getPoliciesJsonUrisAccessToken();
 		List<String> policiesJsonUris = appConfiguration.getPoliciesJsonUris();
 		if (policiesJsonUris == null) {
 			return;
@@ -119,6 +130,9 @@ public class PolicyDownloadService {
 			List<String> downloadedPolicies = new ArrayList<>();
 
 			HttpGet request = new HttpGet(policiesJsonUri);
+			if (StringHelper.isNotEmpty(policiesJsonUrisAccessToken)) {
+				request.setHeader("Authorization", "Bearer " + policiesJsonUrisAccessToken);
+			}
 			try {
 				CloseableHttpClient httpClient = httpService.getHttpsClient();
 				HttpResponse httpResponse = httpClient.execute(request);
@@ -151,12 +165,82 @@ public class PolicyDownloadService {
 		}
 		
 		// Remove policies from unloaded policy Uris 
-		loadedPolicyUris.removeAll(newPoliciesJsonUris);
-		for (String policiesJsonUri : loadedPolicyUris) {
+		loadedPoliciesJsonUris.removeAll(newPoliciesJsonUris);
+		for (String policiesJsonUri : loadedPoliciesJsonUris) {
 			policyConsumer.removePolicies(policiesJsonUri);
 		}
 		
-		loadedPolicyUris = newPoliciesJsonUris;
+		loadedPoliciesJsonUris = newPoliciesJsonUris;
+		log.debug("End URIs policies reload");
+	}
+
+	private void reloadZipPolicies() {
+		log.debug("Starting Zip policies reload");
+		String policiesZipUrisAccessToken = appConfiguration.getPoliciesZipUrisAccessToken();
+		List<String> policiesZipUris = appConfiguration.getPoliciesZipUris();
+		if (policiesZipUris == null) {
+			return;
+		}
+
+		List<String> newPoliciesZipUris = new ArrayList<>();
+		for (String policiesZipUri : policiesZipUris) {
+			if (StringHelper.isEmpty(policiesZipUri)) {
+				continue;
+			}
+
+			List<String> zipPolicies = new ArrayList<>();
+
+			HttpGet request = new HttpGet(policiesZipUri);
+			if (StringHelper.isNotEmpty(policiesZipUrisAccessToken)) {
+				request.setHeader("Authorization", "Bearer " + policiesZipUrisAccessToken);
+			}
+			try {
+				CloseableHttpClient httpClient = httpService.getHttpsClient();
+				HttpResponse httpResponse = httpClient.execute(request);
+
+				boolean result = httpService.isResponseStastusCodeOk(httpResponse);
+				if (result) {
+					try (ZipInputStream zis = new ZipInputStream(httpResponse.getEntity().getContent())) {
+						ZipEntry ze;
+			            while ((ze = zis.getNextEntry()) != null) {
+			            	String fileName = ze.getName();
+			            	
+			            	if (ze.isDirectory()) {
+			            		continue;
+			            	}
+	
+			            	if (!fileName.endsWith(".json")) {
+			            		continue;
+			            	}
+	
+			            	byte[] fileBytes = IOUtils.toByteArray(zis);
+			            	String zipFilePolicy = new String(fileBytes, StandardCharsets.UTF_8);
+				            zis.closeEntry();
+	
+				            if (StringHelper.isNotEmpty(zipFilePolicy)) {
+								zipPolicies.add(zipFilePolicy);
+							}
+			            }
+					}
+				} else {
+			    	log.error("Get invalid response from URI {}", policiesZipUri);
+				}
+			} catch (IOException ex) {
+		    	log.error("Failed to execute load policies list from Zip {}", policiesZipUri, ex);
+			}
+			
+			policyConsumer.putPolicies(policiesZipUri, zipPolicies);
+			newPoliciesZipUris.add(policiesZipUri);
+		}
+		
+		// Remove policies from unloaded policy Uris 
+		loadedPoliciesZipUris.removeAll(newPoliciesZipUris);
+		for (String policiesJsonUri : loadedPoliciesZipUris) {
+			policyConsumer.removePolicies(policiesJsonUri);
+		}
+		
+		loadedPoliciesZipUris = newPoliciesZipUris;
+		log.debug("End Zip policies reload");
 	}
 
 	private String downloadPolicy(String policyUri) {
