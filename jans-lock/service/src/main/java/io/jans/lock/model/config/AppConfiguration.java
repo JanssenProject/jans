@@ -45,8 +45,12 @@ public class AppConfiguration implements Configuration {
 
 	private String messageConsumerType;
 	private String policyConsumerType;
-	
+
+	private String policiesJsonUrisAccessToken;
 	private List<String> policiesJsonUris;
+
+	private String policiesZipUrisAccessToken;
+	private List<String> policiesZipUris;
 
 	public String getBaseDN() {
 		return baseDN;
@@ -156,6 +160,14 @@ public class AppConfiguration implements Configuration {
 		this.policyConsumerType = policyConsumerType;
 	}
 
+	public String getPoliciesJsonUrisAccessToken() {
+		return policiesJsonUrisAccessToken;
+	}
+
+	public void setPoliciesJsonUrisAccessToken(String policiesJsonUrisAccessToken) {
+		this.policiesJsonUrisAccessToken = policiesJsonUrisAccessToken;
+	}
+
 	public List<String> getPoliciesJsonUris() {
 		return policiesJsonUris;
 	}
@@ -164,5 +176,20 @@ public class AppConfiguration implements Configuration {
 		this.policiesJsonUris = policiesJsonUris;
 	}
 
+	public String getPoliciesZipUrisAccessToken() {
+		return policiesZipUrisAccessToken;
+	}
+
+	public void setPoliciesZipUrisAccessToken(String policiesZipUrisAccessToken) {
+		this.policiesZipUrisAccessToken = policiesZipUrisAccessToken;
+	}
+
+	public List<String> getPoliciesZipUris() {
+		return policiesZipUris;
+	}
+
+	public void setPoliciesZipUris(List<String> policiesZipUris) {
+		this.policiesZipUris = policiesZipUris;
+	}
 
 }
