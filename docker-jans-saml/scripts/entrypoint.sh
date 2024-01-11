@@ -22,23 +22,18 @@ get_max_ram_percentage() {
 
 export_keycloak_admin_creds() {
     creds_file=${CN_SAML_KC_CREDENTIALS_FILE:-/etc/jans/conf/kc_admin_creds}
-    if [ -f "${creds_file}" ]; then
-        creds="$(base64 -d < ${creds_file})"
-        admin_username=$(echo "$creds" | awk -F ":" '{print $1}')
-        admin_password=$(echo "$creds" | awk -F ":" '{print $2}')
-    else
-        admin_username=${KEYCLOAK_ADMIN:-admin}
-        admin_password=${KEYCLOAK_ADMIN_PASSWORD:-admin}
-    fi
+    creds="$(base64 -d < ${creds_file})"
+    admin_username=$(echo "$creds" | awk -F ":" '{print $1}')
+    admin_password=$(echo "$creds" | awk -F ":" '{print $2}')
     export KEYCLOAK_ADMIN="$admin_username"
     export KEYCLOAK_ADMIN_PASSWORD="$admin_password"
 }
 
-export_keycloak_admin_creds
 python3 "$basedir/wait.py"
 python3 "$basedir/bootstrap.py"
 python3 "$basedir/configure_kc.py" &
 python3 "$basedir/upgrade.py"
+export_keycloak_admin_creds
 
 java_opts="$(get_max_ram_percentage) $(get_java_options)"
 export JAVA_OPTS_APPEND="$java_opts"

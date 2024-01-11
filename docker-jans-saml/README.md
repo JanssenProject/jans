@@ -122,16 +122,12 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
 
 #### Admin Credentials
 
-Admin credentials are set in `/etc/jans/conf/kc_admin_creds` (can be changed via `CN_SAML_KC_CREDENTIALS_FILE` environment variable) with the following format:
+By defaults, Keycloak's admin username and password are self-generated during first install and saved as `kc_admin_username` (in configs layer) and `kc_admin_password` (in secrets layer) respectively.
+
+The credentials will be rendered as `/etc/jans/conf/kc_admin_creds` file (can be changed via `CN_SAML_KC_CREDENTIALS_FILE` environment variable) with the following format:
 
 ```
 BASE64(username:password)
-```
-
-Example:
-
-```
-echo admin:admin | base64 -w0 > /etc/jans/conf/kc_admin_creds
 ```
 
 The credentials will be exported as `KEYCLOAK_ADMIN` and `KEYCLOAK_ADMIN_PASSWORD` environment variables for initial admin username and password.

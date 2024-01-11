@@ -174,13 +174,9 @@ def main():
 
     creds_file = os.environ.get("CN_SAML_KC_CREDENTIALS_FILE", "/etc/jans/conf/kc_admin_creds")
 
-    if os.path.isfile(creds_file):
-        with open(creds_file) as f:
-            creds = f.read().strip()
-            admin_username, admin_password = base64.b64decode(creds).decode().strip().split(":")
-    else:
-        admin_username = os.environ.get("KEYCLOAK_ADMIN", "admin")
-        admin_password = os.environ.get("KEYCLOAK_ADMIN_PASSWORD", "admin")
+    with open(creds_file) as f:
+        creds = f.read().strip()
+        admin_username, admin_password = base64.b64decode(creds).decode().strip().split(":")
 
     ctx = {
         "jans_idp_realm": "jans-api",
