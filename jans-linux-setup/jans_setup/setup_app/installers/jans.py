@@ -339,8 +339,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chmod, '+x', target_fn])
 
             print_version_scr_fn = os.path.join(Config.install_dir, 'setup_app/utils/printVersion.py')
-            self.run(['cp', '-f', print_version_scr_fn , Config.jansOptBinFolder])
-            self.run([paths.cmd_ln, '-s', 'printVersion.py' , 'show_version.py'], cwd=Config.jansOptBinFolder)
+            self.run(['cp', '-f', print_version_scr_fn , Config.jansOptFolder])
+            self.run([paths.cmd_ln, '-s', os.path.join(Config.jansOptFolder, 'printVersion.py'), os.path.join(Config.jansOptBinFolder, 'show_version.py')])
 
         for scr in Path(Config.jansOptBinFolder).glob('*'):
             scr_path = scr.as_posix()
