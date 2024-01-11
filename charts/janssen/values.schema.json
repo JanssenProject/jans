@@ -822,6 +822,20 @@
             }
           }
         },
+        "saml": {
+          "type": "object",
+          "properties": {
+            "samlServiceName": {
+              "description": "Name of the saml service. Please keep it as default.",
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$"
+            },
+            "enabled": {
+              "description": "Boolean flag to enable/disable the saml chart.",
+              "type": "boolean"
+            }
+          }
+        },
         "cnSqlPasswordFile": {
           "description": "The location of file contains password for the SQL user config.configmap.cnSqlDbUser. The file path must end with sql_password.",
           "type": "string",
