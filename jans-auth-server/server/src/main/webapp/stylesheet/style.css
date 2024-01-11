@@ -655,7 +655,7 @@ input.btn.btn-done {
     background-color: #150001;
 }
 
-.device-authz-container {
+.jans-form-container {
     padding: 40px 40px 50px 40px;
     max-width: 60%;
     margin: 0 auto;
@@ -666,7 +666,7 @@ input.btn.btn-done {
 }
 
 @media only screen and (max-width: 780px){
-    .device-authz-container {
+    .jans-form-container {
         max-width: 100%;
         padding: 20px 20px 25px 20px;
     }
