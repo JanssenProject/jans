@@ -9,6 +9,8 @@ from string import Template
 import backoff
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.utils import exec_cmd
+from jans.pycloudlib.wait import get_wait_max_time
+from jans.pycloudlib.wait import get_wait_interval
 
 from healthcheck import run_healthcheck
 from settings import LOGGING_CONFIG
@@ -25,12 +27,12 @@ def _on_backoff(details):
 @backoff.on_exception(
     backoff.constant,
     Exception,
-    max_time=60.0,
+    max_time=get_wait_max_time,
     on_backoff=_on_backoff,
     on_success=None,
     on_giveup=None,
     jitter=None,
-    interval=10.0,
+    interval=get_wait_interval,
 )
 def wait_for_keycloak():
     if not run_healthcheck():
