@@ -32,7 +32,6 @@ First, the custom authentication scripts corresponding to the authentication met
 
 Scripts can be more easily looked up by display name. The below table shows the display names of the scripts previously listed:
 
-|-|-|
 |Script|Display name|
 |-|-|
 |OTP (SMS)|twilio_sms|
