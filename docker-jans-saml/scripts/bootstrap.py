@@ -33,9 +33,13 @@ manager = get_manager()
 
 def render_keycloak_conf(ctx):
     with open("/app/templates/jans-saml/keycloak.conf") as f:
-        tmpl = f.read()
+        defaults = f.read()
+
+    with open("/app/templates/jans-saml/keycloak.extra.conf") as f:
+        extras = f.read()
 
     with open("/opt/keycloak/conf/keycloak.conf", "w") as f:
+        tmpl = "\n".join([defaults, extras])
         f.write(tmpl % ctx)
 
 

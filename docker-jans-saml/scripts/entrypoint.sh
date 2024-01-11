@@ -21,13 +21,14 @@ get_max_ram_percentage() {
 }
 
 export_keycloak_admin_creds() {
-    if [ -f /etc/jans/conf/kc_admin_creds ]; then
-        creds="$(base64 -d < /etc/jans/conf/kc_admin_creds)"
+    creds_file=${CN_SAML_KC_CREDENTIALS_FILE:-/etc/jans/conf/kc_admin_creds}
+    if [ -f "${creds_file}" ]; then
+        creds="$(base64 -d < ${creds_file})"
         admin_username=$(echo "$creds" | awk -F ":" '{print $1}')
         admin_password=$(echo "$creds" | awk -F ":" '{print $2}')
     else
-        admin_username=${KEYCLOAK_ADMIN:-}
-        admin_password=${KEYCLOAK_ADMIN_PASSWORD:-}
+        admin_username=${KEYCLOAK_ADMIN:-admin}
+        admin_password=${KEYCLOAK_ADMIN_PASSWORD:-admin}
     fi
     export KEYCLOAK_ADMIN="$admin_username"
     export KEYCLOAK_ADMIN_PASSWORD="$admin_password"
@@ -46,19 +47,16 @@ export JAVA_OPTS_APPEND="$java_opts"
 exec /opt/keycloak/bin/kc.sh start \
     -Dlog.base=/opt/keycloak/logs/ \
     -Djans.config.prop.path=/opt/keycloak/providers \
-    --health-enabled=true \
-    --metrics-enabled=true \
-    --http-host="${CN_SAML_HOST}" \
-    --http-port="${CN_SAML_PORT}" \
+    --http-host="${CN_SAML_HTTP_HOST}" \
+    --http-port=${CN_SAML_HTTP_PORT} \
     --http-enabled=true \
     --http-relative-path=/kc \
-    --hostname="localhost" \
-    --hostname-admin="localhost" \
     --hostname-path=/kc \
-    --hostname-strict-https=false \
+    --hostname-strict-https=true \
     --log=console \
     --log-console-format='jans-saml - %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n' \
     --log-file=/opt/keycloak/logs/keycloak.log \
-    --log-level=INFO
+    --log-level=INFO \
+    --proxy=edge
     # --db=dev-mem \
     # --optimized

@@ -161,17 +161,18 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
-    CN_SAML_PORT=8083 \
-    CN_SAML_HOST=0.0.0.0 \
+    CN_SAML_HTTP_PORT=8083 \
+    CN_SAML_HTTP_HOST=0.0.0.0 \
     CN_SAML_JAVA_OPTIONS="" \
-    KC_HEALTH_ENABLED=true
-    # KC_METRICS_ENABLED=true
+    CN_SAML_KC_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
+    KC_HEALTH_ENABLED=true \
+    KC_METRICS_ENABLED=true
 
 # ==========
 # misc stuff
 # ==========
 
-EXPOSE $CN_SAML_PORT
+EXPOSE $CN_SAML_HTTP_PORT
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
