@@ -54,8 +54,8 @@ class KC:
 
     @property
     def server_url(self):
-        host = os.environ.get("CN_SAML_HOST", "0.0.0.0")  # nosec: B104
-        port = os.environ.get("CN_SAML_PORT", "8083")
+        host = os.environ.get("CN_SAML_HTTP_HOST", "0.0.0.0")  # nosec: B104
+        port = os.environ.get("CN_SAML_HTT_PORT", "8083")
         return f"http://{host}:{port}/kc"
 
     @property
@@ -172,13 +172,11 @@ class KC:
 def main():
     manager = get_manager()
 
-    if os.path.isfile("/etc/jans/conf/kc_admin_creds"):
-        with open("/etc/jans/conf/kc_admin_creds") as f:
-            creds = f.read().strip()
-            admin_username, admin_password = base64.b64decode(creds).decode().strip().split(":")
-    else:
-        admin_username = os.environ.get("KEYCLOAK_ADMIN", "")
-        admin_password = os.environ.get("KEYCLOAK_ADMIN_PASSWORD", "")
+    creds_file = os.environ.get("CN_SAML_KC_CREDENTIALS_FILE", "/etc/jans/conf/kc_admin_creds")
+
+    with open(creds_file) as f:
+        creds = f.read().strip()
+        admin_username, admin_password = base64.b64decode(creds).decode().strip().split(":")
 
     ctx = {
         "jans_idp_realm": "jans-api",

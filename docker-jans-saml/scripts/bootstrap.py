@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import logging.config
 import os
 import typing as _t
@@ -33,9 +34,13 @@ manager = get_manager()
 
 def render_keycloak_conf(ctx):
     with open("/app/templates/jans-saml/keycloak.conf") as f:
-        tmpl = f.read()
+        defaults = f.read()
+
+    with open("/app/templates/jans-saml/keycloak.extra.conf") as f:
+        extras = f.read()
 
     with open("/opt/keycloak/conf/keycloak.conf", "w") as f:
+        tmpl = "\n".join([defaults, extras])
         f.write(tmpl % ctx)
 
 
@@ -44,6 +49,7 @@ def main():
         persistence_setup = PersistenceSetup(manager)
         persistence_setup.import_ldif_files()
         render_keycloak_conf(persistence_setup.ctx)
+        render_keycloak_creds()
 
 
 class PersistenceSetup:
@@ -116,6 +122,17 @@ class PersistenceSetup:
             ).decode()
             self.manager.secret.set("saml_scim_client_encoded_pw", ctx["saml_scim_client_encoded_pw"])
 
+        # keycloak credentials
+        ctx["kc_admin_username"] = self.manager.config.get("kc_admin_username")
+        if not ctx["kc_admin_username"]:
+            ctx["kc_admin_username"] = "admin"
+            self.manager.config.set("kc_admin_username", ctx["kc_admin_username"])
+
+        ctx["kc_admin_password"] = self.manager.secret.get("kc_admin_password")
+        if not ctx["kc_admin_password"]:
+            ctx["kc_admin_password"] = get_random_chars()
+            self.manager.secret.set("kc_admin_password", ctx["kc_admin_password"])
+
         # finalized ctx
         return ctx
 
@@ -130,6 +147,17 @@ class PersistenceSetup:
         for file_ in self.ldif_files:
             logger.info(f"Importing {file_}")
             self.client.create_from_ldif(file_, self.ctx)
+
+
+def render_keycloak_creds():
+    creds_file = os.environ.get("CN_SAML_KC_CREDENTIALS_FILE", "/etc/jans/conf/kc_admin_creds")
+
+    if not os.path.isfile(creds_file):
+        with open(creds_file, "w") as f:
+            username = manager.config.get("kc_admin_username")
+            password = manager.secret.get("kc_admin_password")
+            creds_bytes = f"{username}:{password}".encode()
+            f.write(base64.b64encode(creds_bytes).decode())
 
 
 if __name__ == "__main__":
