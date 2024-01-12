@@ -12,6 +12,7 @@ import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.lock.model.config.StaticConfiguration;
 import io.jans.model.SmtpConfiguration;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.service.EncryptionService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 import jakarta.enterprise.context.ApplicationScoped;

@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 
 import com.google.common.collect.Lists;
 
-import io.jans.link.service.EncryptionService;
 import io.jans.link.service.config.ApplicationFactory;
 import io.jans.link.service.config.ConfigurationFactory;
 import io.jans.exception.ConfigurationException;
@@ -23,6 +22,7 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.util.properties.FileConfiguration;
+import io.jans.service.EncryptionService;
 import io.jans.service.PythonService;
 import io.jans.service.cdi.event.ApplicationInitialized;
 import io.jans.service.cdi.event.ApplicationInitializedEvent;

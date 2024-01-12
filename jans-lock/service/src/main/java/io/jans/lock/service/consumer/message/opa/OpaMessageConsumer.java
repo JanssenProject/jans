@@ -11,6 +11,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -22,10 +23,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.config.OpaConfiguration;
 import io.jans.lock.service.TokenService;
 import io.jans.lock.service.external.ExternalLockService;
 import io.jans.lock.service.external.context.ExternalLockContext;
 import io.jans.model.token.TokenEntity;
+import io.jans.service.EncryptionService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.qualifier.Implementation;
 import io.jans.service.message.consumer.MessageConsumer;
@@ -63,6 +66,9 @@ public class OpaMessageConsumer extends MessageConsumer {
 	
 	@Inject
 	private TokenService tokenService;
+
+    @Inject
+    private EncryptionService encryptionService;
 
 	private ObjectMapper objectMapper;
 
@@ -142,12 +148,15 @@ public class OpaMessageConsumer extends MessageConsumer {
 
 		// Send rest request to OPA
 		
-		String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
+		OpaConfiguration opaConfiguration = appConfiguration.getOpaConfiguration();
+		String baseUrl = opaConfiguration.getBaseUrl();
 
 		HttpPut request = new HttpPut(String.format("%s/data/%s/%s", baseUrl, tknTyp, tknCde));
+		addAccessTokenHeader(request, opaConfiguration);
+
 		request.addHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
 		request.addHeader("If-None-Match", "*");
-		
+
 		StringEntity stringEntity = new StringEntity(dataNode.toString(), ContentType.APPLICATION_JSON);
 		request.setEntity(stringEntity);
 
@@ -193,9 +202,11 @@ public class OpaMessageConsumer extends MessageConsumer {
 		String tknTyp = messageNode.get("tknTyp").asText();
 		String tknCde = messageNode.get("tknCde").asText();
 
-		String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
+		OpaConfiguration opaConfiguration = appConfiguration.getOpaConfiguration();
+		String baseUrl = opaConfiguration.getBaseUrl();
 
 		HttpDelete request = new HttpDelete(String.format("%s/data/%s/%s", baseUrl, tknTyp, tknCde));
+		addAccessTokenHeader(request, opaConfiguration);
 
 		boolean result = false;
 		try {
@@ -218,6 +229,13 @@ public class OpaMessageConsumer extends MessageConsumer {
 
         return duration;
     }
+
+	private void addAccessTokenHeader(HttpRequestBase request, OpaConfiguration opaConfiguration) {
+		String accessToken = encryptionService.decrypt(opaConfiguration.getAccessToken(), true);
+		if (StringHelper.isNotEmpty(accessToken)) {
+			request.setHeader("Authorization", "Bearer " + accessToken);
+		}
+	}
 
 	protected class OpaExpirationListener implements ExpirationListener<String, String> {
 
