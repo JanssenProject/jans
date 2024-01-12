@@ -70,6 +70,7 @@ public class IdpService {
         if (StringUtils.isBlank(realm)) {
             realm = Constants.REALM_MASTER;
         }
+        log.debug("Final realm:{}", realm);
         return realm;
     }
 
@@ -211,6 +212,8 @@ public class IdpService {
         if (StringUtils.isBlank(identityProvider.getProviderId())) {
             identityProvider.setProviderId(Constants.SAML);
         }
+        
+        log.info("After setting default value for identityProvider:{}, update:{}", identityProvider, update);
         return identityProvider;
     }
 
@@ -332,9 +335,11 @@ public class IdpService {
     private InputStream getInputStream(ByteArrayOutputStream output) {
         log.debug("Get InputStream for output:{}", output);
         InputStream input = null;
-        if (output != null) {
-            input = new ByteArrayInputStream(output.toByteArray());
+        if (output == null) {
+           return input;
         }
+        
+        input = new ByteArrayInputStream(output.toByteArray());
         log.debug("From ByteArrayOutputStream InputStream is:{}", input);
         return input;
     }

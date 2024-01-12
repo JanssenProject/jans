@@ -454,7 +454,10 @@ public class AuthUtil {
     public ByteArrayOutputStream getByteArrayOutputStream(InputStream input) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         log.debug("input:{} ", input);
-
+        if(input ==null) {
+            return baos;
+        }
+        
         byte[] buffer = new byte[1024];
         int len;
         while ((len = input.read(buffer)) > -1) {
