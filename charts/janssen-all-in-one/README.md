@@ -245,6 +245,8 @@ Kubernetes: `>=v1.22.0-0`
 | nginx-ingress.ingress.openidAdditionalAnnotations | object | `{}` | openid-configuration ingress resource additional annotations. |
 | nginx-ingress.ingress.openidConfigLabels | object | `{}` | openid-configuration ingress resource labels. key app is taken |
 | nginx-ingress.ingress.path | string | `"/"` |  |
+| nginx-ingress.ingress.samlAdditionalAnnotations | object | `{}` | SAML ingress resource additional annotations. |
+| nginx-ingress.ingress.samlLabels | object | `{}` | SAML config ingress resource labels. key app is taken |
 | nginx-ingress.ingress.scimAdditionalAnnotations | object | `{}` | SCIM ingress resource additional annotations. |
 | nginx-ingress.ingress.scimConfigAdditionalAnnotations | object | `{}` | SCIM config ingress resource additional annotations. |
 | nginx-ingress.ingress.scimConfigLabels | object | `{}` | SCIM config ingress resource labels. key app is taken |
@@ -270,6 +272,9 @@ Kubernetes: `>=v1.22.0-0`
 | resources.requests.cpu | string | `"2500m"` | CPU request. |
 | resources.requests.memory | string | `"2500Mi"` | Memory request. |
 | salt | string | `""` | Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value. |
+| saml.enabled | bool | `false` | Boolean flag to enable/disable the saml chart. |
+| saml.ingress | object | `{"samlEnabled":false}` | Enable endpoints in either istio or nginx ingress depending on users choice |
+| saml.samlServiceName | string | `"saml"` | Name of the saml service. Please keep it as default. |
 | scim.appLoggers | object | `{"enableStdoutLogPrefix":"true","ldapStatsLogLevel":"INFO","ldapStatsLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scimLogLevel":"INFO","scimLogTarget":"STDOUT","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | scim.appLoggers.enableStdoutLogPrefix | string | `"true"` | Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e jans-scim ===> 2022-12-20 17:49:55,744 INFO |
 | scim.appLoggers.ldapStatsLogLevel | string | `"INFO"` | jans-scim_persistence_ldap_statistics.log level |
