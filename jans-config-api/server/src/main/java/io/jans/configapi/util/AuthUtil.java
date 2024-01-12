@@ -28,6 +28,9 @@ import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.lang.reflect.Field;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -435,17 +438,34 @@ public class AuthUtil {
     }
 
     public Date parseStringToDateObj(String dateString) {
-        String DATE_PATTERN_YYYY_MM_DD = "yyyy-MM-dd";
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN_YYYY_MM_DD);
+        String datePattern = "yyyy-MM-dd";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
         log.debug("parseStringToDateObj:{} ", dateString);
         Date date = null;
         try {
             date = dateFormat.parse(dateString);
         } catch (ParseException e) {
             log.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ",
-                    DATE_PATTERN_YYYY_MM_DD, dateString);
+                    datePattern, dateString);
         }
         return date;
     }
-
+    
+    public ByteArrayOutputStream getByteArrayOutputStream(InputStream input) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        log.debug("input:{} ", input);
+        if(input ==null) {
+            return baos;
+        }
+        
+        byte[] buffer = new byte[1024];
+        int len;
+        while ((len = input.read(buffer)) > -1) {
+            baos.write(buffer, 0, len);
+        }
+        baos.flush();
+        return baos;
+    }
+    
+    
 }

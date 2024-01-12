@@ -11,6 +11,8 @@ public class ApiConstants {
     private ApiConstants() {}
 
     public static final String BASE_API_URL = "/";
+    public static final String CONFIG_APP_NAME = "jans-config-api";
+    public static final String ARTIFACT = "artifact";
     public static final String CONFIG = "/config";
     public static final String CONFIGS = "/configs";
     public static final String API_CONFIG = "/api-config";
@@ -76,6 +78,7 @@ public class ApiConstants {
     public static final String STATISTICS = "/stat";
     public static final String USER = "/user";
     public static final String ORG = "/org";
+    public static final String APP_VERSION = "/app-version";
     public static final String SERVER_STAT = "/server-stat";
     public static final String USERNAME_PATH = "/{username}";
     public static final String CLIENTID_PATH = "/{clientId}";
