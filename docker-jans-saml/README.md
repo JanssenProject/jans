@@ -63,6 +63,7 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
 - `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
 - `CN_SAML_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
+- `CN_SAML_KC_CREDENTIALS_FILE`: File contains credentials for Keycloak admin user.
 - `GOOGLE_APPLICATION_CREDENTIALS`: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
@@ -117,18 +118,16 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
     }
     ```
 
-### Keycloak Admin Credentials
+### Keycloak Administration
 
-Admin credentials are set in `/etc/jans/conf/kc_admin_creds` with the following format:
+#### Admin Credentials
+
+By defaults, Keycloak's admin username and password are self-generated during first install and saved as `kc_admin_username` (in configs layer) and `kc_admin_password` (in secrets layer) respectively.
+
+The credentials will be rendered as `/etc/jans/conf/kc_admin_creds` file (can be changed via `CN_SAML_KC_CREDENTIALS_FILE` environment variable) with the following format:
 
 ```
 BASE64(username:password)
-```
-
-Example:
-
-```
-echo admin:admin | base64 -w0 > /etc/jans/conf/kc_admin_creds
 ```
 
 The credentials will be exported as `KEYCLOAK_ADMIN` and `KEYCLOAK_ADMIN_PASSWORD` environment variables for initial admin username and password.
