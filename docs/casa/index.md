@@ -54,6 +54,8 @@ Casa is a plugin-oriented, Java web application. Existing functionality can be e
 - [Custom branding](./plugins/custom-branding.md)  
 - [2FA settings](./plugins/2fa-settings.md)
 
+If you are interested in onboarding additional authentication methods to Casa, read this [guide](./developer/add-authn-methods.md).
+
 ## Janssen Server integration
 
 Janssen Server relies on "interception scripts" to implement user authentication. Casa itself has an interception script which defines authentication logic and routes authentications to specific 2FA mechanisms which also have their own scripts.        
