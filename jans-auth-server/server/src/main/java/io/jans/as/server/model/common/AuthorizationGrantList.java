@@ -332,6 +332,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                         result = tokenExchangeGrant;
                         break;
+                    case TX_TOKEN:
+                        TxTokenGrant txTokenGrant = grantInstance.select(TxTokenGrant.class).get();
+                        txTokenGrant.init(user, AuthorizationGrantType.TX_TOKEN, client, tokenEntity.getCreationDate());
+
+                        result = txTokenGrant;
+                        break;
                     default:
                         return null;
                 }
