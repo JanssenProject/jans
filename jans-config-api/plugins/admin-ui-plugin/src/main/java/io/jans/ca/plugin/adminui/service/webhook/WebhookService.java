@@ -228,7 +228,6 @@ public class WebhookService {
      */
     public void removeWebhook(WebhookEntry webhook) throws ApplicationException {
         try {
-            validateWebhookEntry(webhook);
             if (Strings.isNullOrEmpty(webhook.getWebhookId())) {
                 log.error(ErrorResponse.WEBHOOK_ID_MISSING.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_ID_MISSING.getDescription());
