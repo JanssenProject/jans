@@ -21,6 +21,9 @@ import io.jans.util.exception.InvalidAttributeException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -61,6 +64,16 @@ public class IdpService {
         return samlConfigService.getTrustedIdpDn();
     }
 
+    public String getRealm() {
+        String realm = samlConfigService.getRealm();
+        log.debug("realm:{}", realm);
+        if (StringUtils.isBlank(realm)) {
+            realm = Constants.REALM_MASTER;
+        }
+        log.debug("Final realm:{}", realm);
+        return realm;
+    }
+
     public String getSpMetadataUrl(String realm, String name) {
         return samlConfigService.getSpMetadataUrl(realm, name);
     }
@@ -84,7 +97,7 @@ public class IdpService {
     public List<IdentityProvider> getAllIdp(String realmName) throws IOException {
         log.info("Fetch all IDP from realm:{}", realmName);
         if (StringUtils.isBlank(realmName)) {
-            realmName = Constants.REALM_MASTER;
+            realmName = getRealm();
         }
         return keycloakService.findAllIdentityProviders(realmName);
 
@@ -107,11 +120,12 @@ public class IdpService {
         identityProvider.setDn(identityProviderService.getDnForIdentityProvider(inum));
 
         // common code
-        identityProvider = processIdentityProvider(identityProvider, idpMetadataStream, false);
+        ByteArrayOutputStream bos = getByteArrayOutputStream(idpMetadataStream);
+        identityProvider = processIdentityProvider(identityProvider, getInputStream(bos), false);
         log.debug("Create IdentityProvider identityProvider:{}", identityProvider);
 
         // Create IDP in Jans DB
-        identityProviderService.addSamlIdentityProvider(identityProvider, idpMetadataStream);
+        identityProviderService.addSamlIdentityProvider(identityProvider, getInputStream(bos));
         log.debug("Created IdentityProvider in Jans DB -  identityProvider:{}", identityProvider);
 
         return identityProvider;
@@ -129,16 +143,17 @@ public class IdpService {
         }
 
         // common code
-        identityProvider = processIdentityProvider(identityProvider, idpMetadataStream, true);
+        ByteArrayOutputStream bos = getByteArrayOutputStream(idpMetadataStream);
+        identityProvider = processIdentityProvider(identityProvider, getInputStream(bos), true);
         log.debug("Update IdentityProvider identityProvider:{}", identityProvider);
 
         // Update IDP in Jans DB
-        updateIdentityProvider(identityProvider);
+        updateIdentityProvider(identityProvider, getInputStream(bos));
         log.info("Updated IdentityProvider - identityProvider:{}", identityProvider);
         return identityProvider;
     }
 
-    public void deleteIdentityProvider(IdentityProvider identityProvider) {
+    public void deleteIdentityProvider(IdentityProvider identityProvider) throws IOException {
         boolean status = false;
         log.info("Delete dentityProvider:{}, samlConfigService.isSamlEnabled():{}", identityProvider,
                 samlConfigService.isSamlEnabled());
@@ -171,11 +186,13 @@ public class IdpService {
 
     }
 
-    private IdentityProvider updateIdentityProvider(IdentityProvider identityProvider) throws IOException {
-        log.info("Update IdentityProvider with IDP metadata file in identityProvider:{}", identityProvider);
+    private IdentityProvider updateIdentityProvider(IdentityProvider identityProvider, InputStream idpMetadataStream)
+            throws IOException {
+        log.info("Update IdentityProvider with IDP metadata file in identityProvider:{}, idpMetadataStream:{} ",
+                identityProvider, idpMetadataStream);
 
         // Update IDP in Jans DB
-        identityProviderService.updateIdentityProvider(identityProvider);
+        identityProviderService.updateIdentityProvider(identityProvider, idpMetadataStream);
         log.debug("Updated IdentityProvider in Jans DB -  identityProvider:{}", identityProvider);
 
         return identityProvider;
@@ -189,12 +206,14 @@ public class IdpService {
 
         // Set default Realm in-case null
         if (StringUtils.isBlank(identityProvider.getRealm())) {
-            identityProvider.setRealm(Constants.REALM_MASTER);
+            identityProvider.setRealm(getRealm());
         }
 
         if (StringUtils.isBlank(identityProvider.getProviderId())) {
             identityProvider.setProviderId(Constants.SAML);
         }
+        
+        log.info("After setting default value for identityProvider:{}, update:{}", identityProvider, update);
         return identityProvider;
     }
 
@@ -242,7 +261,7 @@ public class IdpService {
     }
 
     private Map<String, String> validateSamlMetadata(String prorviderId, String realmName,
-            InputStream idpMetadataStream) throws JsonProcessingException {
+            InputStream idpMetadataStream) throws IOException {
         return keycloakService.importSamlMetadata(prorviderId, realmName, idpMetadataStream);
     }
 
@@ -289,9 +308,8 @@ public class IdpService {
         }
 
         for (String attribute : samlConfigService.getKcSamlConfig()) {
-            log.trace("attribute:{}, config.get(attribute):{}", attribute,
-                    config.get(attribute));
-                DataUtil.invokeReflectionSetter(identityProvider, attribute, config.get(attribute));        
+            log.trace("attribute:{}, config.get(attribute):{}", attribute, config.get(attribute));
+            DataUtil.invokeReflectionSetter(identityProvider, attribute, config.get(attribute));
         }
 
         log.info("validateIdpMetadataElements - identityProvider:{}", identityProvider);
@@ -308,6 +326,22 @@ public class IdpService {
             log.error("Error while getting value of config ", ex);
         }
         return value;
+    }
+
+    private ByteArrayOutputStream getByteArrayOutputStream(InputStream input) throws IOException {
+        return authUtil.getByteArrayOutputStream(input);
+    }
+
+    private InputStream getInputStream(ByteArrayOutputStream output) {
+        log.debug("Get InputStream for output:{}", output);
+        InputStream input = null;
+        if (output == null) {
+           return input;
+        }
+        
+        input = new ByteArrayInputStream(output.toByteArray());
+        log.debug("From ByteArrayOutputStream InputStream is:{}", input);
+        return input;
     }
 
 }
