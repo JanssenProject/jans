@@ -344,7 +344,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run(['cp', '-f', print_version_scr_fn , Config.jansOptFolder])
             target_fn = os.path.join(Config.jansOptFolder, print_version_s)
             self.run([paths.cmd_ln, '-s', target_fn, os.path.join(Config.jansOptBinFolder, show_version_s)])
-            self.chown(target_fn, Config.root_user, Config.jetty_user)
+            self.chown(target_fn, Config.jetty_user, Config.root_user)
             self.run([paths.cmd_chmod, '0550', target_fn])
 
         for scr in Path(Config.jansOptBinFolder).glob('*'):
