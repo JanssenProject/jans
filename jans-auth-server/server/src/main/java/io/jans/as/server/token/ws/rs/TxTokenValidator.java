@@ -87,8 +87,7 @@ public class TxTokenValidator {
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Failed to find authorization grant by subject_token."),auditLog));
         }
 
-        final AbstractToken authorizationAccessToken = authorizationGrant.getAccessToken(subjectToken);
-
+        AbstractToken authorizationAccessToken = authorizationGrant.getAccessToken(subjectToken);
         if ((authorizationAccessToken == null || !authorizationAccessToken.isValid())) {
             log.error("Access token is not valid.");
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Access token is not valid."),auditLog));
