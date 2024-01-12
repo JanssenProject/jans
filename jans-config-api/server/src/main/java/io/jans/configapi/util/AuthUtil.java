@@ -4,7 +4,6 @@ import com.unboundid.ldap.sdk.DN;
 import io.jans.as.client.RevokeSessionResponse;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
@@ -22,6 +21,7 @@ import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
+import io.jans.service.EncryptionService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
