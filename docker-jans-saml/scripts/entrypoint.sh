@@ -49,9 +49,7 @@ exec /opt/keycloak/bin/kc.sh start \
     --hostname-path=/kc \
     --hostname-strict-https=true \
     --log=console \
-    --log-console-format='jans-saml - %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n' \
-    --log-file=/opt/keycloak/logs/keycloak.log \
-    --log-level=INFO \
-    --proxy=edge
+    --log-console-format='jans-saml - %d{yyyy-MM-dd HH:mm:ss,SSS} - %-5p - [%c] (%t) %s%e%n' \
+    --log-file=/opt/keycloak/logs/keycloak.log
     # --db=dev-mem \
     # --optimized

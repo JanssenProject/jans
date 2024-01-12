@@ -166,7 +166,9 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_SAML_JAVA_OPTIONS="" \
     CN_SAML_KC_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
     KC_HEALTH_ENABLED=true \
-    KC_METRICS_ENABLED=true
+    KC_METRICS_ENABLED=true \
+    KC_LOG_LEVEL=INFO \
+    KC_PROXY=edge
 
 # ==========
 # misc stuff
