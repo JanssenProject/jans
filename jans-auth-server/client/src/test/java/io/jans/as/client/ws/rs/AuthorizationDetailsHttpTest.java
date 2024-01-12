@@ -52,7 +52,7 @@ public class AuthorizationDetailsHttpTest extends BaseTest {
     @Test
     public void authorizationWithAuthorizationDetails(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri) throws Exception {
-        showTitle("authorizationCodeFlow");
+        showTitle("authorizationWithAuthorizationDetails");
 
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
