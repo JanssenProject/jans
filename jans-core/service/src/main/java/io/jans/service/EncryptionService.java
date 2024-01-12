@@ -4,18 +4,18 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.scim.service;
+package io.jans.service;
 
-import java.io.Serializable;
 import java.util.Properties;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import org.slf4j.Logger;
 
 import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Allows to decrypted properties with passwords
@@ -23,9 +23,10 @@ import io.jans.util.security.StringEncrypter.EncryptionException;
  * @author Yuriy Movchan Date: 09/23/2014
  */
 @ApplicationScoped
-public class EncryptionService implements Serializable {
+public class EncryptionService {
 
-	private static final long serialVersionUID = -5813201875981117513L;
+    @Inject
+    private Logger log;
 
 	@Inject
 	private StringEncrypter stringEncrypter;
@@ -37,6 +38,29 @@ public class EncryptionService implements Serializable {
 
 		return stringEncrypter.decrypt(encryptedString);
 	}
+
+	public String decrypt(String encryptedValue, boolean returnSource) {
+        if (encryptedValue == null) {
+            return encryptedValue;
+        }
+
+        String resultValue;
+        if (returnSource) {
+            resultValue = encryptedValue;
+        } else {
+            resultValue = null;
+        }
+
+        try {
+            resultValue = stringEncrypter.decrypt(encryptedValue);
+        } catch (Exception ex) {
+            if (!returnSource) {
+                log.error(String.format("Failed to decrypt value: '%s'", encryptedValue, ex));
+            }
+        }
+
+        return resultValue;
+    }
 
 	public String encrypt(String unencryptedString) throws EncryptionException {
 		if (StringHelper.isEmpty(unencryptedString)) {

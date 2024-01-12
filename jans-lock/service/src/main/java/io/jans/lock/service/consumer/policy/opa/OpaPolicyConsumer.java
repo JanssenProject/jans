@@ -16,6 +16,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -24,11 +25,14 @@ import org.slf4j.Logger;
 import com.unboundid.util.Base64;
 
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.config.OpaConfiguration;
 import io.jans.lock.service.external.ExternalLockService;
 import io.jans.lock.service.external.context.ExternalLockContext;
+import io.jans.service.EncryptionService;
 import io.jans.service.cdi.qualifier.Implementation;
 import io.jans.service.net.BaseHttpService;
 import io.jans.service.policy.consumer.PolicyConsumer;
+import io.jans.util.StringHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
@@ -60,6 +64,9 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 	@Inject
 	@Implementation
 	private Instance<PolicyConsumer> policyConsumerProviderInstance;
+
+    @Inject
+    private EncryptionService encryptionService;
 	
 	private MessageDigest sha256Digest;
 
@@ -109,9 +116,12 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 				continue;
 			}
 
-			String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
+			OpaConfiguration opaConfiguration = appConfiguration.getOpaConfiguration();
+			String baseUrl = opaConfiguration.getBaseUrl();
+
 			HttpPut request = new HttpPut(String.format("%s/policies/%s", baseUrl, policyId));
-			
+			addAccessTokenHeader(request, opaConfiguration);
+
 			StringEntity stringEntity = new StringEntity(policy, ContentType.TEXT_PLAIN);
 			request.setEntity(stringEntity);
 
@@ -182,8 +192,11 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 			return true;
 		}
 
-		String baseUrl = appConfiguration.getOpaConfiguration().getBaseUrl();
+		OpaConfiguration opaConfiguration = appConfiguration.getOpaConfiguration();
+		String baseUrl = opaConfiguration.getBaseUrl();
+
 		HttpDelete request = new HttpDelete(String.format("%s/policies/%s", baseUrl, policyId));
+		addAccessTokenHeader(request, opaConfiguration);
 
 		boolean result = true;
 		try {
@@ -199,6 +212,13 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 		}
 		
 		return result;
+	}
+
+	private void addAccessTokenHeader(HttpRequestBase request, OpaConfiguration opaConfiguration) {
+		String accessToken = encryptionService.decrypt(opaConfiguration.getAccessToken(), true);
+		if (StringHelper.isNotEmpty(accessToken)) {
+			request.setHeader("Authorization", "Bearer " + accessToken);
+		}
 	}
 
 	@Override
