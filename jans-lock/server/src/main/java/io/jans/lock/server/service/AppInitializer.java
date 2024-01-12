@@ -23,6 +23,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.service.ApplicationConfigurationFactory;
+import io.jans.service.EncryptionService;
 import io.jans.service.PythonService;
 import io.jans.service.cdi.event.ApplicationInitialized;
 import io.jans.service.cdi.event.ApplicationInitializedEvent;
