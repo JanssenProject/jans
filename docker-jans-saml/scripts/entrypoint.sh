@@ -21,7 +21,7 @@ get_max_ram_percentage() {
 }
 
 export_keycloak_admin_creds() {
-    creds_file=${CN_SAML_KC_CREDENTIALS_FILE:-/etc/jans/conf/kc_admin_creds}
+    creds_file=${CN_SAML_KC_ADMIN_CREDENTIALS_FILE:-/etc/jans/conf/kc_admin_creds}
     creds="$(base64 -d < ${creds_file})"
     admin_username=$(echo "$creds" | awk -F ":" '{print $1}')
     admin_password=$(echo "$creds" | awk -F ":" '{print $2}')

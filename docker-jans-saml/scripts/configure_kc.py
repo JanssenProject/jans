@@ -174,7 +174,7 @@ class KC:
 def main():
     manager = get_manager()
 
-    creds_file = os.environ.get("CN_SAML_KC_CREDENTIALS_FILE", "/etc/jans/conf/kc_admin_creds")
+    creds_file = os.environ.get("CN_SAML_KC_ADMIN_CREDENTIALS_FILE", "/etc/jans/conf/kc_admin_creds")
 
     with open(creds_file) as f:
         creds = f.read().strip()

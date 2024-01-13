@@ -163,7 +163,7 @@ class PersistenceSetup:
 
 
 def render_keycloak_creds():
-    creds_file = os.environ.get("CN_SAML_KC_CREDENTIALS_FILE", "/etc/jans/conf/kc_admin_creds")
+    creds_file = os.environ.get("CN_SAML_KC_ADMIN_CREDENTIALS_FILE", "/etc/jans/conf/kc_admin_creds")
 
     if not os.path.isfile(creds_file):
         with open(creds_file, "w") as f:
