@@ -203,10 +203,20 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_SAML_HTTP_HOST=127.0.0.1 \
     CN_SAML_HTTP_PORT=8083 \
     CN_SAML_JAVA_OPTIONS="" \
+    CN_SAML_KC_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
+    CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
     KC_HEALTH_ENABLED=true \
     KC_METRICS_ENABLED=true \
     KC_LOG_LEVEL=INFO \
-    KC_PROXY=edge
+    KC_PROXY=edge \
+    KC_DB=mysql \
+    KC_DB_USERNAME=keycloak \
+    KC_DB_SCHEMA=keycloak \
+    KC_DB_URL_HOST=localhost \
+    KC_DB_URL_PORT=3306 \
+    KC_DB_URL_DATABASE=keycloak \
+    KC_DB_URL_PROPERTIES=?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4 \
+    QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=false
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
