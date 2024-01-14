@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.PatternSyntaxException;
 
-public class Configuration {
+public class AppConfiguration {
     
     private static final String APP_VERSION_UNKNOWN = "N/A";
     private static final String SYS_PROP_APP_VERSION = "app.version";
@@ -25,9 +25,16 @@ public class Configuration {
     private static final String CFG_PROP_CFGAPI_AUTH_SCOPES = "app.config-api.client.auth.scopes";
     private static final String CFG_PROP_CFGAPI_AUTH_METHOD = "app.config-api.auth.method";
 
+    private static final String CFG_PROP_KEYCLOAK_SERVER_URL = "app.keycloak-admin.url";
+    private static final String CFG_PROP_KEYCLOAK_REALM = "app.keycloak-admin.realm";
+    private static final String CFG_PROP_KEYCLOAK_USERNAME = "app.keycloak-admin.username";
+    private static final String CFG_PROP_KEYCLOAK_PASSWORD = "app.keycloak-admin.password";
+    private static final String CFG_PROP_KEYCLOAK_CLIENT_ID = "app.keycloak-admin.client.id";
+    private static final String CFG_PROP_KEYCLOAK_CONN_POOL_SIZE = "app.keycloak-admin.conn.poolsize";
+
     private final Properties configProperties;
 
-    private Configuration(Properties configProperties) {
+    private AppConfiguration(Properties configProperties) {
 
         this.configProperties = configProperties;
     }
@@ -72,6 +79,36 @@ public class Configuration {
         return getStringEntry(CFG_PROP_CFGAPI_AUTH_CLIENT_SECRET);
     }
 
+    public String keycloakAdminUrl() {
+
+        return getStringEntry(CFG_PROP_KEYCLOAK_SERVER_URL);
+    }
+
+    public String keycloakAdminRealm() {
+
+        return getStringEntry(CFG_PROP_KEYCLOAK_REALM);
+    }
+
+    public String keycloakAdminUsername() {
+
+        return getStringEntry(CFG_PROP_KEYCLOAK_USERNAME);
+    }
+
+    public String keycloakAdminPassword() {
+
+        return getStringEntry(CFG_PROP_KEYCLOAK_PASSWORD);
+    }
+
+    public String keycloakAdminClientId() {
+
+        return getStringEntry(CFG_PROP_KEYCLOAK_CLIENT_ID);
+    }
+
+    public Integer keycloakAdminConnPoolSize() {
+
+        return getIntEntry(CFG_PROP_KEYCLOAK_CONN_POOL_SIZE);
+    }
+
     public List<String> configApiAuthScopes() {
 
         String scopes = getStringEntry(CFG_PROP_CFGAPI_AUTH_SCOPES);
@@ -88,7 +125,7 @@ public class Configuration {
             }
             return ret;
         }catch(PatternSyntaxException e) {
-            throw new ConfigurationException("Could not get config api scopes",e);
+            throw new AppConfigException("Could not get config api scopes",e);
         }
     }
 
@@ -111,7 +148,7 @@ public class Configuration {
         try {
             return Integer.parseInt(strvalue);
         }catch(NumberFormatException e) {
-            throw new ConfigurationException("Unable to get specified configuration entryQue Dor",e);
+            throw new AppConfigException("Unable to get specified configuration entryQue Dor",e);
         }
     }
 
@@ -132,18 +169,18 @@ public class Configuration {
         return sb.toString();
     }
 
-    public static final Configuration fromFile(String path) {
+    public static final AppConfiguration fromFile(String path) {
 
         Properties props = new Properties();
         try {
             FileInputStream cfs = new FileInputStream(path);
             props.load(cfs);
             props = mergeWithSystemProperties(props);
-            return new Configuration(props);
+            return new AppConfiguration(props);
         }catch(FileNotFoundException e) {
-            throw new ConfigurationException("Specified configuration file not found",e);
+            throw new AppConfigException("Specified configuration file not found",e);
         }catch(IOException e) {
-            throw new ConfigurationException("Error when loading configuration file",e);
+            throw new AppConfigException("Error when loading configuration file",e);
         }
 
     }
