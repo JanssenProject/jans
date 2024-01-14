@@ -7,24 +7,30 @@ public class RecurringJobSpec extends JobSpec {
     private static final Integer DEFAULT_SCHEDULING_INTERVAL = 5; // in seconds 
     private Integer schedulingInterval;
     private boolean repeatForever;
+    private ExecutionContext context;
 
-    private RecurringJobSpec(String name, Class<? extends RecurringJob> jobclazz) {
+    private RecurringJobSpec(String name, Class<? extends RecurringJob> jobclazz, ExecutionContext context) {
 
         super(name,jobclazz);
         this.schedulingInterval = DEFAULT_SCHEDULING_INTERVAL;
         this.repeatForever = true;
+        this.context = context;
     }
 
-    private RecurringJobSpec(String name, Class<? extends RecurringJob> jobclazz,Integer schedulingInterval) {
+    private RecurringJobSpec(String name, Class<? extends RecurringJob> jobclazz,
+        Integer schedulingInterval, ExecutionContext context) {
         super(name,jobclazz);
         this.schedulingInterval = schedulingInterval;
         this.repeatForever = true;
+        this.context = context;
     }
 
-    private RecurringJobSpec(String name,Class<? extends RecurringJob> jobclazz,Integer schedulingInterval, boolean repeatForever) {
+    private RecurringJobSpec(String name, Class<? extends RecurringJob> jobclazz,
+        Integer schedulingInterval, boolean repeatForever, ExecutionContext context) {
         super(name,jobclazz);
         this.schedulingInterval = schedulingInterval;
         this.repeatForever = repeatForever;
+        this.context = context;
     }
 
     public Integer schedulingInterval() {
@@ -47,7 +53,7 @@ public class RecurringJobSpec extends JobSpec {
         private RecurringJobSpec spec;
 
         private Builder() {
-            this.spec = new RecurringJobSpec(null, null);
+            this.spec = new RecurringJobSpec(null, null,null);
         }
 
         public Builder name(String name) {
@@ -75,6 +81,12 @@ public class RecurringJobSpec extends JobSpec {
             return this;
         }
 
+        public Builder executionContext(ExecutionContext context) {
+
+            this.spec.context = context;
+            return this;
+        }
+
         public RecurringJobSpec build() {
 
             if(this.spec.name == null) {
@@ -83,6 +95,10 @@ public class RecurringJobSpec extends JobSpec {
 
             if(this.spec.jobclazz == null) {
                 throw new JobSchedulerException("Job class not specified");
+            }
+
+            if(this.spec.context == null) {
+                this.spec.context = new ExecutionContext();
             }
             return spec;
         }

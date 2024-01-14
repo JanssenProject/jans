@@ -12,16 +12,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.jans.kc.scheduler.config.ConfigApiAuthnMethod;
-import io.jans.kc.scheduler.config.Configuration;
-import io.jans.kc.scheduler.config.ConfigurationException;
+import io.jans.kc.scheduler.config.AppConfiguration;
+import io.jans.kc.scheduler.config.AppConfigException;
 
 import io.jans.kc.scheduler.job.*;
 import io.jans.kc.scheduler.job.service.JobScheduler;
 import io.jans.kc.scheduler.job.service.JobSchedulerException;
 import io.jans.kc.scheduler.job.service.impl.QuartzJobScheduler;
-
+import io.jans.kc.api.config.client.ApiCredentials;
+import io.jans.kc.api.config.client.ApiCredentialsProvider;
+import io.jans.kc.api.config.client.impl.CredentialsProviderError;
 import io.jans.kc.api.config.client.*;
 import io.jans.kc.api.config.client.impl.*;
+
+import io.jans.kc.api.admin.client.*;
+import io.jans.kc.api.admin.client.model.ManagedSamlClient;
+
+import java.util.List;
 
 public class App {
     
@@ -39,7 +46,7 @@ public class App {
     public static void main(String[] args) throws InterruptedException {
 
         log.info("Application starting ...");
-        Configuration config = null;
+        AppConfiguration config = null;
         try {
             log.debug("Loading application configuration");
             config = loadApplicationConfiguration();
@@ -47,8 +54,8 @@ public class App {
 
 
             log.debug("Setting up access to external apis");
-            log.debug("Client ID: "+ config.configApiAuthClientId());
             configApiCredentialsProvider = createConfigApiCredentialsProvider(config);
+            runKeycloakTest(config);
 
             log.debug("Initializing scheduler ");
             jobScheduler = createJobScheduler(config);
@@ -75,7 +82,7 @@ public class App {
         return System.getProperty(PROP_APP_CFG_FILE);
     }
 
-    private static final Configuration loadApplicationConfiguration() {
+    private static final AppConfiguration loadApplicationConfiguration() {
 
         try {
             String config_file_name = getAppConfigFileName();
@@ -84,13 +91,13 @@ public class App {
                 config_file_name =  DEFAULT_APP_CFG_FILEPATH;
             }
             log.debug("Application configuration file: {} ",config_file_name);
-            return Configuration.fromFile(config_file_name);
-        }catch(ConfigurationException e) {
+            return AppConfiguration.fromFile(config_file_name);
+        }catch(AppConfigException e) {
             throw new StartupError("Application startup failed",e);
         }
     }
 
-    private static final JobScheduler createJobScheduler(Configuration configuration) {
+    private static final JobScheduler createJobScheduler(AppConfiguration configuration) {
 
         return createQuartzJobSchedulerFromConfiguration(configuration);
     }
@@ -100,7 +107,7 @@ public class App {
         jobScheduler.start();
     }
 
-    private static final ApiCredentialsProvider createConfigApiCredentialsProvider(Configuration config) {
+    private static final ApiCredentialsProvider createConfigApiCredentialsProvider(AppConfiguration config) {
 
         try {
             TokenEndpointAuthnParams authparams = null;
@@ -122,7 +129,8 @@ public class App {
         }
     }
 
-    private static final JobScheduler createQuartzJobSchedulerFromConfiguration(Configuration config) {
+    
+    private static final JobScheduler createQuartzJobSchedulerFromConfiguration(AppConfiguration config) {
         
         try {
             return QuartzJobScheduler.builder()
@@ -130,7 +138,7 @@ public class App {
                 .instanceId(config.quartzSchedulerInstanceId())
                 .threadPoolSize(config.quartzSchedulerThreadPoolSize())
                 .build();
-        }catch(ConfigurationException e) {
+        }catch(AppConfigException e) {
             throw new StartupError("Could not create quartz job scheduler",e);
         }
     }
@@ -141,11 +149,18 @@ public class App {
         registerShutdownHook();
     }
 
+    private static final void runKeycloakTest(AppConfiguration config) {
+
+        //KeycloakConfiguration kcconfig = KeycloakConfiguration.fromAppConfiguration(config);
+        //AdminClientApi api = AdminClientApi.createInstance(kcconfig);
+        
+    }
+
     private static final void registerShutdownHook() {
 
         Runtime.getRuntime().addShutdownHook(new ShutdownHook());
     }
-
+    
     
     public static class ShutdownHook extends Thread  {
         
