@@ -23,6 +23,13 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-admin-client</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-core</artifactId>
+      <scope>compile</scope>
     </dependency>
     <!-- end keycloak dependencies-->
 
@@ -40,12 +47,17 @@
     </dependency>
     <!-- end quartz scheduler dependencies -->
 
-    <!-- jackson datatype dependencies -->
+    <!-- fasterxml jackson  dependencies -->
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
     </dependency>
-    <!-- end jackson datatype dependencies -->
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <!-- end fasterxml jackson dependencies -->
 
     <!-- nimbus oidc sdk dependencies -->
     <dependency>
@@ -53,6 +65,23 @@
         <artifactId>oauth2-oidc-sdk</artifactId>
     </dependency>
     <!-- end nimbus oidc sdk dependencies -->
+
+    <!-- jakarta ws-rs dependencies -->
+    <dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>${jakarta.ws-rs-api.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <!-- end jakarta ws-rs dependencies -->
+
+    <!-- jboss logging dependencies -->
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <!-- end jboss logging dependencies-->
     
   </dependencies>
 
@@ -66,7 +95,7 @@
       <version>${maven-deps-plugin.version}</version>
       <executions>
         <execution>
-            <id>copy</id>
+            <id>copy-job-scheduler-deps</id>
             <phase>package</phase>
             <goals>
               <goal>copy-dependencies</goal>
@@ -75,9 +104,6 @@
                 <outputDirectory>${project.build.directory}/deps</outputDirectory>
                 <includeScope>runtime</includeScope>
                 <excludeTransitive>false</excludeTransitive>
-                <excludeArtifactIds>
-                  keycloak-common
-                </excludeArtifactIds>
             </configuration>
         </execution>
       </executions>
@@ -125,24 +151,51 @@
       <artifactId>openapi-generator-maven-plugin</artifactId> 
       <version>${openapi-generator-plugin.version}</version>
       <executions>
+
         <execution>
+          <id>generate-saml-related-apis</id>
           <goals>
             <goal>generate</goal>
           </goals>
           <configuration>
             <generatorName>java</generatorName>
             <inputSpec>${project.basedir}/../../jans-config-api/plugins/docs/kc-saml-plugin-swagger.yaml</inputSpec>
+            <generateApis>true</generateApis>
+            <apisToGenerate>SamlTrustRelationship</apisToGenerate>
             <configOptions>
               <sourceFolder>src/main/java/</sourceFolder>
               <library>resteasy</library>
               <useJakartaEe>true</useJakartaEe>
               <openApiNullable>false</openApiNullable>
-              <apiPackage>io.jans.config.api.client.saml</apiPackage>
-              <modelPackage>io.jans.config.api.client.saml.model</modelPackage>
-              <invokerPackage>io.jans.config.api.client.saml</invokerPackage>
+              <apiPackage>io.jans.config.api.client</apiPackage>
+              <modelPackage>io.jans.config.api.client.model</modelPackage>
+              <invokerPackage>io.jans.config.api.client</invokerPackage>
             </configOptions>
           </configuration>
         </execution>
+
+        <execution>
+          <id>generate-config-api</id>
+          <goals>
+            <goal>generate</goal>
+          </goals>
+          <configuration>
+            <generatorName>java</generatorName>
+            <inputSpec>${project.basedir}/../../jans-config-api/docs/jans-config-api-swagger.yaml</inputSpec>
+            <generateApis>true</generateApis>
+            <apisToGenerate>Attribute</apisToGenerate>
+            <configOptions>
+              <sourceFolder>src/main/java</sourceFolder>
+              <library>resteasy</library>
+              <useJakartaEe>true</useJakartaEe>
+              <openApiNullable>false</openApiNullable>
+              <apiPackage>io.jans.config.api.client</apiPackage>
+              <modelPackage>io.jans.config.api.client.model</modelPackage>
+              <invokerPackage>io.jans.config.api.client</invokerPackage>
+            </configOptions>
+          </configuration>
+        </execution>
+
       </executions>
      </plugin>
      <!-- end openapi generator plugin-->
