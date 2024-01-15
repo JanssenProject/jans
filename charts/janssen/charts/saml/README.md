@@ -38,11 +38,11 @@ Kubernetes: `>=v1.21.0-0`
 | image.repository | string | `"janssenproject/saml"` | Image  to use for deploying. |
 | image.tag | string | `"1.0.22_dev"` | Image  tag to use for deploying. |
 | lifecycle | object | `{}` |  |
-| livenessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":5,"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for saml if needed. |
+| livenessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":10,"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for saml if needed. |
 | livenessProbe.exec | object | `{"command":["python3","/app/scripts/healthcheck.py"]}` | Executes the python3 healthcheck. |
 | nameOverride | string | `""` |  |
 | podSecurityContext | object | `{}` |  |
-| readinessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":5,"initialDelaySeconds":25,"periodSeconds":25,"timeoutSeconds":5}` | Configure the readiness healthcheck for the saml if needed. |
+| readinessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":10,"initialDelaySeconds":25,"periodSeconds":25,"timeoutSeconds":5}` | Configure the readiness healthcheck for the saml if needed. |
 | replicas | int | `1` | Service replica number. |
 | resources | object | `{"limits":{"cpu":"500m","memory":"500Mi"},"requests":{"cpu":"500m","memory":"500Mi"}}` | Resource specs. |
 | resources.limits.cpu | string | `"500m"` | CPU limit. |
