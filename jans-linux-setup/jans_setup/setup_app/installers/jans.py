@@ -585,6 +585,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
         #enable scripts
         self.enable_scripts(base.argsp.enable_script)
 
+        # write default Lock Configuration to DB
+        base.current_app.JansLockInstaller.configure_message_conf()
+
     def apply_selinux_plicies(self):
         self.logIt("Applying SELinux Policies")
         setsebool_cmd = shutil.which('setsebool')
