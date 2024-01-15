@@ -15,4 +15,6 @@ public abstract class MessageConsumer implements MessageConsumerInterface {
 
 	public abstract String getMessageConsumerType();
 
+	public abstract void destroy();
+
 }

@@ -41,6 +41,14 @@ get_max_ram_percentage() {
     fi
 }
 
+get_jetty_args() {
+    if [ -n "${CN_FIDO2_JETTY_ARGS}" ]; then
+        echo " ${CN_FIDO2_JETTY_ARGS} "
+    else
+        echo " ${CN_JETTY_ARGS} "
+    fi
+}
+
 get_prometheus_lib
 python3 "$basedir/wait.py"
 python3 "$basedir/bootstrap.py"
@@ -65,6 +73,6 @@ exec java \
     -jar /opt/jetty/start.jar \
         jetty.http.host="${CN_FIDO2_JETTY_HOST}" \
         jetty.http.port="${CN_FIDO2_JETTY_PORT}" \
-        jetty.http.idleTimeout="${CN_JETTY_IDLE_TIMEOUT}" \
         jetty.deploy.scanInterval=0 \
-        jetty.httpConfig.sendServerVersion=false
+        jetty.httpConfig.sendServerVersion=false \
+        $(get_jetty_args)

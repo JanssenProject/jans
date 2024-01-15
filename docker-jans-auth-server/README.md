@@ -79,7 +79,6 @@ The following environment variables are supported by the container:
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 - `CN_JETTY_REQUEST_HEADER_SIZE`: Maximum size of request header accepted by Jetty (default to `8192`).
-- `CN_JETTY_IDLE_TIMEOUT`: Timeout of Jetty idle connection (default to `30000`).
 - `CN_AUTH_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
 - `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.
 - `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).

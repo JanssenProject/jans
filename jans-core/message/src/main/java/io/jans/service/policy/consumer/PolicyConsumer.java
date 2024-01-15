@@ -15,4 +15,6 @@ public abstract class PolicyConsumer implements MessagePolicyInterface {
 
 	public abstract String getPolicyConsumerType();
 
+	public abstract void destroy();
+
 }
