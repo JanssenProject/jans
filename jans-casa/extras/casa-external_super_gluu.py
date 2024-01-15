@@ -18,7 +18,7 @@ from io.jans.as.common.service.common.fido2 import RegistrationPersistenceServic
 from io.jans.as.server.service.net import HttpService, HttpService2
 from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
-from io.jans.as.common.service.common import EncryptionService
+from io.jans.service import EncryptionService
 from io.jans.as.server.service import UserService
 from io.jans.service import MailService
 from io.jans.as.server.service.push.sns import PushPlatform
