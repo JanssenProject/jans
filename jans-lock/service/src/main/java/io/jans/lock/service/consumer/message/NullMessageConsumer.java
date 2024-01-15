@@ -17,7 +17,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class NullMessageConsumer extends MessageConsumer {
 	
-	public static String MESSAGE_CONSUMER_TYPE = "NULL";
+	public static String MESSAGE_CONSUMER_TYPE = "DISABLED";
 
 	@Inject
 	private Logger log;
@@ -41,6 +41,11 @@ public class NullMessageConsumer extends MessageConsumer {
 	@Override
 	public String getMessageConsumerType() {
 		return MESSAGE_CONSUMER_TYPE;
+	}
+
+	@Override
+	public void destroy() {
+		log.debug("Destory Messages");
 	}
 
 }

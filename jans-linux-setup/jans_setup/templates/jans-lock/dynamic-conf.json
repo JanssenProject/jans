@@ -1,6 +1,5 @@
 {
    "tokenChannels":[
-         "code_token",
          "id_token"
       ],
 
@@ -19,8 +18,10 @@
    "errorReasonEnabled": false,
    
    "opaConfiguration": {
-   		"baseUrl" : "http://localhost:8181/v1/"
+        "baseUrl" : "http://localhost:8181/v1/"
    },
-   "messageConsumerType": "DISABLED",
-   "policyDecisionPointType": "DISABLED"
+   "policiesJsonUris": [
+   ],
+   "messageConsumerType": "OPA",
+   "policyConsumerType": "OPA"
 }

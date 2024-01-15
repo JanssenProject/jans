@@ -792,19 +792,29 @@ class Upgrade:
             entry.attrs["jansScimEnabled"] = scim_enabled
             should_update = True
 
+        message_conf = json.loads(entry.attrs["jansMessageConf"])
+
         # set jansMessageConf if still empty
-        if not entry.attrs.get("jansMessageConf"):
+        if not message_conf:
             entry.attrs["jansMessageConf"] = json.dumps({
-                "messageProviderType": "NULL",
+                "messageProviderType": "DISABLED",
                 "postgresConfiguration": {
+                    "connectionUri": "jdbc:postgresql://localhost:5432/postgres",
                     "dbSchemaName": "public",
+                    "authUserName": "postgres",
+                    "authUserPassword": "",
                     "messageWaitMillis": 100,
-                    "messageSleepThreadTime": 200,
+                    "messageSleepThreadTime": 200
                 },
                 "redisConfiguration": {
                     "servers": "localhost:6379",
                 },
             })
+            should_update = True
+
+        if message_conf["messageProviderType"] == "NULL":
+            message_conf["messageProviderType"] = "DISABLED"
+            entry.attrs["jansMessageConf"] = json.dumps(message_conf)
             should_update = True
 
         if should_update:
