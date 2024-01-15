@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.8@sha256:156b75d18d01f1a83f9a279e80dad82773c212559b20e40620ccb06b1120ce4f
+FROM bellsoft/liberica-openjdk-alpine:17.0.8@sha256:e82fb905ca6efffcdb1b0ed58f207b0ce91aeada78c218ae7dbb16bb31635728
 
 # ===============
 # Alpine packages
@@ -225,7 +225,7 @@ RUN chmod +x /app/scripts/entrypoint.sh
 
 RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
 
-RUN ln -sf /usr/lib/jvm/jre /opt/java
+RUN ln -sf /usr/lib/jvm/jdk /opt/java
 
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
