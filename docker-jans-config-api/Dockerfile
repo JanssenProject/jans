@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.0.22-SNAPSHOT
-ENV CN_BUILD_DATE='2024-01-05 16:17'
+ENV CN_BUILD_DATE='2024-01-15 08:08'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -94,7 +94,8 @@ RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
     /app/schema \
     /app/templates/jans-config-api \
-    /usr/share/java
+    /usr/share/java \
+    /opt/jans/bin
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
@@ -107,6 +108,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/dynamic-conf.json /app/templates/jans-config-api/ \
+    && cp ${JANS_SETUP_DIR}/setup_app/utils/printVersion.py /opt/jans/bin/printVersion.py \
+    && ln -s /opt/jans/bin/printVersion.py /opt/jans/bin/show_version.py \
     && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/templates/jans-config-api/
 
 # ======
