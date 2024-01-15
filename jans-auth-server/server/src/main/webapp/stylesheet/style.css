@@ -746,10 +746,22 @@ input.btn.btn-done {
 }
 
 .frame-6{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 32px;
+    /* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 40px 40px 50px;
+gap: 32px;
+
+position: absolute;
+width: 38% !important;
+/* height: 51% !important; */
+left: 30% !important;
+top: 27% !important;
+
+background: #2C1A1A;
+box-shadow: 10px 20px 20px rgba(0, 0, 0, 0.28);
+border-radius: 12px;
 }
 
 .frame-7{
@@ -790,13 +802,14 @@ input.btn.btn-done {
 .frame-8{
     /* Auto layout */
     display: flex;
-    flex-direction: column;
+    /*flex-direction: column;*/
     align-items: flex-start;
     padding: 0px;
     gap: 28px;
 
-    width: 530px;
-    height: 148px;
+
+    /*width: 33% !important;
+    height: 16% !important;*/
 
 
     /* Inside auto layout */
@@ -808,8 +821,8 @@ input.btn.btn-done {
 .frame-1{
     box-sizing: border-box;
 
-    width: 530px;
-    height: 60px;
+    width: 530px !important;
+    height: 60px !important;
 
     border: 1.2px solid #FFFFFF;
     border-radius: 7px;
@@ -911,6 +924,24 @@ input.btn.btn-done {
     flex-grow: 0;
 }
 
+.frame-9{
+	/* Auto layout */
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	padding: 0px;
+	gap: 32px;
+
+	/*width: 530px;
+	height: 112px;*/
+
+
+	/* Inside auto layout */
+	flex: none;
+	order: 2;
+	flex-grow: 0;
+}
+
 .remember-me-text{
     /*width: 109px;
     height: 20px;*/
@@ -964,4 +995,45 @@ input.btn.btn-done {
     font-style: normal;
     font-weight: 500;
     line-height: normal;
+}
+
+.jans_login_button{
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 24px 40px;
+
+/*width: 530px;
+height: 60px;*/
+
+background: #01BA77;
+border-radius: 7px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+}
+
+.jans_login_button_text{
+/*width: 75px;
+height: 29px;*/
+
+font-family: 'Lato';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 29px;
+/* identical to box height */
+letter-spacing: 0.02em;
+
+color: #FFFFFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
 }

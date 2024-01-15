@@ -19,14 +19,8 @@
         <h:form id="loginForm" name="loginForm" method="post"
                 action="/jans-auth/login.htm"
                 enctype="application/x-www-form-urlencoded"
-                class="bg-highlight position-relative d-flex flex-column align-items-center"
-                style="justify-content: space-evenly; height: 100vh;">
-
-
-            <img id="AppLogo"
-                 src="#{request.contextPath}/servlet/logo"
-                 alt="janssen-logo"
-                 class="absolute-logo"/>
+                class="align-items-center"
+                style="justify-content: space-evenly;">
 
 
             <div class="container jans-form-container frame-6">
@@ -36,53 +30,51 @@
                         </div>
                     </div>
                 </div>
-                <div class="row frame-8">
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12 frame-1">
-                            <input id="loginForm:username"
-                                   type="text"
-                                   name="loginForm:username"
-                                   autocomplete="off"
-                                   placeholder="Email address"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12 frame-2">
-                            <input id="loginForm:password"
-                                   type="password"
-                                   name="loginForm:password"
-                                   autocomplete="off" value=""
-                                   placeholder="Password"/>
-                        </div>
-                    </div>
-                </div>
-                <div class="row frame-9">
-                    <div class="col-sm-1 col-md-1">
-                        <input type="checkbox" value="rememberme"
-                               id="rememberme"
-                               name="rememberme"
-                               class="frame-3"/>
-                    </div>
-                    <div class="col-sm-11 col-md-11">
-                        <label
-                                class="remember-me-text">Remember
-                            Me</label>
-                    </div>
-                </div>
-                <div class="row">
-                    <h:commandButton id="loginButton"
-                                     style="background-color: #00BE79; color:white;"
-                                     styleClass="btn col-sm-12"
-                                     value="    #{msgs['login.login']}"
-                                     onclick="checkRemembeMe()"
-                                     iconAwesome="fa-sign-in"
-                                     action="#{authenticator.authenticate}"/>
 
+                <div class="row frame-8">
+                    <div class="col-sm-12">
+                        <h:inputText placeholder="email address"
+                                     id="username" name="username"
+                                     required="true"
+                                     value="#{credentials.username}"
+                                     styleClass="col-sm-12 frame-1 email-address-text">
+                        </h:inputText>
+                    </div>
+                    <div class="col-sm-12">
+                        <h:inputText placeholder="email address"
+                                     id="username" name="username"
+                                     required="true"
+                                     value="#{credentials.username}"
+                                     styleClass="col-sm-12 frame-1 email-address-text">
+                        </h:inputText>
+                    </div>
+                </div>
+
+                <div class="frame-9">
+                    <div class="row">
+                        <div class="col-sm-1 col-md-1">
+                            <input type="checkbox" value="rememberme"
+                                   id="rememberme"
+                                   name="rememberme"
+                                   class="frame-3"/>
+                        </div>
+                        <div class="col-sm-11 col-md-11">
+                            <label
+                                    class="remember-me-text">Remember
+                                Me</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            <h:commandButton id="loginButton"
+                                             styleClass="jans_login_button jans_login_button_text"
+                                             value="    #{msgs['login.login']}"
+                                             onclick="checkRemembeMe()"
+                                             action="#{authenticator.authenticate}"/>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-
         </h:form>
-
     </ui:define>
 </ui:composition>
