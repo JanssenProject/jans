@@ -1597,7 +1597,7 @@ saml:
     initialDelaySeconds: 30
     periodSeconds: 30
     timeoutSeconds: 5
-    failureThreshold: 5
+    failureThreshold: 10
   readinessProbe:
     # -- http readiness probe endpoint
     exec:
@@ -1607,7 +1607,7 @@ saml:
     initialDelaySeconds: 25
     periodSeconds: 25
     timeoutSeconds: 5
-    failureThreshold: 5
+    failureThreshold: 10
   # -- Configure any additional volumes that need to be attached to the pod
   volumes: []
   # -- Configure any additional volumesMounts that need to be attached to the containers
