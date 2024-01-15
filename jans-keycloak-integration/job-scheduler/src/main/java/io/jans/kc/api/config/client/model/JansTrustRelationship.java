@@ -4,10 +4,12 @@ import io.jans.config.api.client.model.TrustRelationship;
 
 public class JansTrustRelationship {
     
-    private TrustRelationship tr; 
+    private TrustRelationship tr;
+    private InputStream metadata;
 
-    public JansTrustRelationship(TrustRelationship tr) {
+    public JansTrustRelationship(TrustRelationship tr, InputStream metadata) {
 
         this.tr = tr;
+        this.metadata = metadata;
     }
 }

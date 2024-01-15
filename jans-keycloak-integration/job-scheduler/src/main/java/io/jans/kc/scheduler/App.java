@@ -55,7 +55,6 @@ public class App {
 
             log.debug("Setting up access to external apis");
             configApiCredentialsProvider = createConfigApiCredentialsProvider(config);
-            runKeycloakTest(config);
 
             log.debug("Initializing scheduler ");
             jobScheduler = createJobScheduler(config);
@@ -147,13 +146,6 @@ public class App {
 
         running = true;
         registerShutdownHook();
-    }
-
-    private static final void runKeycloakTest(AppConfiguration config) {
-
-        //KeycloakConfiguration kcconfig = KeycloakConfiguration.fromAppConfiguration(config);
-        //AdminClientApi api = AdminClientApi.createInstance(kcconfig);
-        
     }
 
     private static final void registerShutdownHook() {
