@@ -93,6 +93,9 @@ spec:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
+            - name: kc-db-pass
+              mountPath: {{ .Values.global.kcDbPasswordFile }}
+              subPath: kc_db_password
           {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
             - mountPath: {{ .Values.global.cnAwsSharedCredentialsFile }}
               name: aws-shared-credential-file
@@ -153,6 +156,9 @@ spec:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
+        - name: kc-db-pass
+          secret:
+            secretName: {{ .Release.Name }}-kc-db-pass
       {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
         - name: aws-shared-credential-file
           secret:

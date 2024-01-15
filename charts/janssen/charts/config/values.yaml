@@ -120,6 +120,28 @@ configmap:
   cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- OpenDJ key string. This must be encoded using base64.
   cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+  # -- Quarkus transaction recovery
+  quarkusTransactionEnableRecovery: false
+  # -- Keycloak logging level
+  kcLogLevel: INFO
+  # -- Keycloak proxy mode (for most deployments, this doesn't need to be changed)
+  kcProxy: edge
+  # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
+  kcDbVendor: mysql
+  # -- Keycloak database username
+  kcDbUsername: keycloak
+  # -- Password for Keycloak database access
+  kcDbPassword: Test1234#
+  # -- Database schema name (note that PostgreSQL may using "public" schema).
+  kcDbSchema: keycloak
+  # -- Database host
+  kcDbUrlHost: mysql.kc.svc.cluster.local
+  # -- Database port
+  kcDbUrlPort: 3306
+  # -- Keycloak database name
+  kcDbUrlDatabase: keycloak
+  # -- Keycloak database connection properties
+  kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
 # -- Country code. Used for certificate creation.
 countryCode: US
 # -- Email address of the administrator usually. Used for certificate creation.

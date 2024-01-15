@@ -72,7 +72,18 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected in the secrets. |
 | configmap.containerMetadataName | string | `"kubernetes"` |  |
+| configmap.kcDbPassword | string | `"Test1234#"` | Password for Keycloak database access |
+| configmap.kcDbSchema | string | `"keycloak"` | Database schema name (note that PostgreSQL may using "public" schema). |
+| configmap.kcDbUrlDatabase | string | `"keycloak"` | Keycloak database name |
+| configmap.kcDbUrlHost | string | `"mysql.kc.svc.cluster.local"` | Database host |
+| configmap.kcDbUrlPort | int | `3306` | Database port |
+| configmap.kcDbUrlProperties | string | `"?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"` | Keycloak database connection properties |
+| configmap.kcDbUsername | string | `"keycloak"` | Keycloak database username |
+| configmap.kcDbVendor | string | `"mysql"` | Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres. |
+| configmap.kcLogLevel | string | `"INFO"` | Keycloak logging level |
+| configmap.kcProxy | string | `"edge"` | Keycloak proxy mode (for most deployments, this doesn't need to be changed) |
 | configmap.lbAddr | string | `""` | Loadbalancer address for AWS if the FQDN is not registered. |
+| configmap.quarkusTransactionEnableRecovery | bool | `false` | Quarkus transaction recovery |
 | countryCode | string | `"US"` | Country code. Used for certificate creation. |
 | customScripts | list | `[]` | Add custom scripts that have been mounted to run before the entrypoint. - /tmp/custom.sh - /tmp/custom2.sh |
 | dnsConfig | object | `{}` | Add custom dns config |
