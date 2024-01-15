@@ -6,29 +6,6 @@
 
 package io.jans.configapi.plugin.saml.service;
 
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.common.InumService;
-import io.jans.as.common.service.OrganizationService;
-import io.jans.as.common.util.AttributeConstants;
-import io.jans.util.exception.InvalidConfigurationException;
-import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.saml.service.SamlConfigService;
-import io.jans.configapi.plugin.saml.service.SamlIdpService;
-import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
-import io.jans.configapi.plugin.saml.util.Constants;
-import io.jans.configapi.plugin.saml.model.IdentityProvider;
-
-import io.jans.model.GluuStatus;
-import io.jans.model.SearchRequest;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.search.filter.Filter;
-import io.jans.util.StringHelper;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +18,25 @@ import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.OrganizationService;
+import io.jans.as.common.service.common.InumService;
+import io.jans.as.common.util.AttributeConstants;
+import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.plugin.saml.model.IdentityProvider;
+import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
+import io.jans.configapi.plugin.saml.util.Constants;
+import io.jans.model.GluuStatus;
+import io.jans.model.SearchRequest;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
+import io.jans.orm.search.filter.Filter;
+import io.jans.util.StringHelper;
+import io.jans.util.exception.InvalidConfigurationException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class IdentityProviderService {
@@ -68,7 +64,6 @@ public class IdentityProviderService {
 
     @Inject
     MetadataValidationTimer metadataValidationTimer;
-
 
     public boolean containsIdentityProvider(String dn) {
         return persistenceEntryManager.contains(dn, IdentityProvider.class);
@@ -117,7 +112,7 @@ public class IdentityProviderService {
         try {
             result = persistenceEntryManager.find(IdentityProvider.class, getDnForIdentityProvider(inum));
         } catch (Exception ex) {
-            log.error("Failed to load IdentityProvider entry", ex);
+             log.error("Failed to load IdentityProvider entry", ex);
         }
         return result;
     }
@@ -200,21 +195,14 @@ public class IdentityProviderService {
 
     }
 
-    public IdentityProvider addSamlIdentityProvider(IdentityProvider identityProvider, InputStream file)
-            throws IOException {
+    public IdentityProvider addSamlIdentityProvider(IdentityProvider identityProvider, InputStream file) {
         log.info("Add new identityProvider:{}, file:{}", identityProvider, file);
-
-        String inum = generateInumForIdentityProvider();
-        identityProvider.setInum(inum);
-        identityProvider.setDn(getDnForIdentityProvider(inum));
 
         if (file != null) {
             log.info("Save IDP metadatfile on server");
             saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
         }
 
-        // Set default Value for SAML IDP
-        setSamlIdentityProviderDefaultValue(identityProvider, false);
         persistenceEntryManager.persist(identityProvider);
 
         return getIdentityProviderByInum(identityProvider.getInum());
@@ -234,8 +222,6 @@ public class IdentityProviderService {
             saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
         }
 
-        // Set default Value for SAML IDP
-        setSamlIdentityProviderDefaultValue(identityProvider, true);
         persistenceEntryManager.merge(identityProvider);
 
         return getIdentityProviderByInum(identityProvider.getInum());
@@ -282,23 +268,6 @@ public class IdentityProviderService {
         return newInum;
     }
 
-    private IdentityProvider setSamlIdentityProviderDefaultValue(IdentityProvider identityProvider, boolean update) {
-        log.info("setting default value for identityProvider:{}, update:{}", identityProvider, update);
-        if (identityProvider == null) {
-            return identityProvider;
-        }
-        
-        //Set default Realm in-case null
-        if(StringUtils.isBlank(identityProvider.getRealm())){
-            identityProvider.setRealm(Constants.REALM_MASTER);
-        }
-        
-        if (!update) {
-            identityProvider.setProviderId(Constants.SAML);
-        }
-        return identityProvider;
-    }
-
     private boolean saveIdpMetaDataFileSourceTypeFile(IdentityProvider identityProvider, InputStream file) {
         log.info("Saving file identityProvider:{}, file:{}", identityProvider, file);
 
@@ -310,14 +279,14 @@ public class IdentityProviderService {
         if ((file == null)) {
             log.debug("File is null");
             if (emptyidpMetaDataFN) {
-                log.error("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
+                log.debug("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
                 return false;
             }
             String filePath = getIdpMetadataTempDirFilePath(idpMetaDataFN);
             log.debug("filePath:{}", filePath);
 
             if (filePath == null) {
-                log.error("The trust relationship {} has an invalid Metadata file storage path",
+                log.debug("The trust relationship {} has an invalid Metadata file storage path",
                         identityProvider.getInum());
                 return false;
             }
@@ -328,7 +297,7 @@ public class IdentityProviderService {
                 log.trace("newFile:{}", newFile);
 
                 if (!newFile.exists()) {
-                    log.error(
+                    log.info(
                             "The trust relationship {} metadata used local storage but the IDP metadata file `{}` was not found",
                             identityProvider.getInum(), filePath);
                     return false;
@@ -346,8 +315,8 @@ public class IdentityProviderService {
         InputStream targetStream = file;
         log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
 
-        String result = samlIdpService.saveMetadataFile(getIdpMetadataTempDirFilePath(),
-                idpMetaDataFN, Constants.IDP_MODULE, targetStream);
+        String result = samlIdpService.saveMetadataFile(getIdpMetadataTempDirFilePath(), idpMetaDataFN,
+                Constants.IDP_MODULE, targetStream);
         log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
         if (StringHelper.isNotEmpty(result)) {
             metadataValidationTimer.idpQueue(result);
@@ -370,7 +339,7 @@ public class IdentityProviderService {
                 getIdpMetadataFileName(identityProvider.getInum()));
         return getIdpMetadataFileName(identityProvider.getInum());
     }
-    
+
     private String getIdpMetadataTempDirFilePath(String idpMetaDataFN) {
         log.debug("idpMetaDataFN:{}", idpMetaDataFN);
         if (StringUtils.isBlank(getIdpMetadataTempDirFilePath())) {
@@ -379,13 +348,12 @@ public class IdentityProviderService {
 
         return getIdpMetadataTempDirFilePath() + idpMetaDataFN;
     }
-    
-    
+
     private String getIdpMetadataFileName(String inum) {
         String id = StringHelper.removePunctuation(inum);
         return String.format(samlConfigService.getIdpMetadataFilePattern(), id);
     }
-    
+
     private String getIdpMetadataTempDirFilePath() {
         return samlConfigService.getIdpMetadataTempDir() + File.separator;
     }
@@ -393,13 +361,13 @@ public class IdentityProviderService {
     public void processUnprocessedIdpMetadataFiles() {
         log.info("Processing unprocessed IDP Metadata files ");
         String directory = samlConfigService.getIdpMetadataTempDir();
-        log.trace("IDP Metadata directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
+        log.trace("IDP Metadata directory:{}, Files.exists(Paths.get(directory):{}", directory,
+                Files.exists(Paths.get(directory)));
 
         if (Files.exists(Paths.get(directory))) {
             log.trace("IDP Metadata directory:{} does exists)", directory);
             File folder = new File(directory);
             File[] files = folder.listFiles();
-            log.trace("IDP Metadata files:{}", files);
             if (files != null && files.length > 0) {
 
                 for (File file : files) {

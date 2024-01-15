@@ -32,6 +32,10 @@ public class Conf {
 	@AttributeName(name = "jansConfStatic")
 	private StaticConfiguration statics;
 
+	@JsonObject
+	@AttributeName(name = "jansConfErrors")
+	private ErrorMessages errors;
+
 	@AttributeName(name = "jansRevision")
 	private long revision;
 
@@ -57,6 +61,14 @@ public class Conf {
 
 	public void setStatics(StaticConfiguration statics) {
 		this.statics = statics;
+	}
+
+	public ErrorMessages getErrors() {
+		return errors;
+	}
+
+	public void setErrors(ErrorMessages errors) {
+		this.errors = errors;
 	}
 
 	public long getRevision() {

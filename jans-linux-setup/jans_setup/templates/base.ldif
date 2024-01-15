@@ -143,3 +143,7 @@ objectClass: top
 objectClass: organizationalUnit
 ou: trusted-idp
 
+dn: ou=archived_jwks,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: archived_jwks

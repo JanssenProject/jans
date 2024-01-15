@@ -7,10 +7,11 @@
 package io.jans.as.server.comp;
 
 import io.jans.as.server.BaseComponentTest;
-import io.jans.as.server.model.ldap.TokenEntity;
-import io.jans.as.server.model.ldap.TokenType;
 import io.jans.as.server.service.GrantService;
 import io.jans.as.server.util.TokenHashUtil;
+import io.jans.model.token.TokenEntity;
+import io.jans.model.token.TokenType;
+
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

@@ -339,6 +339,7 @@ public class AttestationService {
 		// default is cross platform
 		AuthenticatorAttachment authenticatorAttachment = AuthenticatorAttachment.CROSS_PLATFORM;
 		UserVerification userVerification = UserVerification.preferred;
+		UserVerification residentKey = UserVerification.preferred;
 
 		Boolean requireResidentKey = false;
 
@@ -351,6 +352,8 @@ public class AttestationService {
 					.verifyUserVerification(authenticatorSelectionNodeParameter.get("userVerification"));
 			requireResidentKey = commonVerifiers
 					.verifyRequireResidentKey(authenticatorSelectionNodeParameter.get("requireResidentKey"));
+			residentKey = commonVerifiers
+					.verifyUserVerification(authenticatorSelectionNodeParameter.get("residentKey"));
 		}
 
 		ObjectNode authenticatorSelectionNode = dataMapperService.createObjectNode();
@@ -363,6 +366,9 @@ public class AttestationService {
 		}
 		if (userVerification != null) {
 			authenticatorSelectionNode.put("userVerification", userVerification.toString());
+		}
+		if (residentKey != null) {
+			authenticatorSelectionNode.put("residentKey", residentKey.toString());
 		}
 
 		return authenticatorSelectionNode;

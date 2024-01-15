@@ -36,7 +36,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Create backport PRs
         uses: korthout/backport-action@bd68141f079bd036e45ea8149bc9d174d5a04703 # v1.4.0
         with:

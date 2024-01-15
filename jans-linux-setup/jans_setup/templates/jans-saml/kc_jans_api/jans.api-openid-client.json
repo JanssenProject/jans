@@ -5,5 +5,6 @@
   "consentRequired": false,
   "serviceAccountsEnabled": true,
   "enabled": true,
+  "directAccessGrantsEnabled":true,
   "secret": "${jans_idp_client_secret}"
 }
