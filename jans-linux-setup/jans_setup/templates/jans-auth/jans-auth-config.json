@@ -85,7 +85,8 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange"
+        "urn:ietf:params:oauth:grant-type:token-exchange",
+        "tx_token"
     ],
     "subjectTypesSupported":[
         "public",
@@ -356,7 +357,8 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange"
+        "urn:ietf:params:oauth:grant-type:token-exchange",
+        "tx_token"
     ],
     "claimsParameterSupported":false,
     "requestParameterSupported":true,

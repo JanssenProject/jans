@@ -137,7 +137,8 @@ It returns all the information of the Jans Authorization server.
     "client_credentials",
     "refresh_token",
     "authorization_code",
-    "password"
+    "password",
+    "tx_token"
   ],
   "subjectTypesSupported": [
     "public",
