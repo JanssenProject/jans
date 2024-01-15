@@ -169,7 +169,18 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbTimezone | string | `"UTC"` | SQL database timezone. |
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected the secrets . |
+| configmap.kcDbPassword | string | `"Test1234#"` | Password for Keycloak database access |
+| configmap.kcDbSchema | string | `"keycloak"` | Database schema name (note that PostgreSQL may using "public" schema). |
+| configmap.kcDbUrlDatabase | string | `"keycloak"` | Keycloak database name |
+| configmap.kcDbUrlHost | string | `"mysql.kc.svc.cluster.local"` | Database host |
+| configmap.kcDbUrlPort | int | `3306` | Database port |
+| configmap.kcDbUrlProperties | string | `"?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"` | Keycloak database connection properties |
+| configmap.kcDbUsername | string | `"keycloak"` | Keycloak database username |
+| configmap.kcDbVendor | string | `"mysql"` | Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres. |
+| configmap.kcLogLevel | string | `"INFO"` | Keycloak logging level |
+| configmap.kcProxy | string | `"edge"` | Keycloak proxy mode (for most deployments, this doesn't need to be changed) |
 | configmap.lbAddr | string | `""` | Load balancer address for AWS if the FQDN is not registered. |
+| configmap.quarkusTransactionEnableRecovery | bool | `false` | Quarkus transaction recovery |
 | countryCode | string | `"US"` | Country code. Used for certificate creation. |
 | customScripts | list | `[]` | Add custom scripts that have been mounted to run before the entrypoint. - /tmp/custom.sh - /tmp/custom2.sh |
 | dnsConfig | object | `{}` | Add custom dns config |
@@ -206,6 +217,8 @@ Kubernetes: `>=v1.22.0-0`
 | istio.ingress | bool | `false` | Boolean flag that enables using istio gateway for Janssen. This assumes istio ingress is installed and hence the LB is available. |
 | istio.namespace | string | `"istio-system"` | The namespace istio is deployed in. The is normally istio-system. |
 | istio.tlsSecretName | string | `"istio-tls-certificate"` |  |
+| kcAdminCredentialsFile | string | `"/etc/jans/conf/kc_admin_creds"` | Path to file contains Keycloak admin credentials (username and password) |
+| kcDbPasswordFile | string | `"/etc/jans/conf/kc_db_password"` | Path to file contains password for database access |
 | lbIp | string | `"22.22.22.22"` | The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `fqdn` is globally resolvable. |
 | lifecycle | object | `{}` |  |
 | link.appLoggers | object | `{"enableStdoutLogPrefix":"true","ldapStatsLogLevel":"INFO","ldapStatsLogTarget":"FILE","linkLogLevel":"INFO","linkLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |

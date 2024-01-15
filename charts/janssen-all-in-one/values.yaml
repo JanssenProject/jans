@@ -115,6 +115,28 @@ configmap:
   cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- OpenDJ key string. This must be encoded using base64.
   cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+  # -- Quarkus transaction recovery
+  quarkusTransactionEnableRecovery: false
+  # -- Keycloak logging level
+  kcLogLevel: INFO
+  # -- Keycloak proxy mode (for most deployments, this doesn't need to be changed)
+  kcProxy: edge
+  # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
+  kcDbVendor: mysql
+  # -- Keycloak database username
+  kcDbUsername: keycloak
+  # -- Password for Keycloak database access
+  kcDbPassword: Test1234#
+  # -- Database schema name (note that PostgreSQL may using "public" schema).
+  kcDbSchema: keycloak
+  # -- Database host
+  kcDbUrlHost: mysql.kc.svc.cluster.local
+  # -- Database port
+  kcDbUrlPort: 3306
+  # -- Keycloak database name
+  kcDbUrlDatabase: keycloak
+  # -- Keycloak database connection properties
+  kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
 nameOverride: ""
 fullNameOverride: ""
 # -- Redis admin password if `configmap.cnCacheType` is set to `REDIS`.
@@ -446,6 +468,10 @@ cnSqlPasswordFile: /etc/jans/conf/sql_password
 cnCouchbasePasswordFile: /etc/jans/conf/couchbase_password
 # -- Path to Couchbase superuser password file
 cnCouchbaseSuperuserPasswordFile: /etc/jans/conf/couchbase_superuser_password
+# -- Path to file contains password for database access
+kcDbPasswordFile: /etc/jans/conf/kc_db_password
+# -- Path to file contains Keycloak admin credentials (username and password)
+kcAdminCredentialsFile: /etc/jans/conf/kc_admin_creds
 
 # ingress properties
 istio:
