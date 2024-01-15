@@ -338,9 +338,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chown, 'root:root', target_fn])
             self.run([paths.cmd_chmod, '+x', target_fn])
 
-            print_version_scr_fn = os.path.join(Config.install_dir, 'setup_app/utils/printVersion.py')
+            print_version_s = 'printVersion.py'
+            show_version_s = 'show_version.py'
+            print_version_scr_fn = os.path.join(Config.install_dir, f'setup_app/utils/{print_version_s}')
             self.run(['cp', '-f', print_version_scr_fn , Config.jansOptFolder])
-            self.run([paths.cmd_ln, '-s', os.path.join(Config.jansOptFolder, 'printVersion.py'), os.path.join(Config.jansOptBinFolder, 'show_version.py')])
+            target_fn = os.path.join(Config.jansOptFolder, print_version_s)
+            self.run([paths.cmd_ln, '-s', target_fn, os.path.join(Config.jansOptBinFolder, show_version_s)])
+            self.chown(target_fn, Config.jetty_user, Config.root_user)
+            self.run([paths.cmd_chmod, '0550', target_fn])
 
         for scr in Path(Config.jansOptBinFolder).glob('*'):
             scr_path = scr.as_posix()
@@ -352,7 +357,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 else:
                     scr_content.insert(0, first_line)
                 self.writeFile(scr_path, '\n'.join(scr_content), backup=False)
-
+            if scr.name == show_version_s:
+                continue
             self.run([paths.cmd_chmod, '700', scr_path])
 
     def update_hostname(self):
