@@ -10,10 +10,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @DataEntry(sortBy = {"webhookId"})
 @ObjectClass(value = "auiWebhooks")
@@ -39,7 +36,8 @@ public class WebhookEntry extends Entry implements Serializable {
     @AttributeName(name = "url")
     private String url;
     @AttributeName(name = "httpRequestBody")
-    private String httpRequestBody;
+    @JsonObject
+    private Map<String, String> httpRequestBody;
     @NotNull
     @AttributeName(name = "httpMethod")
     private String httpMethod;
@@ -127,11 +125,14 @@ public class WebhookEntry extends Entry implements Serializable {
         this.description = description;
     }
 
-    public String getHttpRequestBody() {
+    public Map<String, String> getHttpRequestBody() {
+        if (httpRequestBody == null) {
+            httpRequestBody = new HashMap<>();
+        }
         return httpRequestBody;
     }
 
-    public void setHttpRequestBody(String httpRequestBody) {
+    public void setHttpRequestBody(Map<String, String> httpRequestBody) {
         this.httpRequestBody = httpRequestBody;
     }
 

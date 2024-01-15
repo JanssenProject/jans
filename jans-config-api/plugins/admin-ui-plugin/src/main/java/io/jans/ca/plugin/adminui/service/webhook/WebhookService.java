@@ -307,7 +307,7 @@ public class WebhookService {
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_HTTP_METHOD_EMPTY.getDescription());
         }
         if (Lists.newArrayList("POST", "PUT", "PATCH").contains(webhookEntry.getHttpMethod())) {
-            if (webhookEntry.getHttpRequestBody() == null) {
+            if (CommonUtils.isEmptyOrNullCollection(webhookEntry.getHttpRequestBody())) {
                 log.error(ErrorResponse.WEBHOOK_REQUEST_BODY_EMPTY.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_REQUEST_BODY_EMPTY.getDescription());
             }
@@ -332,7 +332,7 @@ public class WebhookService {
         List<WebhookEntry> webhooks = getWebhookByIds(webhookIds);
         for (WebhookEntry webhook : webhooks) {
             validateWebhookEntry(webhook);
-            if(webhook.isJansEnabled()) {
+            if (webhook.isJansEnabled()) {
                 Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
                 callables.add(callable);
             }

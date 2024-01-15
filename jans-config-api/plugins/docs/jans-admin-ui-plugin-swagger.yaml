@@ -1510,7 +1510,9 @@ components:
         url:
           type: string
         httpRequestBody:
-          type: string
+          type: object
+          additionalProperties:
+            type: string
         httpMethod:
           type: string
         jansEnabled:

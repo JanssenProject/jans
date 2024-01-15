@@ -18,6 +18,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
 
 public class CommonUtils {
     @Inject
@@ -72,5 +73,9 @@ public class CommonUtils {
 
     public static boolean isEmptyOrNullCollection(Collection<?> collection) {
         return (collection == null || collection.isEmpty());
+    }
+
+    public static boolean isEmptyOrNullCollection(final Map<?, ?> m) {
+        return m == null || m.isEmpty();
     }
 }

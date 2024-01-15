@@ -14,11 +14,9 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -79,7 +77,7 @@ public class WebhookCallable implements Callable<GenericResponse> {
             case "POST":
             case "PUT":
             case "PATCH":
-                if (webhook.getHttpRequestBody() == null) {
+                if (CommonUtils.isEmptyOrNullCollection(webhook.getHttpRequestBody())) {
                     break;
                 }
                 Map<String, Object> requestBody = setRequestBody(webhook);
@@ -101,10 +99,8 @@ public class WebhookCallable implements Callable<GenericResponse> {
                     .filter(Objects::nonNull)
                     .forEach(header -> {
                         if (header.getKey().equalsIgnoreCase(AppConstants.CONTENT_TYPE) && header.getKey().equalsIgnoreCase(AppConstants.APPLICATION_JSON)) {
-                            JSONObject reqBody = new JSONObject(webhook.getHttpRequestBody());
-                            Iterator<String> reqBodyIte = reqBody.keys();
-                            while (reqBodyIte.hasNext()) {
-                                String key = reqBodyIte.next();
+                            Map<String, String> reqBody = webhook.getHttpRequestBody();
+                            for (String key : reqBody.keySet()) {
                                 body.put(key, reqBody.get(key));
                             }
                         }
