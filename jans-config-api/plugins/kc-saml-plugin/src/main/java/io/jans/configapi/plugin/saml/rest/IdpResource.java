@@ -286,9 +286,6 @@ public class IdpResource extends BaseResource {
                 throwBadRequestException("UNAUTHORIZED", UNAUTHORIZED_MSG);
             }
             throwInternalServerException(APPLICATION_ERROR, wex.getMessage());
-        }catch(Exception ex) {
-            log.error(" Error while updating IDP is -  message:{}", ex.getMessage());
-            throwInternalServerException(SERVER_ERROR, ex.getMessage());
         }
         
         log.info("Updated IdentityProvider idp:{}", idp);
