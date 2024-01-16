@@ -12,7 +12,7 @@ from settings import LOGGING_CONFIG
 manager = get_manager()
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("jans-auth")
+logger = logging.getLogger("auth")
 
 
 def jks_created():

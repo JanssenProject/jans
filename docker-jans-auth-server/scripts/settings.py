@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "jans-auth": {
+        "auth": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,

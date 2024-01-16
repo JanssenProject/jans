@@ -15,7 +15,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("jans-auth")
+logger = logging.getLogger("auth")
 
 
 Library = namedtuple("Library", ["path", "basename", "meta"])

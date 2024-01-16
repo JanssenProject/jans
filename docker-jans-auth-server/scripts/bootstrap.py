@@ -23,7 +23,7 @@ from lock import configure_lock_logging
 from lock import LockPersistenceSetup
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("jans-auth")
+logger = logging.getLogger("auth")
 
 manager = get_manager()
 
