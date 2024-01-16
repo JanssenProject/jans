@@ -7892,11 +7892,11 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
+        userCanView:
+          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
-          type: boolean
-        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
@@ -10151,10 +10151,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

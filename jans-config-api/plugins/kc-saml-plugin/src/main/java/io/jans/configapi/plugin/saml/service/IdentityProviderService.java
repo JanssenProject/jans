@@ -320,8 +320,6 @@ public class IdentityProviderService {
         log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
         if (StringHelper.isNotEmpty(result)) {
             metadataValidationTimer.idpQueue(result);
-            // process files in temp that were not processed earlier
-            processUnprocessedIdpMetadataFiles();
         } else {
             log.error("Failed to save IDP meta-data file. Please check if you provide correct file");
         }

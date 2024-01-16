@@ -248,7 +248,7 @@ public class IdpService {
             identityProvider = keycloakService.createUpdateIdentityProvider(identityProvider.getRealm(), isUpdate,
                     identityProvider);
 
-            log.info("Newly created identityProvider:{}", identityProvider);
+            log.info("Newly created identityProvider in KC:{}", identityProvider);
 
             // set KC SP MetadataURL name
             if (identityProvider != null) {
