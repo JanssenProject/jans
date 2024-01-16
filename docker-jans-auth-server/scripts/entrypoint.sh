@@ -83,6 +83,7 @@ python3 "$basedir/bootstrap.py"
 python3 "$basedir/jks_sync.py" &
 python3 "$basedir/mod_context.py" jans-auth
 python3 "$basedir/auth_conf.py"
+python3 "$basedir/upgrade.py"
 
 cd /opt/jans/jetty/jans-auth
 # shellcheck disable=SC2046
