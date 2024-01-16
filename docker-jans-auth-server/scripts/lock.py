@@ -17,7 +17,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("auth")
+logger = logging.getLogger("jans-auth")
 
 manager = get_manager()
 
@@ -27,14 +27,6 @@ def configure_lock_logging():
     config = {
         "lock_log_target": "STDOUT",
         "lock_log_level": "INFO",
-        "persistence_log_target": "FILE",
-        "persistence_log_level": "INFO",
-        "persistence_duration_log_target": "FILE",
-        "persistence_duration_log_level": "INFO",
-        "script_log_target": "FILE",
-        "script_log_level": "INFO",
-        "ldap_stats_log_level": "INFO",
-        "ldap_stats_log_target": "FILE",
         "log_prefix": "",
     }
 
@@ -73,15 +65,17 @@ def configure_lock_logging():
 
     # mapping between the ``log_target`` value and their appenders
     file_aliases = {
-        "lock_log_target": "FILE",
-        "persistence_log_target": "JANS_LOCK_PERSISTENCE_FILE",
-        "persistence_duration_log_target": "JANS_LOCK_PERSISTENCE_DURATION_FILE",
-        "script_log_target": "JANS_LOCK_SCRIPT_LOG_FILE",
-        "ldap_stats_log_target": "JANS_LOCK_PERSISTENCE_LDAP_STATISTICS_FILE",
+        "lock_log_target": "JANS_LOCK_FILE",
     }
-    for key, value in file_aliases.items():
-        if config[key] == "FILE":
-            config[key] = value
+
+    for key, value in config.items():
+        if not key.endswith("_target"):
+            continue
+
+        if value == "STDOUT":
+            config[key] = "Lock_Console"
+        else:
+            config[key] = file_aliases[key]
 
     if any([
         as_boolean(custom_config.get("enable_stdout_log_prefix")),

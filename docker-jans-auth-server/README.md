@@ -141,6 +141,39 @@ To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Ex
 {"auth_log_target":"STDOUT","script_log_target":"STDOUT","enable_stdout_log_prefix":true}
 ```
 
+### Configure plugin loggers
+
+Plugin loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.
+
+Supported redirect target:
+
+- `STDOUT`
+- `FILE`
+
+Supported level:
+
+- `FATAL`
+- `ERROR`
+- `WARN`
+- `INFO`
+- `DEBUG`
+- `TRACE`
+
+The following key-value pairs are the defaults:
+
+```json
+{
+    "lock_log_target": "STDOUT",
+    "lock_log_level": "INFO"
+}
+```
+
+To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
+
+```
+{"lock_log_target":"STDOUT","enable_stdout_log_prefix":true}
+```
+
 ### Hybrid mapping
 
 As per v1.0.1, hybrid persistence supports all available persistence types. To configure hybrid persistence and its data mapping, follow steps below:
