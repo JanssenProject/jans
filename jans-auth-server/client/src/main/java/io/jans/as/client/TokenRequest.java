@@ -44,6 +44,7 @@ public class TokenRequest extends ClientAuthnRequest {
     private String actorToken;
     private String actorTokenType;
     private String requestedTokenType;
+    private String rctx;
     private DPoP dpop;
 
     /**
@@ -107,6 +108,24 @@ public class TokenRequest extends ClientAuthnRequest {
 
     public void setRequestedTokenType(String requestedTokenType) {
         this.requestedTokenType = requestedTokenType;
+    }
+
+    /**
+     * Gets request context as json string
+     *
+     * @return request context as json string
+     */
+    public String getRctx() {
+        return rctx;
+    }
+
+    /**
+     * Sets request context as json string
+     *
+     * @param rctx request context as json string
+     */
+    public void setRctx(String rctx) {
+        this.rctx = rctx;
     }
 
     /**
@@ -340,6 +359,7 @@ public class TokenRequest extends ClientAuthnRequest {
         builder.append("actor_token", actorToken);
         builder.append("actor_token_type", actorTokenType);
         builder.append("requested_token_type", requestedTokenType);
+        builder.append("rctx", rctx);
         appendClientAuthnToQuery(builder);
         for (String key : getCustomParameters().keySet()) {
             builder.append(key, getCustomParameters().get(key));
@@ -386,6 +406,9 @@ public class TokenRequest extends ClientAuthnRequest {
         }
         if (StringUtils.isNotBlank(requestedTokenType)) {
             parameters.put("requested_token_type", requestedTokenType);
+        }
+        if (StringUtils.isNotBlank(rctx)) {
+            parameters.put("rctx", rctx);
         }
         if (password != null && !password.isEmpty()) {
             parameters.put("password", password);
