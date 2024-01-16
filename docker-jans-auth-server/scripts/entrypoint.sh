@@ -67,6 +67,15 @@ get_jetty_args() {
     fi
 }
 
+get_logging_files() {
+    logs="resources/log4j2.xml"
+
+    if [ -f /opt/jans/jetty/jans-auth/resources/log4j2-lock.xml ]; then
+        logs="$logs,resources/log4j2-lock.xml"
+    fi
+    echo $logs
+}
+
 move_builtin_jars
 get_prometheus_lib
 python3 "$basedir/wait.py"
@@ -85,7 +94,7 @@ exec java \
     -Dserver.base=/opt/jans/jetty/jans-auth \
     -Dlog.base=/opt/jans/jetty/jans-auth \
     -Djava.io.tmpdir=/opt/jetty/temp \
-    -Dlog4j2.configurationFile=resources/log4j2.xml \
+    -Dlog4j2.configurationFile=$(get_logging_files) \
     -Dpython.home=/opt/jython \
     $(get_debug_opt) \
     $(get_max_ram_percentage) \
