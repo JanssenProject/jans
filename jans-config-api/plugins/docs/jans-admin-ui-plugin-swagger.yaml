@@ -1020,8 +1020,11 @@ paths:
                   {
                     "displayName": "posts-webhook-1",
                     "description": "posts-webhook description",
-                    "url": "https://jsonplaceholder.typicode.com/posts",
-                    "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
+                    "url": "https://reqres.in/api/users",
+                    "httpRequestBody": {
+                      "name": "morpheus",
+                      "job": "leader"
+                    },
                     "httpMethod": "POST",
                     "jansEnabled": true,
                     "httpHeaders":[{"key":"Content-Type", "value":"application/json"}],
@@ -1039,12 +1042,15 @@ paths:
                   description: Response json example
                   value: |
                     {
-                      "dn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
-                      "webhookId": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
+                      "dn": "webhookId=f704922d-e97f-3097-a06a-4a90ddedb87a,ou=auiWebhooks,ou=admin-ui,o=jans",
+                      "webhookId": "f704922d-e97f-3097-a06a-4a90ddedb87a",
                       "displayName": "posts-webhook-1",
                       "description": "posts-webhook description",
-                      "url": "https://jsonplaceholder.typicode.com/posts",
-                      "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
+                      "url": "https://reqres.in/api/users",
+                      "httpRequestBody": {
+                        "name": "morpheus",
+                        "job": "leader"
+                      },
                       "httpMethod": "POST",
                       "jansEnabled": true,
                       "httpHeaders": [{
@@ -1052,7 +1058,7 @@ paths:
                         "value": "application/json"
                       }],
                       "auiFeatureIds": ["jans_link_write"],
-                      "baseDn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
+                      "baseDn": "webhookId=f704922d-e97f-3097-a06a-4a90ddedb87a,ou=auiWebhooks,ou=admin-ui,o=jans"
                     }
         "400":
           description: Bad Request

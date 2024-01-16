@@ -49,19 +49,19 @@ public class WebhookCallable implements Callable<GenericResponse> {
         Response response = invocation.invoke();
         ObjectMapper objectMapper = new ObjectMapper();
         log.debug("Webhook (Name: {}, Id: {}) response status code: {}", webhook.getDisplayName(), webhook.getWebhookId(), response.getStatus());
+        JsonNode jsonNode = objectMapper.createObjectNode();
+        ((ObjectNode) jsonNode).put("webhookId", webhook.getWebhookId());
+        ((ObjectNode) jsonNode).put("webhookName", webhook.getDisplayName());
         if (response.getStatus() == Response.Status.OK.getStatusCode() ||
                 response.getStatus() == Response.Status.CREATED.getStatusCode() ||
                 response.getStatus() == Response.Status.ACCEPTED.getStatusCode()) {
             String responseData = response.readEntity(String.class);
             log.debug("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getWebhookId(), responseData);
-            JsonNode jsonNode = objectMapper.createObjectNode();
-            ((ObjectNode) jsonNode).put("webhookId", webhook.getWebhookId());
-            ((ObjectNode) jsonNode).put("webhookName", webhook.getDisplayName());
             return CommonUtils.createGenericResponse(true, response.getStatus(), responseData, jsonNode);
         } else {
             String responseData = response.readEntity(String.class);
             log.error("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getWebhookId(), responseData);
-            return CommonUtils.createGenericResponse(false, response.getStatus(), responseData);
+            return CommonUtils.createGenericResponse(false, response.getStatus(), responseData, jsonNode);
         }
     }
 
