@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-core-parent</artifactId>
-		<version>1.0.21</version>
+		<version>1.0.22-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -71,6 +71,12 @@
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-annotations-jakarta</artifactId>
+			<version>2.2.19</version>
 		</dependency>
 
 		<!-- Tests -->

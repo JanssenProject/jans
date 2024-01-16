@@ -135,6 +135,10 @@ public class BaseResource {
     public static void throwInternalServerException(String msg) {
         throw new InternalServerErrorException(getInternalServerException(msg));
     }
+    
+    public static void throwInternalServerException(String msg, String description) {
+        throw new InternalServerErrorException(getInternalServerException(msg, description));
+    }
 
     public static void throwInternalServerException(Throwable throwable) {
         throwable = findRootError(throwable);
@@ -185,6 +189,13 @@ public class BaseResource {
     protected static Response getInternalServerException(String msg) {
         ApiError error = new ApiError.ErrorBuilder()
                 .withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())).withMessage(msg)
+                .build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
+    }
+    
+    protected static Response getInternalServerException(String msg, String description) {
+        ApiError error = new ApiError.ErrorBuilder()
+                .withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())).withMessage(msg).andDescription(description)
                 .build();
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
     }

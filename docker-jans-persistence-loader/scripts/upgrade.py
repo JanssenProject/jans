@@ -590,14 +590,7 @@ class Upgrade:
         if not entry:
             return
 
-        # calculate new permissions for api-admin
         role_mapping = get_role_scope_mappings()
-        api_admin_perms = []
-
-        for api_role in role_mapping["rolePermissionMapping"]:
-            if api_role["role"] == "api-admin":
-                api_admin_perms = api_role["permissions"]
-                break
 
         try:
             conf = json.loads(entry.attrs["jansConfDyn"])
@@ -606,40 +599,9 @@ class Upgrade:
 
         should_update = False
 
-        # check for rolePermissionMapping
-        #
-        # - compare role permissions for api-admin
-        for i, api_role in enumerate(conf["rolePermissionMapping"]):
-            if api_role["role"] == "api-admin":
-                # compare permissions between the ones from persistence (current) and newer permissions
-                if sorted(api_role["permissions"]) != sorted(api_admin_perms):
-                    conf["rolePermissionMapping"][i]["permissions"] = api_admin_perms
-                    should_update = True
-                break
-
-        # check for permissions
-        #
-        # - add new permission if not exist
-        # - add defaultPermissionInToken (if not exist) in each permission
-
-        # determine current permission with index/position
-        current_perms = {
-            permission["permission"]: {"index": i}
-            for i, permission in enumerate(conf["permissions"])
-        }
-
-        for perm in role_mapping["permissions"]:
-            if perm["permission"] not in current_perms:
-                # add missing permission
-                conf["permissions"].append(perm)
-                should_update = True
-            else:
-                # add missing defaultPermissionInToken
-                index = current_perms[perm["permission"]]["index"]
-                if "defaultPermissionInToken" in conf["permissions"][index]:
-                    continue
-                conf["permissions"][index]["defaultPermissionInToken"] = perm["defaultPermissionInToken"]
-                should_update = True
+        if conf != role_mapping:
+            conf = role_mapping
+            should_update = True
 
         # licenseSpringCredentials must be removed in favor of SCAN license credentials
         if "licenseSpringCredentials" in conf:
@@ -671,11 +633,19 @@ class Upgrade:
         if self.backend.type != "couchbase":
             entry.attrs["jansConfErrors"] = json.loads(entry.attrs["jansConfErrors"])
 
-        conf, should_update = _transform_auth_errors_config(entry.attrs["jansConfErrors"])
+        should_update = False
+
+        # compare config from persistence with the ones from assets
+        with open("/app/templates/jans-auth/jans-auth-errors.json") as f:
+            new_conf = json.loads(f.read())
+
+            if entry.attrs["jansConfErrors"] != new_conf:
+                entry.attrs["jansConfErrors"] = new_conf
+                should_update = True
 
         if should_update:
             if self.backend.type != "couchbase":
-                entry.attrs["jansConfErrors"] = json.dumps(conf)
+                entry.attrs["jansConfErrors"] = json.dumps(entry.attrs["jansConfErrors"])
 
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
@@ -822,14 +792,19 @@ class Upgrade:
             entry.attrs["jansScimEnabled"] = scim_enabled
             should_update = True
 
+        message_conf = json.loads(entry.attrs["jansMessageConf"])
+
         # set jansMessageConf if still empty
-        if not entry.attrs.get("jansMessageConf"):
+        if not message_conf:
             entry.attrs["jansMessageConf"] = json.dumps({
-                "messageProviderType": "NULL",
+                "messageProviderType": "DISABLED",
                 "postgresConfiguration": {
-                    "db-schema-name": "public",
-                    "message-wait-millis": 100,
-                    "message-sleep-thread-millis": 200,
+                    "connectionUri": "jdbc:postgresql://localhost:5432/postgres",
+                    "dbSchemaName": "public",
+                    "authUserName": "postgres",
+                    "authUserPassword": "",
+                    "messageWaitMillis": 100,
+                    "messageSleepThreadTime": 200
                 },
                 "redisConfiguration": {
                     "servers": "localhost:6379",
@@ -837,89 +812,13 @@ class Upgrade:
             })
             should_update = True
 
+        if message_conf["messageProviderType"] == "NULL":
+            message_conf["messageProviderType"] = "DISABLED"
+            entry.attrs["jansMessageConf"] = json.dumps(message_conf)
+            should_update = True
+
         if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
-
-
-def _transform_auth_errors_config(conf):
-    should_update = False
-
-    if "ssa" not in conf:
-        conf["ssa"] = [
-            {
-                "id": "invalid_request",
-                "description": "The request is missing a required parameter, includes an invalid parameter value, includes a parameter more than once, or is otherwise malformed.",
-                "uri": None,
-            },
-            {
-                "id": "unauthorized_client",
-                "description": "The Client is not authorized to use this authentication flow.",
-                "uri": None,
-            },
-            {
-                "id": "invalid_client",
-                "description": "The Client is not authorized to use this authentication flow.",
-                "uri": None,
-            },
-            {
-                "id": "unknown_error",
-                "description": "Unknown or not found error.",
-                "uri": None,
-            },
-        ]
-        should_update = True
-
-    # add new ssa error
-    ssa_errors = [err["id"] for err in conf["ssa"]]
-
-    if "invalid_signature" not in ssa_errors:
-        conf["ssa"].append({
-            "id": "invalid_signature",
-            "description": "No algorithm found to sign the JWT.",
-            "uri": None,
-        })
-        should_update = True
-
-    if "invalid_ssa_metadata" not in ssa_errors:
-        conf["ssa"].append({
-            "id": "invalid_ssa_metadata",
-            "description": "The value of one of the SSA Metadata fields is invalid and the server has rejected this request. Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter of a SSA's Metadata.",
-            "uri": None,
-        })
-        should_update = True
-
-    # dpop as part of token errors
-    dpop_errors = [
-        {
-            "id": "use_dpop_nonce",
-            "description": "Authorization server requires nonce in DPoP proof.",
-            "uri": None
-        },
-        {
-            "id": "use_new_dpop_nonce",
-            "description": "Authorization server requires new nonce in DPoP proof.",
-            "uri": None
-        },
-    ]
-    token_err_ids = [err["id"] for err in conf["token"]]
-
-    for err in dpop_errors:
-        if err["id"] in token_err_ids:
-            continue
-        conf["token"].append(err)
-        should_update = True
-
-    # add stale_evidence on register
-    reg_errors = [err["id"] for err in conf["register"]]
-    if "stale_evidence" not in reg_errors:
-        conf["register"].append({
-            "id": "stale_evidence",
-            "description": "The provided evidence is not current. Resend fresh evidence.",
-            "uri": None,
-        })
-        should_update = True
-
-    return conf, should_update
 
 
 def _transform_auth_static_config(conf):

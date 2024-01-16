@@ -196,6 +196,11 @@ public class RegisterService {
             client.setContacts(listAsArrayWithoutDuplicates(contacts));
         }
 
+        List<String> authorizationDetailsTypes = requestObject.getAuthorizationDetailsTypes();
+        if (authorizationDetailsTypes != null && !authorizationDetailsTypes.isEmpty()) {
+            client.getAttributes().setAuthorizationDetailsTypes(authorizationDetailsTypes);
+        }
+
         for (String key : requestObject.getClientNameLanguageTags()) {
             client.setClientNameLocalized(requestObject.getClientName(key), Locale.forLanguageTag(key));
         }

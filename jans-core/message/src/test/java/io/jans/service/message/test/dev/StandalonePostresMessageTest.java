@@ -6,11 +6,11 @@
 
 package io.jans.service.message.test.dev;
 
-import io.jans.service.message.MessageProvider;
-import io.jans.service.message.StandaloneMessageProviderFactory;
 import io.jans.service.message.model.config.MessageConfiguration;
 import io.jans.service.message.model.config.MessageProviderType;
 import io.jans.service.message.model.config.PostgresMessageConfiguration;
+import io.jans.service.message.provider.MessageProvider;
+import io.jans.service.message.provider.StandaloneMessageProviderFactory;
 import io.jans.service.message.pubsub.PubSubInterface;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
@@ -28,7 +28,7 @@ public class StandalonePostresMessageTest {
 
 		PostgresMessageConfiguration postgresMessageConfiguration = new PostgresMessageConfiguration();
 		postgresMessageConfiguration.setDbSchemaName("public");
-		postgresMessageConfiguration.setConnectionUri("jdbc:postgresql://localhost:5432/postgres");
+		postgresMessageConfiguration.setConnectionUri("jdbc:postgresql://localhost:5433/postgres");
 		postgresMessageConfiguration.setAuthUserName("postgres");
 		postgresMessageConfiguration.setAuthUserPassword("rgy1GUg+1kY="); // secret
 		postgresMessageConfiguration.setMessageWaitMillis(100);

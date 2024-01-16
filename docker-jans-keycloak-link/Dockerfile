@@ -40,8 +40,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # KC Link
 # =======
 
-ENV CN_VERSION=1.0.21
-ENV CN_BUILD_DATE='2023-12-11 13:17'
+ENV CN_VERSION=1.0.22-SNAPSHOT
+ENV CN_BUILD_DATE='2024-01-05 13:56'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-keycloak-link-server/${CN_VERSION}/jans-keycloak-link-server-${CN_VERSION}.war
 
 # Install Link
@@ -192,7 +192,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
-    CN_KEYCLOAK_LINK_JETTY_HOST=0.0.0.0
+    CN_KEYCLOAK_LINK_JETTY_HOST=0.0.0.0 \
+    CN_JETTY_ARGS=""
 
 # ==========
 # misc stuff
@@ -203,7 +204,7 @@ EXPOSE $CN_KEYCLOAK_LINK_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/keycloak-link" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.version="1.0.22" \
     org.opencontainers.image.title="Janssen Keycloak Link" \
     org.opencontainers.image.description=""
 

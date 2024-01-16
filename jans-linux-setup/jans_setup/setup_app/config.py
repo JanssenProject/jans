@@ -175,6 +175,7 @@ class Config:
         self.rdbm_db = 'jansdb'
         self.rdbm_user = 'jans'
         self.rdbm_password = None
+        self.rdbm_password_enc = ''
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
 
         #spanner
@@ -208,6 +209,8 @@ class Config:
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
         self.install_jans_keycloak_link = False
+        self.install_jans_lock = False
+        self.install_opa = False
 
         # backward compatibility
         self.os_type = base.os_type

@@ -66,6 +66,7 @@ public class RegisterRequest extends BaseRequest {
     private List<GrantType> grantTypes;
     private ApplicationType applicationType;
     private List<String> contacts;
+    private List<String> authorizationDetailsTypes;
     private final LocalizedString clientName;
     private final LocalizedString logoUri;
     private final LocalizedString clientUri;
@@ -171,6 +172,7 @@ public class RegisterRequest extends BaseRequest {
         this.responseTypes = new ArrayList<>();
         this.grantTypes = new ArrayList<>();
         this.contacts = new ArrayList<>();
+        this.authorizationDetailsTypes = new ArrayList<>();
         this.defaultAcrValues = new ArrayList<>();
         this.minimumAcrPriorityList = new ArrayList<>();
         this.postLogoutRedirectUris = new ArrayList<>();
@@ -478,6 +480,24 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setContacts(List<String> contacts) {
         this.contacts = contacts;
+    }
+
+    /**
+     * Gets authorization details types.
+     *
+     * @return authorization details types
+     */
+    public List<String> getAuthorizationDetailsTypes() {
+        return authorizationDetailsTypes;
+    }
+
+    /**
+     * Sets authorization details types
+     *
+     * @param authorizationDetailsTypes authorization details types
+     */
+    public void setAuthorizationDetailsTypes(List<String> authorizationDetailsTypes) {
+        this.authorizationDetailsTypes = authorizationDetailsTypes;
     }
 
     /**
@@ -1760,6 +1780,7 @@ public class RegisterRequest extends BaseRequest {
         result.setGrantTypes(extractGrantTypes(requestObject));
         result.setApplicationType(ApplicationType.fromString(requestObject.optString(APPLICATION_TYPE.toString())));
         result.setContacts(extractListByKey(requestObject, CONTACTS.toString()));
+        result.setAuthorizationDetailsTypes(extractListByKey(requestObject, AUTHORIZATION_DETAILS_TYPES.toString()));
         result.setIdTokenTokenBindingCnf(requestObject.optString(ID_TOKEN_TOKEN_BINDING_CNF.toString(), ""));
 
         LocalizedString.fromJson(requestObject, CLIENT_NAME.getName(), (String key, Locale locale) -> {
@@ -1858,6 +1879,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (contacts != null && !contacts.isEmpty()) {
             function.apply(CONTACTS.toString(), toJSONArray(contacts));
+        }
+        if (authorizationDetailsTypes != null && !authorizationDetailsTypes.isEmpty()) {
+            function.apply(AUTHORIZATION_DETAILS_TYPES.toString(), toJSONArray(authorizationDetailsTypes));
         }
 
         if (StringUtils.isNotBlank(jwksUri)) {
