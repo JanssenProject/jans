@@ -1,3 +1,4 @@
+import logging.config
 import os
 import typing as _t
 from pathlib import Path
@@ -8,6 +9,11 @@ from pluggy import PluginManager
 
 from jans_aio.hooks import AioPlugin
 from jans_aio.utils import import_from_string
+
+from settings import LOGGING_CONFIG
+logging.config.dictConfig(LOGGING_CONFIG)
+
+logger = logging.getLogger("jans_aio")
 
 
 def get_max_memory() -> int:
@@ -54,6 +60,8 @@ def get_apps_resources(
     for program in enabled_programs:
         allowed_ratio = supervisor_programs[program]["mem_ratio"] * ratio_multiplier
         apps_mem_alloc[program] = int(round(allowed_ratio * int(apps_max_mem)))
+
+    logger.info(f"Memory allocation => {max_memory=} | {apps_max_mem=} | {used_ratio=} {ratio_multiplier=} | {apps_mem_alloc=}")
     return apps_mem_alloc
 
 

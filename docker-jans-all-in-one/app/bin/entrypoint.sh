@@ -12,7 +12,19 @@ get_prometheus_lib() {
     fi
 }
 
+show_ps_output() {
+    while true
+    do
+        ps aux | more
+        sleep 30
+    done
+}
+
 get_prometheus_lib
 python3 /app/jans_aio/bootstrap.py
+
+if [ "$CN_AIO_ENABLE_MONITOR" = "true" ]; then
+    show_ps_output &
+fi
 
 exec supervisord -c /app/conf/supervisord.conf
