@@ -14,7 +14,9 @@ from jans.pycloudlib.persistence import SqlClient
 from jans.pycloudlib.persistence import doc_id_from_dn
 from jans.pycloudlib.persistence import id_from_dn
 from jans.pycloudlib.persistence import PersistenceMapper
+from jans.pycloudlib.persistence.sql import get_sql_password
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import encode_text
 
 from settings import LOGGING_CONFIG
 from utils import get_role_scope_mappings
@@ -792,32 +794,21 @@ class Upgrade:
             entry.attrs["jansScimEnabled"] = scim_enabled
             should_update = True
 
-        message_conf = json.loads(entry.attrs["jansMessageConf"])
+        # message configuration
+        if "jansMessageConf" not in entry.attrs:
+            entry.attrs["jansMessageConf"] = "'{}'"
 
-        # set jansMessageConf if still empty
-        if not message_conf:
-            entry.attrs["jansMessageConf"] = json.dumps({
-                "messageProviderType": "DISABLED",
-                "postgresConfiguration": {
-                    "connectionUri": "jdbc:postgresql://localhost:5432/postgres",
-                    "dbSchemaName": "public",
-                    "authUserName": "postgres",
-                    "authUserPassword": "",
-                    "messageWaitMillis": 100,
-                    "messageSleepThreadTime": 200
-                },
-                "redisConfiguration": {
-                    "servers": "localhost:6379",
-                },
-            })
-            should_update = True
+        if self.backend.type != "couchbase":
+            entry.attrs["jansMessageConf"] = json.loads(entry.attrs["jansMessageConf"])
 
-        if message_conf["messageProviderType"] == "NULL":
-            message_conf["messageProviderType"] = "DISABLED"
-            entry.attrs["jansMessageConf"] = json.dumps(message_conf)
-            should_update = True
+        entry.attrs["jansMessageConf"], should_update = _transform_message_config(entry.attrs["jansMessageConf"])
 
         if should_update:
+            if self.backend.type != "couchbase":
+                entry.attrs["jansMessageConf"] = json.dumps(entry.attrs["jansMessageConf"])
+
+            revision = entry.attrs.get("jansRevision") or 1
+            entry.attrs["jansRevision"] = revision + 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
@@ -848,3 +839,40 @@ def _transform_smtp_config(default_smtp_conf, smtp_conf):
             k.replace("_", "-"), ""
         ) or v
     return new_smtp_conf
+
+
+def _transform_message_config(conf):
+    should_update = False
+    provider_type = os.environ.get("CN_MESSAGE_TYPE", "DISABLED")
+
+    pg_host = os.environ.get("CN_SQL_DB_HOST", "localhost")
+    pg_port = os.environ.get("CN_SQL_DB_PORT", "5432")
+    pg_db = os.environ.get("CN_SQL_DB_NAME", "jans")
+
+    if os.environ.get("CN_PERSISTENCE_TYPE", "ldap") == "sql":
+        pg_pw_encoded = encode_text(
+            get_sql_password(manager),
+            manager.secret.get("encoded_salt")
+        ).decode()
+    else:
+        pg_pw_encoded = ""
+
+    new_conf = {
+        "messageProviderType": provider_type,
+        "postgresConfiguration": {
+            "connectionUri": f"jdbc:postgresql://{pg_host}:{pg_port}/{pg_db}",
+            "dbSchemaName": os.environ.get("CN_SQL_DB_SCHEMA", "public"),
+            "authUserName": os.environ.get("CN_SQL_DB_USER", "jans"),
+            "authUserPassword": pg_pw_encoded,
+            "messageWaitMillis": conf["postgresConfiguration"]["messageWaitMillis"],
+            "messageSleepThreadTime": conf["postgresConfiguration"]["messageSleepThreadTime"],
+        },
+        "redisConfiguration": {
+            "servers": os.environ.get("CN_REDIS_URL", "localhost:6379"),
+        },
+    }
+
+    if new_conf != conf:
+        conf = new_conf
+        should_update = True
+    return conf, should_update
