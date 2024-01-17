@@ -55,6 +55,17 @@ distribution Janssen [Gluu Flex](https://gluu.org/flex).
 
 ## Janssen Components
 
+| Component | Description                                                                                                                                                                                             | Development Stage |
+|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------|
+| **[Jans Auth Server](jans-auth-server)**          | A very complete Java OAuth Authorization Server and a [certified](https://openid.net/certification/) OpenID Connect Provider. It's the upstream open-source core of [Gluu Flex](https://gluu.org/flex). | [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)                  |
+|           |                                                                                                                                                                                                         |                   |
+|           |                                                                                                                                                                                                         |                   |
+|           |                                                                                                                                                                                                         |                   |
+|           |                                                                                                                                                                                                         |                   |
+|           |                                                                                                                                                                                                         |                   |
+|           |                                                                                                                                                                                                         |                   |
+
+
 #### Internal
 
 1. **[Jans Auth Server](jans-auth-server)**: A very complete Java OAuth
