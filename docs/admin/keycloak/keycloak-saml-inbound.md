@@ -6,14 +6,23 @@ tags:
   - inbound
 ---
 
-## This content is in progress
+## Overview
+Janssen supports authentication against external SAML identity provider (IDP) namely inbound SAML/inbound identity.
+This document provides instructions for configuring Janssen server
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
 
-## Have questions in the meantime?
+## Enable inbound SAML
+Make sure you have Janssen server with SAML plugin installed and enabled. SAML plugin can be enabled using TUI (Jans Saml -> Contribution)
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+## Inbound SAML Authentication Flow
 
-## Want to contribute?
+The following is a high-level diagram depicting a typical inbound identity user authentication and provisioning workflow:
+![](../../../assets/inbound-saml-flow.png)
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+## Configure IDP for inbound SAML
+1. Create new IDP in Keycloak using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/config-tools/jans-cli/README.md).
+2. Use Agama Lab is an online visual editor to build authentication flows. Learn more about [Agama Lab](../../developer/agama/quick-start-using-agama-lab.md)
+3. Fork existing agama-inbound-saml project from [Agama Lab Projects](https://agama-lab.gluu.org/landing-page/)
+4. Deploying .gama package on Janssen Server 
+5. Testing the authentication flow using [Jans Tarp](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md)
+
