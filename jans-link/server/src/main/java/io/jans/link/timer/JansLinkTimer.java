@@ -28,6 +28,7 @@ import io.jans.orm.model.SearchScope;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
+import io.jans.service.EncryptionService;
 import io.jans.service.ObjectSerializationService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;

@@ -175,6 +175,7 @@ class Config:
         self.rdbm_db = 'jansdb'
         self.rdbm_user = 'jans'
         self.rdbm_password = None
+        self.rdbm_password_enc = ''
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
 
         #spanner

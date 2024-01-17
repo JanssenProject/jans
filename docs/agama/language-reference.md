@@ -174,7 +174,7 @@ Input names follow the same naming conventions (patterns) of variables and can b
 !!! Important
     Note the difference between properties and inputs. Properties are parameters that callers of the flow should not control or be interested in. On the other hand, inputs are parameters that callers supply explicitly to make the flow exhibit certain behaviors.
 
-To learn how callers can pass values to input parameters of a check [here](#input-parameters).
+Check this [section](#input-parameters) to learn how callers can pass values to input parameters of a flow.
 
 ### Flow statements
 

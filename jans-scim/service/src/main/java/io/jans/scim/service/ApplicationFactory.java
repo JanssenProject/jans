@@ -87,7 +87,7 @@ public class ApplicationFactory {
             log.info("Creating fallback Null message configuration ... ");
 
             messageConfiguration = new MessageConfiguration();
-            messageConfiguration.setMessageProviderType(MessageProviderType.NULL);
+            messageConfiguration.setMessageProviderType(MessageProviderType.DISABLED);
             messageConfiguration.setNullConfiguration(new NullMessageConfiguration());
 
             log.info("NULL message configuration is created.");

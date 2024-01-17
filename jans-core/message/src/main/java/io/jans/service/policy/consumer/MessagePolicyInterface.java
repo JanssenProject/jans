@@ -6,7 +6,7 @@
 
 package io.jans.service.policy.consumer;
 
-import org.json.JSONArray;
+import java.util.List;
 
 /**
  * Interface for each policy consumer
@@ -15,7 +15,7 @@ import org.json.JSONArray;
  */
 public interface MessagePolicyInterface {
 	
-	public boolean putPolicies(String sourceUri, JSONArray policies);
+	public boolean putPolicies(String sourceUri, List<String> policies);
 
 	public boolean removePolicies(String sourceUri);
 

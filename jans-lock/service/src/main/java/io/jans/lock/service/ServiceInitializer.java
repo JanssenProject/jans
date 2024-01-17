@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 
 import io.jans.lock.service.config.ConfigurationFactory;
 import io.jans.lock.service.message.TokenSubService;
+import io.jans.lock.service.policy.PolicyDownloadService;
 import io.jans.service.cdi.event.ApplicationInitializedEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -33,13 +34,17 @@ public class ServiceInitializer {
     @Inject
     private TokenSubService tokenSubService;
 
+    @Inject
+    private PolicyDownloadService policyDownloadService;
+
 	public void applicationInitialized(@Observes ApplicationInitializedEvent applicationInitializedEvent) {
 		log.info("Initializing Lock service module services");
 
 		configurationFactory.initTimer();
 		tokenSubService.subscribe();
+		policyDownloadService.initTimer();
 
-		log.debug("Initializing Lock service module services comple");
+		log.debug("Initializing Lock service module services complete");
 	}
 
 }

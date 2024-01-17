@@ -10,6 +10,7 @@ from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 
 Config.jans_lock_port = '8076'
+Config.lock_message_provider_type = 'DISABLED'
 
 class JansLockInstaller(JettyInstaller):
 
@@ -28,27 +29,33 @@ class JansLockInstaller(JettyInstaller):
         self.install_var = 'install_jans_lock'
         self.register_progess()
 
-        self.systemd_units = ['jans-lock']
+        self.systemd_units = []
 
         self.output_dir = os.path.join(Config.output_dir, self.service_name)
         self.template_dir = os.path.join(Config.templateFolder, self.service_name)
         self.dynamic_conf_json = os.path.join(self.output_dir, 'dynamic-conf.json')
         self.error_json = os.path.join(self.output_dir, 'errors.json')
         self.static_conf_json = os.path.join(self.output_dir, 'static-conf.json')
+        self.message_conf_json = os.path.join(self.output_dir, 'jans_message_conf.json')
         self.config_ldif = os.path.join(self.output_dir, 'config.ldif')
         self.opa_addr = 'localhost:8181'
         self.opa_dir = os.path.join(Config.opt_dir, 'opa')
+        self.opa_bin_dir = os.path.join(self.opa_dir, 'bin')
 
     def install(self):
 
         if Config.get('install_jans_lock_as_server'):
             self.install_as_server()
+            self.systemd_units.append('jans-lock')
         else:
-            self.no_unit_file = True
             self.install_as_service()
 
         if Config.get('install_opa'):
             self.install_opa()
+
+        if Config.rdbm_type == 'pgsql':
+            self.dbUtils.set_oxAuthConfDynamic({'lockMessageConfig': {'enableIdTokenMessages': True, 'idTokenMessagesChannel': 'id_token'}})
+            Config.lock_message_provider_type = 'POSTGRES'
 
     def install_as_server(self):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
@@ -67,9 +74,8 @@ class JansLockInstaller(JettyInstaller):
 
     def render_import_templates(self):
 
-        self.renderTemplateInOut(self.dynamic_conf_json, self.template_dir, self.output_dir)
-        self.renderTemplateInOut(self.error_json, self.template_dir, self.output_dir)
-        self.renderTemplateInOut(self.static_conf_json, self.template_dir, self.output_dir)
+        for tmp in (self.dynamic_conf_json, self.error_json, self.static_conf_json):
+            self.renderTemplateInOut(tmp, self.template_dir, self.output_dir)
 
         Config.templateRenderingDict['lock_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
         Config.templateRenderingDict['lock_error_base64'] = self.generate_base64_file(self.error_json, 1)
@@ -80,10 +86,17 @@ class JansLockInstaller(JettyInstaller):
         ldif_files = [self.config_ldif]
         self.dbUtils.import_ldif(ldif_files)
 
+
+    def configure_message_conf(self):
+        # this function is called in JansInstaller.post_install_tasks
+        self.renderTemplateInOut(self.message_conf_json, self.template_dir, self.output_dir)
+        message_conf_json = self.readFile(self.message_conf_json)
+        self.dbUtils.set_configuration('jansMessageConf', message_conf_json)
+
+
     def install_opa(self):
         opa_fn = 'opa'
         self.systemd_units.append(opa_fn)
-        self.opa_bin_dir = os.path.join(self.opa_dir, 'bin')
         self.createDirs(self.opa_bin_dir)
         self.copyFile(self.source_files[2][0], self.opa_bin_dir)
         self.run([paths.cmd_chmod, '755', os.path.join(self.opa_bin_dir, opa_fn)])

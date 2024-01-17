@@ -6,7 +6,7 @@ from com.fasterxml.jackson.databind import ObjectMapper
 
 from io.jans.agama import NativeJansFlowBridge
 from io.jans.agama.engine.misc import FlowUtils
-from io.jans.as.common.service.common import EncryptionService
+from io.jans.service import EncryptionService
 from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService, UserService
 from io.jans.jsf2.service import FacesService
