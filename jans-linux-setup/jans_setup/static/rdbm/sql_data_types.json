@@ -960,5 +960,106 @@
     "spanner": {
       "type": "STRING(MAX)"
     }
+  },
+  "singleLogoutServiceUrl": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "nameIDPolicyFormat": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "singleSignOnServiceUrl": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "jansSAMLspMetaDataURL": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "jansSAMLidpMetaDataURL": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "rootUrl": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "baseUrl": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "adminUrl": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "jansSAMLspMetaDataURL": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "jansPostLogoutRedirectURI": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
   }
+  
 }
