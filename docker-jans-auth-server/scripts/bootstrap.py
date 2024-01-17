@@ -19,6 +19,8 @@ from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from hooks import get_auth_keys_hook
+from lock import configure_lock_logging
+from lock import LockPersistenceSetup
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("auth")
@@ -96,6 +98,13 @@ def main():
     except ValueError:
         # likely secret is not created yet
         logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
+
+    if as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
+        configure_lock_logging()
+
+        with manager.lock.create_lock("lock-setup"):
+            persistence_setup = LockPersistenceSetup(manager)
+            persistence_setup.import_ldif_files()
 
 
 def configure_logging():
