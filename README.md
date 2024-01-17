@@ -49,8 +49,7 @@ distribution Janssen [Gluu Flex](https://gluu.org/flex).
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
 [![Hex.pm](https://img.shields.io/hexpm/l/plug)](./LICENSE)
 [![GitHub contributors](https://img.shields.io/github/contributors/janssenproject/jans)](#users-and-community)
-[![Incubating](https://img.shields.io/badge/just%20the%20message-8A2BE2)]
-(https://conventionalcommits.org)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
 ----
 
