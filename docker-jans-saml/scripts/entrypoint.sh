@@ -38,6 +38,9 @@ export_keycloak_admin_creds
 java_opts="$(get_max_ram_percentage) $(get_java_options)"
 export JAVA_OPTS_APPEND="$java_opts"
 
+# build optimized KC for production (https://www.keycloak.org/server/configuration#_optimize_the_keycloak_startup)
+/opt/keycloak/bin/kc.sh build --http-relative-path=/kc
+
 # shellcheck disable=SC2046
 exec /opt/keycloak/bin/kc.sh start \
     -Dlog.base=/opt/keycloak/logs/ \
@@ -45,11 +48,9 @@ exec /opt/keycloak/bin/kc.sh start \
     --http-host="${CN_SAML_HTTP_HOST}" \
     --http-port=${CN_SAML_HTTP_PORT} \
     --http-enabled=true \
-    --http-relative-path=/kc \
     --hostname-path=/kc \
     --hostname-strict-https=true \
     --log=console \
     --log-console-format='jans-saml - %d{yyyy-MM-dd HH:mm:ss,SSS} - %-5p - [%c] (%t) %s%e%n' \
-    --log-file=/opt/keycloak/logs/keycloak.log
-    # --db=dev-mem \
-    # --optimized
+    --log-file=/opt/keycloak/logs/keycloak.log \
+    --optimized
