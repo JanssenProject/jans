@@ -304,9 +304,9 @@ config:
     kcDbUsername: keycloak
     # -- Password for Keycloak database access
     kcDbPassword: Test1234#
-    # -- Keycloak database schema name (note that PostgreSQL may using "public" schema).
+    # -- Keycloak database schema name (note that PostgreSQL may be using "public" schema).
     kcDbSchema: keycloak
-    # -- Keycloak database host
+    # -- Keycloak database host uri
     kcDbUrlHost: mysql.kc.svc.cluster.local
     # -- Keycloak database port (default to port 3306 for mysql).
     kcDbUrlPort: 3306
