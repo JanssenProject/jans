@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any
 
 from prompt_toolkit.application import Application
-from prompt_toolkit.eventloop import get_event_loop
+from asyncio import get_event_loop
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit
 from prompt_toolkit.layout.containers import DynamicContainer, Window

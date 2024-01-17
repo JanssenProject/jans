@@ -10,7 +10,7 @@ from prompt_toolkit.application import Application
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Dialog
-from prompt_toolkit.eventloop import get_event_loop
+from asyncio import get_event_loop
 
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_user_dialog import EditUserDialog

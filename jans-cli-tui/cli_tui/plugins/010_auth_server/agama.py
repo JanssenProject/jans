@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Any
 from types import SimpleNamespace
 from prompt_toolkit.application import Application
-from prompt_toolkit.eventloop import get_event_loop
+from asyncio import get_event_loop
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 

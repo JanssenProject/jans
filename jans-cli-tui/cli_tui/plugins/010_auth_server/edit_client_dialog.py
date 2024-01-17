@@ -44,7 +44,7 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import AnyFormattedText
 from typing import Optional, Sequence
 from typing import Callable
-from prompt_toolkit.eventloop import get_event_loop
+from asyncio import get_event_loop
 import asyncio
 
 import json
