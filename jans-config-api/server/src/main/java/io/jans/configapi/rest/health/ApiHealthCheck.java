@@ -6,12 +6,16 @@
 
 package io.jans.configapi.rest.health;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.jans.configapi.core.model.HealthStatus;
 import io.jans.configapi.core.model.Status;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.model.status.StatsData;
 import io.jans.configapi.rest.resource.auth.ConfigBaseResource;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.status.StatusCheckerTimer;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -143,17 +147,18 @@ public class ApiHealthCheck extends ConfigBaseResource {
     }
 
     @Operation(summary = "Returns application version", description = "Returns application version", operationId = "get-app-version", tags = {
-    "Health - Check" })
+    "Health - Check" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            ApiAccessConstants.APP_VERSION_READ_ACCESS }))
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = StatsData.class))),
+    @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class))),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.APP_VERSION_READ_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.APP_VERSION)
     public Response getApplicationVersion(@Parameter(description = "artifact name for which version is requied else ALL") @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.ARTIFACT) String artifact) {
         logger.debug("Application Version - artifact:{}", artifact);
-        String appVersion = statusCheckerTimer.getAppVersionData(artifact);
-        logger.debug("Application Version - appVersion:{}",appVersion);
-        return Response.ok(appVersion).build();
+        return Response.ok(statusCheckerTimer.getAppVersionData(artifact)).build();
     }
 
     
