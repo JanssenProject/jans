@@ -452,7 +452,7 @@ public class SqlFilterConverter {
 	}
 
 	private String toInternalAttribute(String tableName, String attributeName) {
-		if (operationService == null) {
+		if ((operationService == null) || (tableName == null)) {
 			return attributeName;
 		}
 
@@ -543,7 +543,8 @@ public class SqlFilterConverter {
     		return convertToSqlFilterImpl(tableMapping, genericFilter.getFilters()[0], propertiesAnnotationsMap, jsonAttributes, processor, skipAlias).expression();
 		}
 		
-		String internalAttribute = toInternalAttribute(tableMapping.getTableName(), genericFilter);
+		String tableName = tableMapping == null ? null : tableMapping.getTableName();
+		String internalAttribute = toInternalAttribute(tableName, genericFilter);
 		
 		return buildTypedPath(tableMapping, genericFilter, internalAttribute, skipAlias);
 	}
