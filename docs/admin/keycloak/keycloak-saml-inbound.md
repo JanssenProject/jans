@@ -44,14 +44,14 @@ SAML IDP is created in Keycloak server under default realm ,`jans-api`. IDP deta
 1. Fork existing agama-inbound-saml project from [Agama Lab Projects](https://agama-lab.gluu.org/landing-page/)
 1. In Agama orchestrator create a new flow by adding a RFAC (Redirect and fetch a callback) node for SAML IDP.
 1. Deploying .gama package on Janssen Server 
-1. Testing the authentication flow using Jans Tarp.__
-__ Install Tarp, check details [here](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md).
-__ Open Tarp extension.
-__ Enter URL of Keycloak OpenID configuration. Example http:///realms/keycloak-external-broker/.well-known/openid-configuration.
-__ Click Register.
-__ Registered Client details are displayed, enter Additional Params to hint Keycloak about IDP to be trigger. Example {"kc_idp_hint":"gluu-saml-idp-1"}
-__ Click "Trigger Auth Code Flow.
-__ This should redirect to IDP login page.
-__ Enter user details and login.
+1. Testing the authentication flow using Jans Tarp.
+-- Install Tarp, check details [here](https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md).
+-- Open Tarp extension.
+-- Enter URL of Keycloak OpenID configuration. Example http:///realms/keycloak-external-broker/.well-known/openid-configuration.
+-- Click Register.
+-- Registered Client details are displayed, enter Additional Params to hint Keycloak about IDP to be trigger. Example {"kc_idp_hint":"gluu-saml-idp-1"}
+--  Click "Trigger Auth Code Flow.
+-- This should redirect to IDP login page.
+-- Enter user details and login.
 
 
