@@ -323,7 +323,7 @@ class JansCliApp(Application):
     def create_cli(self) -> None:
         test_client = config_cli.client_id if config_cli.test_client else None
         self.cli_object = config_cli.JCA_CLI(
-                host=config_cli.host,
+                endpoints=config_cli.get_endpoints(),
                 client_id=config_cli.client_id,
                 client_secret=config_cli.client_secret,
                 access_token=config_cli.access_token,
@@ -447,7 +447,7 @@ class JansCliApp(Application):
 
 
     async def check_jans_cli_ini(self) -> None:
-        if not(config_cli.host and (config_cli.client_id and config_cli.client_secret or config_cli.access_token)):
+        if not(config_cli.client_id and config_cli.client_secret or config_cli.access_token):
             self.jans_creds_dialog()
         else :
             self.create_cli()
