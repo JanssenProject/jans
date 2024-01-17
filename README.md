@@ -56,7 +56,7 @@ distribution Janssen [Gluu Flex](https://gluu.org/flex).
 
 ## Janssen Components
 
-| Component                                | Description                                                                                                                                                                                                                                 | Development Stage                                                |
+| Component                                | Description                                                                                                                                                                                                                                 | Lifecycle Stage                                                  |
 |------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------|
 | **[Jans Auth Server](jans-auth-server)** | A very complete Java OAuth Authorization Server and a [certified](https://openid.net/certification/) OpenID Connect Provider. It's the upstream open-source core of [Gluu Flex](https://gluu.org/flex).                                     | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
 | **[Agama](agama)**                       | Agama offers an interoperable way to design authentication flows, coded in a DSL purpose-built for writing identity journeys.                                                                                                               | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
@@ -70,52 +70,6 @@ distribution Janssen [Gluu Flex](https://gluu.org/flex).
 | **[Jans Tarp](demos/jans-tarp)**                                         | An OpenID Connect RP test website that runs as a browser plugin in Chrome or Firefox.                                                                                                                                                       | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
 | **[Jans Chip](demos/jans-chip)**                                         | Sample iOS and Android mobile applications that implement the full OAuth and FIDO security stack for app integrity, client constrained access tokens, and user presence.                                                                                                                                                                                                                                            | ![Demo](https://img.shields.io/badge/Demo-%23368af7)             |
 | **[Jans Tent](demos/jans-tent)** | | ![Demo](https://img.shields.io/badge/Demo-%23368af7)             |
-
-#### Internal
-
-1. **[Jans Auth Server](jans-auth-server)**: A very complete Java OAuth
-Authorization Server and a [certified](https://openid.net/certification/)
-OpenID Connect Provider. It's the
-upstream open-source core of [Gluu Flex](https://gluu.org/flex).
-
-1. **[Agama](https://docs.jans.io/head/agama/introduction/)**: Agama offers an
-interoperable way to design authentication flows, coded in a DSL purpose-built
-for writing identity journeys.
-
-1. **[Jans FIDO](jans-fido2)**: Enables end-users to enroll and
-authenticate with passkeys and other FIDO authenticators.
-
-1. **[Jans SCIM](jans-scim)**: [SCIM](http://www.simplecloud.info/) JSON/REST
-[API](https://docs.jans.io/head/admin/reference/openapi/) for user
-management, including associated FIDO devices.
-
-1. **[Jans Config API](jans-config-api)**: Config API is a
-RESTful control plane for all Janssen components.
-
-1. **[Text UI ("TUI")](jans-cli-tui)**: Command line and interactive
-configuration tools to help you correctly call the Config API.
-
-1. **[Jans Chip](demos/jans-chip)**: Sample iOS and Android mobile applications
-that implement the full OAuth and FIDO security stack for app integrity,  
-client constrained access tokens, and user presence.
-
-1. **[Jans Tarp](demos/jans-tarp)**: An OpenID Connect RP test website that runs
-as a browser plugin in Chrome or Firefox.
-
-1. **[Jans Lock](jans-lock)**: A Pub/Sub client that retrieves the latest
-data about OAuth access and transaction tokens and updates OPA.
-
-#### External
-
-1. **[Keycloak](https://www.cncf.io/projects/keycloak/)**: provides an array of
-out of the box IAM services in a single lightweight container image. It's handy
-for many workforce requirements like SAML. The Janssen authenticator module
-(SPI) simplifies SSO across Janssen and Keycloak websites.
-
-1. **[Open Policy Agent](https://www.cncf.io/projects/open-policy-agent-opa/)**:
-A general-purpose policy engine that runs next to the services that need
-external authorization. Jans Lock runs next to OPA to keep the data and policies
-up to date.
 
 ## Installation
 
