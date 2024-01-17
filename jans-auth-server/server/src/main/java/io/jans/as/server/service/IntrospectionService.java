@@ -24,6 +24,7 @@ import io.jans.as.model.jwk.KeyOpsType;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
+import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.token.JwtSigner;
 import io.jans.util.security.StringEncrypter;
@@ -89,12 +90,17 @@ public class IntrospectionService {
             log.trace("Preparing encrypted introspection response with keyEncryptionAlgorithm {}, blockEncryptionAlgorithm: {}", keyAlgorithm, blockAlgorithm);
             Jwe jwe = new Jwe();
 
-            jwe.getHeader().setType(JwtType.JWT); // Header
+            // Header
+            jwe.getHeader().setType(JwtType.JWT);
             jwe.getHeader().setAlgorithm(keyAlgorithm);
             jwe.getHeader().setEncryptionMethod(blockAlgorithm);
 
+            // Claims
+            fillPayload(jwe, response, grant);
+
             // nested signed jwt payload
             JwtSigner jwtSigner = newJwtSigner(client);
+
             Jwt jwt = jwtSigner.newJwt();
             jwt.setClaims(jwe.getClaims());
             jwe.setSignedJWTPayload(signJwt(jwt, client));
@@ -146,7 +152,7 @@ public class IntrospectionService {
         return jwt;
     }
 
-    public void fillPayload(Jwt jwt, JSONObject response, AuthorizationGrant grant) throws InvalidJwtException {
+    public void fillPayload(JsonWebResponse jwt, JSONObject response, AuthorizationGrant grant) throws InvalidJwtException {
         final Client client = grant.getClient();
         Audience.setAudience(jwt.getClaims(), client);
         jwt.getClaims().setIssuer(appConfiguration.getIssuer());
