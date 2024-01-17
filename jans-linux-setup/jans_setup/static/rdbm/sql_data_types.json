@@ -944,5 +944,21 @@
     "spanner": {
       "type": "STRING(MAX)"
     }
+  },
+  "signingCertificate": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "encryptionPublicKey": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
   }
 }

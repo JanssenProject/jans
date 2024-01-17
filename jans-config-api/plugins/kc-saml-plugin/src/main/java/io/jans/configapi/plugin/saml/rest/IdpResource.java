@@ -312,7 +312,7 @@ public class IdpResource extends BaseResource {
         log.debug(" existingIdentityProvider:{} ", existingIdentityProvider);
         checkResourceNotNull(existingIdentityProvider, SAML_IDP_CHECK_STR + inum + "'");
 
-        idpService.deleteIdentityProvider(existingIdentityProvider);
+        idpService.deleteIdentityProvider(existingIdentityProvider, true);
         return Response.noContent().build();
     }
 
