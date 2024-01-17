@@ -1,0 +1,7 @@
+[{
+  "dn": "auiFeatureId=jans_link_write,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "jans_link_write",
+  "displayName": "Jans Link - Edit",
+  "jansScope": "https://jans.io/oauth/config/jans-link.write",
+  "webhookIdsMapped": ["dd6e0e18-231e-3a47-8cbf-d7dc07018158", "5ea5829b-322f-33ec-acc7-17a89165d4fb", "57ebb7bc-ebb6-3f0c-8633-63a4f453cc11", "7d5295d2-0b88-3fa1-8ea1-f4ec93dea2fb"]
+}]
