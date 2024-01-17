@@ -17,10 +17,10 @@ Make sure you have Janssen server with SAML plugin installed and enabled. SAML p
 ## Inbound SAML Authentication Flow
 
 The following is a high-level diagram depicting a typical inbound identity user authentication and provisioning workflow.
-![](../../../assets/inbound-saml-flow.png)
+![](../../assets/inbound-saml-flow.png)
 
 ## Configure SAML IDP
-Use [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/config-tools/jans-cli/README.md) to create new IDP Keycloak Server.
+Use [Janssen Text-based UI(TUI)](../config-guide/config-tools/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/config-tools/jans-cli/README.md) to create new IDP Keycloak Server.
 1. Navigate to Inbound SAML
 
 1. Click on `Add IDP`
