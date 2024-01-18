@@ -1,0 +1,72 @@
+[{
+  "dn": "auiFeatureId=attributes_delete,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "attributes_delete",
+  "displayName": "Schema:Person - Delete",
+  "jansScope": "https://jans.io/oauth/config/attributes.delete"
+}, {
+  "dn": "auiFeatureId=attributes_write,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "attributes_write",
+  "displayName": "Schema:Person - Add/Edit",
+  "jansScope": "https://jans.io/oauth/config/attributes.write"
+}, {
+  "dn": "auiFeatureId=custom_script_delete,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "custom_script_delete",
+  "displayName": "Custom Script - Delete",
+  "jansScope": "https://jans.io/oauth/config/scripts.delete"
+}, {
+  "dn": "auiFeatureId=custom_script_write,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "custom_script_write",
+  "displayName": "Custom Script - Add/Edit",
+  "jansScope": "https://jans.io/oauth/config/scripts.write"
+}, {
+  "dn": "auiFeatureId=fido_configuration_write,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "fido_configuration_write",
+  "displayName": "FIDO Configuration - Edit",
+  "jansScope": "https://jans.io/oauth/jans-auth-server/config/properties.write"
+}, {
+  "dn": "auiFeatureId=jans_link_write,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "jans_link_write",
+  "displayName": "Jans Link - Edit",
+  "jansScope": "https://jans.io/oauth/config/jans-link.write",
+  "webhookIdsMapped": ["dd6e0e18-231e-3a47-8cbf-d7dc07018158", "5ea5829b-322f-33ec-acc7-17a89165d4fb", "57ebb7bc-ebb6-3f0c-8633-63a4f453cc11", "7d5295d2-0b88-3fa1-8ea1-f4ec93dea2fb"]
+}, {
+  "dn": "auiFeatureId=oidc_clients_delete,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "oidc_clients_delete",
+  "displayName": "OIDC Clients - Delete",
+  "jansScope": "https://jans.io/oauth/config/openid/clients.delete"
+}, {
+  "dn": "auiFeatureId=oidc_clients_write,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "oidc_clients_write",
+  "displayName": "OIDC Clients - Add/Edit",
+  "jansScope": "https://jans.io/oauth/config/openid/clients.write"
+}, {
+  "dn": "auiFeatureId=scim_configuration_edit,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "scim_configuration_edit",
+  "displayName": "SCIM Configuration - Edit",
+  "jansScope": "https://jans.io/scim/config.write"
+}, {
+  "dn": "auiFeatureId=scopes_delete,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "scopes_delete",
+  "displayName": "Scopes - Delete",
+  "jansScope": "https://jans.io/oauth/config/scopes.delete"
+}, {
+  "dn": "auiFeatureId=scopes_write,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "scopes_write",
+  "displayName": "Scopes - Add/Edit",
+  "jansScope": "https://jans.io/oauth/config/scopes.write"
+}, {
+  "dn": "auiFeatureId=smtp_configuration_edit,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "smtp_configuration_edit",
+  "displayName": "SMTP Configuration - Edit",
+  "jansScope": "https://jans.io/oauth/config/smtp.write"
+}, {
+  "dn": "auiFeatureId=users_delete,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "users_delete",
+  "displayName": "Users - Delete",
+  "jansScope": "https://jans.io/oauth/config/user.delete"
+}, {
+  "dn": "auiFeatureId=users_edit,ou=auiFeatures,ou=admin-ui,o=jans",
+  "auiFeatureId": "users_edit",
+  "displayName": "Users - Add/Edit",
+  "jansScope": "https://jans.io/oauth/config/user.write"
+}]
