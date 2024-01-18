@@ -22,6 +22,10 @@ annotations:
       image: ghcr.io/janssenproject/jans/casa:1.0.22_dev
     - name: scim
       image: ghcr.io/janssenproject/jans/scim:1.0.22_dev
+    - name: link
+      image: ghcr.io/janssenproject/jans/link:1.0.22_dev
+    - name: saml
+      image: ghcr.io/janssenproject/jans/saml:1.0.22_dev
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
@@ -84,4 +88,8 @@ dependencies:
 
     - name: link
       condition: global.link.enabled
+      version: 1.0.22-dev
+
+    - name: saml
+      condition: global.saml.enabled
       version: 1.0.22-dev
