@@ -87,7 +87,13 @@ public class IdpService {
     }
 
     public List<IdentityProvider> getIdentityProviderByName(String name) {
-        return identityProviderService.getIdentityProviderByName(name);
+        List<IdentityProvider> list = null;
+        try {
+            list = identityProviderService.getIdentityProviderByName(name);
+        } catch (Exception ex) {
+            log.error("Error while finding IDP with name:{} is:{}", name, ex);
+        }
+        return list;
     }
 
     public PagedResult<IdentityProvider> getIdentityProviders(SearchRequest searchRequest) {
