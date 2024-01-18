@@ -43,7 +43,6 @@ h6 {
 	clear: both;
 }
 html {
-	overflow-y: scroll;
 	font-size: 100%;
 	-webkit-text-size-adjust: 100%;
 	-ms-text-size-adjust: 100%;
@@ -697,6 +696,10 @@ input.btn.btn-done {
     margin: 0 !important;
 }
 
+.no-padding {
+    padding: 0 !important;
+}
+
 .device-authz-label {
     margin-top: 32px;
     text-align: left;
@@ -728,7 +731,7 @@ input.btn.btn-done {
     border-radius: 7px !important;
 }
 
-.device-authz-input-code {
+.device-authz-input-code, .app-input-styles {
     text-align: center;
     font-weight: bold !important;
     font-size: 25px !important;
@@ -738,302 +741,60 @@ input.btn.btn-done {
     color: #fff !important;
 }
 
+.app-input-styles {
+    text-align: left !important;
+}
+
 .absolute-logo {
     position: absolute;
     top: 0;
     left: 50%;
     transform: translate(-50%, 100%);
+    max-height: 70px;
 }
 
-.frame-6{
-    /* Auto layout */
-display: flex;
-flex-direction: column;
-align-items: flex-start;
-padding: 40px 40px 50px;
-gap: 32px;
-
-position: absolute;
-width: 38% !important;
-/* height: 51% !important; */
-left: 30% !important;
-top: 27% !important;
-
-background: #2C1A1A;
-box-shadow: 10px 20px 20px rgba(0, 0, 0, 0.28);
-border-radius: 12px;
+@media only screen and (max-height: 780px) {
+    .absolute-logo {
+        transform: translate(-50%, 20%);
+    }
 }
 
-.frame-7{
-    /* Auto layout */
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    padding: 0px;
-    gap: 10px;
-
-    width: 530px;
-    height: 46px;
-
-
-    /* Inside auto layout */
-    flex: none;
-    order: 0;
-    align-self: stretch;
-    flex-grow: 0;
-
+.remember-me__text {
+    font-size: 17px;
 }
 
-.sign-in-text{
-    font-family: 'Lato';
-    font-style: normal;
-    font-weight: 700;
-    font-size: 38px;
-    line-height: 46px;
-    color: #FFFFFF;
-
-
-    /* Inside auto layout */
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-}
-
-.frame-8{
-    /* Auto layout */
-    display: flex;
-    /*flex-direction: column;*/
-    align-items: flex-start;
-    padding: 0px;
-    gap: 28px;
-
-
-    /*width: 33% !important;
-    height: 16% !important;*/
-
-
-    /* Inside auto layout */
-    flex: none;
-    order: 1;
-    flex-grow: 0;
-}
-
-.frame-1{
-    box-sizing: border-box;
-
-    width: 530px !important;
-    height: 60px !important;
-
-    border: 1.2px solid #FFFFFF;
-    border-radius: 7px;
-
-    /* Inside auto layout */
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-
-}
-
-.email-address-text{
-    position: absolute;
-    /*width: 120px;
-    height: 24px;
-    left: 73px;
-    top: 18px; */
-
-    font-family: 'Lato';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 20px;
-    line-height: 24px;
-    /* identical to box height */
-
-    color: #D6D6D6;
-    background: transparent !important
-}
-
-.frame-2{
-    box-sizing: border-box;
-
-    width: 530px;
-    height: 60px;
-
-    border: 1.2px solid #FFFFFF;
-    border-radius: 7px;
-
-    /* Inside auto layout */
-    flex: none;
-    order: 1;
-    flex-grow: 0;
-}
-
-.password-text{
-    position: absolute;
-    /*width: 85px;
-    height: 24px;
-    left: 73px;
-    top: 18px;*/
-
-    font-family: 'Lato';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 20px;
-    line-height: 24px;
-    /* identical to box height */
-
-    color: #D6D6D6;
-    background: transparent !important
-}
-
-.frame-4{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 0px;
-    gap: 10px;
-
-    width: 530px;
-    height: 20px;
-
-
-    /* Inside auto layout */
-    flex: none;
-    order: 0;
-    align-self: stretch;
-    flex-grow: 0;
-}
-
-.frame-3{
-    /* Auto layout */
-    display: flex;
+.remember-me__input {
+    width: 16px;
+    height: 16px;
+    padding: 10px;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 10px;
     gap: 10px;
-
-    width: 19px;
-    height: 19px;
-
-    background: #01BA77;
-    border-radius: 4px;
-
-    /* Inside auto layout */
-    flex: none;
-    order: 0;
-    flex-grow: 0;
+    accent-color: #00BE79;
 }
 
-.frame-9{
-	/* Auto layout */
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	padding: 0px;
-	gap: 32px;
-
-	/*width: 530px;
-	height: 112px;*/
-
-
-	/* Inside auto layout */
-	flex: none;
-	order: 2;
-	flex-grow: 0;
+.mt-4 {
+    margin-top: 4rem;
 }
 
-.remember-me-text{
-    /*width: 109px;
-    height: 20px;*/
-
-    font-family: 'Lato';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 17px;
-    line-height: 20px;
-
-    color: #FFFFFF;
-
-
-    /* Inside auto layout */
-    flex: none;
-    order: 1;
-    flex-grow: 0;
+.error-text {
+    color: #FF7F7F;
 }
 
-.button{
-    /* Auto layout */
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 24px 40px;
-
-    width: 530px;
-    height: 60px;
-
-    background: #01BA77;
-    border-radius: 7px;
-
-    /* Inside auto layout */
-    flex: none;
-    order: 1;
-    flex-grow: 0;
+.mt-8 {
+    margin-top: 2rem;
 }
 
-.jans_base_text_box{
-    display: flex;
-    width: 530px;
-    padding: 14px 337px 14px 21px;
-    align-items: center;
-    gap: 20px;
-    border-radius: 7px;
-    border: 1.2px solid #FFF;
-    color: #D6D6D6;
-    font-family: Lato;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: normal;
+.mt-7 {
+    margin-top: 1.75rem;
 }
 
-.jans_login_button{
-/* Auto layout */
-display: flex;
-flex-direction: row;
-justify-content: center;
-align-items: center;
-padding: 24px 40px;
-
-/*width: 530px;
-height: 60px;*/
-
-background: #01BA77;
-border-radius: 7px;
-
-/* Inside auto layout */
-flex: none;
-order: 1;
-flex-grow: 0;
+.login__sign-up--link {
+    color: #00BE79;
+    border-bottom: 1px solid #00BE79;
 }
 
-.jans_login_button_text{
-/*width: 75px;
-height: 29px;*/
-
-font-family: 'Lato';
-font-style: normal;
-font-weight: 700;
-font-size: 24px;
-line-height: 29px;
-/* identical to box height */
-letter-spacing: 0.02em;
-
-color: #FFFFFF;
-
-
-/* Inside auto layout */
-flex: none;
-order: 0;
-flex-grow: 0;
+.text-lg {
+    font-size: 18px;
 }

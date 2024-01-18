@@ -23,8 +23,7 @@
 	</ui:define>
 	<ui:define name="body">
 		<h:form id="deviceAuthzForm" class="bg-highlight position-relative d-flex flex-column align-items-center" style="justify-content: space-evenly; height: 100vh;">
-			<img style="max-height: 70px;" id="AppLogo"
-				src="#{request.contextPath}/servlet/logo" alt="janssen-logo" class="absolute-logo" />
+			<img id="AppLogo" src="#{request.contextPath}/servlet/logo" alt="janssen-logo" class="absolute-logo" />
 			<div class="container">
 				<h:panelGroup rendered="#{deviceAuthorizationAction.newRequest}">
 					<div class="jans-form-container">
@@ -33,7 +32,7 @@
 								<h:outputText value="#{msgs['device.authorization.title']}" />
 							</div>
 							<div>
-								<h:messages style="color:#FF7F7F; width: 100%; text-align: left; padding: 0;" id="messages" />
+								<h:messages class="error-text" style="width: 100%; text-align: left; padding: 0;" id="messages" />
 							</div>
 							<div class="device-authz-subtitle">
 								<h:outputText value="#{msgs['device.authorization.subtitle']}" />
@@ -84,8 +83,8 @@
 
 				<h:panelGroup layout="block" styleClass="row col-12 justify-content-center"
 							  rendered="#{deviceAuthorizationAction.errorResponse || deviceAuthorizationAction.deviceAuthnCompleted}">
-					<h:outputLabel styleClass="col-12 device-authz-title" value="#{deviceAuthorizationAction.titleMsg}" />
-					<h:outputLabel styleClass="col-12 reg_link" value="#{deviceAuthorizationAction.descriptionMsg}" />
+					<h:outputLabel styleClass="col-12 device-authz-title text-center text-white" value="#{deviceAuthorizationAction.titleMsg}" />
+					<h:outputLabel styleClass="col-12 reg_link text-white" value="#{deviceAuthorizationAction.descriptionMsg}" />
 					<h:commandButton id="newAuthn1"
 									 style="background-color: #00BE79; color:white;"
 									 styleClass="btn device-authz-init-btn" value="#{msgs['device.authorization.init.new.request.msg']}"
