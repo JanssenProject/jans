@@ -47,6 +47,10 @@ class PackageUtils(SetupUtils):
     def check_and_install_packages(self):
 
         install_command, update_command, query_command, check_text = self.get_install_commands()
+        dnf_command = shutil.which('dnf')
+        if dnf_command:
+            for action_, repo_ in (('disable', 'postgresql'), ('reset', 'postgresql'), ('enable', 'postgresql:12')):
+                self.run([dnf_command, '-y', 'module', action_, repo_])
 
         install_list = {'mandatory': [], 'optional': []}
 
@@ -63,16 +67,6 @@ class PackageUtils(SetupUtils):
                     package_list[os_type_version]['mandatory'] += ' mysql-community-server'
                 else:
                     package_list[os_type_version]['mandatory'] += ' mysql-server'
-            if base.argsp.local_rdbm == 'pgsql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'pgsql'):
-                package_list[os_type_version]['mandatory'] += ' postgresql python3-psycopg2 postgresql-contrib'
-                if base.clone_type == 'deb':
-                    package_list[os_type_version]['mandatory'] += ''
-                elif base.clone_type == 'rpm':
-                    package_list[os_type_version]['mandatory'] += ' postgresql-server'
-                    self.run(['dnf', '-y', 'module', 'disable', 'postgresql'])
-                    self.run(['dnf', '-y', 'module', 'reset', 'postgresql'])
-                    self.run(['dnf', '-y', 'module', 'enable', 'postgresql:12'])
-
 
         for pypackage in package_list[os_type_version]['python']:
             try:
