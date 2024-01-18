@@ -124,9 +124,15 @@ public class IdpService {
         identityProvider = processIdentityProvider(identityProvider, getInputStream(bos), false);
         log.debug("Create IdentityProvider identityProvider:{}", identityProvider);
 
-        // Create IDP in Jans DB
-        identityProviderService.addSamlIdentityProvider(identityProvider, getInputStream(bos));
-        log.debug("Created IdentityProvider in Jans DB -  identityProvider:{}", identityProvider);
+        try {
+            // Create IDP in Jans DB
+            identityProviderService.addSamlIdentityProvider(identityProvider, getInputStream(bos));
+            log.debug("Created IdentityProvider in Jans DB -  identityProvider:{}", identityProvider);
+        } catch (Exception ex) {
+            log.error("Deleting KC IDP as error while persisting identityProvider:{}", identityProvider);
+            deleteIdentityProvider(identityProvider, false);
+            throw ex;
+        }
 
         return identityProvider;
     }
@@ -153,10 +159,10 @@ public class IdpService {
         return identityProvider;
     }
 
-    public void deleteIdentityProvider(IdentityProvider identityProvider) throws IOException {
+    public void deleteIdentityProvider(IdentityProvider identityProvider, boolean deleteInDB) throws IOException {
         boolean status = false;
-        log.info("Delete dentityProvider:{}, samlConfigService.isSamlEnabled():{}", identityProvider,
-                samlConfigService.isSamlEnabled());
+        log.info("Delete dentityProvider:{}, deleteInDB:{}, samlConfigService.isSamlEnabled():{}", identityProvider,
+                deleteInDB, samlConfigService.isSamlEnabled());
         // validate
         if (identityProvider == null) {
             throw new InvalidAttributeException("IdentityProvider object for delete is null!!!");
@@ -166,10 +172,14 @@ public class IdpService {
             // Delete IDP in KC
             status = keycloakService.deleteIdentityProvider(identityProvider.getRealm(), identityProvider.getName());
         }
-        log.info("Delete IDP status:{},)", status);
+        log.info("Delete IDP status:{}, deleteInDB:{}", status, deleteInDB);
         // Delete in Jans DB
-        if (status) {
+        if (status && deleteInDB) {
+            log.info("Deleting IDP in DB - identityProvider.getInum():{}, identityProvider.getName():{}",
+                    identityProvider.getInum(), identityProvider.getName());
             identityProviderService.removeIdentityProvider(identityProvider);
+            log.info("IDP successfully deleted in DB - identityProvider.getInum():{}, identityProvider.getName():{}",
+                    identityProvider.getInum(), identityProvider.getName());
         }
     }
 
@@ -212,7 +222,7 @@ public class IdpService {
         if (StringUtils.isBlank(identityProvider.getProviderId())) {
             identityProvider.setProviderId(Constants.SAML);
         }
-        
+
         log.info("After setting default value for identityProvider:{}, update:{}", identityProvider, update);
         return identityProvider;
     }
@@ -248,7 +258,7 @@ public class IdpService {
             identityProvider = keycloakService.createUpdateIdentityProvider(identityProvider.getRealm(), isUpdate,
                     identityProvider);
 
-            log.info("Newly created identityProvider:{}", identityProvider);
+            log.info("Newly created identityProvider in KC:{}", identityProvider);
 
             // set KC SP MetadataURL name
             if (identityProvider != null) {
@@ -336,9 +346,9 @@ public class IdpService {
         log.debug("Get InputStream for output:{}", output);
         InputStream input = null;
         if (output == null) {
-           return input;
+            return input;
         }
-        
+
         input = new ByteArrayInputStream(output.toByteArray());
         log.debug("From ByteArrayOutputStream InputStream is:{}", input);
         return input;

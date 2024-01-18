@@ -54,7 +54,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
             data = {}
             title = _("Add new Trust Relationship")
 
-        super().__init__(app, title)
+        super().__init__(parent=app, title=title)
         self.app = app
         self.data = data
         self.myparent = myparent

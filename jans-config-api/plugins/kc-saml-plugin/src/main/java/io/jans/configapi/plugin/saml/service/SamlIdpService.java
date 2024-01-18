@@ -52,7 +52,7 @@ public class SamlIdpService {
             this.samlSchema = samlSchemaBuilder.getSAMLSchema();
             logger.debug("samlSchema:{}", samlSchema);
         } catch (Exception ex) {
-            logger.error("Failed to load SAMLSchema - ", ex);
+            logger.warn("Failed to load SAMLSchema - ", ex);
         }
     }
 
