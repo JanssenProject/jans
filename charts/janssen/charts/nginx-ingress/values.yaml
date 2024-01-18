@@ -53,6 +53,14 @@ ingress:
   authServerLabels: { }
   # -- Auth server ingress resource additional annotations.
   authServerAdditionalAnnotations: { }
+  # -- Casa ingress resource labels. key app is taken
+  casaLabels: { }
+  # -- Casa ingress resource additional annotations.
+  casaAdditionalAnnotations: { }
+  # -- SAML config ingress resource labels. key app is taken
+  samlLabels: { }
+  # -- SAML ingress resource additional annotations.
+  samlAdditionalAnnotations: { }
   # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
   additionalLabels: { }
   # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken
