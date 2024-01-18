@@ -8,6 +8,8 @@ import copy
 import hashlib
 import ldap3
 import pymysql
+import time
+
 from ldap3.utils import dn as dnutils
 from pathlib import PurePath
 
