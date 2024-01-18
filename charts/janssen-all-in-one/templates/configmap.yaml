@@ -192,6 +192,21 @@ data:
   CN_LDAP_TRUSTSTORE_FILE: {{ .Values.cnLdapTruststoreFile }}
   CN_CONFIG_API_PLUGINS: "admin-ui,fido2,scim,user-mgt"
   CN_AIO_COMPONENTS: {{ include "janssen-all-in-one.aioComponents" . | fromJsonArray | join "," | quote}}
+  {{- if .Values.saml.enabled }}
+  QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: {{ .Values.configmap.quarkusTransactionEnableRecovery | quote }}
+  KC_LOG_LEVEL: {{ .Values.configmap.kcLogLevel | quote }}
+  KC_PROXY: {{ .Values.configmap.kcProxy | quote }}
+  KC_DB: {{ .Values.configmap.kcDbVendor | quote }}
+  KC_DB_USERNAME: {{ .Values.configmap.kcDbUsername | quote }}
+  KC_DB_SCHEMA: {{ .Values.configmap.kcDbSchema | quote }}
+  KC_DB_URL_HOST: {{ .Values.configmap.kcDbUrlHost | quote }}
+  KC_DB_URL_PORT: {{ .Values.configmap.kcDbUrlPort | quote }}
+  KC_DB_URL_DATABASE: {{ .Values.configmap.kcDbUrlDatabase | quote }}
+  KC_DB_URL_PROPERTIES: {{ .Values.configmap.kcDbUrlProperties | quote }}
+  CN_SAML_KC_DB_PASSWORD_FILE: {{ .Values.kcDbPasswordFile | quote }}
+  CN_SAML_KC_ADMIN_CREDENTIALS_FILE: {{ .Values.kcAdminCredentialsFile | quote }}
+  {{- end }}
+
 ---
 
 apiVersion: v1
