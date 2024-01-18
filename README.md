@@ -2,6 +2,9 @@
 
 ## Welcome to the Janssen Project
 
+[![The Linux Foundation](https://img.shields.io/badge/Member-The%20Linux%20Foundation-blue?style=flat-square)](https://www.linuxfoundation.org/press/press-release/the-janssen-project-takes-on-worlds-most-demanding-digital-trust-challenges-at-linux-foundation)
+[![DPGA](https://img.shields.io/badge/DPGA-digital%20public%20good-green?style=flat-square)](https://app.digitalpublicgoods.net/a/10470)
+
 An open source digital identity platforms that scales, Janssen is a software
 distribution of standards-based, developer-friendly components that are
 engineered to work together in any cloud.
@@ -14,7 +17,7 @@ engineered to work together in any cloud.
 Digital identity has a huge technical surface area. As you can see from
 the commits on this projects, we write a lot of code. But we don't have to
 write everything! Where it's synergistic, the project leverages third party
-security components, like Keycloak and Open Policy Agent. We favor security
+security components, like [Keycloak](https://www.keycloak.org/) and [Open Policy Agent](https://www.openpolicyagent.org/). We favor security
 software that lives under the Linux Foundation umbrella, but other community
 governed open source components are ok too.
 
@@ -26,12 +29,12 @@ format to standardize deployment of Agama code on any IDP.
 Janssen is a self-funded project chartered directly under the
 Linux Foundation. It is recognized as a
 [Digital Public Good](https://app.digitalpublicgoods.net/a/10470) by the
-[DPGA](https://digitalpublicgoods.net/). The core contributors of the Janssen
-Project are the [Gluu team](https://gluu.org), who monetize a commercial
-distribution Janssen [Gluu Flex](https://gluu.org/flex).
-
-[![The Linux Foundation](https://img.shields.io/badge/Member-The%20Linux%20Foundation-blue?style=flat-square)](https://www.linuxfoundation.org/press/press-release/the-janssen-project-takes-on-worlds-most-demanding-digital-trust-challenges-at-linux-foundation)
-[![DPGA](https://img.shields.io/badge/DPGA-digital%20public%20good-green?style=flat-square)](https://app.digitalpublicgoods.net/a/10470)
+[DPGA](https://digitalpublicgoods.net/). Currently, a lot of contributions and 
+many core 
+contributors of the Janssen
+Project are from the [Gluu team](https://gluu.org), who provide a 
+commercial 
+distribution called [Gluu Flex](https://gluu.org/flex).
 
 ----
 
@@ -55,20 +58,20 @@ distribution Janssen [Gluu Flex](https://gluu.org/flex).
 
 ## Janssen Components
 
-| Component                                | Description                                                                                                                                                                                                                                 | Lifecycle Stage                                                  |
-|------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------|
-| **[Jans Auth Server](jans-auth-server)** | A very complete Java OAuth Authorization Server and a [certified](https://openid.net/certification/) OpenID Connect Provider. It's the upstream open-source core of [Gluu Flex](https://gluu.org/flex).                                     | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
-| **[Agama](agama)**                       | Agama offers an interoperable way to design authentication flows, coded in a DSL purpose-built for writing identity journeys.                                                                                                               | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
-| **[Jans FIDO](jans-fido2)**              | Enables end-users to enroll and authenticate with passkeys and other FIDO authenticators.                                                                                                                                                   | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
-| **[Jans SCIM](jans-scim)**               | [SCIM](http://www.simplecloud.info/) JSON/REST [API](https://docs.jans.io/head/admin/reference/openapi/) for user management, including associated FIDO devices.                                                                            | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
-| **[Jans Config API](jans-config-api)**   | RESTful control plane for all Janssen components.                                                                                                                                                                                           | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
-| **[Text UI ("TUI")](jans-cli-tui)**      | Command line and interactive configuration tools to help you correctly call the Config API.                                                                                                                                                 | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
-| **[Jans Casa](jans-casa)**               |                                                                                                                                                                                                                                             | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
-| **[Keycloak](https://www.cncf.io/projects/keycloak/)**                                         | provides an array of out of the box IAM services in a single lightweight container image. It's handy for many workforce requirements like SAML. The Janssen authenticator module (SPI) simplifies SSO across Janssen and Keycloak websites. | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
-| **[Jans Lock](jans-lock)**                                         | A Pub/Sub client that retrieves the latest data about OAuth access and transaction tokens and updates OPA.                                                                                                                                  | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
-| **[Jans Tarp](demos/jans-tarp)**                                         | An OpenID Connect RP test website that runs as a browser plugin in Chrome or Firefox.                                                                                                                                                       | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
-| **[Jans Chip](demos/jans-chip)**                                         | Sample iOS and Android mobile applications that implement the full OAuth and FIDO security stack for app integrity, client constrained access tokens, and user presence.                                                                                                                                                                                                                                            | ![Demo](https://img.shields.io/badge/Demo-%23368af7)             |
-| **[Jans Tent](demos/jans-tent)** | | ![Demo](https://img.shields.io/badge/Demo-%23368af7)             |
+| Component                                                  | Description                                                                                                                                                                                                                                 | Lifecycle Stage                                                  |
+|------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------|
+| **[Jans Auth Server](jans-auth-server)**                   | A very complete Java OAuth Authorization Server and a [certified](https://openid.net/certification/) OpenID Connect Provider. It's the upstream open-source core of [Gluu Flex](https://gluu.org/flex).                                     | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
+| **[Agama](agama)**                                         | Agama offers an interoperable way to design authentication flows, coded in a DSL purpose-built for writing identity journeys.                                                                                                               | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
+| **[Jans FIDO](jans-fido2)**                                | Enables end-users to enroll and authenticate with passkeys and other FIDO authenticators.                                                                                                                                                   | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
+| **[Jans SCIM](jans-scim)**                                 | [SCIM](http://www.simplecloud.info/) JSON/REST [API](https://docs.jans.io/head/admin/reference/openapi/) for user management, including associated FIDO devices.                                                                            | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
+| **[Jans Config API](jans-config-api)**                     | RESTful control plane for all Janssen components.                                                                                                                                                                                           | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
+| **[Text UI ("TUI")](jans-cli-tui)**                        | Command line and interactive configuration tools to help you correctly call the Config API.                                                                                                                                                 | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
+| **[Jans Casa](jans-casa)**                                 |                                                                                                                                                                                                                                             | ![Graduated](https://img.shields.io/badge/Graduated-%2301ba77)   |
+| **[Jans Keycloak Integration](jans-keycloak-integration)** | provides an array of out of the box IAM services in a single lightweight container image. It's handy for many workforce requirements like SAML. The Janssen authenticator module (SPI) simplifies SSO across Janssen and Keycloak websites. | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
+| **[Jans Lock](jans-lock)**                                 | A Pub/Sub client that retrieves the latest data about OAuth access and transaction tokens and updates OPA.                                                                                                                                  | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
+| **[Jans Tarp](demos/jans-tarp)**                           | An OpenID Connect RP test website that runs as a browser plugin in Chrome or Firefox.                                                                                                                                                       | ![Incubating](https://img.shields.io/badge/Incubating-%23f79307) |
+| **[Jans Chip](demos/jans-chip)**                           | Sample iOS and Android mobile applications that implement the full OAuth and FIDO security stack for app integrity, client constrained access tokens, and user presence.                                                                    | ![Demo](https://img.shields.io/badge/Demo-%23368af7)             |
+| **[Jans Tent](demos/jans-tent)**                           | A test Relying Party ("RP") built using Python and Flask. Enables you to send different requests by quickly modifying just one configuration file.                                                                                          | ![Demo](https://img.shields.io/badge/Demo-%23368af7)             |
 
 ## Installation
 
