@@ -1040,26 +1040,5 @@
       "size": 128,
       "type": "STRING"
     }
-  },
-  "jansSAMLspMetaDataURL": {
-    "mysql": {
-      "size": 128,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 128,
-      "type": "STRING"
-    }
-  },
-  "jansPostLogoutRedirectURI": {
-    "mysql": {
-      "size": 128,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 128,
-      "type": "STRING"
-    }
   }
-  
 }
