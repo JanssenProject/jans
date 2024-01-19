@@ -2,21 +2,21 @@
 # Assets sources
 # ==============
 
-# original Janssen version (without suffix, i.e. SNAPSHOT)
-ARG CN_VERSION=1.0.22
+# original Janssen base version (without suffix)
+ARG BASE_VERSION=1.0.22
 
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
-ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:${CN_VERSION}_dev
-ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:${CN_VERSION}_dev
-ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:${CN_VERSION}_dev
-ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${CN_VERSION}_dev
-ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${CN_VERSION}_dev
-ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${CN_VERSION}_dev
-ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${CN_VERSION}_dev
-ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${CN_VERSION}_dev
-ARG JANS_KEYCLOAK_LINK_IMAGE=ghcr.io/janssenproject/jans/keycloak-link:${CN_VERSION}_dev
-ARG JANS_SAML_IMAGE=ghcr.io/janssenproject/jans/saml:${CN_VERSION}_dev
+ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:${BASE_VERSION}_dev
+ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:${BASE_VERSION}_dev
+ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:${BASE_VERSION}_dev
+ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${BASE_VERSION}_dev
+ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${BASE_VERSION}_dev
+ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${BASE_VERSION}_dev
+ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${BASE_VERSION}_dev
+ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${BASE_VERSION}_dev
+ARG JANS_KEYCLOAK_LINK_IMAGE=ghcr.io/janssenproject/jans/keycloak-link:${BASE_VERSION}_dev
+ARG JANS_SAML_IMAGE=ghcr.io/janssenproject/jans/saml:${BASE_VERSION}_dev
 
 # -----------
 # base images
