@@ -4,6 +4,7 @@ import base64
 import logging.config
 import os
 import typing as _t
+from contextlib import suppress
 from functools import cached_property
 from string import Template
 from uuid import uuid4
@@ -38,8 +39,9 @@ def render_keycloak_conf():
     if not db_password:
         passwd_file = os.environ.get("CN_SAML_KC_DB_PASSWORD_FILE", "/etc/jans/conf/kc_db_password")
 
-        with open(passwd_file) as f:
-            db_password = f.read().strip()
+        with suppress(FileNotFoundError):
+            with open(passwd_file) as f:
+                db_password = f.read().strip()
 
     ctx = {
         "hostname": manager.config.get("hostname"),

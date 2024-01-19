@@ -2,7 +2,7 @@
 # Assets sources
 # ==============
 
-# original Janssen version
+# original Janssen version (without suffix, i.e. SNAPSHOT)
 ARG CN_VERSION=1.0.22
 
 # the following ARGs set default base images
@@ -158,6 +158,9 @@ RUN mkdir -p /opt/jans/configurator/db \
     /usr/share/java
 
 COPY app /app
+
+# CN version as env var (with suffix if any, i.e. SNAPSHOT)
+ENV CN_VERSION=1.0.22-SNAPSHOT
 
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app

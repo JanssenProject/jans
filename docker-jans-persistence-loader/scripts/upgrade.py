@@ -857,6 +857,9 @@ def _transform_message_config(conf):
     else:
         pg_pw_encoded = ""
 
+    # backward-compat values
+    msg_wait_millis = conf["postgresConfiguration"].get("messageWaitMillis") or conf["postgresConfiguration"].get("message-wait-millis") or 100
+    msg_sleep_thread = conf["postgresConfiguration"].get("messageSleepThreadTime") or conf["postgresConfiguration"].get("message-sleep-thread-millis") or 200
     new_conf = {
         "messageProviderType": provider_type,
         "postgresConfiguration": {
@@ -864,8 +867,8 @@ def _transform_message_config(conf):
             "dbSchemaName": os.environ.get("CN_SQL_DB_SCHEMA", "public"),
             "authUserName": os.environ.get("CN_SQL_DB_USER", "jans"),
             "authUserPassword": pg_pw_encoded,
-            "messageWaitMillis": conf["postgresConfiguration"]["messageWaitMillis"],
-            "messageSleepThreadTime": conf["postgresConfiguration"]["messageSleepThreadTime"],
+            "messageWaitMillis": msg_wait_millis,
+            "messageSleepThreadTime": msg_sleep_thread,
         },
         "redisConfiguration": {
             "servers": os.environ.get("CN_REDIS_URL", "localhost:6379"),

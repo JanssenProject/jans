@@ -26,7 +26,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=7ed7b9daae7b7b272bcacba0f9c8ad495a938c3e
+ENV JANS_SOURCE_VERSION=647aa0b0a118ab629e185b7f67ab3ded87ea1b9c
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
