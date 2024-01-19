@@ -228,6 +228,12 @@ public class IdpService {
         if (StringUtils.isBlank(identityProvider.getProviderId())) {
             identityProvider.setProviderId(Constants.SAML);
         }
+        
+        if(!update) {
+            //While creating set store token to be true
+            identityProvider.setStoreToken(true);
+            identityProvider.setAddReadTokenRoleOnCreate(true);
+        }
 
         log.info("After setting default value for identityProvider:{}, update:{}", identityProvider, update);
         return identityProvider;
