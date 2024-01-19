@@ -45,6 +45,7 @@ class Plugin(DialogUtils):
         self.page_entered = False
 
         self.trust_realtionships = []
+        self.identity_providers = []
         self.config = {}
         self.prepare_navbar()
         self.prepare_containers()
@@ -56,6 +57,7 @@ class Plugin(DialogUtils):
 
         self.app.create_background_task(self.get_configuration())
         self.app.create_background_task(self.get_trust_relations())
+        self.app.create_background_task(self.get_identity_providers())
 
     def set_center_frame(self) -> None:
         """center frame content
@@ -130,7 +132,7 @@ class Plugin(DialogUtils):
 
         self.provider_container = JansVerticalNav(
                 myparent=self.app,
-                headers=['inum', _("Display Name"), _("Status")],
+                headers=['inum', _("Display Name"), _("Enabled")],
                 preferred_size= self.app.get_column_sizes(.3, .5, .2),
                 data=[],
                 on_enter=self.edit_identity_provider,
@@ -200,6 +202,29 @@ class Plugin(DialogUtils):
             self.app.disable_plugin(self.pid)
             return
 
+    async def get_identity_providers(self) -> None:
+        'Coroutine for getting identity_providers.'
+        try:
+            response = self.app.cli_object.process_command_by_id(
+                        operation_id='get-saml-identity-provider',
+                        url_suffix='',
+                        endpoint_args='',
+                        data_fn=None,
+                        data={}
+                        )
+            providers = response.json()
+            self.identity_providers = providers.get('entries', [])
+
+        except Exception as e:
+            self.app.show_message(_("Error getting Identity Providers-1"), str(e), tobefocused=self.app.center_container)
+            return
+
+        if response.status_code not in (200, 201):
+            self.app.show_message(_("Error getting Identity Providers-2"), str(response.text), tobefocused=self.app.center_container)
+            return
+
+        self.update_provider_container()
+
     def update_trust_relationships_container(self):
         self.tr_container.clear()
         self.tr_container.all_data = self.trust_realtionships
@@ -209,6 +234,17 @@ class Plugin(DialogUtils):
                         tr['displayName'],
                         tr['enabled']
                     ))
+
+    def update_provider_container(self):
+        self.provider_container.clear()
+        self.provider_container.all_data = self.identity_providers
+        for provider in self.identity_providers:
+            self.provider_container.add_item((
+                        provider['inum'],
+                        provider['displayName'],
+                        provider['enabled']
+                    ))
+
 
     def prepare_navbar(self) -> None:
         """prepare the navbar for the current Plugin 
