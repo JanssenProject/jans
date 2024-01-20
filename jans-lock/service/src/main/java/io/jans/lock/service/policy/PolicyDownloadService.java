@@ -152,7 +152,7 @@ public class PolicyDownloadService {
 					}
 					
 					for (JsonNode policyUri : policiesArray) {
-						String downloadedPolicy = downloadPolicy(policyUri.asText());
+						String downloadedPolicy = downloadPolicy(policyUri.asText(), policiesJsonUrisAccessToken);
 						if (StringHelper.isNotEmpty(downloadedPolicy)) {
 							downloadedPolicies.add(downloadedPolicy);
 						}
@@ -247,8 +247,11 @@ public class PolicyDownloadService {
 		log.debug("End Zip policies reload");
 	}
 
-	private String downloadPolicy(String policyUri) {
+	private String downloadPolicy(String policyUri, String accessToken) {
 		HttpGet request = new HttpGet(policyUri);
+		if (StringHelper.isNotEmpty(accessToken)) {
+			request.setHeader("Authorization", "Bearer " + accessToken);
+		}
 
 		try {
 			CloseableHttpClient httpClient = httpService.getHttpsClient();

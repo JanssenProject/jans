@@ -53,6 +53,7 @@ public class ExecutionContext {
     private AttributeService attributeService;
 
     private CustomScriptConfiguration script;
+    private boolean skipModifyAccessTokenScript;
     private TokenEntity idTokenEntity;
     private TokenEntity accessTokenEntity;
     private TokenEntity refreshTokenEntity;
@@ -112,6 +113,53 @@ public class ExecutionContext {
         return executionContext;
     }
 
+    public static ExecutionContext of(ExecutionContext context) {
+        ExecutionContext executionContext = new ExecutionContext();
+        if (context == null) {
+            return executionContext;
+        }
+
+        executionContext.httpRequest = context.httpRequest;
+        executionContext.httpResponse = context.httpResponse;
+        executionContext.responseBuilder = context.responseBuilder;
+        executionContext.client = context.client;
+        executionContext.grant = context.grant;
+        executionContext.user = context.user;
+        executionContext.sessionId = context.sessionId;
+        executionContext.currentSessions = context.currentSessions;
+        executionContext.authzRequest = context.authzRequest;
+        executionContext.authzDetails = context.authzDetails;
+        executionContext.authzDetail = context.authzDetail;
+        executionContext.appConfiguration = context.appConfiguration;
+        executionContext.attributeService = context.attributeService;
+        executionContext.script = context.script;
+        executionContext.skipModifyAccessTokenScript = context.skipModifyAccessTokenScript;
+        executionContext.idTokenEntity = context.idTokenEntity;
+        executionContext.accessTokenEntity = context.accessTokenEntity;
+        executionContext.refreshTokenEntity = context.refreshTokenEntity;
+        executionContext.dpop = context.dpop;
+        executionContext.certAsPem = context.certAsPem;
+        executionContext.deviceSecret = context.deviceSecret;
+        executionContext.nonce = context.nonce;
+        executionContext.state = context.state;
+        executionContext.includeIdTokenClaims = context.includeIdTokenClaims;
+        executionContext.preProcessing = context.preProcessing;
+        executionContext.postProcessor = context.postProcessor;
+        executionContext.scopes = context.scopes;
+        executionContext.claimsAsString = context.claimsAsString;
+        executionContext.userSessions = context.userSessions;
+        executionContext.auditLog = context.auditLog;
+
+        executionContext.attributes.clear();
+        executionContext.attributes.putAll(context.attributes);
+
+        return executionContext;
+    }
+
+    public ExecutionContext copy() {
+        return of(this);
+    }
+
     public AuthzDetails getAuthzDetails() {
         return authzDetails;
     }
@@ -166,6 +214,14 @@ public class ExecutionContext {
 
     public void setDeviceSecret(String deviceSecret) {
         this.deviceSecret = deviceSecret;
+    }
+
+    public boolean isSkipModifyAccessTokenScript() {
+        return skipModifyAccessTokenScript;
+    }
+
+    public void setSkipModifyAccessTokenScript(boolean skipModifyAccessTokenScript) {
+        this.skipModifyAccessTokenScript = skipModifyAccessTokenScript;
     }
 
     @NotNull

@@ -435,7 +435,7 @@ public class SqlFilterConverter {
 		return attributeType;
 	}
 
-	private String toInternalAttribute(Filter filter) {
+	private String toInternalAttribute(String tableName, Filter filter) {
 		String attributeName = filter.getAttributeName();
 
 		if (StringHelper.isEmpty(attributeName)) {
@@ -448,15 +448,15 @@ public class SqlFilterConverter {
 			}
 		}
 
-		return toInternalAttribute(attributeName);
+		return toInternalAttribute(tableName, attributeName);
 	}
 
-	private String toInternalAttribute(String attributeName) {
-		if (operationService == null) {
+	private String toInternalAttribute(String tableName, String attributeName) {
+		if ((operationService == null) || (tableName == null)) {
 			return attributeName;
 		}
 
-		return operationService.toInternalAttribute(attributeName);
+		return operationService.toInternalAttribute(tableName, attributeName);
 	}
 
 	private Expression buildTypedExpression(TableMapping tableMapping, Filter filter) throws SearchException {
@@ -543,7 +543,8 @@ public class SqlFilterConverter {
     		return convertToSqlFilterImpl(tableMapping, genericFilter.getFilters()[0], propertiesAnnotationsMap, jsonAttributes, processor, skipAlias).expression();
 		}
 		
-		String internalAttribute = toInternalAttribute(genericFilter);
+		String tableName = tableMapping == null ? null : tableMapping.getTableName();
+		String internalAttribute = toInternalAttribute(tableName, genericFilter);
 		
 		return buildTypedPath(tableMapping, genericFilter, internalAttribute, skipAlias);
 	}

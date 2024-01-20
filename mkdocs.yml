@@ -8827,6 +8827,8 @@ nav:
 plugins:
 - tags
 - search
+- exclude-search:
+    exclude_unreferenced: true
 - git-revision-date-localized:
     enable_creation_date: true
     type: timeago
