@@ -15,6 +15,8 @@ ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${CN_VERSION}_dev
 ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${CN_VERSION}_dev
 ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${CN_VERSION}_dev
 ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${CN_VERSION}_dev
+ARG JANS_KEYCLOAK_LINK_IMAGE=ghcr.io/janssenproject/jans/keycloak-link:${CN_VERSION}_dev
+ARG JANS_SAML_IMAGE=ghcr.io/janssenproject/jans/saml:${CN_VERSION}_dev
 
 # -----------
 # base images
@@ -35,6 +37,10 @@ FROM ${JANS_SCIM_IMAGE} AS jans-scim-src
 FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 
 FROM ${JANS_LINK_IMAGE} AS jans-link-src
+
+FROM ${JANS_KEYCLOAK_LINK_IMAGE} AS jans-keycloak-link-src
+
+FROM ${JANS_SAML_IMAGE} AS jans-saml-src
 
 # ===
 # app
@@ -127,6 +133,18 @@ COPY --from=jans-link-src /app/templates/jans-link /app/templates/jans-link
 COPY --from=jans-link-src /app/scripts /app/jans_aio/jans_link
 RUN ln -sf /app/jans_aio/jans_link/entrypoint.sh /app/bin/jans-link-entrypoint.sh
 
+COPY --from=jans-keycloak-link-src /opt/jans/jetty/jans-keycloak-link /opt/jans/jetty/jans-keycloak-link
+COPY --from=jans-keycloak-link-src /app/templates/jans-keycloak-link /app/templates/jans-keycloak-link
+COPY --from=jans-keycloak-link-src /app/scripts /app/jans_aio/jans_keycloak_link
+COPY --from=jans-keycloak-link-src /var/jans/cr-snapshots /var/jans/cr-snapshots
+RUN ln -sf /app/jans_aio/jans_keycloak_link/entrypoint.sh /app/bin/jans-keycloak-link-entrypoint.sh
+
+COPY --from=jans-saml-src /app/templates/jans-saml /app/templates/jans-saml
+COPY --from=jans-saml-src /app/scripts /app/jans_aio/jans_saml
+COPY --from=jans-saml-src /opt/idp /opt/idp
+COPY --from=jans-saml-src /opt/keycloak /opt/keycloak
+RUN ln -sf /app/jans_aio/jans_saml/entrypoint.sh /app/bin/jans-saml-entrypoint.sh
+
 # ----
 # misc
 # ----
@@ -146,7 +164,7 @@ ENV PYTHONPATH=/app
 
 ENV JETTY_BASE=/opt/jans/jetty \
     JETTY_HOME=/opt/jetty \
-    CN_AIO_COMPONENTS="" \
+    CN_AIO_COMPONENTS="configurator,persistence-loader,jans-auth,jans-config-api,jans-fido2,jans-scim,jans-casa" \
     CN_AIO_ENABLE_MONITOR=false \
     CN_ENABLE_STDOUT_LOG_PREFIX=true \
     CN_DUO_ENABLED=false \
@@ -178,7 +196,27 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
     CN_COUCHBASE_SUPERUSER_PASSWORD_FILE=/etc/jans/conf/couchbase_superuser_password \
     CN_LDAP_PASSWORD_FILE=/etc/jans/conf/ldap_password \
-    CN_LDAP_TRUSTSTORE_PASSWORD_FILE=/etc/jans/conf/ldap_truststore_password
+    CN_LDAP_TRUSTSTORE_PASSWORD_FILE=/etc/jans/conf/ldap_truststore_password \
+    CN_KEYCLOAK_LINK_JETTY_HOST=127.0.0.1 \
+    CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
+    CN_KEYCLOAK_LINK_JAVA_OPTIONS="" \
+    CN_SAML_HTTP_HOST=127.0.0.1 \
+    CN_SAML_HTTP_PORT=8083 \
+    CN_SAML_JAVA_OPTIONS="" \
+    CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
+    CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
+    KC_HEALTH_ENABLED=true \
+    KC_METRICS_ENABLED=true \
+    KC_LOG_LEVEL=INFO \
+    KC_PROXY=edge \
+    KC_DB=mysql \
+    KC_DB_USERNAME=keycloak \
+    KC_DB_SCHEMA=keycloak \
+    KC_DB_URL_HOST=localhost \
+    KC_DB_URL_PORT=3306 \
+    KC_DB_URL_DATABASE=keycloak \
+    KC_DB_URL_PROPERTIES=?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4 \
+    QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=false
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
@@ -224,6 +262,8 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-casa/logs \
     ${JETTY_BASE}/jans-link/resources \
     ${JETTY_BASE}/jans-link/logs \
+    ${JETTY_BASE}/jans-keycloak-link/resources \
+    ${JETTY_BASE}/jans-keycloak-link/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
@@ -234,7 +274,11 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     /var/log/nginx \
     /var/log/adminui \
     /etc/nginx/jans-aio \
-    /usr/share/java
+    /usr/share/java \
+    /var/jans/cr-snapshots \
+    /opt/idp \
+    /opt/keycloak/logs \
+    /opt/keycloak/conf
 
 RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \
@@ -257,6 +301,8 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-casa/logs \
     ${JETTY_BASE}/jans-link/resources \
     ${JETTY_BASE}/jans-link/logs \
+    ${JETTY_BASE}/jans-keycloak-link/resources \
+    ${JETTY_BASE}/jans-keycloak-link/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
@@ -267,7 +313,11 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     /var/log/nginx \
     /var/log/adminui \
     /etc/nginx/jans-aio \
-    /usr/share/java
+    /usr/share/java \
+    /var/jans/cr-snapshots \
+    /opt/idp \
+    /opt/keycloak/logs \
+    /opt/keycloak/conf
 
 RUN chown 1000:1000 /opt/java/lib/security/cacerts \
     /run/nginx/nginx.pid \
