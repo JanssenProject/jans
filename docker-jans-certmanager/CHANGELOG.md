@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.22-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.21-1...docker-jans-certmanager-v1.0.22-1) (2024-01-22)
+
+
+### Bug Fixes
+
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+
 ## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.20-1...docker-jans-certmanager-v1.0.21-1) (2023-12-14)
 
 
