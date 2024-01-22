@@ -22,7 +22,7 @@
     "scopes_dns": [],
     "scopes_ids": ["email" , "user_name" , "openid"],
     "redirect_uri": ["https://%(idp_config_hostname)s:%(idp_config_http_port)s/realms/master/kc-jans-authn-rest-bridge/auth-complete"],
-    "grant_types": null,
+    "grant_types": ["authorization_code"],
     "authorization_methods": ["client_secret_basic"],
     "response_types": ["code", "token"],
     "application_type": "native"
@@ -36,7 +36,7 @@
     "scopes_dns": [],
     "scopes_ids": ["http://jans.io/idp/saml.write", "http://jans.io/idp/saml.readonly", "http://jans.io/oauth/config/saml.readonly", "http://jans.io/oauth/config/saml.write", "http://jans.io/oauth/config/attributes.readonly"],
     "redirect_uri": ["https://%(idp_config_hostname)s:%(idp_config_http_port)s/realms/jans/dev/null"],
-    "grant_types": null,
+    "grant_types": ["client_credentials"],
     "authorization_methods": ["client_secret_basic"],
     "response_types": ["token"],
     "application_type": "native"
@@ -50,7 +50,7 @@
     "scopes_dns": [],
     "scopes_ids": ["email" , "user_name" , "openid"],
     "redirect_uri": ["https://%(idp_config_hostname)s:%(idp_config_http_port)s/realms/master/kc-jans-authn-rest-bridge/auth-complete"],
-    "grant_types": null,
+    "grant_types": ["authorization_code"],
     "authorization_methods": ["client_secret_basic"],
     "response_types": ["code", "token"],
     "application_type": "web"
