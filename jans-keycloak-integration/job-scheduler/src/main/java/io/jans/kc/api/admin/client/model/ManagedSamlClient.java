@@ -4,6 +4,7 @@ import org.keycloak.representations.idm.ClientRepresentation;
 
 public class ManagedSamlClient {
     
+    private String realm;
     private String trustRelationshipInum;
     private ClientRepresentation clientRepresentation;
 
