@@ -8,6 +8,7 @@ import sys
 import os
 import json
 import argparse
+import datetime
 
 try:
     from urllib.request import urlopen
@@ -28,8 +29,9 @@ def get_latest_commit(service):
 
 def get_war_info(war_fn):
     retDict = {'title':'', 'version':'', 'build':'', 'buildDate':'', 'branch':''}
-    war_zip = zipfile.ZipFile(war_fn,"r")
-    menifest = war_zip.read('META-INF/MANIFEST.MF')
+    war_zip = zipfile.ZipFile(war_fn, 'r')
+    menifest_fn = 'META-INF/MANIFEST.MF'
+    menifest = war_zip.read(menifest_fn)
 
     for l in menifest.splitlines():
         ls = l.strip().decode('utf-8')
@@ -43,16 +45,10 @@ def get_war_info(war_fn):
                 branch = branch.split('/')[1]
 
             retDict['branch'] = branch
-            
 
-    for f in war_zip.filelist:
-        if f.filename.startswith('META-INF/maven/org.jans') and f.filename.endswith('pom.properties'):
-            pom_prop = war_zip.read(f.filename)
-            for l in pom_prop.splitlines():
-                build_date = re.findall("\w{3}\s\w{3}\s{1,2}\w{1,2}\s\w{2}:\w{2}:\w{2}\s[+\w]{3}\s\w{4}", l.decode('utf-8'))
-                if build_date:
-                    retDict['buildDate'] =  build_date[0]
-                    break
+    menifest_info = war_zip.getinfo(menifest_fn)
+    retDict['buildDate'] = str(datetime.datetime(*menifest_info.date_time))
+
 
     return retDict
 
