@@ -8,6 +8,8 @@ import copy
 import hashlib
 import ldap3
 import pymysql
+import time
+
 from ldap3.utils import dn as dnutils
 from pathlib import PurePath
 
@@ -43,7 +45,7 @@ class DBUtils:
     def bind(self, use_ssl=True, force=False):
 
         setattr(base.current_app, self.__class__.__name__, self)
-
+        self.mariadb = None
         base.logIt("Bind to database")
 
         logging.basicConfig(

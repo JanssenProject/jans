@@ -287,7 +287,7 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 
 	private Conf loadConfigurationFromDB(String... returnAttributes) {
 		final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
-		final String dn = this.baseConfiguration.getString("link_ConfigurationEntryDN");
+		final String dn = this.baseConfiguration.getString("lock_ConfigurationEntryDN");
 		try {
 			final Conf conf = persistenceEntryManager.find(dn, Conf.class, returnAttributes);
 

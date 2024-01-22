@@ -226,6 +226,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
         addReqParam(AuthorizeRequestParam.UI_LOCALES, uiLocalesAsString);
         addReqParam(AuthorizeRequestParam.CLAIMS_LOCALES, claimLocalesAsString);
         addReqParam(AuthorizeRequestParam.ID_TOKEN_HINT, getRequest().getIdTokenHint());
+        addReqParam(AuthorizeRequestParam.AUTHORIZATION_DETAILS, getRequest().getAuthorizationDetails());
         addReqParam(AuthorizeRequestParam.LOGIN_HINT, getRequest().getLoginHint());
         addReqParam(AuthorizeRequestParam.ACR_VALUES, acrValuesAsString);
         addReqParam(AuthorizeRequestParam.CLAIMS, claimsAsString);

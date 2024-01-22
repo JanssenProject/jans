@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.21</version>
+		<version>1.0.22-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -391,6 +391,14 @@
             <version>${project.version}</version>
         </dependency>
 
+		<!-- lock -->
+<!--
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-lock-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+-->
 		<!-- Weld -->
 		<dependency>
             <groupId>jakarta.validation</groupId>

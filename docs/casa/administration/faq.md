@@ -60,7 +60,7 @@ Once fixed, please restart the application. You will have to see a "WEBAPP INITI
 
 ### Admin console is not shown 
 
-If you have logged in using an administrative account and cannot find any admin features in the UI ensure you have performed this [step](./README.md#unlocking-admin-features).
+If you have logged in using an administrative account and cannot find any admin features in the UI ensure you have gone through these [steps](./quick-startd.md#finish-configuration).
 
 ### A previously enabled method is not available anymore
 
@@ -76,7 +76,7 @@ For Time-based OTP, ensure the time of your server is correctly synchronized (us
 
 Big time differences can cause unsuccessful attempts to enroll TOTP credentials in Casa.
 
-For Event-based OTP (HOTP), ensure you are using a suitable value for `look ahead window` (we suggest at least 10). Check contents of file `/etc/certs/otp_configuration.json`. If you apply editions, it is recommended to press the "Update" button of the "Manage Custom Scripts" form in oxTrust and wait a couple of minutes before retrying..
+For Event-based OTP (HOTP), ensure you are using a suitable value for `look ahead window` (we suggest at least 10). Check contents of file `/etc/certs/otp_configuration.json`. If you apply editions, it is recommended to wait a couple of minutes before retrying..
 
 ### The user interface is not showing any means to enroll credentials
 

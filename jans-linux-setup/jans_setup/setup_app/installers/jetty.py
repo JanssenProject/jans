@@ -339,6 +339,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                                     ('installFido2', 'jans-fido2'),
                                     ('install_config_api', 'jans-config-api'),
                                     ('installEleven', 'jans-eleven'),
+                                    ('install_jans_lock_as_server', 'jans-lock'),
                                     ]:
 
             if Config.get(config_var) and service in self.jetty_app_configuration:

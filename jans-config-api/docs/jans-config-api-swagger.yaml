@@ -40,6 +40,32 @@ tags:
 - name: Configuration – Config API
 - name: Client Authorization
 paths:
+  /api/v1/health/app-version:
+    get:
+      tags:
+      - Health - Check
+      summary: Returns application version
+      description: Returns application version
+      operationId: get-app-version
+      parameters:
+      - name: artifact
+        in: query
+        description: artifact name for which version is requied else ALL
+        schema:
+          type: string
+          default: all
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonNode'
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/app-version.readonly
   /api/v1/health:
     get:
       tags:
@@ -4101,10 +4127,12 @@ paths:
                   - persistence_extension
                   - idp
                   - discovery
+                  - authz_detail
                   - update_token
                   - config_api_auth
                   - modify_ssa_response
                   - fido2_extension
+                  - lock_extension
               examples:
                 Response json example:
                   description: Response json example
@@ -7616,6 +7644,8 @@ paths:
         - https://jans.io/oauth/config/uma/resources.readonly
 components:
   schemas:
+    JsonNode:
+      type: object
     HealthStatus:
       type: object
       properties:
@@ -7862,17 +7892,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanView:
+          type: boolean
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8673,6 +8703,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        lockMessageConfig:
+          $ref: '#/components/schemas/LockMessageConfig'
         fapi:
           type: boolean
         allResponseTypesSupported:
@@ -8824,8 +8856,13 @@ components:
           type: object
           additionalProperties:
             type: string
-    JsonNode:
+    LockMessageConfig:
       type: object
+      properties:
+        enableIdTokenMessages:
+          type: boolean
+        idTokenMessagesChannel:
+          type: string
     SsaConfiguration:
       type: object
       properties:
@@ -9193,6 +9230,16 @@ components:
           type: string
         tokenEndpointAuthMethod:
           type: string
+          format: enum
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         tokenEndpointAuthSigningAlg:
           type: string
         defaultMaxAge:
@@ -9410,6 +9457,10 @@ components:
           type: string
         introspectionEncryptedResponseEnc:
           type: string
+        authorizationDetailsTypes:
+          type: array
+          items:
+            type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -9631,10 +9682,12 @@ components:
           - persistence_extension
           - idp
           - discovery
+          - authz_detail
           - update_token
           - config_api_auth
           - modify_ssa_response
           - fido2_extension
+          - lock_extension
         programmingLanguage:
           type: string
           enum:
@@ -9662,14 +9715,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -9853,61 +9906,41 @@ components:
         messageProviderType:
           type: string
           enum:
-          - "NULL"
+          - DISABLED
           - REDIS
           - POSTGRES
-        nullConfiguration:
-          $ref: '#/components/schemas/NullMessageConfiguration'
         redisConfiguration:
           $ref: '#/components/schemas/RedisMessageConfiguration'
         postgresConfiguration:
           $ref: '#/components/schemas/PostgresMessageConfiguration'
-    NullMessageConfiguration:
-      type: object
     PostgresMessageConfiguration:
       type: object
       properties:
+        driverClassName:
+          type: string
         dbSchemaName:
           type: string
-          xml:
-            name: db-schema-name
         connectionUri:
           type: string
-          xml:
-            name: connection-uri
         authUserName:
           type: string
-          xml:
-            name: auth-userName
         authUserPassword:
           type: string
-          xml:
-            name: auth-userPassword
         connectionPoolMaxTotal:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-max-total
         connectionPoolMaxIdle:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-max-idle
         connectionPoolMinIdle:
           type: integer
           format: int32
-          xml:
-            name: connection-pool-min-idle
         messageWaitMillis:
           type: integer
           format: int32
-          xml:
-            name: message-wait-millis
         messageSleepThreadTime:
           type: integer
           format: int32
-          xml:
-            name: message-sleep-thread-millis
     RedisMessageConfiguration:
       type: object
       properties:

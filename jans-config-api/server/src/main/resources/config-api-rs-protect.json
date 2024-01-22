@@ -2550,6 +2550,203 @@
           ]
         }
       ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/config/message",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.68",
+              "name": "https://jans.io/oauth/config/message.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.69",
+              "name": "https://jans.io/oauth/config/message.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "PATCH"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.69",
+              "name": "https://jans.io/oauth/config/message.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/config/message/redis",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.68",
+              "name": "https://jans.io/oauth/config/message.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.69",
+              "name": "https://jans.io/oauth/config/message.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "PUT"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.69",
+              "name": "https://jans.io/oauth/config/message.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "PATCH"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.69",
+              "name": "https://jans.io/oauth/config/message.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/config/message/postgres",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.68",
+              "name": "https://jans.io/oauth/config/message.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.69",
+              "name": "https://jans.io/oauth/config/message.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "PUT"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.69",
+              "name": "https://jans.io/oauth/config/message.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "PATCH"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.69",
+              "name": "https://jans.io/oauth/config/message.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "path": "/jans-config-api/api/v1/health/app-version",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.70",
+              "name": "https://jans.io/oauth/config/app-version.readonly"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

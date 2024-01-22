@@ -9,6 +9,7 @@ package io.jans.lock.model.config;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.enterprise.inject.Vetoed;
+import jakarta.xml.bind.annotation.XmlElement;
 
 /**
  * 
@@ -22,6 +23,7 @@ public class BaseDnConfiguration {
 	private String people;
 	private String attributes;
     private String sessions;
+    private String tokens;
 	private String scripts;
 	private String metric;
 
@@ -47,6 +49,14 @@ public class BaseDnConfiguration {
 
 	public void setSessions(String sessions) {
 		this.sessions = sessions;
+	}
+
+	public String getTokens() {
+		return tokens;
+	}
+
+	public void setTokens(String tokens) {
+		this.tokens = tokens;
 	}
 
 	public String getScripts() {

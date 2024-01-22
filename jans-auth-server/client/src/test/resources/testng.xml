@@ -6,6 +6,11 @@
         <listener class-name="io.jans.as.client.RetryListener"/>
     </listeners>
 
+    <test name="Authorization Details Http Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.AuthorizationDetailsHttpTest"/>
+        </classes>
+    </test>
     <test name="JsonApplier Client test" enabled="true">
         <classes>
             <class name="io.jans.as.client.json.JsonApplierTest"/>

@@ -49,7 +49,8 @@ class BaseInstaller:
 
     def render_unit_file(self, unit=None):
         # render unit file
-
+        if getattr(self, 'no_unit_file', False):
+            return
         units = self.get_systemd_service_list(unit)
 
         for unit in units:
@@ -127,7 +128,11 @@ class BaseInstaller:
     def get_systemd_service_list(self, service):
         if service:
             return [service]
-        return getattr(self, 'systemd_units', None) or [self.service_name]
+
+        if hasattr(self, 'systemd_units'):
+            return self.systemd_units
+
+        return [self.service_name]
 
     def run_service_command(self, operation, service):
 
