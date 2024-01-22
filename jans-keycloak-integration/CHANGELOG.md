@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.22 (2024-01-22)
+
+
+### Bug Fixes
+
+* **keycloak-integration:** Keycloak startup issue [#7123](https://github.com/JanssenProject/jans/issues/7123) ([#7133](https://github.com/JanssenProject/jans/issues/7133)) ([8d8cd3b](https://github.com/JanssenProject/jans/commit/8d8cd3bc72874d57abef667a3ac46c91dd9d1071))
+
 ## 1.0.19 (2023-10-11)
 
 
