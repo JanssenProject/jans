@@ -192,11 +192,13 @@ def main():
     base_dir = os.path.join(tempfile.gettempdir(), "kc_jans_api")
     os.makedirs(base_dir, exist_ok=True)
 
-    kc = KC(admin_username, admin_password, base_dir, ctx)
-    kc.login()
-    kc.create_realm()
-    kc.create_client()
-    kc.create_user()
+    with manager.lock.create_lock("saml-configure-kc"):
+        logger.info("Configuring Keycloak (if required)")
+        kc = KC(admin_username, admin_password, base_dir, ctx)
+        kc.login()
+        kc.create_realm()
+        kc.create_client()
+        kc.create_user()
 
 
 if __name__ == "__main__":
