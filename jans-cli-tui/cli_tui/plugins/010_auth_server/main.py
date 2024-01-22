@@ -1041,7 +1041,7 @@ class Plugin(DialogUtils):
                 data_fn=None,
                 data=pathches
                 )
-            self.app.app_configuration = response
+            self.app.app_configuration = response.json()
 
             body = HSplit([Label(_("Jans authorization server application configuration logging properties were saved."))])
 

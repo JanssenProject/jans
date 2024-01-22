@@ -8755,6 +8755,12 @@ nav:
     - admin/link/README.md
     - Jans Link: admin/link/jans-link.md
     - Keycloak Synch: admin/link/keycloak-synch.md
+  - Lock Guide:
+      - admin/lock/README.md
+      - Auth Server Configuration: admin/lock/lock_auth_server_config.md
+      - Lock Client Configuration: admin/lock/lock_client_config.md
+      - Implement Lock PDP Plugin: admin/lock/lock_pdp_plugin.md
+      - Policy Store Integration: admin/lock/lock_opa.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md
@@ -8821,6 +8827,8 @@ nav:
 plugins:
 - tags
 - search
+- exclude-search:
+    exclude_unreferenced: true
 - git-revision-date-localized:
     enable_creation_date: true
     type: timeago
