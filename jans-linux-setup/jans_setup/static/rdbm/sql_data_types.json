@@ -1040,5 +1040,47 @@
       "size": 128,
       "type": "STRING"
     }
+  },
+  "jansSAMLspMetaDataFN": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "jansSAMLidpMetaDataFN": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "jansSAMLspMetaLocation": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "jansSAMLidpMetaLocation": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
   }
+  
+  
 }
