@@ -1,0 +1,13 @@
+{
+  "displayName": "posts-webhook-1",
+  "description": "posts-webhook description",
+  "url": "https://reqres.in/api/users",
+  "httpRequestBody": {
+    "name": "morpheus",
+    "job": "leader"
+  },
+  "httpMethod": "POST",
+  "jansEnabled": true,
+  "httpHeaders":[{"key":"Content-Type", "value":"application/json"}],
+  "auiFeatureIds":["jans_link_write"]
+}

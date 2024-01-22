@@ -391,7 +391,7 @@ public class MetadataValidationTimer {
      */
     private boolean validateIdpMetadata(String idpMetadataTempDir, String idpMetadataDir) throws Exception {
         boolean result = false;
-        log.debug("Starting metadata validation process.");
+        log.info("Starting metadata validation process.");
 
         String metadataFN = null;
         synchronized (idpMetadataUpdates) {
@@ -407,7 +407,7 @@ public class MetadataValidationTimer {
                 String idpMetadataPath = idpMetadataTempDir + metadataFN;
                 String destinationMetadataName = metadataFN.replaceAll(".{4}\\..{4}$", "");
                 String destinationMetadataPath = idpMetadataDir + destinationMetadataName;
-                log.debug("metadataFN:{}, idpMetadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}",
+                log.info("metadataFN:{}, idpMetadataPath:{}, destinationMetadataName:{}, destinationMetadataPath:{}",
                         metadataFN, idpMetadataPath, destinationMetadataName, destinationMetadataPath);
 
                 IdentityProvider idp = identityProviderService.getIdentityProviderByUnpunctuatedInum(

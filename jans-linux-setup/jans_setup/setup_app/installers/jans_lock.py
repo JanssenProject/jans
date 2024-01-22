@@ -74,7 +74,7 @@ class JansLockInstaller(JettyInstaller):
 
     def render_import_templates(self):
 
-        for tmp in (self.dynamic_conf_json, self.error_json, self.static_conf_json, self.message_conf_json):
+        for tmp in (self.dynamic_conf_json, self.error_json, self.static_conf_json):
             self.renderTemplateInOut(tmp, self.template_dir, self.output_dir)
 
         Config.templateRenderingDict['lock_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
@@ -85,6 +85,11 @@ class JansLockInstaller(JettyInstaller):
 
         ldif_files = [self.config_ldif]
         self.dbUtils.import_ldif(ldif_files)
+
+
+    def configure_message_conf(self):
+        # this function is called in JansInstaller.post_install_tasks
+        self.renderTemplateInOut(self.message_conf_json, self.template_dir, self.output_dir)
         message_conf_json = self.readFile(self.message_conf_json)
         self.dbUtils.set_configuration('jansMessageConf', message_conf_json)
 

@@ -2724,6 +2724,29 @@
           ]
         }
       ]
+    },
+	{
+      "path": "/jans-config-api/api/v1/health/app-version",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.70",
+              "name": "https://jans.io/oauth/config/app-version.readonly"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
