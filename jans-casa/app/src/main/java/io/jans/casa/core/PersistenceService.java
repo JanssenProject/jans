@@ -42,6 +42,7 @@ public class PersistenceService implements IPersistenceService {
     private static final int RETRIES = 15;
     private static final int RETRY_INTERVAL = 15;
     private static final String DEFAULT_CONF_BASE = "/etc/jans/conf";
+    private static final String ADMIN_ROLE = "CasaAdmin";
 
     @Inject
     private Logger logger;
@@ -237,13 +238,10 @@ public class PersistenceService implements IPersistenceService {
     }
 
     public boolean isAdmin(String userId) {
-        JansOrganization organization = getOrganization();
-        List<String> dns = organization.getManagerGroups();
 
-        Person personMember = get(Person.class, getPersonDn(userId));
-        return personMember != null
-                && personMember.getMemberOf().stream()
-                        .anyMatch(m -> dns.stream().anyMatch(dn -> dn.equals(m)));
+        Person petardo = get(Person.class, getPersonDn(userId));
+        return petardo != null
+                && petardo.getRoles().stream().anyMatch(ADMIN_ROLE::equals);
 
     }
 
