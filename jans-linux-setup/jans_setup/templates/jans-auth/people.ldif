@@ -15,3 +15,4 @@ displayName: Default Admin User
 mail: admin@%(hostname)s
 emailVerified: true
 jansAdminUIRole: api-admin
+role: CasaAdmin

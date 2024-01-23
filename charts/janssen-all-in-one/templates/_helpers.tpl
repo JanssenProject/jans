@@ -152,5 +152,8 @@ Create aio enabled list
 {{- if .Values.scim.enabled}}
 {{ $newList = append $newList ("jans-scim") }}
 {{- end}}
+{{- if .Values.saml.enabled}}
+{{ $newList = append $newList ("jans-saml") }}
+{{- end}}
 {{ toJson $newList }}
 {{- end }}

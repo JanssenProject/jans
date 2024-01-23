@@ -54,6 +54,8 @@ Casa is a plugin-oriented, Java web application. Existing functionality can be e
 - [Custom branding](./plugins/custom-branding.md)  
 - [2FA settings](./plugins/2fa-settings.md)
 
+If you are interested in onboarding additional authentication methods to Casa, read this [guide](./developer/add-authn-methods.md).
+
 ## Janssen Server integration
 
 Janssen Server relies on "interception scripts" to implement user authentication. Casa itself has an interception script which defines authentication logic and routes authentications to specific 2FA mechanisms which also have their own scripts.        
@@ -62,11 +64,13 @@ Janssen Server relies on "interception scripts" to implement user authentication
 
 There are two types of users in Jans Casa:
 
-- **Admin users**: Any user in the `Managers Group` in the Janssen Server
-
 - **Regular users**: Any user in the Janssen Server  
 
-Admin users have access to the Casa [admin console](./administration/admin-console.md). All users can manage their 2FA credentials, as outlined in the [user guide](./user-guide.md).  
+- **Admin users**: Users having the `CasaAdmin` role 
+
+Admin users have access to the Casa [admin console](./administration/admin-console.md). All users can manage their 2FA credentials, as outlined in the [user guide](./user-guide.md). 
+
+A user can be "turned" into an administrator by editing his profile - in [TUI](../admin/config-guide/config-tools/jans-tui/README.md) for instance - ensuring `CasaAdmin` is part of his `role` attribute.
 
 ## Get started
 

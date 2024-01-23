@@ -21,44 +21,36 @@ get_max_ram_percentage() {
 }
 
 export_keycloak_admin_creds() {
-    if [ -f /etc/jans/conf/kc_admin_creds ]; then
-        creds="$(base64 -d < /etc/jans/conf/kc_admin_creds)"
-        admin_username=$(echo "$creds" | awk -F ":" '{print $1}')
-        admin_password=$(echo "$creds" | awk -F ":" '{print $2}')
-    else
-        admin_username=${KEYCLOAK_ADMIN:-}
-        admin_password=${KEYCLOAK_ADMIN_PASSWORD:-}
-    fi
+    creds_file=${CN_SAML_KC_ADMIN_CREDENTIALS_FILE:-/etc/jans/conf/kc_admin_creds}
+    creds="$(base64 -d < ${creds_file})"
+    admin_username=$(echo "$creds" | awk -F ":" '{print $1}')
+    admin_password=$(echo "$creds" | awk -F ":" '{print $2}')
     export KEYCLOAK_ADMIN="$admin_username"
     export KEYCLOAK_ADMIN_PASSWORD="$admin_password"
 }
 
-export_keycloak_admin_creds
 python3 "$basedir/wait.py"
 python3 "$basedir/bootstrap.py"
 python3 "$basedir/configure_kc.py" &
 python3 "$basedir/upgrade.py"
+export_keycloak_admin_creds
 
 java_opts="$(get_max_ram_percentage) $(get_java_options)"
 export JAVA_OPTS_APPEND="$java_opts"
+
+# build optimized KC for production (https://www.keycloak.org/server/configuration#_optimize_the_keycloak_startup)
+/opt/keycloak/bin/kc.sh build --http-relative-path=/kc
 
 # shellcheck disable=SC2046
 exec /opt/keycloak/bin/kc.sh start \
     -Dlog.base=/opt/keycloak/logs/ \
     -Djans.config.prop.path=/opt/keycloak/providers \
-    --health-enabled=true \
-    --metrics-enabled=true \
-    --http-host="${CN_SAML_HOST}" \
-    --http-port="${CN_SAML_PORT}" \
+    --http-host="${CN_SAML_HTTP_HOST}" \
+    --http-port=${CN_SAML_HTTP_PORT} \
     --http-enabled=true \
-    --http-relative-path=/kc \
-    --hostname="localhost" \
-    --hostname-admin="localhost" \
     --hostname-path=/kc \
-    --hostname-strict-https=false \
+    --hostname-strict-https=true \
     --log=console \
-    --log-console-format='jans-saml - %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n' \
+    --log-console-format='jans-saml - %d{yyyy-MM-dd HH:mm:ss,SSS} - %-5p - [%c] (%t) %s%e%n' \
     --log-file=/opt/keycloak/logs/keycloak.log \
-    --log-level=INFO
-    # --db=dev-mem \
-    # --optimized
+    --optimized

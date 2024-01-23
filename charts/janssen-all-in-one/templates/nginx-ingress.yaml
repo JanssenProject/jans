@@ -612,4 +612,53 @@ spec:
                 port:
                   number: 8080
 {{- end }}
+
+---
+
+{{ if .Values.saml.ingress.samlEnabled -}}
+{{ $fullName := include "janssen-all-in-one.fullname" . -}}
+{{- $ingressPath := index .Values "nginx-ingress" "ingress" "path" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-saml
+  labels:
+    app: {{ $fullName }}-saml
+{{- if index .Values "nginx-ingress" "ingress" "additionalLabels" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "additionalLabels" | indent 4 }}
+{{- end }}
+{{- if index .Values "nginx-ingress" "ingress" "samlLabels" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "samlLabels" | indent 4 }}
+{{- end }}
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-hash: sha1
+    nginx.ingress.kubernetes.io/session-cookie-name: "saml-route"
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
+{{- if index .Values "nginx-ingress" "ingress" "samlAdditionalAnnotations" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "samlAdditionalAnnotations" | indent 4 }}
+{{- end }}
+{{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "additionalAnnotations" | indent 4 }}
+{{- end }}
+spec:
+  ingressClassName: {{ index .Values "nginx-ingress" "ingress" "ingressClassName" }}
+{{- if index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+  tls:
+    - hosts:
+        - {{ .Values.fqdn | quote }}
+      secretName: {{ index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+{{- end }}
+  rules:
+    - host: {{ .Values.fqdn | quote }}
+      http:
+        paths:
+          - path: /kc
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.service.name }}
+                port:
+                  number: 8080
+{{- end }}
 {{- end }}

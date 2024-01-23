@@ -40,6 +40,32 @@ tags:
 - name: Configuration – Config API
 - name: Client Authorization
 paths:
+  /api/v1/health/app-version:
+    get:
+      tags:
+      - Health - Check
+      summary: Returns application version
+      description: Returns application version
+      operationId: get-app-version
+      parameters:
+      - name: artifact
+        in: query
+        description: artifact name for which version is requied else ALL
+        schema:
+          type: string
+          default: all
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonNode'
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/app-version.readonly
   /api/v1/health:
     get:
       tags:
@@ -7618,6 +7644,8 @@ paths:
         - https://jans.io/oauth/config/uma/resources.readonly
 components:
   schemas:
+    JsonNode:
+      type: object
     HealthStatus:
       type: object
       properties:
@@ -7862,19 +7890,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8828,8 +8856,6 @@ components:
           type: object
           additionalProperties:
             type: string
-    JsonNode:
-      type: object
     LockMessageConfig:
       type: object
       properties:
@@ -10125,10 +10151,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

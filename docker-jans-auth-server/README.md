@@ -79,7 +79,6 @@ The following environment variables are supported by the container:
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 - `CN_JETTY_REQUEST_HEADER_SIZE`: Maximum size of request header accepted by Jetty (default to `8192`).
-- `CN_JETTY_IDLE_TIMEOUT`: Timeout of Jetty idle connection (default to `30000`).
 - `CN_AUTH_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
 - `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.
 - `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
@@ -96,6 +95,8 @@ The following environment variables are supported by the container:
 - `AWS_SHARED_CREDENTIALS_FILE`: The location of the shared credentials file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 - `AWS_CONFIG_FILE`: The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 - `AWS_PROFILE`: The default profile to use, if any.
+- `CN_LOCK_ENABLED`: Enable `jans-lock` as part of `jans-auth`.
+- `CN_OPA_URL`: URL to OPA server (default to `http://localhost:8181/v1`).
 
 ### Configure app loggers
 
@@ -142,6 +143,39 @@ To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Ex
 {"auth_log_target":"STDOUT","script_log_target":"STDOUT","enable_stdout_log_prefix":true}
 ```
 
+### Configure plugin loggers
+
+Plugin loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.
+
+Supported redirect target:
+
+- `STDOUT`
+- `FILE`
+
+Supported level:
+
+- `FATAL`
+- `ERROR`
+- `WARN`
+- `INFO`
+- `DEBUG`
+- `TRACE`
+
+The following key-value pairs are the defaults:
+
+```json
+{
+    "lock_log_target": "STDOUT",
+    "lock_log_level": "INFO"
+}
+```
+
+To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
+
+```
+{"lock_log_target":"STDOUT","enable_stdout_log_prefix":true}
+```
+
 ### Hybrid mapping
 
 As per v1.0.1, hybrid persistence supports all available persistence types. To configure hybrid persistence and its data mapping, follow steps below:
@@ -183,3 +217,4 @@ i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
+

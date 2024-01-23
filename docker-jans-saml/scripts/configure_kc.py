@@ -9,6 +9,8 @@ from string import Template
 import backoff
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.utils import exec_cmd
+from jans.pycloudlib.wait import get_wait_max_time
+from jans.pycloudlib.wait import get_wait_interval
 
 from healthcheck import run_healthcheck
 from settings import LOGGING_CONFIG
@@ -25,12 +27,12 @@ def _on_backoff(details):
 @backoff.on_exception(
     backoff.constant,
     Exception,
-    max_time=60.0,
+    max_time=get_wait_max_time,
     on_backoff=_on_backoff,
     on_success=None,
     on_giveup=None,
     jitter=None,
-    interval=10.0,
+    interval=get_wait_interval,
 )
 def wait_for_keycloak():
     if not run_healthcheck():
@@ -54,8 +56,8 @@ class KC:
 
     @property
     def server_url(self):
-        host = os.environ.get("CN_SAML_HOST", "0.0.0.0")  # nosec: B104
-        port = os.environ.get("CN_SAML_PORT", "8083")
+        host = os.environ.get("CN_SAML_HTTP_HOST", "0.0.0.0")  # nosec: B104
+        port = os.environ.get("CN_SAML_HTT_PORT", "8083")
         return f"http://{host}:{port}/kc"
 
     @property
@@ -172,13 +174,11 @@ class KC:
 def main():
     manager = get_manager()
 
-    if os.path.isfile("/etc/jans/conf/kc_admin_creds"):
-        with open("/etc/jans/conf/kc_admin_creds") as f:
-            creds = f.read().strip()
-            admin_username, admin_password = base64.b64decode(creds).decode().strip().split(":")
-    else:
-        admin_username = os.environ.get("KEYCLOAK_ADMIN", "")
-        admin_password = os.environ.get("KEYCLOAK_ADMIN_PASSWORD", "")
+    creds_file = os.environ.get("CN_SAML_KC_ADMIN_CREDENTIALS_FILE", "/etc/jans/conf/kc_admin_creds")
+
+    with open(creds_file) as f:
+        creds = f.read().strip()
+        admin_username, admin_password = base64.b64decode(creds).decode().strip().split(":")
 
     ctx = {
         "jans_idp_realm": "jans-api",
@@ -192,11 +192,13 @@ def main():
     base_dir = os.path.join(tempfile.gettempdir(), "kc_jans_api")
     os.makedirs(base_dir, exist_ok=True)
 
-    kc = KC(admin_username, admin_password, base_dir, ctx)
-    kc.login()
-    kc.create_realm()
-    kc.create_client()
-    kc.create_user()
+    with manager.lock.create_lock("saml-configure-kc"):
+        logger.info("Configuring Keycloak (if required)")
+        kc = KC(admin_username, admin_password, base_dir, ctx)
+        kc.login()
+        kc.create_realm()
+        kc.create_client()
+        kc.create_user()
 
 
 if __name__ == "__main__":
