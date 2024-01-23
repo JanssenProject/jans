@@ -522,20 +522,24 @@ class Upgrade:
 
         should_update = False
 
-        # add jansAdminUIRole to default admin user
-        if self.user_backend.type == "sql" and self.user_backend.client.dialect == "mysql" and not entry.attrs["jansAdminUIRole"]["v"]:
-            entry.attrs["jansAdminUIRole"] = {"v": ["api-admin"]}
-            should_update = True
-        if self.user_backend.type == "sql" and self.user_backend.client.dialect == "pgsql" and not entry.attrs["jansAdminUIRole"]:
-            entry.attrs["jansAdminUIRole"] = ["api-admin"]
-            should_update = True
-        elif self.user_backend.type == "spanner" and not entry.attrs["jansAdminUIRole"]:
-            entry.attrs["jansAdminUIRole"] = ["api-admin"]
-            should_update = True
-        else:  # ldap and couchbase
-            if "jansAdminUIRole" not in entry.attrs:
-                entry.attrs["jansAdminUIRole"] = ["api-admin"]
+        # add jansAdminUIRole and role to default admin user
+        for attr_name, role_name in [
+            ("jansAdminUIRole", "api-admin"),
+            ("role", "CasaAdmin"),
+        ]:
+            if self.user_backend.type == "sql" and self.user_backend.client.dialect == "mysql" and not entry.attrs[attr_name]["v"]:
+                entry.attrs[attr_name] = {"v": [role_name]}
                 should_update = True
+            if self.user_backend.type == "sql" and self.user_backend.client.dialect == "pgsql" and not entry.attrs[attr_name]:
+                entry.attrs[attr_name] = [role_name]
+                should_update = True
+            elif self.user_backend.type == "spanner" and not entry.attrs[attr_name]:
+                entry.attrs[attr_name] = [role_name]
+                should_update = True
+            else:  # ldap and couchbase
+                if attr_name not in entry.attrs:
+                    entry.attrs[attr_name] = [role_name]
+                    should_update = True
 
         # set lowercased jansStatus
         if entry.attrs["jansStatus"] == "ACTIVE":
@@ -857,6 +861,9 @@ def _transform_message_config(conf):
     else:
         pg_pw_encoded = ""
 
+    # backward-compat values
+    msg_wait_millis = conf["postgresConfiguration"].get("messageWaitMillis") or conf["postgresConfiguration"].get("message-wait-millis") or 100
+    msg_sleep_thread = conf["postgresConfiguration"].get("messageSleepThreadTime") or conf["postgresConfiguration"].get("message-sleep-thread-millis") or 200
     new_conf = {
         "messageProviderType": provider_type,
         "postgresConfiguration": {
@@ -864,8 +871,8 @@ def _transform_message_config(conf):
             "dbSchemaName": os.environ.get("CN_SQL_DB_SCHEMA", "public"),
             "authUserName": os.environ.get("CN_SQL_DB_USER", "jans"),
             "authUserPassword": pg_pw_encoded,
-            "messageWaitMillis": conf["postgresConfiguration"]["messageWaitMillis"],
-            "messageSleepThreadTime": conf["postgresConfiguration"]["messageSleepThreadTime"],
+            "messageWaitMillis": msg_wait_millis,
+            "messageSleepThreadTime": msg_sleep_thread,
         },
         "redisConfiguration": {
             "servers": os.environ.get("CN_REDIS_URL", "localhost:6379"),

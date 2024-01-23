@@ -25,11 +25,30 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 
 def _transform_lock_dynamic_config(conf):
     should_update = False
+
     opa_url = os.environ.get("CN_OPA_URL", "http://localhost:8181/v1")
 
     if opa_url != conf["opaConfiguration"]["baseUrl"]:
         conf["opaConfiguration"]["baseUrl"] = opa_url
         should_update = True
+
+    # add missing top-level keys
+    for missing_key, value in [
+        ("policiesJsonUrisAccessToken", ""),
+        ("policiesZipUris", []),
+        ("policiesZipUrisAccessToken", ""),
+    ]:
+        if missing_key not in conf:
+            conf[missing_key] = value
+            should_update = True
+
+    # add missing opaConfiguration-level keys
+    for missing_key, value in [
+        ("accessToken", ""),
+    ]:
+        if missing_key not in conf["opaConfiguration"]:
+            conf["opaConfiguration"][missing_key] = value
+            should_update = True
 
     # return modified config (if any) and update flag
     return conf, should_update
