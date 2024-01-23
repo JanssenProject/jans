@@ -189,7 +189,7 @@ class Plugin(DialogUtils):
                         on_enter=self.edit_client,
                         on_display=self.app.data_display_dialog,
                         on_delete=self.delete_client,
-                        jans_help=HTML(_("Press key <b>s</b> to save client summary")),
+                        jans_help=HTML(_("Press key <b>s</b> to save client summary, <b>d</b> to display configurations")),
                         custom_key_bindings=[('s', self.save_client_summary)],
                         headerColor=cli_style.navbar_headcolor,
                         entriesColor=cli_style.navbar_entriescolor,
