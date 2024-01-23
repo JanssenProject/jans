@@ -97,6 +97,8 @@ class PersistenceSetup:
             "jans_idp_realm": "jans-api",
             "jans_idp_grant_type": "PASSWORD",
             "jans_idp_user_name": "jans-api",
+            "idp_config_hostname": hostname,
+            "idp_config_http_port": os.environ.get("CN_SAML_HTTP_PORT", "8083"),
         }
 
         # jans-idp contexts
@@ -120,24 +122,6 @@ class PersistenceSetup:
             tmpl = Template(f.read())
             ctx["saml_dynamic_conf_base64"] = generate_base64_contents(tmpl.safe_substitute(ctx))
 
-        # scim client for saml
-        ctx["saml_scim_client_id"] = self.manager.config.get("saml_scim_client_id")
-        if not ctx["saml_scim_client_id"]:
-            ctx["saml_scim_client_id"] = f"2100.{uuid4()}"
-            self.manager.config.set("saml_scim_client_id", ctx["saml_scim_client_id"])
-
-        ctx["saml_scim_client_pw"] = self.manager.secret.get("saml_scim_client_pw")
-        if not ctx["saml_scim_client_pw"]:
-            ctx["saml_scim_client_pw"] = get_random_chars()
-            self.manager.secret.set("saml_scim_client_pw", ctx["saml_scim_client_pw"])
-
-        ctx["saml_scim_client_encoded_pw"] = self.manager.secret.get("saml_scim_client_encoded_pw")
-        if not ctx["saml_scim_client_encoded_pw"]:
-            ctx["saml_scim_client_encoded_pw"] = encode_text(
-                ctx["saml_scim_client_pw"], self.manager.secret.get("encoded_salt"),
-            ).decode()
-            self.manager.secret.set("saml_scim_client_encoded_pw", ctx["saml_scim_client_encoded_pw"])
-
         # keycloak credentials
         ctx["kc_admin_username"] = self.manager.config.get("kc_admin_username")
         if not ctx["kc_admin_username"]:
@@ -148,6 +132,9 @@ class PersistenceSetup:
         if not ctx["kc_admin_password"]:
             ctx["kc_admin_password"] = get_random_chars()
             self.manager.secret.set("kc_admin_password", ctx["kc_admin_password"])
+
+        # pre-populate contexts for clients
+        ctx.update(self._get_clients_ctx())
 
         # finalized ctx
         return ctx
@@ -163,6 +150,40 @@ class PersistenceSetup:
         for file_ in self.ldif_files:
             logger.info(f"Importing {file_}")
             self.client.create_from_ldif(file_, self.ctx)
+
+    def _get_clients_ctx(self):
+        ctx = {}
+        encoded_salt = self.manager.secret.get("encoded_salt")
+
+        for id_prefix, ctx_name in [
+            # scim client for saml
+            (2100, "saml_scim"),
+            # KC client for saml
+            (2101, "kc_saml_openid"),
+            # KC scheduler API client
+            (2102, "kc_scheduler_api"),
+            # KC master auth client
+            (2103, "kc_master_auth"),
+        ]:
+            client_id = f"{ctx_name}_client_id"
+            client_pw = f"{ctx_name}_client_pw"
+            client_encoded_pw = f"{ctx_name}_client_encoded_pw"
+
+            ctx[client_id] = self.manager.config.get(client_id)
+            if not ctx[client_id]:
+                ctx[client_id] = f"{id_prefix}.{uuid4()}"
+                self.manager.config.set(client_id, ctx[client_id])
+
+            ctx[client_pw] = self.manager.secret.get(client_pw)
+            if not ctx[client_pw]:
+                ctx[client_pw] = get_random_chars()
+                self.manager.secret.set(client_pw, ctx[client_pw])
+
+            ctx[client_encoded_pw] = self.manager.secret.get(client_encoded_pw)
+            if not ctx[client_encoded_pw]:
+                ctx[client_encoded_pw] = encode_text(ctx[client_pw], encoded_salt).decode()
+                self.manager.secret.set(client_encoded_pw, ctx[client_encoded_pw])
+        return ctx
 
 
 def render_keycloak_creds():
