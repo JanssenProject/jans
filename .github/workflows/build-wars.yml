@@ -83,7 +83,7 @@ jobs:
         fi
         echo "$DIRECTORIES_CHANGED"
 
-    - uses: actions/setup-java@0ab4596768b603586c0de567f2430c30f5b0d2b0 # v3.13.0
+    - uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
       if: contains(env.DIRECTORIES_CHANGED, matrix.fldrpath)
       with:
           java-version: '17'
