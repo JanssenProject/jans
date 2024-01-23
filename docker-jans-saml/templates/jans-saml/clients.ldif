@@ -28,7 +28,7 @@ jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
 jansTknEndpointAuthMethod: client_secret_post
 jansTrustedClnt: false
-jansRedirectURI: https://%(hostname)s/admin-ui
+jansRedirectURI: https://%(hostname)s/admin
 jansRedirectURI: http://localhost:4100
 
 dn: inum=%(kc_saml_openid_client_id)s,ou=clients,o=jans
@@ -58,7 +58,7 @@ jansScope: inum=10B2,ou=scopes,o=jans
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: false
-jansRedirectURI: https://%(idp_config_hostname)s:%(idp_config_http_port)s/realms/master/kc-jans-authn-rest-bridge/auth-complete
+jansRedirectURI: https://%(hostname)s/kc/realms/jans/kc-jans-authn-rest-bridge/auth-complete
 
 dn: inum=%(kc_scheduler_api_client_id)s,ou=clients,o=jans
 objectClass: top
@@ -88,7 +88,7 @@ jansScope: inum=1800.01.57,ou=scopes,o=jans
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: false
-jansRedirectURI: https://%(idp_config_hostname)s:%(idp_config_http_port)s/realms/jans/dev/null
+jansRedirectURI: https://%(hostname)s/kc/realms/jans/dev/null
 
 dn: inum=%(kc_master_auth_client_id)s,ou=clients,o=jans
 objectClass: top
@@ -117,4 +117,4 @@ jansScope: inum=10B2,ou=scopes,o=jans
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: false
-jansRedirectURI: https://%(idp_config_hostname)s:%(idp_config_http_port)s/realms/master/kc-jans-authn-rest-bridge/auth-complete
+jansRedirectURI: https://%(hostname)s/kc/realms/master/kc-jans-authn-rest-bridge/auth-complete
