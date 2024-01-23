@@ -224,9 +224,6 @@ public class IdpResource extends BaseResource {
                 throwBadRequestException(UNAUTHORIZED,UNAUTHORIZED_MSG);
             }
             throwInternalServerException(APPLICATION_ERROR, wex.getMessage());
-        }catch(Exception ex) {
-            log.error(" Error while creating IDP is - message:{}", ex.getMessage());
-            throwInternalServerException(SERVER_ERROR, ex.getMessage());
         }
 
         log.info("Create IdentityProvider - idp:{}", idp);
@@ -289,9 +286,6 @@ public class IdpResource extends BaseResource {
                 throwBadRequestException("UNAUTHORIZED", UNAUTHORIZED_MSG);
             }
             throwInternalServerException(APPLICATION_ERROR, wex.getMessage());
-        }catch(Exception ex) {
-            log.error(" Error while updating IDP is -  message:{}", ex.getMessage());
-            throwInternalServerException(SERVER_ERROR, ex.getMessage());
         }
         
         log.info("Updated IdentityProvider idp:{}", idp);
@@ -318,7 +312,7 @@ public class IdpResource extends BaseResource {
         log.debug(" existingIdentityProvider:{} ", existingIdentityProvider);
         checkResourceNotNull(existingIdentityProvider, SAML_IDP_CHECK_STR + inum + "'");
 
-        idpService.deleteIdentityProvider(existingIdentityProvider);
+        idpService.deleteIdentityProvider(existingIdentityProvider, true);
         return Response.noContent().build();
     }
 

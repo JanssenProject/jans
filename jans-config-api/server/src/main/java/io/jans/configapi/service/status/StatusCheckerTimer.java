@@ -8,8 +8,9 @@ package io.jans.configapi.service.status;
 
 import io.jans.util.process.ProcessHelper;
 
-import io.jans.configapi.core.util.Jackson;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.model.status.StatsData;
 import io.jans.configapi.model.status.FacterData;
 import io.jans.configapi.service.auth.ConfigurationService;
@@ -46,7 +47,7 @@ public class StatusCheckerTimer {
 
     private static final int DEFAULT_INTERVAL = 5 * 60; // 1 minute
     public static final String PROGRAM_FACTER = "facter";
-    public static final String PROGRAM_SHOW_VERSION = "printVersion.py";
+    public static final String PROGRAM_SHOW_VERSION = "/opt/jans/printVersion.py";
 
     @Inject
     private Logger log;
@@ -146,10 +147,10 @@ public class StatusCheckerTimer {
         return facterData;
     }
     
-    public String getAppVersionData(String artifact) {
+    public JsonNode getAppVersionData(String artifact) {
         log.debug("Getting application version for artifact:{}", artifact);
        
-        String appVersion = null;
+        JsonNode appVersion = null;
         if (!isLinux()) {
             return appVersion;
         }
@@ -159,23 +160,30 @@ public class StatusCheckerTimer {
         if(StringUtils.isNotBlank(artifact) && !artifact.equalsIgnoreCase(ApiConstants.ALL)) {
             commandLine.addArgument("-artifact="+artifact);
         }
-        commandLine.addArgument("-json");
+        commandLine.addArgument("--json");
         log.debug("Getting application version for commandLine:{}", commandLine);
+        
+        String resultOutput;
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
             
             boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
             if (!result) {
                 return appVersion;
             }
-
-            appVersion = new String(bos.toByteArray(), UTF_8);
-            log.debug("appVersion:{}", appVersion);
-
+            
+            resultOutput = new String(bos.toByteArray(), UTF_8);
+            log.debug("resultOutput:{}", resultOutput);
+            
+            if(StringUtils.isNotBlank(resultOutput)) {
+                appVersion = Jackson.asJsonNode(resultOutput);
+            }
+            
         } catch (UnsupportedEncodingException uex) {
             log.debug("Failed to parse program {} output", PROGRAM_SHOW_VERSION, uex);
             return appVersion;
         } catch (Exception ex) {
             log.error("Failed to execute program {} output", PROGRAM_SHOW_VERSION, ex);
+            return appVersion;
         }
         log.debug("Server application version - appVersion:{}", appVersion);
         return appVersion;
