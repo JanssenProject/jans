@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=%(opa_bin_dir)s/opa run --server --addr %(opa_addr)s
+ExecStart=%(opa_bin_dir)s/opa run --server --addr %(jans_opa_host)s:%(jans_opa_port)s
 
 User=jetty
 Group=jetty
