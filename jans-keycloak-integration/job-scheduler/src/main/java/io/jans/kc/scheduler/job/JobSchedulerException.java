@@ -1,4 +1,4 @@
-package io.jans.kc.scheduler.job.service;
+package io.jans.kc.scheduler.job;
 
 public class JobSchedulerException extends RuntimeException {
     

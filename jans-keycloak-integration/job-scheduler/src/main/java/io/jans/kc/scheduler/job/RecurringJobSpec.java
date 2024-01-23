@@ -1,39 +1,37 @@
 package io.jans.kc.scheduler.job;
 
-import io.jans.kc.scheduler.job.service.JobSchedulerException;
+import io.jans.kc.scheduler.job.JobSchedulerException;
+import java.time.Duration;
 
 public class RecurringJobSpec extends JobSpec {
 
-    private static final Integer DEFAULT_SCHEDULING_INTERVAL = 5; // in seconds 
-    private Integer schedulingInterval;
+    private Duration schedulingInterval;
     private boolean repeatForever;
-    private ExecutionContext context;
+    private Integer repeatCount;
 
-    private RecurringJobSpec(String name, Class<? extends RecurringJob> jobclazz, ExecutionContext context) {
-
+    private RecurringJobSpec(String name, Class<? extends RecurringJob> jobclazz) {
         super(name,jobclazz);
-        this.schedulingInterval = DEFAULT_SCHEDULING_INTERVAL;
+        this.schedulingInterval = null;
         this.repeatForever = true;
-        this.context = context;
+        this.repeatCount = 0;
     }
-
     private RecurringJobSpec(String name, Class<? extends RecurringJob> jobclazz,
-        Integer schedulingInterval, ExecutionContext context) {
+        Duration schedulingInterval) {
         super(name,jobclazz);
         this.schedulingInterval = schedulingInterval;
         this.repeatForever = true;
-        this.context = context;
+        this.repeatCount = 0;
     }
 
     private RecurringJobSpec(String name, Class<? extends RecurringJob> jobclazz,
-        Integer schedulingInterval, boolean repeatForever, ExecutionContext context) {
+        Duration schedulingInterval, boolean repeatForever) {
         super(name,jobclazz);
         this.schedulingInterval = schedulingInterval;
         this.repeatForever = repeatForever;
-        this.context = context;
+        this.repeatCount = 0;
     }
 
-    public Integer schedulingInterval() {
+    public Duration schedulingInterval() {
 
         return schedulingInterval;
     }
@@ -41,6 +39,11 @@ public class RecurringJobSpec extends JobSpec {
     public boolean repeatForever() {
 
         return repeatForever;
+    }
+
+    public Integer repeatCount() {
+
+        return this.repeatCount;
     }
 
     public static Builder builder() {
@@ -75,15 +78,15 @@ public class RecurringJobSpec extends JobSpec {
             return this;
         }
 
-        public Builder scheduleIntervalInSeconds(Integer seconds) {
+        public Builder schedulingInterval(Duration interval) {
 
-            this.spec.schedulingInterval = seconds;
+            this.spec.schedulingInterval = interval;
             return this;
         }
 
-        public Builder executionContext(ExecutionContext context) {
+        public Builder repeatCount(Integer count) {
 
-            this.spec.context = context;
+            this.spec.repeatCount = count;
             return this;
         }
 
@@ -97,8 +100,12 @@ public class RecurringJobSpec extends JobSpec {
                 throw new JobSchedulerException("Job class not specified");
             }
 
-            if(this.spec.context == null) {
-                this.spec.context = new ExecutionContext();
+            if(this.spec.schedulingInterval == null || this.spec.schedulingInterval.isZero() || this.spec.schedulingInterval.isNegative()) {
+                throw new JobSchedulerException("Invalid job scheduling interval value specified");
+            }
+            
+            if(this.spec.repeatCount < 0) {
+                throw new JobSchedulerException("Job repeat count must be greater than zero");
             }
             return spec;
         }
