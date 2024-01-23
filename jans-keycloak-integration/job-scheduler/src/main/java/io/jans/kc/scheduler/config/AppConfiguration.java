@@ -3,6 +3,8 @@ package io.jans.kc.scheduler.config;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -25,12 +27,16 @@ public class AppConfiguration {
     private static final String CFG_PROP_CFGAPI_AUTH_SCOPES = "app.config-api.client.auth.scopes";
     private static final String CFG_PROP_CFGAPI_AUTH_METHOD = "app.config-api.auth.method";
 
-    private static final String CFG_PROP_KEYCLOAK_SERVER_URL = "app.keycloak-admin.url";
-    private static final String CFG_PROP_KEYCLOAK_REALM = "app.keycloak-admin.realm";
-    private static final String CFG_PROP_KEYCLOAK_USERNAME = "app.keycloak-admin.username";
-    private static final String CFG_PROP_KEYCLOAK_PASSWORD = "app.keycloak-admin.password";
-    private static final String CFG_PROP_KEYCLOAK_CLIENT_ID = "app.keycloak-admin.client.id";
-    private static final String CFG_PROP_KEYCLOAK_CONN_POOL_SIZE = "app.keycloak-admin.conn.poolsize";
+    private static final String CFG_PROP_KEYCLOAK_ADMIN_SERVER_URL = "app.keycloak-admin.url";
+    private static final String CFG_PROP_KEYCLOAK_ADMIN_REALM = "app.keycloak-admin.realm";
+    private static final String CFG_PROP_KEYCLOAK_ADMIN_USERNAME = "app.keycloak-admin.username";
+    private static final String CFG_PROP_KEYCLOAK_ADMIN_PASSWORD = "app.keycloak-admin.password";
+    private static final String CFG_PROP_KEYCLOAK_ADMIN_CLIENT_ID = "app.keycloak-admin.client.id";
+    private static final String CFG_PROP_KEYCLOAK_ADMIN_CONN_POOL_SIZE = "app.keycloak-admin.conn.poolsize";
+
+    private static final String CFG_PROP_JOB_TRSYNC_SCHEDULE_INTERVAL = "app.job.trustrelationship-sync.schedule-interval";
+
+    private static final String CFG_PROP_KEYCLOAK_RESOURCES_REALM = "app.keycloak.resources.realm";
 
     private final Properties configProperties;
 
@@ -81,32 +87,50 @@ public class AppConfiguration {
 
     public String keycloakAdminUrl() {
 
-        return getStringEntry(CFG_PROP_KEYCLOAK_SERVER_URL);
+        return getStringEntry(CFG_PROP_KEYCLOAK_ADMIN_SERVER_URL);
     }
 
     public String keycloakAdminRealm() {
 
-        return getStringEntry(CFG_PROP_KEYCLOAK_REALM);
+        return getStringEntry(CFG_PROP_KEYCLOAK_ADMIN_REALM);
     }
 
     public String keycloakAdminUsername() {
 
-        return getStringEntry(CFG_PROP_KEYCLOAK_USERNAME);
+        return getStringEntry(CFG_PROP_KEYCLOAK_ADMIN_USERNAME);
     }
 
     public String keycloakAdminPassword() {
 
-        return getStringEntry(CFG_PROP_KEYCLOAK_PASSWORD);
+        return getStringEntry(CFG_PROP_KEYCLOAK_ADMIN_PASSWORD);
     }
 
     public String keycloakAdminClientId() {
 
-        return getStringEntry(CFG_PROP_KEYCLOAK_CLIENT_ID);
+        return getStringEntry(CFG_PROP_KEYCLOAK_ADMIN_CLIENT_ID);
     }
 
     public Integer keycloakAdminConnPoolSize() {
 
-        return getIntEntry(CFG_PROP_KEYCLOAK_CONN_POOL_SIZE);
+        return getIntEntry(CFG_PROP_KEYCLOAK_ADMIN_CONN_POOL_SIZE);
+    }
+
+    public String keycloakResourcesRealm() {
+
+        return getStringEntry(CFG_PROP_KEYCLOAK_RESOURCES_REALM);
+    }
+
+    public Duration trustRelationshipSyncScheduleInterval() {
+
+        try {
+            String value = getStringEntry(CFG_PROP_JOB_TRSYNC_SCHEDULE_INTERVAL);
+            if(value == null || value.isEmpty()) {
+               return null;
+            }
+            return Duration.parse(value);
+        }catch(DateTimeParseException e) {
+            throw new AppConfigException("Could not get the trustrelationship sync job interval",e);
+        }
     }
 
     public List<String> configApiAuthScopes() {
