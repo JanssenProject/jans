@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.22-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.21-1...docker-jans-auth-server-v1.0.22-1) (2024-01-22)
+
+
+### Features
+
+* **docker-jans:** add jans-lock as custom library in jans-auth ([#7381](https://github.com/JanssenProject/jans/issues/7381)) ([8a45b10](https://github.com/JanssenProject/jans/commit/8a45b103c9e69d48978139906313a6a4ed56b78d))
+* **docker-jans:** add support for passing jetty.http.idleTimeout option ([#7298](https://github.com/JanssenProject/jans/issues/7298)) ([a1a2e10](https://github.com/JanssenProject/jans/commit/a1a2e1062c0759a40c6d45b48158ff8741473ada))
+* **docker:** support for OAuth 2.0 Rich Authorization Requests ([#7196](https://github.com/JanssenProject/jans/issues/7196)) ([f02db0f](https://github.com/JanssenProject/jans/commit/f02db0f14f47e69bce654e5c86d8a3b621cdb984))
+
+
+### Bug Fixes
+
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+* resolve install failure in CN setup ([#7439](https://github.com/JanssenProject/jans/issues/7439)) ([f84e99a](https://github.com/JanssenProject/jans/commit/f84e99a1a6257854cd23e2cc16aa1a3a5d0790b6))
+
 ## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.20-1...docker-jans-auth-server-v1.0.21-1) (2023-12-14)
 
 
