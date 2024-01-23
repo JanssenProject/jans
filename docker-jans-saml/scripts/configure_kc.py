@@ -173,13 +173,9 @@ class KC:
             self._reset_user_password(self.ctx["jans_idp_user_name"], self.ctx["jans_idp_user_password"])
             self._assign_user_roles(self.ctx["jans_idp_user_name"])
 
-    # def maybe_flow_exists(self):
     def _get_flow(self):
-        # flow_exists = False
-        # flow_id = ""
         flow = {}
 
-        # out, err, code = exec_cmd(f"{self.kcadm_script} get authentication/flows --fields 'id,alias' -r {self.ctx['jans_idp_realm']} --config {self.config_file}")
         out, err, code = exec_cmd(f"{self.kcadm_script} get authentication/flows -r {self.ctx['jans_idp_realm']} --config {self.config_file}")
 
         if code != 0:
@@ -285,9 +281,6 @@ def main():
         kc.create_user()
 
         if flow := kc.get_or_create_flow():
-            logger.info(f"{flow=}")
-            logger.info("CREATING FLOW EXECUTIONS")
-
             kc.ctx["jans_browser_auth_flow_id"] = flow["id"]
 
             kc.render_templates(templates=[
