@@ -168,10 +168,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
         self.writeFile(systemd_conf_fn, ''.join(systemd_conf))
 
 
-    def set_mapping_locations(self):
-        ptype = 'rdbm' if Config.persistence_type in ('sql', 'spanner') else Config.persistence_type
-        Config.mapping_locations = { group: ptype for group in Config.couchbaseBucketDict }
-
     def makeFolders(self):
         # Create these folder on all instances
         for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
