@@ -104,6 +104,8 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.couchbase_bucket_prefix = 'jans'
 
 
+        Config.set_mapping_locations()
+
         # It is time to bind database
         dbUtils.bind()
 

@@ -37,7 +37,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Set up Go
-      uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+      uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
       with:
         go-version: 1.18
 
@@ -92,7 +92,7 @@ jobs:
 
     - name: Publish Test Results
       continue-on-error: true
-      uses: EnricoMi/publish-unit-test-result-action@ca89ad036b5fcd524c1017287fb01b5139908408 # v2.11.0
+      uses: EnricoMi/publish-unit-test-result-action@e780361cd1fc1b1a170624547b3ffda64787d365 # v2.12.0
       if: >-
           github.event.pull_request.head.repo.full_name == github.repository ||
           github.event_name == 'workflow_dispatch' ||
@@ -107,7 +107,7 @@ jobs:
     - name: Upload Test Results
       continue-on-error: true
       if: always()
-      uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+      uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
       with:
         name: java-${{ matrix.persistence-backends }}-test-results
         path: "/${{ matrix.persistence-backends }}-reports/*.xml"
@@ -125,12 +125,12 @@ jobs:
         reporter: java-junit
 
     - name: Download Artifacts
-      uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+      uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
       with:
         name: java-${{ matrix.persistence-backends }}-test-results
         path: java-${{ matrix.persistence-backends }}-test-results
 
     - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action/composite@ca89ad036b5fcd524c1017287fb01b5139908408 # v2.11.0
+      uses: EnricoMi/publish-unit-test-result-action/composite@e780361cd1fc1b1a170624547b3ffda64787d365 # v2.12.0
       with:
         files: "java-${{ matrix.persistence-backends }}-test-results/**/*.xml"

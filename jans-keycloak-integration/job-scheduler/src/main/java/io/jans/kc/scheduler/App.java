@@ -16,9 +16,9 @@ import io.jans.kc.scheduler.config.AppConfiguration;
 import io.jans.kc.scheduler.config.AppConfigException;
 
 import io.jans.kc.scheduler.job.*;
-import io.jans.kc.scheduler.job.service.JobScheduler;
-import io.jans.kc.scheduler.job.service.JobSchedulerException;
-import io.jans.kc.scheduler.job.service.impl.QuartzJobScheduler;
+import io.jans.kc.scheduler.job.JobScheduler;
+import io.jans.kc.scheduler.job.JobSchedulerException;
+import io.jans.kc.scheduler.job.impl.QuartzJobScheduler;
 import io.jans.kc.api.config.client.ApiCredentials;
 import io.jans.kc.api.config.client.ApiCredentialsProvider;
 import io.jans.kc.api.config.client.impl.CredentialsProviderError;
@@ -37,8 +37,11 @@ public class App {
     private static final String DEFAULT_APP_CFG_FILEPATH = "/opt/kc-scheduler/conf/config.properties";
     private static final Logger log = LoggerFactory.getLogger(App.class);
 
+    private static AppConfiguration config = null;
     private static JobScheduler jobScheduler = null;
-    private static ApiCredentialsProvider configApiCredentialsProvider = null;
+    private static JansConfigApiFactory jansConfigApiFactory = null;
+    private static KeycloakApiFactory keycloakApiFactory = null;
+
     private static boolean running = false;
     /*
      * Entry point 
@@ -46,7 +49,6 @@ public class App {
     public static void main(String[] args) throws InterruptedException {
 
         log.info("Application starting ...");
-        AppConfiguration config = null;
         try {
             log.debug("Loading application configuration");
             config = loadApplicationConfiguration();
@@ -54,11 +56,17 @@ public class App {
 
 
             log.debug("Setting up access to external apis");
-            configApiCredentialsProvider = createConfigApiCredentialsProvider(config);
+            jansConfigApiFactory = JansConfigApiFactory.createFactory(config);
+            keycloakApiFactory = KeycloakApiFactory.createFactory(config);
 
             log.debug("Initializing scheduler ");
             jobScheduler = createJobScheduler(config);
             startJobScheduler(jobScheduler);
+
+            log.debug("Starting jans trust relationship sync job");
+            startJansTrustRelationshipSyncJob(config);
+
+
 
             log.debug("Performing post-startup operations");
             performPostStartupOperations();
@@ -70,6 +78,9 @@ public class App {
             log.debug("Application shutting down");
         }catch(StartupError e) {
             log.error("Application startup failed",e);
+            if(jobScheduler != null) {
+                jobScheduler.stop();
+            }
             System.exit(-1);
             return;
         }
@@ -106,29 +117,25 @@ public class App {
         jobScheduler.start();
     }
 
-    private static final ApiCredentialsProvider createConfigApiCredentialsProvider(AppConfiguration config) {
+    private static final void startJansTrustRelationshipSyncJob(AppConfiguration configuration) {
 
         try {
-            TokenEndpointAuthnParams authparams = null;
-            if(config.configApiAuthMethod() == ConfigApiAuthnMethod.BASIC_AUTHN) {
-                authparams = TokenEndpointAuthnParams.basicAuthn(
-                   config.configApiAuthClientId(),config.configApiAuthClientSecret(),config.configApiAuthScopes());
-            }else if(config.configApiAuthMethod() == ConfigApiAuthnMethod.POST_AUTHN) {
-                authparams = TokenEndpointAuthnParams.postAuthn(
-                   config.configApiAuthClientId(),config.configApiAuthClientSecret(),config.configApiAuthScopes());
-            }else {
-                throw new StartupError("Unsupported API authentication method specified");
+
+            if(configuration.trustRelationshipSyncScheduleInterval() == null) {
+                throw new StartupError("Missing tr sync job scheduling interval.");
             }
-            return OAuthApiCredentialsProvider.create(config.configApiAuthUrl(),authparams);
-            
-        }catch(CredentialsProviderError e) {
-            throw new StartupError("Unable to create config-api credentials provider",e);
-        }catch(TokenEndpointAuthnParamError e) {
-            throw new StartupError("Unable to create config-api credentials provider",e);
+            RecurringJobSpec jobspec = RecurringJobSpec.builder()
+                .jobClass(TrustRelationshipSyncJob.class)
+                .name(TrustRelationshipSyncJob.class.getSimpleName())
+                .schedulingInterval(configuration.trustRelationshipSyncScheduleInterval())
+                .build();
+        
+            jobScheduler.scheduleRecurringJob(jobspec);
+        }catch(AppConfigException e) {
+            throw new StartupError("Failed to start TR sync job",e);
         }
     }
 
-    
     private static final JobScheduler createQuartzJobSchedulerFromConfiguration(AppConfiguration config) {
         
         try {
@@ -152,7 +159,88 @@ public class App {
 
         Runtime.getRuntime().addShutdownHook(new ShutdownHook());
     }
+
+    public static final KeycloakApi keycloakApi() {
+
+        return keycloakApiFactory.newApiClient();
+    }
+
+    public static final JansConfigApi jansConfigApi() {
+
+        return jansConfigApiFactory.newApiClient();
+    }
+
+    public static final AppConfiguration configuration() {
+
+        return config;
+    }
     
+    private static class KeycloakApiFactory {
+
+        private final KeycloakConfiguration kcConfig;
+
+        private KeycloakApiFactory(KeycloakConfiguration kcConfig) {
+
+            this.kcConfig = kcConfig;
+        }
+
+        public KeycloakApi newApiClient() {
+
+            return KeycloakApi.createInstance(kcConfig);
+        }
+
+        public static KeycloakApiFactory createFactory(AppConfiguration config) {
+
+            try {
+                KeycloakConfiguration cfg = KeycloakConfiguration.fromAppConfiguration(config);
+                return new KeycloakApiFactory(cfg);
+            }catch(KeycloakConfigurationError e) {
+                throw new StartupError("Could not initialize keycloak API",e);
+            }
+        }
+    }
+
+    private static class JansConfigApiFactory {
+
+        private ApiCredentialsProvider credsprovider;
+
+        private JansConfigApiFactory(ApiCredentialsProvider credsprovider) {
+
+            this.credsprovider = credsprovider;
+        }
+
+        public JansConfigApi newApiClient() {
+
+            return JansConfigApi.createInstance(credsprovider.getApiCredentials());
+        }
+
+        public static JansConfigApiFactory createFactory(AppConfiguration config) {
+            try {
+                TokenEndpointAuthnParams authparams = null;
+                if(config.configApiAuthMethod() == ConfigApiAuthnMethod.BASIC_AUTHN) {
+                    authparams = TokenEndpointAuthnParams.basicAuthn(
+                        config.configApiAuthClientId(),
+                        config.configApiAuthClientSecret(),
+                        config.configApiAuthScopes());
+                }else if(config.configApiAuthMethod() == ConfigApiAuthnMethod.POST_AUTHN) {
+                    authparams = TokenEndpointAuthnParams.postAuthn(
+                        config.configApiAuthClientId(),
+                        config.configApiAuthClientSecret(),
+                        config.configApiAuthScopes()
+                    );
+                }else {
+                    throw new StartupError("Could not initialize jans-config API. Unsupported authn method");
+                }
+                ApiCredentialsProvider provider = OAuthApiCredentialsProvider.create(config.configApiAuthUrl(),authparams);
+                return new JansConfigApiFactory(provider);
+
+            }catch(CredentialsProviderError e) {
+                throw new StartupError("Could not initialize jans-config API",e);
+            }catch(TokenEndpointAuthnParamError e) {
+                throw new StartupError("Could not initialize jans-config API",e);
+            }
+        }
+    }
     
     public static class ShutdownHook extends Thread  {
         

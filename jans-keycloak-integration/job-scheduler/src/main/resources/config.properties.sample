@@ -26,3 +26,9 @@ app.keycloak-admin.username=%{keycloak_admin_username}
 app.keycloak-admin.password=%{keycloak_admin_password}
 app.keycloak-admin.client.id=%{keycloak_client_id}
 app.keycloak-admin.conn.poolsize=10
+
+# trust relationship sync job configuration
+app.job.trustrelationship-sync.schedule-interval=PT10M
+
+# keycloak configuration 
+app.keycloak.resources.realm=jans
