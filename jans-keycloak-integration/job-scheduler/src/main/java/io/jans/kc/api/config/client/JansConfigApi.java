@@ -9,11 +9,11 @@ import io.jans.kc.api.config.client.model.JansTrustRelationship;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class JansConfigApiClient {
+public class JansConfigApi {
 
     private SamlTrustRelationshipApi trApi;
 
-    private JansConfigApiClient() {
+    private JansConfigApi() {
         
     }
 
@@ -27,21 +27,21 @@ public class JansConfigApiClient {
         }
     }
 
-    public List<JansTrustRelationship> getAllTrustRelationships() {
+    public List<JansTrustRelationship> findAllTrustRelationships() {
 
         try {
-            List<TrustRelationship> trlist = trApi.getTrustRelationships();
+            List<TrustRelationship> trlist = trApi.getTrustRelationship();
             return trlist.stream()
-                .map(JansConfigApiClient::toJansTrustRelationship)
+                .map(JansConfigApi::toJansTrustRelationship)
                 .collect(Collectors.toList());
         }catch(ApiException e) {
             throw new JansConfigApiError("getAllTrustRelationships() failed",e);
         }
     }
 
-    public static JansConfigApiClient createInstance(ApiCredentials credentials) {
+    public static JansConfigApi createInstance(ApiCredentials credentials) {
 
-        JansConfigApiClient client = new JansConfigApiClient();
+        JansConfigApi client = new JansConfigApi();
         client.trApi = newSamlTrustRelationshipApi(credentials);
         return client;
     }
