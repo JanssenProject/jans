@@ -1,6 +1,6 @@
 package io.jans.kc.scheduler.job;
 
-import io.jans.kc.scheduler.job.service.JobSchedulerException;
+import io.jans.kc.scheduler.job.JobSchedulerException;
 
 public class JobSpec {
 
