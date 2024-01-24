@@ -104,7 +104,7 @@ Kubernetes: `>=v1.22.0-0`
 | cnAwsSharedCredentialsFile | string | `"/etc/jans/conf/aws_shared_credential_file"` |  |
 | cnCouchbasePasswordFile | string | `"/etc/jans/conf/couchbase_password"` | Path to Couchbase password file |
 | cnCouchbaseSuperuserPasswordFile | string | `"/etc/jans/conf/couchbase_superuser_password"` | Path to Couchbase superuser password file |
-| cnDocumentStoreType | string | `"LOCAL"` | Document store type to use for shibboleth files LOCAL. |
+| cnDocumentStoreType | string | `"DB"` | Document store type to use for shibboleth files DB. |
 | cnGoogleApplicationCredentials | string | `"/etc/jans/conf/google-credentials.json"` | Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner. Leave as this is a sensible default. |
 | cnPersistenceType | string | `"sql"` | Persistence backend to run Janssen with couchbase|hybrid|sql|spanner. |
 | cnPrometheusPort | string | `""` | Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. |

@@ -456,9 +456,9 @@
           "pattern": "^(ldap|couchbase|hybrid|sql|spanner)$"
         },
         "cnDocumentStoreType": {
-          "description": "Document store type to use for shibboleth files  LOCAL.",
+          "description": "Document store type to use for shibboleth files  DB.",
           "type": "string",
-          "pattern": "^(LOCAL)$"
+          "pattern": "^(DB)$"
         },
         "config": {
           "type": "object",

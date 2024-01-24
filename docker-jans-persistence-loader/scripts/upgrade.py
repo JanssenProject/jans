@@ -186,10 +186,10 @@ class CouchbaseBackend:
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
         bucket = kwargs.get("bucket")
         req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec: B608
         )
         if not req.ok:
-            return
+            return None
 
         try:
             _attrs = req.json()["results"][0]
@@ -793,6 +793,7 @@ class Upgrade:
                     entry.attrs["jansSmtpConf"][0] = json.dumps(new_smtp_conf)
                     should_update = True
 
+        # scim support
         scim_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
         if as_boolean(entry.attrs["jansScimEnabled"]) != scim_enabled:
             entry.attrs["jansScimEnabled"] = scim_enabled
@@ -807,9 +808,20 @@ class Upgrade:
 
         entry.attrs["jansMessageConf"], should_update = _transform_message_config(entry.attrs["jansMessageConf"])
 
+        # set document store
+        doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
+
+        if self.backend.type != "couchbase":
+            entry.attrs["jansDocStoreConf"] = json.loads(entry.attrs["jansDocStoreConf"])
+
+        if entry.attrs["jansDocStoreConf"]["documentStoreType"] != doc_store_type:
+            entry.attrs["jansDocStoreConf"]["documentStoreType"] = doc_store_type
+            should_update = True
+
         if should_update:
             if self.backend.type != "couchbase":
                 entry.attrs["jansMessageConf"] = json.dumps(entry.attrs["jansMessageConf"])
+                entry.attrs["jansDocStoreConf"] = json.dumps(entry.attrs["jansDocStoreConf"])
 
             revision = entry.attrs.get("jansRevision") or 1
             entry.attrs["jansRevision"] = revision + 1

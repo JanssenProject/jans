@@ -794,8 +794,8 @@ global:
     testEnviroment: false
   # -- Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number.
   cnPrometheusPort: ""
-  # -- Document store type to use for shibboleth files LOCAL.
-  cnDocumentStoreType: LOCAL
+  # -- Document store type to use for shibboleth files DB.
+  cnDocumentStoreType: DB
   # -- Persistence backend to run Janssen with ldap|couchbase|hybrid|sql|spanner.
   cnPersistenceType: sql
   config:

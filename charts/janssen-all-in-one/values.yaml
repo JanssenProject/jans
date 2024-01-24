@@ -460,8 +460,8 @@ cnAwsConfigFile: /etc/jans/conf/aws_config_file
 cnAwsSecretsReplicaRegionsFile: /etc/jans/conf/aws_secrets_replica_regions
 # -- Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number.
 cnPrometheusPort: ""
-# -- Document store type to use for shibboleth files LOCAL.
-cnDocumentStoreType: LOCAL
+# -- Document store type to use for shibboleth files DB.
+cnDocumentStoreType: DB
 # -- Path to SQL password file
 cnSqlPasswordFile: /etc/jans/conf/sql_password
 # -- Path to Couchbase password file
