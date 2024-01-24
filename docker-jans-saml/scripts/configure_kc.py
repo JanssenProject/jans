@@ -187,10 +187,7 @@ class KC:
             for datum in json.loads(out.decode()):
                 if datum["alias"] == alias:
                     flow = datum
-                    # flow_exists = True
-                    # flow_id = datum["id"]
                     break
-        # return flow_exists, flow_id
         return flow
 
     def get_or_create_flow(self):
@@ -251,17 +248,16 @@ def main():
         admin_username, admin_password = base64.b64decode(creds).decode().strip().split(":")
 
     ctx = {
-        "jans_idp_realm": "jans-api",
+        "jans_idp_realm": "jans",
         "jans_idp_client_id": manager.config.get("jans_idp_client_id"),
         "jans_idp_client_secret": manager.secret.get("jans_idp_client_secret"),
-        "jans_idp_user_name": "jans-api",
+        "jans_idp_user_name": "jans",
         "jans_idp_user_password": manager.secret.get("jans_idp_user_password"),
         "kc_saml_openid_client_id": manager.config.get("kc_saml_openid_client_id"),
         "kc_saml_openid_client_pw": manager.secret.get("kc_saml_openid_client_pw"),
         "hostname": manager.config.get("hostname"),
     }
 
-    # with tempfile.TemporaryDirectory() as tmp_dir:
     base_dir = os.path.join(tempfile.gettempdir(), "kc_jans_api")
     os.makedirs(base_dir, exist_ok=True)
 

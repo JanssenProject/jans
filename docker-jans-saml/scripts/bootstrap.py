@@ -94,9 +94,9 @@ class PersistenceSetup:
         ctx = {
             "hostname": hostname,
             "keycloack_hostname": hostname,
-            "jans_idp_realm": "jans-api",
+            "jans_idp_realm": "jans",
             "jans_idp_grant_type": "PASSWORD",
-            "jans_idp_user_name": "jans-api",
+            "jans_idp_user_name": "jans",
             "idp_config_hostname": hostname,
             "idp_config_http_port": os.environ.get("CN_SAML_HTTP_PORT", "8083"),
         }
@@ -104,7 +104,7 @@ class PersistenceSetup:
         # jans-idp contexts
         ctx["jans_idp_client_id"] = self.manager.config.get("jans_idp_client_id")
         if not ctx["jans_idp_client_id"]:
-            ctx["jans_idp_client_id"] = f"jans-api-{uuid4()}"
+            ctx["jans_idp_client_id"] = f"jans-{uuid4()}"
             self.manager.config.set("jans_idp_client_id", ctx["jans_idp_client_id"])
 
         ctx["jans_idp_client_secret"] = self.manager.secret.get("jans_idp_client_secret")
