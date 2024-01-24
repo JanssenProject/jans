@@ -929,6 +929,11 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 	}
 
     @Override
+	protected boolean hasMapSupport() {
+		return true;
+	}
+
+    @Override
 	protected Object getNativeDateAttributeValue(Date dateValue) {
 		return dateValue;
     }

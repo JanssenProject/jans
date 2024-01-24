@@ -934,6 +934,11 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
 	}
 
     @Override
+	protected boolean hasMapSupport() {
+		return true;
+	}
+
+    @Override
 	protected Object getNativeDateAttributeValue(Date dateValue) {
 		return encodeTime(dateValue);
     }
