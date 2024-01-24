@@ -743,6 +743,7 @@ input.btn.btn-done {
 
 .app-input-styles {
     text-align: left !important;
+    padding: 0px 10px !important
 }
 
 .absolute-logo {
