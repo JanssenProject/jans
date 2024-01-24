@@ -673,7 +673,7 @@ class PropertiesUtils(SetupUtils):
         if not self.prompt_to_install('install_jans_saml'):
             return
 
-        prompt = self.getPrompt("Install Jans SAML?",
+        prompt = self.getPrompt("Install Jans KC?",
                                             self.getDefaultOption(Config.install_jans_saml)
                                             )[0].lower()
 
