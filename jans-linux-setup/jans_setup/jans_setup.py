@@ -279,7 +279,8 @@ jansCliInstaller = JansCliInstaller()
 
 rdbmInstaller.packageUtils = packageUtils
 
-jansInstaller.set_mapping_locations()
+if not Config.installed_instance:
+    Config.set_mapping_locations()
 
 
 if Config.installed_instance:
