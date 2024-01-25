@@ -156,7 +156,20 @@ def schema2json(schema_file, out_dir=None):
     with open(out_file, 'w') as w:
         w.write(schema_str)
 
-def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, display_name, trusted_client='false', grant_types=None, authorization_methods=None):
+def create_client_ldif(
+            ldif_fn, 
+            client_id, 
+            encoded_pw, 
+            scopes, 
+            redirect_uri, 
+            display_name, 
+            trusted_client='false', 
+            grant_types=None, 
+            authorization_methods=None,
+            response_types=['code'],
+            application_type='web',
+            description=None
+            ):
     # create directory if not exists
     dirname = os.path.dirname(ldif_fn)
     if not os.path.exists(dirname):
@@ -170,8 +183,7 @@ def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, dis
     if not authorization_methods:
         authorization_methods = ['client_secret_basic']
 
-    ldif_clients_writer.unparse(
-        client_dn, {
+    client_dict = {
         'objectClass': ['top', 'jansClnt'],
         'del': ['false'],
         'displayName': [display_name],
@@ -182,18 +194,25 @@ def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, dis
         'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
         'jansClntSecret': [encoded_pw],
         'jansDisabled': ['false'],
-        'jansGrantTyp': grant_types,
         'jansIdTknSignedRespAlg': ['RS256'],
         'jansInclClaimsInIdTkn': ['false'],
         'jansLogoutSessRequired': ['false'],
         'jansPersistClntAuthzs': ['true'],
-        'jansRespTyp': ['code'],
         'jansRptAsJwt': ['false'],
         'jansScope': scopes,
         'jansSubjectTyp': ['pairwise'],
         'jansTknEndpointAuthMethod': authorization_methods,
         'jansTrustedClnt': [trusted_client],
         'jansRedirectURI': redirect_uri
-        })
+        }
+
+    if description:
+        client_dict['description'] = [description]
+    if response_types:
+        client_dict['jansRespTyp'] = response_types
+    if grant_types:
+        client_dict['jansGrantTyp'] = grant_types
+
+    ldif_clients_writer.unparse(client_dn, client_dict)
 
     clients_ldif_fd.close()

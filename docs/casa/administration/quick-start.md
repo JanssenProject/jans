@@ -7,7 +7,7 @@ tags:
 # Jans Casa Quick Start Guide
 
 !!! Note
-    This document is intended for administrators only
+    This document is intended for administrators only. Learn [here](../index.md#user-roles) how to "grant" administrative privileges for Casa.
 
 Use this guide to install and configure your Casa deployment.
 

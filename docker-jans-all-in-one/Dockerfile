@@ -2,21 +2,21 @@
 # Assets sources
 # ==============
 
-# original Janssen version
-ARG CN_VERSION=1.0.22
+# original Janssen base version (without suffix)
+ARG BASE_VERSION=1.0.22
 
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
-ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:${CN_VERSION}_dev
-ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:${CN_VERSION}_dev
-ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:${CN_VERSION}_dev
-ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${CN_VERSION}_dev
-ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${CN_VERSION}_dev
-ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${CN_VERSION}_dev
-ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${CN_VERSION}_dev
-ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${CN_VERSION}_dev
-ARG JANS_KEYCLOAK_LINK_IMAGE=ghcr.io/janssenproject/jans/keycloak-link:${CN_VERSION}_dev
-ARG JANS_SAML_IMAGE=ghcr.io/janssenproject/jans/saml:${CN_VERSION}_dev
+ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:${BASE_VERSION}_dev
+ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:${BASE_VERSION}_dev
+ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:${BASE_VERSION}_dev
+ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${BASE_VERSION}_dev
+ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${BASE_VERSION}_dev
+ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${BASE_VERSION}_dev
+ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${BASE_VERSION}_dev
+ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${BASE_VERSION}_dev
+ARG JANS_KEYCLOAK_LINK_IMAGE=ghcr.io/janssenproject/jans/keycloak-link:${BASE_VERSION}_dev
+ARG JANS_SAML_IMAGE=ghcr.io/janssenproject/jans/saml:${BASE_VERSION}_dev
 
 # -----------
 # base images
@@ -109,6 +109,7 @@ COPY --from=jans-config-api-src /app/templates/jans-config-api /app/templates/ja
 COPY --from=jans-config-api-src /usr/bin/facter /usr/local/bin/facter
 COPY --from=jans-config-api-src /app/scripts /app/jans_aio/jans_config_api
 COPY --from=jans-config-api-src /var/log/adminui /var/log/adminui
+COPY --from=jans-config-api-src /opt/jans/bin /opt/jans/bin
 RUN ln -sf /app/jans_aio/jans_config_api/entrypoint.sh /app/bin/jans-config-api-entrypoint.sh
 
 COPY --from=jans-fido2-src /opt/jans/jetty/jans-fido2 /opt/jans/jetty/jans-fido2
@@ -158,6 +159,9 @@ RUN mkdir -p /opt/jans/configurator/db \
     /usr/share/java
 
 COPY app /app
+
+# CN version as env var (with suffix if any, i.e. SNAPSHOT)
+ENV CN_VERSION=1.0.22
 
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app

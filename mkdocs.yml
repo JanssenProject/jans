@@ -182,6 +182,7 @@ nav:
       - admin/auth-server/tokens/README.md
       - OAuth Access Tokens: admin/auth-server/tokens/oauth-access-tokens.md
       - OAuth Refresh Tokens: admin/auth-server/tokens/oauth-refresh-tokens.md
+      - OAuth Transaction Tokens: admin/auth-server/tokens/oauth-tx-tokens.md
       - OpenID id_token: admin/auth-server/tokens/openid-id-token.md
       - OpenID Userinfo Token: admin/auth-server/tokens/openid-userinfo-token.md
       - UMA RPT Token: admin/auth-server/tokens/uma-rpt-token.md
@@ -8755,6 +8756,12 @@ nav:
     - admin/link/README.md
     - Jans Link: admin/link/jans-link.md
     - Keycloak Synch: admin/link/keycloak-synch.md
+  - Lock Guide:
+      - admin/lock/README.md
+      - Auth Server Configuration: admin/lock/lock_auth_server_config.md
+      - Lock Client Configuration: admin/lock/lock_client_config.md
+      - Implement Lock PDP Plugin: admin/lock/lock_pdp_plugin.md
+      - Policy Store Integration: admin/lock/lock_opa.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md

@@ -121,19 +121,11 @@ class PropertiesUtils(SetupUtils):
             if Config.cb_install and not Config.get('cb_password'):
                 Config.cb_password = Config.admin_password
 
-            if not Config.opendj_install:
-                if Config.cb_install:
-                    Config.mapping_locations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
-
-                if Config.rdbm_install:
-                    Config.mapping_locations = { group: 'rdbm' for group in Config.couchbaseBucketDict }
-
             if Config.opendj_install == InstallTypes.LOCAL and not Config.installed_instance:
                 used_ports = self.opendj_used_ports()
                 if used_ports:
                     print(msg.used_ports.format(','.join(used_ports)))
                     sys.exit(1)
-
 
             self.set_persistence_type()
 
@@ -615,7 +607,7 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_jans_keycloak_link:
             return
 
-        prompt_to_install = self.getPrompt("Install Jans Keycloak Link Server?",
+        prompt_to_install = self.getPrompt("Install Jans KC Link Server?",
                                             self.getDefaultOption(Config.install_jans_keycloak_link)
                                             )[0].lower()
 
@@ -681,7 +673,7 @@ class PropertiesUtils(SetupUtils):
         if not self.prompt_to_install('install_jans_saml'):
             return
 
-        prompt = self.getPrompt("Install Jans SAML?",
+        prompt = self.getPrompt("Install Jans KC?",
                                             self.getDefaultOption(Config.install_jans_saml)
                                             )[0].lower()
 
@@ -757,11 +749,11 @@ class PropertiesUtils(SetupUtils):
         print('Chose Backend Type:')
 
         backend_types = [
-                    BackendStrings.LOCAL_OPENDJ,
-                    BackendStrings.LOCAL_MYSQL,
-                    BackendStrings.REMOTE_MYSQL,
                     BackendStrings.LOCAL_PGSQL,
                     BackendStrings.REMOTE_PGSQL,
+                    BackendStrings.LOCAL_MYSQL,
+                    BackendStrings.REMOTE_MYSQL,
+                    BackendStrings.LOCAL_OPENDJ,
                     ]
 
         backend_types += [BackendStrings.REMOTE_COUCHBASE, BackendStrings.CLOUD_SPANNER]
@@ -797,6 +789,7 @@ class PropertiesUtils(SetupUtils):
 
         if backend_type_str == BackendStrings.LOCAL_OPENDJ:
             Config.opendj_install = InstallTypes.LOCAL
+            Config.rdbm_install = False
             ldapPass = Config.ldapPass or Config.admin_password or self.getPW(special='.*=!%&+/-')
 
             while True:
@@ -812,6 +805,7 @@ class PropertiesUtils(SetupUtils):
 
         elif backend_type_str == BackendStrings.REMOTE_OPENDJ:
             Config.opendj_install = InstallTypes.REMOTE
+            Config.rdbm_install = False
             while True:
                 ldapHost = self.getPrompt("    LDAP hostname")
                 ldapPass = self.getPrompt("    Password for '{0}'".format(Config.ldap_binddn))
@@ -825,7 +819,7 @@ class PropertiesUtils(SetupUtils):
             Config.ldap_hostname = ldapHost
 
         elif backend_type_str == BackendStrings.LOCAL_COUCHBASE:
-            Config.opendj_install = InstallTypes.NONE
+            Config.rdbm_install = False
             Config.cb_install = InstallTypes.LOCAL
             Config.isCouchbaseUserAdmin = True
 
@@ -838,10 +832,9 @@ class PropertiesUtils(SetupUtils):
                     print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
 
             Config.cb_password = cbPass
-            Config.mapping_locations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
 
         elif backend_type_str == BackendStrings.REMOTE_COUCHBASE:
-            Config.opendj_install = InstallTypes.NONE
+            Config.rdbm_install = False
             Config.cb_install = InstallTypes.REMOTE
 
             while True:
@@ -852,10 +845,7 @@ class PropertiesUtils(SetupUtils):
                 if result['result']:
                     break
 
-            Config.mapping_locations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
-
         elif backend_type_str in (BackendStrings.LOCAL_MYSQL, BackendStrings.LOCAL_PGSQL):
-            Config.opendj_install = InstallTypes.NONE
             Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.LOCAL
             if backend_type_str == BackendStrings.LOCAL_MYSQL:
@@ -866,8 +856,6 @@ class PropertiesUtils(SetupUtils):
                 Config.rdbm_type = 'pgsql'
 
         elif backend_type_str in (BackendStrings.REMOTE_MYSQL, BackendStrings.REMOTE_PGSQL):
-            Config.opendj_install = InstallTypes.NONE
-            Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.REMOTE
             if backend_type_str == BackendStrings.REMOTE_MYSQL:
                 Config.rdbm_port = 3306
@@ -899,7 +887,6 @@ class PropertiesUtils(SetupUtils):
         elif backend_type_str == BackendStrings.CLOUD_SPANNER:
             Config.opendj_install = InstallTypes.NONE
             Config.rdbm_type = 'spanner'
-            Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.REMOTE
 
             emulator = self.getPrompt("  Is it emulator?", "N|y")[0].lower()

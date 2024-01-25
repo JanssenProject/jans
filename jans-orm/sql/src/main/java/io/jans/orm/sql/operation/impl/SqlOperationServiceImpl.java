@@ -948,6 +948,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					attributeValue = new JsonAttributeValue(((List<?>) propertyValue).toArray());
 				} else if (propertyValue.getClass().isArray()) {
 					attributeValue = new JsonAttributeValue((Object[]) propertyValue);
+				} else if (propertyValue instanceof Map) {
+					attributeValue = new JsonAttributeValue(new Object[] { propertyValue });
 				} else {
 					attributeValue = new JsonAttributeValue(new Object[] { propertyValue });
 				}

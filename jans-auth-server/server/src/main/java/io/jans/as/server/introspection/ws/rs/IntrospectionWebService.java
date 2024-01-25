@@ -158,7 +158,7 @@ public class IntrospectionWebService {
                 return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, "")).build();
             }
 
-            final io.jans.as.model.common.IntrospectionResponse response = new io.jans.as.model.common.IntrospectionResponse(false);
+            final IntrospectionResponse response = new IntrospectionResponse(false);
 
             final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
 

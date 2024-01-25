@@ -2,6 +2,8 @@ package io.jans.lock.service.consumer.message;
 
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.qualifier.Implementation;
 import io.jans.service.message.consumer.MessageConsumer;
@@ -46,6 +48,11 @@ public class NullMessageConsumer extends MessageConsumer {
 	@Override
 	public void destroy() {
 		log.debug("Destory Messages");
+	}
+
+	@Override
+	public boolean putData(String message, JsonNode messageNode) {
+		return false;
 	}
 
 }

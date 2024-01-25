@@ -24,6 +24,8 @@ public enum TokenType {
      */
     BEARER("Bearer"),
 
+    TX_TOKEN("txn_token"),
+
     DPOP("DPoP");
 
     private final String name;

@@ -94,6 +94,17 @@
       "type": "STRING(MAX)"
     }
   },
+  "jansUmaResourcePermission:jansAttrs": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+   "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
   "jansAuthData": {
     "mysql": {
       "type": "TEXT"
@@ -1041,7 +1052,7 @@
       "type": "STRING"
     }
   },
-  "jansSAMLspMetaDataURL": {
+  "jansSAMLspMetaDataFN": {
     "mysql": {
       "size": 128,
       "type": "VARCHAR"
@@ -1051,7 +1062,27 @@
       "type": "STRING"
     }
   },
-  "jansPostLogoutRedirectURI": {
+  "jansSAMLidpMetaDataFN": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "jansSAMLspMetaLocation": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "jansSAMLidpMetaLocation": {
     "mysql": {
       "size": 128,
       "type": "VARCHAR"
@@ -1061,5 +1092,6 @@
       "type": "STRING"
     }
   }
+  
   
 }

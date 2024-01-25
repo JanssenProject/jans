@@ -126,7 +126,8 @@ public class OpaMessageConsumer extends MessageConsumer {
 		return MESSAGE_CONSUMER_TYPE;
 	}
 
-	protected boolean putData(String message, JsonNode messageNode) {
+	@Override
+	public boolean putData(String message, JsonNode messageNode) {
 		ExternalLockContext lockContext = new ExternalLockContext();
 
 		String tknTyp = messageNode.get("tknTyp").asText();

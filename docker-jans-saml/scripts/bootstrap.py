@@ -38,8 +38,11 @@ def render_keycloak_conf():
     if not db_password:
         passwd_file = os.environ.get("CN_SAML_KC_DB_PASSWORD_FILE", "/etc/jans/conf/kc_db_password")
 
-        with open(passwd_file) as f:
-            db_password = f.read().strip()
+        try:
+            with open(passwd_file) as f:
+                db_password = f.read().strip()
+        except FileNotFoundError as exc:
+            raise ValueError(f"Unable to get password from {passwd_file}; reason={exc}")
 
     ctx = {
         "hostname": manager.config.get("hostname"),
