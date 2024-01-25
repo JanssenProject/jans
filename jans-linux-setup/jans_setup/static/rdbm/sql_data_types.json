@@ -94,6 +94,17 @@
       "type": "STRING(MAX)"
     }
   },
+  "jansUmaResourcePermission:jansAttrs": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+   "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
   "jansAuthData": {
     "mysql": {
       "type": "TEXT"
