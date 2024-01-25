@@ -741,23 +741,29 @@ input.btn.btn-done {
     color: #fff !important;
 }
 
+.app-input-styles::placeholder {
+    font-size: 20px;
+    font-family: 'Lato';
+}
+
 .app-input-styles {
+    font-size: 20px !important;
     text-align: left !important;
-    padding: 0px 10px !important
+    padding: 6px 10px !important;
     font-weight: normal !important;
 }
 
 .absolute-logo {
     position: absolute;
     top: 0;
-    left: 50%;
-    transform: translate(-50%, 100%);
-    max-height: 70px;
+    left: 0%;
+    transform: translate(5%, 5%) scale(0.8);
+    z-index: 11;
 }
 
-@media only screen and (max-height: 780px) {
+@media only screen and (max-height: 780px), (max-width: 620px) {
     .absolute-logo {
-        transform: translate(-50%, 20%);
+        transform: translate(-10%, 0%) scale(0.7) !important;
     }
 }
 
