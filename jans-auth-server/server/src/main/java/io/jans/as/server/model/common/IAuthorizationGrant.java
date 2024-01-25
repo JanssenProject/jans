@@ -109,6 +109,8 @@ public interface IAuthorizationGrant {
 
     void setAccessTokens(List<AccessToken> accessTokens);
 
+    void setTxTokens(List<TxToken> txTokens);
+
     String getAcrValues();
 
     void setAcrValues(String authMode);
