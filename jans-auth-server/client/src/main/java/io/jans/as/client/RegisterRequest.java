@@ -109,6 +109,9 @@ public class RegisterRequest extends BaseRequest {
     private SignatureAlgorithm introspectionSignedResponseAlg;
     private KeyEncryptionAlgorithm introspectionEncryptedResponseAlg;
     private BlockEncryptionAlgorithm introspectionEncryptedResponseEnc;
+    private SignatureAlgorithm txTokenSignedResponseAlg;
+    private KeyEncryptionAlgorithm txTokenEncryptedResponseAlg;
+    private BlockEncryptionAlgorithm txTokenEncryptedResponseEnc;
     private SignatureAlgorithm requestObjectSigningAlg;
     private KeyEncryptionAlgorithm requestObjectEncryptionAlg;
     private BlockEncryptionAlgorithm requestObjectEncryptionEnc;
@@ -128,6 +131,8 @@ public class RegisterRequest extends BaseRequest {
     private List<String> authorizedOrigins;
     private Integer accessTokenLifetime;
     private Integer parLifetime;
+    private Integer idTokenLifetime;
+    private Integer txTokenLifetime;
     private Boolean requirePar;
     private Boolean dpopBoundAccessToken;
     private String softwareId;
@@ -974,6 +979,61 @@ public class RegisterRequest extends BaseRequest {
         this.introspectionEncryptedResponseEnc = introspectionEncryptedResponseEnc;
     }
 
+
+    /**
+     * Returns the JWS alg algorithm (JWA) required for Transaction Token responses.
+     *
+     * @return The JWS algorithm (JWA) for Transaction Tokens.
+     */
+    public SignatureAlgorithm getTxTokenSignedResponseAlg() {
+        return txTokenSignedResponseAlg;
+    }
+
+    /**
+     * Sets the JWS alg algorithm (JWA) required for Transaction Token responses.
+     *
+     * @param txTokenSignedResponseAlg The JWS algorithm (JWA) for Transaction Token.
+     */
+    public void setTxTokenSignedResponseAlg(SignatureAlgorithm txTokenSignedResponseAlg) {
+        this.txTokenSignedResponseAlg = txTokenSignedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE alg algorithm (JWA) required for encrypting Transaction Token responses.
+     *
+     * @return The JWE algorithm (JWA) of Transaction Token.
+     */
+    public KeyEncryptionAlgorithm getTxTokenEncryptedResponseAlg() {
+        return txTokenEncryptedResponseAlg;
+    }
+
+    /**
+     * Sets the JWE alg algorithm (JWA) required for encrypting Transaction Token responses.
+     *
+     * @param txTokenEncryptedResponseAlg The JWE algorithm (JWA) of Transaction Token.
+     */
+    public void setTxTokenEncryptedResponseAlg(KeyEncryptionAlgorithm txTokenEncryptedResponseAlg) {
+        this.txTokenEncryptedResponseAlg = txTokenEncryptedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE enc algorithm (JWA) required for symmetric encryption of Transaction Tokens responses.
+     *
+     * @return The JWE algorithm (JWA) of Transaction Token.
+     */
+    public BlockEncryptionAlgorithm getTxTokenEncryptedResponseEnc() {
+        return txTokenEncryptedResponseEnc;
+    }
+
+    /**
+     * Sets the JWE enc algorithm (JWA) required for symmetric encryption of Transaction Token responses.
+     *
+     * @param txTokenEncryptedResponseEnc The JWE algorithm (JWA) of Transaction Token.
+     */
+    public void setTxTokenEncryptedResponseEnc(BlockEncryptionAlgorithm txTokenEncryptedResponseEnc) {
+        this.txTokenEncryptedResponseEnc = txTokenEncryptedResponseEnc;
+    }
+
     /**
      * Returns the JWS alg algorithm (JWA) required for UserInfo responses.
      *
@@ -1375,6 +1435,42 @@ public class RegisterRequest extends BaseRequest {
         this.parLifetime = parLifetime;
     }
 
+    /**
+     * Gets id_token lifetime in seconds
+     *
+     * @return id_token lifetime in seconds
+     */
+    public Integer getIdTokenLifetime() {
+        return idTokenLifetime;
+    }
+
+    /**
+     * Sets id_token lifetime in seconds
+     *
+     * @param idTokenLifetime id_token lifetime in seconds
+     */
+    public void setIdTokenLifetime(Integer idTokenLifetime) {
+        this.idTokenLifetime = idTokenLifetime;
+    }
+
+    /**
+     * Gets tx_token lifetime in seconds
+     *
+     * @return tx_token lifetime in seconds
+     */
+    public Integer getTxTokenLifetime() {
+        return txTokenLifetime;
+    }
+
+    /**
+     * Sets tx_token lifetime in seconds
+     *
+     * @param txTokenLifetime tx_token lifetime in seconds
+     */
+    public void setTxTokenLifetime(Integer txTokenLifetime) {
+        this.txTokenLifetime = txTokenLifetime;
+    }
+
     public Boolean getRequirePar() {
         return requirePar;
     }
@@ -1735,6 +1831,8 @@ public class RegisterRequest extends BaseRequest {
         result.setBackchannelLogoutSessionRequired(requestObject.optBoolean(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setAccessTokenLifetime(integerOrNull(requestObject, ACCESS_TOKEN_LIFETIME.toString()));
         result.setParLifetime(integerOrNull(requestObject, PAR_LIFETIME.toString()));
+        result.setIdTokenLifetime(integerOrNull(requestObject, ID_TOKEN_LIFETIME.toString()));
+        result.setTxTokenLifetime(integerOrNull(requestObject, TX_TOKEN_LIFETIME.toString()));
         result.setRequirePar(booleanOrNull(requestObject, REQUIRE_PAR.toString()));
         result.setDpopBoundAccessToken(booleanOrNull(requestObject, DPOP_BOUND_ACCESS_TOKEN.toString()));
         result.setDefaultMaxAge(integerOrNull(requestObject, DEFAULT_MAX_AGE.toString()));
@@ -1767,6 +1865,9 @@ public class RegisterRequest extends BaseRequest {
         result.setIntrospectionSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(INTROSPECTION_SIGNED_RESPONSE_ALG.toString())));
         result.setIntrospectionEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(INTROSPECTION_ENCRYPTED_RESPONSE_ALG.toString())));
         result.setIntrospectionEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(INTROSPECTION_ENCRYPTED_RESPONSE_ENC.toString())));
+        result.setTxTokenSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(TX_TOKEN_SIGNED_RESPONSE_ALG.toString())));
+        result.setTxTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(TX_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())));
+        result.setTxTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(TX_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())));
         result.setRequestObjectSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(REQUEST_OBJECT_SIGNING_ALG.toString())));
         result.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
         result.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
@@ -1945,6 +2046,15 @@ public class RegisterRequest extends BaseRequest {
         if (introspectionEncryptedResponseEnc != null) {
             function.apply(INTROSPECTION_ENCRYPTED_RESPONSE_ENC.toString(), introspectionEncryptedResponseEnc.getName());
         }
+        if (txTokenSignedResponseAlg != null) {
+            function.apply(TX_TOKEN_SIGNED_RESPONSE_ALG.toString(), txTokenSignedResponseAlg.getName());
+        }
+        if (txTokenEncryptedResponseAlg != null) {
+            function.apply(TX_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), txTokenEncryptedResponseAlg.getName());
+        }
+        if (txTokenEncryptedResponseEnc != null) {
+            function.apply(TX_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), txTokenEncryptedResponseEnc.getName());
+        }
         if (requestObjectSigningAlg != null) {
             function.apply(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
         }
@@ -2070,6 +2180,12 @@ public class RegisterRequest extends BaseRequest {
         }
         if (accessTokenLifetime != null) {
             function.apply(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime.toString());
+        }
+        if (idTokenLifetime != null) {
+            function.apply(ID_TOKEN_LIFETIME.toString(), idTokenLifetime.toString());
+        }
+        if (txTokenLifetime != null) {
+            function.apply(TX_TOKEN_LIFETIME.toString(), txTokenLifetime.toString());
         }
         if (parLifetime != null) {
             function.apply(PAR_LIFETIME.toString(), parLifetime.toString());
