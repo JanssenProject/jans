@@ -182,6 +182,7 @@ nav:
       - admin/auth-server/tokens/README.md
       - OAuth Access Tokens: admin/auth-server/tokens/oauth-access-tokens.md
       - OAuth Refresh Tokens: admin/auth-server/tokens/oauth-refresh-tokens.md
+      - OAuth Transaction Tokens: admin/auth-server/tokens/oauth-tx-tokens.md
       - OpenID id_token: admin/auth-server/tokens/openid-id-token.md
       - OpenID Userinfo Token: admin/auth-server/tokens/openid-userinfo-token.md
       - UMA RPT Token: admin/auth-server/tokens/uma-rpt-token.md
