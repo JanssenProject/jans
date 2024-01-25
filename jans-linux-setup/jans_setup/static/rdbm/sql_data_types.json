@@ -94,6 +94,14 @@
       "type": "STRING(MAX)"
     }
   },
+  "jansUmaResourcePermission:jansAttrs": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "spanner": {
+      "type": "JSONB"
+    }
+  },
   "jansAuthData": {
     "mysql": {
       "type": "TEXT"
