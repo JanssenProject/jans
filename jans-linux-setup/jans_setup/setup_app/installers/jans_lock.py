@@ -11,7 +11,7 @@ from setup_app.installers.jetty import JettyInstaller
 
 Config.jans_lock_port = '8076'
 Config.jans_opa_host = 'localhost'
-Config.jans_opa_port = '8081'
+Config.jans_opa_port = '8181'
 Config.lock_message_provider_type = 'DISABLED'
 
 class JansLockInstaller(JettyInstaller):
