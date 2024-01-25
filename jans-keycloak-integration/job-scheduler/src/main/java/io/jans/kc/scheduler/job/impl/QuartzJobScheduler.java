@@ -1,10 +1,15 @@
-package io.jans.kc.scheduler.job.service.impl;
+package io.jans.kc.scheduler.job.impl;
 
 
 import io.jans.kc.scheduler.job.RecurringJobSpec;
-import io.jans.kc.scheduler.job.service.JobScheduler;
-import io.jans.kc.scheduler.job.service.JobSchedulerException;
+import io.jans.kc.scheduler.job.JobScheduler;
+import io.jans.kc.scheduler.job.JobSchedulerException;
 
+import java.util.Map;
+import java.util.Properties;
+import java.util.HashMap;
+
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -24,7 +29,7 @@ import org.quartz.simpl.RAMJobStore;
 import org.quartz.simpl.SimpleThreadPool;
 import org.quartz.spi.JobStore;
 import org.quartz.spi.ThreadPool;
-import org.quartz.impl.DirectSchedulerFactory;
+import org.quartz.impl.StdSchedulerFactory;
 
 public class QuartzJobScheduler implements JobScheduler {
     
@@ -63,14 +68,12 @@ public class QuartzJobScheduler implements JobScheduler {
         
         try {
             
-            Trigger trigger = newTrigger()
-                .withIdentity(recurringJobTriggerKey(spec))
-                .withSchedule(simpleSchedule().repeatSecondlyForever(spec.schedulingInterval()))
-                .startNow()
-                .build();
-            
+            Trigger trigger = createRecurringJobTrigger(spec);
+        
             JobDetail jobdetail = newJob(QuartzJobWrapper.class)
                     .withIdentity(spec.getName())
+                    .usingJobData(QuartzJobWrapper.JOB_NAME_ENTRY_KEY,spec.getName())
+                    .usingJobData(QuartzJobWrapper.JOB_CLASS_ENTRY_KEY,spec.getJobClass().getName())
                     .build();
             
             quartzScheduler.scheduleJob(jobdetail,trigger);
@@ -78,6 +81,28 @@ public class QuartzJobScheduler implements JobScheduler {
         }catch(SchedulerException e) {
             throw new JobSchedulerException("Unable to schedule recurring job",e);
         }
+    }
+
+    private Trigger createRecurringJobTrigger(RecurringJobSpec spec) {
+
+        Trigger trigger = null;
+        int interval = Math.toIntExact(spec.schedulingInterval().toSeconds());
+        int count = spec.repeatCount();
+
+        if(spec.repeatForever()) {
+            trigger = newTrigger()
+                .withIdentity(recurringJobTriggerKey(spec))
+                .withSchedule(simpleSchedule().repeatSecondlyForever(interval))
+                .startNow()
+                .build();
+        }else {
+            trigger = newTrigger()
+                .withIdentity(recurringJobTriggerKey(spec))
+                .withSchedule(simpleSchedule().repeatSecondlyForTotalCount(count,interval))
+                .startNow()
+                .build();
+        }
+        return trigger;
     }
 
     private TriggerKey recurringJobTriggerKey(RecurringJobSpec spec) {
@@ -92,6 +117,7 @@ public class QuartzJobScheduler implements JobScheduler {
 
         return new Builder();
     }
+    
 
     public static final class Builder {
 
@@ -140,8 +166,9 @@ public class QuartzJobScheduler implements JobScheduler {
             }
 
             try {
-                DirectSchedulerFactory.getInstance().createScheduler(this.name,this.instanceId,createThreadPool(),createJobStore());
-                Scheduler scheduler = DirectSchedulerFactory.getInstance().getScheduler(this.name);
+                StdSchedulerFactory schedulerfactory = new StdSchedulerFactory();
+                schedulerfactory.initialize(schedulerProperties());
+                Scheduler scheduler = schedulerfactory.getScheduler();
                 return new QuartzJobScheduler(scheduler);
             }catch(SchedulerException e) {
                 throw new JobSchedulerException("Could not create quartz scheduler",e);
@@ -156,6 +183,20 @@ public class QuartzJobScheduler implements JobScheduler {
         private ThreadPool createThreadPool() {
 
             return new SimpleThreadPool(this.threadPoolSize,Thread.NORM_PRIORITY);
+        }
+
+        private Properties schedulerProperties() {
+
+            Properties props = new Properties();
+            props.setProperty("org.quartz.scheduler.instanceName",this.name);
+            props.setProperty("org.quartz.scheduler.instanceId",this.instanceId);
+            props.setProperty("org.quartz.scheduler.threadsInheritContextClassLoaderOfInitializer","true");
+            props.setProperty("org.quartz.threadPool.class",SimpleThreadPool.class.getName());
+            props.setProperty("org.quartz.threadPool.threadCount",Integer.toString(this.threadPoolSize));
+            props.setProperty("org.quartz.threadPool.threadPriority",Integer.toString(Thread.NORM_PRIORITY));
+            props.setProperty("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread","true");
+            props.setProperty("org.quartz.jobStore.class","org.quartz.simpl.RAMJobStore");
+            return props;
         }
     }
 }

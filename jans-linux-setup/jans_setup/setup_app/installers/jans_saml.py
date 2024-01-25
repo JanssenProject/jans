@@ -31,7 +31,6 @@ Config.jans_idp_idp_metadata_file = 'idp-metadata.xml'
 class JansSamlInstaller(JettyInstaller):
 
     install_var = 'install_jans_saml'
-    setattr(Config, install_var + '_pre_released', True)
 
     source_files = [
         (os.path.join(Config.dist_jans_dir, 'kc-jans-storage-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-storage-plugin/{0}/kc-jans-storage-plugin-{0}.jar').format(base.current_app.app_info['jans_version'])),

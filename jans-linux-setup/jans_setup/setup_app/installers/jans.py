@@ -84,7 +84,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
                         ('Install Jans Casa Server', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
-                        ('Install Jans SAML', 'install_jans_saml')):
+                        ('Install Jans KC', 'install_jans_saml')):
                     txt += get_install_string(prompt_str, install_var)
 
 
@@ -167,10 +167,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         self.writeFile(systemd_conf_fn, ''.join(systemd_conf))
 
-
-    def set_mapping_locations(self):
-        ptype = 'rdbm' if Config.persistence_type in ('sql', 'spanner') else Config.persistence_type
-        Config.mapping_locations = { group: ptype for group in Config.couchbaseBucketDict }
 
     def makeFolders(self):
         # Create these folder on all instances

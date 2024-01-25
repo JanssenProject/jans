@@ -5,11 +5,14 @@ import io.jans.config.api.client.model.TrustRelationship;
 public class JansTrustRelationship {
     
     private TrustRelationship tr;
-    private InputStream metadata;
 
-    public JansTrustRelationship(TrustRelationship tr, InputStream metadata) {
+    public JansTrustRelationship(TrustRelationship tr) {
 
         this.tr = tr;
-        this.metadata = metadata;
+    }
+
+    public String getInum() {
+
+        return this.tr.getInum();
     }
 }

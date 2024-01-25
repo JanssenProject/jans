@@ -151,7 +151,7 @@ jobs:
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
       - name: Setup Python 3.7
         if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
-        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
           python-version: 3.7
 
@@ -174,7 +174,7 @@ jobs:
 
       - name: Set up QEMU
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
-        uses: docker/setup-qemu-action@326560df218a7ea9cf6ab49bbc88b8b306bb437e # master
+        uses: docker/setup-qemu-action@5306bad0baa6b616b9934712d4eba8da2112606d # master
         with:
           image: tonistiigi/binfmt:master
           platforms: all
