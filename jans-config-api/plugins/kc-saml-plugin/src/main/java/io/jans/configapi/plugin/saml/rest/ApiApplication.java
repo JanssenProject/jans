@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.saml.rest;
 
+import io.jans.configapi.core.configuration.ObjectMapperContextResolver;
 import io.jans.configapi.core.rest.BaseApiApplication;
 import io.jans.configapi.plugin.saml.util.Constants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -33,7 +34,7 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 }
 )))
 public class ApiApplication extends BaseApiApplication {
-
+    
     @Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
@@ -41,6 +42,9 @@ public class ApiApplication extends BaseApiApplication {
         // General
         classes = (HashSet) addCommonClasses((classes));
         
+        // General Application level class
+        classes.add(ObjectMapperContextResolver.class);
+                
         classes.add(SamlConfigResource.class);
         classes.add(TrustRelationshipResource.class);
         classes.add(IdpResource.class);

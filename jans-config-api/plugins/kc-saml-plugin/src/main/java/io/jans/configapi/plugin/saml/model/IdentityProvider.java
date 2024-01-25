@@ -12,14 +12,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.model.GluuStatus;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 import io.swagger.v3.oas.annotations.Hidden;
 
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotNull;
@@ -59,8 +56,8 @@ public class IdentityProvider extends Entry implements Serializable {
     @AttributeName(name = "jansEnabled")
     private boolean enabled;
     
-    @AttributeName(name = "signingCertificates")
-    private String signingCertificates;
+    @AttributeName(name = "signingCertificate")
+    private String signingCertificate;
     
     @AttributeName(name = "validateSignature")
     private String validateSignature;
@@ -132,11 +129,6 @@ public class IdentityProvider extends Entry implements Serializable {
 
     @AttributeName(name = "jansValidationLog")
     private List<String> validationLog;
-    
-    @Hidden
-    @JsonObject
-    @AttributeName(name = "jansSAMLidpConfDyn")
-    private Map<String, String> config = new HashMap<>();
 
     public String getInum() {
         return inum;
@@ -192,14 +184,14 @@ public class IdentityProvider extends Entry implements Serializable {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }   
+
+    public String getSigningCertificate() {
+        return signingCertificate;
     }
 
-    public String getSigningCertificates() {
-        return signingCertificates;
-    }
-
-    public void setSigningCertificates(String signingCertificates) {
-        this.signingCertificates = signingCertificates;
+    public void setSigningCertificate(String signingCertificate) {
+        this.signingCertificate = signingCertificate;
     }
 
     public String getValidateSignature() {
@@ -385,20 +377,12 @@ public class IdentityProvider extends Entry implements Serializable {
     public void setValidationLog(List<String> validationLog) {
         this.validationLog = validationLog;
     }
-    
-    public Map<String, String> getConfig() {
-        return config;
-    }
-
-    public void setConfig(Map<String, String> config) {
-        this.config = config;
-    }
 
     @Override
     public String toString() {
         return "IdentityProvider [inum=" + inum + ", creatorId=" + creatorId + ", name=" + name + ", displayName="
                 + displayName + ", description=" + description + ", realm=" + realm + ", enabled=" + enabled
-                + ", signingCertificates=" + signingCertificates + ", validateSignature=" + validateSignature
+                + ", signingCertificate=" + signingCertificate + ", validateSignature=" + validateSignature
                 + ", singleLogoutServiceUrl=" + singleLogoutServiceUrl + ", nameIDPolicyFormat=" + nameIDPolicyFormat
                 + ", idpEntityId=" + idpEntityId + ", singleSignOnServiceUrl=" + singleSignOnServiceUrl
                 + ", encryptionPublicKey=" + encryptionPublicKey + ", providerId=" + providerId + ", trustEmail="
@@ -408,8 +392,8 @@ public class IdentityProvider extends Entry implements Serializable {
                 + postBrokerLoginFlowAlias + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL
                 + ", spMetaDataLocation=" + spMetaDataLocation + ", idpMetaDataFN=" + idpMetaDataFN
                 + ", idpMetaDataURL=" + idpMetaDataURL + ", idpMetaDataLocation=" + idpMetaDataLocation + ", status="
-                + status + ", validationStatus=" + validationStatus + ", validationLog=" + validationLog + ", config="
-                + config + "]";
+                + status + ", validationStatus=" + validationStatus + ", validationLog=" + validationLog 
+                + "]";
     }
       
 }

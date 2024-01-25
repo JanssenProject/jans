@@ -11,7 +11,7 @@ from io.jans.util import StringHelper
 from io.jans.as.server.util import ServerUtil
 
 from io.jans.as.common.service.common import ConfigurationService
-from io.jans.as.common.service.common import EncryptionService
+from io.jans.service import EncryptionService
 from io.jans.jsf2.message import FacesMessages
 from io.jans.casa.model import ApplicationConfiguration
 from io.jans.orm.exception import AuthenticationException

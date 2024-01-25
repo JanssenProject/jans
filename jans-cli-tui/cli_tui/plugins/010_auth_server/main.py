@@ -189,7 +189,7 @@ class Plugin(DialogUtils):
                         on_enter=self.edit_client,
                         on_display=self.app.data_display_dialog,
                         on_delete=self.delete_client,
-                        jans_help=HTML(_("Press key <b>s</b> to save client summary")),
+                        jans_help=HTML(_("Press key <b>s</b> to save client summary, <b>d</b> to display configurations")),
                         custom_key_bindings=[('s', self.save_client_summary)],
                         headerColor=cli_style.navbar_headcolor,
                         entriesColor=cli_style.navbar_entriescolor,
@@ -265,14 +265,14 @@ class Plugin(DialogUtils):
                     entries=[
                         ('clients', 'C[l]ients'),
                         ('scopes', 'Sc[o]pes'),
-                        ('keys', '[K]eys'),
+                        ('keys', 'Ke[y]s'),
                         ('authn', 'Au[t]hn'),
                         ('properties', 'Properti[e]s'),
                         ('logging', 'Lo[g]ging'),
                         ('ssa', '[S]SA'),
                         ('agama', 'Aga[m]a'),
                         ('attributes', 'Attri[b]utes'),
-                        ('message', 'Message')
+                        ('message', 'Loc[k]')
                         ],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
@@ -1041,7 +1041,7 @@ class Plugin(DialogUtils):
                 data_fn=None,
                 data=pathches
                 )
-            self.app.app_configuration = response
+            self.app.app_configuration = response.json()
 
             body = HSplit([Label(_("Jans authorization server application configuration logging properties were saved."))])
 

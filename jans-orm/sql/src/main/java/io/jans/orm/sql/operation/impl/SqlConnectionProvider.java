@@ -283,7 +283,8 @@ public class SqlConnectionProvider {
 				LOG.debug("Found table: '{}'.", tableName);
 				try (ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null)) {
 					while (columnResultSet.next()) {
-						String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
+						String defColumnName = columnResultSet.getString("COLUMN_NAME");
+						String columnName = defColumnName.toLowerCase();
 						String columnTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
 
 						if ((SupportedDbType.MARIADB == dbType) && SqlOperationService.LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
@@ -300,7 +301,7 @@ public class SqlConnectionProvider {
 						boolean multiValued = SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName)
 								|| SqlOperationService.JSONB_TYPE_NAME.equals(columnTypeName);
 
-						AttributeType attributeType = new AttributeType(columnName, columnTypeName, multiValued);
+						AttributeType attributeType = new AttributeType(defColumnName, columnName, columnTypeName, multiValued);
 						tableColumns.put(columnName, attributeType);
 					}
 				}
@@ -500,6 +501,10 @@ public class SqlConnectionProvider {
 		} catch (SQLException ex) {
 			throw new ConnectionException("Failed to get database metadata", ex);
 		}
+	}
+
+	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
+		return tableColumnsMap;
 	}
 
 	public SupportedDbType getDbType() {

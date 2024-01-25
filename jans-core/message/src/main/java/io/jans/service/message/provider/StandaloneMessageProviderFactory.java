@@ -52,13 +52,13 @@ public class StandaloneMessageProviderFactory {
 
 		if (messageProviderType == null) {
 			LOG.error("Failed to initialize messageProvider, messageProviderType is null. Fallback to NULL type.");
-			messageProviderType = MessageProviderType.NULL;
+			messageProviderType = MessageProviderType.DISABLED;
 		}
 
 		// Create bean
 		AbstractMessageProvider<?> messageProvider = null;
 		switch (messageProviderType) {
-		case NULL:
+		case DISABLED:
 			if (stringEncrypter == null) {
 				throw new RuntimeException("Factory is not initialized properly. stringEncrypter is not specified");
 			}

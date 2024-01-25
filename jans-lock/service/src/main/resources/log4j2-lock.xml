@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration name="jans-lock">
+    <Appenders>
+		<RollingFile name="JANS_LOCK_FILE" fileName="${sys:log.base}/logs/jans-lock.log" filePattern="${sys:log.base}/logs/jans-lock-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+
+			<Policies>
+				<SizeBasedTriggeringPolicy size="5 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+    </Appenders>
+
+    <Loggers>
+		<Logger name="io.jans.lock" level="${log4j.default.log.level}">
+			<AppenderRef ref="JANS_LOCK_FILE" />
+		</Logger>
+    </Loggers>
+
+</Configuration>

@@ -7,6 +7,7 @@
 package io.jans.lock.server.service;
 
 import io.jans.lock.model.config.StaticConfiguration;
+import io.jans.service.custom.script.AbstractCustomScriptService;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
@@ -21,7 +22,7 @@ import jakarta.interceptor.Interceptor;
 @ApplicationScoped
 @Alternative
 @Priority(Interceptor.Priority.APPLICATION + 5)
-public class CustomScriptService extends io.jans.lock.service.custom.CustomScriptService {
+public class CustomScriptService extends AbstractCustomScriptService {
 
 	@Inject
 	private StaticConfiguration staticConfiguration;

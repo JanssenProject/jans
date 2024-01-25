@@ -47,6 +47,7 @@ setup(
         # handle CVE-2022-36087
         "oauthlib>=3.2.1",
         "boto3",
+        "sprig-aes>=0.4.0",
     ],
     classifiers=[
         "Intended Audience :: Developers",

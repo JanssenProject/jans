@@ -40,13 +40,13 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
         fetch-depth: 0
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@d6f3f49f3345e29369fe57596a3ca8f94c4d2ca7 # v5.4.0
+      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -59,7 +59,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@db8f2c60ee802b3748b512940dde88eabd7b7e01 # v3.7.13
+    - uses: google-github-actions/release-please-action@cc61a07e2da466bebbc19b3a7dd01d6aecb20d1e # v4.0.2
       id: release-please
       with:
          path: ${{ matrix.simple }}
@@ -83,13 +83,13 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
         fetch-depth: 0
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@d6f3f49f3345e29369fe57596a3ca8f94c4d2ca7 # v5.4.0
+      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -102,7 +102,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@db8f2c60ee802b3748b512940dde88eabd7b7e01 # v3.7.13
+    - uses: google-github-actions/release-please-action@cc61a07e2da466bebbc19b3a7dd01d6aecb20d1e # v4.0.2
       id: release-please
       with:
          path: ${{ matrix.maven }}
@@ -126,13 +126,13 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
         fetch-depth: 0
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@d6f3f49f3345e29369fe57596a3ca8f94c4d2ca7 # v5.4.0
+      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -145,7 +145,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@db8f2c60ee802b3748b512940dde88eabd7b7e01 # v3.7.13
+    - uses: google-github-actions/release-please-action@cc61a07e2da466bebbc19b3a7dd01d6aecb20d1e # v4.0.2
       id: release-please
       with:
          path: ${{ matrix.simple }}
@@ -169,13 +169,13 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
         fetch-depth: 0
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@d6f3f49f3345e29369fe57596a3ca8f94c4d2ca7 # v5.4.0
+      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -188,7 +188,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@db8f2c60ee802b3748b512940dde88eabd7b7e01 # v3.7.13
+    - uses: google-github-actions/release-please-action@cc61a07e2da466bebbc19b3a7dd01d6aecb20d1e # v4.0.2
       id: release-please
       with:
          path: ${{ matrix.python-projects }}
@@ -207,13 +207,13 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
         fetch-depth: 0
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@d6f3f49f3345e29369fe57596a3ca8f94c4d2ca7 # v5.4.0
+      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -227,7 +227,7 @@ jobs:
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
 
-    - uses: google-github-actions/release-please-action@db8f2c60ee802b3748b512940dde88eabd7b7e01 # v3.7.13
+    - uses: google-github-actions/release-please-action@cc61a07e2da466bebbc19b3a7dd01d6aecb20d1e # v4.0.2
       id: release-please
       with:
          token: ${{ secrets.MOAUTO3_WORKFLOW_TOKEN }}

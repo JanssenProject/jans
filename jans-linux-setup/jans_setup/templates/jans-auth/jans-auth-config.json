@@ -585,5 +585,9 @@
     "blockWebviewAuthorizationEnabled": false,
     "dateFormatterPatterns": {
         "birthdate": "yyyy-MM-dd"
+    },
+    "lockMessageConfig": {
+        "enableIdTokenMessages" : false,
+        "idTokenMessagesChannel": "id_token"
     }
 }

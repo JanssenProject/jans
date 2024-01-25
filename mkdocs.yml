@@ -8756,6 +8756,12 @@ nav:
     - admin/link/README.md
     - Jans Link: admin/link/jans-link.md
     - Keycloak Synch: admin/link/keycloak-synch.md
+  - Lock Guide:
+      - admin/lock/README.md
+      - Auth Server Configuration: admin/lock/lock_auth_server_config.md
+      - Lock Client Configuration: admin/lock/lock_client_config.md
+      - Implement Lock PDP Plugin: admin/lock/lock_pdp_plugin.md
+      - Policy Store Integration: admin/lock/lock_opa.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md
@@ -8803,11 +8809,10 @@ nav:
   - gama format: agama/gama-format.md
 - 'Jans Casa':
     - 'casa/index.md'
-    - Quick Start: 'casa/quick-start.md'
     - Administration Guide:
-        - 'casa/administration/README.md'
-        - 'About 2FA': 'casa/administration/2fa-basics.md'
+        - 'Quick Start': 'casa/administration/quick-start.md'
         - 'Admin console': 'casa/administration/admin-console.md'
+        - 'About 2FA': 'casa/administration/2fa-basics.md'
         - 'Credentials storage': 'casa/administration/credentials-stored.md'
         - 'Custom branding': 'casa/administration/custom-branding.md'
         - 'URL path customization': 'casa/administration/change-context-path.md'
@@ -8817,10 +8822,14 @@ nav:
             - 'Consent Management': 'casa/plugins/consent-management.md'
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'
+    - Developer Guide:
+        - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
     - User Guide: 'casa/user-guide.md'
 plugins:
 - tags
 - search
+- exclude-search:
+    exclude_unreferenced: true
 - git-revision-date-localized:
     enable_creation_date: true
     type: timeago

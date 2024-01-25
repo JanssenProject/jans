@@ -10,7 +10,6 @@ import io.jans.service.document.store.service.DocumentStoreService;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.service.LocalDocumentStoreService;
 import io.jans.util.exception.InvalidConfigurationException;
-import io.jans.util.StringHelper;
 import io.jans.util.INumGenerator;
 import io.jans.xml.GluuErrorHandler;
 import io.jans.xml.XMLValidator;
@@ -19,14 +18,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import org.opensaml.saml.common.xml.SAMLSchemaBuilder;
 import org.opensaml.saml.common.xml.SAMLSchemaBuilder.SAML1Version;
-import org.opensaml.xml.parse.XMLParserException;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javax.xml.validation.Schema;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.*;
@@ -55,7 +52,7 @@ public class SamlIdpService {
             this.samlSchema = samlSchemaBuilder.getSAMLSchema();
             logger.debug("samlSchema:{}", samlSchema);
         } catch (Exception ex) {
-            logger.error("Failed to load SAMLSchema - ", ex);
+            logger.warn("Failed to load SAMLSchema - ", ex);
         }
     }
 
@@ -111,7 +108,7 @@ public class SamlIdpService {
     }
 
     public GluuErrorHandler validateMetadata(String metadataPath)
-            throws ParserConfigurationException, SAXException, IOException, XMLParserException {
+            throws ParserConfigurationException, SAXException, IOException {
         if (samlSchema == null) {
             final List<String> validationLog = new ArrayList<>();
             validationLog.add(GluuErrorHandler.SCHEMA_CREATING_ERROR_MESSAGE);

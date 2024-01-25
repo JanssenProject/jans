@@ -1,9 +1,7 @@
 {
    "tokenChannels":[
-         "code_token",
          "id_token"
-      ]
-   },
+      ],
 
    "cleanServiceInterval":60,
    "cleanServiceBatchChunkSize":10000,
@@ -17,5 +15,21 @@
    "metricReporterInterval":300,
    "metricReporterKeepDataDays":15,
    "metricReporterEnabled":true,
-   "errorReasonEnabled": false
+   "errorReasonEnabled": false,
+   
+   "opaConfiguration": {
+        "baseUrl" : "http://localhost:8181/v1/",
+        "accessToken" : ""
+   },
+
+   "policiesJsonUris": [
+   ],
+   "policiesJsonUrisAccessToken" : "",
+
+   "policiesZipUris": [
+   ],
+   "policiesZipUrisAccessToken" : "",
+
+   "messageConsumerType": "OPA",
+   "policyConsumerType": "OPA"
 }

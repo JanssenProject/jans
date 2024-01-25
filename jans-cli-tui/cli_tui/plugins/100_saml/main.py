@@ -21,6 +21,7 @@ from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseTyp
 from wui_components.jans_label_container import JansLabelContainer
 
 from edit_tr_dialog import EditTRDialog
+from edit_identity_provider_dialog import EditIdentityProvideDialog
 from utils.multi_lang import _
 from utils.utils import DialogUtils
 from utils.static import cli_style
@@ -39,11 +40,12 @@ class Plugin(DialogUtils):
         """
         self.app = app
         self.pid = 'saml'
-        self.name = 'Jans Sa[m]l'
+        self.name = 'Ja[n]s SAML'
         self.server_side_plugin = True
         self.page_entered = False
 
         self.trust_realtionships = []
+        self.identity_providers = []
         self.config = {}
         self.prepare_navbar()
         self.prepare_containers()
@@ -55,6 +57,7 @@ class Plugin(DialogUtils):
 
         self.app.create_background_task(self.get_configuration())
         self.app.create_background_task(self.get_trust_relations())
+        self.app.create_background_task(self.get_identity_providers())
 
     def set_center_frame(self) -> None:
         """center frame content
@@ -78,16 +81,6 @@ class Plugin(DialogUtils):
                 all_data=[],
                 hide_headers=False
             )
-
-
-        add_tr_button_label = _("Add Trust Relationship")
-        self.tabs['trust_relationships'] = HSplit([
-                                self.tr_container,
-                                Window(height=1),
-                                VSplit([Button(add_tr_button_label, handler=self.edit_tr, width=len(add_tr_button_label)+4)], align=HorizontalAlign.CENTER),
-                                ],
-                                width=D()
-                                )
 
         self.tabs['configuration'] = HSplit([
                         self.app.getTitledCheckBox(
@@ -127,6 +120,39 @@ class Plugin(DialogUtils):
                         width=D()
                     )
 
+        add_tr_button_label = _("Add Service Provider")
+        self.tabs['trust_relationships'] = HSplit([
+                                self.tr_container,
+                                Window(height=1),
+                                VSplit([Button(add_tr_button_label, handler=self.edit_tr, width=len(add_tr_button_label)+4)], align=HorizontalAlign.CENTER),
+                                ],
+                                width=D()
+                                )
+
+        self.provider_container = JansVerticalNav(
+                myparent=self.app,
+                headers=['inum', _("Display Name"), _("Enabled")],
+                preferred_size= self.app.get_column_sizes(.3, .5, .2),
+                data=[],
+                on_enter=self.edit_identity_provider,
+                on_display=self.app.data_display_dialog,
+                on_delete=self.delete_identity_provider,
+                selectes=0,
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
+                all_data=[],
+                hide_headers=False
+            )
+
+
+        add_provider_button_label = _("Add Identity Provider")
+        self.tabs['identity_providers'] = HSplit([
+                                self.provider_container,
+                                Window(height=1),
+                                VSplit([Button(add_provider_button_label, handler=self.edit_identity_provider, width=len(add_provider_button_label)+4)], align=HorizontalAlign.CENTER),
+                                ],
+                                width=D()
+                                )
 
         self.nav_selection_changed(list(self.tabs)[0])
 
@@ -175,6 +201,29 @@ class Plugin(DialogUtils):
             self.app.disable_plugin(self.pid)
             return
 
+    async def get_identity_providers(self) -> None:
+        'Coroutine for getting identity_providers.'
+        try:
+            response = self.app.cli_object.process_command_by_id(
+                        operation_id='get-saml-identity-provider',
+                        url_suffix='',
+                        endpoint_args='',
+                        data_fn=None,
+                        data={}
+                        )
+            providers = response.json()
+            self.identity_providers = providers.get('entries', [])
+
+        except Exception as e:
+            self.app.show_message(_("Error getting Identity Providers-1"), str(e), tobefocused=self.app.center_container)
+            return
+
+        if response.status_code not in (200, 201):
+            self.app.show_message(_("Error getting Identity Providers-2"), str(response.text), tobefocused=self.app.center_container)
+            return
+
+        self.update_provider_container()
+
     def update_trust_relationships_container(self):
         self.tr_container.clear()
         self.tr_container.all_data = self.trust_realtionships
@@ -185,14 +234,26 @@ class Plugin(DialogUtils):
                         tr['enabled']
                     ))
 
+    def update_provider_container(self):
+        self.provider_container.clear()
+        self.provider_container.all_data = self.identity_providers
+        for provider in self.identity_providers:
+            self.provider_container.add_item((
+                        provider['inum'],
+                        provider['displayName'],
+                        provider['enabled']
+                    ))
+
+
     def prepare_navbar(self) -> None:
         """prepare the navbar for the current Plugin 
         """
         self.nav_bar = JansNavBar(
                     self.app,
                     entries=[
-                            ('trust_relationships', '[T]rust Relationships'),
                             ('configuration', 'C[o]nfiguration'),
+                            ('trust_relationships', 'S[e]rvice Providers'),
+                            ('identity_providers', 'I[d]entity Providers'),
                             ],
                     selection_changed=self.nav_selection_changed,
                     select=0,
@@ -293,3 +354,14 @@ class Plugin(DialogUtils):
                 tobefocused=self.tr_container
                 )
 
+    def edit_identity_provider(self, **kwargs: Any) -> None:
+        """This is method for editing/creating identity provider 
+        """
+        edit_identity_provider_dialog = EditIdentityProvideDialog(self, data=kwargs.get('data', {}))
+        self.app.show_jans_dialog(edit_identity_provider_dialog)
+
+
+    def delete_identity_provider(self, **kwargs: Any) -> None:
+        """This is method for the deleting trust relationship 
+        """
+        pass

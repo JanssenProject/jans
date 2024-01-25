@@ -9,13 +9,13 @@ tags:
 
 ## Common errors
 
-### Unable to find a constructor with arity ... in class ...
+### Unable to find a suitable constructor with arity ... in class ...
 
-A Java invocation of the form `Call package.className#new ...` is passing a number of parameters that does not match any of the existing constructors for that class. 
+A Java invocation of the form `Call package.className#new ...` is passing an incorrect number of arguments or their data types do not match the signature of any of the constructors for that class. 
 
-### Unable to find a method called ... with arity ... in class ...
+### Unable to find a suitable method called ... with arity ... in class ...
 
-A java invocation is attempting to call a method that is not part of the given class or the number of parameters passed for the method is not correct.
+A java invocation is attempting to call a method that is not part of the given class, the number of arguments passed for the method is not correct, or the arguments could not be converted to make a successful call.
 
 ### No Finish instruction was reached
 
@@ -25,7 +25,7 @@ This occurs when no `Finish` statement has been found in the execution of a flow
 
 Agama engine saves the state of a flow every time an [RRF](../../../agama/language-reference.md#rrf) or [RFAC](../../../agama/language-reference.md#rfac) instruction is reached. The _State_ can be understood as the set of all variables defined in a flow and their associated values up to certain point. 
 
-Most of times, variables hold basic Agama [values](../../../agama/language-reference.md#data-types) like strings, booleans, numbers, lists or maps, however, more complex values may appear due to Java `Call`s. The engine does its best  to properly serialize these Java objects, nonetheless, this is not always feasible. In these cases, the flow crashes and errors will appear on screen as well as in the server logs.
+Most of times, variables hold basic Agama [values](../../../agama/language-reference.md#data-types) like strings, booleans, numbers, lists or maps, however, more complex values may appear due to Java `Call`s. The engine does its best  to properly serialize these Java objects, nonetheless, this is not always possible. In these cases, the flow crashes and errors will appear on screen as well as in the server logs.
 
 Use the information in the logs to detect the problematic Java class. This would normally allow you to identify the variable that is causing the issue. Now you have several options to proceed:
 
@@ -41,7 +41,7 @@ In general, a good practice is to avoid handling complex variables in flows. Let
 
 ### What Groovy and Java versions are supported?
 
-Groovy 4.0 and Java 11. The runtime is Amazon Corretto 17.
+Groovy 4.0 and Java 8 or higher. The runtime is Amazon Corretto 17.
 
 ### How to add third party libraries?
 
@@ -56,9 +56,44 @@ This is a limitation of the scripting engine. Here, classes have to be imported 
 
 This is because the JVM does not support unloading: even if a given source file is removed, its corresponding class will still be accessible - it remains in the classpath. The classpath will be clean again after a service restart.
 
+### How to add log statements?
+
+The Jans server uses [slf4j](https://slf4j.org) and [log4j2](https://logging.apache.org/log4j/2.x/) logging frameworks. Below is a simple usage example for Java/Groovy code:
+
+```
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+...
+Logger logger = LoggerFactory.getLogger(your.class);
+logger.info("ahoy, ahoy");
+```
+
+!!! Note
+    The logging descriptor used by the server can be found [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/resources/log4j2.xml)
+
+Depending on the package `your` class belongs to, the message may not appear in the server log. In this case, you have two choices:
+
+- Supply a [custom log4j](../../auth-server/logging/custom-logs.md) descriptor
+- Use a class in package `io.jans` when calling `getLogger`. A good example would be using `io.jans.agama.model.Flow`
+
 ### How to append data to a flow's log directly?
 
 Call method `log` of class `io.jans.agama.engine.script.LogUtils`. This method receives a variable number of arguments as DSL's `Log` does. Thus you can do `LogUtils.log("@w Today is Friday %th", 13)`, as in the logging [examples](../../../agama/language-reference.md#logging).
+
+## How to use Contexts and Dependency Injection (CDI)?
+
+Jans server uses Weld (a CDI reference implementation), and as such makes heavy use of managed beans, scopes, dependency injection, events, etc. Unless the code added is part of a jar [library](#how-to-add-third-party-libraries), annotations related to scopes or dependency injection won't take any effect in your code. This is because the Java container does a thorough scanning of classes upon start, but the source code files in `lib` directory are compiled upon use and modification, as expected in a scripting scenario.
+
+Java/Groovy files can however reuse any of the (application-scoped) managed beans available in the server's classpath. To obtain a reference to a bean, use a call like:
+
+```
+import io.jans.service.cdi.util.CdiUtil;
+...
+ref = CdiUtil.bean(managedBean.class);
+```
+
+More advanced bean lookup capabilities are provided by method `instance` of [this](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/service/ManagedBeanService.java) class where you can supply qualifiers.
 
 ## Templates
 
@@ -122,9 +157,9 @@ This is to avoid traversing big structures fully. You can increase the value of 
 
 ### How to add two numbers or compare numeric values in Agama?
 
-Agama only provides operators for equality check in conditional statements. The structure of an authentication flow will rarely have to deal with computations/comparisons of numbers, strings, etc. In case this is needed, developers have to resort to Java.
+Agama only provides operators for equality/inequality check in conditional statements. Comparisons like "less-than", "greater-than-or-equal", etc. require Java usage, however, the structure of an authentication flow will rarely have to deal with this kind of computations.
 
-_Hint_: some methods like `addExact`, `incrementExact`, etc. in `java.lang.Math` might help.  
+_Hint_: methods like `addExact`, `incrementExact`, etc. in `java.lang.Math` may help you to do some arithmetic.  
 
 ### How to concatenate strings in Agama?
 

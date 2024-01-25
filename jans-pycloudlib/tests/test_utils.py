@@ -253,3 +253,56 @@ def test_generate_signed_ssl_certkey(tmpdir):
     assert os.path.isfile(str(base_dir.join("my-suffix.crt")))
     assert os.path.isfile(str(base_dir.join("my-suffix.csr")))
     assert os.path.isfile(str(base_dir.join("my-suffix.key")))
+
+
+@pytest.mark.parametrize("key, text, decrypted_text, password_fmt", [
+    # sprig-aes encoded
+    ("6Jsv61H7fbkeIkRvUpnZ98fu", "ow1Ty1OZWcOm8NRF49J07F1J1+fEQNLT5BKnCGqauvU=", "S3cr3t+pass", "sprig-aes"),
+    # vanilla base64
+    ("6Jsv61H7fbkeIkRvUpnZ98fu", "UzNjcjN0K3Bhc3MK", "S3cr3t+pass", "base64"),
+    # plain text
+    ("6Jsv61H7fbkeIkRvUpnZ98fu", "S3cr3t+pass", "S3cr3t+pass", ""),
+])
+def test_get_password_from_file(monkeypatch, tmpdir, key, text, decrypted_text, password_fmt):
+    from jans.pycloudlib.utils import get_password_from_file
+
+    monkeypatch.setenv("CN_OCI_LOCK_DECODER", password_fmt)
+
+    if password_fmt == "sprig-aes":
+        salt_file = tmpdir.join("oci_lock_salt")
+        salt_file.write(key)
+        monkeypatch.setenv("CN_OCI_LOCK_SALT_FILE", str(salt_file))
+
+    passwd_file = tmpdir.join("oci_lock_password")
+    passwd_file.write(text)
+
+    # ensure returning plain text password
+    assert get_password_from_file(str(passwd_file)) == decrypted_text
+
+
+def test_get_password_from_file_invalid_aes(monkeypatch, tmpdir):
+    from jans.pycloudlib.utils import get_password_from_file
+
+    salt_file = tmpdir.join("oci_lock_salt")
+    salt_file.write("6Jsv61H7fbkeIkRvUpnZ98fu")
+    monkeypatch.setenv("CN_OCI_LOCK_SALT_FILE", str(salt_file))
+    monkeypatch.setenv("CN_OCI_LOCK_DECODER", "sprig-aes")
+
+    passwd_file = tmpdir.join("oci_lock_password")
+    passwd_file.write("S3cr3t+pass")
+
+    # ensure exception is thrown
+    with pytest.raises(ValueError):
+        get_password_from_file(str(passwd_file))
+
+
+def test_get_password_from_file_invalid_b64(monkeypatch, tmpdir):
+    from jans.pycloudlib.utils import get_password_from_file
+
+    passwd_file = tmpdir.join("oci_lock_password")
+    passwd_file.write("ow1Ty1OZWcOm8NRF49J07F1J1+fEQNLT5BKnCGqauvU=")
+    monkeypatch.setenv("CN_OCI_LOCK_DECODER", "base64")
+
+    # ensure exception is thrown
+    with pytest.raises(ValueError):
+        get_password_from_file(str(passwd_file))

@@ -86,11 +86,11 @@ public interface SqlOperationService extends PersistenceOperationService {
 	String unescapeValue(String value);
 	void unescapeValues(Object[] realValues);
 
-	String toInternalAttribute(String attributeName);
-	String[] toInternalAttributes(String[] attributeNames);
+	String toInternalAttribute(String objectClass, String attributeName);
+	String[] toInternalAttributes(String objectClass, String[] attributeNames);
 
-	String fromInternalAttribute(String internalAttributeName);
-	String[] fromInternalAttributes(String[] internalAttributeNames);
+	String fromInternalAttribute(String objectClass, String internalAttributeName);
+	String[] fromInternalAttributes(String objectClass, String[] internalAttributeNames);
 
     boolean destroy();
 

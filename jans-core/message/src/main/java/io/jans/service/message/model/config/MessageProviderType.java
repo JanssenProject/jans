@@ -14,6 +14,6 @@ import jakarta.xml.bind.annotation.XmlEnum;
 @XmlEnum(String.class)
 public enum MessageProviderType {
 
-	NULL, REDIS, POSTGRES
+	DISABLED, REDIS, POSTGRES
 
 }

@@ -32,9 +32,9 @@ the admin console. See the [Admin console page](./admin-console.md#enabled-metho
 all the following authentication methods are supported:
 
 - FIDO 2 security keys
-- [Super Gluu](https://super.gluu.org/) for push notifications 
-- HOTP/TOTP apps, cards, "dongles"
-- OTP via SMS (using Twilio or an SMPP server)
+- [Super Gluu](https://docs.gluu.org/head/supergluu/) for push notifications 
+- HOTP/TOTP apps, cards, "dongles", etc
+- OTP via SMS (using Twilio)
 
 Other methods may be supported via [plugins](../index.md#existing-plugins).
 
@@ -65,8 +65,12 @@ they normally don't demand special conditions from the device used to access, li
 
 To do so, just add a new configuration property named `2fa_requisite` to the custom interception script corresponding 
 to the authentication method, and assign `true` as its value. It may take more than one minute for Casa to pick up the 
-changes. To add the property, open oxTrust web console and navigate to `Configuration` > `Manage custom scripts`, 
-collapse the method you want to set as requisite for 2FA, and click on `Add new property`.
+changes. To add the property to a custom interception script, open 
+[the text-based UI (TUI)](../../admin/config-guide/config-tools/jans-tui/README.md) 
+and 
+navigate to 
+`Scripts`. Select and open the script. Use `Config properties` section to 
+add the new property.
 
 You can flag more than one method as requisite. In this case users will be encouraged to enroll one credential 
 associated to any of the flagged methods.

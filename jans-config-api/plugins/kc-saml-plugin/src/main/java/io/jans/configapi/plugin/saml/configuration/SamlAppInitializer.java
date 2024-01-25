@@ -6,17 +6,12 @@
 
 package io.jans.configapi.plugin.saml.configuration;
 
-import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.service.timer.QuartzSchedulerManager;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.BeforeDestroyed;
 import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
@@ -31,19 +26,8 @@ public class SamlAppInitializer {
     Logger log;
 
     @Inject
-    @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
-    Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
-
-    @Inject
-    BeanManager beanManager;
-
-    @Inject
     SamlConfigurationFactory samlConfigurationFactory;
 
-
-    @Inject
-    QuartzSchedulerManager quartzSchedulerManager;
-    
     @Inject
     MetadataValidationTimer metadataValidationTimer;
 
@@ -53,23 +37,11 @@ public class SamlAppInitializer {
 
         // configuration
         this.samlConfigurationFactory.create();
-        initSchedulerService();
         metadataValidationTimer.initTimer();
 
         log.info("==============  SAML Plugin IS UP AND RUNNING ===================");
     }
-    
-
-    protected void initSchedulerService() {
-        log.debug("Initializing Scheduler Service");
-        quartzSchedulerManager.start();
-
-        String disableScheduler = System.getProperties().getProperty("gluu.disable.scheduler");
-        if (Boolean.parseBoolean(disableScheduler)) {
-            this.log.warn("Suspending Quartz Scheduler Service...");
-            quartzSchedulerManager.standby();
-        }
-    }
+  
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("================================================================");

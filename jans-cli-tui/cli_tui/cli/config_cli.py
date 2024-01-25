@@ -852,7 +852,7 @@ class JCA_CLI:
             return response
 
         if response.status_code in (404, 401):
-            if response.text == 'ID Token is expired':
+            if response.text == 'ID Token is expired' or 'unauthorized' in response.text.lower():
                 self.access_token = None
                 self.get_access_token(security)
                 return self.get_requests(endpoint, params)

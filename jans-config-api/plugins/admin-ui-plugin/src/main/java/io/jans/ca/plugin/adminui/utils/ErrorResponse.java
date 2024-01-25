@@ -45,7 +45,21 @@ public enum ErrorResponse {
     LICENSE_NOT_PRESENT("Active license not present."),
     LICENSE_ALREADY_ACTIVE("The license has been already activated."),
     LICENSE_CONFIG_ABSENT("License configuration is not present."),
-    SCAN_HOSTNAME_MISSING("SCAN api hostname is missing in configuration.")
+    SCAN_HOSTNAME_MISSING("SCAN api hostname is missing in configuration."),
+    WEBHOOK_ENTRY_EMPTY("Webhook entry is empty."),
+    WEBHOOK_NAME_EMPTY("Webhook name is required."),
+    WEBHOOK_URL_EMPTY("Webhook URL is required."),
+    WEBHOOK_HTTP_METHOD_EMPTY("HTTP method for webhook is required."),
+    WEBHOOK_REQUEST_BODY_EMPTY("HTTP request-body for webhook is required for POST/PUT/PATCH request."),
+    WEBHOOK_SAVE_ERROR("Error in saving webhook."),
+    WEBHOOK_SEARCH_ERROR("Error in fetching webhook."),
+    WEBHOOK_UPDATE_ERROR("Error in updating webhook."),
+    WEBHOOK_ID_MISSING("Webhook Id is missing in request."),
+    WEBHOOK_DELETE_ERROR("Error in removing webhook."),
+    WEBHOOK_RECORD_NOT_EXIST("Record does not exist."),
+    NO_WEBHOOK_FOUND("No webhook mapped to feature."),
+    WEBHOOK_CONTENT_TYPE_REQUIRED("Content-Type required."),
+    FETCH_DATA_ERROR("Error in fetching data.")
     ;
 
     private final String description;

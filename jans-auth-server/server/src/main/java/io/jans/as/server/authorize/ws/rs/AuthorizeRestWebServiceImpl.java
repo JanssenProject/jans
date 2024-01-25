@@ -284,12 +284,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             builder = authorize(authzRequest);
         } catch (WebApplicationException e) {
             applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
-            if (log.isErrorEnabled() && canLogWebApplicationException(e))
-                log.error(e.getMessage(), e);
+            if (log.isTraceEnabled() && canLogWebApplicationException(e))
+                log.trace(e.getMessage(), e);
             throw e;
         } catch (AcrChangedException e) { // Acr changed
-            log.error("ACR is changed, please provide a supported and enabled acr value");
-            log.error(e.getMessage(), e);
+            log.debug("ACR is changed, please provide a supported and enabled acr value");
+            log.debug(e.getMessage(), e);
 
             RedirectUri redirectUriResponse = new RedirectUri(authzRequest.getRedirectUri(), authzRequest.getResponseTypeList(), authzRequest.getResponseModeEnum());
             redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(

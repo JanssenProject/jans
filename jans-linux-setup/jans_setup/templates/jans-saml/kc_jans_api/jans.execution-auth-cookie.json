@@ -1,0 +1,7 @@
+{
+   "parentFlow": "${jans_browser_auth_flow_id}",
+   "authenticator": "auth-cookie",
+   "authenticatorConfig": null,
+   "requirement": "ALTERNATIVE",
+   "priority": 10
+}

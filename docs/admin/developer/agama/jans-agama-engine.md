@@ -73,15 +73,15 @@ There are three relevant sources of log data:
 
 - The engine. It emits information related to flows transpilation, projects deployment, and flow crashes - generally low-level information
 - [Log](../../../agama/language-reference.md#logging) instructions. These are statements originated directly from the Agama code
-- [Call](#foreign-calls) directives. Foreign code can issue logging statements as well as any other code a `Call` may depend on
+- [Call](#foreign-calls) directives. Foreign code can issue logging statements as well as any other code a `Call` may depend on. See the [FAQ](./faq.md#how-to-add-log-statements)
 
 The following table details the location of log data. Paths are relative to directory `/opt/jans/jetty/jans-auth/log`:
 
-|Source|Destination file|Notes|
-|-|-|-|
-|Engine|`jans-auth.log`||
-|`Log` instructions|`jans-auth_script.log`|This log also contains the output of `print` statements used in standard Jython custom scripts of Jans Server|
-|Foreign code|`jans-auth.log`|Usage of [slf4j](https://slf4j.org) recommended. Proper visualization of logging statements may require customization of the server [loggers](../../auth-server/logging/log4j2.md) (Log4j2 descriptor)|
+|Source|Destination file|
+|-|-|
+|Engine|`jans-auth.log`|
+|`Log` instructions|`jans-auth_script.log`|
+|Foreign code|`jans-auth.log`|
 
 Depending on the specificity required, you may have to change the logging level so more or less details appear in the logs. This can be done by altering the `loggingLevel` property of the [auth server configuration](../../config-guide/jans-authorization-server-config.md). `DEBUG` usually suffices for troubleshooting.
 
@@ -97,7 +97,7 @@ The available levels for statements issued with the `Log` instruction are:
 
 For instance, these two instructions are equivalent: `Log "@e Universe collapsed"` and `Log "@error Universe collapsed"`
 
-The engine will use `info` when the level is not specified explicitly, as in `Log "ahoy, ahoy"`.
+The engine will use `info` when the level is not specified explicitly, as in `Log "Look ma!"`.
 
 ## RFAC and Callback URL
 

@@ -904,6 +904,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
+    
+    @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
+    private LockMessageConfig lockMessageConfig;
 
     public int getArchivedJwkLifetimeInSeconds() {
         return archivedJwkLifetimeInSeconds;
@@ -3489,6 +3492,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setSkipAuthenticationFilterOptionsMethod(Boolean skipAuthenticationFilterOptionsMethod) {
 		this.skipAuthenticationFilterOptionsMethod = skipAuthenticationFilterOptionsMethod;
+	}
+
+	public LockMessageConfig getLockMessageConfig() {
+		return lockMessageConfig;
+	}
+
+	public void setLockMessageConfig(LockMessageConfig lockMessageConfig) {
+		this.lockMessageConfig = lockMessageConfig;
 	}
 
 }

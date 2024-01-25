@@ -13,14 +13,16 @@ package io.jans.orm.model;
  */
 public class AttributeType {
     private final String name;
+    private final String defName;
     private final String type;
     private final Boolean multiValued;
 
-    public AttributeType(String name, String type) {
-		this(name, type, null);
+    public AttributeType(String defName, String name, String type) {
+		this(defName, name, type, null);
 	}
 
-	public AttributeType(String name, String type, Boolean multiValued) {
+	public AttributeType(String defName, String name, String type, Boolean multiValued) {
+		this.defName = defName;
 		this.name = name;
 		this.type = type;
 		this.multiValued = multiValued;
@@ -28,6 +30,10 @@ public class AttributeType {
 
 	public Boolean getMultiValued() {
 		return multiValued;
+	}
+
+	public String getDefName() {
+		return defName;
 	}
 
 	public String getName() {
@@ -40,7 +46,8 @@ public class AttributeType {
 
 	@Override
 	public String toString() {
-		return "AttributeType [name=" + name + ", type=" + type + ", multiValued=" + multiValued + "]";
+		return "AttributeType [name=" + name + ", defName=" + defName + ", type=" + type + ", multiValued="
+				+ multiValued + "]";
 	}
 
 }

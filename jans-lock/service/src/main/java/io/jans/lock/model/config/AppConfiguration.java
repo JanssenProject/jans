@@ -40,9 +40,17 @@ public class AppConfiguration implements Configuration {
 
 	// Period in seconds
 	private int cleanServiceInterval;
+	
+	private OpaConfiguration opaConfiguration;
 
 	private String messageConsumerType;
 	private String policyConsumerType;
+
+	private String policiesJsonUrisAccessToken;
+	private List<String> policiesJsonUris;
+
+	private String policiesZipUrisAccessToken;
+	private List<String> policiesZipUris;
 
 	public String getBaseDN() {
 		return baseDN;
@@ -128,6 +136,14 @@ public class AppConfiguration implements Configuration {
 		this.cleanServiceInterval = cleanServiceInterval;
 	}
 
+	public OpaConfiguration getOpaConfiguration() {
+		return opaConfiguration;
+	}
+
+	public void setOpaConfiguration(OpaConfiguration opaConfiguration) {
+		this.opaConfiguration = opaConfiguration;
+	}
+
 	public String getMessageConsumerType() {
 		return messageConsumerType;
 	}
@@ -142,6 +158,38 @@ public class AppConfiguration implements Configuration {
 
 	public void setPolicyConsumerType(String policyConsumerType) {
 		this.policyConsumerType = policyConsumerType;
+	}
+
+	public String getPoliciesJsonUrisAccessToken() {
+		return policiesJsonUrisAccessToken;
+	}
+
+	public void setPoliciesJsonUrisAccessToken(String policiesJsonUrisAccessToken) {
+		this.policiesJsonUrisAccessToken = policiesJsonUrisAccessToken;
+	}
+
+	public List<String> getPoliciesJsonUris() {
+		return policiesJsonUris;
+	}
+
+	public void setPoliciesJsonUris(List<String> policiesJsonUris) {
+		this.policiesJsonUris = policiesJsonUris;
+	}
+
+	public String getPoliciesZipUrisAccessToken() {
+		return policiesZipUrisAccessToken;
+	}
+
+	public void setPoliciesZipUrisAccessToken(String policiesZipUrisAccessToken) {
+		this.policiesZipUrisAccessToken = policiesZipUrisAccessToken;
+	}
+
+	public List<String> getPoliciesZipUris() {
+		return policiesZipUris;
+	}
+
+	public void setPoliciesZipUris(List<String> policiesZipUris) {
+		this.policiesZipUris = policiesZipUris;
 	}
 
 }

@@ -14,13 +14,13 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.ldap.TokenEntity;
-import io.jans.as.server.model.ldap.TokenType;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.GrantService;
 import io.jans.as.server.service.MetricService;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
+import io.jans.model.token.TokenEntity;
+import io.jans.model.token.TokenType;
 import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.Dependent;
@@ -216,9 +216,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode) {
         if (isFalse(appConfiguration.getPersistRefreshToken())) {
-            return assertTokenType((TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), io.jans.as.server.model.ldap.TokenType.REFRESH_TOKEN, clientId);
+            return assertTokenType((TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), io.jans.model.token.TokenType.REFRESH_TOKEN, clientId);
         }
-        return assertTokenType(grantService.getGrantByCode(refreshTokenCode), io.jans.as.server.model.ldap.TokenType.REFRESH_TOKEN, clientId);
+        return assertTokenType(grantService.getGrantByCode(refreshTokenCode), io.jans.model.token.TokenType.REFRESH_TOKEN, clientId);
     }
 
     public AuthorizationGrant assertTokenType(TokenEntity tokenEntity, TokenType tokenType, String clientId) {

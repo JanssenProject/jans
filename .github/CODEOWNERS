@@ -7,13 +7,13 @@
 /jans-keycloak-integration/ @uprightech
 /jans-keycloak-link/ @shekhar16
 /docker-jans-*/ @moabu @iromli
-/automation/ @moabu
-/charts/ @moabu
+/automation/ @moabu @iromli
+/charts/ @moabu @iromli
 /.github/ @moabu
-/jans-*/version.txt @moabu
-/jans-*/CHANGELOG.md @moabu
+/jans-*/version.txt @moabu @mo-auto
+/jans-*/CHANGELOG.md @moabu @mo-auto
 /jans-pycloudlib/ @moabu
-/docker-jans-*/requirments.txt @mo-auto
+/docker-jans-*/requirments.txt @iromli @mo-auto
 /jans-bom/ @yurem @yuriyz
 /jans-core/ @yurem @yuriyz
 /jans-orm/ @yurem @yuriyz
@@ -25,7 +25,7 @@
 /jans-config-api/ @pujavs @yuriyz @yurem
 /jans-cli-tui/ @devrimyatar
 /jans-linux-setup/ @devrimyatar @yuriyz @yurem
-/jans-linux-setup/jans_setup/setup_app/version.py @moabu
+/jans-linux-setup/jans_setup/setup_app/version.py @moabu @mo-auto
 /jans-linux-setup/static/scripts/admin_ui_plugin.py @devrimyatar @duttarnab
 /jans-cache-refresh/ @yurem @shekhar16
 /jans-link/ @shekhar16

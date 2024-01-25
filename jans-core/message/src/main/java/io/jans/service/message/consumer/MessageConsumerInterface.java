@@ -6,6 +6,8 @@
 
 package io.jans.service.message.consumer;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.jans.service.message.pubsub.PubSubInterface;
 
 /**
@@ -14,5 +16,7 @@ import io.jans.service.message.pubsub.PubSubInterface;
  * @author Yuriy Movchan Date: 12/18/2023
  */
 public interface MessageConsumerInterface extends PubSubInterface {
+
+	public boolean putData(String message, JsonNode pdpMessageNode);
 
 }

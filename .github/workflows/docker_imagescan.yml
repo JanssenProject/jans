@@ -30,10 +30,10 @@ jobs:
       with:
         egress-policy: audit
 
-    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - name: Build the Container image
       run: docker build ./docker-jans-${{ matrix.docker-images }} --file ./docker-jans-${{ matrix.docker-images }}/Dockerfile --tag localbuild/scanimage:latest
-    - uses: anchore/scan-action@62370b53ab026f5d09b9fb43a7b5ec4b73c1a8e0 # v3.3.7
+    - uses: anchore/scan-action@c35e932c2a7c572bfdb1c3dbcdadb2d4fc62418d # v3.6.1
       id: scan
       with:
         image: "localbuild/scanimage:latest"
@@ -51,7 +51,7 @@ jobs:
             -H "X-Auth-Token: ${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" \
             -H "X-User-Id: ${{ secrets.MOAUTO_ROCKETCHAT_ID }}"
     - name: upload Anchore scan SARIF report
-      uses: github/codeql-action/upload-sarif@407ffafae6a767df3e0230c3df91b6443ae8df75 # v2.22.8
+      uses: github/codeql-action/upload-sarif@0b21cf2492b6b02c465a3e5d7c473717ad7721ba # v3.23.1
       with:
         sarif_file: results.sarif
     - uses: azure/container-scan@f9af925b897d8af5f7e0026b8bca9346261abc93 # v0.1

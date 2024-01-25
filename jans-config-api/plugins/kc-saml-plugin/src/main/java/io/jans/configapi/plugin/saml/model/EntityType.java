@@ -18,7 +18,7 @@ public enum EntityType implements AttributeEnum {
 	private final String value;
 	private final String displayName;
 
-	private static final Map<String, EntityType> mapByValues = new HashMap<String, EntityType>();
+	private static final Map<String, EntityType> mapByValues = new HashMap<>();
 	static {
 		for (EntityType enumType : values()) {
 			mapByValues.put(enumType.getValue(), enumType);

@@ -94,7 +94,7 @@ To check usage of this script run help command
                      [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
 ```
 
-Use this script to configure your Jans Server and to add initial data required for oxAuth and oxTrust to start. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.
+Use this script to configure your Jans Server and to add initial data. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.
 
 Below are the optional arguments:
 

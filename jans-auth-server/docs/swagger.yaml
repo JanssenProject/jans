@@ -953,9 +953,9 @@ paths:
                       description: Scope map object
                   authorization_details_types_supported:
                     type: array
-                      description: Array of string. Each string represents supported type of authorization details.
-                      items:
-                        type: string
+                    description: Array of string. Each string represents supported type of authorization details.
+                    items:
+                      type: string
         500:
           $ref: '#/components/responses/InternalServerError'
   /introspection:
@@ -1341,9 +1341,9 @@ paths:
                   description: Name of the Client to be presented to the user.
                 authorization_details_types:
                   type: array
-                    description: authorization details types (RFC9396). Fine-graned access.
-                    items:
-                      type: string
+                  description: authorization details types (RFC9396). Fine-graned access.
+                  items:
+                    type: string
                 logo_uri:
                   type: string
                   description: URL that references a logo for the Client application
@@ -1783,9 +1783,9 @@ paths:
                     type: string
                 authorization_details_types:
                   type: array
-                    description: authorization details types (RFC9396). Fine-graned access.
-                    items:
-                      type: string
+                  description: authorization details types (RFC9396). Fine-graned access.
+                  items:
+                    type: string
                 client_name:
                   type: string
                   description: Name of the Client to be presented to the user.
@@ -2201,9 +2201,9 @@ paths:
                       type: string
                   authorization_details_types:
                     type: array
-                      description: authorization details types (RFC9396). Fine-graned access.
-                      items:
-                        type: string
+                    description: authorization details types (RFC9396). Fine-graned access.
+                    items:
+                      type: string
                   client_name:
                     type: string
                     description: Name of the Client to be presented to the user.

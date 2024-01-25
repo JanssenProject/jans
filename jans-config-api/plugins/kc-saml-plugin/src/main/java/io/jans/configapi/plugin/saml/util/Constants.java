@@ -43,10 +43,14 @@ public class Constants {
     public static final String CLIENTID = "clientId";
     public static final String ID = "id";
     public static final String IDP = "idp";
+    public static final String INUM = "inum";
     public static final String NAME = "name";
     public static final String OIDC = "oidc";
     public static final String SAML = "saml";
     public static final String REALM = "realm";
+    public static final String ACCESS_TOKEN = "access_token";
+    public static final String INTERNAL_ID = "internalId";
+    public static final String ALIAS = "alias";
 
     public static final String SIGNING_CERTIFICATES = "signingCertificates";
     public static final String VALIDATE_SIGNATURE = "validateSignature";

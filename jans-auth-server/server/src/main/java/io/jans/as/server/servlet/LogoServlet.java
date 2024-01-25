@@ -49,7 +49,7 @@ public class LogoServlet extends HttpServlet {
     }
 
     private boolean readDefaultLogo(HttpServletResponse response) {
-        String defaultLogoFileName = "/WEB-INF/static/logo.png";
+        String defaultLogoFileName = "/WEB-INF/static/janssen-logo.png";
         try (InputStream in = getServletContext().getResourceAsStream(defaultLogoFileName);
              OutputStream out = response.getOutputStream()) {
             IOUtils.copy(in, out);

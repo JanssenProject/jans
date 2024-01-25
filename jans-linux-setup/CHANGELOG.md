@@ -1,5 +1,49 @@
 # Changelog
 
+## [1.0.22](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.21...jans-linux-setup-v1.0.22) (2024-01-22)
+
+
+### Features
+
+* **jans-auth-server:** support for OAuth 2.0 Rich Authorization Requests ([#7145](https://github.com/JanssenProject/jans/issues/7145)) ([c7d99c8](https://github.com/JanssenProject/jans/commit/c7d99c81efbaffd31b1b7d2963cd4f77768fd40e))
+* **jans-casa:** use an attribute to designate administrative role ([#7421](https://github.com/JanssenProject/jans/issues/7421)) ([7190e6e](https://github.com/JanssenProject/jans/commit/7190e6ed62c58ee547ba548ea7eae56f4f10b74a))
+* **jans-fido2:** update the size of the jansPublicKeyId field to 256 ([#7121](https://github.com/JanssenProject/jans/issues/7121)) ([33728da](https://github.com/JanssenProject/jans/commit/33728da0e3add85ae674d2c22a3c19d0bb0fe1a3))
+* **jans-linux-setup:** auto-enable PubSub messages for Postgres and Lock ([#7277](https://github.com/JanssenProject/jans/issues/7277)) ([f3c9fa5](https://github.com/JanssenProject/jans/commit/f3c9fa5d614a01d4a1305f19824cbb8626f0cc3d))
+* **jans-linux-setup:** install OPA ([#7182](https://github.com/JanssenProject/jans/issues/7182)) ([2549287](https://github.com/JanssenProject/jans/commit/2549287bc2d7d378ac55bfcb8a4d8cca50e6373b))
+* **jans-linux-setup:** jans-lock installer ([#7170](https://github.com/JanssenProject/jans/issues/7170)) ([c3035b7](https://github.com/JanssenProject/jans/commit/c3035b7e00faeda773f8961b635aa8cf7dd7b1b0))
+* **jans-linux-setup:** load test data to external Jans setup ([#5661](https://github.com/JanssenProject/jans/issues/5661)) ([c47dce0](https://github.com/JanssenProject/jans/commit/c47dce0282097214d034ad043d086b3080a949d4))
+* **jans-linux-setup:** postgresql is default backend ([#7420](https://github.com/JanssenProject/jans/issues/7420)) ([46d1087](https://github.com/JanssenProject/jans/commit/46d10876174f3ee2db94071d1c1c95d2f0c073d6))
+* **jans-linux-setup:** remove MariaDB support ([#7218](https://github.com/JanssenProject/jans/issues/7218)) ([2e938f4](https://github.com/JanssenProject/jans/commit/2e938f4ca64251d1215ab95caa507c8733783575))
+* **jans-linux-setup:** resource provisioning on both jans-auth and keycloak ([#7447](https://github.com/JanssenProject/jans/issues/7447)) ([e8fa4cf](https://github.com/JanssenProject/jans/commit/e8fa4cf120d6fdcf64a3b26a032cf303d50b3443))
+* **jans-linux-setup:** schema for admin-ui webhook ([#7373](https://github.com/JanssenProject/jans/issues/7373)) ([0479535](https://github.com/JanssenProject/jans/commit/0479535f2f33890ffcb0bd6589eb8ebbd950ce96))
+* jans-lock service should have own log4j configuration [#7309](https://github.com/JanssenProject/jans/issues/7309) ([#7310](https://github.com/JanssenProject/jans/issues/7310)) ([800811d](https://github.com/JanssenProject/jans/commit/800811da331c632d990972a28dc178512a88eb33))
+* lock script, policy downloader, data publisher ([#7229](https://github.com/JanssenProject/jans/issues/7229)) ([e1c1c41](https://github.com/JanssenProject/jans/commit/e1c1c41cbbfe81180169a8c81202c3fd4a31c75c))
+* lock should check periodically policies updates in specified list of URIs and update them in OPA [#6541](https://github.com/JanssenProject/jans/issues/6541) ([#7416](https://github.com/JanssenProject/jans/issues/7416)) ([39b6096](https://github.com/JanssenProject/jans/commit/39b609640aa290f7607089950ac3525ab09e6d1f))
+* lock should subscribe to messages from event system to get notifications about token IDs [#6539](https://github.com/JanssenProject/jans/issues/6539) ([#7143](https://github.com/JanssenProject/jans/issues/7143)) ([fd6ece5](https://github.com/JanssenProject/jans/commit/fd6ece561314e675a31cf8db2d0ca15f9edd0bd0))
+* publish Lock message on id_token issue/revoke ([#7271](https://github.com/JanssenProject/jans/issues/7271)) ([7963dce](https://github.com/JanssenProject/jans/commit/7963dce0d3812aab0f649ea09b13cc3667732c60))
+* rename JSON message configuration properties to conform karate test framework ([#7186](https://github.com/JanssenProject/jans/issues/7186)) ([1dc880d](https://github.com/JanssenProject/jans/commit/1dc880de92025ab2d92eeaa13465779d32bbef31))
+
+
+### Bug Fixes
+
+* **config-api:** IDP mysql creation issue and added version endpoint ([#7394](https://github.com/JanssenProject/jans/issues/7394)) ([7ed7b9d](https://github.com/JanssenProject/jans/commit/7ed7b9daae7b7b272bcacba0f9c8ad495a938c3e))
+* **jans-linux-setup:** check couchbase readiness before creating buckets ([#7404](https://github.com/JanssenProject/jans/issues/7404)) ([e07acca](https://github.com/JanssenProject/jans/commit/e07acca05708026cc5c3e037c2e06f97f2c0602f))
+* **jans-linux-setup:** KC client ([#7177](https://github.com/JanssenProject/jans/issues/7177)) ([1ef9d9f](https://github.com/JanssenProject/jans/commit/1ef9d9f68499314e98866d708017854120caf989))
+* **jans-linux-setup:** KC version 23.0.3 ([#7140](https://github.com/JanssenProject/jans/issues/7140)) ([5b83bc8](https://github.com/JanssenProject/jans/commit/5b83bc8b233a0055dcb85d768e8e877ef98f194f))
+* **jans-linux-setup:** modification date of MANIFEST.MF in war file is build date ([#7453](https://github.com/JanssenProject/jans/issues/7453)) ([3639863](https://github.com/JanssenProject/jans/commit/363986305f4e856071a287c51f7242d39b050bf3))
+* **jans-linux-setup:** opa and jans-lock unit files ([#7328](https://github.com/JanssenProject/jans/issues/7328)) ([c1e4f61](https://github.com/JanssenProject/jans/commit/c1e4f61a5916f60cc740f107603ec1d22490d531))
+* **jans-linux-setup:** print version ([#7329](https://github.com/JanssenProject/jans/issues/7329)) ([43793a6](https://github.com/JanssenProject/jans/commit/43793a6122c66b30035d933f597331114f843adc))
+* **jans-linux-setup:** systemctl fido2 start order ([#7103](https://github.com/JanssenProject/jans/issues/7103)) ([07e078b](https://github.com/JanssenProject/jans/commit/07e078bb4457800296ba74f3cadf70a639f39c79))
+* **jans-linux-setup:** typo and primission of printVersion.py ([#7355](https://github.com/JanssenProject/jans/issues/7355)) ([8a025f2](https://github.com/JanssenProject/jans/commit/8a025f202432d17387f2f60b4e91a800a0eac9b4))
+* **jans-linux-setup:** uninstall opa ([#7184](https://github.com/JanssenProject/jans/issues/7184)) ([e9e27f9](https://github.com/JanssenProject/jans/commit/e9e27f932b9b36f019801adba7fdd69926644c98))
+* **jans-linux-setup:** write default lock config even not installed ([#7371](https://github.com/JanssenProject/jans/issues/7371)) ([abf69d1](https://github.com/JanssenProject/jans/commit/abf69d12691caffa553b0e05eb9819ac2d053b19))
+* **jans:** setting default value set and width issue for metedata file ([#7438](https://github.com/JanssenProject/jans/issues/7438)) ([fd4207f](https://github.com/JanssenProject/jans/commit/fd4207fa65eba86111295dd70db57f83d2e09413))
+* **kc-saml-plugin:** exception handling and error handling ([#7351](https://github.com/JanssenProject/jans/issues/7351)) ([afe15ff](https://github.com/JanssenProject/jans/commit/afe15ff0c5e9030613db91bc0a1c8a0797a2d543))
+* **kc-saml-plugin:** fixed IDP creation issue, enum values and removed kc lib dependency ([#7238](https://github.com/JanssenProject/jans/issues/7238)) ([d3401e3](https://github.com/JanssenProject/jans/commit/d3401e3b695f21a61c5ddc5675d242a30839ef06))
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+* re-engineer how calls work in the engine ([#7152](https://github.com/JanssenProject/jans/issues/7152)) ([a940e7d](https://github.com/JanssenProject/jans/commit/a940e7dbc7da77c9f896dbe7bd73d7f9056231af))
+* update ldif entry related to failing test [#7193](https://github.com/JanssenProject/jans/issues/7193) ([#7194](https://github.com/JanssenProject/jans/issues/7194)) ([ef2943e](https://github.com/JanssenProject/jans/commit/ef2943edbc728d55041175c6467a22395545ec58))
+
 ## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.20...jans-linux-setup-v1.0.21) (2023-12-14)
 
 

@@ -28,7 +28,7 @@ parser.add_argument('-encode-salt', help="24 characters length string to be used
 
 rdbm_group = parser.add_mutually_exclusive_group()
 rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql', 'spanner'], help="Enables using remote RDBM server")
-rdbm_group.add_argument('-local-rdbm', choices=['mysql', 'pgsql'], help="Enables installing/configuring local RDBM server")
+rdbm_group.add_argument('-local-rdbm', choices=['mysql', 'pgsql'], help="Enables installing/configuring local RDBM server", default='pgsql')
 parser.add_argument('-ip-address', help="Used primarily by Apache httpd for the Listen directive")
 parser.add_argument('-host-name', help="Internet-facing FQDN that is used to generate certificates and metadata.")
 parser.add_argument('-org-name', help="Organization name field used for generating X.509 certificates")
@@ -75,6 +75,8 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('-t', help="Load test data", action='store_true')
     parser.add_argument('-x', help="Load test data and exit", action='store_true')
     parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
+
+    parser.add_argument('--local-ldap', help="Install local OpenDJ Server", action='store_true')
     parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
 
     ldap_group = parser.add_mutually_exclusive_group()
@@ -96,11 +98,11 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
     parser.add_argument('--install-eleven', help="Install Eleven Server", action='store_true')
-    parser.add_argument('--install-jans-link', help="Install Link Server", action='store_true')
+    parser.add_argument('--no-link', help="Do not install Jans Link Server", action='store_true')
     parser.add_argument('--install-jans-keycloak-link', help="Install Keycloak Link Server", action='store_true')
 
     parser.add_argument('--with-casa', help="Install Jans Casa Server", action='store_true')
-    parser.add_argument('--install-jans-saml', help="Install Jans SAML", action='store_true')
+    parser.add_argument('--install-jans-saml', help="Install Jans KC", action='store_true')
     parser.add_argument('--install-jans-lock', help="Install Jans Lock", action='store_true')
     parser.add_argument('--install-opa', help="Install OPA", action='store_true')
 
