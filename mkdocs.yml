@@ -8754,7 +8754,7 @@ nav:
   - Link Guide:
     - admin/link/README.md
     - Jans Link: admin/link/jans-link.md
-    - Keycloak Synch: admin/link/keycloak-synch.md
+    - Keycloak Synch: admin/link/jans-kc-link.md
   - Lock Guide:
       - admin/lock/README.md
       - Auth Server Configuration: admin/lock/lock_auth_server_config.md
