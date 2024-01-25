@@ -34,7 +34,7 @@
     "display_name": "kc_scheduler_api",
     "description": "keycloak scheduler openid client used to obtain API keys to invoke the config-api",
     "scopes_dns": [],
-    "scopes_ids": ["http://jans.io/idp/saml.write", "http://jans.io/idp/saml.readonly", "http://jans.io/oauth/config/saml.readonly", "http://jans.io/oauth/config/saml.write", "http://jans.io/oauth/config/attributes.readonly"],
+    "scopes_ids": ["https://jans.io/idp/saml.write", "https://jans.io/idp/saml.readonly", "https://jans.io/oauth/config/saml.readonly", "https://jans.io/oauth/config/saml.write", "https://jans.io/oauth/config/attributes.readonly"],
     "redirect_uri": ["https://%(hostname)s/kc/realms/%(jans_idp_realm)s/dev/null"],
     "grant_types": ["client_credentials"],
     "authorization_methods": ["client_secret_basic"],
