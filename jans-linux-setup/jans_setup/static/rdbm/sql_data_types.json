@@ -98,8 +98,11 @@
     "mysql": {
       "type": "JSON"
     },
-    "spanner": {
+    "pgsql": {
       "type": "JSONB"
+    },
+   "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansAuthData": {
