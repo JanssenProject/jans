@@ -72,6 +72,11 @@ public enum AuthorizationGrantType implements HasParamName {
      * Device Authorization Grant Type for OAuth 2.0
      */
     DEVICE_CODE("urn:ietf:params:oauth:grant-type:device_code"),
+
+    /**
+     * Transaction Token grant type
+     */
+    TX_TOKEN("urn:ietf:params:oauth:grant-type:tx_token"),
     ;
 
     private final String paramName;

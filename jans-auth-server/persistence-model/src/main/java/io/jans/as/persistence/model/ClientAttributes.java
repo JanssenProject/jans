@@ -104,6 +104,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("jansDefaultPromptLogin")
     private Boolean defaultPromptLogin = false;
 
+    @JsonProperty("txTokenLifetime")
+    private Integer txTokenLifetime;
+
     @JsonProperty("idTokenLifetime")
     private Integer idTokenLifetime;
 
@@ -137,6 +140,15 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("introspectionEncryptedResponseEnc")
     private String introspectionEncryptedResponseEnc;
 
+    @JsonProperty("txTokenSignedResponseAlg")
+    private String txTokenSignedResponseAlg;
+
+    @JsonProperty("txTokenEncryptedResponseAlg")
+    private String txTokenEncryptedResponseAlg;
+
+    @JsonProperty("txTokenEncryptedResponseEnc")
+    private String txTokenEncryptedResponseEnc;
+
     @JsonProperty("authorizationDetailsTypes")
     private List<String> authorizationDetailsTypes;
 
@@ -147,6 +159,30 @@ public class ClientAttributes implements Serializable {
 
     public void setAuthorizationDetailsTypes(List<String> authorizationDetailsTypes) {
         this.authorizationDetailsTypes = authorizationDetailsTypes;
+    }
+
+    public String getTxTokenSignedResponseAlg() {
+        return txTokenSignedResponseAlg;
+    }
+
+    public void setTxTokenSignedResponseAlg(String txTokenSignedResponseAlg) {
+        this.txTokenSignedResponseAlg = txTokenSignedResponseAlg;
+    }
+
+    public String getTxTokenEncryptedResponseAlg() {
+        return txTokenEncryptedResponseAlg;
+    }
+
+    public void setTxTokenEncryptedResponseAlg(String txTokenEncryptedResponseAlg) {
+        this.txTokenEncryptedResponseAlg = txTokenEncryptedResponseAlg;
+    }
+
+    public String getTxTokenEncryptedResponseEnc() {
+        return txTokenEncryptedResponseEnc;
+    }
+
+    public void setTxTokenEncryptedResponseEnc(String txTokenEncryptedResponseEnc) {
+        this.txTokenEncryptedResponseEnc = txTokenEncryptedResponseEnc;
     }
 
     public String getIntrospectionSignedResponseAlg() {
@@ -239,6 +275,14 @@ public class ClientAttributes implements Serializable {
 
     public void setAllowOfflineAccessWithoutConsent(Boolean allowOfflineAccessWithoutConsent) {
         this.allowOfflineAccessWithoutConsent = allowOfflineAccessWithoutConsent;
+    }
+
+    public Integer getTxTokenLifetime() {
+        return txTokenLifetime;
+    }
+
+    public void setTxTokenLifetime(Integer txTokenLifetime) {
+        this.txTokenLifetime = txTokenLifetime;
     }
 
     public Integer getIdTokenLifetime() {
@@ -512,10 +556,15 @@ public class ClientAttributes implements Serializable {
                 ", requestedLifetime=" + requestedLifetime +
                 ", requirePar=" + requirePar +
                 ", evidence=" + evidence +
+                ", idTokenLifetime=" + idTokenLifetime +
+                ", txTokenLifetime=" + txTokenLifetime +
                 ", dpopBoundAccessToken=" + dpopBoundAccessToken +
                 ", introspectionSignedResponseAlg=" + introspectionSignedResponseAlg +
                 ", introspectionEncryptedResponseAlg=" + introspectionEncryptedResponseAlg +
                 ", introspectionEncryptedResponseEnc=" + introspectionEncryptedResponseEnc +
+                ", txTokenSignedResponseAlg=" + txTokenSignedResponseAlg +
+                ", txTokenEncryptedResponseAlg=" + txTokenEncryptedResponseAlg +
+                ", txTokenEncryptedResponseEnc=" + txTokenEncryptedResponseEnc +
                 ", authorizationDetailsTypes=" + authorizationDetailsTypes +
                 '}';
     }

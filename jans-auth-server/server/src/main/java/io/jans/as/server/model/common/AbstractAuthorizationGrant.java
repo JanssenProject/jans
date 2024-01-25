@@ -76,6 +76,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private String acrValues;
     private String sessionDn;
 
+    protected final ConcurrentMap<String, TxToken> txTokens = new ConcurrentHashMap<>();
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<>();
     protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<>();
 
@@ -213,6 +214,14 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     @Override
     public List<AccessToken> getAccessTokens() {
         return new ArrayList<>(accessTokens.values());
+    }
+
+    public List<TxToken> getTxTokens() {
+        return new ArrayList<>(txTokens.values());
+    }
+
+    public TxToken getTxToken(String txTokenCode) {
+        return txTokens.get(txTokenCode);
     }
 
     @Override
@@ -469,6 +478,11 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         put(this.accessTokens, accessTokens);
     }
 
+    @Override
+    public void setTxTokens(List<TxToken> txTokens) {
+        put(this.txTokens, txTokens);
+    }
+
     private static <T extends AbstractToken> void put(ConcurrentMap<String, T> map, List<T> list) {
         map.clear();
         if (list != null && !list.isEmpty()) {
@@ -527,6 +541,11 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
         if (longLivedAccessToken != null && longLivedAccessToken.getCode().equals(hashedTokenCode)) {
             return longLivedAccessToken;
+        }
+
+        final TxToken txToken = txTokens.get(hashedTokenCode);
+        if (txToken != null) {
+            return txToken;
         }
 
         return accessTokens.get(hashedTokenCode);
