@@ -45,6 +45,10 @@ class Config:
     def get(self, attr, default=None):
         return getattr(self, attr) if hasattr(self, attr) else default
 
+    @classmethod
+    def set_mapping_locations(self):
+        ptype = 'rdbm' if self.persistence_type in ('sql', 'spanner') else self.persistence_type
+        self.mapping_locations = { group: ptype for group in self.couchbaseBucketDict }
 
     @classmethod
     def dump(self, dumpFile=False):

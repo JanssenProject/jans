@@ -607,7 +607,7 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_jans_keycloak_link:
             return
 
-        prompt_to_install = self.getPrompt("Install Jans Keycloak Link Server?",
+        prompt_to_install = self.getPrompt("Install Jans KC Link Server?",
                                             self.getDefaultOption(Config.install_jans_keycloak_link)
                                             )[0].lower()
 
@@ -673,7 +673,7 @@ class PropertiesUtils(SetupUtils):
         if not self.prompt_to_install('install_jans_saml'):
             return
 
-        prompt = self.getPrompt("Install Jans SAML?",
+        prompt = self.getPrompt("Install Jans KC?",
                                             self.getDefaultOption(Config.install_jans_saml)
                                             )[0].lower()
 
