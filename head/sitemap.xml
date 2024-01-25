@@ -426,6 +426,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/auth-server/tokens/oauth-tx-tokens/</loc>
+         <lastmod>2024-01-25</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/auth-server/tokens/openid-id-token/</loc>
          <lastmod>2024-01-25</lastmod>
          <changefreq>daily</changefreq>
