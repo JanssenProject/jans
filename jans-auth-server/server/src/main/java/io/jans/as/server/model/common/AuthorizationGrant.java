@@ -460,6 +460,12 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         return result;
     }
 
+    public TokenEntity asToken(TxToken txToken) {
+        final TokenEntity result = asTokenEntity(txToken);
+        result.setTokenTypeEnum(TokenType.TX_TOKEN);
+        return result;
+    }
+
     public String getScopesAsString() {
         final StringBuilder scopes = new StringBuilder();
         for (String s : getScopes()) {

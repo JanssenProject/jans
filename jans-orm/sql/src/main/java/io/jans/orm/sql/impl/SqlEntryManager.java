@@ -47,6 +47,7 @@ import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.LocalizedString;
 import io.jans.orm.reflect.property.PropertyAnnotation;
+import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.search.filter.FilterProcessor;
 import io.jans.orm.sql.model.ConvertedExpression;
@@ -925,6 +926,9 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
 	@Override
 	protected Object convertJsonToValue(Class<?> parameterType, Object propertyValue) {
+		if (ReflectHelper.assignableFrom(parameterType, Map.class)  &&  propertyValue instanceof Map<?, ?>) {
+			return propertyValue;
+		}
     	return super.convertJsonToValue(parameterType, propertyValue);
 	}
 
