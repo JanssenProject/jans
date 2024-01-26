@@ -251,7 +251,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('jans_idp_idp_root_dir', 'idpRootDir'),
                     ('jans_idp_idp_metadata_root_dir', 'idpMetadataRootDir'),
                     ('jans_idp_idp_metadata_temp_dir', 'idpMetadataTempDir'),
-                    ('jans_idp_idp_metadata_file_pattern', 'idpMetadataFilePattern'),
                     ('jans_idp_idp_metadata_file', 'idpMetadataFile'),
                     ('jans_idp_sp_metadata_root_dir', 'spMetadataRootDir'),
                     ('jans_idp_sp_metadata_temp_dir', 'spMetadataTempDir'),

@@ -4,6 +4,7 @@ import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.configapi.plugin.saml.configuration.SamlConfigurationFactory;
 import io.jans.configapi.plugin.saml.model.config.SamlAppConfiguration;
 import io.jans.configapi.plugin.saml.model.config.SamlConf;
+import io.jans.configapi.plugin.saml.util.Constants;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.exception.InvalidConfigurationException;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -259,13 +260,7 @@ public class SamlConfigService {
     }
 
     public String getIdpMetadataFilePattern() {
-        final SamlConf samlConf = getSamlConf();
-        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
-        String idpMetadataFilePattern = null;
-        if (samlAppConfiguration != null) {
-            idpMetadataFilePattern = samlAppConfiguration.getIdpMetadataFilePattern();
-        }
-        return idpMetadataFilePattern;
+        return Constants.IDP_METADATA_FILE_PATTERN;
     }
 
     public String getIdpMetadataFile() {
@@ -299,13 +294,7 @@ public class SamlConfigService {
     }
 
     public String getSpMetadataFilePattern() {
-        final SamlConf samlConf = getSamlConf();
-        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
-        String spMetadataFilePattern = null;
-        if (samlAppConfiguration != null) {
-            spMetadataFilePattern = samlAppConfiguration.getSpMetadataFilePattern();
-        }
-        return spMetadataFilePattern;
+        return Constants.SP_METADATA_FILE_PATH;
     }
 
     public String getSpMetadataFile() {

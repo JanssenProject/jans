@@ -24,7 +24,6 @@ Config.jans_idp_grant_type = 'PASSWORD'
 Config.jans_idp_user_name = 'jans-api'
 Config.jans_idp_user_password = os.urandom(10).hex()
 Config.jans_idp_idp_root_dir = os.path.join(Config.jansOptFolder, 'idp')
-Config.jans_idp_idp_metadata_file_pattern = '%s-idp-metadata.xml'
 Config.jans_idp_ignore_validation = 'true'
 Config.jans_idp_idp_metadata_file = 'idp-metadata.xml'
 
