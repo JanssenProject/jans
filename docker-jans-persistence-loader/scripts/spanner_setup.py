@@ -120,6 +120,15 @@ class SpannerBackend:
             # run the callback
             self.create_spanner_indexes(table_name, column_mapping)
 
+    def create_unique_indexes(self):
+        for table_name, column in [
+            ("jansPerson", "mail"),
+            ("jansPerson", "uid"),
+        ]:
+            index_name = f"{table_name.lower()}_{column.lower()}_unique_idx"
+            query = f"CREATE UNIQUE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column)})"
+            self.client.create_index(query)
+
     def import_builtin_ldif(self, ctx):
         optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
         ldif_mappings = get_ldif_mappings_hook("spanner", optional_scopes)
@@ -138,6 +147,7 @@ class SpannerBackend:
 
         logger.info("Creating indexes (if not exist)")
         self.create_indexes()
+        self.create_unique_indexes()
 
         ctx = prepare_template_ctx(self.manager)
 
