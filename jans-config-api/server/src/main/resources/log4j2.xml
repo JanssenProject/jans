@@ -116,8 +116,7 @@
 			<AppenderRef ref="JANS_CONFIGAPI_SCRIPT_LOG_FILE" />
 		</logger>
 
-        <Root level="INFO">
-			<AppenderRef ref="FILE" />
+        <Root level="ERROR">
 			<AppenderRef ref="Console" />
         </Root>
 		
