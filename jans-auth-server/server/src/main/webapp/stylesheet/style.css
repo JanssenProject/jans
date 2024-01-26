@@ -655,7 +655,7 @@ input.btn.btn-done {
 }
 
 .jans-form-container {
-    padding: 40px 40px 50px 40px;
+    padding: calc(40px - (40px * 0.2)) calc(40px - (40px * 0.2)) calc(50px - (50px * 0.2)) calc(40px - (40px * 0.2));
     max-width: 60%;
     margin: 0 auto;
     border-radius: 12px;
@@ -673,12 +673,12 @@ input.btn.btn-done {
 
 .device-authz-title {
     font-weight: bold;
-    font-size: 38px;
+    font-size: calc(38px - (38px * 0.2));
     text-align: left;
 }
 
 .device-authz-subtitle {
-    font-size: 20px;
+    font-size: calc(20px - (20px * 0.2));
     text-align: left;
     max-width: 90%;
     font-weight: normal !important;
@@ -703,7 +703,7 @@ input.btn.btn-done {
 .device-authz-label {
     margin-top: 32px;
     text-align: left;
-    font-size: 20px;
+    font-size: calc(20px - (20px * 0.2));
     font-weight: normal !important;
 }
 
@@ -711,20 +711,20 @@ input.btn.btn-done {
     margin-top: 10px !important;
     text-align: center;
     font-weight: bold;
-    font-size: 30px;
+    font-size: calc(30px - (30px * 0.2));
 }
 
 .device-authz-input-container {
     margin-top: 20px !important;
     text-align: center;
     font-weight: bold;
-    font-size: 25px !important;
+    font-size: calc(25px - (25px * 0.2)) !important;
 }
 
 .device-authz-continue-btn {
     background-color: #00BE79;
     color:white;
-    font-size: 20px !important;
+    font-size: calc(20px - (20px * 0.2)) !important;
     width: 100%;
     font-weight: bold !important;
     padding: 8px 0 !important;
@@ -734,7 +734,7 @@ input.btn.btn-done {
 .device-authz-input-code, .app-input-styles {
     text-align: center;
     font-weight: bold !important;
-    font-size: 25px !important;
+    font-size: calc(25px - (25px * 0.2)) !important;
     height: 50px !important;
     background-color: transparent !important;
     border: 2px solid #fff !important;
@@ -742,12 +742,12 @@ input.btn.btn-done {
 }
 
 .app-input-styles::placeholder {
-    font-size: 20px;
+    font-size: calc(20px - (20px * 0.2)) !important;
     font-family: 'Lato';
 }
 
 .app-input-styles {
-    font-size: 20px !important;
+    font-size: calc(20px - (20px * 0.2)) !important;
     text-align: left !important;
     padding: 6px 10px !important;
     font-weight: normal !important;
@@ -768,7 +768,7 @@ input.btn.btn-done {
 }
 
 .remember-me__text {
-    font-size: 17px;
+    font-size: calc(17px - (17px * 0.2)) !important;
 }
 
 .remember-me__input {
@@ -804,5 +804,5 @@ input.btn.btn-done {
 }
 
 .text-lg {
-    font-size: 18px;
+    font-size: calc(18px - (18px * 0.2)) !important;
 }
