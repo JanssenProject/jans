@@ -176,7 +176,7 @@ class DBUtils:
         self.opendj_attributes_syntax = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'opendj_attributes_syntax.json'))
         self.sub_tables = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'sub_tables.json'))
 
-        for attr in attribDataTypes.listAttributes:
+        for attr in attribDataTypes.listAttributes + attribDataTypes.jsonAttributes:
             if not attr in self.sql_data_types:
                 self.sql_data_types[attr] = { 'mysql': {'type': 'JSON'}, 'pgsql': {'type': 'JSONB'}, 'spanner': {'type': 'ARRAY<STRING(MAX)>'} }
 

@@ -19,6 +19,7 @@ syntaxType = {
 class AttribDataTypes:
 
     listAttributes = ['member']
+    jsonAttributes = []
     attribTypes = {}
 
     def __init__(self):
@@ -41,13 +42,18 @@ class AttribDataTypes:
         jansAtrribs = jansSchema['attributeTypes']
 
         for attrib in jansAtrribs:
+            if attrib.get('rdbm_type') == 'json':
+                for name in attrib['names']:
+                    if name not in self.jsonAttributes:
+                        self.jsonAttributes.append(name)
+
             if attrib.get('json'):
                 atype = 'json'
             elif  attrib['syntax'] in syntaxType:
                 atype = syntaxType[attrib['syntax']]
             else:
                 atype = 'string'
-                
+
             for name in attrib['names']:
                 self.attribTypes[atype].append(name)
 
