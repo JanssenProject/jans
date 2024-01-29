@@ -55,7 +55,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-casa/plugins \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=e6d8566897fab9598897b6a7e02670ea1d794c78
+ENV JANS_SOURCE_VERSION=d1be3487234a2f369f07a0105d15e451eae7048d
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CASA_EXTRAS_DIR=jans-casa/extras
 
