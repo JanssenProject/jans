@@ -7,13 +7,19 @@ import tempfile
 from string import Template
 
 import backoff
+from sqlalchemy import create_engine
+from sqlalchemy import MetaData
+from sqlalchemy.sql import text
+from sqlalchemy.exc import OperationalError
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.utils import exec_cmd
+from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.wait import get_wait_max_time
 from jans.pycloudlib.wait import get_wait_interval
 
 from healthcheck import run_healthcheck
 from settings import LOGGING_CONFIG
+from utils import get_kc_db_password
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-saml")
@@ -227,8 +233,7 @@ class KC:
                     execution_id = err.decode().strip().split()[-1].strip("'").strip('"')
             return execution_id
 
-        logger.info(f"Creating executions in realm {self.ctx['jans_idp_realm']}")
-
+        # create required executions
         _create_execution(f"{self.base_dir}/jans.execution-auth-cookie.json", flow, "auth-cookie")
 
         if execution_id := _create_execution(f"{self.base_dir}/jans.execution-auth-jans.json", flow, "kc-jans-authn"):
@@ -236,6 +241,73 @@ class KC:
             out, err, code = exec_cmd(f"{self.kcadm_script} create authentication/executions/{execution_id}/config -r {self.ctx['jans_idp_realm']} -f {config_fn} --config {self.config_file}")
             if code != 0:
                 logger.warning(f"Unable to create execution config specified in {config_fn}; reason={err.decode()}")
+
+    def grant_xa_transaction_privilege(self):
+        recovery_enabled = as_boolean(os.environ.get("QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY", "false"))
+        db_vendor = os.environ.get("KC_DB", "mysql")
+
+        if recovery_enabled and db_vendor == "mysql":
+            mysql_kc = MysqlKeycloak()
+
+            if not mysql_kc.check_xa_recover_admin():
+                mysql_kc.grant_xa_recover_admin()
+
+
+class MysqlKeycloak:
+    def __init__(self):
+        host = os.environ.get("KC_DB_URL_HOST", "localhost")
+        port = os.environ.get("KC_DB_URL_PORT", "3306")
+        database = os.environ.get("KC_DB_URL_DATABASE", "keycloak")
+        self.user = os.environ.get("KC_DB_USERNAME", "keycloak")
+        password = get_kc_db_password()
+
+        self.engine = create_engine(
+            f"mysql+pymysql://{self.user}:{password}@{host}:{port}/{database}",
+            pool_pre_ping=True,
+            hide_parameters=True,
+        )
+
+        metadata = MetaData(bind=self.engine)
+        metadata.reflect()
+
+    @property
+    def xa_grant_name(self):
+        return "XA_RECOVER_ADMIN"
+
+    def check_xa_recover_admin(self):
+        granted = False
+
+        with self.engine.connect() as conn:
+            query = text("SHOW GRANTS FOR :username")
+            for grant in conn.execute(query, username=self.user):
+                if self.xa_grant_name in grant[0]:
+                    granted = True
+                    break
+
+        # privilege not granted
+        return granted
+
+    def grant_xa_recover_admin(self):
+        with self.engine.begin() as conn:
+            logger.info(
+                "Transaction recovery is enabled via QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY environment variable "
+                f"and KC_DB is set to 'mysql'; trying to grant required privilege {self.xa_grant_name} to {self.user!r} user ..."
+            )
+
+            query = text("GRANT :grant_name ON *.* TO :username@'%';")
+
+            try:
+                conn.execute(query, grant_name=self.xa_grant_name, username=self.user)
+            except OperationalError as exc:
+                logger.warning(f"Unable to grant {self.xa_grant_name} privilege to {self.user!r} user; reason={exc.orig.args[1]}")
+
+                if exc.orig.args[0] == 1227:
+                    manual_query = f"""GRANT {self.xa_grant_name} ON *.* TO '{self.user}'@'%'; FLUSH PRIVILEGES;"""
+                    # access denied, may need to switch user or run the query in mysql client manually
+                    logger.warning(
+                        f"Got insufficient permission, please try using user with {self.xa_grant_name} privilege "
+                        f"and running the following query manually via MySQL client: {manual_query!r}"
+                    )
 
 
 def main():
@@ -286,6 +358,9 @@ def main():
             ])
 
             kc.create_flow_executions(flow)
+
+        # grant privilege (if required)
+        kc.grant_xa_transaction_privilege()
 
 
 if __name__ == "__main__":
