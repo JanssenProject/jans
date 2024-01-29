@@ -469,14 +469,6 @@
       "type": "STRING(MAX)"
     }
   },
-  "jansSessAttr": {
-    "mysql": {
-      "type": "TEXT"
-    },
-    "spanner": {
-      "type": "STRING(MAX)"
-    }
-  },
   "jansSessState": {
     "mysql": {
       "type": "TEXT"
@@ -1091,7 +1083,27 @@
       "size": 128,
       "type": "STRING"
     }
-  }
-  
-  
+  },
+  "creatorAttrs": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
+  "jansSessAttr": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  }  
 }
