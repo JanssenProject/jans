@@ -465,14 +465,11 @@ class Upgrade:
     def update_scope_creator_attrs(self):
         kwargs = {}
 
-        if self.backend.type in ("sql", "spanner"):
-            kwargs.update({"table_name": "jansScope"})
-            entries = self.backend.search_entries("", **kwargs)
-        elif self.backend.type == "couchbase":
-            kwargs.update({"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")})
-            entries = self.backend.search_entries("", filter_="WHERE objectClass='jansScope'", **kwargs)
-        else:
-            entries = self.backend.search_entries("ou=scopes,o=jans")
+        if self.backend.type != "sql":
+            return
+
+        kwargs.update({"table_name": "jansScope"})
+        entries = self.backend.search_entries("", **kwargs)
 
         for entry in entries:
             if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
@@ -480,11 +477,14 @@ class Upgrade:
             else:
                 creator_attrs = entry.attrs.get("creatorAttrs") or []
 
+            if not isinstance(creator_attrs, list):
+                creator_attrs = [creator_attrs]
+
             new_creator_attrs = []
 
             # check the type of attr
             for _, attr in enumerate(creator_attrs):
-                with contextlib.suppress(TypeError):
+                with contextlib.suppress(TypeError, json.decoder.JSONDecodeError):
                     # migrating from old data, i.e. `{"v": ["{}"]}`
                     attr = json.loads(attr)
 

@@ -801,9 +801,9 @@ class Upgrade:
 
         # message configuration
         if "jansMessageConf" not in entry.attrs:
-            entry.attrs["jansMessageConf"] = "'{}'"
+            entry.attrs["jansMessageConf"] = {}
 
-        if self.backend.type != "couchbase":
+        with contextlib.suppress(TypeError):
             entry.attrs["jansMessageConf"] = json.loads(entry.attrs["jansMessageConf"])
 
         entry.attrs["jansMessageConf"], should_update = _transform_message_config(entry.attrs["jansMessageConf"])
@@ -811,7 +811,7 @@ class Upgrade:
         # set document store
         doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
 
-        if self.backend.type != "couchbase":
+        with contextlib.suppress(TypeError):
             entry.attrs["jansDocStoreConf"] = json.loads(entry.attrs["jansDocStoreConf"])
 
         if entry.attrs["jansDocStoreConf"]["documentStoreType"] != doc_store_type:
@@ -874,8 +874,9 @@ def _transform_message_config(conf):
         pg_pw_encoded = ""
 
     # backward-compat values
-    msg_wait_millis = conf["postgresConfiguration"].get("messageWaitMillis") or conf["postgresConfiguration"].get("message-wait-millis") or 100
-    msg_sleep_thread = conf["postgresConfiguration"].get("messageSleepThreadTime") or conf["postgresConfiguration"].get("message-sleep-thread-millis") or 200
+    pg_conf = conf.get("postgresConfiguration") or {}
+    msg_wait_millis = pg_conf.get("messageWaitMillis") or pg_conf.get("message-wait-millis") or 100
+    msg_sleep_thread = pg_conf.get("messageSleepThreadTime") or pg_conf.get("message-sleep-thread-millis") or 200
     new_conf = {
         "messageProviderType": provider_type,
         "postgresConfiguration": {
