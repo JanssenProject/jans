@@ -165,7 +165,8 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
                     value=self.data.get('name', ''),
                     style=cli_style.edit_text_required,
                     jans_help=_("Name for Identity Provider"),
-                    widget_style=cli_style.white_bg_widget
+                    widget_style=cli_style.white_bg_widget,
+                    read_only = not self.new_provider
                 ),
 
                 common_data.app.getTitledCheckBox(
