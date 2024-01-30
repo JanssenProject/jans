@@ -87,10 +87,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('Install Jans KC', 'install_jans_saml')):
                     txt += get_install_string(prompt_str, install_var)
 
-
-            if Config.profile == 'jans' and Config.installEleven:
-                txt += get_install_string('Install Eleven Server', 'installEleven')
-
             if base.argsp.t:
                 txt += 'Load Test Data '.ljust(30) + repr( base.argsp.t).rjust(35) + "\n"
 
@@ -642,7 +638,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def order_services(self):
 
         service_list = [
-                        ('jans-eleven', 'installEleven'),
                         ('jans-auth', 'installOxAuth'),
                         ('jans-config-api', 'install_config_api'),
                         ('jans-casa', 'install_casa'),

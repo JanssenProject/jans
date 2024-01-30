@@ -197,15 +197,6 @@
       "title-prefixes": []
     }
   },
-  "comp-jans-eleven": {
-    "color": "0052CC",
-    "description": "Touching folder /jans-eleven",
-    "auto-label": {
-      "branch": "",
-      "paths": ["jans-eleven"],
-      "title-prefixes": []
-    }
-  },
   "comp-jans-fido2": {
     "color": "0052CC",
     "description": "Touching folder /jans-fido2",

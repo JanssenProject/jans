@@ -8413,16 +8413,6 @@ components:
           type: string
         staticDecryptionKid:
           type: string
-        jansElevenTestModeToken:
-          type: string
-        jansElevenGenerateKeyEndpoint:
-          type: string
-        jansElevenSignEndpoint:
-          type: string
-        jansElevenVerifySignatureEndpoint:
-          type: string
-        jansElevenDeleteKeyEndpoint:
-          type: string
         introspectionAccessTokenMustHaveUmaProtectionScope:
           type: boolean
         introspectionAccessTokenMustHaveIntrospectionScope:

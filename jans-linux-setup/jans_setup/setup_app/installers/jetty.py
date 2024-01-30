@@ -338,7 +338,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                                     ('install_scim_server', 'jans-scim'),
                                     ('installFido2', 'jans-fido2'),
                                     ('install_config_api', 'jans-config-api'),
-                                    ('installEleven', 'jans-eleven'),
                                     ('install_jans_lock_as_server', 'jans-lock'),
                                     ]:
 
