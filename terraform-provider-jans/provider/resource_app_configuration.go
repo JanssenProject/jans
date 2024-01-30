@@ -1361,34 +1361,6 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Specifies static decryption Kid",
 			},
-			"jans_eleven_test_mode_token": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "jansEleven Test Mode Token.",
-			},
-			"jans_eleven_generate_key_endpoint": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "URL for the jansEleven Generate Key Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/generateKey",
-				ValidateDiagFunc: validateURL,
-			},
-			"jans_eleven_sign_endpoint": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "URL for the jansEleven Sign Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/sign",
-				ValidateDiagFunc: validateURL,
-			},
-			"jans_eleven_verify_signature_endpoint": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "URL for the jansEleven Verify Signature Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/verifySignature",
-				ValidateDiagFunc: validateURL,
-			},
-			"jans_eleven_delete_key_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "URL for the jansEleven Delete Key Endpoint. Example: https://server.example.com/janseleven/rest/oxeleven/deleteKey",
-			},
 			"introspection_access_token_must_have_uma_protection_scope": {
 				Type:        schema.TypeBool,
 				Optional:    true,
