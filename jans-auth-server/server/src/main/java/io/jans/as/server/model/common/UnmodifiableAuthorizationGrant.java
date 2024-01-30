@@ -243,6 +243,11 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
+    public void setTxTokens(List<TxToken> txTokens) {
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
+    }
+
+    @Override
     public String getAcrValues() {
         return grant.getAcrValues();
     }

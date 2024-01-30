@@ -196,6 +196,7 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
         for (TokenEntity token : tokens) {
             if (tth == null ||
                     (tth == TokenTypeHint.ACCESS_TOKEN && token.getTokenTypeEnum() == TokenType.ACCESS_TOKEN) ||
+                    (tth == TokenTypeHint.TX_TOKEN && token.getTokenTypeEnum() == TokenType.TX_TOKEN) ||
                     (tth == TokenTypeHint.REFRESH_TOKEN && token.getTokenTypeEnum() == TokenType.REFRESH_TOKEN)) {
                 grantService.removeSilently(token);
             }
@@ -203,7 +204,7 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
     }
 
     private AuthorizationGrant findAuthorizationGrant(String token, TokenTypeHint tth) {
-        if (tth == TokenTypeHint.ACCESS_TOKEN) {
+        if (tth == TokenTypeHint.ACCESS_TOKEN || tth == TokenTypeHint.TX_TOKEN) {
             return authorizationGrantList.getAuthorizationGrantByAccessToken(token);
         }
 
