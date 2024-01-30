@@ -75,7 +75,7 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        maven: [ "jans-scim", "jans-orm", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama", "jans-link", "jans-keycloak-link", "jans-keycloak-integration", "jans-casa", "jans-lock" ]
+        maven: [ "jans-scim", "jans-orm", "jans-fido2", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama", "jans-link", "jans-keycloak-link", "jans-keycloak-integration", "jans-casa", "jans-lock" ]
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
