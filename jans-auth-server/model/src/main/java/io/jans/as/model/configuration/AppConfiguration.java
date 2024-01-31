@@ -571,23 +571,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Specifies static decryption Kid")
     private String staticDecryptionKid;
 
-
-    //oxEleven
-    @DocProperty(description = "oxEleven Test Mode Token")
-    private String jansElevenTestModeToken;
-
-    @DocProperty(description = "oxEleven Generate Key endpoint URL")
-    private String jansElevenGenerateKeyEndpoint;
-
-    @DocProperty(description = "oxEleven Sign endpoint UR")
-    private String jansElevenSignEndpoint;
-
-    @DocProperty(description = "oxEleven Verify Signature endpoint URL")
-    private String jansElevenVerifySignatureEndpoint;
-
-    @DocProperty(description = "oxEleven Delete Key endpoint URL")
-    private String jansElevenDeleteKeyEndpoint;
-
     @DocProperty(description = "If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header", defaultValue = "false")
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
 
@@ -2705,46 +2688,6 @@ public class AppConfiguration implements Configuration {
 
     public void setKeyStoreSecret(String keyStoreSecret) {
         this.keyStoreSecret = keyStoreSecret;
-    }
-
-    public String getJansElevenTestModeToken() {
-        return jansElevenTestModeToken;
-    }
-
-    public void setJansElevenTestModeToken(String jansElevenTestModeToken) {
-        this.jansElevenTestModeToken = jansElevenTestModeToken;
-    }
-
-    public String getJansElevenGenerateKeyEndpoint() {
-        return jansElevenGenerateKeyEndpoint;
-    }
-
-    public void setJansElevenGenerateKeyEndpoint(String jansElevenGenerateKeyEndpoint) {
-        this.jansElevenGenerateKeyEndpoint = jansElevenGenerateKeyEndpoint;
-    }
-
-    public String getJansElevenSignEndpoint() {
-        return jansElevenSignEndpoint;
-    }
-
-    public void setJansElevenSignEndpoint(String jansElevenSignEndpoint) {
-        this.jansElevenSignEndpoint = jansElevenSignEndpoint;
-    }
-
-    public String getJansElevenVerifySignatureEndpoint() {
-        return jansElevenVerifySignatureEndpoint;
-    }
-
-    public void setJansElevenVerifySignatureEndpoint(String jansElevenVerifySignatureEndpoint) {
-        this.jansElevenVerifySignatureEndpoint = jansElevenVerifySignatureEndpoint;
-    }
-
-    public String getJansElevenDeleteKeyEndpoint() {
-        return jansElevenDeleteKeyEndpoint;
-    }
-
-    public void setJansElevenDeleteKeyEndpoint(String jansElevenDeleteKeyEndpoint) {
-        this.jansElevenDeleteKeyEndpoint = jansElevenDeleteKeyEndpoint;
     }
 
     public Boolean getEndSessionWithAccessToken() {
