@@ -222,6 +222,7 @@ data:
     import base64
 
     from jans.pycloudlib import get_manager
+    from jans.pycloudlib.wait import wait_for
 
     log_format = '%(asctime)s - %(name)8s - %(levelname)5s - %(message)s'
     logging.basicConfig(format=log_format, level=logging.INFO)
@@ -323,6 +324,7 @@ data:
             )
 
     if __name__ == "__main__":
+        wait_for(get_manager(), deps=["secret"])
         main()
 
 kind: ConfigMap
