@@ -30,12 +30,10 @@ public class SamlAppConfiguration implements Configuration {
     private String idpRootDir;
     private String idpMetadataDir;
     private String idpMetadataTempDir;
-    private String idpMetadataFilePattern;
     private String idpMetadataFile;
 
     private String spMetadataDir;
     private String spMetadataTempDir;
-    private String spMetadataFilePattern;
     private String spMetadataFile;
 
     private boolean ignoreValidation;
@@ -203,15 +201,7 @@ public class SamlAppConfiguration implements Configuration {
     public void setIdpMetadataTempDir(String idpMetadataTempDir) {
         this.idpMetadataTempDir = idpMetadataTempDir;
     }
-    
-    public String getIdpMetadataFilePattern() {
-        return idpMetadataFilePattern;
-    }
-    
-    public void setIdpMetadataFilePattern(String idpMetadataFilePattern) {
-        this.idpMetadataFilePattern = idpMetadataFilePattern;
-    }
-    
+       
     public String getIdpMetadataFile() {
         return idpMetadataFile;
     }
@@ -234,14 +224,6 @@ public class SamlAppConfiguration implements Configuration {
     
     public void setSpMetadataTempDir(String spMetadataTempDir) {
         this.spMetadataTempDir = spMetadataTempDir;
-    }
-    
-    public String getSpMetadataFilePattern() {
-        return spMetadataFilePattern;
-    }
-    
-    public void setSpMetadataFilePattern(String spMetadataFilePattern) {
-        this.spMetadataFilePattern = spMetadataFilePattern;
     }
     
     public String getSpMetadataFile() {
@@ -289,16 +271,13 @@ public class SamlAppConfiguration implements Configuration {
         return "SamlAppConfiguration [applicationName=" + applicationName + ", samlTrustRelationshipDn="
                 + samlTrustRelationshipDn + ", trustedIdpDn=" + trustedIdpDn + ", enabled=" + enabled + ", selectedIdp="
                 + selectedIdp + ", serverUrl=" + serverUrl + ", realm=" + realm + ", clientId=" + clientId
-                + ", clientSecret=" + clientSecret + ", grantType=" + grantType + ", scope=" + scope + ", username="
-                + username + ", password=" + password + ", spMetadataUrl=" + spMetadataUrl + ", tokenUrl=" + tokenUrl
+                + ", grantType=" + grantType + ", scope=" + scope + ", username="
+                + username + ", spMetadataUrl=" + spMetadataUrl + ", tokenUrl=" + tokenUrl
                 + ", idpUrl=" + idpUrl + ", idpMetadataImportUrl=" + idpMetadataImportUrl + ", idpRootDir=" + idpRootDir
                 + ", idpMetadataDir=" + idpMetadataDir + ", idpMetadataTempDir=" + idpMetadataTempDir
-                + ", idpMetadataFilePattern=" + idpMetadataFilePattern + ", idpMetadataFile=" + idpMetadataFile
-                + ", spMetadataDir=" + spMetadataDir + ", spMetadataTempDir=" + spMetadataTempDir
-                + ", spMetadataFilePattern=" + spMetadataFilePattern + ", spMetadataFile=" + spMetadataFile
-                + ", ignoreValidation=" + ignoreValidation + ", idpMetadataMandatoryAttributes="
-                + idpMetadataMandatoryAttributes + ", kcAttributes=" + kcAttributes + ", kcSamlConfig=" + kcSamlConfig
-                + "]";
+                + ", idpMetadataFile=" + idpMetadataFile + ", spMetadataDir=" + spMetadataDir + ", spMetadataTempDir="
+                + spMetadataTempDir + ", spMetadataFile=" + spMetadataFile + ", ignoreValidation=" + ignoreValidation
+                + ", idpMetadataMandatoryAttributes=" + idpMetadataMandatoryAttributes + ", kcAttributes="
+                + kcAttributes + ", kcSamlConfig=" + kcSamlConfig + "]";
     }
-    
 }
