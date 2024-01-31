@@ -138,8 +138,10 @@ data:
   CN_HYBRID_MAPPING: {{ .Values.configmap.cnPersistenceHybridMapping | quote }}
   {{- end }}
   # Auto enable installation of some services
-  {{ if eq .Values.configmap.cnCacheType "REDIS" }}
+  {{ if or (eq .Values.configmap.cnCacheType "REDIS") (eq .Values.configmap.cnMessageType "REDIS") }}
   CN_REDIS_URL: {{ .Values.configmap.cnRedisUrl | quote }}
+  {{- end }}
+  {{ if eq .Values.configmap.cnCacheType "REDIS" }}
   CN_REDIS_TYPE: {{ .Values.configmap.cnRedisType | quote }}
   CN_REDIS_USE_SSL: {{ .Values.configmap.cnRedisUseSsl | quote }}
   CN_REDIS_SSL_TRUSTSTORE: {{ .Values.configmap.cnRedisSslTruststore | quote }}
@@ -217,6 +219,9 @@ data:
   CN_SAML_KC_DB_PASSWORD_FILE: {{ .Values.global.kcDbPasswordFile | quote }}
   CN_SAML_KC_ADMIN_CREDENTIALS_FILE: {{ .Values.global.kcAdminCredentialsFile | quote }}
   {{- end }}
+  CN_LOCK_ENABLED: {{ index .Values "global" "auth-server" "lockEnabled" | quote }}
+  CN_OPA_URL: {{ .Values.configmap.cnOpaUrl | quote }}
+  CN_MESSAGE_TYPE: {{ .Values.configmap.cnMessageType | quote }}
 ---
 
 apiVersion: v1

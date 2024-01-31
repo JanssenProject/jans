@@ -861,17 +861,21 @@ def _transform_message_config(conf):
     should_update = False
     provider_type = os.environ.get("CN_MESSAGE_TYPE", "DISABLED")
 
-    pg_host = os.environ.get("CN_SQL_DB_HOST", "localhost")
-    pg_port = os.environ.get("CN_SQL_DB_PORT", "5432")
-    pg_db = os.environ.get("CN_SQL_DB_NAME", "jans")
-
-    if os.environ.get("CN_PERSISTENCE_TYPE", "ldap") == "sql":
+    if os.environ.get("CN_PERSISTENCE_TYPE", "ldap") == "sql" and os.environ.get("CN_SQL_DB_DIALECT", "mysql") in ("pgsql", "postgresql"):
         pg_pw_encoded = encode_text(
             get_sql_password(manager),
             manager.secret.get("encoded_salt")
         ).decode()
+        pg_host = os.environ.get("CN_SQL_DB_HOST", "localhost")
+        pg_port = os.environ.get("CN_SQL_DB_PORT", "5432")
+        pg_db = os.environ.get("CN_SQL_DB_NAME", "jans")
+        pg_schema = os.environ.get("CN_SQL_DB_SCHEMA") or "public"
     else:
         pg_pw_encoded = ""
+        pg_host = "localhost"
+        pg_port = "5432"
+        pg_db = "jans"
+        pg_schema = "public"
 
     # backward-compat values
     pg_conf = conf.get("postgresConfiguration") or {}
@@ -881,7 +885,7 @@ def _transform_message_config(conf):
         "messageProviderType": provider_type,
         "postgresConfiguration": {
             "connectionUri": f"jdbc:postgresql://{pg_host}:{pg_port}/{pg_db}",
-            "dbSchemaName": os.environ.get("CN_SQL_DB_SCHEMA", "public"),
+            "dbSchemaName": pg_schema,
             "authUserName": os.environ.get("CN_SQL_DB_USER", "jans"),
             "authUserPassword": pg_pw_encoded,
             "messageWaitMillis": msg_wait_millis,

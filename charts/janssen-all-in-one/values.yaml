@@ -137,6 +137,10 @@ configmap:
   kcDbUrlDatabase: keycloak
   # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
   kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
+  # -- URL of OPA server
+  cnOpaUrl: http://opa.opa.svc.cluster.cluster.local:8181/v1
+  # -- Message type (one of POSTGRES, REDIS, or DISABLED)
+  cnMessageType: DISABLED
 nameOverride: ""
 fullNameOverride: ""
 # -- Redis admin password if `configmap.cnCacheType` is set to `REDIS`.
@@ -212,6 +216,8 @@ auth-server:
     webdiscoveryEnabled: true
     # -- Enable endpoint /.well-known/fido-configuration
     u2fConfigEnabled: true
+  # -- Enable jans-lock as service running inside auth-server
+  lockEnabled: false
 # -- Responsible for regenerating auth-keys per x hours
 auth-server-key-rotation:
   # -- Add custom normal and secret envs to the service
@@ -645,9 +651,9 @@ replicas: 1
 resources:
   limits:
     # -- CPU limit.
-    cpu: 2500m
+    cpu: 16000m
     # -- Memory limit.
-    memory: 2500Mi
+    memory: 16000Mi
   requests:
     # -- CPU request.
     cpu: 2500m
