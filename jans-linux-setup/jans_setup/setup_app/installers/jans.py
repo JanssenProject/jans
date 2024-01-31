@@ -653,12 +653,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
         service_listr.reverse()
         for i, service in enumerate(service_listr):
             order_var_str = 'order_{}_service'.format(service[0].replace('-','_'))
+            if service[0] == 'jans-auth':
+                Config.templateRenderingDict[order_var_str] = Config.backend_service
+                continue
             for sservice in (service_listr[i+1:]):
                 if Config.get(sservice[1]):
                     Config.templateRenderingDict[order_var_str] = sservice[0]+'.service'
                     break
-                else:
-                    if service[0] != 'jans-auth':
-                        Config.templateRenderingDict[order_var_str] = 'jans-auth.service'
-                    else:
-                        Config.templateRenderingDict['order_jans_auth_service'] =  'jans-eleven.service' if Config.installEleven else  Config.backend_service
+

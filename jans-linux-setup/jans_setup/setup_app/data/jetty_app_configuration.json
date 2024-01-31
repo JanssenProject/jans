@@ -15,7 +15,7 @@
     "memory": {
       "max_allowed_mb": 512,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.08
+      "ratio": 0.10
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,threadpool,console-capture,jsp"
@@ -51,7 +51,7 @@
     "memory": {
       "max_allowed_mb": 1024,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.08
+      "ratio": 0.10
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
@@ -76,7 +76,7 @@
     "memory": {
       "max_allowed_mb": 1024,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.08
+      "ratio": 0.10
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
@@ -88,7 +88,7 @@
     "memory": {
       "max_allowed_mb": 1024,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.08
+      "ratio": 0.10
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
