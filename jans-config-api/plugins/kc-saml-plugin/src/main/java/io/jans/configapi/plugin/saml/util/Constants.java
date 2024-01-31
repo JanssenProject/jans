@@ -18,6 +18,8 @@ public class Constants {
     public static final String IDP_MODULE = "idp-module";
     public static final String SP_MODULE = "sp-module";
     public static final String REALM_MASTER = "master";
+    public static final String SP_METADATA_FILE_PATTERN = "%s-sp-metadata.xml";
+    public static final String IDP_METADATA_FILE_PATTERN = "%s-idp-metadata.xml";
 
     public static final String SAML_CONFIG = "/samlConfig";
     public static final String TRUST_RELATIONSHIP = "/trust-relationship";

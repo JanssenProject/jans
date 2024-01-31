@@ -976,15 +976,11 @@ components:
           type: string
         idpMetadataTempDir:
           type: string
-        idpMetadataFilePattern:
-          type: string
         idpMetadataFile:
           type: string
         spMetadataDir:
           type: string
         spMetadataTempDir:
-          type: string
-        spMetadataFilePattern:
           type: string
         spMetadataFile:
           type: string
