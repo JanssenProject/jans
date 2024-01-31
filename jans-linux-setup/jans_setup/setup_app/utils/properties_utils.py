@@ -502,6 +502,8 @@ class PropertiesUtils(SetupUtils):
             Config.mapping_locations[m] = 'couchbase'
 
     def set_persistence_type(self):
+        if Config.installed_instance:
+            return
         if Config.opendj_install and (not Config.cb_install) and (not Config.rdbm_install):
             Config.persistence_type = 'ldap'
         elif (not Config.opendj_install) and (not Config.rdbm_install) and Config.cb_install:
