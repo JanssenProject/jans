@@ -157,3 +157,17 @@ Individual modules of the Janssen Server will continue to write their operationa
 ## After installation, what's next?
 
 After successful installation of the Janssen Server, move on to the [configuration steps](../config-guide/config-tools/jans-cli/README.md) in the Command Line Interface documentation to align Janssen with your organizational requirements.
+
+## Does the Janssen Server uninstall process remove the data store as well?
+
+Only if the persistence type is local LDAP, it will be removed during the
+Janssen server uninstallation process. 
+
+For all other persistence options, the
+Janssen server uninstall steps ([this](./vm-install/suse.md#uninstall)
+for instance) will only remove the Janssen Server
+software and it'll keep the data store untouched. Removing data store is at 
+the discretion of the
+administrator and it is a manual step. If not removed before attempting a
+reinstall of Janssen Server, the installer would fail due to the existence of
+the previous data store. 
