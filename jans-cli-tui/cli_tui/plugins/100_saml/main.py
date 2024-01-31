@@ -40,7 +40,7 @@ class Plugin(DialogUtils):
         """
         self.app = app
         self.pid = 'saml'
-        self.name = 'Jans SA[M]L'
+        self.name = 'Ja[n]s SAML'
         self.server_side_plugin = True
         self.page_entered = False
 
@@ -82,16 +82,6 @@ class Plugin(DialogUtils):
                 hide_headers=False
             )
 
-
-        add_tr_button_label = _("Add Trust Relationship")
-        self.tabs['trust_relationships'] = HSplit([
-                                self.tr_container,
-                                Window(height=1),
-                                VSplit([Button(add_tr_button_label, handler=self.edit_tr, width=len(add_tr_button_label)+4)], align=HorizontalAlign.CENTER),
-                                ],
-                                width=D()
-                                )
-
         self.tabs['configuration'] = HSplit([
                         self.app.getTitledCheckBox(
                             _("Enable SAML"),
@@ -129,6 +119,15 @@ class Plugin(DialogUtils):
                         ],
                         width=D()
                     )
+
+        add_tr_button_label = _("Add Service Provider")
+        self.tabs['trust_relationships'] = HSplit([
+                                self.tr_container,
+                                Window(height=1),
+                                VSplit([Button(add_tr_button_label, handler=self.edit_tr, width=len(add_tr_button_label)+4)], align=HorizontalAlign.CENTER),
+                                ],
+                                width=D()
+                                )
 
         self.provider_container = JansVerticalNav(
                 myparent=self.app,
@@ -252,9 +251,9 @@ class Plugin(DialogUtils):
         self.nav_bar = JansNavBar(
                     self.app,
                     entries=[
-                            ('trust_relationships', '[T]rust Relationships'),
                             ('configuration', 'C[o]nfiguration'),
-                            ('identity_providers', '[I]dentity Providers'),
+                            ('trust_relationships', 'S[e]rvice Providers'),
+                            ('identity_providers', 'I[d]entity Providers'),
                             ],
                     selection_changed=self.nav_selection_changed,
                     select=0,

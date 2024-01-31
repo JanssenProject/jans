@@ -142,7 +142,6 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.couchbase import CouchbaseInstaller
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
-    from setup_app.installers.eleven import ElevenInstaller
     from setup_app.installers.jans_link import JansLinkInstaller
     from setup_app.installers.jans_keycloak_link import JansKCLinkInstaller
     from setup_app.installers.jans_casa import CasaInstaller
@@ -266,7 +265,6 @@ configApiInstaller = ConfigApiInstaller()
 if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
     scimInstaller = ScimInstaller()
-    elevenInstaller = ElevenInstaller()
     casa_installer = CasaInstaller()
     jans_link_installer = JansLinkInstaller()
     jans_keycloak_link_installer = JansKCLinkInstaller()
@@ -279,7 +277,8 @@ jansCliInstaller = JansCliInstaller()
 
 rdbmInstaller.packageUtils = packageUtils
 
-jansInstaller.set_mapping_locations()
+if not Config.installed_instance:
+    Config.set_mapping_locations()
 
 
 if Config.installed_instance:
@@ -447,10 +446,6 @@ def main():
                 if (Config.installed_instance and 'install_scim_server' in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.install_scim_server):
                     scimInstaller.start_installation()
-
-                if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.get(elevenInstaller.install_var)):
-                    elevenInstaller.start_installation()
 
                 if (Config.installed_instance and casa_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(casa_installer.install_var)):

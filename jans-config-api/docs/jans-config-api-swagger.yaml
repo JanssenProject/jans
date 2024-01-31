@@ -7904,6 +7904,8 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
+        whitePagesCanView:
+          type: boolean
         baseDn:
           type: string
     PatchRequest:
@@ -8413,16 +8415,6 @@ components:
           type: string
         staticDecryptionKid:
           type: string
-        jansElevenTestModeToken:
-          type: string
-        jansElevenGenerateKeyEndpoint:
-          type: string
-        jansElevenSignEndpoint:
-          type: string
-        jansElevenVerifySignatureEndpoint:
-          type: string
-        jansElevenDeleteKeyEndpoint:
-          type: string
         introspectionAccessTokenMustHaveUmaProtectionScope:
           type: boolean
         introspectionAccessTokenMustHaveIntrospectionScope:
@@ -8705,8 +8697,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8716,6 +8706,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn

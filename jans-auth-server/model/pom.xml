@@ -60,14 +60,6 @@
 			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-eleven-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-eleven-model</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxb-provider</artifactId>
 		</dependency>

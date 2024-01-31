@@ -368,16 +368,6 @@
             <artifactId>jans-core-script</artifactId>
         </dependency>
 
-		<!-- Eleven -->
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-eleven-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-eleven-client</artifactId>
-		</dependency>
-
 		<!-- jans-notify -->
 		<dependency>
 			<groupId>io.jans</groupId>

@@ -447,12 +447,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.restart('jans-auth')
 
-        if Config.installEleven:
-            eleven_tokens_package = os.path.join(Config.staticFolder, 'eleven/jans-eleven-tokens.tar.gz')
-            target_dir = '/var/lib/softhsm/tokens/'
-            self.logIt(f"Extracting {eleven_tokens_package} into {target_dir}")
-            shutil.unpack_archive(eleven_tokens_package, format='gztar', extract_dir=target_dir)
-
         if Config.install_scim_server:
             self.restart('jans-scim')
 
@@ -461,10 +455,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         if Config.install_config_api:
             self.restart('jans-config-api')
-
-        if Config.installEleven:
-            self.restart('jans-eleven')
-
 
         # Prepare for tests run
         #install_command, update_command, query_command, check_text = self.get_install_commands()

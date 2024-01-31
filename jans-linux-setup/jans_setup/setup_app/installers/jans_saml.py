@@ -17,21 +17,19 @@ from setup_app.utils.ldif_utils import create_client_ldif
 # Config
 Config.idp_config_http_port = '8083'
 Config.jans_idp_enabled = 'true'
-Config.jans_idp_realm = 'jans-api'
-Config.jans_idp_client_id = f'jans-api-{uuid.uuid4()}'
+Config.jans_idp_realm = 'jans'
+Config.jans_idp_client_id = f'jans-{uuid.uuid4()}'
 Config.jans_idp_client_secret = os.urandom(10).hex()
 Config.jans_idp_grant_type = 'PASSWORD'
-Config.jans_idp_user_name = 'jans-api'
+Config.jans_idp_user_name = 'jans'
 Config.jans_idp_user_password = os.urandom(10).hex()
 Config.jans_idp_idp_root_dir = os.path.join(Config.jansOptFolder, 'idp')
-Config.jans_idp_idp_metadata_file_pattern = '%s-idp-metadata.xml'
 Config.jans_idp_ignore_validation = 'true'
 Config.jans_idp_idp_metadata_file = 'idp-metadata.xml'
 
 class JansSamlInstaller(JettyInstaller):
 
     install_var = 'install_jans_saml'
-    setattr(Config, install_var + '_pre_released', True)
 
     source_files = [
         (os.path.join(Config.dist_jans_dir, 'kc-jans-storage-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-storage-plugin/{0}/kc-jans-storage-plugin-{0}.jar').format(base.current_app.app_info['jans_version'])),

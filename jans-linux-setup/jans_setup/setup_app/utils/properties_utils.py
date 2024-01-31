@@ -502,6 +502,8 @@ class PropertiesUtils(SetupUtils):
             Config.mapping_locations[m] = 'couchbase'
 
     def set_persistence_type(self):
+        if Config.installed_instance:
+            return
         if Config.opendj_install and (not Config.cb_install) and (not Config.rdbm_install):
             Config.persistence_type = 'ldap'
         elif (not Config.opendj_install) and (not Config.rdbm_install) and Config.cb_install:
@@ -574,21 +576,6 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installOxd:
             Config.addPostSetupService.append('installOxd')
 
-
-    def promptForEleven(self):
-        if Config.installed_instance and Config.installEleven:
-            return
-
-        promp_for_eleven = self.getPrompt("Install Eleven Server?",
-                                            self.getDefaultOption(Config.installEleven)
-                                            )[0].lower()
-
-        Config.installEleven = promp_for_eleven == 'y'
-
-        if Config.installed_instance and Config.installEleven:
-            Config.addPostSetupService.append('installEleven')
-
-
     def prompt_for_jans_link(self):
         if Config.installed_instance and Config.install_jans_link:
             return
@@ -607,7 +594,7 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_jans_keycloak_link:
             return
 
-        prompt_to_install = self.getPrompt("Install Jans Keycloak Link Server?",
+        prompt_to_install = self.getPrompt("Install Jans KC Link Server?",
                                             self.getDefaultOption(Config.install_jans_keycloak_link)
                                             )[0].lower()
 
@@ -673,7 +660,7 @@ class PropertiesUtils(SetupUtils):
         if not self.prompt_to_install('install_jans_saml'):
             return
 
-        prompt = self.getPrompt("Install Jans SAML?",
+        prompt = self.getPrompt("Install Jans KC?",
                                             self.getDefaultOption(Config.install_jans_saml)
                                             )[0].lower()
 
@@ -1042,9 +1029,6 @@ class PropertiesUtils(SetupUtils):
             self.prompt_for_casa()
             self.pompt_for_jans_lock()
             self.prompt_for_jans_saml()
-            #self.promptForEleven()
-            #if (not Config.installOxd) and Config.oxd_package:
-            #    self.promptForOxd()
 
 
 

@@ -270,11 +270,6 @@ type AppConfiguration struct {
 	KeyAlgsAllowedForGeneration                               []string                              `schema:"key_algs_allowed_for_generation" json:"keyAlgsAllowedForGeneration"`
 	StaticKid                                                 string                                `schema:"static_kid" json:"staticKid"`
 	StaticDecryptionKid                                       string                                `schema:"static_decryption_kid" json:"staticDecryptionKid"`
-	JansElevenTestModeToken                                   string                                `schema:"jans_eleven_test_mode_token" json:"jansElevenTestModeToken"`
-	JansElevenGenerateKeyEndpoint                             string                                `schema:"jans_eleven_generate_key_endpoint" json:"jansElevenGenerateKeyEndpoint"`
-	JansElevenSignEndpoint                                    string                                `schema:"jans_eleven_sign_endpoint" json:"jansElevenSignEndpoint"`
-	JansElevenVerifySignatureEndpoint                         string                                `schema:"jans_eleven_verify_signature_endpoint" json:"jansElevenVerifySignatureEndpoint"`
-	JansElevenDeleteKeyEndpoint                               string                                `schema:"jans_eleven_delete_key_endpoint" json:"jansElevenDeleteKeyEndpoint"`
 	IntrospectionAccessTokenMustHaveUmaProtectionScope        bool                                  `schema:"introspection_access_token_must_have_uma_protection_scope" json:"introspectionAccessTokenMustHaveUmaProtectionScope"`
 	IntrospectionAccessTokenMustHaveIntrospectionScope        bool                                  `schema:"introspection_access_token_must_have_introspection_scope" json:"introspectionAccessTokenMustHaveIntrospectionScope"`
 	IntrospectionSkipAuthorization                            bool                                  `schema:"introspection_skip_authorization" json:"introspectionSkipAuthorization"`
