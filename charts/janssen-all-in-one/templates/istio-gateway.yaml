@@ -1,4 +1,4 @@
-{{- if and (.Values.global.istio.ingress) (not .Values.global.istio.gateways) }}
+{{- if and (.Values.istio.ingress) (not .Values.istio.gateways) }}
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
