@@ -87,10 +87,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('Install Jans KC', 'install_jans_saml')):
                     txt += get_install_string(prompt_str, install_var)
 
-
-            if Config.profile == 'jans' and Config.installEleven:
-                txt += get_install_string('Install Eleven Server', 'installEleven')
-
             if base.argsp.t:
                 txt += 'Load Test Data '.ljust(30) + repr( base.argsp.t).rjust(35) + "\n"
 
@@ -642,7 +638,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def order_services(self):
 
         service_list = [
-                        ('jans-eleven', 'installEleven'),
                         ('jans-auth', 'installOxAuth'),
                         ('jans-config-api', 'install_config_api'),
                         ('jans-casa', 'install_casa'),
@@ -658,12 +653,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
         service_listr.reverse()
         for i, service in enumerate(service_listr):
             order_var_str = 'order_{}_service'.format(service[0].replace('-','_'))
+            if service[0] == 'jans-auth':
+                Config.templateRenderingDict[order_var_str] = Config.backend_service
+                continue
             for sservice in (service_listr[i+1:]):
                 if Config.get(sservice[1]):
                     Config.templateRenderingDict[order_var_str] = sservice[0]+'.service'
                     break
-                else:
-                    if service[0] != 'jans-auth':
-                        Config.templateRenderingDict[order_var_str] = 'jans-auth.service'
-                    else:
-                        Config.templateRenderingDict['order_jans_auth_service'] =  'jans-eleven.service' if Config.installEleven else  Config.backend_service
+

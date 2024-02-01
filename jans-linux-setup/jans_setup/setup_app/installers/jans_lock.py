@@ -10,6 +10,8 @@ from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 
 Config.jans_lock_port = '8076'
+Config.jans_opa_host = 'localhost'
+Config.jans_opa_port = '8181'
 Config.lock_message_provider_type = 'DISABLED'
 
 class JansLockInstaller(JettyInstaller):
@@ -38,12 +40,10 @@ class JansLockInstaller(JettyInstaller):
         self.static_conf_json = os.path.join(self.output_dir, 'static-conf.json')
         self.message_conf_json = os.path.join(self.output_dir, 'jans_message_conf.json')
         self.config_ldif = os.path.join(self.output_dir, 'config.ldif')
-        self.opa_addr = 'localhost:8181'
         self.opa_dir = os.path.join(Config.opt_dir, 'opa')
         self.opa_bin_dir = os.path.join(self.opa_dir, 'bin')
 
     def install(self):
-
         if Config.get('install_jans_lock_as_server'):
             self.install_as_server()
             self.systemd_units.append('jans-lock')
@@ -53,7 +53,7 @@ class JansLockInstaller(JettyInstaller):
         if Config.get('install_opa'):
             self.install_opa()
 
-        if Config.rdbm_type == 'pgsql':
+        if Config.persistence_type == 'sql' and Config.rdbm_type == 'pgsql':
             self.dbUtils.set_oxAuthConfDynamic({'lockMessageConfig': {'enableIdTokenMessages': True, 'idTokenMessagesChannel': 'id_token'}})
             Config.lock_message_provider_type = 'POSTGRES'
 
@@ -73,7 +73,6 @@ class JansLockInstaller(JettyInstaller):
 
 
     def render_import_templates(self):
-
         for tmp in (self.dynamic_conf_json, self.error_json, self.static_conf_json):
             self.renderTemplateInOut(tmp, self.template_dir, self.output_dir)
 
