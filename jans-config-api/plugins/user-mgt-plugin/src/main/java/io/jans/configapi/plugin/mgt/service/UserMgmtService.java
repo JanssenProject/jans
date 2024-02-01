@@ -1,6 +1,8 @@
 package io.jans.configapi.plugin.mgt.service;
 
 import com.github.fge.jsonpatch.JsonPatchException;
+
+import io.jans.model.GluuStatus;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.core.service.ConfigUserService;
@@ -11,6 +13,7 @@ import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.service.auth.ConfigurationService;
+import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
@@ -89,9 +92,14 @@ public class UserMgmtService {
             searchFilter = Filter.createORFilter(filters);
         }
         logger.info("Users searchFilter:{}", searchFilter);
-        return persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(), User.class, searchFilter, null,
+        PagedResult<User>  pagedResult = persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(), User.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
+        
+        //remove inactive claims
+        List<User> users = this.verifyCustomAttributes(pagedResult.getEntries());
+        pagedResult.setEntries(users);
+        return pagedResult;
 
     }
 
@@ -131,6 +139,15 @@ public class UserMgmtService {
         // persist user
         ignoreCustomObjectClassesForNonLDAP(user);
         user = userService.updateUser(user);
+        
+        //remove inactive claims
+        if(user!=null) {
+            List<User> users = new ArrayList<>();
+            users.add(user);
+            users = this.verifyCustomAttributes(users);
+            user = users.get(0);
+        }
+        
         logger.info("User after patch user:{}", user);
         return user;
 
@@ -140,6 +157,15 @@ public class UserMgmtService {
         User result = null;
         try {
             result = userService.getUserByInum(inum);
+            
+            //remove inactive claims
+            if(result!=null) {
+                List<User> users = new ArrayList<>();
+                users.add(result);
+                users = this.verifyCustomAttributes(users);
+                result = users.get(0);
+            }
+
         } catch (Exception ex) {
             logger.error("Failed to load user entry", ex);
         }
@@ -333,12 +359,13 @@ public class UserMgmtService {
     }
 
     public boolean isLDAP() {
+        boolean isLDAP = false;
         String persistenceType = getPersistenceType();
         logger.debug("persistenceType: {}", persistenceType);
         if (PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)) {
-            return true;
+            isLDAP = true;
         }
-        return false;
+        return isLDAP;
     }
 
     public String getPersistenceType() {
@@ -346,10 +373,74 @@ public class UserMgmtService {
     }
 
     public User addUser(User user, boolean active) {
-        return userService.addUser(user, active);
+        user = userService.addUser(user, active);
+        //remove inactive claims
+        if(user!=null) {
+            List<User> users = new ArrayList<>();
+            users.add(user);
+            users = this.verifyCustomAttributes(users);
+            user = users.get(0);
+        }
+        return user;
     }
 
     public User updateUser(User user) {
-        return userService.updateUser(user);
+        user = userService.updateUser(user);
+        //remove inactive claims
+        if(user!=null) {
+            List<User> users = new ArrayList<>();
+            users.add(user);
+            users = this.verifyCustomAttributes(users);
+            user = users.get(0);
+        }
+        return user;
+    }
+    
+    public List<User> verifyCustomAttributes(List<User> users) {
+        logger.info("Verify CustomAttributes for users: {}", users);
+        if (users == null || users.isEmpty()) {
+            return users;
+        }
+        for (User user : users) {
+            List<CustomObjectAttribute> customAttributes = user.getCustomAttributes();
+            logger.debug("customAttributes: {}", customAttributes);
+            // remove inactive attributes
+            removeInActiveCustomAttribute(customAttributes);         
+        }
+        return users;
+    }
+
+    public List<CustomObjectAttribute> removeInActiveCustomAttribute(List<CustomObjectAttribute> customAttributes) {
+        logger.info("User customAttributes: {}", customAttributes);
+        if (customAttributes == null || customAttributes.isEmpty()) {
+            return customAttributes;
+        }
+        
+        //remove attribute that are not active
+        for (Iterator<CustomObjectAttribute> it = customAttributes.iterator(); it.hasNext();) {
+            String attributeName = it.next().getName();
+            logger.debug("Verify status of attributeName: {}", attributeName);
+            List<JansAttribute> attList = findAttributeByName(attributeName);
+            logger.debug("attributeName:{} data is attList: {}", attributeName, attList);
+       
+            if (attList!=null && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {
+                logger.info("Removing attribute as it is not active attributeName: {} , status:{}", attributeName, attList.get(0).getStatus().getValue());
+                it.remove();
+            }
+        }
+        return customAttributes;
+    }
+
+    public List<JansAttribute> findAttributeByName(String name) {
+        return persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
+                Filter.createEqualityFilter(AttributeConstants.JANS_ATTR_NAME, name));
+    }
+
+    private String getDnForAttribute(String inum) {
+        String attributesDn = staticConfiguration.getBaseDn().getAttributes();
+        if (StringHelper.isEmpty(inum)) {
+            return attributesDn;
+        }
+        return String.format("inum=%s,%s", inum, attributesDn);
     }
 }
