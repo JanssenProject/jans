@@ -24,6 +24,7 @@ from ldap3.utils import dn as dnutils
 
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
+from jans.pycloudlib.utils import get_password_from_file
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -52,9 +53,8 @@ def get_sql_password(manager: Manager) -> str:
     password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
 
     if os.path.isfile(password_file):
-        with open(password_file) as f:
-            password = f.read().strip()
-            manager.secret.set(secret_name, password)
+        password = get_password_from_file(password_file)
+        manager.secret.set(secret_name, password)
     else:
         # get from secrets (if any)
         password = manager.secret.get(secret_name)

@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.8
+FROM bellsoft/liberica-openjre-alpine:17.0.8@sha256:156b75d18d01f1a83f9a279e80dad82773c212559b20e40620ccb06b1120ce4f
 
 # ===============
 # Alpine packages
@@ -40,8 +40,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Config API
 # ==========
 
-ENV CN_VERSION=1.0.21-SNAPSHOT
-ENV CN_BUILD_DATE='2023-10-14 09:54'
+ENV CN_VERSION=1.0.22
+ENV CN_BUILD_DATE='2024-01-22 12:56'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -67,31 +67,17 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 # Plugins
 # =======
 
-RUN mkdir -p /usr/share/java \
-    ${JETTY_BASE}/jans-config-api/_plugins
-
-ENV SCIM_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
-ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
-ENV ADMIN_UI_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
-ENV ADMIN_UI_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
-ENV FIDO2_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
-ENV FIDO2_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/fido2-plugin/${CN_VERSION}/fido2-plugin-${CN_VERSION}-distribution.jar
-ENV USER_MGT_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
-ENV USER_MGT_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/${CN_VERSION}/user-mgt-plugin-${CN_VERSION}-distribution.jar
-ENV JANS_LINK_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
-ENV JANS_LINK_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/jans-link-plugin/${CN_VERSION}/jans-link-plugin-${CN_VERSION}-distribution.jar
-
-RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/scim-plugin.jar \
-    && wget -q ${ADMIN_UI_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/admin-ui-plugin.jar \
-    && wget -q ${FIDO2_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/fido2-plugin.jar \
-    && wget -q ${USER_MGT_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/user-mgt-plugin.jar \
-    && wget -q ${JANS_LINK_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/jans-link-plugin.jar
+RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
+    && for plugin in scim admin-ui fido2 user-mgt jans-link kc-saml; \
+    do \
+        wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
+    done
 
 # =====================
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=a3026d7957a1aaefa30269904744975352ae4642
+ENV JANS_SOURCE_VERSION=e6d8566897fab9598897b6a7e02670ea1d794c78
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -107,7 +93,9 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
 RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
     /app/schema \
-    /app/templates/jans-config-api
+    /app/templates/jans-config-api \
+    /usr/share/java \
+    /opt/jans/bin
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
@@ -120,6 +108,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/dynamic-conf.json /app/templates/jans-config-api/ \
+    && cp ${JANS_SETUP_DIR}/setup_app/utils/printVersion.py /opt/jans/bin/printVersion.py \
+    && ln -s /opt/jans/bin/printVersion.py /opt/jans/bin/show_version.py \
     && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/templates/jans-config-api/
 
 # ======
@@ -229,7 +219,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_CONFIG_API_CREATE_SCOPES=true \
     CN_CONFIG_API_JETTY_PORT=8074 \
-    CN_CONFIG_API_JETTY_HOST=0.0.0.0
+    CN_CONFIG_API_JETTY_HOST=0.0.0.0 \
+    CN_JETTY_ARGS=""
 
 # ==========
 # misc stuff
@@ -240,7 +231,7 @@ EXPOSE $CN_CONFIG_API_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.version="1.0.22" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 
@@ -251,7 +242,8 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/spanner \
     ${JETTY_BASE}/common/libs/couchbase \
     ${JETTY_HOME}/temp \
-    /usr/share/java
+    /usr/share/java \
+    /var/log/adminui
 
 RUN touch /etc/hosts.back
 COPY templates /app/templates/
@@ -263,6 +255,8 @@ RUN chmod +x /app/scripts/entrypoint.sh
 RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans-config-api/dynamic-conf.json
 
 RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
+
+RUN sed -i 's/\${sys:log.base}\/logs/\/var\/log\/adminui/g' /app/templates/jans-config-api/log4j2-adminui.xml
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
 
@@ -283,7 +277,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chown -R 1000:0 /opt/prometheus \
     && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/_plugins \
     && chown 1000:0 ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.xml \
-    && chown -R 1000:0 ${JETTY_HOME}/temp
+    && chown -R 1000:0 ${JETTY_HOME}/temp \
+    && chown -R 1000:0 /var/log/adminui
 
 USER 1000
 

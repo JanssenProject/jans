@@ -72,6 +72,20 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         self.couchbaseSSL()
 
+        cbm_ready = False
+        for i in range(10):
+            time.sleep(3)
+            self.logIt("Checking if couchbase server is ready Try %d ..." % (i+1))
+            isready = self.dbUtils.cbm.check_readiness()
+            if isready:
+                self.logIt("Couchbase server is ready")
+                cbm_ready = True
+                break
+
+        if not cbm_ready:
+            print("Couchbase server was not ready in 60 seconds. Giving up")    
+            sys.exit(1)
+
         self.create_couchbase_buckets()
 
         Config.pbar.progress(self.service_name, "Importing documents into Couchbase", incr=False)

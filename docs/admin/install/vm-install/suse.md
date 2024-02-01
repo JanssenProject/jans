@@ -15,7 +15,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 ## Supported versions
 
 - SUSE Linux Enterprise Server (SLES) 15
-- openSUSE Leap 15.4
+- openSUSE Leap 15.5
 
 ## Install the Package
 
@@ -23,16 +23,16 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 needed for OpenID and FIDO.
 
 ```shell
-firewall-cmd --permanent --zone=public --add-service=https
+sudo firewall-cmd --permanent --zone=public --add-service=https
 ```
 
 ```shell
-firewall-cmd --reload
+sudo firewall-cmd --reload
 ```
 
 - for SLES, we need to enable PackageHub as per OSversion and architecture
 ```
-sudo SUSEConnect -p PackageHub/15.4/x86_64
+sudo SUSEConnect -p PackageHub/15.5/x86_64
 
 ```
 - Download the GPG key zip file , unzip and import GPG key

@@ -41,7 +41,7 @@ spec:
         env:
           {{- include "persistence.usr-envs" . | indent 12 }}
           {{- include "persistence.usr-secret-envs" . | indent 12 }}
-        {{- if .Values.global.istio.enabled }}
+        {{- if or ( .Values.global.istio.enabled ) ( .Values.customScripts )}}
         command:
           - tini
           - -g
@@ -49,8 +49,13 @@ spec:
           - /bin/sh
           - -c
           - |
+            {{- with .Values.customScripts }}
+            {{- toYaml . | replace "- " "" | nindent 12}}
+            {{- end }}
             /app/scripts/entrypoint.sh
+            {{- if .Values.global.istio.enabled }}
             curl -X POST http://localhost:15020/quitquitquit
+            {{- end }}
         {{- end }}
         envFrom:
         - configMapRef:

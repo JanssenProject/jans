@@ -2,19 +2,21 @@
 # Assets sources
 # ==============
 
+# original Janssen base version (without suffix)
+ARG BASE_VERSION=1.0.22
+
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
-ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:1.0.21_dev
-ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:1.0.21_dev
-ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:1.0.21_dev
-ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:1.0.21_dev
-ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:1.0.21_dev
-ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:1.0.21_dev
-ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:1.0.21_dev
-ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:1.0.21_dev
-
-# original Janssen version
-ARG CN_VERSION=1.0.21-SNAPSHOT
+ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:${BASE_VERSION}_dev
+ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:${BASE_VERSION}_dev
+ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:${BASE_VERSION}_dev
+ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${BASE_VERSION}_dev
+ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${BASE_VERSION}_dev
+ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${BASE_VERSION}_dev
+ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${BASE_VERSION}_dev
+ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${BASE_VERSION}_dev
+ARG JANS_KEYCLOAK_LINK_IMAGE=ghcr.io/janssenproject/jans/keycloak-link:${BASE_VERSION}_dev
+ARG JANS_SAML_IMAGE=ghcr.io/janssenproject/jans/saml:${BASE_VERSION}_dev
 
 # -----------
 # base images
@@ -36,11 +38,15 @@ FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 
 FROM ${JANS_LINK_IMAGE} AS jans-link-src
 
+FROM ${JANS_KEYCLOAK_LINK_IMAGE} AS jans-keycloak-link-src
+
+FROM ${JANS_SAML_IMAGE} AS jans-saml-src
+
 # ===
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.8
+FROM bellsoft/liberica-openjdk-alpine:17.0.8@sha256:e82fb905ca6efffcdb1b0ed58f207b0ce91aeada78c218ae7dbb16bb31635728
 
 # hadolint ignore=DL3018
 RUN apk update \
@@ -102,6 +108,8 @@ COPY --from=jans-config-api-src /opt/jans/jetty/jans-config-api /opt/jans/jetty/
 COPY --from=jans-config-api-src /app/templates/jans-config-api /app/templates/jans-config-api
 COPY --from=jans-config-api-src /usr/bin/facter /usr/local/bin/facter
 COPY --from=jans-config-api-src /app/scripts /app/jans_aio/jans_config_api
+COPY --from=jans-config-api-src /var/log/adminui /var/log/adminui
+COPY --from=jans-config-api-src /opt/jans/bin /opt/jans/bin
 RUN ln -sf /app/jans_aio/jans_config_api/entrypoint.sh /app/bin/jans-config-api-entrypoint.sh
 
 COPY --from=jans-fido2-src /opt/jans/jetty/jans-fido2 /opt/jans/jetty/jans-fido2
@@ -126,6 +134,18 @@ COPY --from=jans-link-src /app/templates/jans-link /app/templates/jans-link
 COPY --from=jans-link-src /app/scripts /app/jans_aio/jans_link
 RUN ln -sf /app/jans_aio/jans_link/entrypoint.sh /app/bin/jans-link-entrypoint.sh
 
+COPY --from=jans-keycloak-link-src /opt/jans/jetty/jans-keycloak-link /opt/jans/jetty/jans-keycloak-link
+COPY --from=jans-keycloak-link-src /app/templates/jans-keycloak-link /app/templates/jans-keycloak-link
+COPY --from=jans-keycloak-link-src /app/scripts /app/jans_aio/jans_keycloak_link
+COPY --from=jans-keycloak-link-src /var/jans/cr-snapshots /var/jans/cr-snapshots
+RUN ln -sf /app/jans_aio/jans_keycloak_link/entrypoint.sh /app/bin/jans-keycloak-link-entrypoint.sh
+
+COPY --from=jans-saml-src /app/templates/jans-saml /app/templates/jans-saml
+COPY --from=jans-saml-src /app/scripts /app/jans_aio/jans_saml
+COPY --from=jans-saml-src /opt/idp /opt/idp
+COPY --from=jans-saml-src /opt/keycloak /opt/keycloak
+RUN ln -sf /app/jans_aio/jans_saml/entrypoint.sh /app/bin/jans-saml-entrypoint.sh
+
 # ----
 # misc
 # ----
@@ -140,12 +160,15 @@ RUN mkdir -p /opt/jans/configurator/db \
 
 COPY app /app
 
+# CN version as env var (with suffix if any, i.e. SNAPSHOT)
+ENV CN_VERSION=1.0.22
+
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app
 
 ENV JETTY_BASE=/opt/jans/jetty \
     JETTY_HOME=/opt/jetty \
-    CN_AIO_COMPONENTS="" \
+    CN_AIO_COMPONENTS="configurator,persistence-loader,jans-auth,jans-config-api,jans-fido2,jans-scim,jans-casa" \
     CN_AIO_ENABLE_MONITOR=false \
     CN_ENABLE_STDOUT_LOG_PREFIX=true \
     CN_DUO_ENABLED=false \
@@ -154,6 +177,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_FIDO2_JAVA_OPTIONS="" \
     CN_SCIM_JAVA_OPTIONS=""  \
     CN_JETTY_REQUEST_HEADER_SIZE=8192 \
+    CN_JETTY_IDLE_TIMEOUT=30000 \
     CN_CONFIG_API_CREATE_SCOPES=true \
     CN_AUTH_JETTY_HOST=127.0.0.1 \
     CN_AUTH_JETTY_PORT=8081 \
@@ -176,12 +200,32 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
     CN_COUCHBASE_SUPERUSER_PASSWORD_FILE=/etc/jans/conf/couchbase_superuser_password \
     CN_LDAP_PASSWORD_FILE=/etc/jans/conf/ldap_password \
-    CN_LDAP_TRUSTSTORE_PASSWORD_FILE=/etc/jans/conf/ldap_truststore_password
+    CN_LDAP_TRUSTSTORE_PASSWORD_FILE=/etc/jans/conf/ldap_truststore_password \
+    CN_KEYCLOAK_LINK_JETTY_HOST=127.0.0.1 \
+    CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
+    CN_KEYCLOAK_LINK_JAVA_OPTIONS="" \
+    CN_SAML_HTTP_HOST=127.0.0.1 \
+    CN_SAML_HTTP_PORT=8083 \
+    CN_SAML_JAVA_OPTIONS="" \
+    CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
+    CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
+    KC_HEALTH_ENABLED=true \
+    KC_METRICS_ENABLED=true \
+    KC_LOG_LEVEL=INFO \
+    KC_PROXY=edge \
+    KC_DB=mysql \
+    KC_DB_USERNAME=keycloak \
+    KC_DB_SCHEMA=keycloak \
+    KC_DB_URL_HOST=localhost \
+    KC_DB_URL_PORT=3306 \
+    KC_DB_URL_DATABASE=keycloak \
+    KC_DB_URL_PROPERTIES=?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4 \
+    QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=false
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.version="1.0.22" \
     org.opencontainers.image.title="Janssen All-in-One" \
     org.opencontainers.image.description=""
 
@@ -222,6 +266,8 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-casa/logs \
     ${JETTY_BASE}/jans-link/resources \
     ${JETTY_BASE}/jans-link/logs \
+    ${JETTY_BASE}/jans-keycloak-link/resources \
+    ${JETTY_BASE}/jans-keycloak-link/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
@@ -230,8 +276,13 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     /app \
     /var/lib/nginx \
     /var/log/nginx \
+    /var/log/adminui \
     /etc/nginx/jans-aio \
-    /usr/share/java
+    /usr/share/java \
+    /var/jans/cr-snapshots \
+    /opt/idp \
+    /opt/keycloak/logs \
+    /opt/keycloak/conf
 
 RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \
@@ -254,6 +305,8 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/jans-casa/logs \
     ${JETTY_BASE}/jans-link/resources \
     ${JETTY_BASE}/jans-link/logs \
+    ${JETTY_BASE}/jans-keycloak-link/resources \
+    ${JETTY_BASE}/jans-keycloak-link/logs \
     /etc/certs \
     /etc/jans \
     /opt/jans/python/libs \
@@ -262,8 +315,13 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     /app \
     /var/lib/nginx \
     /var/log/nginx \
+    /var/log/adminui \
     /etc/nginx/jans-aio \
-    /usr/share/java
+    /usr/share/java \
+    /var/jans/cr-snapshots \
+    /opt/idp \
+    /opt/keycloak/logs \
+    /opt/keycloak/conf
 
 RUN chown 1000:1000 /opt/java/lib/security/cacerts \
     /run/nginx/nginx.pid \

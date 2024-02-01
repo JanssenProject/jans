@@ -8,6 +8,7 @@ package io.jans.as.model.error;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.jans.model.error.ErrorMessage;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;

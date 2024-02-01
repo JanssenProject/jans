@@ -1,0 +1,11 @@
+Flow io.jans.agama.test.ot.flow2
+    Basepath "ot" 
+
+obj = Trigger io.jans.agama.test.ot.flow1
+    Override templates "ot/page.ftl" "cust/mypage.ftlh"
+
+When obj.data.flavor is null
+    Finish false
+
+// if the template override worked as expected, execution should reach this point
+Finish true

@@ -11,7 +11,6 @@ import ssl
 import json
 import re
 import json
-import tempfile
 
 from urllib import request
 from urllib.parse import urljoin, urlparse
@@ -224,6 +223,9 @@ def uninstall_jans():
     if os.path.exists('/opt/opendj/bin/stop-ds'):
         service_list.append('opendj')
 
+    if os.path.exists('/opt/opa'):
+        service_list.append('opa')
+
     for service in service_list:
 
         print("Stopping", service)
@@ -237,12 +239,13 @@ def uninstall_jans():
 
         unit_fn = os.path.join('/etc/systemd/system', service + '.service')
         if os.path.exists(unit_fn):
+            print("Removing", unit_fn)
             os.remove(unit_fn)
 
     os.system('systemctl daemon-reload')
     os.system('systemctl reset-failed')
 
-    remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*', '/opt/keycloak', '/opt/idp']
+    remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*', '/opt/keycloak', '/opt/idp', '/opt/opa']
     if argsp.profile == 'jans':
         remove_list.append('/opt/opendj')
     if not argsp.keep_downloads:

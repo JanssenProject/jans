@@ -54,6 +54,19 @@ def download_pyjwt():
         base.download(base.current_app.app_info['PYJWT'], pyjwt_dir_zip_file, verbose=True)
         base.extract_subdir(pyjwt_dir_zip_file, 'jwt', pyjwt_dir)
 
+
+def download_pymysql():
+    pylib_dir = os.path.join(base.pylib_dir, 'pymysql')
+
+    if os.path.exists(pylib_dir) and not base.argsp.force_download:
+        return
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        pylib_dir_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['PYMYSQL']))
+        base.download(base.current_app.app_info['PYMYSQL'], pylib_dir_zip_file, verbose=True)
+        base.extract_subdir(pylib_dir_zip_file, 'pymysql', pylib_dir)
+
+
 def download_all():
     download_files = []
     modules = glob.glob(os.path.join(base.ces_dir, 'installers/*.py'))
@@ -79,3 +92,4 @@ def download_apps():
     download_sqlalchemy()
     download_cryptography()
     download_pyjwt()
+    download_pymysql()

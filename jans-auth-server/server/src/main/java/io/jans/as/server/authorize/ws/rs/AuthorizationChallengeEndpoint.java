@@ -43,6 +43,7 @@ public class AuthorizationChallengeEndpoint {
             @FormParam("nonce") String nonce,
             @FormParam("code_challenge") String codeChallenge,
             @FormParam("code_challenge_method") String codeChallengeMethod,
+            @FormParam("authorization_details") String authorizationDetails,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse) {
 
@@ -61,6 +62,7 @@ public class AuthorizationChallengeEndpoint {
         authzRequest.setHttpResponse(httpResponse);
         authzRequest.setCodeChallenge(codeChallenge);
         authzRequest.setCodeChallengeMethod(codeChallengeMethod);
+        authzRequest.setAuthzDetailsString(authorizationDetails);
 
         return authorizationChallengeService.requestAuthorization(authzRequest);
     }

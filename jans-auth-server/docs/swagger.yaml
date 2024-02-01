@@ -11,6 +11,7 @@ info:
   license:
     name: License
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: "OAS Version"
 servers:
   - url: https://jans.local.io/jans-auth
 tags:
@@ -261,6 +262,12 @@ paths:
           description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
           schema:
             type: string
+        - name: authorization_details
+          in: query
+          required: false
+          description: The request parameter authorization_details contains, in JSON notation, an array of objects. Each JSON object contains the data to specify the authorization requirements for a certain type of resource. The type of resource or access requirement is determined by the type field.
+          schema:
+            type: string
       responses:
         200:
           description: OK
@@ -290,6 +297,7 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required
@@ -405,6 +413,9 @@ paths:
                 dpop_jkt:
                   type: string
                   description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
+                authorization_details:
+                  type: string
+                  description: The request parameter authorization_details contains, in JSON notation, an array of objects. Each JSON object contains the data to specify the authorization requirements for a certain type of resource. The type of resource or access requirement is determined by the type field.
 
       responses:
         200:
@@ -435,6 +446,7 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required
@@ -922,7 +934,6 @@ paths:
                 title: GluuConfigurationResponse
                 description: Client GluuAttribute by Dn(Distinguished Name) based on Authorization Scope.
                 required:
-                  - id_generation_endpoint
                   - introspection_endpoint
                 type: object
                 properties:
@@ -940,6 +951,11 @@ paths:
                     additionalProperties:
                       type: string
                       description: Scope map object
+                  authorization_details_types_supported:
+                    type: array
+                    description: Array of string. Each string represents supported type of authorization details.
+                    items:
+                      type: string
         500:
           $ref: '#/components/responses/InternalServerError'
   /introspection:
@@ -1059,6 +1075,7 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required
@@ -1185,6 +1202,7 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required
@@ -1321,6 +1339,11 @@ paths:
                 client_name:
                   type: string
                   description: Name of the Client to be presented to the user.
+                authorization_details_types:
+                  type: array
+                  description: authorization details types (RFC9396). Fine-graned access.
+                  items:
+                    type: string
                 logo_uri:
                   type: string
                   description: URL that references a logo for the Client application
@@ -1390,6 +1413,15 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                tx_token_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
+                tx_token_encrypted_response_alg:
+                  type: string
+                  description: JWE alg algorithm (JWA) required for encrypting Transaction Token Responses.
+                tx_token_encrypted_response_enc:
+                  type: string
+                  description: JWE enc algorithm (JWA) required for encrypting Transaction Token Responses.
                 request_object_signing_alg:
                   type: string
                   description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
@@ -1521,8 +1553,16 @@ paths:
                     type: string
                 access_token_lifetime:
                   type: integer
-                  description: Specifies the Client-specific access token expiration.
-                  example: 100000000
+                  description: Specifies the Client-specific access token expiration in seconds.
+                  example: 600
+                id_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific id_token expiration in seconds.
+                  example: 600
+                tx_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific tx_token expiration in seconds.
+                  example: 600
                 par_lifetime:
                   type: integer
                   description: Specifies the Client-specific PAR expiration in seconds.
@@ -1741,6 +1781,11 @@ paths:
                   description: e-mail addresses of people responsible for this Client.
                   items:
                     type: string
+                authorization_details_types:
+                  type: array
+                  description: authorization details types (RFC9396). Fine-graned access.
+                  items:
+                    type: string
                 client_name:
                   type: string
                   description: Name of the Client to be presented to the user.
@@ -1813,6 +1858,15 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                tx_token_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
+                tx_token_encrypted_response_alg:
+                  type: string
+                  description: JWE alg algorithm (JWA) required for encrypting Transaction Token Responses.
+                tx_token_encrypted_response_enc:
+                  type: string
+                  description: JWE enc algorithm (JWA) required for encrypting Transaction Token Responses.
                 request_object_signing_alg:
                   type: string
                   description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
@@ -1944,8 +1998,16 @@ paths:
                     type: string
                 access_token_lifetime:
                   type: integer
-                  description: Specifies the Client-specific access token expiration.
-                  example: 100000000
+                  description: Specifies the Client-specific access token expiration in seconds.
+                  example: 600
+                id_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific id_token expiration in seconds.
+                  example: 600
+                tx_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific tx_token expiration in seconds.
+                  example: 600
                 par_lifetime:
                   type: integer
                   description: Specifies the Client-specific PAR expiration in seconds.
@@ -2137,6 +2199,11 @@ paths:
                     description: e-mail addresses of people responsible for this Client.
                     items:
                       type: string
+                  authorization_details_types:
+                    type: array
+                    description: authorization details types (RFC9396). Fine-graned access.
+                    items:
+                      type: string
                   client_name:
                     type: string
                     description: Name of the Client to be presented to the user.
@@ -2216,6 +2283,15 @@ paths:
                   introspection_encrypted_response_enc:
                     type: string
                     description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                  tx_token_signed_response_alg:
+                    type: string
+                    description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
+                  tx_token_encrypted_response_alg:
+                    type: string
+                    description: JWE alg algorithm (JWA) required for encrypting Transaction Token Responses.
+                  tx_token_encrypted_response_enc:
+                    type: string
+                    description: JWE enc algorithm (JWA) required for encrypting Transaction Token Responses.
                   request_object_signing_alg:
                     type: string
                     description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
@@ -2348,7 +2424,15 @@ paths:
                   access_token_lifetime:
                     type: integer
                     description: Specifies the Client-specific access token expiration.
-                    example: 100000000
+                    example: 100
+                  id_token_lifetime:
+                    type: integer
+                    description: Specifies the Client-specific id_token expiration in seconds.
+                    example: 600
+                  tx_token_lifetime:
+                    type: integer
+                    description: Specifies the Client-specific tx_token expiration in seconds.
+                    example: 600
                   par_lifetime:
                     type: integer
                     description: Specifies the Client-specific PAR expiration in seconds.
@@ -4214,7 +4298,7 @@ paths:
                   default: true
                 lifetime:
                   type: integer
-                  description: SSA lifetime in milliseconds.
+                  description: SSA lifetime in seconds.
                   example: 86400
       responses:
         201:

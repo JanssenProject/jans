@@ -353,6 +353,7 @@ class KeyRegenerator:
 
             ox_auth_conf_dynamic = json.loads(result[self.conf_dyn])
             self.key_store_secret = ox_auth_conf_dynamic[self.conf_keystore_secret]
+            self.keystore_fn = ox_auth_conf_dynamic['keyStoreFile']
             self.get_sig_enc_algs(json.loads(result[self.conf_web_keys]))
             self.revision = int(result[self.conf_rev])
 

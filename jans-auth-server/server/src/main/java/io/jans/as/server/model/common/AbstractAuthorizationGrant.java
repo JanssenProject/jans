@@ -6,6 +6,7 @@
 
 package io.jans.as.server.model.common;
 
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.TokenType;
@@ -13,11 +14,11 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
-import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.service.KeyGeneratorTimer;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.util.TokenHashUtil;
+import io.jans.model.token.TokenEntity;
 import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -55,6 +56,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private AuthorizationGrantType authorizationGrantType;
     private Client client;
     private Set<String> scopes;
+    private AuthzDetails authzDetails;
 
     private String grantId;
     private JwtAuthorizationRequest jwtAuthorizationRequest;
@@ -74,6 +76,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private String acrValues;
     private String sessionDn;
 
+    protected final ConcurrentMap<String, TxToken> txTokens = new ConcurrentHashMap<>();
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<>();
     protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<>();
 
@@ -211,6 +214,14 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     @Override
     public List<AccessToken> getAccessTokens() {
         return new ArrayList<>(accessTokens.values());
+    }
+
+    public List<TxToken> getTxTokens() {
+        return new ArrayList<>(txTokens.values());
+    }
+
+    public TxToken getTxToken(String txTokenCode) {
+        return txTokens.get(txTokenCode);
     }
 
     @Override
@@ -440,6 +451,18 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         return scopes;
     }
 
+    public String getAuthzDetailsAsString() {
+        return authzDetails != null ? authzDetails.asJsonArray().toString() : null;
+    }
+
+    public AuthzDetails getAuthzDetails() {
+        return authzDetails;
+    }
+
+    public void setAuthzDetails(AuthzDetails authzDetails) {
+        this.authzDetails = authzDetails;
+    }
+
     @Override
     public JwtAuthorizationRequest getJwtAuthorizationRequest() {
         return jwtAuthorizationRequest;
@@ -453,6 +476,11 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     @Override
     public void setAccessTokens(List<AccessToken> accessTokens) {
         put(this.accessTokens, accessTokens);
+    }
+
+    @Override
+    public void setTxTokens(List<TxToken> txTokens) {
+        put(this.txTokens, txTokens);
     }
 
     private static <T extends AbstractToken> void put(ConcurrentMap<String, T> map, List<T> list) {
@@ -515,6 +543,11 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
             return longLivedAccessToken;
         }
 
+        final TxToken txToken = txTokens.get(hashedTokenCode);
+        if (txToken != null) {
+            return txToken;
+        }
+
         return accessTokens.get(hashedTokenCode);
     }
 
@@ -525,6 +558,6 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
                 + '\'' + ", sessionDn='" + sessionDn + '\'' + ", codeChallenge='" + codeChallenge + '\''
                 + ", codeChallengeMethod='" + codeChallengeMethod + '\'' + ", authenticationTime=" + authenticationTime
                 + ", scopes=" + scopes + ", authorizationGrantType=" + authorizationGrantType + ", tokenBindingHash=" + tokenBindingHash
-                + ", x5ts256=" + x5ts256 + ", claims=" + claims + '}';
+                + ", x5ts256=" + x5ts256 + ", claims=" + claims + ", authzDetails=" + authzDetails + '}';
     }
 }

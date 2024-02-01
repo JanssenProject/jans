@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>casa-base</artifactId>
-        <version>1.0.21-SNAPSHOT</version>
+        <version>1.0.22</version>
     </parent>
 
     <dependencies>
@@ -94,7 +94,7 @@
             <groupId>io.jans</groupId>
             <artifactId>jans-core-document-store</artifactId>
             <version>${project.version}</version>
-            <exclusions>           
+            <exclusions>
                 <exclusion>
                     <groupId>org.apache.jackrabbit</groupId>
                     <artifactId>*</artifactId>

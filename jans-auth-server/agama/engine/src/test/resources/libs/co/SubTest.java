@@ -7,7 +7,7 @@ public class SubTest extends Test {
     public SubTest() {}
 
     public SubTest(String id, String name) {
-        this.id = id;
+        setId(id);
         this.name = name;
     }
 

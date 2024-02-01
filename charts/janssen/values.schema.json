@@ -44,7 +44,7 @@
             "cnSqlDbDialect": {
               "description": "SQL dialect",
               "type": "string",
-              "pattern": "^(mysql)$"
+              "pattern": "^(mysql|pgsql|ldap)$"
             },
             "cnSqlDbHost": {
               "description": "SQL server address or ip",
@@ -822,6 +822,30 @@
             }
           }
         },
+        "saml": {
+          "type": "object",
+          "properties": {
+            "samlServiceName": {
+              "description": "Name of the saml service. Please keep it as default.",
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$"
+            },
+            "enabled": {
+              "description": "Boolean flag to enable/disable the saml chart.",
+              "type": "boolean"
+            },
+            "ingress":{
+              "description":"Endpoint control",
+              "type":"object",
+              "properties": {
+                "samlEnabled":{
+                  "description":" Enable SAML endpoints /kc",
+                  "type":"boolean"
+                }
+              }
+            }
+          }
+        },
         "cnSqlPasswordFile": {
           "description": "The location of file contains password for the SQL user config.configmap.cnSqlDbUser. The file path must end with sql_password.",
           "type": "string",
@@ -888,6 +912,12 @@
       "description": "System for Cross-domain Identity Management (SCIM) version 2.0",
       "type": "object",
       "properties": {}
+    },
+    "saml": {
+      "description": "Jans SAML"
+      ,
+      "type": "object",
+      "properties": {}
     }
   },
   "allOf": [
@@ -917,6 +947,9 @@
     },
     {
       "$ref": "#/definitions/scim-enabled"
+    },
+    {
+      "$ref": "#/definitions/saml-enabled"
     }
   ],
   "definitions": {
@@ -2265,6 +2298,157 @@
                 "properties": {
                   "scimServiceName": {
                     "description": "Name of the SCIM service. Please keep it as default.",
+                    "type": "string",
+                    "pattern": "^[a-z0-9-]+$"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "else": true
+    },
+    "saml-enabled": {
+      "if": {
+        "properties": {
+          "global": {
+            "properties": {
+              "saml": {
+                "properties": {
+                  "enabled": {
+                    "const": "true"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "saml": {
+            "required": [
+              "image",
+              "replicas",
+              "resources",
+              "service"
+            ],
+            "type": "object",
+            "properties": {
+              "hpa": {
+                "description": "Configure the HorizontalPodAutoscaler",
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "minReplicas": {
+                    "type": "integer"
+                  },
+                  "maxReplicas": {
+                    "type": "integer"
+                  },
+                  "targetCPUUtilizationPercentage": {
+                    "type": "integer"
+                  },
+                  "metrics": {
+                    "description": "metrics if targetCPUUtilizationPercentage is not set",
+                    "type": "array"
+                  },
+                  "behavior": {
+                    "description": "Scaling Policies",
+                    "type": "object"
+                  }
+                }
+              },
+              "usrEnvs": {
+                "description": "Add custom normal and secret envs to the service",
+                "type": "object",
+                "properties": {
+                  "normal": {
+                    "description": "Add custom normal envs to the service",
+                    "type": "object"
+                  },
+                  "secret": {
+                    "description": "Add custom secret envs to the service",
+                    "type": "object"
+                  }
+                }
+              },
+              "dnsPolicy": {
+                "description": "Add custom dns policy",
+                "type": "string",
+                "pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+              },
+              "dnsConfig": {
+                "description": "Add custom dns config",
+                "type": "object"
+              },
+              "image": {
+                "type": "object",
+                "properties": {
+                  "pullPolicy": {
+                    "description": "Image pullPolicy to use for deploying.",
+                    "type": "string",
+                    "pattern": "^(Always|Never|IfNotPresent)$"
+                  },
+                  "repository": {
+                    "description": "Image  to use for deploying",
+                    "type": "string"
+                  },
+                  "tag": {
+                    "description": "Image  tag to use for deploying.",
+                    "type": "string",
+                    "pattern": "^[a-z0-9-_.]+$"
+                  }
+                }
+              },
+              "replicas": {
+                "description": "Service replica number.",
+                "type": "integer"
+              },
+              "resources": {
+                "description": "Resource specs.",
+                "type": "object",
+                "properties": {
+                  "limits": {
+                    "type": "object",
+                    "properties": {
+                      "cpu": {
+                        "description": "CPU limit.",
+                        "type": "string",
+                        "pattern": "^[0-9m]+$"
+                      },
+                      "memory": {
+                        "description": "Memory limit.",
+                        "type": "string",
+                        "pattern": "^[0-9Mi]+$"
+                      }
+                    }
+                  },
+                  "requests": {
+                    "type": "object",
+                    "properties": {
+                      "cpu": {
+                        "description": "CPU request.",
+                        "type": "string",
+                        "pattern": "^[0-9m]+$"
+                      },
+                      "memory": {
+                        "description": "Memory request.",
+                        "type": "string",
+                        "pattern": "^[0-9Mi]+$"
+                      }
+                    }
+                  }
+                }
+              },
+              "service": {
+                "type": "object",
+                "properties": {
+                  "scimServiceName": {
+                    "description": "Name of the SAML service. Please keep it as default.",
                     "type": "string",
                     "pattern": "^[a-z0-9-]+$"
                   }

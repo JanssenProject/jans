@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.0.22-1](https://github.com/JanssenProject/jans/compare/docker-jans-link-v1.0.21-1...docker-jans-link-v1.0.22-1) (2024-01-22)
+
+
+### Features
+
+* **docker-jans:** add support for passing jetty.http.idleTimeout option ([#7298](https://github.com/JanssenProject/jans/issues/7298)) ([a1a2e10](https://github.com/JanssenProject/jans/commit/a1a2e1062c0759a40c6d45b48158ff8741473ada))
+
+
+### Bug Fixes
+
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+* resolve install failure in CN setup ([#7439](https://github.com/JanssenProject/jans/issues/7439)) ([f84e99a](https://github.com/JanssenProject/jans/commit/f84e99a1a6257854cd23e2cc16aa1a3a5d0790b6))
+
+## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-link-v1.0.20-1...docker-jans-link-v1.0.21-1) (2023-12-14)
+
+
+### Features
+
+* **docker-jans:** add archived jwks ([#6564](https://github.com/JanssenProject/jans/issues/6564)) ([119d9ad](https://github.com/JanssenProject/jans/commit/119d9ade7cb4ce60b08825e6cda2f43fd153eadf))
+
+
+### Bug Fixes
+
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
 ## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-link-v1.0.19-1...docker-jans-link-v1.0.20-1) (2023-11-08)
 
 

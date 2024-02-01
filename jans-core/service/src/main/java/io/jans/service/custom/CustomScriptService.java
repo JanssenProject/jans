@@ -64,13 +64,10 @@ public class CustomScriptService extends AbstractCustomScriptService {
         }
 
         Filter filter = searchFilter;
-        log.debug("filter:{}", filter);
         if (type != null) {
             Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
             filter = Filter.createANDFilter(searchFilter, typeFilter);
         }
-
-        log.debug("Searching CustomScript Flow with filter:{}", filter);
 
         return persistenceEntryManager.findPagedEntries(baseDn(), CustomScript.class, filter, null, sortBy,
                 SortOrder.getByValue(sortOrder), startIndex, limit, maximumRecCount);
@@ -110,6 +107,7 @@ public class CustomScriptService extends AbstractCustomScriptService {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
                 Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
                 log.trace("CustomScript dataFilter:{}", dataFilter);
+                log.trace("CustomScript entry.getKey():{}, entry.getValue():{}, entry.getValue().getClass():{}", entry.getKey(),entry.getValue(), (entry.getValue()!=null? entry.getValue().getClass():" "));
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
@@ -124,8 +122,8 @@ public class CustomScriptService extends AbstractCustomScriptService {
             Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
             filter = Filter.createANDFilter(searchFilter, typeFilter);
         }
-
-        log.info("Searching CustomScript Flow with filter:{}", filter);
+        
+        log.trace("Searching CustomScript Flow with filter:{}", filter);
         return persistenceEntryManager.findPagedEntries(baseDn(), CustomScript.class, filter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());

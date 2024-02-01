@@ -28,7 +28,7 @@ public class NativeJavaBox implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(NativeJavaBox.class);
 
     private static final ManagedBeanService MBSRV = CdiUtil.bean(ManagedBeanService.class);
-    private static final SerializerFactory SERFACT = CdiUtil.bean(SerializerFactory.class);
+    private static final SerializationUtil INUTIL = CdiUtil.bean(SerializationUtil.class);
     private static final ActionService ACTSRV = CdiUtil.bean(ActionService.class);
     
     private NativeJavaObject raw;
@@ -71,18 +71,7 @@ public class NativeJavaBox implements Serializable {
             out.writeUTF(realClassName);
             out.writeObject(qualies);   //kryo fails deserializing Annotations :(
         } else {
-
-            //The object serializer instance may change at runtime. It has to be looked up every time 
-            ObjectSerializer serializer = SERFACT.get();
-            boolean useJavaOnlySerialization = serializer == null;
-
-            out.writeObject(useJavaOnlySerialization ? null : serializer.getType());
-            //unwrapped is not a managed object
-            if (useJavaOnlySerialization) {
-                out.writeObject(unwrapped);
-            } else {
-                serializer.serialize(unwrapped, out);
-            }
+            INUTIL.write(unwrapped, out);
         }
 
     }
@@ -103,10 +92,7 @@ public class NativeJavaBox implements Serializable {
             logger.trace("Managed bean class {}", realClassName);
             unwrapped = ManagedBeanService.instance(ACTSRV.classFromName(realClassName), qualies);
         } else {
-
-            Type type = (Type) in.readObject();
-            ObjectSerializer serializer = SERFACT.get(type);
-            unwrapped = serializer == null ? in.readObject() : serializer.deserialize(in);
+            unwrapped = INUTIL.read(in);
         }
 
         logger.trace("Underlying object is an instance of {}", unwrapped.getClass().getName());

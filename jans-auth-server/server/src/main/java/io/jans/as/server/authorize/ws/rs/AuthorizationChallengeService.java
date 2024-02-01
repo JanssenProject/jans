@@ -131,6 +131,7 @@ public class AuthorizationChallengeService {
         authorizationChallengeValidator.validateGrantType(client, state);
         authorizationChallengeValidator.validateAccess(client);
         Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
+        authorizeRestWebServiceValidator.validateAuthorizationDetails(authzRequest, client);
 
         final ExecutionContext executionContext = ExecutionContext.of(authzRequest);
 
@@ -161,6 +162,7 @@ public class AuthorizationChallengeService {
         authorizationGrant.setJwtAuthorizationRequest(authzRequest.getJwtRequest());
         authorizationGrant.setTokenBindingHash(TokenBindingMessage.getTokenBindingIdHashFromTokenBindingMessage(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
         authorizationGrant.setScopes(scopes);
+        authorizationGrant.setAuthzDetails(authzRequest.getAuthzDetails());
         authorizationGrant.setCodeChallenge(authzRequest.getCodeChallenge());
         authorizationGrant.setCodeChallengeMethod(authzRequest.getCodeChallengeMethod());
         authorizationGrant.setClaims(authzRequest.getClaims());
@@ -189,10 +191,16 @@ public class AuthorizationChallengeService {
         Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
         SessionId sessionUser = sessionIdService.generateAuthenticatedSessionId(authzRequest.getHttpRequest(), user.getDn(), authzRequest.getPrompt());
-        sessionUser.setSessionAttributes(requestParameterMap);
+        final Set<String> sessionAttributesKeySet = sessionUser.getSessionAttributes().keySet();
+        requestParameterMap.forEach((key, value) -> {
+            if (!sessionAttributesKeySet.contains(key)) {
+                sessionUser.getSessionAttributes().put(key, value);
+            }
+        });
 
         cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
         sessionIdService.updateSessionId(sessionUser);
+        log.trace("Session updated with {}", sessionUser);
 
         return sessionUser;
     }

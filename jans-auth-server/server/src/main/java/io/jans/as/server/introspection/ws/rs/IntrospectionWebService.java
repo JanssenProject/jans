@@ -6,7 +6,11 @@
 
 package io.jans.as.server.introspection.ws.rs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.IntrospectionResponse;
@@ -58,6 +62,7 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
 public class IntrospectionWebService {
 
     private static final Pair<AuthorizationGrant, Boolean> EMPTY = new Pair<>(null, false);
+    private static final ObjectMapper OBJECT_MAPPER = ServerUtil.createJsonMapper();
 
     @Inject
     private Logger log;
@@ -153,11 +158,11 @@ public class IntrospectionWebService {
                 return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, "")).build();
             }
 
-            final io.jans.as.model.common.IntrospectionResponse response = new io.jans.as.model.common.IntrospectionResponse(false);
+            final IntrospectionResponse response = new IntrospectionResponse(false);
 
             final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
 
-            AbstractToken tokenToIntrospect = fillResponse(token, response, grantOfIntrospectionToken);
+            fillResponse(token, response, grantOfIntrospectionToken);
             JSONObject responseAsJsonObject = createResponseAsJsonObject(response, grantOfIntrospectionToken);
 
             ExternalIntrospectionContext context = new ExternalIntrospectionContext(authorizationGrant, httpRequest, httpResponse, appConfiguration, attributeService);
@@ -194,8 +199,8 @@ public class IntrospectionWebService {
             return Response.status(Response.Status.OK).entity(entity).type(MediaType.APPLICATION_JSON_TYPE).build();
 
         } catch (WebApplicationException e) {
-            if (log.isErrorEnabled()) {
-                log.error(e.getMessage(), e);
+            if (log.isTraceEnabled()) {
+                log.trace(e.getMessage(), e);
             }
             throw e;
         } catch (Exception e) {
@@ -221,6 +226,16 @@ public class IntrospectionWebService {
             response.setIssuer(appConfiguration.getIssuer());
             response.setAudience(grantOfIntrospectionToken.getClientId());
             response.setAuthTime(ServerUtil.dateToSeconds(grantOfIntrospectionToken.getAuthenticationTime()));
+
+            final AuthzDetails authzDetails = grantOfIntrospectionToken.getAuthzDetails();
+            if (!AuthzDetails.isEmpty(authzDetails)) {
+                try {
+                    JsonNode authorizationDetailsNode = OBJECT_MAPPER.readTree(authzDetails.asJsonString());
+                    response.setAuthorizationDetails(authorizationDetailsNode);
+                } catch (JsonProcessingException e) {
+                    log.error(String.format("Failed to convert authorization_details %s", authzDetails.asJsonString()), e);
+                }
+            }
 
             if (tokenToIntrospect instanceof AccessToken) {
                 AccessToken accessToken = (AccessToken) tokenToIntrospect;

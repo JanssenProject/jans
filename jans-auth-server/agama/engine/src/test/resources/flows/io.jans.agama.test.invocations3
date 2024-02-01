@@ -26,7 +26,7 @@ obj2 = { id: "2" }
 | E = Call co.Test#sum obj1 obj2
 When E is not null
     Finish false
-    
+
 // pass a Java object (obj1) that requires type narrowing
 obj1 = Call co.SubTest#new "1" s
 obj2 = Call co.Test#new
@@ -74,7 +74,7 @@ When E is not null
 
 // pass a Java array of Test instances to a method expecting a list of Integers
 | E = Call co.ListUtil#sum l
-When E is null or E.class.name is not "java.lang.IllegalArgumentException"  
+When E is null or E.class.name is not "java.lang.NoSuchMethodException"  
     Finish false
 
 Finish true

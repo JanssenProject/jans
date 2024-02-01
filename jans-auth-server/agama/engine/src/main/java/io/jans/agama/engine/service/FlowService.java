@@ -41,7 +41,6 @@ import org.mozilla.javascript.NativeJavaList;
 import org.mozilla.javascript.NativeJavaMap;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
 import org.slf4j.Logger;
@@ -127,7 +126,7 @@ public class FlowService {
             }
 
         } catch (IOException ie) {
-            throw new FlowCrashException(ie.getMessage(), ie);
+            makeCrashException(ie);
         }
         return status;
         
@@ -160,16 +159,17 @@ public class FlowService {
 
             } catch (ContinuationPending pe) {
                 status = processPause(pe, status);
-                
+
             } catch (FlowTimeoutException te) {
                 terminateFlow();
                 throw te;
+
             } catch (Exception e) {
                 terminateFlow();
                 makeCrashException(e);
             }
         } catch (IOException ie) {
-            throw new FlowCrashException(ie.getMessage(), ie);
+            makeCrashException(ie);
         }
         return status;
         
@@ -253,7 +253,7 @@ public class FlowService {
     }
 
     private FlowStatus processPause(ContinuationPending pending, FlowStatus status)
-            throws FlowCrashException, IOException {
+            throws IOException {
 
         PendingException pe = null;
         if (pending instanceof PendingRenderException) {
@@ -262,7 +262,7 @@ public class FlowService {
             String templPath = computeTemplatePath(pre.getTemplatePath(), parentsMappings);
             
             if (!templPath.contains("."))
-                throw new FlowCrashException(
+                throw new IOException(
                         "Expecting file extension for the template to render: " + templPath);
 
             status.setTemplatePath(templPath);
@@ -350,32 +350,32 @@ public class FlowService {
     
     private NativeObject checkJSReturnedValue(Object obj) throws Exception {
 
-        try {
+        try {      
             //obj is not null
-            return NativeObject.class.cast(obj);
-        } catch (ClassCastException e) {
             if (Undefined.isUndefined(obj)) {
-                //This may only happen for a top-level flow. A subflow that returns undefined
-                //is handled in the generated javascript for a Trigger directive
-                throw new Exception("No Finish instruction was reached");
-            } else throw e;
+                //This may only happen at a top-level flow. For subflows see util.js#_flowCall
+                throw new FlowCrashException("No Finish instruction was reached during execution of flow");
+                
+            } else return NativeObject.class.cast(obj);
+
+        } catch (ClassCastException e) {
+
+            Object ex = NativeJavaObject.class.cast(obj).unwrap();
+            
+            if (Exception.class.isInstance(ex))
+                throw (Exception) ex;
+            
+            throw new RuntimeException("Unexpected Java value received upon flow termination");
         }
 
     }
 
     private void makeCrashException(Exception e) throws FlowCrashException {
-
-        String msg;
-        if (e instanceof RhinoException) {            
-            RhinoException re = (RhinoException) e;
-            msg = re.details();
-            logger.error(msg + re.getScriptStackTrace());
-            //logger.error(re.getMessage());
-            msg = "Error executing flow's code - " + msg;
-        } else 
-            msg = e.getMessage();
         
-        throw new FlowCrashException(msg, e);
+        if (FlowCrashException.class.isInstance(e))
+            throw (FlowCrashException) e;
+
+        throw new FlowCrashException(e.getMessage(), e);
         
     }
 

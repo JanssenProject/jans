@@ -251,8 +251,12 @@ class DropDownWidget:
                 self.display_value = self.select_box.values[self.select_box.selected_line][1]
                 self._value = self.select_box.values[self.select_box.selected_line][0]
                 get_app().layout.container.floats.remove(self.select_box_float)
+                if self.on_value_changed:
+                    self.on_value_changed(self._value)
             else:
                 get_app().layout.container.floats.append(self.select_box_float)
+
+
 
         @kb.add('up')
         def _up(event):

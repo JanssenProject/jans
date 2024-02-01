@@ -97,6 +97,7 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, GRANT_TYPES.toString(), GrantType.toStringArray(client.getGrantTypes()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, APPLICATION_TYPE.toString(), client.getApplicationType());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CONTACTS.toString(), client.getContacts());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZATION_DETAILS_TYPES.toString(), client.getAttributes().getAuthorizationDetailsTypes());
         Util.addToJSONObjectIfNotNull(responseJsonObject, JWKS_URI.toString(), client.getJwksUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SECTOR_IDENTIFIER_URI.toString(), client.getSectorIdentifierUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SUBJECT_TYPE.toString(), client.getSubjectType());
@@ -112,6 +113,9 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, INTROSPECTION_SIGNED_RESPONSE_ALG.toString(), client.getAttributes().getIntrospectionSignedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, INTROSPECTION_ENCRYPTED_RESPONSE_ALG.toString(), client.getAttributes().getIntrospectionEncryptedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, INTROSPECTION_ENCRYPTED_RESPONSE_ENC.toString(), client.getAttributes().getIntrospectionEncryptedResponseEnc());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, TX_TOKEN_SIGNED_RESPONSE_ALG.toString(), client.getAttributes().getTxTokenSignedResponseAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, TX_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), client.getAttributes().getTxTokenEncryptedResponseAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, TX_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), client.getAttributes().getTxTokenEncryptedResponseEnc());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_SIGNING_ALG.toString(), client.getRequestObjectSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ALG.toString(), client.getRequestObjectEncryptionAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ENC.toString(), client.getRequestObjectEncryptionEnc());
@@ -134,6 +138,8 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_AS_JWT.toString(), client.isAccessTokenAsJwt());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_SIGNING_ALG.toString(), client.getAccessTokenSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_LIFETIME.toString(), client.getAccessTokenLifetime());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, ID_TOKEN_LIFETIME.toString(), client.getAttributes().getIdTokenLifetime());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, TX_TOKEN_LIFETIME.toString(), client.getAttributes().getTxTokenLifetime());
         Util.addToJSONObjectIfNotNull(responseJsonObject, PAR_LIFETIME.toString(), client.getAttributes().getParLifetime());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUIRE_PAR.toString(), client.getAttributes().getRequirePar());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SOFTWARE_ID.toString(), client.getSoftwareId());

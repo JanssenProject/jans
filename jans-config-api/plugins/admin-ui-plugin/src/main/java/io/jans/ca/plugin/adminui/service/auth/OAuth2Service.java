@@ -3,9 +3,7 @@ package io.jans.ca.plugin.adminui.service.auth;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import io.jans.as.client.TokenRequest;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.ca.plugin.adminui.model.auth.ApiTokenRequest;
 import io.jans.ca.plugin.adminui.model.auth.TokenResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
@@ -15,16 +13,14 @@ import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.service.EncryptionService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Singleton
 public class OAuth2Service extends BaseService {
@@ -64,17 +60,27 @@ public class OAuth2Service extends BaseService {
                 tokenResponse = getToken(tokenRequest, auiConfiguration.getAuiBackendApiServerTokenEndpoint(), apiTokenRequest.getUjwt(), apiTokenRequest.getPermissionTag());
             }
 
-            final Jwt tokenJwt = Jwt.parse(tokenResponse.getAccessToken());
-            Map<String, Object> claims = getClaims(tokenJwt);
+            Optional<Map<String, Object>> introspectionResponse = introspectToken(tokenResponse.getAccessToken(), auiConfiguration.getAuiBackendApiServerIntrospectionEndpoint());
+
+
             TokenResponse tokenResp = new TokenResponse();
             tokenResp.setAccessToken(tokenResponse.getAccessToken());
             tokenResp.setIdToken(tokenResponse.getIdToken());
             tokenResp.setRefreshToken(tokenResponse.getRefreshToken());
-            final String SCOPE = "scope";
-            if (claims.get(SCOPE) instanceof List) {
-                tokenResp.setScopes((List) claims.get(SCOPE));
-            }
 
+            if (!introspectionResponse.isPresent()) {
+                return tokenResp;
+            }
+            final String SCOPE = "scope";
+            Map<String, Object> claims = introspectionResponse.get();
+            if (claims.get(SCOPE) != null) {
+                if (claims.get(SCOPE) instanceof List) {
+                    tokenResp.setScopes((List) claims.get(SCOPE));
+                }
+                if (claims.get(SCOPE) instanceof String) {
+                    tokenResp.setScopes(Arrays.asList(((String) claims.get(SCOPE)).split(" ")));
+                }
+            }
             if (claims.get("iat") != null) {
                 tokenResp.setIat(Long.valueOf(claims.get("iat").toString()));
             }

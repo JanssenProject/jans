@@ -621,7 +621,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	        		continue;
 	        	}
 
-	        	String attributeName = fromInternalAttribute(shortAttributeName);
+	        	String attributeName = fromInternalAttribute(tableMapping.getTableName(), shortAttributeName);
 	
 	        	Boolean multiValued = Boolean.FALSE;
 	            Object[] attributeValueObjects;
@@ -824,8 +824,22 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	}
 
 	@Override
-	public String toInternalAttribute(String attributeName) {
-		return attributeName;
+	public String toInternalAttribute(String objectClass, String attributeName) {
+		Map<String, AttributeType> columTypes = connectionProvider.getTableColumnsMap().get(StringHelper.toLowerCase(objectClass));
+		if (columTypes == null) {
+			return attributeName;
+		}
+		
+		AttributeType realColumnName = columTypes.get(StringHelper.toLowerCase(attributeName));
+		if (realColumnName == null) {
+			return attributeName;
+		}
+		
+		if (realColumnName.getDefName() == null) {
+			return attributeName;
+		}
+		
+		return realColumnName.getDefName();
 //		if (isDisableAttributeMapping()) {
 //			return attributeName;
 //		}
@@ -834,7 +848,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	}
 
 	@Override
-	public String[] toInternalAttributes(String[] attributeNames) {
+	public String[] toInternalAttributes(String objectClass, String[] attributeNames) {
 		return attributeNames;
 //		if (isDisableAttributeMapping() || ArrayHelper.isEmpty(attributeNames)) {
 //			return attributeNames;
@@ -850,7 +864,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	}
 
 	@Override
-	public String fromInternalAttribute(String internalAttributeName) {
+	public String fromInternalAttribute(String objectClass, String internalAttributeName) {
 		return internalAttributeName;
 //		if (isDisableAttributeMapping()) {
 //			return internalAttributeName;
@@ -860,7 +874,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	}
 
 	@Override
-	public String[] fromInternalAttributes(String[] internalAttributeNames) {
+	public String[] fromInternalAttributes(String objectClass, String[] internalAttributeNames) {
 		return internalAttributeNames;
 //		if (isDisableAttributeMapping() || ArrayHelper.isEmpty(internalAttributeNames)) {
 //			return internalAttributeNames;
@@ -934,6 +948,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					attributeValue = new JsonAttributeValue(((List<?>) propertyValue).toArray());
 				} else if (propertyValue.getClass().isArray()) {
 					attributeValue = new JsonAttributeValue((Object[]) propertyValue);
+				} else if (propertyValue instanceof Map) {
+					attributeValue = new JsonAttributeValue(new Object[] { propertyValue });
 				} else {
 					attributeValue = new JsonAttributeValue(new Object[] { propertyValue });
 				}

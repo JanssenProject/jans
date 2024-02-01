@@ -1,0 +1,37 @@
+Flow io.jans.agama.test.invocations5
+    Basepath "test"
+
+// invoke a method on an object belonging to an inner class; java.util.ImmutableCollections$MapN
+// in this case. Its methods are not accessible by external code so a method in one of its
+// superclasses is picked instead
+map = Call java.util.Map#of true false false true
+s = Call map size
+When s is not 2 
+    Finish false
+
+// same case, this time class is java.util.Collections$EmptyMap
+map = Call java.util.Collections#emptyMap
+s = Call map size
+When s is not 0
+    Finish false
+
+// same case, this time class is java.util.Collections$singletonList
+list = Call java.util.Collections#singletonList -1
+s = Call list size
+When s is not 1
+    Finish false
+
+// invoke a method with an argument not matching exactly the parameter type,
+// however arguments conversion makes the operation succeed
+s = "a man's gotta do what a man's gotta do"
+arr = Call s split " "
+words = Call java.util.Collections#unmodifiableSet arr
+
+// same case, this time with two params not matching the arg types
+s1 = "Colombia"
+s2 = "Columbia"
+i = Call java.util.Arrays#mismatch s1 s2
+When i is not 3
+    Finish false
+
+Finish true

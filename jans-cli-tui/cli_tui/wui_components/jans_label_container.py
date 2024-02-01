@@ -11,6 +11,7 @@ from prompt_toolkit.layout.containers import (
     VSplit,
     DynamicContainer,
 )
+
 class JansLabelContainer:
     def __init__(
         self,
@@ -21,6 +22,7 @@ class JansLabelContainer:
         on_display: Optional[Callable]=None,
         buttonbox: Optional[Button]=None,
         entries: Optional=None,
+        height: Optional[int]=1,
         ) -> None:
 
         """Label container for Jans
@@ -37,7 +39,7 @@ class JansLabelContainer:
         self.on_enter = on_enter
         self.on_delete = on_delete
         self.on_display = on_display
-        self.height=2
+        self.height = height
         self.entries = [] if not entries else entries
         self.invalidate = False
         self.selected_entry = 0
@@ -50,7 +52,7 @@ class JansLabelContainer:
             width=self.width-2,
             height=self.height
         )
-        self.line_count = 1
+
         widgets = [self.body]
         if buttonbox:
             widgets.append(Window(height=1))
@@ -67,12 +69,12 @@ class JansLabelContainer:
         
         result = []
         line_width = 0
-        self.line_count = 1
+        line_count = 1
         for i, entry in enumerate(self.entries):
             if line_width + len(entry[1]) + 2 > self.width:
                 result.append('\n\n')
                 line_width = 0
-                self.line_count += 2
+                line_count += 2
 
             line_width += len(entry[1]) + 2
 
@@ -82,7 +84,8 @@ class JansLabelContainer:
                 result.append(HTML('<style fg="{}" bg="{}">{}</style>'.format("black", "lightgrey", entry[1])))
             result.append('  ')
 
-        self.body.height = self.line_count
+        if line_count > self.body.height:
+            self.body.height = line_count
         if self.invalidate:
             get_app().invalidate()
             self.invalidate = False

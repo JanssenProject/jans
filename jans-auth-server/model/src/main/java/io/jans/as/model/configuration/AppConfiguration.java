@@ -16,7 +16,8 @@ import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
 import io.jans.doc.annotation.DocProperty;
-
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import java.util.*;
 
 /**
@@ -248,6 +249,15 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
     private List<String> introspectionEncryptionEncValuesSupported;
 
+    @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    private List<String> txTokenSigningAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    private List<String> txTokenEncryptionAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    private List<String> txTokenEncryptionEncValuesSupported;
+
     @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT")
     private List<String> idTokenSigningAlgValuesSupported;
 
@@ -334,6 +344,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "The lifetime of the Refresh Token")
     private int refreshTokenLifetime;
+
+    @DocProperty(description = "The lifetime of the Transaction Token")
+    private int txTokenLifetime;
 
     @DocProperty(description = "The lifetime of the ID Token")
     private int idTokenLifetime;
@@ -853,6 +866,7 @@ public class AppConfiguration implements Configuration {
     private List<String> discoveryDenyKeys;
 
     @DocProperty(description = "List of enabled feature flags")
+    @ArraySchema(schema = @Schema(implementation = FeatureFlagType.class))
     private List<String> featureFlags;
 
     @DocProperty(description = "Enable/disable request/response logging filter")
@@ -890,6 +904,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
+    
+    @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
+    private LockMessageConfig lockMessageConfig;
 
     public int getArchivedJwkLifetimeInSeconds() {
         return archivedJwkLifetimeInSeconds;
@@ -1973,6 +1990,30 @@ public class AppConfiguration implements Configuration {
         this.introspectionEncryptionEncValuesSupported = introspectionEncryptionEncValuesSupported;
     }
 
+    public List<String> getTxTokenSigningAlgValuesSupported() {
+        return txTokenSigningAlgValuesSupported;
+    }
+
+    public void setTxTokenSigningAlgValuesSupported(List<String> txTokenSigningAlgValuesSupported) {
+        this.txTokenSigningAlgValuesSupported = txTokenSigningAlgValuesSupported;
+    }
+
+    public List<String> getTxTokenEncryptionAlgValuesSupported() {
+        return txTokenEncryptionAlgValuesSupported;
+    }
+
+    public void setTxTokenEncryptionAlgValuesSupported(List<String> txTokenEncryptionAlgValuesSupported) {
+        this.txTokenEncryptionAlgValuesSupported = txTokenEncryptionAlgValuesSupported;
+    }
+
+    public List<String> getTxTokenEncryptionEncValuesSupported() {
+        return txTokenEncryptionEncValuesSupported;
+    }
+
+    public void setTxTokenEncryptionEncValuesSupported(List<String> txTokenEncryptionEncValuesSupported) {
+        this.txTokenEncryptionEncValuesSupported = txTokenEncryptionEncValuesSupported;
+    }
+
     public List<String> getUserInfoSigningAlgValuesSupported() {
         return userInfoSigningAlgValuesSupported;
     }
@@ -2244,6 +2285,14 @@ public class AppConfiguration implements Configuration {
 
     public void setRefreshTokenLifetime(int refreshTokenLifetime) {
         this.refreshTokenLifetime = refreshTokenLifetime;
+    }
+
+    public int getTxTokenLifetime() {
+        return txTokenLifetime;
+    }
+
+    public void setTxTokenLifetime(int txTokenLifetime) {
+        this.txTokenLifetime = txTokenLifetime;
     }
 
     public int getIdTokenLifetime() {
@@ -3443,6 +3492,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setSkipAuthenticationFilterOptionsMethod(Boolean skipAuthenticationFilterOptionsMethod) {
 		this.skipAuthenticationFilterOptionsMethod = skipAuthenticationFilterOptionsMethod;
+	}
+
+	public LockMessageConfig getLockMessageConfig() {
+		return lockMessageConfig;
+	}
+
+	public void setLockMessageConfig(LockMessageConfig lockMessageConfig) {
+		this.lockMessageConfig = lockMessageConfig;
 	}
 
 }

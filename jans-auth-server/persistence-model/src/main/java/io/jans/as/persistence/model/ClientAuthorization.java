@@ -6,13 +6,10 @@
 
 package io.jans.as.persistence.model;
 
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.Expiration;
-import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.*;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -44,8 +41,23 @@ public class ClientAuthorization implements Serializable {
     @AttributeName(name = "del")
     private boolean deletable = true;
 
+    @AttributeName(name = "jansAttrs")
+    @JsonObject
+    private ClientAuthorizationAttributes attributes;
+
     @Expiration
     private Integer ttl;
+
+    public ClientAuthorizationAttributes getAttributes() {
+        if (attributes == null) {
+            attributes = new ClientAuthorizationAttributes();
+        }
+        return attributes;
+    }
+
+    public void setAttributes(ClientAuthorizationAttributes attributes) {
+        this.attributes = attributes;
+    }
 
     public Integer getTtl() {
         return ttl;
@@ -127,5 +139,20 @@ public class ClientAuthorization implements Serializable {
         int result = dn.hashCode();
         result = 31 * result + id.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ClientAuthorization{" +
+                "dn='" + dn + '\'' +
+                ", id='" + id + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", userId='" + userId + '\'' +
+                ", scopes=" + Arrays.toString(scopes) +
+                ", expirationDate=" + expirationDate +
+                ", deletable=" + deletable +
+                ", attributes=" + attributes +
+                ", ttl=" + ttl +
+                '}';
     }
 }

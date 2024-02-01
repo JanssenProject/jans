@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.0.22-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.21-1...docker-jans-persistence-loader-v1.0.22-1) (2024-01-22)
+
+
+### Features
+
+* **charts:** add chart for docker-jans-saml ([#7361](https://github.com/JanssenProject/jans/issues/7361)) ([777412b](https://github.com/JanssenProject/jans/commit/777412b279154db2dc4ba821de39c3d271d6d6d1))
+* **docker-jans:** add jans-lock as custom library in jans-auth ([#7381](https://github.com/JanssenProject/jans/issues/7381)) ([8a45b10](https://github.com/JanssenProject/jans/commit/8a45b103c9e69d48978139906313a6a4ed56b78d))
+* **docker:** support for OAuth 2.0 Rich Authorization Requests ([#7196](https://github.com/JanssenProject/jans/issues/7196)) ([f02db0f](https://github.com/JanssenProject/jans/commit/f02db0f14f47e69bce654e5c86d8a3b621cdb984))
+* rename JSON message configuration properties to conform karate test framework ([#7186](https://github.com/JanssenProject/jans/issues/7186)) ([1dc880d](https://github.com/JanssenProject/jans/commit/1dc880de92025ab2d92eeaa13465779d32bbef31))
+
+
+### Bug Fixes
+
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+* resolve install failure in CN setup ([#7439](https://github.com/JanssenProject/jans/issues/7439)) ([f84e99a](https://github.com/JanssenProject/jans/commit/f84e99a1a6257854cd23e2cc16aa1a3a5d0790b6))
+
+## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.20-1...docker-jans-persistence-loader-v1.0.21-1) (2023-12-14)
+
+
+### Features
+
+* **docker-jans-persistence-loader:** set feature flags state ([#6833](https://github.com/JanssenProject/jans/issues/6833)) ([13ef9c2](https://github.com/JanssenProject/jans/commit/13ef9c24ab443f457bede1d47e914b9ee0d69813))
+* **docker-jans:** add archived jwks ([#6564](https://github.com/JanssenProject/jans/issues/6564)) ([119d9ad](https://github.com/JanssenProject/jans/commit/119d9ade7cb4ce60b08825e6cda2f43fd153eadf))
+* **docker-jans:** automatically update schema of sql/spanner tables ([#6634](https://github.com/JanssenProject/jans/issues/6634)) ([2d86835](https://github.com/JanssenProject/jans/commit/2d868351ec9d8a8649ac804e2584aa7447e6c36f))
+* **docker-jans:** use mixed strategy for Agama serialization ([#6889](https://github.com/JanssenProject/jans/issues/6889)) ([289cf26](https://github.com/JanssenProject/jans/commit/289cf26ec6e2e019187346fb6aea05b135edbf8b))
+* **docker-jans:** use reference token for TUI client ([#6600](https://github.com/JanssenProject/jans/issues/6600)) ([3c5c0e9](https://github.com/JanssenProject/jans/commit/3c5c0e98a6e8cfc8171aaab3084d953238772fe3))
+
+
+### Bug Fixes
+
+* **docker-jans-persistence-loader:** passing CN_SCIM_ENABLED doesn't toggle jansScimEnabled config ([#6952](https://github.com/JanssenProject/jans/issues/6952)) ([30f901a](https://github.com/JanssenProject/jans/commit/30f901a044bb83aa1296757f334958d571317e5a))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
 ## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.19-1...docker-jans-persistence-loader-v1.0.20-1) (2023-11-08)
 
 

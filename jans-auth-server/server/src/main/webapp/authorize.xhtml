@@ -34,6 +34,7 @@
 		<f:viewParam name="code_challenge" value="#{authorizeAction.codeChallenge}" />
 		<f:viewParam name="code_challenge_method" value="#{authorizeAction.codeChallengeMethod}" />
 		<f:viewParam name="claims" value="#{authorizeAction.claims}" />
+		<f:viewParam name="authorization_details" value="#{authorizeAction.authorizationDetails}" />
 
 		<!-- CIBA request parameter -->
 		<f:viewParam name="auth_req_id" value="#{authorizeAction.authReqId}" />
@@ -46,6 +47,7 @@
 	<ui:param name="_client" value="#{clientService.getClient(request.getParameter('client_id'))}" />
 	<ui:param name="_scopes" value="#{authorizeAction.scopes}" />
 	<ui:param name="_requestedClaims" value="#{authorizeAction.requestedClaims}" />
+	<ui:param name="_authzDetails" value="#{authorizeAction.authzDetails}" />
 
     <ui:define name="controlButttons">
 		<h:commandLink id="doNotAllowButton"  class="button button-default"

@@ -5,7 +5,7 @@ s = "agama"
 
 // null value passed for a primitive argument
 | E = Call s charAt null
-When E is null or E.class.name is not "java.lang.IllegalArgumentException"  
+When E is null or E.class.name is not "java.lang.NoSuchMethodException"  
     Finish false
 
 // pass null to a method that accepts it
@@ -41,7 +41,7 @@ When E is not null
 
 // pass an agama number where String expected
 | E = Call java.lang.Integer#valueOf 10 2
-When E is null or E.class.name is not "java.lang.IllegalArgumentException"  
+When E is null or E.class.name is not "java.lang.NoSuchMethodException"  
     Finish false
     
 // pass a one-lengthed agama string where char expected
@@ -51,12 +51,12 @@ When E is not null
     
 // pass an agama string where char expected
 | E = Call java.lang.Character#hashCode s
-When E is null or E.class.name is not "java.lang.IllegalArgumentException"  
+When E is null or E.class.name is not "java.lang.NoSuchMethodException"  
     Finish false
     
 // pass an Integer where String expected
 | E = Call java.lang.Integer#valueOf i 2
-When E is null or E.class.name is not "java.lang.IllegalArgumentException"  
+When E is null or E.class.name is not "java.lang.NoSuchMethodException"  
     Finish false
     
 // invoke a static method using an object

@@ -2,8 +2,8 @@ package io.jans.as.server.service;
 
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.model.ldap.TokenEntity;
-import io.jans.as.server.model.ldap.TokenType;
+import io.jans.model.token.TokenEntity;
+import io.jans.model.token.TokenType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.CacheService;
 import io.jans.service.cache.CacheConfiguration;

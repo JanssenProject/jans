@@ -6,6 +6,7 @@
 
 package io.jans.as.server.model.common;
 
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.GrantType;
 import io.jans.service.CacheService;
 
@@ -38,6 +39,7 @@ public class CIBAGrant extends AuthorizationGrant {
         setAuthReqId(cibaRequest.getAuthReqId());
         setAcrValues(cibaRequest.getAcrValues());
         setScopes(cibaRequest.getScopes());
+        setAuthzDetails(AuthzDetails.ofSilently(cibaRequest.getAuthzDetails()));
         setIsCachedWithNoPersistence(true);
     }
 

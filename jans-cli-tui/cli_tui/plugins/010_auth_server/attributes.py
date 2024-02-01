@@ -201,11 +201,15 @@ class Attributes(DialogUtils):
                 operation_id = 'put-attributes' if 'inum' in dialog.data  else 'post-attributes'
                 cli_args = {'operation_id': operation_id, 'data': new_data}
                 self.app.start_progressing(_("Saving Attribute ..."))
-                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
-                self.get_attributes()
-                common_data.claims_retreived = False
 
+                if response.status_code in (200, 201):
+                    self.app.start_progressing(_("Attribute was saved"))
+                    self.get_attributes()
+                    common_data.claims_retreived = False
+                else:
+                    self.myparent.show_message(_("A server error ocurred while saving attribute"), str(response.text), tobefocused=self.main_container)
             asyncio.ensure_future(coroutine())
 
 
@@ -261,7 +265,7 @@ class Attributes(DialogUtils):
             pattern (str, optional): an optional argument for searching attribute.
         """
 
-        asyncio.ensure_future(self.get_attributes_coroutine())
+        asyncio.ensure_future(self.get_attributes_coroutine(start_index, pattern))
 
 
 

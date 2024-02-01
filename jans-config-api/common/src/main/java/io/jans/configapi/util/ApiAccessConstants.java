@@ -29,6 +29,9 @@ public class ApiAccessConstants {
     public static final String CACHE_READ_ACCESS = "https://jans.io/oauth/config/cache.readonly";
     public static final String CACHE_WRITE_ACCESS = "https://jans.io/oauth/config/cache.write";
 
+    public static final String MESSAGE_READ_ACCESS = "https://jans.io/oauth/config/message.readonly";
+    public static final String MESSAGE_WRITE_ACCESS = "https://jans.io/oauth/config/message.write";
+
     public static final String SMTP_READ_ACCESS = "https://jans.io/oauth/config/smtp.readonly";
     public static final String SMTP_WRITE_ACCESS = "https://jans.io/oauth/config/smtp.write";
     public static final String SMTP_DELETE_ACCESS = "https://jans.io/oauth/config/smtp.delete";
@@ -92,5 +95,6 @@ public class ApiAccessConstants {
     public static final String CLIENT_AUTHORIZATIONS_READ_ACCESS = "https://jans.io/oauth/client/authorizations.readonly";
     public static final String CLIENT_AUTHORIZATIONS_DELETE_ACCESS = "https://jans.io/oauth/client/authorizations.delete";
 
+    public static final String APP_VERSION_READ_ACCESS = "https://jans.io/oauth/config/app-version.readonly";
     
 }

@@ -11,7 +11,9 @@ import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.ExchangeTokenType;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.SubjectTokenType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -21,17 +23,21 @@ import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.token.TokenRequestParam;
 import io.jans.as.model.util.Util;
+import io.jans.as.server.model.audit.Action;
+import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AuthorizationCodeGrant;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.model.token.ClientAssertion;
 import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.token.TokenService;
+import io.jans.as.server.token.ws.rs.TxTokenValidator;
+import io.jans.as.server.util.ServerUtil;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.security.Identity;
+import io.jans.model.token.TokenEntity;
 import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
 import jakarta.inject.Inject;
@@ -133,6 +139,9 @@ public class AuthenticationFilter implements Filter {
     @Inject
     private DpopService dPoPService;
 
+    @Inject
+    private TxTokenValidator txTokenValidator;
+
     private String realm;
 
     @Override
@@ -186,6 +195,13 @@ public class AuthenticationFilter implements Filter {
                         HttpAuthTokenType.Bearer, HttpAuthTokenType.AccessToken);
                 if (StringUtils.isNotBlank(accessToken)) {
                     processAuthByAccessToken(accessToken, httpRequest, httpResponse, filterChain);
+                    return;
+                }
+
+                // Transaction Tokens
+                final String requestedTokenType = httpRequest.getParameter("requested_token_type");
+                if (ExchangeTokenType.fromString(requestedTokenType) == ExchangeTokenType.TX_TOKEN) {
+                    processTxToken(httpRequest, httpResponse, filterChain);
                     return;
                 }
 
@@ -259,6 +275,32 @@ public class AuthenticationFilter implements Filter {
         }
     }
 
+    private void processTxToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
+        try {
+            final OAuth2AuditLog auditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.TOKEN_REQUEST);
+            auditLog.setUsername("tx_token");
+
+            final String subjectToken = httpRequest.getParameter("subject_token");
+            final String subjectTokenType = httpRequest.getParameter("subject_token_type");
+
+            final SubjectTokenType subjectTokenTypeEnum = txTokenValidator.validateSubjectTokenType(subjectTokenType, auditLog);
+            final AuthorizationGrant subjectGrant = txTokenValidator.validateSubjectToken(subjectToken, subjectTokenTypeEnum, auditLog);
+
+            final Client client = subjectGrant.getClient();
+            if (client != null) {
+                authenticator.configureSessionClient(client);
+                filterChain.doFilter(httpRequest, httpResponse);
+                return;
+            } else {
+                log.error("Client is not set for grant {}", subjectGrant.getGrantId());
+            }
+        } catch (Exception ex) {
+            log.error("Failed to authenticate client by subject_token (Transaction Tokens)", ex);
+        }
+
+        sendError(httpResponse);
+    }
+
     @NotNull
     public String getRealmHeaderValue() {
         return String.format("Basic realm=\"%s\"", getRealm());
@@ -277,7 +319,7 @@ public class AuthenticationFilter implements Filter {
         if (StringUtils.isNotBlank(clientId)) {
             final Client client = clientService.getClient(clientId);
             if (client != null &&
-                    (client.hasAuthenticationMethod(AuthenticationMethod.TLS_CLIENT_AUTH)||
+                    (client.hasAuthenticationMethod(AuthenticationMethod.TLS_CLIENT_AUTH) ||
                             client.hasAuthenticationMethod(AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH))) {
                 return mtlsService.processMTLS(httpRequest, httpResponse, filterChain, client);
             }

@@ -21,6 +21,7 @@ public class DeviceAuthorizationCacheControl implements Serializable {
     private String deviceCode;
     private Client client;
     private List<String> scopes;
+    private String authzDetails;
     private URI verificationUri;
     private int expiresIn = 1;
     private int interval = 5;
@@ -76,6 +77,14 @@ public class DeviceAuthorizationCacheControl implements Serializable {
         this.scopes = scopes;
     }
 
+    public String getAuthzDetails() {
+        return authzDetails;
+    }
+
+    public void setAuthzDetails(String authzDetails) {
+        this.authzDetails = authzDetails;
+    }
+
     public URI getVerificationUri() {
         return verificationUri;
     }
@@ -128,6 +137,7 @@ public class DeviceAuthorizationCacheControl implements Serializable {
                 ", interval=" + interval +
                 ", lastAccessControl=" + lastAccessControl +
                 ", status=" + status +
+                ", authzDetails=" + authzDetails +
                 '}';
     }
 }

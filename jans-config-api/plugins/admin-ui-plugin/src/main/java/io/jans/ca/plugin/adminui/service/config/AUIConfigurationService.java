@@ -3,7 +3,6 @@ package io.jans.ca.plugin.adminui.service.config;
 import com.google.api.client.util.Strings;
 import com.google.common.collect.Maps;
 import io.jans.as.client.TokenRequest;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.config.adminui.LicenseConfig;
@@ -19,6 +18,7 @@ import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.service.EncryptionService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
@@ -114,6 +114,7 @@ public class AUIConfigurationService extends BaseService {
         auiConfig.setAuiBackendApiServerClientSecret(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getClientSecret());
         auiConfig.setAuiBackendApiServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getScopes(), "+"));
         auiConfig.setAuiBackendApiServerTokenEndpoint(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getTokenEndpoint());
+        auiConfig.setAuiBackendApiServerIntrospectionEndpoint(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getIntrospectionEndpoint());
 
         return auiConfig;
     }

@@ -168,17 +168,17 @@ public class AttestationService {
 			log.debug("Put extensions {}", extensions);
 		}
 		// incase of Apple's Touch ID and Window's Hello; timeout,status and error message cause a NotAllowedError on the browser, so skipping these attributes
-//		if (params.hasNonNull("authenticatorAttachment")) {
-//			if (AuthenticatorAttachment.CROSS_PLATFORM.equals(authenticatorSelectionNode.get("authenticatorAttachment").asText())) {
-		// Put timeout
-		int timeout = commonVerifiers.verifyTimeout(params);
-		log.debug("Put timeout {}", timeout);
-		optionsResponseNode.put("timeout", timeout);
+		if (params.hasNonNull("authenticatorAttachment")) {
+			if (AuthenticatorAttachment.CROSS_PLATFORM.getAttachment().equals(authenticatorSelectionNode.get("authenticatorAttachment").asText())) {
+				// Put timeout
+				int timeout = commonVerifiers.verifyTimeout(params);
+				log.debug("Put timeout {}", timeout);
+				optionsResponseNode.put("timeout", timeout);
 
-		optionsResponseNode.put("status", "ok");
-		optionsResponseNode.put("errorMessage", "");
-//			}
-//		}
+				optionsResponseNode.put("status", "ok");
+				optionsResponseNode.put("errorMessage", "");
+			}
+		}
 		
 		// Store request in DB
 		Fido2RegistrationData entity = new Fido2RegistrationData();
@@ -339,6 +339,7 @@ public class AttestationService {
 		// default is cross platform
 		AuthenticatorAttachment authenticatorAttachment = AuthenticatorAttachment.CROSS_PLATFORM;
 		UserVerification userVerification = UserVerification.preferred;
+		UserVerification residentKey = UserVerification.preferred;
 
 		Boolean requireResidentKey = false;
 
@@ -351,6 +352,8 @@ public class AttestationService {
 					.verifyUserVerification(authenticatorSelectionNodeParameter.get("userVerification"));
 			requireResidentKey = commonVerifiers
 					.verifyRequireResidentKey(authenticatorSelectionNodeParameter.get("requireResidentKey"));
+			residentKey = commonVerifiers
+					.verifyUserVerification(authenticatorSelectionNodeParameter.get("residentKey"));
 		}
 
 		ObjectNode authenticatorSelectionNode = dataMapperService.createObjectNode();
@@ -363,6 +366,9 @@ public class AttestationService {
 		}
 		if (userVerification != null) {
 			authenticatorSelectionNode.put("userVerification", userVerification.toString());
+		}
+		if (residentKey != null) {
+			authenticatorSelectionNode.put("residentKey", residentKey.toString());
 		}
 
 		return authenticatorSelectionNode;

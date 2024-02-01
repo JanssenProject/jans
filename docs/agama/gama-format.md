@@ -39,29 +39,41 @@ Except for `code` and `web` directories, all elements in the file structure abov
 
 ### Metadata
 
-`project.json` file is expected to contain metadata about the contents of the project in JSON format. This is an example:
+`project.json` file is expected to contain metadata about the contents of the project in JSON format. 
+
+|Field|Description|data type|
+|-|-|-|
+|`projectName`|A unique name that will be associated to this project|_string_|
+|`version`|Project's version. It is recommended to use semantic versioning format|_string_|
+|`author`|A user handle that identifies the author of the project|_string_|
+|`license`|A reference to applicable license terms|_string_|
+|`description`||_string_|
+|`configs`|Object containing exemplifying [configuration properties](./language-reference.md#header-basics) for flows that may need them. The keys of this field, if any, are qualified flow names already part of the project|_json object_|
+|`noDirectLaunch`|An array holding zero or more qualified flow names. This list is used to prevent certain flows to be launched directly from a web browser. It's a security measure to avoid end-users triggering flows at will|_array_|
+
+All fields are optional and more can be added if desired.
+
+Below is an example of a `project.json` file:
 
 ```
 {
-  "projectName": "A unique name that will be associated to this project",
-  "author": "A user handle that identifies you",
-  "description": "Other relevant data can go here",
-  "type": "",
+  "projectName": "biometric-auth",
+  "version": "2.0.3",
+  "author": "avgJoe123",
+  "license": "apache-2.0",
+  "description": "Allows users to authenticate via fingerpint and/or iris recognition",
   "configs": {
-    "com.foods.sweet": {
+    "com.acme.bio.IrisScan": {
         "prop1": "secret",
-        "prop2": [1, 2, 3]
+        "prop2": { "subprop": [1, 2, 3] }
     }
   },
-  "noDirectLaunch": [ "test" ]
+  "noDirectLaunch": [ "com.acme.bio.TraitExtractor" ]
 }
 ```
 
-The `configs` section is a JSON object containing exemplifying [configuration properties](./language-reference.md#header-basics) for flows that may need them. Note `.gama` files **must not** contain **real** configuration properties because these files can be freely distributed; in practice, configurations hold sensitive data that should not be exposed. The keys of object `configs`, if any, are qualified flow names already part of the project.  
-
-The `noDirectLaunch` section is an array holding zero or more qualified flow names. Use this list to prevent certain flows to be launched directly from a web browser. This is a security measure to avoid end-users triggering flows at will.
-
-Other fields can be added in `project.json`.
+!!! Important
+    Use the `configs` section wisely: `.gama` files **must not** contain **real** configuration properties because these files may be freely distributed; in practice, configurations hold sensitive data that should not be exposed
 
 ## Sample project
 

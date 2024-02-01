@@ -196,6 +196,11 @@ public class RegisterService {
             client.setContacts(listAsArrayWithoutDuplicates(contacts));
         }
 
+        List<String> authorizationDetailsTypes = requestObject.getAuthorizationDetailsTypes();
+        if (authorizationDetailsTypes != null && !authorizationDetailsTypes.isEmpty()) {
+            client.getAttributes().setAuthorizationDetailsTypes(authorizationDetailsTypes);
+        }
+
         for (String key : requestObject.getClientNameLanguageTags()) {
             client.setClientNameLocalized(requestObject.getClientName(key), Locale.forLanguageTag(key));
         }
@@ -307,6 +312,15 @@ public class RegisterService {
         }
         if (requestObject.getIntrospectionEncryptedResponseEnc() != null) {
             client.getAttributes().setIntrospectionEncryptedResponseEnc(requestObject.getIntrospectionEncryptedResponseEnc().toString());
+        }
+        if (requestObject.getTxTokenSignedResponseAlg() != null) {
+            client.getAttributes().setTxTokenSignedResponseAlg(requestObject.getTxTokenSignedResponseAlg().toString());
+        }
+        if (requestObject.getTxTokenEncryptedResponseAlg() != null) {
+            client.getAttributes().setTxTokenEncryptedResponseAlg(requestObject.getTxTokenEncryptedResponseAlg().toString());
+        }
+        if (requestObject.getTxTokenEncryptedResponseEnc() != null) {
+            client.getAttributes().setTxTokenEncryptedResponseEnc(requestObject.getTxTokenEncryptedResponseEnc().toString());
         }
         if (requestObject.getRequestObjectSigningAlg() != null) {
             client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());

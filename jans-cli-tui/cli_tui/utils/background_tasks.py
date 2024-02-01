@@ -2,6 +2,7 @@ from prompt_toolkit.eventloop import get_event_loop
 
 from utils.utils import common_data
 from utils.static import common_strings
+from utils.multi_lang import _
 
 
 async def get_attributes_coroutine(app) -> None:
@@ -32,3 +33,16 @@ async def get_attributes_coroutine(app) -> None:
         else:
             break
 
+
+async def retrieve_enabled_scripts() -> None:
+    'Coroutine for retreiving enabled scripts'
+
+    cli_args = {'operation_id': 'get-config-scripts', 'endpoint_args': 'fieldValuePair:enabled=true'}
+    response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
+
+    if response.status_code not in (200, 201):
+        common_data.app.show_message(_("Error getting scripts"), str(response.text), tobefocused=common_data.app.center_frame)
+        return
+
+    result = response.json()
+    common_data.enabled_scripts = result['entries']

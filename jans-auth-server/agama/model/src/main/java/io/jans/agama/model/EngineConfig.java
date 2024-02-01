@@ -3,10 +3,9 @@ package io.jans.agama.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.jans.agama.model.serialize.Type;
-import io.jans.util.Pair;
-
 import jakarta.ws.rs.core.HttpHeaders;
+
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,8 +18,6 @@ public class EngineConfig {
     private String rootDir;
     private String templatesPath = "/ftl";
     private String scriptsPath = "/scripts";
-    
-    private Type serializerType = Type.KRYO;
     
     private int maxItemsLoggedInCollections = 3;
     
@@ -35,9 +32,10 @@ public class EngineConfig {
     //relative to https://.../jans-auth
     private String bridgeScriptPage = "agama.xhtml";
     
-    private Map<String, String> defaultResponseHeaders = Stream.of(
-                new Pair<>(HttpHeaders.CACHE_CONTROL, "max-age=0, no-store")
-        ).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
+    private Map<String, List<String>> serializeRules;
+
+    private Map<String, String> defaultResponseHeaders = Map.of(
+            HttpHeaders.CACHE_CONTROL, "max-age=0, no-store");
 
     public String getJsonErrorPage(String page) {
         return "json_"+ page;
@@ -78,14 +76,6 @@ public class EngineConfig {
 
     public void setScriptsPath(String scriptsPath) {
         this.scriptsPath = scriptsPath;
-    }
-
-    public Type getSerializerType() {
-        return serializerType;
-    }
-
-    public void setSerializerType(Type serializerType) {
-        this.serializerType = serializerType;
     }
 
     public String getInterruptionErrorPage() {
@@ -150,6 +140,14 @@ public class EngineConfig {
 
     public void setDefaultResponseHeaders(Map<String, String> defaultResponseHeaders) {
         this.defaultResponseHeaders = defaultResponseHeaders;
+    }
+
+    public Map<String, List<String>> getSerializeRules() {
+        return serializeRules;
+    }
+
+    public void setSerializeRules(Map<String, List<String>> serializeRules) {
+        this.serializeRules = serializeRules;
     }
 
 }

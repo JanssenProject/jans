@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.0.21-SNAPSHOT</version>
+		<version>1.0.22</version>
 	</parent>
 
 	<prerequisites>
@@ -26,6 +26,10 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-message</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -83,15 +87,7 @@
 			<artifactId>weld-core-impl</artifactId>
 		</dependency>
 
-		<!-- Security -->
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcpkix-jdk15on</artifactId>
-		</dependency>
+
 
 		<!-- Microprofile -->
 		<dependency>
@@ -237,10 +233,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>

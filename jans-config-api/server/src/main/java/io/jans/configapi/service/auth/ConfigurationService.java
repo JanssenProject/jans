@@ -31,7 +31,7 @@ public class ConfigurationService {
 
     @Inject
     ConfigurationFactory configurationFactory;
-    
+
     private StatsData statsData;
 
     public Conf findConf() {

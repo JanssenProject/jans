@@ -21,7 +21,7 @@ tags:
    
 1. The installer will detect which operating system, init type, and Apache version are currently on the server.
   
-2. The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Gluu Server. Hit Enter to accept the default values.
+2. The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Janssen Authorization Server. Hit Enter to accept the default values.
   
   ```bash
   Enter IP Address:
@@ -61,7 +61,7 @@ Avoid setup issues by acknowledging the following:
      
    - Use a real hostname--this can always be managed via host file entries if adding a DNS entry is too much work for testing.
      
-   - For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Gluu.
+   - For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Janssen Authorization Server.
   
 !!! Warning    
     Use a FQDN (fully qualified domain name) as hostname and refrain from using 127.0.0.1 as IP address or usage of private IP is not supported and not recommended.
@@ -94,7 +94,7 @@ To check usage of this script run help command
                      [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
 ```
 
-Use this script to configure your Jans Server and to add initial data required for oxAuth and oxTrust to start. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.
+Use this script to configure your Jans Server and to add initial data. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.
 
 Below are the optional arguments:
 

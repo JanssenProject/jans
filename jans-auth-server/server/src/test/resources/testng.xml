@@ -26,6 +26,8 @@
 
             <class name="io.jans.as.server.auth.DpopServiceTest" />
             <class name="io.jans.as.server.token.ws.rs.TokenExchangeServiceTest" />
+            <class name="io.jans.as.server.token.ws.rs.TxTokenServiceTest" />
+            <class name="io.jans.as.server.token.ws.rs.TxTokenValidatorTest" />
             <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceValidatorTest" />
             <class name="io.jans.as.server.ws.rs.stat.MonthsTest" />
 
@@ -35,6 +37,7 @@
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeActionTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizationChallengeValidatorTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthzRequestTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthzDetailsServiceTest" />
 
             <!-- REVOKE -->
             <class name="io.jans.as.server.revoke.RevokeRestWebServiceImplTest" />

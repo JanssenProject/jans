@@ -1,0 +1,8 @@
+{
+  "username": "${jans_idp_user_name}",
+  "firstName": "Jans",
+  "lastName": "API User",
+  "emailVerified": true,
+  "attributes": [],
+  "enabled": true
+}

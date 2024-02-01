@@ -8,6 +8,11 @@
 //Generated at ${.now?iso_utc}
 <#assign fqname = flow.@fqname>
 function ${flow.@fun}<#recurse flow>
+    <#-- see header macro -->
+} catch (_e) {
+    return _makeJavaException(_fqname, _e)   <#-- See jans#6530 -->
+}
+
 }
 
 <#macro header>
@@ -21,6 +26,8 @@ const _fqname = "${fqname}", _basePath = ${.node.base.STRING}
 let _it = null, _it2 = null
 <#-- idx is accessible to flow writers (it's not underscore-prefixed). It allows to access the status of loops -->
 let idx = [], _items = []
+
+try {
 </#macro>
 
 <#macro statement>
@@ -55,52 +62,53 @@ let idx = [], _items = []
 <#macro action_call>
     <#local catch=.node.preassign_catch?size gt 0>
 
-    <#if catch>
-try {
-    var ${.node.preassign_catch.short_var} = null
-    </#if>
-    <@util_preassign node=.node /> _actionCall(
+    _it = _actionCall(
     <#if .node.static_call?size gt 0>
-        null, false, "${.node.static_call.qname}", "${.node.static_call.ALPHANUM}"
+        null, "${.node.static_call.qname}", "${.node.static_call.ALPHANUM}"
         , <@util_argslist node=.node.static_call />
     <#else>
-        ${.node.oo_call.variable}, true, null, "${.node.oo_call.ALPHANUM}"
+        ${.node.oo_call.variable}, null, "${.node.oo_call.ALPHANUM}"
         , <@util_argslist node=.node.oo_call />
     </#if>    
     )
-
+    
+    _it2 = _it.second
     <#if catch>
-} catch (_e) {
-    ${.node.preassign_catch.short_var} = _e.javaException
-}
+        var ${.node.preassign_catch.short_var} = _it2
+    <#else>
+        if (!_isNil(_it2)) return _it2   <#-- "propagate exception" to parent, see jans#6530 -->
     </#if>
+
+    if (_isNil(_it2)) <@util_preassign node=.node /> _it.first
+
+    _it = null      <#-- avoids a later serialization of a Pair -->
 </#macro>
 
 <#macro flow_call>
     <#local catch=.node.preassign_catch?size gt 0>
 
-    <#if catch>
-try {
-    var ${.node.preassign_catch.short_var} = null
-    </#if>
-    
     <#if .node.variable?size gt 0>
         _it = ${.node.variable}
     <#else>
         _it = "${.node.qname}"
     </#if>
-_it = _flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_argslist node=.node />)
 
-if (_it === undefined) throw new Error("No Finish instruction was reached")
+    _it = _flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_argslist node=.node />)
 
-if (_it.bubbleUp) return _it.value
-    <@util_preassign node=.node /> _it.value
-    
+    if (_it.bubbleUp) return _it.value
+
+    _it = _it.value
+    _it2 = _isJavaException(_it)
+
     <#if catch>
-} catch (_e) {
-    ${.node.preassign_catch.short_var} = _makeRhinoException(_e)
-}
+        var ${.node.preassign_catch.short_var} = _it2 ? _it : null
+    <#else>
+        if (_it2) return _it  <#-- "propagate exception" to parent -->
     </#if>
+    
+    if (!_it2) <@util_preassign node=.node /> _it
+    
+    _it = null
 </#macro>
 
 <#macro rfac>

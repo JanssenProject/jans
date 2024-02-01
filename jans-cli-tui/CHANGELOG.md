@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.0.22](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.21...jans-cli-tui-v1.0.22) (2024-01-22)
+
+
+### Features
+
+* **jans-cli-tui:** grab values of tokenEndpointAuthMethod from swagger doc ([#7141](https://github.com/JanssenProject/jans/issues/7141)) ([d1e6974](https://github.com/JanssenProject/jans/commit/d1e697432193459f55387bdcc1bfb827feadb6b7))
+* **jans-cli-tui:** inbound SAML ([#7147](https://github.com/JanssenProject/jans/issues/7147)) ([9bebb1a](https://github.com/JanssenProject/jans/commit/9bebb1a7403f1f6644b2976ada2422630dcd3ec8))
+* **jans-cli-tui:** message configuration ([#7198](https://github.com/JanssenProject/jans/issues/7198)) ([5dd6786](https://github.com/JanssenProject/jans/commit/5dd6786b3f12e662658b99ab845109a54ced0676))
+* **jans-cli-tui:** save client summary ([#7153](https://github.com/JanssenProject/jans/issues/7153)) ([f017df3](https://github.com/JanssenProject/jans/commit/f017df309458c7ba298a25c3c945476812567a40))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** CLI asks creds for unauthorized request ([#7207](https://github.com/JanssenProject/jans/issues/7207)) ([ec8afbe](https://github.com/JanssenProject/jans/commit/ec8afbe79991776b934b515ff1166e5044dba5a5))
+* **jans-cli-tui:** display provider list and edit provider ([#7434](https://github.com/JanssenProject/jans/issues/7434)) ([5967da0](https://github.com/JanssenProject/jans/commit/5967da03bef4560aba71c60107fa1e206d740f45))
+* **jans-cli-tui:** don't include client secret in summary ([#7161](https://github.com/JanssenProject/jans/issues/7161)) ([798a4d7](https://github.com/JanssenProject/jans/commit/798a4d7fdac64c7515ddd0d2f359f2ff905d7b7b))
+* **jans-cli-tui:** LOCK configuration NULL to DISABLED ([#7256](https://github.com/JanssenProject/jans/issues/7256)) ([529ba5f](https://github.com/JanssenProject/jans/commit/529ba5fc000dde43ed5b1c300af061ab751766ef))
+* **jans-cli-tui:** rename Message to Lock ([#7210](https://github.com/JanssenProject/jans/issues/7210)) ([19968e8](https://github.com/JanssenProject/jans/commit/19968e8c7be3215dfe22426f866edf366552c022))
+* **jans-cli-tui:** save auth server logging config ([#7432](https://github.com/JanssenProject/jans/issues/7432)) ([04dcbde](https://github.com/JanssenProject/jans/commit/04dcbdecb260162734c8bcd1d4517beb6514fa4c))
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.20...jans-cli-tui-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* **jans-cli-tui:** JWT Response for OAuth Token Introspection ([#6574](https://github.com/JanssenProject/jans/issues/6574)) ([aef08c1](https://github.com/JanssenProject/jans/commit/aef08c1beaf42c0b8d9ef6a214c612c4209925ee))
+* **jans-cli-tui:** provide list of enabled scripts for client scripts ([#6621](https://github.com/JanssenProject/jans/issues/6621)) ([f798b32](https://github.com/JanssenProject/jans/commit/f798b32e9b92af54fef683615cd17e4e688c16d4))
+* **jans-cli-tui:** replace list by label container for scope claims ([#6521](https://github.com/JanssenProject/jans/issues/6521)) ([4f37aa2](https://github.com/JanssenProject/jans/commit/4f37aa2de920a4f5532f27dcde99edd64ef1d362))
+* **jans-cli-tui:** SAML configuration interface ([#6591](https://github.com/JanssenProject/jans/issues/6591)) ([254fbdc](https://github.com/JanssenProject/jans/commit/254fbdcd3123bcef4ba80922dfcfc1c22cd0cbc5))
+* **jans-linux-tui:** tag field for endpoint adminUIPermissions ([#6556](https://github.com/JanssenProject/jans/issues/6556)) ([8eb7ac0](https://github.com/JanssenProject/jans/commit/8eb7ac00d61e16553f96d5bdb9af75ef010de268))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** fix saving acr script ([#6593](https://github.com/JanssenProject/jans/issues/6593)) ([396576d](https://github.com/JanssenProject/jans/commit/396576dc5f201489a6563757d4f422def12e244a))
+* **jans-cli-tui:** hide attrbiute requirePkce for clients ([#7066](https://github.com/JanssenProject/jans/issues/7066)) ([ff44f9c](https://github.com/JanssenProject/jans/commit/ff44f9c21332d7ccc64baf5e3629545d9a592a90))
+* **jans-cli-tui:** import error ([#6786](https://github.com/JanssenProject/jans/issues/6786)) ([a71bd2a](https://github.com/JanssenProject/jans/commit/a71bd2ad9e93b886af468cf3d5db63aa6064186f))
+* **jans-cli-tui:** saml tr issues ([#7068](https://github.com/JanssenProject/jans/issues/7068)) ([16c32b4](https://github.com/JanssenProject/jans/commit/16c32b43b1e5b13cba2c550ce6da8c1ebfccc3bd))
+* **jans-cli-tui:** search attribute ([#6630](https://github.com/JanssenProject/jans/issues/6630)) ([361f52b](https://github.com/JanssenProject/jans/commit/361f52b4ed30a58c98363adee3bdf2f71e1226ff))
+* **jans-linux-setup:** python requests-toolbelt library for tui ([#7052](https://github.com/JanssenProject/jans/issues/7052)) ([f0ecba7](https://github.com/JanssenProject/jans/commit/f0ecba7f75ee3f697ee5e0436a32b208f1a7bc0c))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
 ## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.19...jans-cli-tui-v1.0.20) (2023-11-08)
 
 

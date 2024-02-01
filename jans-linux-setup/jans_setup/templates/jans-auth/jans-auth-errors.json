@@ -51,6 +51,11 @@
             "uri":null
         },
         {
+            "id":"invalid_authorization_details",
+            "description":"The authorization_details in the Authorization Request does not pass AS validation.",
+            "uri":null
+        },
+        {
             "id":"login_required",
             "description":"The Authorization Server requires End-User authentication. This error MAY be returned when the prompt parameter in the Authorization Request is set to none to request that the Authorization Server should not display any user interfaces to the End-User, but the Authorization Request cannot be completed without displaying a user interface for user authentication.",
             "uri":null
@@ -192,6 +197,21 @@
              "id":"use_dpop_nonce",
              "description":"Authorization server requires nonce in DPoP proof.",
              "uri":null
+        },
+        {
+            "id":"invalid_authorization_details",
+            "description":"The authorization_details in the request does not pass AS validation.",
+            "uri":null
+        },
+        {
+            "id":"invalid_requested_token_type",
+            "description":"The requested_token_type in the request is not valid.",
+            "uri":null
+        },
+        {
+            "id":"invalid_subject_token_type",
+            "description":"The subject_token_type in the request is not valid.",
+            "uri":null
         },
         {
              "id":"use_new_dpop_nonce",

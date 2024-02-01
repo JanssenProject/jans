@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.22](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.21...jans-pycloudlib-v1.0.22) (2024-01-22)
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** specify decoder to load password from file ([#7300](https://github.com/JanssenProject/jans/issues/7300)) ([6b0a450](https://github.com/JanssenProject/jans/commit/6b0a450f03d432ff143ec0d2870456ddda6f9a5d))
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.20...jans-pycloudlib-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* **docker-jans:** automatically update schema of sql/spanner tables ([#6634](https://github.com/JanssenProject/jans/issues/6634)) ([2d86835](https://github.com/JanssenProject/jans/commit/2d868351ec9d8a8649ac804e2584aa7447e6c36f))
+
+
+### Bug Fixes
+
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
 ## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.19...jans-pycloudlib-v1.0.20) (2023-11-08)
 
 

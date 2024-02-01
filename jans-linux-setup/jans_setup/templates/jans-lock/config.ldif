@@ -1,0 +1,9 @@
+dn: ou=jans-lock,ou=configuration,o=jans
+jansConfDyn::%(lock_dynamic_conf_base64)s
+jansConfErrors::%(lock_error_base64)s
+jansConfStatic::%(lock_static_conf_base64)s
+jansRevision: 1
+objectClass: top
+objectClass: jansAppConf
+ou: lock
+

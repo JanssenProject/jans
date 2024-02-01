@@ -9,6 +9,7 @@ package io.jans.as.model.common;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.jans.as.model.common.converter.ListConverter;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
@@ -56,6 +57,8 @@ public class IntrospectionResponse {
     private String acr;
     @JsonProperty(value = "auth_time")
     private Integer authTime;
+    @JsonProperty(value = "authorization_details")
+    private JsonNode authorizationDetails;
 
     // DPoP
     @JsonProperty(value = "nbf")
@@ -69,6 +72,14 @@ public class IntrospectionResponse {
 
     public IntrospectionResponse(boolean active) {
         this.active = active;
+    }
+
+    public JsonNode getAuthorizationDetails() {
+        return authorizationDetails;
+    }
+
+    public void setAuthorizationDetails(JsonNode authorizationDetails) {
+        this.authorizationDetails = authorizationDetails;
     }
 
     public String getAcr() {
@@ -196,6 +207,7 @@ public class IntrospectionResponse {
         return "IntrospectionResponse{" +
                 "active=" + active +
                 ", scope=" + scope +
+                ", authorizationDetails=" + authorizationDetails +
                 ", clientId='" + clientId + '\'' +
                 ", username='" + username + '\'' +
                 ", tokenType='" + tokenType + '\'' +

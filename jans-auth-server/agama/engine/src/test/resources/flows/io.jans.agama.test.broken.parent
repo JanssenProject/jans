@@ -1,0 +1,10 @@
+Flow io.jans.agama.test.broken.parent
+    Basepath "" 
+
+| E1 = Trigger io.jans.agama.test.broken.flow1
+| E2 = Trigger io.jans.agama.test.broken.flow2
+    
+When E1 is null or E2 is null
+    Finish false
+    
+Finish true     //all flows should have thrown error

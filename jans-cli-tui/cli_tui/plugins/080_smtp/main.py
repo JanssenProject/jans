@@ -102,20 +102,20 @@ class Plugin(DialogUtils):
         self.app.stop_progressing()
         self.data = response.json()
 
-        self.host_widget.me.text = self.data.get('host', '')
-        self.port_widget.me.text = str(self.data.get('port', ''))
-        self.connect_protection_widget.me.current_value = self.data.get('connect_protection', 'None')
-        self.from_name_widget.me.text = self.data.get('from_name', '')
-        self.from_email_address_widget.me.text = self.data.get('from_email_address', '')
+        self.host_widget.me.text = self.data.get('host') or ''
+        self.port_widget.me.text = str(self.data.get('port')) or ''
+        self.connect_protection_widget.me.current_value = self.data.get('connect_protection') or 'None'
+        self.from_name_widget.me.text = self.data.get('from_name') or ''
+        self.from_email_address_widget.me.text = self.data.get('from_email_address') or ''
         self.requires_authentication_widget.me.checked = self.data.get('requires_authentication', False)
-        self.smtp_authentication_account_username_widget.me.text = self.data.get('smtp_authentication_account_username', '')
-        self.smtp_authentication_account_password_widget.me.text = self.data.get('smtp_authentication_account_password', '')
+        self.smtp_authentication_account_username_widget.me.text = self.data.get('smtp_authentication_account_username') or ''
+        self.smtp_authentication_account_password_widget.me.text = self.data.get('smtp_authentication_account_password') or ''
         self.trust_host_widget.me.checked = self.data.get('trust_host', False)
 
-        self.key_store_widget.me.text = self.data.get('key_store', '')
-        self.key_store_password_widget.me.text = self.data.get('key_store_password', '')
-        self.key_store_alias_widget.me.text = self.data.get('key_store_alias', '')
-        self.signing_algorithm_widget.me.text = self.data.get('signing_algorithm', '')
+        self.key_store_widget.me.text = self.data.get('key_store') or ''
+        self.key_store_password_widget.me.text = self.data.get('key_store_password') or ''
+        self.key_store_alias_widget.me.text = self.data.get('key_store_alias') or ''
+        self.signing_algorithm_widget.me.text = self.data.get('signing_algorithm') or ''
 
     def save_config(self) -> None:
         """This method saves STMP configuration

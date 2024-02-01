@@ -24,7 +24,8 @@ public enum ApplicationType implements AttributeEnum {
     SCIM("scim", "SCIM"),
     CACHE_REFRESH("cache_refresh", "Cache Refresh"),
     JANS_CONFIG_API("jans_config_api", "Jans Config API"),
-    JANS_CLIENT_API("jans_client_api", "Jans Client API");
+    JANS_CLIENT_API("jans_client_api", "Jans Client API"),
+    JANS_LOCK("jans_lock", "Jans Lock");
 
     private String value;
     private String displayName;

@@ -45,6 +45,10 @@ class Config:
     def get(self, attr, default=None):
         return getattr(self, attr) if hasattr(self, attr) else default
 
+    @classmethod
+    def set_mapping_locations(self):
+        ptype = 'rdbm' if self.persistence_type in ('sql', 'spanner') else self.persistence_type
+        self.mapping_locations = { group: ptype for group in self.couchbaseBucketDict }
 
     @classmethod
     def dump(self, dumpFile=False):
@@ -140,7 +144,7 @@ class Config:
         self.cmd_java = os.path.join(self.jre_home, 'bin/java')
         self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
         self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
-        os.environ['OPENDJ_JAVA_HOME'] =  self.jre_home
+        os.environ['OPENDJ_JAVA_HOME'] = self.jre_home
 
         if self.profile == OPENBANKING_PROFILE:
             self.use_external_key = True
@@ -156,26 +160,26 @@ class Config:
 
         #passwords
         self.ldapPass = None
-        self.admin_password = None
         self.admin_password = ''
         self.cb_password = None
         self.encoded_cb_password = ''
 
         #DB installation types
-        self.opendj_install = InstallTypes.LOCAL
+        self.opendj_install = InstallTypes.NONE
         self.cb_install = InstallTypes.NONE
-        self.rdbm_install = InstallTypes.LOCAL if self.profile == OPENBANKING_PROFILE else False
+        self.rdbm_install = InstallTypes.LOCAL
 
         self.couchbase_buckets = []
 
         #rdbm
-        self.rdbm_install_type = InstallTypes.LOCAL if self.profile == OPENBANKING_PROFILE else InstallTypes.NONE
-        self.rdbm_type = 'mysql'
+        self.rdbm_install_type = InstallTypes.LOCAL
+        self.rdbm_type = 'pgsql'
         self.rdbm_host = 'localhost'
         self.rdbm_port = 3306
         self.rdbm_db = 'jansdb'
         self.rdbm_user = 'jans'
         self.rdbm_password = None
+        self.rdbm_password_enc = ''
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
 
         #spanner
@@ -209,13 +213,15 @@ class Config:
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
         self.install_jans_keycloak_link = False
+        self.install_jans_lock = False
+        self.install_opa = False
 
         # backward compatibility
         self.os_type = base.os_type
         self.os_version = base.os_version
         self.os_initdaemon = base.os_initdaemon
 
-        self.persistence_type = 'sql' if self.profile == OPENBANKING_PROFILE else 'ldap'
+        self.persistence_type = 'sql'
 
         self.setup_properties_fn = os.path.join(self.install_dir, 'setup.properties')
         self.savedProperties = os.path.join(self.install_dir, 'setup.properties.last')
@@ -416,12 +422,7 @@ class Config:
 
                     ))
 
-        if self.profile == OPENBANKING_PROFILE:
-            #default locations are rdbm
-            self.mapping_locations = { group: 'rdbm' for group in self.couchbaseBucketDict }
-        else:
-            #default locations are OpenDJ
-            self.mapping_locations = { group: 'ldap' for group in self.couchbaseBucketDict }
+        self.mapping_locations = { group: 'rdbm' for group in self.couchbaseBucketDict }
 
         self.non_setup_properties = {
             'oxauth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')

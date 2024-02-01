@@ -11,7 +11,7 @@ from cli_style import style
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_spinner import Spinner
 from wui_components.jans_vetrical_nav import JansVerticalNav
-
+from utils.static import cli_style
 from wui_components.jans_date_picker import DateSelectWidget
 from utils.multi_lang import _
 
@@ -90,12 +90,95 @@ class DialogUtils:
                         missing_fields.append(item.children[1].jans_name)
 
         if missing_fields:
-            app = self.app if hasattr(self, 'app') else self.myparent
-            app.show_message(_("Please fill required fields"), _("The following fields are required:\n") + ', '.join(missing_fields), tobefocused=tobefocused)
+            common_data.app.show_message(_("Please fill required fields"), _("The following fields are required:\n") + ', '.join(missing_fields), tobefocused=tobefocused)
             return False
 
         return True
 
+    def get_widgets(
+            self, 
+            properties:dict,
+            values: dict=None,
+            styles: dict=None
+            ) -> list:
+        """Returns list of widgets for properties
+
+        Args:
+            properties (dict): properties to get widget
+            values (dict): values of properties
+            styes (dict): styles for widgets
+        """
+
+        if not values:
+            values = {}
+        if not styles:
+            styles = {'widget_style':'', 'string': cli_style.edit_text, 'boolean': cli_style.check_box}
+
+        widgets = []
+        for item_name in properties:
+            item = properties[item_name]
+            if item['type'] in ('integer', 'string'):
+                if item.get('enum'):
+                    widgets.append(
+                        common_data.app.getTitledWidget(
+                                item_name,
+                                name=item_name,
+                                widget=DropDownWidget(
+                                    values=[(str(enum), str(enum)) for enum in item['enum']],
+                                    value=str(values.get(item_name) or '')
+                                    ),
+                                style=styles['string'],
+                                )
+                        )
+                else:
+                    widgets.append(
+                        common_data.app.getTitledText(
+                            item_name,
+                            name=item_name,
+                            value=str(values.get(item_name) or ''),
+                            text_type=item['type'],
+                            style=styles['string'],
+                            widget_style=styles['widget_style']
+                            )
+                        )
+
+            elif item['type'] == 'boolean':
+                widgets.append(
+                    common_data.app.getTitledCheckBox(
+                        item_name,
+                        name=item_name,
+                        checked=values.get(item_name, False),
+                        style=styles['boolean'],
+                        widget_style=styles['widget_style']
+                        )
+                    )
+
+            elif item['type'] == 'array' and item['items'].get('enum'):
+                widgets.append(
+                    common_data.app.getTitledCheckBoxList(
+                        item_name, 
+                        name=item_name, 
+                        values=item['items']['enum'],
+                        current_values=values.get(item_name, []),
+                        style=styles['boolean'],
+                        widget_style=styles['widget_style']
+                        )
+                    )
+
+            elif item['type'] == 'array' and item['items'].get('type') in ('string', 'integer'):
+                titled_text = common_data.app.getTitledText(
+                                    item_name,
+                                    name=item_name,
+                                    height=4,
+                                    text_type = item['items']['type'],
+                                    value='\n'.join(values.get(item_name, [])),
+                                    style=styles['string'],
+                                    widget_style=styles['widget_style']
+                                )
+                titled_text.jans_list_type = True
+                widgets.append(titled_text)
+
+        return widgets
 
 def fromisoformat(dt_str):
     dt, _, us = dt_str.partition(".")

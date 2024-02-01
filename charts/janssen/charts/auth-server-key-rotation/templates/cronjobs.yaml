@@ -35,6 +35,16 @@ spec:
         {{- end }}
           containers:
             - name: {{ include "auth-server-key-rotation.name" . }}
+              {{- if .Values.customScripts }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                    {{- with .Values.customScripts }}
+                    {{- toYaml . | replace "- " "" | nindent 20}}
+                    {{- end }}
+                    /app/scripts/entrypoint.sh
+              {{- end}}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               env:
                 {{- include "auth-server-key-rotation.usr-envs" . | indent 16 }}

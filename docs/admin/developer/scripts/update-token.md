@@ -204,13 +204,13 @@ Pseudocode and example - Issue Access token only if account balance is greater t
     def modifyAccessToken(self, accessToken, context):
 
 	    # header claims
-	    accessToken.getHeader().setClaim("header_name", "header_value")
+	    context.getHeader().setClaim("header_name", "header_value")
 
 	    #custom claims
-	    accessToken.getClaims().setClaim("claim_name", "claimValue")
+	    context.getClaims().setClaim("claim_name", "claimValue")
 
 	    #regular claims        
-	    accessToken.getClaims().setClaim("sub", claimValue)
+	    context.getClaims().setClaim("sub", claimValue)
 
 	    return True
 

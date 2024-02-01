@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.0.21_dev
+    tag: 1.0.22-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -100,6 +100,10 @@ auth-server:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []
 # -- Responsible for regenerating auth-keys per x hours
 auth-server-key-rotation:
   # -- Add custom normal and secret envs to the service
@@ -120,7 +124,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.21_dev
+    tag: 1.0.22-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -159,6 +163,10 @@ auth-server-key-rotation:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: {}
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []
 # -- Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 config:
   # -- Add custom normal and secret envs to the service.
@@ -284,6 +292,28 @@ config:
     cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
     # -- OpenDJ key string. This must be encoded using base64.
     cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+    # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
+    quarkusTransactionEnableRecovery: true
+    # -- Keycloak logging level
+    kcLogLevel: INFO
+    # -- Keycloak proxy mode (for most deployments, this doesn't need to be changed)
+    kcProxy: edge
+    # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
+    kcDbVendor: mysql
+    # -- Keycloak database username
+    kcDbUsername: keycloak
+    # -- Password for Keycloak database access
+    kcDbPassword: Test1234#
+    # -- Keycloak database schema name (note that PostgreSQL may be using "public" schema).
+    kcDbSchema: keycloak
+    # -- Keycloak database host uri
+    kcDbUrlHost: mysql.kc.svc.cluster.local
+    # -- Keycloak database port (default to port 3306 for mysql).
+    kcDbUrlPort: 3306
+    # -- Keycloak database name.
+    kcDbUrlDatabase: keycloak
+    # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
+    kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
   # -- Country code. Used for certificate creation.
   countryCode: US
   # -- Email address of the administrator usually. Used for certificate creation.
@@ -292,7 +322,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.0.21_dev
+    tag: 1.0.22-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- LDAP admin password if OpenDJ is used for persistence.
@@ -335,6 +365,10 @@ config:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Config Api endpoints can be used to configure the auth-server, which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS).
 config-api:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -384,7 +418,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.0.21_dev
+    tag: 1.0.22-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -434,6 +468,10 @@ config-api:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- FIDO 2.0 (FIDO2) is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments.
 fido2:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -483,7 +521,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.0.21_dev
+    tag: 1.0.22-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -538,6 +576,10 @@ fido2:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Janssen Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Auth Server.
 casa:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -587,7 +629,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 1.0.21_dev
+    tag: 1.0.22-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -638,6 +680,10 @@ casa:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []
 # -- Parameters used globally across all services helm charts.
 global:
   # -- Add custom normal and secret envs to the service.
@@ -715,7 +761,7 @@ global:
 
   auth-server-key-rotation:
     # -- Boolean flag to enable/disable the auth-server-key rotation cronjob chart.
-    enabled: false
+    enabled: true
   # -- Volume storage type if using AWS volumes.
   awsStorageType: io1
   # -- Volume storage type if using Azure disks.
@@ -947,6 +993,16 @@ global:
     ingress:
       # Enable link endpoints /jans-link
       linkEnabled: true
+  saml:
+    # -- Name of the saml service. Please keep it as default.
+    samlServiceName: saml
+    # -- Boolean flag to enable/disable the saml chart.
+    enabled: false
+    # -- Enable endpoints in either istio or nginx ingress depending on users choice
+    ingress:
+      # Enable saml endpoints /kc
+      samlEnabled: false
+
   # -- Path to SQL password file
   cnSqlPasswordFile: /etc/jans/conf/sql_password
   # -- Path to Couchbase password file
@@ -965,6 +1021,10 @@ global:
   cnLdapCacertFile: /etc/certs/opendj.pem
   # -- Path to OpenDJ truststore file
   cnLdapTruststoreFile: /etc/certs/opendj.pkcs12
+  # -- Path to file contains password for database access
+  kcDbPasswordFile: /etc/jans/conf/kc_db_password
+  # -- Path to file contains Keycloak admin credentials (username and password)
+  kcAdminCredentialsFile: /etc/jans/conf/kc_admin_creds
 
 # -- Nginx ingress definitions chart
 nginx-ingress:
@@ -1021,6 +1081,10 @@ nginx-ingress:
     casaLabels: { }
     # -- Casa ingress resource additional annotations.
     casaAdditionalAnnotations: { }
+    # -- SAML config ingress resource labels. key app is taken
+    samlLabels: { }
+    # -- SAML ingress resource additional annotations.
+    samlAdditionalAnnotations: { }
     # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
     additionalLabels: { }
     # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
@@ -1183,6 +1247,10 @@ opendj:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Job to generate data and initial config for Janssen Server persistence layer.
 persistence:
   # -- Add custom normal and secret envs to the service
@@ -1203,7 +1271,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.0.21_dev
+    tag: 1.0.22-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1234,6 +1302,10 @@ persistence:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- System for Cross-domain Identity Management (SCIM) version 2.0
 scim:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -1283,7 +1355,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 1.0.21_dev
+    tag: 1.0.22-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1338,7 +1410,10 @@ scim:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
-
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Link.
 link:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -1388,7 +1463,7 @@ link:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/link
     # -- Image  tag to use for deploying.
-    tag: 1.0.21_dev
+    tag: 1.0.22-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1442,3 +1517,114 @@ link:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
+# -- SAML.
+saml:
+  # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
+  # https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: {}
+    # -- Define below as many constraints as needed. The key name should follow the structure tsc1, tsc2...etc.
+    # Do not enter the key labelSelector in the entry/entries below as that is automatically injected by the chart
+    #tsc1:
+    #  maxSkew: 1
+    #  minDomains: 1 # optional; beta since v1.25
+    #  topologyKey: kubernetes.io/hostname
+    #  whenUnsatisfiable: DoNotSchedule
+    #  matchLabelKeys: [] # optional; alpha since v1.25
+    #  nodeAffinityPolicy: [] # optional; alpha since v1.25
+    #  nodeTaintsPolicy: [] # optional; alpha since v1.25
+    #tsc2:
+      #maxSkew: 1
+  # -- Configure the PodDisruptionBudget
+  pdb:
+    enabled: true
+    maxUnavailable: "90%"
+  # -- Configure the HorizontalPodAutoscaler
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 50
+    # -- metrics if targetCPUUtilizationPercentage is not set
+    metrics: []
+    # -- Scaling Policies
+    behavior: {}
+  # -- Add custom normal and secret envs to the service
+  usrEnvs:
+    # -- Add custom normal envs to the service
+    # variable1: value1
+    normal: {}
+    # -- Add custom secret envs to the service
+    # variable1: value1
+    secret: {}
+  # -- Add custom dns policy
+  dnsPolicy: ""
+  # -- Add custom dns config
+  dnsConfig: {}
+  image:
+    # -- Image pullPolicy to use for deploying.
+    pullPolicy: IfNotPresent
+    # -- Image  to use for deploying.
+    repository: ghcr.io/janssenproject/jans/saml
+    # -- Image  tag to use for deploying.
+    tag: 1.0.22-1
+    # -- Image Pull Secrets
+    pullSecrets: [ ]
+  # -- Service replica number.
+  replicas: 1
+  # -- Resource specs.
+  resources:
+    limits:
+      # -- CPU limit.
+      cpu: 500m
+      # -- Memory limit.
+      memory: 1000Mi
+    requests:
+      # -- CPU request.
+      cpu: 500m
+      # -- Memory request.
+      memory: 1000Mi
+  # -- Configure the liveness healthcheck for the auth server if needed.
+  livenessProbe:
+    # -- http liveness probe endpoint
+    exec:
+      command:
+        - python3
+        - /app/scripts/healthcheck.py
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 10
+  readinessProbe:
+    # -- http readiness probe endpoint
+    exec:
+      command:
+        - python3
+        - /app/scripts/healthcheck.py
+    initialDelaySeconds: 25
+    periodSeconds: 25
+    timeoutSeconds: 5
+    failureThreshold: 10
+  # -- Configure any additional volumes that need to be attached to the pod
+  volumes: []
+  # -- Configure any additional volumesMounts that need to be attached to the containers
+  volumeMounts: []
+  # Actions on lifecycle events such as postStart and preStop
+  # Example
+  # lifecycle:
+  #   postStart:
+  #     exec:
+  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+  lifecycle: {}
+
+  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
+  additionalLabels: { }
+  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
+  additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]

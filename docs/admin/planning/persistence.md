@@ -68,4 +68,3 @@ engineer to implement it.
 was purpose built for auto-scaling, multi-region persistence. It has it's own
 API, although recently Google added support for MySQL and Postgres drivers.
 
-1. **MariaDB** Coming soon! Similar to MySQL but more cutting edge.

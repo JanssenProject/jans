@@ -47,6 +47,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private List<String> responseModesSupported;
     private List<String> grantTypesSupported;
     private List<String> acrValuesSupported;
+    private List<String> authorizationDetailsTypesSupported;
     private List<String> subjectTypesSupported;
     private List<String> authorizationSigningAlgValuesSupported;
     private List<String> authorizationEncryptionAlgValuesSupported;
@@ -110,6 +111,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         responseModesSupported = new ArrayList<>();
         grantTypesSupported = new ArrayList<>();
         acrValuesSupported = new ArrayList<>();
+        authorizationDetailsTypesSupported = new ArrayList<>();
         subjectTypesSupported = new ArrayList<>();
         authorizationSigningAlgValuesSupported = new ArrayList<>();
         authorizationEncryptionAlgValuesSupported = new ArrayList<>();
@@ -521,6 +523,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setAcrValuesSupported(List<String> acrValuesSupported) {
         this.acrValuesSupported = acrValuesSupported;
+    }
+
+    /**
+     * Gets authorization details types supported.
+     *
+     * @return authorization details types supported.
+     */
+    public List<String> getAuthorizationDetailsTypesSupported() {
+        return authorizationDetailsTypesSupported;
+    }
+
+    /**
+     * Sets authorization details types supported.
+     *
+     * @param authorizationDetailsTypesSupported authorization details types supported.
+     */
+    public void setAuthorizationDetailsTypesSupported(List<String> authorizationDetailsTypesSupported) {
+        this.authorizationDetailsTypesSupported = authorizationDetailsTypesSupported;
     }
 
     /**
@@ -1257,6 +1277,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", responseModesSupported=" + responseModesSupported +
                 ", grantTypesSupported=" + grantTypesSupported +
                 ", acrValuesSupported=" + acrValuesSupported +
+                ", authorizationDetailsTypesSupported=" + authorizationDetailsTypesSupported +
                 ", subjectTypesSupported=" + subjectTypesSupported +
                 ", authorizationSigningAlgValuesSupported=" + authorizationSigningAlgValuesSupported +
                 ", authorizationEncryptionAlgValuesSupported=" + authorizationEncryptionAlgValuesSupported +

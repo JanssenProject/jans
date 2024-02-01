@@ -13,7 +13,7 @@ This Operation guide helps you learn about the common operations for Janssen on 
 ## Prerequisite
 - Review the [Janssen](../reference/kubernetes/README.md) components and architecture
 
-- Complete the [installation](../install/helm-install/local.md) of janssen on your desired Kubernetes provider.
+- Complete the [installation](../install/helm-install/README.md) of Janssen on your desired Kubernetes provider.
 
 ## Common Operations
 

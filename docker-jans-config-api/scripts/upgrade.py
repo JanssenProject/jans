@@ -103,6 +103,14 @@ def _transform_api_dynamic_config(conf):
             "className": "io.jans.configapi.plugin.link.rest.ApiApplication",
         })
         should_update = True
+
+    if "saml" not in plugins_names:
+        conf["plugins"].append({
+            "name": "saml",
+            "description": "saml plugin",
+            "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
+        })
+        should_update = True
     return conf, should_update
 
 

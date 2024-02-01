@@ -25,6 +25,7 @@ public class CibaRequestCacheControl implements Serializable {
     private User user;
     private Client client;
     private List<String> scopes;
+    private String authzDetails;
 
     private int expiresIn = 1;
     private String clientNotificationToken;
@@ -145,6 +146,14 @@ public class CibaRequestCacheControl implements Serializable {
         this.tokensDelivered = tokensDelivered;
     }
 
+    public String getAuthzDetails() {
+        return authzDetails;
+    }
+
+    public void setAuthzDetails(String authzDetails) {
+        this.authzDetails = authzDetails;
+    }
+
     public String getAcrValues() {
         return acrValues;
     }
@@ -167,6 +176,7 @@ public class CibaRequestCacheControl implements Serializable {
                 ", userAuthorization=" + status +
                 ", tokensDelivered=" + tokensDelivered +
                 ", acrValues='" + acrValues + '\'' +
+                ", authzDetails='" + authzDetails + '\'' +
                 '}';
     }
 }

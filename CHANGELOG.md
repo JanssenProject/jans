@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/v1.0.21...v1.0.21) (2023-12-14)
+
+
+### Bug Fixes
+
+* location for saml plugin ([#7097](https://github.com/JanssenProject/jans/issues/7097)) ([c57ba6c](https://github.com/JanssenProject/jans/commit/c57ba6c5f8133e73189c51368711d8a37c766751))
+* remove agama inbound jar dependency ([#7095](https://github.com/JanssenProject/jans/issues/7095)) ([c58c55c](https://github.com/JanssenProject/jans/commit/c58c55cca0a88872d791941c9f7abca45a09813c))
+
 ## [1.0.20](https://github.com/JanssenProject/jans/compare/v1.0.20...v1.0.20) (2023-11-08)
 
 

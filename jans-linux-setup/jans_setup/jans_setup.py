@@ -148,7 +148,7 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.jans_casa import CasaInstaller
 
     from setup_app.installers.jans_saml import JansSamlInstaller
-    
+    from setup_app.installers.jans_lock import JansLockInstaller
 
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
@@ -271,12 +271,17 @@ if Config.profile == 'jans':
     jans_link_installer = JansLinkInstaller()
     jans_keycloak_link_installer = JansKCLinkInstaller()
     jans_saml_installer = JansSamlInstaller()
+    jans_lock_installer = JansLockInstaller()
 
 jansCliInstaller = JansCliInstaller()
 
 # oxdInstaller = OxdInstaller()
 
 rdbmInstaller.packageUtils = packageUtils
+
+if not Config.installed_instance:
+    Config.set_mapping_locations()
+
 
 if Config.installed_instance:
 
@@ -469,6 +474,10 @@ def main():
                 if (Config.installed_instance and jans_saml_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jans_saml_installer.install_var)):
                     jans_saml_installer.start_installation()
+
+                if (Config.installed_instance and jans_lock_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jans_lock_installer.install_var)):
+                    jans_lock_installer.start_installation()
 
             # if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
             #    oxdInstaller.start_installation()

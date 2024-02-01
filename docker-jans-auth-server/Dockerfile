@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-alpine:17.0.8
+FROM bellsoft/liberica-openjdk-alpine:17.0.8@sha256:e82fb905ca6efffcdb1b0ed58f207b0ce91aeada78c218ae7dbb16bb31635728
 
 # ===============
 # Alpine packages
@@ -50,8 +50,8 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.21-SNAPSHOT
-ENV CN_BUILD_DATE='2023-10-11 10:17'
+ENV CN_VERSION=1.0.22
+ENV CN_BUILD_DATE='2024-01-22 12:44'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -80,12 +80,15 @@ ARG FIDO2_CLIENT_VERSION=${CN_VERSION}
 ARG FIDO2_CLIENT_BUILD_DATE=${CN_BUILD_DATE}
 ARG AGAMA_INBOUND_VERSION=${CN_VERSION}
 ARG AGAMA_INBOUND_BUILD_DATE=${CN_BUILD_DATE}
+ARG JANS_LOCK_VERSION=${CN_VERSION}
+ARG JANS_LOCK_BUILD_DATE=${CN_BUILD_DATE}
 
 RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://jenkins.jans.io/maven/io/jans/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
     && wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
-    && wget -q https://jenkins.jans.io/maven/io/jans/agama-inbound/${AGAMA_INBOUND_VERSION}/agama-inbound-${AGAMA_INBOUND_VERSION}-jar-with-dependencies.jar -P ${JETTY_BASE}/jans-auth/_libs
+    && wget -q https://jenkins.jans.io/maven/io/jans/agama-inbound/${AGAMA_INBOUND_VERSION}/agama-inbound-${AGAMA_INBOUND_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
+    && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-service/${JANS_LOCK_VERSION}/jans-lock-service-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
 
 # =====================
 # jans-linux-setup sync
@@ -93,23 +96,35 @@ RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSIO
 
 RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/ftl \
-    ${JETTY_BASE}/jans-auth/agama/scripts
+    ${JETTY_BASE}/jans-auth/agama/scripts \
+    /app/templates \
+    /app/static/rdbm \
+    /app/schema
 
-ENV JANS_SOURCE_VERSION=a3026d7957a1aaefa30269904744975352ae4642
+ENV JANS_SOURCE_VERSION=e6d8566897fab9598897b6a7e02670ea1d794c78
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the agama code
+# we are using partial-clone and sparse-checkout to get the assets
 RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add agama/misc \
-    && git sparse-checkout add jans-linux-setup/jans_setup/static/auth/conf \
+    && git sparse-checkout add jans-linux-setup/jans_setup \
     && git sparse-checkout add jans-casa/extras \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sub_tables.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp -R agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
-    && cp -R jans-linux-setup/jans_setup/static/auth/conf /etc/certs \
+    && cp -R ${JANS_SETUP_DIR}/static/auth/conf /etc/certs \
     && mkdir -p /opt/jans/python/libs \
-    && cp jans-casa/extras/casa-external_* /opt/jans/python/libs
+    && cp jans-casa/extras/casa-external_* /opt/jans/python/libs \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-lock /app/templates/
 
 # ======
 # Python
@@ -220,13 +235,16 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_JETTY_REQUEST_HEADER_SIZE=8192 \
+    CN_JETTY_ARGS="" \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_AUTH_JETTY_PORT=8080 \
     CN_AUTH_JETTY_HOST=0.0.0.0 \
-    CN_SHARE_AUTH_CONF=true
+    CN_SHARE_AUTH_CONF=true \
+    CN_LOCK_ENABLED=false \
+    CN_OPA_URL=http://localhost:8181/v1
 
 # @TODO: revisit the usage (if any)
 ENV ADMIN_UI_JWKS=http://${CN_AUTH_JETTY_HOST}:${CN_AUTH_JETTY_PORT}/jans-auth/restv1/jwks
@@ -240,7 +258,7 @@ EXPOSE $CN_AUTH_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.21" \
+    org.opencontainers.image.version="1.0.22" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 
@@ -279,6 +297,7 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/agama \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/custom \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/resources \
     && chown -R 1000:0 /opt/jans/python/libs \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \

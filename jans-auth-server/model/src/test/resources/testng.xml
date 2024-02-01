@@ -1,9 +1,10 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="oxAuthModel" parallel="false">
+<suite name="jans-auth-model" parallel="false">
     <test name="Unit Tests" enabled="true">
         <classes>
             <class name="io.jans.as.model.jwk.AlgorithmTest"/>
+            <class name="io.jans.as.model.common.AuthzDetailsTest"/>
         </classes>
     </test>
     <test name="Code Verifier (PKCE)" enabled="true">

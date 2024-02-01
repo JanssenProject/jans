@@ -103,7 +103,7 @@ public class Jackson {
         }
     }
 
-    public <T> String getJsonString(T obj) throws IOException {
+    public static <T> String getJsonString(T obj) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(obj);
     }

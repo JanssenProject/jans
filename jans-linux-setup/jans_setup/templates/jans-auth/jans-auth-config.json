@@ -1,4 +1,24 @@
 {
+    "featureFlags": [
+      "health_check",
+      "userinfo",
+      "clientinfo",
+      "id_generation",
+      "registration",
+      "introspection",
+      "revoke_token",
+      "revoke_session",
+      "active_session",
+      "end_session",
+      "status_session",
+      "jans_configuration",
+      "ciba",
+      "device_authz",
+      "metric",
+      "stat",
+      "par",
+      "ssa"
+    ],
     "issuer":"https://%(hostname)s",
     "baseEndpoint":"https://%(hostname)s/jans-auth/restv1",
     "authorizationEndpoint":"https://%(hostname)s/jans-auth/restv1/authorize",
@@ -65,7 +85,8 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange"
+        "urn:ietf:params:oauth:grant-type:token-exchange",
+        "tx_token"
     ],
     "subjectTypesSupported":[
         "public",
@@ -121,6 +142,60 @@
         "A256KW"
     ],
     "userInfoEncryptionEncValuesSupported":[
+        "A128CBC+HS256",
+        "A256CBC+HS512",
+        "A128GCM",
+        "A256GCM"
+    ],
+    "txTokenSigningAlgValuesSupported":[
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "txTokenEncryptionAlgValuesSupported":[
+        "RSA1_5",
+        "RSA-OAEP",
+        "A128KW",
+        "A256KW"
+    ],
+    "txTokenEncryptionEncValuesSupported":[
+        "A128CBC+HS256",
+        "A256CBC+HS512",
+        "A128GCM",
+        "A256GCM"
+    ],
+    "introspectionSigningAlgValuesSupported":[
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "introspectionEncryptionAlgValuesSupported":[
+        "RSA1_5",
+        "RSA-OAEP",
+        "A128KW",
+        "A256KW"
+    ],
+    "introspectionEncryptionEncValuesSupported":[
         "A128CBC+HS256",
         "A256CBC+HS512",
         "A128GCM",
@@ -282,7 +357,8 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange"
+        "urn:ietf:params:oauth:grant-type:token-exchange",
+        "tx_token"
     ],
     "claimsParameterSupported":false,
     "requestParameterSupported":true,
@@ -301,6 +377,7 @@
     "authorizationCodeLifetime":60,
     "refreshTokenLifetime":14400,
     "idTokenLifetime":3600,
+    "txTokenLifetime":180,
     "spontaneousScopeLifetime":86400,
     "accessTokenLifetime":300,
     "umaResourceLifetime":1728000,
@@ -491,7 +568,6 @@
         "rootDir": "/opt/jans/jetty/jans-auth/agama",
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
-        "serializerType": "KRYO",
         "maxItemsLoggedInCollections": 9,
         "pageMismatchErrorPage": "mismatch.ftlh",
         "interruptionErrorPage": "timeout.ftlh",
@@ -500,10 +576,18 @@
         "bridgeScriptPage": "agama.xhtml",
         "defaultResponseHeaders": {
             "Cache-Control": "max-age=0, no-store"
+        },
+        "serializeRules": {
+          "JAVA": ["java", "sun", "com.sun", "jdk"],
+          "KRYO": []
         }
     },
     "blockWebviewAuthorizationEnabled": false,
     "dateFormatterPatterns": {
         "birthdate": "yyyy-MM-dd"
+    },
+    "lockMessageConfig": {
+        "enableIdTokenMessages" : false,
+        "idTokenMessagesChannel": "id_token"
     }
 }

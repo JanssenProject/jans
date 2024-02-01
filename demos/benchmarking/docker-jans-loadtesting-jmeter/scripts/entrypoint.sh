@@ -40,6 +40,8 @@ replace_all() {
     | sed "s#ROPC_CLIENT_ID#$ROPC_CLIENT_ID#g" \
     | sed "s#AUTHZ_CLIENT_SECRET#$AUTHZ_CLIENT_SECRET#g" \
     | sed "s#ROPC_CLIENT_SECRET#$ROPC_CLIENT_SECRET#g" \
+    | sed "s#CLIENT_CREDENTIALS_CLIENT_ID#$CLIENT_CREDENTIALS_CLIENT_ID#g" \
+    | sed "s#CLIENT_CREDENTIALS_CLIENT_SECRET#$CLIENT_CREDENTIALS_CLIENT_SECRET#g" \
     | sed "s#DCR_CLIENT_ID#$DCR_CLIENT_ID#g" \
     | sed "s#DCR_CLIENT_SECRET#$DCR_CLIENT_SECRET#g" \
     | sed "s#FQDN_PART1#${FQDN_PARTS[0]}#g" \
@@ -58,6 +60,7 @@ replace_all() {
 cat /scripts/tests/authorization_code_flow.jmx | replace_all > tmpfile && mv tmpfile /scripts/authorization_code_flow.jmx
 cat /scripts/tests/resource_owner_password_credentials.jmx | replace_all > tmpfile && mv tmpfile /scripts/resource_owner_password_credentials.jmx
 cat /scripts/tests/register_client.jmx | replace_all > tmpfile && mv tmpfile /scripts/register_client.jmx
+cat /scripts/tests/client_credentials.jmx | replace_all > tmpfile && mv tmpfile /scripts/client_credentials.jmx
 
 if [[ "$RUN_AUTHZ_TEST" = "true" ]]
 then
@@ -80,5 +83,13 @@ then
   echo "DCR is activated."
   # Add -o modules.console.disable=true to disable TUI
   bzt /scripts/register_client.jmx
+  exit 0
+fi
+
+if [[ "$RUN_CLIENT_CREDENTIALS_TEST" = "true" ]]
+then
+  echo "Client Credentials test is activated."
+  # Add -o modules.console.disable=true to disable TUI
+  bzt /scripts/client_credentials.jmx
   exit 0
 fi

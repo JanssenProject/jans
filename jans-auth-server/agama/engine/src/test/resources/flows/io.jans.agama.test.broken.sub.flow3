@@ -1,0 +1,6 @@
+Flow io.jans.agama.test.broken.sub.flow3
+    Basepath "" 
+
+Trigger io.jans.agama.test.broken.flow3
+
+Finish false

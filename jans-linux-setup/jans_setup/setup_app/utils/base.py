@@ -48,7 +48,7 @@ with open('/proc/1/status', 'r') as f:
     os_initdaemon = f.read().split()[1]
 
 # Determine os_type and os_version
-os_type, os_version = '', ''
+os_type, os_version, os_subversion = '', '', ''
 
 os_release_fn = '/usr/lib/os-release'
 if not os.path.exists(os_release_fn):
@@ -70,7 +70,10 @@ with open(os_release_fn) as f:
                         os_version = 'tumbleweed'
                         break
             elif row[0] == 'VERSION_ID':
-                os_version = row[1].split('.')[0]
+                version_split = row[1].split('.')
+                os_version = version_split[0]
+                if len(version_split) > 1:
+                    os_subversion = version_split[1]
 
 if not (os_type and os_version):
     print("Can't determine OS type and OS version")
@@ -101,6 +104,8 @@ def get_os_description():
     desc_dict = { 'suse': 'SUSE', 'red': 'RHEL', 'ubuntu': 'Ubuntu', 'deb': 'Debian', 'centos': 'CentOS', 'fedora': 'Fedora' }
     descs = desc_dict.get(os_type, os_type)
     descs += ' ' + os_version
+    if os_subversion:
+        descs += f'.{os_subversion}'
 
     fipsl = subprocess.getoutput("sysctl crypto.fips_enabled").strip().split()
 

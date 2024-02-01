@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.21-SNAPSHOT</version>
+		<version>1.0.22</version>
 	</parent>
 
 	<prerequisites>
@@ -391,6 +391,14 @@
             <version>${project.version}</version>
         </dependency>
 
+		<!-- lock -->
+<!--
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-lock-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+-->
 		<!-- Weld -->
 		<dependency>
             <groupId>jakarta.validation</groupId>
@@ -589,6 +597,7 @@
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
+            <version>6.14.3</version> <!-- we need 6.14.3 due to Arquillian -->
 		</dependency>
 		<dependency>
             <groupId>jakarta.websocket</groupId>
@@ -1015,7 +1024,7 @@
 				<dependency>
 					<groupId>org.glassfish.main.extras</groupId>
 					<artifactId>glassfish-embedded-all</artifactId>
-					<version>4.1.2</version>
+					<version>7.0.10</version>
 					<scope>test</scope>
 				</dependency>
 				<dependency>

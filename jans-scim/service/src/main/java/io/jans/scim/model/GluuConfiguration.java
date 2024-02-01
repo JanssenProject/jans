@@ -21,6 +21,7 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.InumEntry;
 import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+import io.jans.service.message.model.config.MessageConfiguration;
 
 /**
  * GluuConfiguration
@@ -75,6 +76,10 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "jansCacheConf")
 	@JsonObject
 	private CacheConfiguration cacheConfiguration;
+
+    @AttributeName(name = "jansMessageConf")
+    @JsonObject
+    private MessageConfiguration messageConfiguration;
 
 	@AttributeName(name = "jansDocStoreConf")
 	@JsonObject
@@ -188,6 +193,14 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 
 	public void setCacheConfiguration(CacheConfiguration cacheConfiguration) {
 		this.cacheConfiguration = cacheConfiguration;
+	}
+
+	public MessageConfiguration getMessageConfiguration() {
+		return messageConfiguration;
+	}
+
+	public void setMessageConfiguration(MessageConfiguration messageConfiguration) {
+		this.messageConfiguration = messageConfiguration;
 	}
 
 	public DocumentStoreConfiguration getDocumentStoreConfiguration() {

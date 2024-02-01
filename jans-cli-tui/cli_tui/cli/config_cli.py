@@ -8,6 +8,7 @@ pylib_dir = os.path.join(cur_dir, 'pylib')
 if os.path.exists(pylib_dir):
     sys.path.insert(0, pylib_dir)
 
+import copy
 import json
 import re
 import urllib3
@@ -31,6 +32,7 @@ import stat
 import ruamel.yaml
 import urllib.parse
 
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 from pathlib import Path
 from types import SimpleNamespace
 from urllib.parse import urlencode
@@ -61,7 +63,7 @@ error_color = 196
 success_color = 10
 bold_color = 15
 grey_color = 242
-
+file_data_type = '/path/to/file'
 
 def clear():
     if not debug:
@@ -76,6 +78,7 @@ client_secret = os.environ.get(my_op_mode + '_client_secret')
 access_token = None
 debug = os.environ.get('jans_client_debug')
 log_dir = os.environ.get('cli_log_dir', os.path.join('jans_cli_logs', home_dir))
+tmp_dir = os.environ.get('cli_tmp_dir', log_dir)
 
 if not os.path.exists(log_dir):
     os.makedirs(log_dir, exist_ok=True)
@@ -173,6 +176,7 @@ parser.add_argument("--patch-replace", help="Colon delimited key:value pair for 
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
 parser.add_argument("-no-color", help="Do not colorize json dumps", action='store_true')
 parser.add_argument("--log-dir", help="Log directory", default=log_dir)
+parser.add_argument("--tmp-dir", help="Directory for storing temporary files", default=tmp_dir)
 parser.add_argument("-revoke-session", help="Revokes session", action='store_true')
 parser.add_argument("-scim", help="SCIM Mode", action='store_true', default=False)
 parser.add_argument("-auth", help="Jans OAuth Server Mode", action='store_true', default=False)
@@ -238,6 +242,7 @@ if not(host and (client_id and client_secret or access_token)):
 
         debug = config['DEFAULT'].get('debug')
         log_dir = config['DEFAULT'].get('log_dir', log_dir)
+        tmp_dir = config['DEFAULT'].get('log_dir', tmp_dir)
 
 
 def get_bool(val):
@@ -282,6 +287,8 @@ class JCA_CLI:
             self.host += '/jans-scim/restv1/v2'
         elif self.my_op_mode == 'auth':
             self.host += '/jans-auth/restv1'
+
+        self.tmp_dir = tmp_dir
 
         self.set_logging()
         self.ssl_settings()
@@ -794,13 +801,13 @@ class JCA_CLI:
         for plugin in cfg_yaml[self.my_op_mode]:
             for path in cfg_yaml[self.my_op_mode][plugin]['paths']:
                 for method in cfg_yaml[self.my_op_mode][plugin]['paths'][path]:
-                    if 'operationId' in cfg_yaml[self.my_op_mode][plugin]['paths'][path][method] and cfg_yaml[self.my_op_mode][plugin]['paths'][path][method][
-                        'operationId'] == operation_id:
+                    if 'operationId' in cfg_yaml[self.my_op_mode][plugin]['paths'][path][method] and\
+                      cfg_yaml[self.my_op_mode][plugin]['paths'][path][method]['operationId'] == operation_id:
                         retVal = cfg_yaml[self.my_op_mode][plugin]['paths'][path][method].copy()
                         retVal['__path__'] = path
                         retVal['__method__'] = method
                         retVal['__urlsuffix__'] = self.get_url_param(path)
-
+                        retVal['__plugin__'] = plugin
         return retVal
 
 
@@ -845,7 +852,7 @@ class JCA_CLI:
             return response
 
         if response.status_code in (404, 401):
-            if response.text == 'ID Token is expired':
+            if response.text == 'ID Token is expired' or 'unauthorized' in response.text.lower():
                 self.access_token = None
                 self.get_access_token(security)
                 return self.get_requests(endpoint, params)
@@ -866,14 +873,33 @@ class JCA_CLI:
                 return key
 
 
-    def post_requests(self, endpoint, data, params=None):
+    def post_requests(self, endpoint, data, params=None, method='post'):
         url = 'https://{}{}'.format(self.host, endpoint.path)
         url_param_name = self.get_url_param(endpoint.path)
 
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
+
         mime_type = self.get_mime_for_endpoint(endpoint)
-        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
+
+        if mime_type == 'multipart/form-data':
+            data_js = json.loads(data) if isinstance(data, str) else copy.deepcopy(data)
+            schema_ref = endpoint.info['requestBody']['content'][mime_type]['schema']['$ref']
+            schema = self.get_schema_from_reference(endpoint.info['__plugin__'], schema_ref)
+            multi_part_fields = {}
+            for prop in schema['properties']:
+                if schema['properties'][prop].get('type') == 'string' and schema['properties'][prop].get('format') == 'binary':
+                    if prop in data_js:
+                        multi_part_fields[prop] = (os.path.basename(data_js[prop]), open(data_js[prop], 'rb'), 'application/octet-stream')
+                else:
+                    multi_part_fields[prop] = (None, json.dumps(data_js[prop]), 'application/json')
+            data = MultipartEncoder(fields=multi_part_fields)
+
+            headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': data.content_type})
+            mime_type = data.content_type
+        else:
+            mime_type = self.get_mime_for_endpoint(endpoint)
+            headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
 
         if params and url_param_name in params:
             url = url.format(**{url_param_name: params.pop(url_param_name)})
@@ -893,7 +919,10 @@ class JCA_CLI:
         else:
             post_params['data'] = data
 
-        response = requests.post(**post_params)
+        if method == 'post':
+            response = requests.post(**post_params)
+        elif method == 'put':
+            response = requests.put(**post_params)
 
         self.log_response(response)
 
@@ -962,56 +991,13 @@ class JCA_CLI:
         response = requests.patch(**patch_params)
         self.log_response(response)
 
-        try:
-            return response.json()
-        except:
-            self.print_exception(response.text)
-
-
-    def put_requests(self, endpoint, data, params=None):
-
-        security = self.get_scope_for_endpoint(endpoint)
-        self.get_access_token(security)
-
-        mime_type = self.get_mime_for_endpoint(endpoint)
-
-        url_param_name = self.get_url_param(endpoint.path)
-
-        url = 'https://{}{}'.format(self.host, endpoint.path)
-        if params and url_param_name in params:
-            url = url.format(**{url_param_name: params.pop(url_param_name)})
-
-        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
-
-        put_params = {
-            'url': url,
-            'headers': headers,
-            'verify': self.verify_ssl,
-            'cert': self.mtls_client_cert,
-            }
-
-
-        if mime_type.endswith(('json', 'text')):
-            put_params['json'] = data
-        else:
-            put_params['data'] = data
-
-        if params:
-            put_params['params'] = params
-
-        response = requests.put(**put_params)
-
-        self.log_response(response)
-
         if self.wrapped:
             return response
 
         try:
-            result = response.json()
-        except Exception:
-            self.exit_with_error(response.text)
-
-        return result
+            return response.json()
+        except:
+            self.print_exception(response.text)
 
 
     def parse_command_args(self, args):
@@ -1215,7 +1201,7 @@ class JCA_CLI:
         if path['__method__'] == 'post':
             response = self.post_requests(endpoint, data, params)
         elif path['__method__'] == 'put':
-            response = self.put_requests(endpoint, data, params)
+            response = self.post_requests(endpoint, data, params, method='put')
 
         if self.wrapped:
             return response
@@ -1430,23 +1416,6 @@ class JCA_CLI:
                 schema_['properties'][key_]['description'] = ref_schema.get('description', '')
                 schema_['properties'][key_]['__schema_name__'] = ref_schema['__schema_name__']
 
-            # else:
-            #     ref = self.get_nasted_schema(schema_)
-            #     print('ref else: '+str(ref)+'\n')
-            #     if ref :
-            #         ### Get schema from refrence for the new `ref`
-            #         new_schema = self.get_schema_from_reference(plugin_name, ref) 
-
-            #         ### Get List of keys to the `ref` value ex: ['properties', 'agamaConfiguration', 'properties', 'clientAuthMapSchema', 'additionalProperties', 'items', '$ref']
-            #         keys_to_lookup = self.list_leading_to_value(my_dict=current_schema, value=ref) 
-
-            #         ### Change the value that List of keys looks at.
-            #         schema_['properties'][key_] =OrderedDict(self.change_certain_value_from_list(keys_to_lookup,current_schema,new_schema['properties'])) 
-
-               
-
-
-
         if not 'title' in schema_:
             schema_['title'] = p
 
@@ -1494,6 +1463,8 @@ class JCA_CLI:
                 sample_schema[prop_name] = random.choice((True, False))
             elif prop.get('type') == 'integer':
                 sample_schema[prop_name] = random.randint(1,200)
+            elif prop.get('type') == 'string' and prop.get('format') == 'binary':
+                sample_schema[prop_name] = file_data_type
             else:
                 sample_schema[prop_name]='string'
 
@@ -1536,8 +1507,10 @@ def main():
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
-    if 1:
-    #try:
+    if not os.path.exists(tmp_dir):
+        os.makedirs(tmp_dir)
+
+    try:
         if not access_token:
             cli_object.check_connection()
 
@@ -1549,11 +1522,11 @@ def main():
             cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
         elif args.output_access_token:
             cli_object.get_access_token(None)
-    #except Exception as e:
-    #    print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
-    #    with open(error_log_file, 'a') as w:
-    #        traceback.print_exc(file=w)
-    #    print("Error is logged to {}".format(error_log_file))
+    except Exception as e:
+        print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
+        with open(error_log_file, 'a') as w:
+            traceback.print_exc(file=w)
+        print("Error is logged to {}".format(error_log_file))
 
 
 if __name__ == "__main__":

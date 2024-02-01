@@ -49,6 +49,7 @@ function() {
         authConfigurationUrl: baseUrl + '/jans-config-api/api/v1/jans-auth-server/config',
         scriptsUrl: baseUrl + '/jans-config-api/api/v1/config/scripts',
         cacheUrl: baseUrl + '/jans-config-api/api/v1/config/cache',
+        messageUrl: baseUrl + '/jans-config-api/api/v1/config/message',
         jwksUrl: baseUrl + '/jans-config-api/api/v1/config/jwks',
         ldapUrl: baseUrl + '/jans-config-api/api/v1/config/database/ldap',
         openidclients_url: baseUrl + '/jans-config-api/api/v1/openid/clients',

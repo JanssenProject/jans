@@ -1,0 +1,7 @@
+Flow io.jans.agama.test.ot.flow1
+    Basepath "ot" 
+
+o = RRF "page.ftl"
+//o should be an empty map at this point
+o = { success: true, data: o }
+Finish o

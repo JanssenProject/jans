@@ -1,5 +1,6 @@
 package io.jans.as.server.token.ws.rs;
 
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
@@ -7,6 +8,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.server.authorize.ws.rs.AuthzDetailsService;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.token.HandleTokenFactory;
@@ -64,6 +66,9 @@ public class TokenExchangeService {
 
     @Inject
     private AttributeService attributeService;
+
+    @Inject
+    private AuthzDetailsService authzDetailsService;
 
     public void rotateDeviceSecretOnRefreshToken(HttpServletRequest httpRequest, AuthorizationGrant refreshGrant, String scope) {
         if (StringUtils.isBlank(scope) || !scope.contains(ScopeConstants.DEVICE_SSO)) {
@@ -134,6 +139,7 @@ public class TokenExchangeService {
         executionContext.setGrant(tokenExchangeGrant);
 
         scope = tokenExchangeGrant.checkScopesPolicy(scope);
+        AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), tokenExchangeGrant);
 
         AccessToken accessToken = tokenExchangeGrant.createAccessToken(executionContext); // create token after scopes are checked
 
@@ -160,7 +166,7 @@ public class TokenExchangeService {
 
         JSONObject jsonObj = new JSONObject();
         try {
-            TokenRestWebServiceImpl.fillJsonObject(jsonObj, accessToken, accessToken.getTokenType(), accessToken.getExpiresIn(), reToken, scope, idToken);
+            TokenRestWebServiceImpl.fillJsonObject(jsonObj, accessToken, accessToken.getTokenType(), accessToken.getExpiresIn(), reToken, scope, idToken, checkedAuthzDetails);
             jsonObj.put("issued_token_type", TOKEN_TYPE_ACCESS_TOKEN);
             if (StringUtils.isNotBlank(rotatedDeviceSecret)) {
                 jsonObj.put(DEVICE_SECRET, rotatedDeviceSecret);

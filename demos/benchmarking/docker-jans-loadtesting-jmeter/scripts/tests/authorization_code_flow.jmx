@@ -49,7 +49,7 @@
           </elementProp>
           <elementProp name="location_regexp" elementType="Argument">
             <stringProp name="Argument.name">location_regexp</stringProp>
-            <stringProp name="Argument.value">Location: https:\/\/FQDN_PART1\.FQDN_PART2\.FQDN_PART3(.*)</stringProp>
+            <stringProp name="Argument.value">location: https:\/\/FQDN_PART1\.FQDN_PART2\.FQDN_PART3(.*)</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>

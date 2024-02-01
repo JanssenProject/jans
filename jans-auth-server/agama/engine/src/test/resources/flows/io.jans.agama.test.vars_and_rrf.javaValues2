@@ -1,0 +1,41 @@
+//This flow tests if some Java variables are properly serialized/deserialized before/after RRF usage
+Flow io.jans.agama.test.vars_and_rrf.javaValues2
+    Basepath ""
+
+t1 = Call co.Test#new
+t2 = Call co.SubTest#new "Dog" "Hi-fi"
+Call t1 setId "Cat"
+
+map = Call java.util.Map#of 1 t1 2 t2
+
+RRF "ot/page.ftl"
+
+s = Call map size
+When s is not 2
+    Log "Variable map is corrupt"
+    Finish false
+
+u1 = Call map get 1
+u2 = Call map get 2    
+sum = Call co.Test#sum u1 u2
+
+When sum is not "CatDog"
+    Log "Variable map is corrupt"
+    Finish false
+
+RRF "ot/page.ftl"
+
+When u1.id is not t1.id or u2.id is not t2.id
+    Finish false
+    
+| E = Call map put 3 u1        //map is an unmodifiable map
+
+RRF "ot/page.ftl"
+
+exname = "java.lang.UnsupportedOperationException"
+
+When E is null or E.class.name is not exname 
+    Log "Something is wrong with variable E"
+    Finish false
+
+Finish true

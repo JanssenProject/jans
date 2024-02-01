@@ -1,0 +1,16 @@
+{
+	"creatorId": "jans-admin-2",
+	"name": "SAML_IDP_104",
+	"displayName": "Test SAML IDP 104",	"description": "SAML IDP 104 created using Rest API",
+	"realm": "keycloak-internal-identity",
+	"enabled": true,
+	"providerId": "SAML_IDP_104",
+	"trustEmail": false,
+	"storeToken": false,
+	"addReadTokenRoleOnCreate": false,
+	"authenticateByDefault": false,
+	"linkOnly": false,
+	"firstBrokerLoginFlowAlias": null,
+	"postBrokerLoginFlowAlias": null
+	
+}

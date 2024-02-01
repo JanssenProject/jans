@@ -6,6 +6,7 @@
 
 package io.jans.as.server.servlet;
 
+import com.google.common.collect.Lists;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.*;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -17,6 +18,7 @@ import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.LocalResponseCache;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
+import io.jans.as.server.service.external.ExternalAuthzDetailTypeService;
 import io.jans.as.server.service.external.ExternalDiscoveryService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.util.ServerUtil;
@@ -70,6 +72,9 @@ public class OpenIdConfiguration extends HttpServlet {
 
     @Inject
     private transient ExternalDiscoveryService externalDiscoveryService;
+
+    @Inject
+    private transient ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
 
     @Inject
     private transient CIBAConfigurationService cibaConfigurationService;
@@ -164,6 +169,7 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping());
 
             Util.putArray(jsonObj, getAcrValuesList(), ACR_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, Lists.newArrayList(externalAuthzDetailTypeService.getSupportedAuthzDetailsTypes()), AUTHORIZATION_DETAILS_TYPES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getSubjectTypesSupported(), SUBJECT_TYPES_SUPPORTED);
 
@@ -178,6 +184,10 @@ public class OpenIdConfiguration extends HttpServlet {
             Util.putArray(jsonObj, appConfiguration.getIntrospectionSigningAlgValuesSupported(), INTROSPECTION_SIGNING_ALG_VALUES_SUPPORTED);
             Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionAlgValuesSupported(), INTROSPECTION_ENCRYPTION_ALG_VALUES_SUPPORTED);
             Util.putArray(jsonObj, appConfiguration.getIntrospectionEncryptionEncValuesSupported(), INTROSPECTION_ENCRYPTION_ENC_VALUES_SUPPORTED);
+
+            Util.putArray(jsonObj, appConfiguration.getTxTokenSigningAlgValuesSupported(), TX_TOKEN_SIGNING_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getTxTokenEncryptionAlgValuesSupported(), TX_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, appConfiguration.getTxTokenEncryptionEncValuesSupported(), TX_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getIdTokenSigningAlgValuesSupported(), ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED);
             Util.putArray(jsonObj, appConfiguration.getIdTokenEncryptionAlgValuesSupported(), ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED);
