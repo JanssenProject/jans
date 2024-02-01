@@ -1,27 +1,28 @@
-{{- if and (.Values.global.istio.ingress) (not .Values.global.istio.gateways) }}
+{{- if not .Values.global.istio.gateways }}
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: {{ .Release.Name }}-global-gtw
   namespace: {{ .Release.Namespace }}
-{{- if .Values.istio.additionalLabels }}
+{{- if .Values.global.istio.additionalLabels }}
   labels:
-{{ toYaml .Values.istio.additionalLabels | indent 4 }}
+{{ toYaml .Values.global.istio.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.istio.additionalAnnotations }}
+{{- if .Values.global.istio.additionalAnnotations }}
   annotations:
-{{ toYaml .Values.istio.additionalAnnotations | indent 4 }}
+{{ toYaml .Values.global.istio.additionalAnnotations | indent 4 }}
 {{- end }}
 spec:
   selector:
     istio: ingressgateway
   servers:
+  # admin-ui
   - port:
       number: 80
-      name: http
+      name: http-admin-ui
       protocol: HTTP
     hosts:
-      - {{ .Values.fqdn }}
+      - {{ .Values.global.fqdn }}
     tls:
       httpsRedirect: true
   - port:
@@ -29,8 +30,8 @@ spec:
       name: https
       protocol: HTTPS
     hosts:
-      - {{ .Values.fqdn }}
+      - {{ .Values.global.fqdn }}
     tls:
       mode: SIMPLE # enable https on this port
-      credentialName: {{ .Values.istio.tlsSecretName }}
-{{- end }}
+      credentialName: tls-certificate # fetch cert from k8s secret
+{{- end }}  
