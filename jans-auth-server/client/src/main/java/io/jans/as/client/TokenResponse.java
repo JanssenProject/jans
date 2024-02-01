@@ -6,19 +6,20 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.common.ExchangeTokenType;
 import io.jans.as.model.common.TokenType;
 import io.jans.as.model.token.TokenErrorResponseType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import jakarta.ws.rs.core.Response;
-
 /**
  * Represents a token response received from the authorization server.
  *
- * @author Javier Rojas Blum Date: 10.19.2011
+ * @author Javier Rojas Blum
+ * @author Yuriy Z
  */
 public class TokenResponse extends BaseResponseWithErrors<TokenErrorResponseType> {
 
@@ -31,6 +32,7 @@ public class TokenResponse extends BaseResponseWithErrors<TokenErrorResponseType
     private String scope;
     private String idToken;
     private String deviceToken;
+    private ExchangeTokenType issuedTokenType;
 
     public TokenResponse() {
     }
@@ -45,8 +47,8 @@ public class TokenResponse extends BaseResponseWithErrors<TokenErrorResponseType
     }
 
     @Override
-    public TokenErrorResponseType fromString(String p_str) {
-        return TokenErrorResponseType.fromString(p_str);
+    public TokenErrorResponseType fromString(String str) {
+        return TokenErrorResponseType.fromString(str);
     }
 
     public void injectDataFromJson() {
@@ -63,6 +65,9 @@ public class TokenResponse extends BaseResponseWithErrors<TokenErrorResponseType
                 }
                 if (jsonObj.has("token_type")) {
                     setTokenType(TokenType.fromString(jsonObj.getString("token_type")));
+                }
+                if (jsonObj.has("issued_token_type")) {
+                    setIssuedTokenType(ExchangeTokenType.fromString(jsonObj.getString("issued_token_type")));
                 }
                 if (jsonObj.has("expires_in")) {
                     setExpiresIn(jsonObj.getInt("expires_in"));
@@ -125,6 +130,24 @@ public class TokenResponse extends BaseResponseWithErrors<TokenErrorResponseType
      */
     public void setTokenType(TokenType tokenType) {
         this.tokenType = tokenType;
+    }
+
+    /**
+     * Gets issued token type.
+     *
+     * @return issued token type
+     */
+    public ExchangeTokenType getIssuedTokenType() {
+        return issuedTokenType;
+    }
+
+    /**
+     * Sets issued token type
+     *
+     * @param issuedTokenType issued token type
+     */
+    public void setIssuedTokenType(ExchangeTokenType issuedTokenType) {
+        this.issuedTokenType = issuedTokenType;
     }
 
     /**

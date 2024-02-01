@@ -6,10 +6,10 @@
 
 package io.jans.as.server.model.common;
 
-import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.UserService;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.util.Util;
@@ -23,13 +23,12 @@ import io.jans.model.token.TokenEntity;
 import io.jans.model.token.TokenType;
 import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -118,6 +117,14 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public ClientCredentialsGrant createClientCredentialsGrant(User user, Client client) {
         ClientCredentialsGrant grant = grantInstance.select(ClientCredentialsGrant.class).get();
+        grant.init(user, client);
+
+        return grant;
+    }
+
+    @Override
+    public TxTokenGrant createTxTokenGrant(User user, Client client) {
+        TxTokenGrant grant = grantInstance.select(TxTokenGrant.class).get();
         grant.init(user, client);
 
         return grant;
@@ -247,7 +254,10 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken) {
         final TokenEntity tokenEntity = grantService.getGrantByCode(accessToken);
-        if (tokenEntity != null && (tokenEntity.getTokenTypeEnum() == io.jans.model.token.TokenType.ACCESS_TOKEN || tokenEntity.getTokenTypeEnum() == io.jans.model.token.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
+        if (tokenEntity != null && (
+                tokenEntity.getTokenTypeEnum() == TokenType.ACCESS_TOKEN ||
+                        tokenEntity.getTokenTypeEnum() == TokenType.LONG_LIVED_ACCESS_TOKEN ||
+                        tokenEntity.getTokenTypeEnum() == TokenType.TX_TOKEN)) {
             return asGrant(tokenEntity);
         }
         return null;
@@ -259,7 +269,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
             return null;
         }
         final TokenEntity tokenEntity = grantService.getGrantByCode(idToken);
-        if (tokenEntity != null && (tokenEntity.getTokenTypeEnum() == io.jans.model.token.TokenType.ID_TOKEN)) {
+        if (tokenEntity != null && (tokenEntity.getTokenTypeEnum() == TokenType.ID_TOKEN)) {
             return asGrant(tokenEntity);
         }
         return null;
@@ -322,6 +332,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                         result = tokenExchangeGrant;
                         break;
+                    case TX_TOKEN:
+                        TxTokenGrant txTokenGrant = grantInstance.select(TxTokenGrant.class).get();
+                        txTokenGrant.init(user, AuthorizationGrantType.TX_TOKEN, client, tokenEntity.getCreationDate());
+
+                        result = txTokenGrant;
+                        break;
                     default:
                         return null;
                 }
@@ -378,6 +394,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                             accessToken.setDpop(tokenEntity.getDpop());
                             accessToken.setX5ts256(result.getX5ts256());
                             result.setAccessTokens(Collections.singletonList(accessToken));
+                            break;
+                        case TX_TOKEN:
+                            final TxToken txToken = new TxToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
+                            txToken.setDpop(tokenEntity.getDpop());
+                            txToken.setX5ts256(result.getX5ts256());
+                            result.setTxTokens(Collections.singletonList(txToken));
                             break;
                         case ID_TOKEN:
                             final IdToken idToken = new IdToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
