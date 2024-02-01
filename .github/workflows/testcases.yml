@@ -48,7 +48,7 @@ jobs:
         cd ./jans-pycloudlib
         tox
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+      uses: codecov/codecov-action@f30e4959ba63075080d4f7f90cacc18d9f3fafd7 # v4.0.0
       with:
         file: ./jans-pycloudlib/coverage.xml
         files: ./jans-pycloudlib/coverage1.xml,./jans-pycloudlib/coverage2.xml
