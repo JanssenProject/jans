@@ -435,7 +435,8 @@ It returns all the information of the Jans Authorization server.
     "urn:ietf:params:oauth:grant-type:device_code",
     "client_credentials",
     "refresh_token",
-    "authorization_code"
+    "authorization_code",
+    "tx_token"
   ],
   "metricReporterInterval": 300,
   "metricReporterKeepDataDays": 15,
