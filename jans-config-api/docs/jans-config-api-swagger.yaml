@@ -7890,21 +7890,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8081,6 +8079,7 @@ components:
             - password
             - client_credentials
             - refresh_token
+            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -8124,6 +8123,18 @@ components:
           items:
             type: string
         introspectionEncryptionEncValuesSupported:
+          type: array
+          items:
+            type: string
+        txTokenSigningAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        txTokenEncryptionAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        txTokenEncryptionEncValuesSupported:
           type: array
           items:
             type: string
@@ -8219,6 +8230,9 @@ components:
           type: integer
           format: int32
         refreshTokenLifetime:
+          type: integer
+          format: int32
+        txTokenLifetime:
           type: integer
           format: int32
         idTokenLifetime:
@@ -8364,6 +8378,7 @@ components:
             - password
             - client_credentials
             - refresh_token
+            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -8697,6 +8712,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8706,8 +8723,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9156,6 +9171,7 @@ components:
             - password
             - client_credentials
             - refresh_token
+            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -9420,6 +9436,9 @@ components:
             type: string
         jansDefaultPromptLogin:
           type: boolean
+        txTokenLifetime:
+          type: integer
+          format: int32
         idTokenLifetime:
           type: integer
           format: int32
@@ -9448,6 +9467,12 @@ components:
         introspectionEncryptedResponseAlg:
           type: string
         introspectionEncryptedResponseEnc:
+          type: string
+        txTokenSignedResponseAlg:
+          type: string
+        txTokenEncryptedResponseAlg:
+          type: string
+        txTokenEncryptedResponseEnc:
           type: string
         authorizationDetailsTypes:
           type: array
