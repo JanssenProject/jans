@@ -104,15 +104,6 @@ class Plugin(DialogUtils):
                             style=cli_style.titled_text
                         ),
 
-                    self.app.getTitledText(
-                        title=_("IDP Metadata File Pattern"),
-                        name='idpMetadataFilePattern',
-                        value=self.config.get('idpMetadataFilePattern', ''),
-                        style=cli_style.edit_text,
-                        jans_help=_("Pattern for saving metadata file"),
-                        widget_style=cli_style.black_bg_widget
-                    ),
-
                         self.app.getTitledCheckBox(_("Ignore Validation"), name='ignoreValidation', checked=self.config.get('ignoreValidation'), jans_help=self.app.get_help_from_schema(self.schema, 'ignoreValidation'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
                         Window(height=1),
                         VSplit([Button(_("Save"), handler=self.save_config)], align=HorizontalAlign.CENTER),

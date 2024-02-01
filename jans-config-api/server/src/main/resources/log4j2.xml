@@ -65,11 +65,7 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="io.jans.configapi" level="${log4j.default.log.level}">
-            <AppenderRef ref="FILE" />
-        </Logger>
-		
-		<Logger name="io.jans.configapi.core" level="${log4j.default.log.level}">
+        <Logger name="io.jans" level="${log4j.default.log.level}">
             <AppenderRef ref="FILE" />
         </Logger>
 		
@@ -120,8 +116,7 @@
 			<AppenderRef ref="JANS_CONFIGAPI_SCRIPT_LOG_FILE" />
 		</logger>
 
-        <Root level="INFO">
-			<AppenderRef ref="FILE" />
+        <Root level="ERROR">
 			<AppenderRef ref="Console" />
         </Root>
 		

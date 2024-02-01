@@ -140,7 +140,10 @@ To generate Let’s Encrypt CA certificate follow this [let's encrypt](https://g
  
 ## Uninstall
 
-Removing Janssen is a two step process:
+Uninstall process involves two steps and removes all the Janssen Server components.
+
+!!! Note
+For removal of the attached persistence store, please refer to [this note](../install-faq.md#does-the-janssen-server-uninstall-process-remove-the-data-store-as-well).
 
 1. Delete files installed by Janssen
 1. Remove and purge the `jans` package

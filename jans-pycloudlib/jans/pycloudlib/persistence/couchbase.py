@@ -685,10 +685,6 @@ class CouchbaseClient:
             name: Attribute name.
             values: Pre-transformed values.
         """
-        def as_dict(val: _t.Any) -> dict[str, _t.Any]:
-            retval: dict[str, _t.Any] = json.loads(val)
-            return retval
-
         def as_bool(val: _t.Any) -> bool:
             return val.lower() in ("true", "yes", "1", "on")
 
@@ -698,6 +694,13 @@ class CouchbaseClient:
                 retval = int(val)
             except (TypeError, ValueError):
                 pass
+            return retval
+
+        def maybe_json(val: _t.Any) -> _t.Any:
+            try:
+                retval = json.loads(val)
+            except json.decoder.JSONDecodeError:
+                retval = val
             return retval
 
         def as_datetime(val: _t.Any) -> str:
@@ -713,7 +716,7 @@ class CouchbaseClient:
             return dt.isoformat()
 
         callbacks = {
-            "json": as_dict,
+            "json": maybe_json,
             "boolean": as_bool,
             "integer": as_int,
             "datetime": as_datetime,
