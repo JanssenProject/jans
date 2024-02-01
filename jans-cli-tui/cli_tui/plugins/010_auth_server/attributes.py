@@ -3,7 +3,7 @@ from functools import partial
 from typing import Optional, Any
 
 from prompt_toolkit.application import Application
-from prompt_toolkit.eventloop import get_event_loop
+from asyncio import get_event_loop
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign
 from prompt_toolkit.widgets import Button
