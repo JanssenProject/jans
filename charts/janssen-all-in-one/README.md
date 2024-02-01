@@ -125,6 +125,7 @@ Kubernetes: `>=v1.22.0-0`
 | config-api.configApiServerServiceName | string | `"config-api"` | Name of the config-api service. Please keep it as default. |
 | config-api.enabled | bool | `true` | Boolean flag to enable/disable the config-api chart. |
 | config-api.ingress | object | `{"configApiEnabled":true}` | Enable endpoints in either istio or nginx ingress depending on users choice |
+| config-api.plugins | string | `"admin-ui,fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml") |
 | config.enabled | bool | `true` | Boolean flag to enable/disable the configuration job. This normally should never be false |
 | configAdapterName | string | `"kubernetes"` | The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes |
 | configSecretAdapter | string | `"kubernetes"` | The config backend adapter that will hold Janssen secret layer. aws|google|kubernetes |

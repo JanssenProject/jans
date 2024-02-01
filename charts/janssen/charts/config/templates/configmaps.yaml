@@ -205,6 +205,7 @@ data:
   CN_LDAP_KEY_FILE: {{ .Values.global.cnLdapKeyFile }}
   CN_LDAP_CACERT_FILE: {{ .Values.global.cnLdapCacertFile }}
   CN_LDAP_TRUSTSTORE_FILE: {{ .Values.global.cnLdapTruststoreFile }}
+  CN_CONFIG_API_PLUGINS: {{ index .Values "global" "config-api" "plugins" | quote  }}
   {{- if .Values.global.saml.enabled }}
   QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: {{ .Values.configmap.quarkusTransactionEnableRecovery | quote }}
   KC_LOG_LEVEL: {{ .Values.configmap.kcLogLevel | quote }}

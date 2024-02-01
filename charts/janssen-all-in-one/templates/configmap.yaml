@@ -192,7 +192,7 @@ data:
   CN_LDAP_KEY_FILE: {{ .Values.cnLdapKeyFile }}
   CN_LDAP_CACERT_FILE: {{ .Values.cnLdapCacertFile }}
   CN_LDAP_TRUSTSTORE_FILE: {{ .Values.cnLdapTruststoreFile }}
-  CN_CONFIG_API_PLUGINS: "admin-ui,fido2,scim,user-mgt"
+  CN_CONFIG_API_PLUGINS: {{ index .Values "config-api" "plugins" | quote }}
   CN_AIO_COMPONENTS: {{ include "janssen-all-in-one.aioComponents" . | fromJsonArray | join "," | quote}}
   {{- if .Values.saml.enabled }}
   QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: {{ .Values.configmap.quarkusTransactionEnableRecovery | quote }}
