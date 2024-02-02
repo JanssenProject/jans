@@ -2,7 +2,7 @@ from io.jans.as.persistence.model.configuration import GluuConfiguration
 from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService
-from io.jans.as.common.service.common import EncryptionService
+from io.jans.service import EncryptionService
 from io.jans.as.server.service.custom import CustomScriptService
 from io.jans.as.server.service.net import HttpService
 from io.jans.as.server.util import ServerUtil

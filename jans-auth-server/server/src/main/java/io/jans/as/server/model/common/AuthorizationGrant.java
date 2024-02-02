@@ -8,16 +8,18 @@ package io.jans.as.server.model.common;
 
 import com.google.common.collect.Lists;
 import io.jans.as.common.claims.Audience;
-import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.token.HandleTokenFactory;
@@ -40,6 +42,8 @@ import io.jans.model.token.TokenType;
 import io.jans.service.CacheService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -94,6 +98,9 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Inject
     private StatService statService;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
 
     private boolean isCachedWithNoPersistence = false;
 
@@ -209,8 +216,16 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
             boolean externalOk = externalUpdateTokenService.modifyAccessToken(accessToken, ExternalUpdateTokenContext.of(context, jwtSigner));
             if (!externalOk) {
-                log.trace("External script forbids access token creation.");
-                return null;
+                final String reason = "External UpdateToken script forbids access token creation.";
+                log.trace(reason);
+
+                throw new WebApplicationException(Response
+                        .status(Response.Status.FORBIDDEN)
+                        .type(MediaType.APPLICATION_JSON_TYPE)
+                        .cacheControl(ServerUtil.cacheControl(true, false))
+                        .header("Pragma", "no-cache")
+                        .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.ACCESS_DENIED, reason))
+                        .build());
             }
 
             if (getClient().isAccessTokenAsJwt() && jwtSigner != null) {
@@ -442,6 +457,12 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     public TokenEntity asToken(AccessToken accessToken) {
         final TokenEntity result = asTokenEntity(accessToken);
         result.setTokenTypeEnum(TokenType.ACCESS_TOKEN);
+        return result;
+    }
+
+    public TokenEntity asToken(TxToken txToken) {
+        final TokenEntity result = asTokenEntity(txToken);
+        result.setTokenTypeEnum(TokenType.TX_TOKEN);
         return result;
     }
 

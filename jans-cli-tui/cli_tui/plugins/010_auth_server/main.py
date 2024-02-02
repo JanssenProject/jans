@@ -4,7 +4,7 @@ import asyncio
 from functools import partial
 from typing import Any, Optional
 from prompt_toolkit.application.current import get_app
-from prompt_toolkit.eventloop import get_event_loop
+from asyncio import get_event_loop
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
@@ -189,7 +189,7 @@ class Plugin(DialogUtils):
                         on_enter=self.edit_client,
                         on_display=self.app.data_display_dialog,
                         on_delete=self.delete_client,
-                        jans_help=HTML(_("Press key <b>s</b> to save client summary")),
+                        jans_help=HTML(_("Press key <b>s</b> to save client summary, <b>d</b> to display configurations")),
                         custom_key_bindings=[('s', self.save_client_summary)],
                         headerColor=cli_style.navbar_headcolor,
                         entriesColor=cli_style.navbar_entriescolor,
@@ -1041,7 +1041,7 @@ class Plugin(DialogUtils):
                 data_fn=None,
                 data=pathches
                 )
-            self.app.app_configuration = response
+            self.app.app_configuration = response.json()
 
             body = HSplit([Label(_("Jans authorization server application configuration logging properties were saved."))])
 

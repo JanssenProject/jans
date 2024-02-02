@@ -6,7 +6,18 @@
 
 package io.jans.as.server.service;
 
+import static org.apache.commons.lang.BooleanUtils.isTrue;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.LockMessageConfig;
@@ -24,15 +35,6 @@ import io.jans.util.StringHelper;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -94,14 +96,18 @@ public class GrantService {
     public void persist(TokenEntity token) {
         persistenceEntryManager.persist(token);
         
-        publishIdTokenLockMessage(token, "add");
+        if (TokenType.ID_TOKEN.getValue().equals(token.getTokenType())) {
+        	publishIdTokenLockMessage(token, "add");
+        }
     }
 
     public void remove(TokenEntity token) {
         persistenceEntryManager.remove(token);
         log.trace("Removed token from LDAP, code: {}", token.getTokenCode());
 
-        publishIdTokenLockMessage(token, "del");
+        if (TokenType.ID_TOKEN.equals(token.getTokenType())) {
+        	publishIdTokenLockMessage(token, "del");
+        }
     }
 
 	protected void publishIdTokenLockMessage(TokenEntity token, String opearation) {
@@ -111,7 +117,7 @@ public class GrantService {
         }
         
         if (Boolean.TRUE.equals(lockMessageConfig.getEnableIdTokenMessages()) && StringHelper.isNotEmpty(lockMessageConfig.getIdTokenMessagesChannel())) {
-        	String jsonMessage = String.format("{\"tknTyp\" : %s, \"tknCde\" : %s, \"tknOp\" : %s}", token.getTokenType(), token.getTokenCode(), opearation);
+        	String jsonMessage = String.format("{\"tknTyp\" : \"%s\", \"tknCde\" : \"%s\", \"tknOp\" : \"%s\"}", token.getTokenType(), token.getTokenCode(), opearation);
             messageService.publish(lockMessageConfig.getIdTokenMessagesChannel(), jsonMessage);
         }
 	}

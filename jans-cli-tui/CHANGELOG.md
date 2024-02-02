@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.0.22](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.21...jans-cli-tui-v1.0.22) (2024-01-22)
+
+
+### Features
+
+* **jans-cli-tui:** grab values of tokenEndpointAuthMethod from swagger doc ([#7141](https://github.com/JanssenProject/jans/issues/7141)) ([d1e6974](https://github.com/JanssenProject/jans/commit/d1e697432193459f55387bdcc1bfb827feadb6b7))
+* **jans-cli-tui:** inbound SAML ([#7147](https://github.com/JanssenProject/jans/issues/7147)) ([9bebb1a](https://github.com/JanssenProject/jans/commit/9bebb1a7403f1f6644b2976ada2422630dcd3ec8))
+* **jans-cli-tui:** message configuration ([#7198](https://github.com/JanssenProject/jans/issues/7198)) ([5dd6786](https://github.com/JanssenProject/jans/commit/5dd6786b3f12e662658b99ab845109a54ced0676))
+* **jans-cli-tui:** save client summary ([#7153](https://github.com/JanssenProject/jans/issues/7153)) ([f017df3](https://github.com/JanssenProject/jans/commit/f017df309458c7ba298a25c3c945476812567a40))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** CLI asks creds for unauthorized request ([#7207](https://github.com/JanssenProject/jans/issues/7207)) ([ec8afbe](https://github.com/JanssenProject/jans/commit/ec8afbe79991776b934b515ff1166e5044dba5a5))
+* **jans-cli-tui:** display provider list and edit provider ([#7434](https://github.com/JanssenProject/jans/issues/7434)) ([5967da0](https://github.com/JanssenProject/jans/commit/5967da03bef4560aba71c60107fa1e206d740f45))
+* **jans-cli-tui:** don't include client secret in summary ([#7161](https://github.com/JanssenProject/jans/issues/7161)) ([798a4d7](https://github.com/JanssenProject/jans/commit/798a4d7fdac64c7515ddd0d2f359f2ff905d7b7b))
+* **jans-cli-tui:** LOCK configuration NULL to DISABLED ([#7256](https://github.com/JanssenProject/jans/issues/7256)) ([529ba5f](https://github.com/JanssenProject/jans/commit/529ba5fc000dde43ed5b1c300af061ab751766ef))
+* **jans-cli-tui:** rename Message to Lock ([#7210](https://github.com/JanssenProject/jans/issues/7210)) ([19968e8](https://github.com/JanssenProject/jans/commit/19968e8c7be3215dfe22426f866edf366552c022))
+* **jans-cli-tui:** save auth server logging config ([#7432](https://github.com/JanssenProject/jans/issues/7432)) ([04dcbde](https://github.com/JanssenProject/jans/commit/04dcbdecb260162734c8bcd1d4517beb6514fa4c))
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+
 ## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.20...jans-cli-tui-v1.0.21) (2023-12-14)
 
 

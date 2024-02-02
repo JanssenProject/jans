@@ -41,6 +41,14 @@ get_max_ram_percentage() {
     fi
 }
 
+get_jetty_args() {
+    if [ -n "${CN_CASA_JETTY_ARGS}" ]; then
+        echo " ${CN_CASA_JETTY_ARGS} "
+    else
+        echo " ${CN_JETTY_ARGS} "
+    fi
+}
+
 touch "$CN_CASA_ADMIN_LOCK_FILE"
 get_prometheus_lib
 python3 "$basedir/wait.py"
@@ -71,4 +79,5 @@ exec java \
         jetty.http.host="${CN_CASA_JETTY_HOST}" \
         jetty.http.port="${CN_CASA_JETTY_PORT}" \
         jetty.deploy.scanInterval=0 \
-        jetty.httpConfig.sendServerVersion=false
+        jetty.httpConfig.sendServerVersion=false \
+        $(get_jetty_args)

@@ -1,6 +1,8 @@
 import os
 import requests
 import urllib3
+import socket
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from requests.auth import HTTPBasicAuth
 from setup_app.utils.base import logIt
@@ -30,6 +32,17 @@ class CBM:
     def set_api_root(self):
         self.api_root = 'https://{}:{}/'.format(self.host, self.port)
         self.n1ql_api = 'https://{}:{}/query/service'.format(self.host, self.n1qlport)
+
+    def check_readiness(self):
+        for port in (self.port, self.n1qlport):
+            try:
+                s = socket.socket()
+                s.connect((self.host, port))
+                s.close()
+            except Exception:
+                return False
+
+        return True
 
     def _get(self, endpoint):
         api = os.path.join(self.api_root, endpoint)

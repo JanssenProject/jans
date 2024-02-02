@@ -62,7 +62,7 @@ jobs:
          sudo add-apt-repository ppa:deadsnakes/ppa
          sudo apt-get update
          sudo apt-get install -y python${{ matrix.python_version }}
-         sudo apt install -y build-essential devscripts debhelper rpm dpkg-sig python3-dev python3-ldap3 python3-requests python3-ruamel.yaml python3-pymysql python3-crypto python3-distutils python3-prompt-toolkit python${{ matrix.python_version }}-distutils libpq-dev python${{ matrix.python_version }}-dev
+         sudo apt install -y build-essential devscripts debhelper rpm dpkg-sig python3-dev python3-ldap3 python3-requests python3-ruamel.yaml python3-pymysql python3-crypto python3-distutils python3-prompt-toolkit python${{ matrix.python_version }}-distutils libpq-dev python${{ matrix.python_version }}-dev apache2 rsyslog python3-urllib3 python3-certifi postgresql postgresql-contrib 
          sudo cp -r /usr/lib/python3/dist-packages /usr/lib/python${{ matrix.python_version }}/
          sudo python${{ matrix.python_version }} -m pip install psycopg2-binary psycopg2
     - name: Import GPG key
@@ -179,7 +179,7 @@ jobs:
           mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
           sha256sum jans-cli-tui-linux-suse-X86-64.pyz > jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
     - name: Set up Python 3.6
-      uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+      uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
       with:
         python-version: 3.6
     - name: Build with Ubuntu
@@ -199,7 +199,7 @@ jobs:
         make zipapp 
         mv jans-cli-tui.pyz jans-cli-tui-linux-ubuntu-X86-64.pyz
         sha256sum jans-cli-tui-linux-ubuntu-X86-64.pyz > jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
-    - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+    - uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
       id: cache-installers
       with:
         path: |
@@ -226,7 +226,7 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-    - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+    - uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
       id: cache-installers
       with:
         path: |

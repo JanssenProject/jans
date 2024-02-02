@@ -64,6 +64,7 @@ import java.util.HashSet;
 import java.util.function.Function;
 
 import static io.jans.as.model.config.Constants.*;
+import static io.jans.as.server.util.ServerUtil.prepareForLogs;
 import static org.apache.commons.lang.BooleanUtils.isFalse;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
@@ -146,6 +147,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private AuthzDetailsService authzDetailsService;
 
+    @Inject
+    private TxTokenService txTokenService;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
@@ -158,7 +162,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         log.debug(
                 "Attempting to request access token: grantType = {}, code = {}, redirectUri = {}, username = {}, refreshToken = {}, " +
                         "clientId = {}, ExtraParams = {}, isSecure = {}, codeVerifier = {}, ticket = {}, authorizationDetails = {}",
-                grantType, code, redirectUri, username, refreshToken, clientId, request.getParameterMap(),
+                grantType, code, redirectUri, username, refreshToken, clientId, prepareForLogs(request.getParameterMap()),
                 sec.isSecure(), codeVerifier, ticket, authorizationDetails);
 
         boolean isUma = StringUtils.isNotBlank(ticket);
@@ -201,6 +205,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             final AuthzDetails authzDetails = authzDetailsService.validateAuthorizationDetails(authorizationDetails, executionContext);
             executionContext.setAuthzDetails(authzDetails);
+
+            if (txTokenService.isTxTokenFlow(request)) {
+                return txTokenService.processTxToken(executionContext);
+            }
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
                 return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, executionContext);

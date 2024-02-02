@@ -87,7 +87,11 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "stat",
             "par",
             "ssa"
-        ])
+        ]),
+        ("lockMessageConfig", {
+            "enableIdTokenMessages": False,
+            "idTokenMessagesChannel": "id_token"
+        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -132,11 +136,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
 
     # change ox to jans
     for old_attr, new_attr in [
-        ("oxElevenGenerateKeyEndpoint", "jansElevenGenerateKeyEndpoint"),
-        ("oxElevenSignEndpoint", "jansElevenSignEndpoint"),
-        ("oxElevenVerifySignatureEndpoint", "jansElevenVerifySignatureEndpoint"),
-        ("oxElevenDeleteKeyEndpoint", "jansElevenDeleteKeyEndpoint"),
-        ("oxElevenJwksEndpoint", "jansElevenJwksEndpoint"),
         ("oxOpenIdConnectVersion", "jansOpenIdConnectVersion"),
         ("oxId", "jansId"),
     ]:

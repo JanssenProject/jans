@@ -148,11 +148,6 @@ tags:
 | introspectionSkipAuthorization | Specifies if authorization to be skipped for introspection | [Details](#introspectionskipauthorization) |
 | invalidateSessionCookiesAfterAuthorizationFlow | Boolean value to specify whether to invalidate session_id and consent_session_id cookies right after successful or unsuccessful authorization | [Details](#invalidatesessioncookiesafterauthorizationflow) |
 | issuer | URL using the https scheme that OP asserts as Issuer identifier | [Details](#issuer) |
-| jansElevenDeleteKeyEndpoint | oxEleven Delete Key endpoint URL | [Details](#janselevendeletekeyendpoint) |
-| jansElevenGenerateKeyEndpoint | oxEleven Generate Key endpoint URL | [Details](#janselevengeneratekeyendpoint) |
-| jansElevenSignEndpoint | oxEleven Sign endpoint UR | [Details](#janselevensignendpoint) |
-| jansElevenTestModeToken | oxEleven Test Mode Token | [Details](#janseleventestmodetoken) |
-| jansElevenVerifySignatureEndpoint | oxEleven Verify Signature endpoint URL | [Details](#janselevenverifysignatureendpoint) |
 | jansId | URL for the Inum generator Service | [Details](#jansid) |
 | jansOpenIdConnectVersion | OpenID Connect Version | [Details](#jansopenidconnectversion) |
 | jmsBrokerURISet | JMS Broker URI Set | [Details](#jmsbrokeruriset) |
@@ -1516,51 +1511,6 @@ tags:
 ### issuer
 
 - Description: URL using the https scheme that OP asserts as Issuer identifier
-
-- Required: No
-
-- Default value: None
-
-
-### jansElevenDeleteKeyEndpoint
-
-- Description: oxEleven Delete Key endpoint URL
-
-- Required: No
-
-- Default value: None
-
-
-### jansElevenGenerateKeyEndpoint
-
-- Description: oxEleven Generate Key endpoint URL
-
-- Required: No
-
-- Default value: None
-
-
-### jansElevenSignEndpoint
-
-- Description: oxEleven Sign endpoint UR
-
-- Required: No
-
-- Default value: None
-
-
-### jansElevenTestModeToken
-
-- Description: oxEleven Test Mode Token
-
-- Required: No
-
-- Default value: None
-
-
-### jansElevenVerifySignatureEndpoint
-
-- Description: oxEleven Verify Signature endpoint URL
 
 - Required: No
 

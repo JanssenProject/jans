@@ -26,6 +26,7 @@ from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import safe_render
+from jans.pycloudlib.utils import get_password_from_file
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -53,9 +54,8 @@ def _get_cb_password(manager: Manager, password_file: str, secret_name: str) -> 
         Plaintext password.
     """
     if os.path.isfile(password_file):
-        with open(password_file) as f:
-            password = f.read().strip()
-            manager.secret.set(secret_name, password)
+        password = get_password_from_file(password_file)
+        manager.secret.set(secret_name, password)
     else:
         # get from secrets (if any)
         password = manager.secret.get(secret_name)
@@ -685,10 +685,6 @@ class CouchbaseClient:
             name: Attribute name.
             values: Pre-transformed values.
         """
-        def as_dict(val: _t.Any) -> dict[str, _t.Any]:
-            retval: dict[str, _t.Any] = json.loads(val)
-            return retval
-
         def as_bool(val: _t.Any) -> bool:
             return val.lower() in ("true", "yes", "1", "on")
 
@@ -698,6 +694,13 @@ class CouchbaseClient:
                 retval = int(val)
             except (TypeError, ValueError):
                 pass
+            return retval
+
+        def maybe_json(val: _t.Any) -> _t.Any:
+            try:
+                retval = json.loads(val)
+            except json.decoder.JSONDecodeError:
+                retval = val
             return retval
 
         def as_datetime(val: _t.Any) -> str:
@@ -713,7 +716,7 @@ class CouchbaseClient:
             return dt.isoformat()
 
         callbacks = {
-            "json": as_dict,
+            "json": maybe_json,
             "boolean": as_bool,
             "integer": as_int,
             "datetime": as_datetime,

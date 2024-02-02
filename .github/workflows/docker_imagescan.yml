@@ -33,7 +33,7 @@ jobs:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - name: Build the Container image
       run: docker build ./docker-jans-${{ matrix.docker-images }} --file ./docker-jans-${{ matrix.docker-images }}/Dockerfile --tag localbuild/scanimage:latest
-    - uses: anchore/scan-action@62370b53ab026f5d09b9fb43a7b5ec4b73c1a8e0 # v3.3.7
+    - uses: anchore/scan-action@1c57367e29d11f99ae56571e49f95f1a1991945e # v3.6.3
       id: scan
       with:
         image: "localbuild/scanimage:latest"
@@ -51,7 +51,7 @@ jobs:
             -H "X-Auth-Token: ${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" \
             -H "X-User-Id: ${{ secrets.MOAUTO_ROCKETCHAT_ID }}"
     - name: upload Anchore scan SARIF report
-      uses: github/codeql-action/upload-sarif@407ffafae6a767df3e0230c3df91b6443ae8df75 # v2.22.8
+      uses: github/codeql-action/upload-sarif@0b21cf2492b6b02c465a3e5d7c473717ad7721ba # v3.23.1
       with:
         sarif_file: results.sarif
     - uses: azure/container-scan@f9af925b897d8af5f7e0026b8bca9346261abc93 # v0.1

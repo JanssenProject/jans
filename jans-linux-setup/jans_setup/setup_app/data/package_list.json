@@ -1,7 +1,7 @@
 {
   "red 7": {
     "optional": "",
-    "mandatory": "httpd httpd-mod_ssl mod_auth_openidc rsyslog",
+    "mandatory": "httpd httpd-mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
       "ldap3": "python3-ldap3",
       "requests": "python3-requests",
@@ -13,7 +13,7 @@
   },
   "red 8": {
     "optional": "",
-    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog",
+    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
       "ldap3": "python3-ldap3",
       "requests": "python3-requests",
@@ -25,7 +25,7 @@
   },
   "red 9": {
     "optional": "",
-    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog",
+    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
       "ldap3": "python-ldap3",
       "requests": "python-requests",
@@ -37,7 +37,7 @@
   },
   "centos 7": {
     "optional": "",
-    "mandatory": "httpd mod_ssl mod_auth_openidc  rsyslog  python3-certifi",
+    "mandatory": "httpd mod_ssl mod_auth_openidc  rsyslog  python3-certifi postgresql postgresql-contrib postgresql-server",
     "python": {
       "ldap3": "python3-ldap3",
       "requests": "python3-requests",
@@ -48,7 +48,7 @@
   },
   "centos 8": {
     "optional": "",
-    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog",
+    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
       "ldap3": "python3-ldap3",
       "requests": "python3-requests",
@@ -60,7 +60,7 @@
   },
   "centos 9": {
     "optional": "",
-    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog",
+    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
       "ldap3": "python-ldap3",
       "requests": "python-requests",
@@ -72,7 +72,7 @@
   },
   "suse 15": {
     "optional": "",
-    "mandatory": "apache2 apache2-mod_auth_openidc rsyslog openssl",
+    "mandatory": "apache2 apache2-mod_auth_openidc rsyslog openssl postgresql postgresql-server postgresql-contrib",
     "python": {
       "ldap3": "python3-ldap3",
       "requests": "python3-requests",
@@ -84,7 +84,7 @@
   },
   "suse tumbleweed": {
     "optional": "",
-    "mandatory": "apache2 apache2-mod_auth_openidc  rsyslog openssl",
+    "mandatory": "apache2 apache2-mod_auth_openidc  rsyslog openssl postgresql postgresql-server postgresql-contrib",
     "python": {
       "ldap3": "python3-ldap3",
       "requests": "python3-requests",
@@ -96,7 +96,7 @@
   },
   "debian 11": {
     "optional": "",
-    "mandatory": "apache2 rsyslog",
+    "mandatory": "apache2 rsyslog postgresql postgresql-contrib",
     "python": {
       "ldap3": "python3-ldap3",
       "requests": "python3-requests",
@@ -108,7 +108,7 @@
   },
   "debian 10": {
     "optional": "",
-    "mandatory": "apache2 rsyslog",
+    "mandatory": "apache2 rsyslog postgresql postgresql-contrib",
     "python": {
       "ldap3": "python3-ldap3",
       "requests": "python3-requests",
@@ -120,7 +120,7 @@
   },
   "debian 9": {
     "optional": "",
-    "mandatory": "apache2 rsyslog",
+    "mandatory": "apache2 rsyslog postgresql postgresql-contrib",
     "python": {
       "ldap3": "python3-ldap3",
       "requests": "python3-requests",
@@ -132,7 +132,7 @@
   },
   "ubuntu 20": {
     "optional": "",
-    "mandatory": "apache2 rsyslog python3-urllib3 python3-certifi",
+    "mandatory": "apache2 rsyslog python3-urllib3 python3-certifi postgresql postgresql-contrib",
     "python": {
       "ldap3": "python3-ldap3",
       "requests": "python3-requests",
@@ -143,7 +143,7 @@
   },
   "ubuntu 22": {
     "optional": "",
-    "mandatory": "apache2 rsyslog python3-urllib3 python3-certifi",
+    "mandatory": "apache2 rsyslog python3-urllib3 python3-certifi postgresql postgresql-contrib",
     "python": {
       "ldap3": "python3-ldap3",
       "requests": "python3-requests",

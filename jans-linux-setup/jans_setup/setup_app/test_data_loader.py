@@ -264,7 +264,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'dynamicRegistrationCustomAttributes': [ "jansTrustedClnt", "myCustomAttr1", "myCustomAttr2", "jansInclClaimsInIdTkn" ],
                                     'dynamicRegistrationExpirationTime': 86400,
                                     'grantTypesAndResponseTypesAutofixEnabled': True,
-                                    'dynamicGrantTypeDefault': [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:device_code", "urn:ietf:params:oauth:grant-type:token-exchange" ],
+                                    'dynamicGrantTypeDefault': [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:device_code", "urn:ietf:params:oauth:grant-type:token-exchange", "tx_token" ],
                                     'legacyIdTokenClaims': True,
                                     'authenticationFiltersEnabled': True,
                                     'clientAuthenticationFiltersEnabled': True,
@@ -281,7 +281,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'userInfoSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'consentGatheringScriptBackwardCompatibility': False,
                                     'claimsParameterSupported': True,
-                                    'grantTypesSupported': [ 'urn:openid:params:grant-type:ciba', 'authorization_code', 'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:ietf:params:oauth:grant-type:device_code', 'client_credentials', 'implicit', 'refresh_token', 'password', 'urn:ietf:params:oauth:grant-type:token-exchange' ],
+                                    'grantTypesSupported': [ 'urn:openid:params:grant-type:ciba', 'authorization_code', 'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:ietf:params:oauth:grant-type:device_code', 'client_credentials', 'implicit', 'refresh_token', 'password', 'urn:ietf:params:oauth:grant-type:token-exchange', 'tx_token' ],
                                     'idTokenSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'accessTokenSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'requestObjectSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
@@ -447,12 +447,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.restart('jans-auth')
 
-        if Config.installEleven:
-            eleven_tokens_package = os.path.join(Config.staticFolder, 'eleven/jans-eleven-tokens.tar.gz')
-            target_dir = '/var/lib/softhsm/tokens/'
-            self.logIt(f"Extracting {eleven_tokens_package} into {target_dir}")
-            shutil.unpack_archive(eleven_tokens_package, format='gztar', extract_dir=target_dir)
-
         if Config.install_scim_server:
             self.restart('jans-scim')
 
@@ -461,10 +455,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         if Config.install_config_api:
             self.restart('jans-config-api')
-
-        if Config.installEleven:
-            self.restart('jans-eleven')
-
 
         # Prepare for tests run
         #install_command, update_command, query_command, check_text = self.get_install_commands()

@@ -1,6 +1,5 @@
 {
    "tokenChannels":[
-         "code_token",
          "id_token"
       ],
 
@@ -19,8 +18,18 @@
    "errorReasonEnabled": false,
    
    "opaConfiguration": {
-   		"baseUrl" : "http://localhost:8181/v1/"
+        "baseUrl" : "http://%(jans_opa_host)s:%(jans_opa_port)s/v1/",
+        "accessToken" : ""
    },
-   "messageConsumerType": "DISABLED",
-   "policyDecisionPointType": "DISABLED"
+
+   "policiesJsonUris": [
+   ],
+   "policiesJsonUrisAccessToken" : "",
+
+   "policiesZipUris": [
+   ],
+   "policiesZipUrisAccessToken" : "",
+
+   "messageConsumerType": "OPA",
+   "policyConsumerType": "OPA"
 }

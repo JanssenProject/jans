@@ -188,6 +188,30 @@ public class RegisterParamsValidator {
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter introspection_encrypted_response_enc is not valid.");
         }
 
+        if (registerRequest.getTxTokenSignedResponseAlg() != null &&
+                !appConfiguration.getTxTokenSigningAlgValuesSupported().contains(
+                        registerRequest.getTxTokenSignedResponseAlg().toString())) {
+            log.debug("Parameter tx_token_signed_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter tx_token_signed_response_alg is not valid.");
+        }
+
+        if (registerRequest.getTxTokenEncryptedResponseAlg() != null &&
+                !appConfiguration.getTxTokenEncryptionAlgValuesSupported().contains(
+                        registerRequest.getTxTokenEncryptedResponseAlg().toString())) {
+            log.debug("Parameter tx_token_encrypted_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter tx_token_encrypted_response_alg is not valid.");
+        }
+
+        if (registerRequest.getTxTokenEncryptedResponseEnc() != null &&
+                !appConfiguration.getTxTokenEncryptionEncValuesSupported().contains(
+                        registerRequest.getTxTokenEncryptedResponseEnc().toString())) {
+            log.debug("Parameter tx_token_encrypted_response_enc is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter tx_token_encrypted_response_enc is not valid.");
+        }
+
         if (registerRequest.getRequestObjectSigningAlg() != null &&
                 !appConfiguration.getRequestObjectSigningAlgValuesSupported().contains(
                         registerRequest.getRequestObjectSigningAlg().toString())) {

@@ -24,6 +24,9 @@ public class Person extends BasePerson {
     @AttributeName(name = "jansPreferredMethod")
     private String preferredMethod;
 
+    @AttributeName(name = "role")
+    private List<String> roles;
+
     @AttributeName
     private List<String> memberOf;
 
@@ -41,6 +44,10 @@ public class Person extends BasePerson {
 
     public List<String> getMemberOf() {
         return Utils.nonNullList(memberOf);
+    }
+
+    public List<String> getRoles() {
+        return Utils.nonNullList(roles);
     }
 
     public String getPreferredMethod() {
@@ -61,6 +68,10 @@ public class Person extends BasePerson {
 
     public void setMemberOf(List<String> memberOf) {
         this.memberOf = memberOf;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 
     public void setPreferredMethod(String preferredMethod) {

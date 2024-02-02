@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.22-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.21-1...docker-jans-config-api-v1.0.22-1) (2024-01-22)
+
+
+### Features
+
+* **charts:** add chart for docker-jans-saml ([#7361](https://github.com/JanssenProject/jans/issues/7361)) ([777412b](https://github.com/JanssenProject/jans/commit/777412b279154db2dc4ba821de39c3d271d6d6d1))
+* **docker-jans:** add support for passing jetty.http.idleTimeout option ([#7298](https://github.com/JanssenProject/jans/issues/7298)) ([a1a2e10](https://github.com/JanssenProject/jans/commit/a1a2e1062c0759a40c6d45b48158ff8741473ada))
+
+
+### Bug Fixes
+
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+
 ## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.20-1...docker-jans-config-api-v1.0.21-1) (2023-12-14)
 
 

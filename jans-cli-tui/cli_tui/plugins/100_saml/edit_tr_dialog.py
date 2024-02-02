@@ -12,7 +12,7 @@ from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer,\
 
 from prompt_toolkit.widgets import Button, Label, CheckboxList, Dialog, TextArea,\
     Frame
-from prompt_toolkit.eventloop import get_event_loop
+from asyncio import get_event_loop
 from utils.static import DialogResult
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_label_container import JansLabelContainer
@@ -39,7 +39,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
             data:dict,
             )-> Dialog:
         """init for `EditTRDialog`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
-            
+
         JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
         DialogUtils (methods): Responsable for all `make data from dialog` and `check required fields` in the form for any Edit or Add New
 
@@ -49,12 +49,12 @@ class EditTRDialog(JansGDialog, DialogUtils):
         """
 
         if data:
-            title = _("Edit Trust Relationship")
+            title = _("Edit Service Provider")
         else:
             data = {}
-            title = _("Add new Trust Relationship")
+            title = _("Add new Service Provider")
 
-        super().__init__(app, title)
+        super().__init__(parent=app, title=title)
         self.app = app
         self.data = data
         self.myparent = myparent

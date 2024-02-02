@@ -12,11 +12,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
-//import javax.inject.Inject;
-//import javax.inject.Named;
-
-import io.jans.link.service.EncryptionService;
 import io.jans.model.SimpleProperty;
+import io.jans.service.EncryptionService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import jakarta.inject.Inject;

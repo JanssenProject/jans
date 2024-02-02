@@ -115,6 +115,28 @@ configmap:
   cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- OpenDJ key string. This must be encoded using base64.
   cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+  # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
+  quarkusTransactionEnableRecovery: true
+  # -- Keycloak logging level
+  kcLogLevel: INFO
+  # -- Keycloak proxy mode (for most deployments, this doesn't need to be changed)
+  kcProxy: edge
+  # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
+  kcDbVendor: mysql
+  # -- Keycloak database username
+  kcDbUsername: keycloak
+  # -- Password for Keycloak database access
+  kcDbPassword: Test1234#
+  # -- Keycloak database schema name (note that PostgreSQL may using "public" schema).
+  kcDbSchema: keycloak
+  # -- Keycloak database host
+  kcDbUrlHost: mysql.kc.svc.cluster.local
+  # -- Keycloak database port (default to port 3306 for mysql).
+  kcDbUrlPort: 3306
+  # -- Keycloak database name
+  kcDbUrlDatabase: keycloak
+  # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
+  kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
 nameOverride: ""
 fullNameOverride: ""
 # -- Redis admin password if `configmap.cnCacheType` is set to `REDIS`.
@@ -210,7 +232,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.22_dev
+    tag: 1.0.22-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -406,6 +428,15 @@ link:
   ingress:
     # Enable link endpoints /jans-link
     linkEnabled: true
+saml:
+  # -- Name of the saml service. Please keep it as default.
+  samlServiceName: saml
+  # -- Boolean flag to enable/disable the saml chart.
+  enabled: false
+  # -- Enable endpoints in either istio or nginx ingress depending on users choice
+  ingress:
+    # Enable saml endpoints /kc
+    samlEnabled: false
 
 
 # Global properties
@@ -437,6 +468,10 @@ cnSqlPasswordFile: /etc/jans/conf/sql_password
 cnCouchbasePasswordFile: /etc/jans/conf/couchbase_password
 # -- Path to Couchbase superuser password file
 cnCouchbaseSuperuserPasswordFile: /etc/jans/conf/couchbase_superuser_password
+# -- Path to file contains password for database access
+kcDbPasswordFile: /etc/jans/conf/kc_db_password
+# -- Path to file contains Keycloak admin credentials (username and password)
+kcAdminCredentialsFile: /etc/jans/conf/kc_admin_creds
 
 # ingress properties
 istio:
@@ -518,6 +553,10 @@ nginx-ingress:
     casaLabels: { }
     # -- Casa ingress resource additional annotations.
     casaAdditionalAnnotations: { }
+    # -- SAML config ingress resource labels. key app is taken
+    samlLabels: { }
+    # -- SAML ingress resource additional annotations.
+    samlAdditionalAnnotations: { }
     # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
     additionalLabels: { }
     # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
@@ -597,7 +636,7 @@ image:
   # -- Image  to use for deploying.
   repository: ghcr.io/janssenproject/jans/all-in-one
   # -- Image  tag to use for deploying.
-  tag: 1.0.22_dev
+  tag: 1.0.22-1
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.

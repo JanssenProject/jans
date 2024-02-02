@@ -40,6 +40,32 @@ tags:
 - name: Configuration – Config API
 - name: Client Authorization
 paths:
+  /api/v1/health/app-version:
+    get:
+      tags:
+      - Health - Check
+      summary: Returns application version
+      description: Returns application version
+      operationId: get-app-version
+      parameters:
+      - name: artifact
+        in: query
+        description: artifact name for which version is requied else ALL
+        schema:
+          type: string
+          default: all
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonNode'
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/app-version.readonly
   /api/v1/health:
     get:
       tags:
@@ -7618,6 +7644,8 @@ paths:
         - https://jans.io/oauth/config/uma/resources.readonly
 components:
   schemas:
+    JsonNode:
+      type: object
     HealthStatus:
       type: object
       properties:
@@ -7862,19 +7890,19 @@ components:
           type: string
         selected:
           type: boolean
+        whitePagesCanView:
+          type: boolean
         userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8051,6 +8079,7 @@ components:
             - password
             - client_credentials
             - refresh_token
+            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -8094,6 +8123,18 @@ components:
           items:
             type: string
         introspectionEncryptionEncValuesSupported:
+          type: array
+          items:
+            type: string
+        txTokenSigningAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        txTokenEncryptionAlgValuesSupported:
+          type: array
+          items:
+            type: string
+        txTokenEncryptionEncValuesSupported:
           type: array
           items:
             type: string
@@ -8189,6 +8230,9 @@ components:
           type: integer
           format: int32
         refreshTokenLifetime:
+          type: integer
+          format: int32
+        txTokenLifetime:
           type: integer
           format: int32
         idTokenLifetime:
@@ -8334,6 +8378,7 @@ components:
             - password
             - client_credentials
             - refresh_token
+            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -8384,16 +8429,6 @@ components:
         staticKid:
           type: string
         staticDecryptionKid:
-          type: string
-        jansElevenTestModeToken:
-          type: string
-        jansElevenGenerateKeyEndpoint:
-          type: string
-        jansElevenSignEndpoint:
-          type: string
-        jansElevenVerifySignatureEndpoint:
-          type: string
-        jansElevenDeleteKeyEndpoint:
           type: string
         introspectionAccessTokenMustHaveUmaProtectionScope:
           type: boolean
@@ -8675,6 +8710,8 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
+        lockMessageConfig:
+          $ref: '#/components/schemas/LockMessageConfig'
         fapi:
           type: boolean
         allResponseTypesSupported:
@@ -8826,8 +8863,13 @@ components:
           type: object
           additionalProperties:
             type: string
-    JsonNode:
+    LockMessageConfig:
       type: object
+      properties:
+        enableIdTokenMessages:
+          type: boolean
+        idTokenMessagesChannel:
+          type: string
     SsaConfiguration:
       type: object
       properties:
@@ -9129,6 +9171,7 @@ components:
             - password
             - client_credentials
             - refresh_token
+            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -9393,6 +9436,9 @@ components:
             type: string
         jansDefaultPromptLogin:
           type: boolean
+        txTokenLifetime:
+          type: integer
+          format: int32
         idTokenLifetime:
           type: integer
           format: int32
@@ -9421,6 +9467,12 @@ components:
         introspectionEncryptedResponseAlg:
           type: string
         introspectionEncryptedResponseEnc:
+          type: string
+        txTokenSignedResponseAlg:
+          type: string
+        txTokenEncryptedResponseAlg:
+          type: string
+        txTokenEncryptedResponseEnc:
           type: string
         authorizationDetailsTypes:
           type: array

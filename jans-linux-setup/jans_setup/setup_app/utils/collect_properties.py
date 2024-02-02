@@ -42,10 +42,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
         jans_ConfigurationDN = 'ou=configuration,o=jans'
 
         if Config.persistence_type in ('couchbase', 'sql', 'spanner'):
-            ptype = 'rdbm' if Config.persistence_type in ('sql', 'spanner') else 'couchbase'
-            Config.mapping_locations = { group: ptype for group in Config.couchbaseBucketDict }
             default_storage = Config.persistence_type
-
+        elif Config.persistence_type == 'ldap':
+            default_storage = Config.persistence_type
 
         if not Config.persistence_type in ('ldap', 'sql', 'spanner') and os.path.exists(Config.jansCouchebaseProperties):
             jans_cb_prop = base.read_properties_file(Config.jansCouchebaseProperties)
@@ -101,20 +100,11 @@ class CollectProperties(SetupUtils, BaseInstaller):
                 Config.google_application_credentials = jans_spanner_prop['auth.credentials-file']
                 Config.templateRenderingDict['spanner_creds'] = 'auth.credentials-file={}'.format(Config.google_application_credentials)
 
-
-        if Config.persistence_type in ['hybrid']:
-             jans_hybrid_properties = base.read_properties_file(jans_hybrid_properties_fn)
-             Config.mapping_locations = {'default': jans_hybrid_properties['storage.default']}
-             storages = [ storage.strip() for storage in jans_hybrid_properties['storages'].split(',') ]
-
-             for ml, m in (('user', 'people'), ('cache', 'cache'), ('site', 'link'), ('token', 'tokens')):
-                 for storage in storages:
-                     if m in jans_hybrid_properties.get('storage.{}.mapping'.format(storage),[]):
-                         Config.mapping_locations[ml] = storage
-
         if not Config.get('couchbase_bucket_prefix'):
             Config.couchbase_bucket_prefix = 'jans'
 
+
+        Config.set_mapping_locations()
 
         # It is time to bind database
         dbUtils.bind()
@@ -240,7 +230,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         Config.install_scim_server = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.d'))
         Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.d'))
-        Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.d'))
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
         Config.install_jans_link = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-link'))
         Config.install_casa = os.path.exists(os.path.join(Config.jetty_base, 'casa/start.d'))
@@ -261,7 +250,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('jans_idp_idp_root_dir', 'idpRootDir'),
                     ('jans_idp_idp_metadata_root_dir', 'idpMetadataRootDir'),
                     ('jans_idp_idp_metadata_temp_dir', 'idpMetadataTempDir'),
-                    ('jans_idp_idp_metadata_file_pattern', 'idpMetadataFilePattern'),
                     ('jans_idp_idp_metadata_file', 'idpMetadataFile'),
                     ('jans_idp_sp_metadata_root_dir', 'spMetadataRootDir'),
                     ('jans_idp_sp_metadata_temp_dir', 'spMetadataTempDir'),

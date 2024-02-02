@@ -7,7 +7,7 @@ tags:
 
 # Storage of User Credentials
 
-The following provides a summary of where user credentials can be found in LDAP. If you need information regarding another backend database, please open a support ticket.
+The following provides a summary of where user credentials can be found when the underlying database is LDAP. If you need information regarding another backend database, please open a support ticket.
 
 ## FIDO 2 devices
 Relevant information can be found under `fido2_register` branch of the user's entry.

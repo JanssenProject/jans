@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import com.google.common.collect.Lists;
 
 import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
@@ -48,6 +47,7 @@ import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.service.ApplicationConfigurationFactory;
+import io.jans.service.EncryptionService;
 import io.jans.service.PythonService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ApplicationInitialized;
