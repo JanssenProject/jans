@@ -1355,13 +1355,19 @@ paths:
         schema:
           type: string
       requestBody:
+        description: Webhook object
         content:
-          '*/*':
+          application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/ShortCode'
-        required: true
+              $ref: '#/components/schemas/ShortCode'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  [{
+                    "webhookId": "0a8e784b-2394-3a34-89d3-4a09d245aa32",
+                    "shortCodes": {"price": 100}
+                  }]
       responses:
         "200":
           description: Ok
