@@ -6,6 +6,7 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.webhook.AuiFeature;
+import io.jans.ca.plugin.adminui.model.webhook.ShortCode;
 import io.jans.ca.plugin.adminui.model.webhook.WebhookEntry;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
@@ -325,13 +326,15 @@ public class WebhookService {
      * @param webhookIds A set of webhook IDs.
      * @return The method is returning a List of Strings.
      */
-    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds) throws ApplicationException {
+    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds, List<ShortCode> shortCodes) throws ApplicationException {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         List<GenericResponse> responseList = new ArrayList<>();
         List<Callable<GenericResponse>> callables = new ArrayList<>();
         List<WebhookEntry> webhooks = getWebhookByIds(webhookIds);
         for (WebhookEntry webhook : webhooks) {
             validateWebhookEntry(webhook);
+            ShortCode shortCodeObj = shortCodes.stream().filter(shortCode -> shortCode.getWebhookId().equals(webhook.getWebhookId())).findAny().orElse(null);
+            replaceShortCodeWithValues(webhook, shortCodeObj);
             if (webhook.isJansEnabled()) {
                 Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
                 callables.add(callable);
@@ -352,6 +355,19 @@ public class WebhookService {
         return responseList;
     }
 
+    private void replaceShortCodeWithValues(WebhookEntry webhook, ShortCode shortCodeObj) {
+        if (shortCodeObj == null) {
+            return;
+        }
+        log.info("CommonUtils.hasShortCode(webhook.getUrl()) {}", CommonUtils.hasShortCode(webhook.getUrl()));
+        if (CommonUtils.hasShortCode(webhook.getUrl())) {
+            webhook.setUrl(CommonUtils.replacePlaceholders(webhook.getUrl(), shortCodeObj.getShortCodes()));
+        }
+
+        if (CommonUtils.hasShortCode(webhook.getHttpRequestBody()) && Lists.newArrayList("POST", "PUT", "PATCH").contains(webhook.getHttpMethod())) {
+            webhook.setHttpRequestBody(CommonUtils.replacePlaceholders(webhook.getHttpRequestBody(), shortCodeObj.getShortCodes()));
+        }
+    }
 
     private static String idFromName(String name) {
         return UUID.nameUUIDFromBytes(name.getBytes(UTF_8)).toString();

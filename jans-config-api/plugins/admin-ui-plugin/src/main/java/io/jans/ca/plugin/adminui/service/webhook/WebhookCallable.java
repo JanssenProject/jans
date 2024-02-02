@@ -3,6 +3,7 @@ package io.jans.ca.plugin.adminui.service.webhook;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
@@ -52,6 +53,10 @@ public class WebhookCallable implements Callable<GenericResponse> {
         JsonNode jsonNode = objectMapper.createObjectNode();
         ((ObjectNode) jsonNode).put("webhookId", webhook.getWebhookId());
         ((ObjectNode) jsonNode).put("webhookName", webhook.getDisplayName());
+        ((ObjectNode) jsonNode).put("webhookMethod", webhook.getHttpMethod());
+        if(Lists.newArrayList("POST", "PUT", "PATCH").contains(webhook.getHttpMethod())) {
+            ((ObjectNode) jsonNode).put("webhookRequestBody", webhook.getHttpRequestBody().toString());
+        }
         if (response.getStatus() == Response.Status.OK.getStatusCode() ||
                 response.getStatus() == Response.Status.CREATED.getStatusCode() ||
                 response.getStatus() == Response.Status.ACCEPTED.getStatusCode()) {
@@ -95,16 +100,12 @@ public class WebhookCallable implements Callable<GenericResponse> {
     private Map<String, Object> setRequestBody(WebhookEntry webhook) {
         try {
             Map<String, Object> body = new HashMap<>();
-            webhook.getHttpHeaders().stream()
-                    .filter(Objects::nonNull)
-                    .forEach(header -> {
-                        if (header.getKey().equalsIgnoreCase(AppConstants.CONTENT_TYPE) && header.getKey().equalsIgnoreCase(AppConstants.APPLICATION_JSON)) {
-                            Map<String, String> reqBody = webhook.getHttpRequestBody();
-                            for (String key : reqBody.keySet()) {
-                                body.put(key, reqBody.get(key));
-                            }
-                        }
-                    });
+            if (webhook.getHttpHeaders().stream().anyMatch(header -> header.getKey().equals(AppConstants.CONTENT_TYPE))) {
+                Map<String, Object> reqBody = webhook.getHttpRequestBody();
+                for (String key : reqBody.keySet()) {
+                    body.put(key, reqBody.get(key));
+                }
+            }
             return body;
         } catch (Exception ex) {
             log.error("Error in parsing request-body.", ex);

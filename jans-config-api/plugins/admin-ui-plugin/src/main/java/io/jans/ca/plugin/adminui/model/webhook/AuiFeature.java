@@ -23,6 +23,8 @@ public class AuiFeature extends Entry implements Serializable {
     private String jansScope;
     @AttributeName(name = "webhookId")
     private List<String> webhookIdsMapped;
+    @AttributeName(name = "shortCode")
+    private List<String> shortCode;
 
     public String getAuiFeatureId() {
         return auiFeatureId;
@@ -58,13 +60,23 @@ public class AuiFeature extends Entry implements Serializable {
         }
     }
 
+    public List<String> getShortCode() {
+        return shortCode;
+    }
+
+    public void setShortCode(List<String> shortCode) {
+        if(shortCode != null) {
+            this.shortCode = Lists.newArrayList(Sets.newHashSet(shortCode));
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         AuiFeature that = (AuiFeature) o;
-        return auiFeatureId.equals(that.auiFeatureId) && displayName.equals(that.displayName) && jansScope.equals(that.jansScope) && Objects.equals(webhookIdsMapped, that.webhookIdsMapped);
+        return auiFeatureId.equals(that.auiFeatureId) && displayName.equals(that.displayName) && jansScope.equals(that.jansScope);
     }
 
     @Override
@@ -79,6 +91,7 @@ public class AuiFeature extends Entry implements Serializable {
                 ", displayName='" + displayName + '\'' +
                 ", jansScope='" + jansScope + '\'' +
                 ", webhookIdsMapped=" + webhookIdsMapped +
+                ", shortCode=" + shortCode +
                 '}';
     }
 }
