@@ -64,6 +64,7 @@ import java.util.HashSet;
 import java.util.function.Function;
 
 import static io.jans.as.model.config.Constants.*;
+import static io.jans.as.server.util.ServerUtil.prepareForLogs;
 import static org.apache.commons.lang.BooleanUtils.isFalse;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
@@ -161,7 +162,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         log.debug(
                 "Attempting to request access token: grantType = {}, code = {}, redirectUri = {}, username = {}, refreshToken = {}, " +
                         "clientId = {}, ExtraParams = {}, isSecure = {}, codeVerifier = {}, ticket = {}, authorizationDetails = {}",
-                grantType, code, redirectUri, username, refreshToken, clientId, request.getParameterMap(),
+                grantType, code, redirectUri, username, refreshToken, clientId, prepareForLogs(request.getParameterMap()),
                 sec.isSecure(), codeVerifier, ticket, authorizationDetails);
 
         boolean isUma = StringUtils.isNotBlank(ticket);
