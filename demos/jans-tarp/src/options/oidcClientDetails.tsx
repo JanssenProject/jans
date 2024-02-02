@@ -67,14 +67,16 @@ const OIDCClientDetails = (data) => {
                         clearInterval(intervalId);
                         chrome.tabs.remove(tab.id);
                         callback(undefined, new Error('Authorization tab was closed.'));
+                        chrome.tabs.onUpdated.removeListener(listener);
                     }
                 });
             }, 1000);
 
-            chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+            chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo, tab) {
                 if (!!chrome.runtime.lastError) {
                     chrome.tabs.remove(tabId);
                     callback(undefined, chrome.runtime.lastError);
+                    chrome.tabs.onUpdated.removeListener(listener);
                 }
                 if (tabId === tab?.id && changeInfo?.status === "complete") {
                     chrome.tabs.sendMessage(tab.id, { requestId: requestId }, function (response) {
@@ -87,11 +89,12 @@ const OIDCClientDetails = (data) => {
                                 callback(url, undefined);
                                 chrome.tabs.remove(tab.id);
                                 setLoading(false);
+                                chrome.tabs.onUpdated.removeListener(listener);
                             }
                         });
                     });
                 }
-                //chrome.tabs.onUpdated.removeListener(tabUpdatedListener);
+                //chrome.tabs.onUpdated.removeListener(listener);
             })
         });
     }
