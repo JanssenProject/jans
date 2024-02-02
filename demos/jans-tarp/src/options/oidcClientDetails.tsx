@@ -67,7 +67,6 @@ const OIDCClientDetails = (data) => {
                         clearInterval(intervalId);
                         chrome.tabs.remove(tab.id);
                         callback(undefined, new Error('Authorization tab was closed.'));
-                        chrome.tabs.onUpdated.removeListener(listener);
                     }
                 });
             }, 1000);
@@ -94,7 +93,6 @@ const OIDCClientDetails = (data) => {
                         });
                     });
                 }
-                //chrome.tabs.onUpdated.removeListener(listener);
             })
         });
     }
