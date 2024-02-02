@@ -12,7 +12,7 @@ from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer,\
 
 from prompt_toolkit.widgets import Button, Label, CheckboxList, Dialog, TextArea,\
     Frame
-from prompt_toolkit.eventloop import get_event_loop
+from asyncio import get_event_loop
 from utils.static import DialogResult
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_label_container import JansLabelContainer
