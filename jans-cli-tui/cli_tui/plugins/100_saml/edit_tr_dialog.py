@@ -90,14 +90,14 @@ class EditTRDialog(JansGDialog, DialogUtils):
             file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.file, ok_handler=read_metadata_file)
             self.app.show_jans_dialog(file_browser_dialog)
 
-        def get_metadata_location(value):
-            if value == 'url':
+        def get_metadata_source_tpe(value):
+            if value == 'uri':
                 self.matadata_type_container = HSplit([
                     self.app.getTitledText(title=_("Metadata URL"),
-                        name='metadataURL',
-                        value='',
+                        name='spMetaDataURL',
+                        value=self.data.get('spMetaDataURL', ''),
                         style=cli_style.edit_text,
-                        jans_help=_("URL of metadata"),
+                        jans_help=_("URL of metadata for service provider"),
                         widget_style=cli_style.white_bg_widget
                     )
                     ], width=D())
@@ -105,16 +105,14 @@ class EditTRDialog(JansGDialog, DialogUtils):
                 self.matadata_type_container = HSplit([
                 self.app.getTitledWidget(
                         _("Metadata File"),
-                        name='jansEntityId',
+                        name='spMetaDataLocation',
                         widget=Button(_('Browse'), handler=upload_file),
                         style=cli_style.edit_text,
                         other_widgets=VSplit([Window(width=2), Window(FormattedTextControl(lambda: self.metadata_file_path))])
-                )
-                ], width=D())
+                    )
+                    ], width=D())
 
-
-        get_metadata_location(self.data.get('metaDataLocation', 'file'))
-
+        get_metadata_source_tpe(self.data.get('spMetaDataSourceType', 'file'))
 
         add_released_attribute_button = VSplit([Window(), self.app.getButton(
             text=_("Add Released Attribute"),
@@ -150,7 +148,6 @@ class EditTRDialog(JansGDialog, DialogUtils):
                     jans_help=_("Is this TR enabled?"),
                     style=cli_style.check_box
                 ),
-
                 self.app.getTitledText(
                     title=_("Description"),
                     name='description',
@@ -160,19 +157,57 @@ class EditTRDialog(JansGDialog, DialogUtils):
                     jans_help=_("Description for TR"),
                     widget_style=cli_style.white_bg_widget
                 ),
-
+                self.app.getTitledCheckBox(
+                    _("Surrogate Auth Required"),
+                    name='surrogateAuthRequired',
+                    checked=self.data.get('surrogateAuthRequired', False),
+                    jans_help=_("Is this TR enabled?"),
+                    style=cli_style.check_box
+                ),
+                self.app.getTitledText(
+                    title=_("Root URL"),
+                    name='rootUrl',
+                    value=self.data.get('rootUrl', ''),
+                    style=cli_style.edit_text,
+                    jans_help=_("Root URL for TR"),
+                    widget_style=cli_style.white_bg_widget
+                ),
+                self.app.getTitledText(
+                    title=_("Admin URL"),
+                    name='adminUrl',
+                    value=self.data.get('adminUrl', ''),
+                    style=cli_style.edit_text,
+                    jans_help=_("Admin URL for TR"),
+                    widget_style=cli_style.white_bg_widget
+                ),
+                self.app.getTitledText(
+                    title=_("URL"),
+                    name='url',
+                    value=self.data.get('url', ''),
+                    style=cli_style.edit_text,
+                    jans_help=_("URL for TR"),
+                    widget_style=cli_style.white_bg_widget
+                ),
+                self.app.getTitledText(
+                    title=_("Service Provider Logout URL"),
+                    name='spLogoutURL',
+                    value=self.data.get('spLogoutURL', ''),
+                    style=cli_style.edit_text,
+                    jans_help=_("Service Provider Logout URL for TR"),
+                    widget_style=cli_style.white_bg_widget
+                ),
                 ]
 
-        if self.new_tr:
+        if self.data.get('spMetaDataSourceType') != 'file':
             edit_tr_container_widgets.append(
                 self.app.getTitledWidget(
-                        _("Metadata Location"),
-                        name='metaDataLocation',
+                        _("Metadata Source Type"),
+                        name='spMetaDataSourceType',
                         widget=DropDownWidget(
-                            values=[('file', 'File'), ('url', 'URL')],
-                            value=self.data.get('metaDataLocation', 'file'),
+                            values=[(dsp, dsp) for dsp in ('file', 'uri', 'federation', 'manual', 'mdq')],
+                            value=self.data.get('spMetaDataSourceType', 'file'),
                             select_one_option = False,
-                            on_value_changed = get_metadata_location
+                            on_value_changed = get_metadata_source_tpe
                         )
                 )
             )
@@ -341,37 +376,27 @@ class EditTRDialog(JansGDialog, DialogUtils):
             metadata_location = tr_data.pop('metaDataLocation', None)
             if metadata_location == 'url':
                 metadata_url_data = self.make_data_from_dialog({'metadataURL': self.matadata_type_container})
-                metadata_url = metadata_url_data['metadataURL']
-
-                try:
-                    metadata_response = requests.get(metadata_url, verify=False)
-                except Exception as e:
-                    self.app.show_message(_(common_strings.error), _("Retreiving meatada from:\n {}\nfailed. Reason:\n{}").format(metadata_url, e), tobefocused=self.edit_tr_container)
-                    return
-
-                if not metadata_response.ok:
-                    self.app.show_message(_(common_strings.error), _("Retreiving meatada from:\n {}\nfailed. Reason:\n{}").format(metadata_url, metadata_response.reason), tobefocused=self.edit_tr_container)
-                    return
-
-                parsed_url = urlparse(metadata_url)
-                metadata_fn = parsed_url.netloc + '_' + parsed_url.path.replace('/', '_')
-                if not metadata_fn.endswith('xml'):
-                    metadata_fn += '.xml'
-
-                self.metadata_file_path = os.path.join(self.app.cli_object.tmp_dir, metadata_fn)
-                with open(self.metadata_file_path, 'w') as w:
-                    w.write(metadata_response.text)
+                tr_data['metadataURL'] = metadata_url_data['metadataURL']
+            else:
+                pass
 
         tr_data['releasedAttributes'] = [entry[0] for entry in self.released_attributes_container.entries]
 
-        if self.new_tr and self.metadata_file_path:
-            tr_data['spMetaDataSourceType'] = 'FILE'
-            tr_data['spMetaDataFN'] = os.path.basename(self.metadata_file_path)
-            data = {'trustRelationship': tr_data, 'metaDataFile': self.metadata_file_path}
-        else:
-            new_data = copy.deepcopy(self.data)
-            new_data.update(tr_data)
-            data = {'trustRelationship': new_data}
+        matadata_type_container_data = self.make_data_from_dialog({'matadata_type_container_data': self.matadata_type_container})
+        new_data = copy.deepcopy(self.data)
+        new_data.update(tr_data)
+
+        sp_meta_data_source_type = tr_data.get('spMetaDataSourceType')
+        if sp_meta_data_source_type == 'file':
+            new_data['spMetaDataLocation'] = os.path.basename(self.metadata_file_path)
+            new_data.pop('spMetaDataURL', None)
+        elif sp_meta_data_source_type == 'uri':
+            new_data.pop('spMetaDataLocation', None)
+            new_data['spMetaDataURL'] = matadata_type_container_data['spMetaDataURL']
+
+        data = {'trustRelationship': new_data}
+        if sp_meta_data_source_type == 'file': 
+            data['metaDataFile'] = self.metadata_file_path
 
         async def coroutine():
             operation_id = 'post-trust-relationship-metadata-file' if self.new_tr else 'put-trust-relationship'
