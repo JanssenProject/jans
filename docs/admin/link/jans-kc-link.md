@@ -5,8 +5,27 @@ tags:
   - keycloak
 ---
 
+# Jans Keycloak Link
 
-## This content is in progress
+The Jans Keycloak Link is a [Jans Link](README.md) module that provide 
+synchronization services to update the Janssen User Store from an external 
+Keycloak instance.
+
+Jans Keycloak Link integration with external Keycloak involves following 
+configuration steps. 
+
+## Configure Client on Keycloak
+
+Jans Keycloak Link accesses Keycloak data via Keycloak API. A new `confidential`
+client needs to be created on Keycloak in order to authorise Jans Keycloak Link
+for API access.
+
+- Go to Keycloak administration console and create a new OpenId Connect client
+  ![](../../assets/jans-kc-link-client-1.png)
+- Select the `access type` as `confidential` and turn `on` the 
+  `Service Accounts Enabled` flag.
+  ![](../../assets/jans-kc-link-client-2.png)
+- 
 
 The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
 
