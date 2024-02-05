@@ -59,6 +59,7 @@ const OIDCClientDetails = (data) => {
 
     function customLaunchWebAuthFlow(options, callback) {
         var requestId = Math.random().toString(36).substring(2);
+        var redirectUrl = options.redirectUrl;
         var authUrl = options.url + "&state=" + requestId;
         chrome.tabs.create({ url: authUrl }, function (tab) {
             var intervalId = setInterval(function () {
@@ -71,10 +72,11 @@ const OIDCClientDetails = (data) => {
                 });
             }, 1000);
 
-            chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+            chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo, tab) {
                 if (!!chrome.runtime.lastError) {
                     chrome.tabs.remove(tabId);
                     callback(undefined, chrome.runtime.lastError);
+                    chrome.tabs.onUpdated.removeListener(listener);
                 }
                 if (tabId === tab?.id && changeInfo?.status === "complete") {
                     chrome.tabs.sendMessage(tab.id, { requestId: requestId }, function (response) {
@@ -83,22 +85,37 @@ const OIDCClientDetails = (data) => {
                             let url = tabs[0].url;
                             const urlParams = new URLSearchParams(new URL(url).search)
                             const code = urlParams.get('code')
-                            if (code != null) {
+                            if (code != null && areUrlsEqual(url, redirectUrl)) {
                                 callback(url, undefined);
                                 chrome.tabs.remove(tab.id);
                                 setLoading(false);
+                                chrome.tabs.onUpdated.removeListener(listener);
                             }
                         });
                     });
                 }
-                //chrome.tabs.onUpdated.removeListener(tabUpdatedListener);
             })
         });
     }
 
+    function areUrlsEqual(url1, url2) {
+        // Create URL objects for comparison
+
+        const parsedUrl1 = new URL(url1);
+        const parsedUrl2 = new URL(url2);
+
+        // Compare individual components
+        return (
+            parsedUrl1.protocol === parsedUrl2.protocol &&
+            parsedUrl1.host === parsedUrl2.host &&
+            parsedUrl1.pathname === parsedUrl2.pathname &&
+            parsedUrl1.port === parsedUrl2.port
+        );
+    }
+
     async function triggerCodeFlowButton() {
         setLoading(true);
-        const redirectUrl = data.data.op_host;
+        const redirectUrl = data.data.redirect_uri[0];
         const { secret, hashed } = await generateRandomChallengePair();
         chrome.storage.local.get(["oidcClient"]).then(async (result) => {
             if (!!result.oidcClient) {
@@ -135,7 +152,8 @@ const OIDCClientDetails = (data) => {
 
                 const resultUrl: string = await new Promise((resolve, reject) => {
                     customLaunchWebAuthFlow({
-                        url: authzUrl
+                        url: authzUrl,
+                        redirectUrl: redirectUrl
                     }, (callbackUrl, error) => {
                         if (!!error) {
                             console.error('Error in executing auth url: ', error)
