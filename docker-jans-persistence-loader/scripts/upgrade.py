@@ -186,10 +186,10 @@ class CouchbaseBackend:
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
         bucket = kwargs.get("bucket")
         req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec: B608
         )
         if not req.ok:
-            return
+            return None
 
         try:
             _attrs = req.json()["results"][0]
@@ -793,6 +793,7 @@ class Upgrade:
                     entry.attrs["jansSmtpConf"][0] = json.dumps(new_smtp_conf)
                     should_update = True
 
+        # scim support
         scim_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
         if as_boolean(entry.attrs["jansScimEnabled"]) != scim_enabled:
             entry.attrs["jansScimEnabled"] = scim_enabled
@@ -800,16 +801,27 @@ class Upgrade:
 
         # message configuration
         if "jansMessageConf" not in entry.attrs:
-            entry.attrs["jansMessageConf"] = "'{}'"
+            entry.attrs["jansMessageConf"] = {}
 
-        if self.backend.type != "couchbase":
+        with contextlib.suppress(TypeError):
             entry.attrs["jansMessageConf"] = json.loads(entry.attrs["jansMessageConf"])
 
         entry.attrs["jansMessageConf"], should_update = _transform_message_config(entry.attrs["jansMessageConf"])
 
+        # set document store
+        doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
+
+        with contextlib.suppress(TypeError):
+            entry.attrs["jansDocStoreConf"] = json.loads(entry.attrs["jansDocStoreConf"])
+
+        if entry.attrs["jansDocStoreConf"]["documentStoreType"] != doc_store_type:
+            entry.attrs["jansDocStoreConf"]["documentStoreType"] = doc_store_type
+            should_update = True
+
         if should_update:
             if self.backend.type != "couchbase":
                 entry.attrs["jansMessageConf"] = json.dumps(entry.attrs["jansMessageConf"])
+                entry.attrs["jansDocStoreConf"] = json.dumps(entry.attrs["jansDocStoreConf"])
 
             revision = entry.attrs.get("jansRevision") or 1
             entry.attrs["jansRevision"] = revision + 1
@@ -849,26 +861,31 @@ def _transform_message_config(conf):
     should_update = False
     provider_type = os.environ.get("CN_MESSAGE_TYPE", "DISABLED")
 
-    pg_host = os.environ.get("CN_SQL_DB_HOST", "localhost")
-    pg_port = os.environ.get("CN_SQL_DB_PORT", "5432")
-    pg_db = os.environ.get("CN_SQL_DB_NAME", "jans")
-
-    if os.environ.get("CN_PERSISTENCE_TYPE", "ldap") == "sql":
+    if os.environ.get("CN_PERSISTENCE_TYPE", "ldap") == "sql" and os.environ.get("CN_SQL_DB_DIALECT", "mysql") in ("pgsql", "postgresql"):
         pg_pw_encoded = encode_text(
             get_sql_password(manager),
             manager.secret.get("encoded_salt")
         ).decode()
+        pg_host = os.environ.get("CN_SQL_DB_HOST", "localhost")
+        pg_port = os.environ.get("CN_SQL_DB_PORT", "5432")
+        pg_db = os.environ.get("CN_SQL_DB_NAME", "jans")
+        pg_schema = os.environ.get("CN_SQL_DB_SCHEMA") or "public"
     else:
         pg_pw_encoded = ""
+        pg_host = "localhost"
+        pg_port = "5432"
+        pg_db = "jans"
+        pg_schema = "public"
 
     # backward-compat values
-    msg_wait_millis = conf["postgresConfiguration"].get("messageWaitMillis") or conf["postgresConfiguration"].get("message-wait-millis") or 100
-    msg_sleep_thread = conf["postgresConfiguration"].get("messageSleepThreadTime") or conf["postgresConfiguration"].get("message-sleep-thread-millis") or 200
+    pg_conf = conf.get("postgresConfiguration") or {}
+    msg_wait_millis = pg_conf.get("messageWaitMillis") or pg_conf.get("message-wait-millis") or 100
+    msg_sleep_thread = pg_conf.get("messageSleepThreadTime") or pg_conf.get("message-sleep-thread-millis") or 200
     new_conf = {
         "messageProviderType": provider_type,
         "postgresConfiguration": {
             "connectionUri": f"jdbc:postgresql://{pg_host}:{pg_port}/{pg_db}",
-            "dbSchemaName": os.environ.get("CN_SQL_DB_SCHEMA", "public"),
+            "dbSchemaName": pg_schema,
             "authUserName": os.environ.get("CN_SQL_DB_USER", "jans"),
             "authUserPassword": pg_pw_encoded,
             "messageWaitMillis": msg_wait_millis,

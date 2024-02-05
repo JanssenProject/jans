@@ -194,6 +194,19 @@ class SQLBackend:
             # run the callback
             index_func(table_name, column_mapping)
 
+    def create_unique_indexes(self):
+        for table_name, column in [
+            ("jansPerson", "mail"),
+            ("jansPerson", "uid"),
+        ]:
+            index_name = f"{table_name.lower()}_{column.lower()}_unique_idx"
+
+            if self.client.dialect == "mysql":
+                query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD UNIQUE INDEX {self.client.quoted_id(index_name)} ({self.client.quoted_id(column)})"
+            else:
+                query = f"CREATE UNIQUE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column)})"
+            self.client.create_index(query)
+
     def import_builtin_ldif(self, ctx):
         optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
         ldif_mappings = get_ldif_mappings_hook("sql", optional_scopes)
@@ -214,6 +227,7 @@ class SQLBackend:
 
         logger.info("Creating indexes (if not exist)")
         self.create_indexes()
+        self.create_unique_indexes()
 
         ctx = prepare_template_ctx(self.manager)
 

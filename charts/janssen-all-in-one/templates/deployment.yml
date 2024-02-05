@@ -58,6 +58,7 @@ spec:
               {{- with .Values.customScripts }}
               {{- toYaml . | replace "- " "" | nindent 14}}
               {{- end }}
+              python3 /scripts/tls_generator.py &
               /app/bin/entrypoint.sh
         {{- end}}
         ports:

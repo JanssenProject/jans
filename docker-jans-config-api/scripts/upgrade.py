@@ -307,6 +307,9 @@ class Upgrade:
         self.update_client_scopes()
         self.update_test_client_scopes()
 
+        # creatorAttrs data type has been changed
+        self.update_scope_creator_attrs()
+
     def update_client_redirect_uri(self):
         kwargs = {}
         jca_client_id = self.manager.config.get("jca_client_id")
@@ -458,6 +461,44 @@ class Upgrade:
             else:
                 entry.attrs["jansScope"] = client_scopes + diff
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_scope_creator_attrs(self):
+        kwargs = {}
+
+        if self.backend.type != "sql":
+            return
+
+        kwargs.update({"table_name": "jansScope"})
+        entries = self.backend.search_entries("", **kwargs)
+
+        for entry in entries:
+            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                creator_attrs = entry.attrs["creatorAttrs"]["v"]
+            else:
+                creator_attrs = entry.attrs.get("creatorAttrs") or []
+
+            if not isinstance(creator_attrs, list):
+                creator_attrs = [creator_attrs]
+
+            new_creator_attrs = []
+
+            # check the type of attr
+            for _, attr in enumerate(creator_attrs):
+                with contextlib.suppress(TypeError, json.decoder.JSONDecodeError):
+                    # migrating from old data, i.e. `{"v": ["{}"]}`
+                    attr = json.loads(attr)
+
+                if isinstance(attr, str):
+                    # migrating from old data, i.e. `{"v": ["\"{}\""]}`
+                    attr = json.loads(attr.strip('"'))
+                new_creator_attrs.append(attr)
+
+            if new_creator_attrs != creator_attrs:
+                if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                    entry.attrs["creatorAttrs"]["v"] = new_creator_attrs
+                else:
+                    entry.attrs["creatorAttrs"] = new_creator_attrs
+                self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
 def main():

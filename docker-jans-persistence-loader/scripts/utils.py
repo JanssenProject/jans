@@ -59,7 +59,7 @@ def get_base_ctx(manager):
             manager.secret.get("encoded_salt"),
         ).decode()
 
-    doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "LOCAL")
+    doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
     jca_user, jca_pw = get_jackrabbit_creds()
 
     jca_pw_encoded = encode_text(

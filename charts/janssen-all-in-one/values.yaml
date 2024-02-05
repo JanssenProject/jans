@@ -137,6 +137,10 @@ configmap:
   kcDbUrlDatabase: keycloak
   # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
   kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
+  # -- URL of OPA server
+  cnOpaUrl: http://opa.opa.svc.cluster.cluster.local:8181/v1
+  # -- Message type (one of POSTGRES, REDIS, or DISABLED)
+  cnMessageType: DISABLED
 nameOverride: ""
 fullNameOverride: ""
 # -- Redis admin password if `configmap.cnCacheType` is set to `REDIS`.
@@ -212,6 +216,8 @@ auth-server:
     webdiscoveryEnabled: true
     # -- Enable endpoint /.well-known/fido-configuration
     u2fConfigEnabled: true
+  # -- Enable jans-lock as service running inside auth-server
+  lockEnabled: false
 # -- Responsible for regenerating auth-keys per x hours
 auth-server-key-rotation:
   # -- Add custom normal and secret envs to the service
@@ -331,6 +337,8 @@ config-api:
   ingress:
     # Enable config API endpoints /jans-config-api
     configApiEnabled: true
+  # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml")
+  plugins: "admin-ui,fido2,scim,user-mgt"
 fido2:
   # -- Name of the fido2 service. Please keep it as default.
   fido2ServiceName: fido2
@@ -460,8 +468,8 @@ cnAwsConfigFile: /etc/jans/conf/aws_config_file
 cnAwsSecretsReplicaRegionsFile: /etc/jans/conf/aws_secrets_replica_regions
 # -- Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number.
 cnPrometheusPort: ""
-# -- Document store type to use for shibboleth files LOCAL.
-cnDocumentStoreType: LOCAL
+# -- Document store type to use for shibboleth files DB.
+cnDocumentStoreType: DB
 # -- Path to SQL password file
 cnSqlPasswordFile: /etc/jans/conf/sql_password
 # -- Path to Couchbase password file
@@ -645,9 +653,9 @@ replicas: 1
 resources:
   limits:
     # -- CPU limit.
-    cpu: 2500m
+    cpu: 16000m
     # -- Memory limit.
-    memory: 2500Mi
+    memory: 16000Mi
   requests:
     # -- CPU request.
     cpu: 2500m

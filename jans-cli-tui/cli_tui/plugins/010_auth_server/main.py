@@ -4,7 +4,7 @@ import asyncio
 from functools import partial
 from typing import Any, Optional
 from prompt_toolkit.application.current import get_app
-from asyncio import get_event_loop
+from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
