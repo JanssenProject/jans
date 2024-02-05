@@ -932,7 +932,10 @@ class JCA_CLI:
         try:
             return response.json()
         except:
-            return {'server_error': response.text}
+            if response.status_code in (200, 201, 202, 203):
+                return {'message': response.text}
+            else:
+                return {'server_error': response.text}
 
 
     def delete_requests(self, endpoint, url_param_dict):
