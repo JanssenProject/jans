@@ -36,7 +36,7 @@ if no_tui:
     sys.exit()
 
 import prompt_toolkit
-from asyncio import get_event_loop
+from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.application import Application, get_app_session
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
@@ -189,6 +189,8 @@ class JansCliApp(Application):
 
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
         self.plugins_initialised = False
+
+        self.create_background_task(self.check_jans_cli_ini())
 
 
     async def progress_coroutine(self) -> None:
@@ -1038,7 +1040,7 @@ application = JansCliApp()
 
 def run():
     with patch_stdout(application):
-        result = application.run(pre_run=lambda: application.create_background_task(application.check_jans_cli_ini()))
+        result = application.run()
     print("See you next time.")
 
 

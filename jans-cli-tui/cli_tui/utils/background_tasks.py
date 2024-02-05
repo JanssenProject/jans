@@ -1,4 +1,4 @@
-from asyncio import get_event_loop
+from prompt_toolkit.eventloop import get_event_loop
 
 from utils.utils import common_data
 from utils.static import common_strings
