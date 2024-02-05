@@ -6,7 +6,7 @@ kind: Service
 metadata:
   name: {{ include "auth-server-key-rotation.fullname" . }}
   labels:
-{{ include "auth-server-key-rotation.fullname" . | indent 4 }}
+{{ include "auth-server-key-rotation.labels" . | indent 4 }}
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}

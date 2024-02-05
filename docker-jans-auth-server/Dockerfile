@@ -51,7 +51,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=1.0.22
-ENV CN_BUILD_DATE='2024-01-22 12:44'
+ENV CN_BUILD_DATE='2024-01-30 15:47'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -101,7 +101,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=e6d8566897fab9598897b6a7e02670ea1d794c78
+ENV JANS_SOURCE_VERSION=892e35894c64d12f5c141b831e2e730f3abc77d1
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -223,7 +223,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
     PYTHON_HOME=/opt/jython \
-    CN_DOCUMENT_STORE_TYPE=LOCAL \
+    CN_DOCUMENT_STORE_TYPE=DB \
     CN_JACKRABBIT_URL=http://localhost:8080 \
     CN_JACKRABBIT_ADMIN_ID=admin \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
