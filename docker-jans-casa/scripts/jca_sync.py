@@ -82,7 +82,7 @@ def get_jackrabbit_url():
 
 
 def main():
-    store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "LOCAL")
+    store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
     if store_type != "JCA":
         logger.warning(f"Using {store_type} document store; sync is disabled ...")
         return
