@@ -114,7 +114,9 @@ class LockPersistenceSetup:
     @cached_property
     def ctx(self) -> dict[str, _t.Any]:
         ctx = {
-            # "hostname": self.manager.config.get("hostname"),
+            "hostname": self.manager.config.get("hostname"),
+            "jans_opa_host": "localhost",
+            "jans_opa_port": 8181,
         }
 
         # pre-populate lock_dynamic_conf_base64

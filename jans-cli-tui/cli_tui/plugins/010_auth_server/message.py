@@ -1,7 +1,7 @@
 import asyncio
 
 from prompt_toolkit.layout.dimension import D
-from asyncio import get_event_loop
+from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign
 from prompt_toolkit.widgets import Button, Frame, RadioList
 
