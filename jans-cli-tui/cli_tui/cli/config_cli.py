@@ -1265,7 +1265,15 @@ class JCA_CLI:
         endpoint_params = self.parse_command_args(endpoint_args)
 
         if path.get('__urlsuffix__') and not path['__urlsuffix__'] in suffix_param:
-            self.exit_with_error("This operation requires a value for url-suffix {}".format(path['__urlsuffix__']))
+            suffix_str = f"A value for {path['__urlsuffix__']}"
+            parameters_ = 'parameters'
+            if parameters_ in path and path[parameters_] and path[parameters_][0].get('description'):
+                suffix_str = path[parameters_][0]['description']
+            self.exit_with_error(
+            f"This operation requires a value for url-suffix {path['__urlsuffix__']}\n"
+            f"For example: --url-suffix=\"{path['__urlsuffix__']}:{suffix_str}\""
+            
+            )
 
         if not data:
             op_path = self.get_path_by_id(operation_id)
