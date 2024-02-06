@@ -425,7 +425,7 @@ It returns all the information of the Jans Authorization server.
   "disablePromptLogin": false,
   "disablePromptConsent": false,
   "sessionIdLifetime": 86400,
-  "serverSessionIdLifetime": 86400,
+  "sessionIdCookieLifetime": 86400,
   "configurationUpdateInterval": 3600,
   "enableClientGrantTypeUpdate": true,
   "dynamicGrantTypeDefault": [

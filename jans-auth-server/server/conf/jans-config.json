@@ -401,6 +401,7 @@
     "sessionIdEnabled":true,
     "sessionIdPersistOnPromptNone":true,
     "sessionIdLifetime":86400,
+    "sessionIdCookieLifetime":86400,
     "forceOfflineAccessScopeToEnableRefreshToken":false,
     "configurationUpdateInterval":3600,
     "cssLocation":"${config.oxauth.contextPath}/stylesheet",
