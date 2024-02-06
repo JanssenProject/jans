@@ -7,7 +7,7 @@
 package io.jans.as.common.service.common;
 
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.config.GluuConfiguration;
 import io.jans.model.SmtpConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.EncryptionService;

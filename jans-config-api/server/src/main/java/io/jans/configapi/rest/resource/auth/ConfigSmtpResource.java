@@ -7,7 +7,7 @@
 package io.jans.configapi.rest.resource.auth;
 
 import io.jans.as.common.service.common.ConfigurationService;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.config.GluuConfiguration;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
