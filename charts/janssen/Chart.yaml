@@ -93,3 +93,7 @@ dependencies:
     - name: saml
       condition: global.saml.enabled
       version: 1.0.22
+
+    - name: cn-istio-ingress
+      condition: global.istio.ingress
+      version: 1.0.22
