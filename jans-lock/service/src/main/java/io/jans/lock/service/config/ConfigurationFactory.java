@@ -107,6 +107,7 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 	private String cryptoConfigurationSalt;
 
 	private AtomicBoolean isActive;
+	private AtomicBoolean isInitialized;
 
 	private long baseConfigurationFileLastModifiedTime;
 
@@ -117,6 +118,7 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 	public void init() {
 		log.info("Initializing ConfigurationFactory ...");
 		this.isActive = new AtomicBoolean(true);
+		this.isInitialized = new AtomicBoolean(false);
 		try {
 			log.info("---------PATH to file configuration: {}", APP_PROPERTIES_FILE);
             this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
@@ -137,13 +139,15 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 	}
 
 	public void initTimer() {
-		log.debug("Initializing Configuration Timer");
-
-		final int delay = 30;
-		final int interval = DEFAULT_INTERVAL;
-
-		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new ConfigurationEvent(),
-				Scheduled.Literal.INSTANCE));
+		if (this.isInitialized.compareAndSet(false, true)) {
+			log.debug("Initializing Configuration Timer");
+	
+			final int delay = 30;
+			final int interval = DEFAULT_INTERVAL;
+	
+			timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new ConfigurationEvent(),
+					Scheduled.Literal.INSTANCE));
+		}
 	}
 
 	@Asynchronous
