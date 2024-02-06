@@ -79,6 +79,18 @@ class Plugin():
             'mapping': HSplit([],width=D()),
         }
 
+        self.accessroles_container = JansVerticalNav(
+                myparent=self.app,
+                headers=['Role', 'Description', 'Deletable'],
+                preferred_size= [0,0,0],
+                on_enter=self.edit_adminui_roles,
+                on_display=self.app.data_display_dialog,
+                on_delete= self.delete_adminui_roles,
+                selectes=0,
+                headerColor='class:outh-verticalnav-headcolor',
+                entriesColor='class:outh-verticalnav-entriescolor',
+            )
+
         self.containers['accessroles'] = HSplit([
                     VSplit([
                         self.app.getButton(
@@ -88,15 +100,15 @@ class Plugin():
                             handler=self.get_adminui_roles),
 
                         self.app.getButton(
-                            text=_("Add adminui roles"), 
+                            text=_("Add adminui role"), 
                             name='oauth:scopes:add', 
                             jans_help=_("Add admin ui role"), 
-                            handler=self.add_adminui_roles),
+                            handler=self.add_adminui_role),
                         ],
                         padding=3,
                         width=D(),
                         ),
-                        DynamicContainer(lambda: self.config_data_container['accessroles'])
+                        self.accessroles_container
                      ],style='class:outh_containers_clients')
 
         self.containers['permissions'] = HSplit([
@@ -131,21 +143,15 @@ class Plugin():
                         self.app.getButton(
                             text=_("Get adminui mapping"), 
                             name='oauth:clients:get', 
-                            jans_help=_("Get all admin ui mapping"), 
+                            jans_help=_("Get all admin ui mapping"),
                             handler=self.get_adminui_mapping),
                         
                         self.app.getTitledText(
                             _("Search"), 
                             name='oauth:scopes:search', 
-                            jans_help=_("Press enter to perform search"), 
+                            jans_help=_("Press enter to perform search"),
                             accept_handler=self.search_adminui_mapping,
                             style='class:outh_containers_scopes.text'),
-
-                        # self.app.getButton(
-                        #     text=_("Add adminui mapping"), 
-                        #     name='oauth:scopes:add', 
-                        #     jans_help=_("Add admin ui mapping"), 
-                        #     handler=self.add_adminui_mapping),
                         ],
                         padding=3,
                         width=D(),
@@ -169,53 +175,22 @@ class Plugin():
                 self.app.show_message(_("Error Getting Admin UI Roles!"), str(data), tobefocused=self.app.center_container)
                 return
 
-            self.admin_ui_roles_data = data
-            self.adminui_update_roles()
-            self.app.layout.focus(self.app.center_container)
+            self.accessroles_container.clear()
+            self.accessroles_container.all_data = data
+
+            for d in data:
+                self.accessroles_container.add_item([
+                    d.get('role'),
+                    d.get('description', ''),
+                    'Yes' if d.get('deletable') else 'No'
+                ])
+
+            self.app.layout.focus(self.accessroles_container)
 
         asyncio.ensure_future(coroutine())
 
-    def adminui_update_roles(self,
-        ) -> None:
-        """update the current adminui-roles to server
-        """
 
-        data =[]
-
-        for d in self.admin_ui_roles_data:
-            data.append(
-                [
-                d.get('role'),
-                d.get('description'),
-                'Yes' if d.get('deletable') else 'No'
-                ]
-            )
-
-        if data:
-            clients = JansVerticalNav(
-                myparent=self.app,
-                headers=['Role', 'Description', 'Deletable'],
-                preferred_size= [0,0,0],
-                data=data,
-                on_enter=self.edit_adminui_roles,
-                on_display=self.app.data_display_dialog,
-                on_delete= self.delete_adminui_roles,
-                # get_help=(self.get_help,'AdminRole'),
-                selectes=0,
-                headerColor='class:outh-verticalnav-headcolor',
-                entriesColor='class:outh-verticalnav-entriescolor',
-                all_data=self.admin_ui_roles_data
-            )
-            self.app.layout.focus(clients)   # clients.focuse..!? TODO >> DONE
-            self.config_data_container['accessroles'] = HSplit([
-                clients,
-            ])
-            get_app().invalidate()
-            self.app.layout.focus(clients)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
-        else:
-            self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
-
-    def add_adminui_roles(self) -> None:
+    def add_adminui_role(self) -> None:
         """Method to display the dialog of adminui-roles
         """
 
