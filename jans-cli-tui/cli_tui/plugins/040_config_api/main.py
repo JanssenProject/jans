@@ -113,12 +113,7 @@ class Plugin():
 
         self.containers['permissions'] = HSplit([
                     VSplit([
-                        self.app.getButton(
-                            text=_("Get adminui permissions"), 
-                            name='oauth:clients:get', 
-                            jans_help=_("Get all admin ui permissions"), 
-                            handler=self.get_adminui_permissions),
-                        
+
                         self.app.getTitledText(
                             _("Search"), 
                             name='oauth:scopes:search', 
@@ -304,8 +299,8 @@ class Plugin():
         asyncio.ensure_future(coroutine())
     
     def get_adminui_permissions(self,
-        start_index: Optional[int]=0, 
-        pattern: Optional[str]= ''
+        start_index: Optional[int]=0,
+        pattern: Optional[str]=''
         ) -> None:
         """Method to get the adminui_permissions data from server
 
@@ -325,7 +320,7 @@ class Plugin():
         asyncio.ensure_future(coroutine())
         
     def adminui_update_permissions(self,
-        start_index: Optional[int]=0, 
+        start_index: Optional[int]=0,
         pattern: Optional[str]= ''
         ) -> None:
         """update the current adminui_permissions data to server
