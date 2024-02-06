@@ -250,7 +250,7 @@ class Plugin():
                 # self.future.set_result(DialogResult.ACCEPT)
                 return True
 
-            self.app.show_message(_("Error!"), _("An error ocurred while Addin role adminui:\n") + str(response.text))
+            self.app.show_message(_("Error!"), _("An error ocurred while Adding admin-ui role:\n") + str(response.text))
 
 
         body = HSplit([self.adminui_role,self.adminui_role_description])
