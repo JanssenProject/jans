@@ -659,19 +659,20 @@ public class SessionIdService {
     }
 
     public int getServerSessionIdLifetimeInSeconds() {
-        if (appConfiguration.getServerSessionIdLifetime() != null && appConfiguration.getServerSessionIdLifetime() > 0) {
-            return appConfiguration.getServerSessionIdLifetime();
-        }
-        if (appConfiguration.getSessionIdLifetime() != null && appConfiguration.getSessionIdLifetime() > 0) {
-            return appConfiguration.getSessionIdLifetime();
+        if (appConfiguration.getSessionIdLifetime() != null) {
+            if (appConfiguration.getSessionIdLifetime() > 0) {
+                return appConfiguration.getSessionIdLifetime();
+            } else { // equals or less then 0
+                // if less or equal to 0 we put it for maximum period
+                return Integer.MAX_VALUE;
+            }
         }
 
-        // we don't know for how long we can put it in cache/persistence since expiration is not set, so we set it to max integer.
-        if (appConfiguration.getServerSessionIdLifetime() != null && appConfiguration.getSessionIdLifetime() != null &&
-                appConfiguration.getServerSessionIdLifetime() <= 0 && appConfiguration.getSessionIdLifetime() <= 0) {
-            return Integer.MAX_VALUE;
+        if (appConfiguration.getSessionIdCookieLifetime() != null && appConfiguration.getSessionIdCookieLifetime() > 0) {
+            return appConfiguration.getSessionIdCookieLifetime();
         }
-        log.debug("Session id lifetime configuration is null.");
+
+        log.debug("Session id lifetime configuration is null. (Both 'sessionIdLifetime' and 'sessionIdCookieLifetime' are null. Fallback to 86400 value.");
         return AppConfiguration.DEFAULT_SESSION_ID_LIFETIME;
     }
 

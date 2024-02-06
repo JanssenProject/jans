@@ -62,6 +62,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.create_subtables()
         self.import_ldif()
         self.create_indexes()
+        self.create_unique_indexes()
         self.rdbmProperties()
 
     def prepare(self):
@@ -468,6 +469,16 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                     custom_index
                                     )
                         self.dbUtils.exec_rdbm_query(sql_cmd)
+
+    def create_unique_indexes(self):
+        #Create uniqueness for columns jansPerson.uid and jansPerson.mail
+        for table, column in (('jansPerson', 'mail'), ('jansPerson', 'uid')):
+            if Config.rdbm_type in ('mysql', 'spanner'):
+                sql_cmd = f'CREATE UNIQUE INDEX `{table.lower()}_{column.lower()}_unique_idx` ON `{table}` (`{column}`)'
+            elif Config.rdbm_type == 'pgsql':
+                sql_cmd = f'CREATE UNIQUE INDEX {table.lower()}_{column.lower()}_unique_idx ON "{table}"("{column}")'
+            self.dbUtils.exec_rdbm_query(sql_cmd)
+
 
     def import_ldif(self):
         ldif_files = []

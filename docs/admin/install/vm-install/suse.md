@@ -141,7 +141,10 @@ HTTPS cofiguration file `https_jans.conf` as shown below:
 
 ## Uninstall
 
-Uninstall process involves two steps
+Uninstall process involves two steps and removes all the Janssen Server components.
+
+!!! Note
+    For removal of the attached persistence store, please refer to [this note](../install-faq.md#does-the-janssen-server-uninstall-process-remove-the-data-store-as-well).
 
 1. Uninstall Janssen Server
 2. Remove and purge the `jans` package

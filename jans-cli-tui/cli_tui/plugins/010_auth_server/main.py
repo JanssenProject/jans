@@ -170,6 +170,20 @@ class Plugin(DialogUtils):
 
         self.oauth_main_area = HSplit([],width=D())
 
+        self.scopes_container = JansVerticalNav(
+                myparent=self.app,
+                headers=['id', 'Description', 'Type','inum'],
+                preferred_size=[30,40,8,12],
+                on_enter=self.edit_scope_dialog,
+                on_display=self.app.data_display_dialog,
+                on_delete=self.delete_scope,
+                get_help=(self.get_help,'Scope'),
+                selectes=0,
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
+            )
+        self.scopes_container_buttons = VSplit([])
+
         self.oauth_containers['scopes'] = HSplit([
                     VSplit([
                         self.app.getTitledText(_("Search"), name='oauth:scopes:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_scope,style='class:outh_containers_scopes.text'),
@@ -178,8 +192,9 @@ class Plugin(DialogUtils):
                         padding=3,
                         width=D(),
                     ),
-                    DynamicContainer(lambda: self.oauth_data_container['scopes'])
-                    ],style='class:outh_containers_scopes')
+                    self.scopes_container,
+                    DynamicContainer(lambda: self.scopes_container_buttons)
+                    ],cli_style.container)
 
 
         self.clients_container = JansVerticalNav(
@@ -189,7 +204,7 @@ class Plugin(DialogUtils):
                         on_enter=self.edit_client,
                         on_display=self.app.data_display_dialog,
                         on_delete=self.delete_client,
-                        jans_help=HTML(_("Press key <b>s</b> to save client summary")),
+                        jans_help=HTML(_("Press key <b>s</b> to save client summary, <b>d</b> to display configurations")),
                         custom_key_bindings=[('s', self.save_client_summary)],
                         headerColor=cli_style.navbar_headcolor,
                         entriesColor=cli_style.navbar_entriescolor,
@@ -488,12 +503,12 @@ class Plugin(DialogUtils):
 
             endpoint_args ='withAssociatedClients:true,limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
             if pattern:
-                endpoint_args +=',pattern:'+pattern
+                endpoint_args += ',pattern:' + pattern
 
             cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args':endpoint_args}
             self.app.start_progressing(_("Retreiving scopes from server..."))
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing(_("Retreived"))
+            self.app.stop_progressing()
 
             try:
                 result = response.json()
@@ -501,61 +516,34 @@ class Plugin(DialogUtils):
                 self.app.show_message(_("Error getting response"), str(response))
                 return
 
-            data =[]
+            self.scopes_container.clear()
+            all_data = result.get('entries', [])
 
-            for d in result.get('entries', []): 
-                data.append(
+            for d in all_data: 
+                self.scopes_container.add_item(
                     [
                     d['id'],
                     d.get('description', ''),
-                    d.get('scopeType',''),   ## some scopes have no scopetypr
+                    d.get('scopeType',''),
                     d['inum']
                     ]
                 )
 
-            if data:
+            buttons = []
+            if start_index > 0:
+                handler_partial = partial(self.oauth_get_scopes, start_index-self.app.entries_per_page, pattern)
+                prev_button = Button(_("Prev"), handler=handler_partial)
+                prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
+                buttons.append(prev_button)
+            if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
+                handler_partial = partial(self.oauth_get_scopes, start_index+self.app.entries_per_page, pattern)
+                next_button = Button(_("Next"), handler=handler_partial)
+                next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
+                buttons.append(next_button)
 
-                scopes =VSplit([
-                    Label(text=" ",width=1),
-                    JansVerticalNav(
-                            myparent=self.app,
-                            headers=['id', 'Description', 'Type','inum'],
-                            preferred_size= [30,40,8,12],
-                            data=data,
-                            on_enter=self.edit_scope_dialog,
-                            on_display=self.app.data_display_dialog,
-                            on_delete=self.delete_scope,
-                            get_help=(self.get_help,'Scope'),
-                            selectes=0,
-                            headerColor=cli_style.navbar_headcolor,
-                            entriesColor=cli_style.navbar_entriescolor,
-                            all_data=result['entries']
-                        )
-                ])
+            self.app.layout.focus(self.scopes_container)
+            self.scopes_container_buttons = VSplit(buttons, padding=3, width=D(), align=HorizontalAlign.CENTER)
 
-                buttons = []
-                if start_index > 0:
-                    handler_partial = partial(self.oauth_get_scopes, start_index-self.app.entries_per_page, pattern)
-                    prev_button = Button(_("Prev"), handler=handler_partial)
-                    prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
-                    buttons.append(prev_button)
-                if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
-                    handler_partial = partial(self.oauth_get_scopes, start_index+self.app.entries_per_page, pattern)
-                    next_button = Button(_("Next"), handler=handler_partial)
-                    next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
-                    buttons.append(next_button)
-
-                self.app.layout.focus(scopes)   # clients.focuse..!? TODO >> DONE
-                self.oauth_data_container['scopes'] = HSplit([
-                    scopes,
-                    VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
-                ])
-
-                get_app().invalidate()
-                self.app.layout.focus(scopes)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
-
-            else:
-                self.app.show_message(_("Oops"), _(common_strings.no_matching_result),tobefocused = self.oauth_containers['scopes'])
 
         asyncio.ensure_future(coroutine())
 

@@ -249,6 +249,15 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
     private List<String> introspectionEncryptionEncValuesSupported;
 
+    @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    private List<String> txTokenSigningAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    private List<String> txTokenEncryptionAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    private List<String> txTokenEncryptionEncValuesSupported;
+
     @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT")
     private List<String> idTokenSigningAlgValuesSupported;
 
@@ -335,6 +344,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "The lifetime of the Refresh Token")
     private int refreshTokenLifetime;
+
+    @DocProperty(description = "The lifetime of the Transaction Token")
+    private int txTokenLifetime;
 
     @DocProperty(description = "The lifetime of the ID Token")
     private int idTokenLifetime;
@@ -483,11 +495,11 @@ public class AppConfiguration implements Configuration {
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
-    @DocProperty(description = "The lifetime of session id in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends")
-    private Integer sessionIdLifetime = DEFAULT_SESSION_ID_LIFETIME;
+    @DocProperty(description = "The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends")
+    private Integer sessionIdCookieLifetime = DEFAULT_SESSION_ID_LIFETIME;
 
-    @DocProperty(description = "Dedicated property to control lifetime of the server side OP session object in seconds. Overrides sessionIdLifetime. By default value is 0, so object lifetime equals sessionIdLifetime (which sets both cookie and object expiration). It can be useful if goal is to keep different values for client cookie and server object")
-    private Integer serverSessionIdLifetime = sessionIdLifetime; // by default same as sessionIdLifetime
+    @DocProperty(description = "The lifetime of session_id server object in seconds. If not set falls back to session_id cookie expiration set by 'sessionIdCookieLifetime' configuration property")
+    private Integer sessionIdLifetime = sessionIdCookieLifetime;
 
     @DocProperty(description = "Authorization Scope for active session")
     private String activeSessionAuthorizationScope;
@@ -558,23 +570,6 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Specifies static decryption Kid")
     private String staticDecryptionKid;
-
-
-    //oxEleven
-    @DocProperty(description = "oxEleven Test Mode Token")
-    private String jansElevenTestModeToken;
-
-    @DocProperty(description = "oxEleven Generate Key endpoint URL")
-    private String jansElevenGenerateKeyEndpoint;
-
-    @DocProperty(description = "oxEleven Sign endpoint UR")
-    private String jansElevenSignEndpoint;
-
-    @DocProperty(description = "oxEleven Verify Signature endpoint URL")
-    private String jansElevenVerifySignatureEndpoint;
-
-    @DocProperty(description = "oxEleven Delete Key endpoint URL")
-    private String jansElevenDeleteKeyEndpoint;
 
     @DocProperty(description = "If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header", defaultValue = "false")
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
@@ -1978,6 +1973,30 @@ public class AppConfiguration implements Configuration {
         this.introspectionEncryptionEncValuesSupported = introspectionEncryptionEncValuesSupported;
     }
 
+    public List<String> getTxTokenSigningAlgValuesSupported() {
+        return txTokenSigningAlgValuesSupported;
+    }
+
+    public void setTxTokenSigningAlgValuesSupported(List<String> txTokenSigningAlgValuesSupported) {
+        this.txTokenSigningAlgValuesSupported = txTokenSigningAlgValuesSupported;
+    }
+
+    public List<String> getTxTokenEncryptionAlgValuesSupported() {
+        return txTokenEncryptionAlgValuesSupported;
+    }
+
+    public void setTxTokenEncryptionAlgValuesSupported(List<String> txTokenEncryptionAlgValuesSupported) {
+        this.txTokenEncryptionAlgValuesSupported = txTokenEncryptionAlgValuesSupported;
+    }
+
+    public List<String> getTxTokenEncryptionEncValuesSupported() {
+        return txTokenEncryptionEncValuesSupported;
+    }
+
+    public void setTxTokenEncryptionEncValuesSupported(List<String> txTokenEncryptionEncValuesSupported) {
+        this.txTokenEncryptionEncValuesSupported = txTokenEncryptionEncValuesSupported;
+    }
+
     public List<String> getUserInfoSigningAlgValuesSupported() {
         return userInfoSigningAlgValuesSupported;
     }
@@ -2249,6 +2268,14 @@ public class AppConfiguration implements Configuration {
 
     public void setRefreshTokenLifetime(int refreshTokenLifetime) {
         this.refreshTokenLifetime = refreshTokenLifetime;
+    }
+
+    public int getTxTokenLifetime() {
+        return txTokenLifetime;
+    }
+
+    public void setTxTokenLifetime(int txTokenLifetime) {
+        this.txTokenLifetime = txTokenLifetime;
     }
 
     public int getIdTokenLifetime() {
@@ -2663,46 +2690,6 @@ public class AppConfiguration implements Configuration {
         this.keyStoreSecret = keyStoreSecret;
     }
 
-    public String getJansElevenTestModeToken() {
-        return jansElevenTestModeToken;
-    }
-
-    public void setJansElevenTestModeToken(String jansElevenTestModeToken) {
-        this.jansElevenTestModeToken = jansElevenTestModeToken;
-    }
-
-    public String getJansElevenGenerateKeyEndpoint() {
-        return jansElevenGenerateKeyEndpoint;
-    }
-
-    public void setJansElevenGenerateKeyEndpoint(String jansElevenGenerateKeyEndpoint) {
-        this.jansElevenGenerateKeyEndpoint = jansElevenGenerateKeyEndpoint;
-    }
-
-    public String getJansElevenSignEndpoint() {
-        return jansElevenSignEndpoint;
-    }
-
-    public void setJansElevenSignEndpoint(String jansElevenSignEndpoint) {
-        this.jansElevenSignEndpoint = jansElevenSignEndpoint;
-    }
-
-    public String getJansElevenVerifySignatureEndpoint() {
-        return jansElevenVerifySignatureEndpoint;
-    }
-
-    public void setJansElevenVerifySignatureEndpoint(String jansElevenVerifySignatureEndpoint) {
-        this.jansElevenVerifySignatureEndpoint = jansElevenVerifySignatureEndpoint;
-    }
-
-    public String getJansElevenDeleteKeyEndpoint() {
-        return jansElevenDeleteKeyEndpoint;
-    }
-
-    public void setJansElevenDeleteKeyEndpoint(String jansElevenDeleteKeyEndpoint) {
-        this.jansElevenDeleteKeyEndpoint = jansElevenDeleteKeyEndpoint;
-    }
-
     public Boolean getEndSessionWithAccessToken() {
         return endSessionWithAccessToken;
     }
@@ -2861,14 +2848,37 @@ public class AppConfiguration implements Configuration {
     }
 
     /**
-     * @return session_id lifetime. If null or value is zero or less then session_id lifetime is not set and will expire when browser session ends.
+     * @return session_id lifetime. If value is zero or less then session_id lifetime is set to Integer.MAX_VALUE. If null then falls back to 86400 seconds.
      */
     public Integer getSessionIdLifetime() {
         return sessionIdLifetime;
     }
 
+    /**
+     * Sets session id lifetime
+     *
+     * @param sessionIdLifetime session id lifetime
+     */
     public void setSessionIdLifetime(Integer sessionIdLifetime) {
         this.sessionIdLifetime = sessionIdLifetime;
+    }
+
+    /**
+     * Gets session id cookie lifetime
+     *
+     * @return session id cookie lifetime
+     */
+    public Integer getSessionIdCookieLifetime() {
+        return sessionIdCookieLifetime;
+    }
+
+    /**
+     * Sets session id cookie lifetime
+     *
+     * @param sessionIdCookieLifetime session id cookie lifetime
+     */
+    public void setSessionIdCookieLifetime(Integer sessionIdCookieLifetime) {
+        this.sessionIdCookieLifetime = sessionIdCookieLifetime;
     }
 
     public String getActiveSessionAuthorizationScope() {
@@ -2877,14 +2887,6 @@ public class AppConfiguration implements Configuration {
 
     public void setActiveSessionAuthorizationScope(String activeSessionAuthorizationScope) {
         this.activeSessionAuthorizationScope = activeSessionAuthorizationScope;
-    }
-
-    public Integer getServerSessionIdLifetime() {
-        return serverSessionIdLifetime;
-    }
-
-    public void setServerSessionIdLifetime(Integer serverSessionIdLifetime) {
-        this.serverSessionIdLifetime = serverSessionIdLifetime;
     }
 
     public Boolean getLogClientIdOnClientAuthentication() {
