@@ -12,7 +12,10 @@ from prompt_toolkit.widgets.base import Border
 from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
-from prompt_toolkit.formatted_text import HTML, merge_formatted_text
+from prompt_toolkit.formatted_text import HTML, merge_formatted_text, is_formatted_text
+
+
+from utils.multi_lang import _
 
 
 class JansVerticalNav():
@@ -93,7 +96,9 @@ class JansVerticalNav():
         self.headerColor = headerColor
         self.entriesColor = entriesColor
         self.max_height = max_height
-        self.jans_help = jans_help
+        if not is_formatted_text(jans_help):
+            jans_help = HTML(jans_help)
+        self.jans_help = merge_formatted_text([HTML(_("Press <b>F1</b> for Help.") + " "), jans_help])
         self.on_enter = on_enter
         self.on_delete = on_delete
         self.on_display = on_display
