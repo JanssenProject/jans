@@ -434,6 +434,7 @@
     "changeSessionIdOnAuthentication":true,
     "returnClientSecretOnRead": true,
     "sessionIdPersistOnPromptNone":true,
+    "sessionIdCookieLifetime": 86400,
     "sessionIdLifetime": 86400,
     "configurationUpdateInterval":3600,
     "cssLocation":"",

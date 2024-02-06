@@ -16,9 +16,9 @@ first, it may need to trigger a logout event at the OpenID Provider.
 Below is a list of some of the Auth Server configuration properties for timeouts
 that you should consider:
 
-1. **sessionIdLifetime**:
+1. **sessionIdCookieLifetime**:
 
-1. **serverSessionIdLifetime**:
+1. **sessionIdLifetime**:
 
 1. **sessionIdUnusedLifetime**:
 
