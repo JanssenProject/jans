@@ -187,14 +187,15 @@ class Plugin():
                 [
                 d.get('role'),
                 d.get('description'),
+                'Yes' if d.get('deletable') else 'No'
                 ]
             )
 
         if data:
             clients = JansVerticalNav(
                 myparent=self.app,
-                headers=['Role', 'Description',],
-                preferred_size= [0,0],
+                headers=['Role', 'Description', 'Deletable'],
+                preferred_size= [0,0,0],
                 data=data,
                 on_enter=self.edit_adminui_roles,
                 on_display=self.app.data_display_dialog,
