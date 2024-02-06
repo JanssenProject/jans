@@ -9,7 +9,6 @@ import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.DataMapperService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -53,8 +52,34 @@ class ConfigurationControllerTest {
     }
 
     @Test
-    void getConfiguration_ifFido2ConfigurationNotNullAndSuperGluuEnabledIsTrue_success() throws JsonProcessingException {
-        when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
+    void getConfiguration_ifEnableAssertionOptionsGenerateEndpointIsTrue_success() throws JsonProcessingException {
+        Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        when(fido2Configuration.isAssertionOptionsGenerateEndpointEnabled()).thenReturn(true);
+        when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode(), mapper.createObjectNode(), mapper.createObjectNode());
+        String issuer = "https://jans-test.org";
+        String baseEndpoint = issuer + "/fido";
+        when(appConfiguration.getIssuer()).thenReturn(issuer);
+        when(appConfiguration.getBaseEndpoint()).thenReturn(baseEndpoint);
+
+        Response response = configurationController.getConfiguration();
+        assertNotNull(response);
+        assertEquals(response.getStatus(), 200);
+
+        assertJsonNode(response, issuer, baseEndpoint, true, false);
+
+        verify(appConfiguration, times(2)).getFido2Configuration();
+        verify(appConfiguration).getBaseEndpoint();
+        verify(appConfiguration).getIssuer();
+        verify(fido2Configuration).isAssertionOptionsGenerateEndpointEnabled();
+        verify(dataMapperService, times(3)).createObjectNode();
+    }
+
+    @Test
+    void getConfiguration_ifSuperGluuEnabledIsTrue_success() throws JsonProcessingException {
+        Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        when(fido2Configuration.isAssertionOptionsGenerateEndpointEnabled()).thenReturn(true);
         when(appConfiguration.isSuperGluuEnabled()).thenReturn(true);
         when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode(), mapper.createObjectNode(), mapper.createObjectNode());
         String issuer = "https://jans-test.org";
@@ -66,21 +91,21 @@ class ConfigurationControllerTest {
         assertNotNull(response);
         assertEquals(response.getStatus(), 200);
 
-        JsonNode nodeEntity = assertJsonNode(response, issuer, baseEndpoint);
+        assertJsonNode(response, issuer, baseEndpoint, true, true);
 
-        assertTrue(nodeEntity.has("super_gluu_registration_endpoint"));
-        assertEquals(nodeEntity.get("super_gluu_registration_endpoint").asText(), baseEndpoint + "/attestation/registration");
-        assertTrue(nodeEntity.has("super_gluu_authentication_endpoint"));
-        assertEquals(nodeEntity.get("super_gluu_authentication_endpoint").asText(), baseEndpoint + "/assertion/authentication");
-
-        verify(appConfiguration).getFido2Configuration();
+        verify(appConfiguration, times(2)).getFido2Configuration();
+        verify(appConfiguration).getBaseEndpoint();
+        verify(appConfiguration).getIssuer();
+        verify(fido2Configuration).isAssertionOptionsGenerateEndpointEnabled();
         verify(appConfiguration).isSuperGluuEnabled();
         verify(dataMapperService, times(3)).createObjectNode();
     }
 
     @Test
-    void getConfiguration_ifFido2ConfigurationNotNullAndSuperGluuEnabledIsFalse_success() throws JsonProcessingException {
-        when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
+    void getConfiguration_happyPath_success() throws JsonProcessingException {
+        Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        when(fido2Configuration.isAssertionOptionsGenerateEndpointEnabled()).thenReturn(false);
         when(appConfiguration.isSuperGluuEnabled()).thenReturn(false);
         when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode(), mapper.createObjectNode(), mapper.createObjectNode());
         String issuer = "https://jans-test.org";
@@ -92,18 +117,18 @@ class ConfigurationControllerTest {
         assertNotNull(response);
         assertEquals(response.getStatus(), 200);
 
-        JsonNode nodeEntity = assertJsonNode(response, issuer, baseEndpoint);
+        assertJsonNode(response, issuer, baseEndpoint, false, false);
 
-        assertFalse(nodeEntity.has("super_gluu_registration_endpoint"));
-        assertFalse(nodeEntity.has("super_gluu_authentication_endpoint"));
-
-        verify(appConfiguration).getFido2Configuration();
+        verify(appConfiguration, times(2)).getFido2Configuration();
+        verify(appConfiguration).getBaseEndpoint();
+        verify(appConfiguration).getIssuer();
+        verify(fido2Configuration).isAssertionOptionsGenerateEndpointEnabled();
         verify(appConfiguration).isSuperGluuEnabled();
         verify(dataMapperService, times(3)).createObjectNode();
     }
 
-    @NotNull
-    private JsonNode assertJsonNode(Response response, String issuer, String baseEndpoint) throws JsonProcessingException {
+    private void assertJsonNode(Response response, String issuer, String baseEndpoint,
+                                boolean verifyAssertionOptionsGenerate, boolean verifySuperGluu) throws JsonProcessingException {
         JsonNode nodeEntity = mapper.readTree(response.getEntity().toString());
         assertTrue(nodeEntity.has("version"));
         assertEquals(nodeEntity.get("version").asText(), "1.1");
@@ -125,8 +150,23 @@ class ConfigurationControllerTest {
         assertEquals(assertionNode.get("base_path").asText(), baseEndpoint + "/assertion");
         assertTrue(assertionNode.has("options_endpoint"));
         assertEquals(assertionNode.get("options_endpoint").asText(), baseEndpoint + "/assertion/options");
+        if (verifyAssertionOptionsGenerate) {
+            assertTrue(assertionNode.has("options_generate_endpoint"));
+            assertEquals(assertionNode.get("options_generate_endpoint").asText(), baseEndpoint + "/assertion/options/generate");
+        } else {
+            assertFalse(assertionNode.has("options_generate_endpoint"));
+        }
         assertTrue(assertionNode.has("result_endpoint"));
         assertEquals(assertionNode.get("result_endpoint").asText(), baseEndpoint + "/assertion/result");
-        return nodeEntity;
+
+        if (verifySuperGluu) {
+            assertTrue(nodeEntity.has("super_gluu_registration_endpoint"));
+            assertEquals(nodeEntity.get("super_gluu_registration_endpoint").asText(), baseEndpoint + "/attestation/registration");
+            assertTrue(nodeEntity.has("super_gluu_authentication_endpoint"));
+            assertEquals(nodeEntity.get("super_gluu_authentication_endpoint").asText(), baseEndpoint + "/assertion/authentication");
+        } else {
+            assertFalse(nodeEntity.has("super_gluu_registration_endpoint"));
+            assertFalse(nodeEntity.has("super_gluu_authentication_endpoint"));
+        }
     }
 }

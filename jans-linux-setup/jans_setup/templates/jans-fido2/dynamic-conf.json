@@ -41,6 +41,7 @@
       "authenticationHistoryExpiration":1296000,
       "metadataUrlsProvider":"",
       "skipDownloadMdsEnabled":false,
-      "skipValidateMdsInAttestationEnabled":false
+      "skipValidateMdsInAttestationEnabled":false,
+      "assertionOptionsGenerateEndpointEnabled":true
    }
 }

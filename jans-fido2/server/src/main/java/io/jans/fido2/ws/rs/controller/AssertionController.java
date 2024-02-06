@@ -87,6 +87,35 @@ public class AssertionController {
     @POST
     @Consumes({"application/json"})
     @Produces({"application/json"})
+    @Path("/options/generate")
+    public Response generateAuthenticate(String content) {
+        try {
+            if (appConfiguration.getFido2Configuration() == null || !appConfiguration.getFido2Configuration().isAssertionOptionsGenerateEndpointEnabled()) {
+                throw errorResponseFactory.forbiddenException();
+            }
+
+            JsonNode params;
+            try {
+                params = dataMapperService.readTree(content);
+            } catch (IOException ex) {
+                throw errorResponseFactory.invalidRequest(ex.getMessage(), ex);
+            }
+            JsonNode result = assertionService.generateOptions(params);
+
+            ResponseBuilder builder = Response.ok().entity(result.toString());
+            return builder.build();
+
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Unknown Error: {}", e.getMessage(), e);
+            throw errorResponseFactory.unknownError(e.getMessage());
+        }
+    }
+
+    @POST
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
     @Path("/result")
     public Response verify(String content) {
         try {
