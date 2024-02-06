@@ -1,10 +1,5 @@
 from prompt_toolkit.application import Application
-from prompt_toolkit.layout.containers import (
-    HSplit,
-    VSplit,
-    HorizontalAlign,
-    DynamicContainer,
-)
+from prompt_toolkit.layout.containers import HSplit, VSplit, HorizontalAlign, DynamicContainer
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.layout.dimension import D
@@ -82,7 +77,7 @@ class Plugin():
         self.accessroles_container = JansVerticalNav(
                 myparent=self.app,
                 headers=['Role', 'Description', 'Deletable'],
-                preferred_size= [0,0,0],
+                preferred_size= [0, 0, 0],
                 on_enter=self.edit_adminui_roles,
                 on_display=self.app.data_display_dialog,
                 on_delete= self.delete_adminui_roles,
@@ -111,9 +106,22 @@ class Plugin():
                         self.accessroles_container
                      ],style='class:outh_containers_clients')
 
+
+        self.adminui_permissions_container = JansVerticalNav(
+                myparent=self.app,
+                headers=['permission', 'defaultPermissionInToken'],
+                preferred_size=[0, 0],
+                on_enter=self.edit_adminui_permissions,
+                on_display=self.app.data_display_dialog,
+                on_delete=self.delete_adminui_permissions,
+                selectes=0,
+                headerColor='class:outh-verticalnav-headcolor',
+                entriesColor='class:outh-verticalnav-entriescolor',
+            )
+        self.adminui_permissions_container_buttons = VSplit([])
+
         self.containers['permissions'] = HSplit([
                     VSplit([
-
                         self.app.getTitledText(
                             _("Search"), 
                             name='oauth:scopes:search', 
@@ -130,7 +138,8 @@ class Plugin():
                         padding=3,
                         width=D(),
                         ),
-                        DynamicContainer(lambda: self.config_data_container['permissions'])
+                        self.adminui_permissions_container,
+                        DynamicContainer(lambda: self.adminui_permissions_container_buttons)
                      ],style='class:outh_containers_clients')
 
         self.containers['mapping'] = HSplit([
@@ -297,31 +306,11 @@ class Plugin():
                     self.get_adminui_roles()
 
         asyncio.ensure_future(coroutine())
-    
-    def get_adminui_permissions(self,
-        start_index: Optional[int]=0,
-        pattern: Optional[str]=''
-        ) -> None:
-        """Method to get the adminui_permissions data from server
 
-        Args:
-        start_index (Optional[int], optional): This is flag for the adminui-roles pages. Defaults to 0.
-        pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
-        """
 
-        async def coroutine():
-            cli_args = {'operation_id': 'get-all-adminui-permissions'}
-            self.app.start_progressing()
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-            self.adminui_permissions_data = response.json()
-            self.adminui_update_permissions(start_index, pattern)
-
-        asyncio.ensure_future(coroutine())
-        
     def adminui_update_permissions(self,
         start_index: Optional[int]=0,
-        pattern: Optional[str]= ''
+        pattern: Optional[str]=''
         ) -> None:
         """update the current adminui_permissions data to server
 
@@ -330,70 +319,54 @@ class Plugin():
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
 
-        if not hasattr(self, 'adminui_permissions_data'):
-            self.get_adminui_permissions(start_index, pattern)
-            return
+        async def coroutine():
+            cli_args = {'operation_id': 'get-all-adminui-permissions'}
+            self.app.start_progressing()
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
 
-        data =[]
-        if pattern:
-            for k in self.adminui_permissions_data:
-                if pattern.lower() in k.get('permission').lower():
-                    data.append(
-                        [
-                        k.get('permission'),
-                        k.get('defaultPermissionInToken'),
-                        ]
-                    )
-        else:
-            for d in self.adminui_permissions_data:
-                data.append(
+            all_data = response.json()
+            self.adminui_permissions_container.clear()
+
+            if pattern:
+                for k in all_data[:]:
+                    if pattern.lower() not in k.get('permission').lower():
+                        all_data.remove(k)
+                        
+            
+            self.adminui_permissions_container.all_data = all_data[start_index:start_index+self.app.entries_per_page]
+
+            for d in self.adminui_permissions_container.all_data:
+                self.adminui_permissions_container.add_item(
                     [
                     d.get('permission'),
                     d.get('defaultPermissionInToken'),
                     ]
                 )
 
-        if data:
-            buttons = []
-            if int(len(data)/self.app.entries_per_page) >=1:
-                if start_index!=0:
-                    handler_partial = partial(self.adminui_update_permissions, start_index-1, pattern)
+            if all_data:
+                buttons = []
+                if len(all_data) and start_index:
+                    handler_partial = partial(self.adminui_update_permissions, start_index-self.app.entries_per_page, pattern)
                     prev_button = Button(_("Prev"), handler=handler_partial)
                     prev_button.window.jans_help = _("Displays previous %d entries") % self.app.entries_per_page
                     buttons.append(prev_button)
 
-                if start_index< int(len(data)/ 20) :
-                    handler_partial = partial(self.adminui_update_permissions, start_index+1, pattern)
+                if len(all_data) - (start_index + self.app.entries_per_page) > 0:
+                    handler_partial = partial(self.adminui_update_permissions, start_index+self.app.entries_per_page, pattern)
                     next_button = Button(_("Next"), handler=handler_partial)
                     next_button.window.jans_help = _("Displays next %d entries") % self.app.entries_per_page
                     buttons.append(next_button)
 
-            data_now = data[start_index*20:start_index*20+20]
+                self.adminui_permissions_container_buttons = VSplit(buttons, padding=3, width=D(), align=HorizontalAlign.CENTER)
+                self.app.layout.focus(self.adminui_permissions_container)
 
-            adminui_permissions = JansVerticalNav(
-                myparent=self.app,
-                headers=['permission', 'defaultPermissionInToken',],
-                preferred_size= [0,0],
-                data=data_now,
-                on_enter=self.edit_adminui_permissions,
-                on_display=self.app.data_display_dialog,
-                on_delete=self.delete_adminui_permissions,
-                # get_help=(self.get_help,'AdminRole'),
-                selectes=0,
-                headerColor='class:outh-verticalnav-headcolor',
-                entriesColor='class:outh-verticalnav-entriescolor',
-                all_data=self.adminui_permissions_data
-            )
+            else:
+                self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
 
-            self.app.layout.focus(adminui_permissions)
-            self.config_data_container['permissions'] = HSplit([
-                adminui_permissions,
-                VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
-            ])
-            self.app.invalidate()
-            self.app.layout.focus(adminui_permissions)
-        else:
-            self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
+        asyncio.ensure_future(coroutine())
+
+
 
     def add_adminui_permissions(self) -> None:
         """Method to display the dialog of adminui-roles
@@ -423,7 +396,7 @@ class Plugin():
                 async def coroutine():
                     cli_args = {
                         'operation_id': 'add-adminui-permission', 
-                        'data': {'permission': '{}'.format(permission), 'defaultPermissionInToken': '{}'.format(defaultPermissionInToken)}
+                        'data': {'permission': '{}'.format(permission), 'defaultPermissionInToken': defaultPermissionInToken}
                         }
                     self.app.start_progressing()
                     response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
@@ -432,7 +405,7 @@ class Plugin():
                     if response:
                         self.app.show_message(_("Error!"), _("An error ocurred while Addin role adminui permission:\n") + str(response.text))
                     else:
-                        self.get_adminui_permissions()
+                        self.adminui_update_permissions()
 
                 asyncio.ensure_future(coroutine())
 
@@ -485,7 +458,7 @@ class Plugin():
             # -- get_properties or serach again to see Momentary change --#
             # ------------------------------------------------------------#
             if response:
-                self.get_adminui_permissions()
+                self.adminui_update_permissions()
                 # self.future.set_result(DialogResult.ACCEPT)
                 return True
 
@@ -523,7 +496,7 @@ class Plugin():
                     data={}
                 )
                 self.app.stop_progressing()
-                self.get_adminui_permissions()
+                self.adminui_update_permissions()
                 
             return result  ### TODO >> Role cannot be deleted. Please set ‘deletable’ property of role to true.
 
@@ -648,7 +621,7 @@ class Plugin():
             # -- get_properties or serach again to see Momentary change --#
             # ------------------------------------------------------------#
             if response:
-                self.get_adminui_permissions()
+                self.adminui_update_permissions()
                 # self.future.set_result(DialogResult.ACCEPT)
                 return True
 
