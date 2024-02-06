@@ -1,7 +1,5 @@
 kubeVersion: ">=v1.22.0-0"
 annotations:
-  artifacthub.io/changes: |
-    - 1.0.22 official chart release
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: all-in-one
