@@ -111,6 +111,7 @@ Run `helm install` or `helm upgrade` if `Janssen` is already installed:
 helm upgrade <helm-release-name> janssen/janssen -f override.yaml -n <namespace>
 ```
 
+
 #### Export/Migration 
 
 
@@ -121,6 +122,35 @@ kubectl get configmap -n <namespace> cn -o json
 
 From the console, Go to `Secret Manager`> Click on `Create Secret` > Add a `name` > Upload a `json` file or add the json to the `Secret value` field > Create
 
+### Vault
+Add the following configuration to your `override.yaml`:
+
+```yaml
+global:
+  configSecretAdapter: vault
+config:
+  configmap:  
+    # supported Vault scheme (`http` or `https`).
+    cnSecretVaultScheme: ""
+    # hostname or IP of Vault (default to `localhost`).
+    cnSecretVaultHost: localhost
+    # port of Vault (default to `8200`).
+    cnSecretVaultPort: 8200
+    # whether to verify cert or not (default to `false`).
+    cnSecretVaultVerify: false
+    # path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
+    cnSecretVaultRoleIdFile: /etc/certs/vault_role_id
+    # path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
+    cnSecretVaultSecretIdFile: /etc/certs/vault_secret_id
+    # path to Vault cert file (default to `/etc/certs/vault_client.crt`).
+    cnSecretVaultCertFile: /etc/certs/vault_client.crt
+    # path to Vault key file (default to `/etc/certs/vault_client.key`).
+    cnSecretVaultKeyFile: /etc/certs/vault_client.key
+    # path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
+    cnSecretVaultCACertFile: /etc/certs/vault_ca.crt
+    # namespace used to create the config tree, i.e. `secret/jans` (default to `jans`).
+    cnSecretVaultNamespace: jans
+```
 
 ## Retrieve Secrets 
 ### AWS
