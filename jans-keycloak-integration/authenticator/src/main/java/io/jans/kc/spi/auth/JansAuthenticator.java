@@ -2,6 +2,7 @@ package io.jans.kc.spi.auth;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 
 import java.text.MessageFormat;
@@ -53,7 +54,7 @@ public class JansAuthenticator implements Authenticator {
     private static final String JANS_LOGIN_URL_ATTRIBUTE = "jansLoginUrl";
     private static final String OPENID_AUTH_PARAMS_ATTRIBUTE = "openIdAuthParams";
 
-    private static final String URI_PATH_TO_REST_SERVICE = "/realms/{0}/{1}/auth-complete";
+    private static final String URI_PATH_TO_REST_SERVICE = "realms/{realm}/{providerid}/auth-complete";
     
     
     private OIDCService oidcService;
@@ -206,14 +207,19 @@ public class JansAuthenticator implements Authenticator {
 
     private URI createRedirectUri(AuthenticationFlowContext context) {
 
-        URI serverUri = context.getSession().getContext().getUri().getBaseUri();
-        String realmname = context.getRealm().getName();
-        String rest_svc_uri = MessageFormat.format(URI_PATH_TO_REST_SERVICE,realmname,ProviderIDs.JANS_AUTH_RESPONSE_REST_PROVIDER);
-        return serverUri.resolve(rest_svc_uri);
+        try {
+            String realmname = context.getRealm().getName();
+            return UriBuilder.fromUri(context.getSession().getContext().getUri().getBaseUri())
+                      .path(URI_PATH_TO_REST_SERVICE)
+                      .build(realmname,ProviderIDs.JANS_AUTH_RESPONSE_REST_PROVIDER);
+        }catch(IllegalArgumentException e) {
+            log.warnv(e,"Could not create redirect URIs");
+            return null;
+        }
     }
 
     private UserModel findUserByNameOrEmail(AuthenticationFlowContext context, String username,String email) {
-
+        
         UserModel user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(),context.getRealm(),username);
         if(user == null) {
             user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(),context.getRealm(),email);
