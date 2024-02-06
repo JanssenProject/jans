@@ -298,7 +298,7 @@ public class CookieService {
         String header = OP_BROWSER_STATE + "=" + opbs;
         header += "; Path=/";
         header += "; Secure";
-        Integer sessionStateLifetime = appConfiguration.getSessionIdLifetime();
+        Integer sessionStateLifetime = appConfiguration.getSessionIdCookieLifetime();
         if (sessionStateLifetime != null && sessionStateLifetime > 0) {
             DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
             Calendar expirationDate = Calendar.getInstance();
@@ -312,7 +312,7 @@ public class CookieService {
     }
 
     protected void createCookie(String header, HttpServletResponse httpResponse) {
-        Integer sessionStateLifetime = appConfiguration.getSessionIdLifetime();
+        Integer sessionStateLifetime = appConfiguration.getSessionIdCookieLifetime();
         if (sessionStateLifetime != null && sessionStateLifetime > 0) {
             DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
             Calendar expirationDate = Calendar.getInstance();
