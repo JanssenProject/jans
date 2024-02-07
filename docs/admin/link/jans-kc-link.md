@@ -21,8 +21,7 @@ client needs to be created on Keycloak in order to authorise Jans Keycloak Link
 for API access.
 
 - Go to Keycloak administration console and create a new OpenId Connect client
-  ![](../../assets/jans-kc-link-client-1.png)
-- Select the `access type` as `confidential` and turn `on` the 
+- Enable this client as `confidential` access type and enable the 
   `Service Accounts Enabled` flag.
   ![](../../assets/jans-kc-link-client-2.png)
 - 
