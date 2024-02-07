@@ -423,7 +423,7 @@ public class UserMgmtService {
             List<JansAttribute> attList = findAttributeByName(attributeName);
             logger.debug("attributeName:{} data is attList: {}", attributeName, attList);
        
-            if (attList!=null && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {
+            if (!isEmptyOrNullCollection(attList) && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {
                 logger.info("Removing attribute as it is not active attributeName: {} , status:{}", attributeName, attList.get(0).getStatus().getValue());
                 it.remove();
             }
@@ -442,5 +442,9 @@ public class UserMgmtService {
             return attributesDn;
         }
         return String.format("inum=%s,%s", inum, attributesDn);
+    }
+
+    private static boolean isEmptyOrNullCollection(Collection<?> collection) {
+        return (collection == null || collection.isEmpty());
     }
 }
