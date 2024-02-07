@@ -34,6 +34,7 @@ def _transform_fido2_dynamic_config(conf):
         ("skipDownloadMdsEnabled", False),
         ("skipValidateMdsInAttestationEnabled", False),
         ("sessionIdPersistInCache", False),
+        ("assertionOptionsGenerateEndpointEnabled", True),
     ]:
         # dont update if key exists
         if k in conf:

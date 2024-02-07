@@ -147,6 +147,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "A256GCM"
         ]),
         ("txTokenLifetime", 180),
+        ("sessionIdCookieLifetime", 86400),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
