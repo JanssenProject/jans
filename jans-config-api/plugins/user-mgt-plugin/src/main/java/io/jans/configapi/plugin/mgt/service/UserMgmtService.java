@@ -26,6 +26,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -423,7 +424,7 @@ public class UserMgmtService {
             List<JansAttribute> attList = findAttributeByName(attributeName);
             logger.debug("attributeName:{} data is attList: {}", attributeName, attList);
        
-            if (!isEmptyOrNullCollection(attList) && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {
+            if (CollectionUtils.isNotEmpty(attList) && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {
                 logger.info("Removing attribute as it is not active attributeName: {} , status:{}", attributeName, attList.get(0).getStatus().getValue());
                 it.remove();
             }
@@ -442,9 +443,5 @@ public class UserMgmtService {
             return attributesDn;
         }
         return String.format("inum=%s,%s", inum, attributesDn);
-    }
-
-    private static boolean isEmptyOrNullCollection(Collection<?> collection) {
-        return (collection == null || collection.isEmpty());
     }
 }
