@@ -2,12 +2,14 @@ package io.jans.ca.plugin.adminui.model.webhook;
 
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 import org.python.google.common.collect.Lists;
 import org.python.google.common.collect.Sets;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,8 +25,6 @@ public class AuiFeature extends Entry implements Serializable {
     private String jansScope;
     @AttributeName(name = "webhookId")
     private List<String> webhookIdsMapped;
-    @AttributeName(name = "shortCode")
-    private List<String> shortCode;
 
     public String getAuiFeatureId() {
         return auiFeatureId;
@@ -60,16 +60,6 @@ public class AuiFeature extends Entry implements Serializable {
         }
     }
 
-    public List<String> getShortCode() {
-        return shortCode;
-    }
-
-    public void setShortCode(List<String> shortCode) {
-        if(shortCode != null) {
-            this.shortCode = Lists.newArrayList(Sets.newHashSet(shortCode));
-        }
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -91,7 +81,6 @@ public class AuiFeature extends Entry implements Serializable {
                 ", displayName='" + displayName + '\'' +
                 ", jansScope='" + jansScope + '\'' +
                 ", webhookIdsMapped=" + webhookIdsMapped +
-                ", shortCode=" + shortCode +
                 '}';
     }
 }

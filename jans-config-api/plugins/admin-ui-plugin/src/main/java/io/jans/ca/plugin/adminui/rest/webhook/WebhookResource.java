@@ -4,7 +4,7 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.webhook.AuiFeature;
-import io.jans.ca.plugin.adminui.model.webhook.ShortCode;
+import io.jans.ca.plugin.adminui.model.webhook.ShortCodeRequest;
 import io.jans.ca.plugin.adminui.model.webhook.WebhookEntry;
 import io.jans.ca.plugin.adminui.service.webhook.WebhookService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
@@ -312,7 +312,7 @@ public class WebhookResource extends BaseResource {
 
     @Operation(summary = "Trigger webhooks mapped to featureId", description = "Trigger webhooks mapped to featureId", operationId = "trigger-webhook", tags = {
             "Admin UI - Webhooks"}, security = @SecurityRequirement(name = "oauth2", scopes = {SCOPE_WEBHOOK_READ}))
-    @RequestBody(description = "Webhook object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ShortCode.class), examples = @ExampleObject(name = "Request json example", value = "example/webhook/trigger-webooks-request.json")))
+    @RequestBody(description = "Webhook object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ShortCodeRequest.class), examples = @ExampleObject(name = "Request json example", value = "example/webhook/trigger-webooks-request.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AuiFeature.class), examples = @ExampleObject(name = "Response json example", value = "example/webhook/trigger-webooks-response.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
@@ -324,7 +324,7 @@ public class WebhookResource extends BaseResource {
     @ProtectedApi(scopes = {SCOPE_WEBHOOK_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response triggerWebhook(@Parameter(description = "Admin UI feature identifier") @PathParam(AppConstants.ADMIN_UI_FEATURE_ID) @NotNull String featureId,
-                                   @Valid @NotNull List<ShortCode> shortCodes) {
+                                   @Valid @NotNull List<ShortCodeRequest> shortCodes) {
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Triggering all webhooks for Admin UI feature - featureId: {}", escapeLog(featureId));

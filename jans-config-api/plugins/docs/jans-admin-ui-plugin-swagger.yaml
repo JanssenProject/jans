@@ -1359,14 +1359,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ShortCode'
+              $ref: '#/components/schemas/ShortCodeRequest'
             examples:
               Request json example:
                 description: Request json example
                 value: |
                   [{
                     "webhookId": "0a8e784b-2394-3a34-89d3-4a09d245aa32",
-                    "shortCodes": {"price": 100}
+                    "shortcodeValueMap": {"price": 100}
                   }]
       responses:
         "200":
@@ -1637,10 +1637,6 @@ components:
           type: array
           items:
             type: string
-        shortCode:
-          type: array
-          items:
-            type: string
         baseDn:
           type: string
     PagedResult:
@@ -1659,12 +1655,12 @@ components:
           type: array
           items:
             type: object
-    ShortCode:
+    ShortCodeRequest:
       type: object
       properties:
         webhookId:
           type: string
-        shortCodes:
+        shortcodeValueMap:
           type: object
           additionalProperties:
             type: object

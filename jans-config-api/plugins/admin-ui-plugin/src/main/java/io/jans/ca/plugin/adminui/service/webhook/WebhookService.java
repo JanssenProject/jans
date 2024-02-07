@@ -6,7 +6,7 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.webhook.AuiFeature;
-import io.jans.ca.plugin.adminui.model.webhook.ShortCode;
+import io.jans.ca.plugin.adminui.model.webhook.ShortCodeRequest;
 import io.jans.ca.plugin.adminui.model.webhook.WebhookEntry;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
@@ -49,7 +49,8 @@ public class WebhookService {
      */
     public List<AuiFeature> getAllAuiFeatures() throws ApplicationException {
         try {
-            return entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, null);
+            final Filter filter = Filter.createPresenceFilter("auiFeatureId");
+            return entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, filter);
         } catch (Exception e) {
             log.error(ErrorResponse.FETCH_DATA_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.FETCH_DATA_ERROR.getDescription());
@@ -326,14 +327,14 @@ public class WebhookService {
      * @param webhookIds A set of webhook IDs.
      * @return The method is returning a List of Strings.
      */
-    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds, List<ShortCode> shortCodes) throws ApplicationException {
+    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds, List<ShortCodeRequest> shortCodes) throws ApplicationException {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         List<GenericResponse> responseList = new ArrayList<>();
         List<Callable<GenericResponse>> callables = new ArrayList<>();
         List<WebhookEntry> webhooks = getWebhookByIds(webhookIds);
         for (WebhookEntry webhook : webhooks) {
             validateWebhookEntry(webhook);
-            ShortCode shortCodeObj = shortCodes.stream().filter(shortCode -> shortCode.getWebhookId().equals(webhook.getWebhookId())).findAny().orElse(null);
+            ShortCodeRequest shortCodeObj = shortCodes.stream().filter(shortCode -> shortCode.getWebhookId().equals(webhook.getWebhookId())).findAny().orElse(null);
             replaceShortCodeWithValues(webhook, shortCodeObj);
             if (webhook.isJansEnabled()) {
                 Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
@@ -355,17 +356,17 @@ public class WebhookService {
         return responseList;
     }
 
-    private void replaceShortCodeWithValues(WebhookEntry webhook, ShortCode shortCodeObj) {
+    private void replaceShortCodeWithValues(WebhookEntry webhook, ShortCodeRequest shortCodeObj) {
         if (shortCodeObj == null) {
             return;
         }
-        log.info("CommonUtils.hasShortCode(webhook.getUrl()) {}", CommonUtils.hasShortCode(webhook.getUrl()));
+
         if (CommonUtils.hasShortCode(webhook.getUrl())) {
-            webhook.setUrl(CommonUtils.replacePlaceholders(webhook.getUrl(), shortCodeObj.getShortCodes()));
+            webhook.setUrl(CommonUtils.replacePlaceholders(webhook.getUrl(), shortCodeObj.getShortcodeValueMap()));
         }
 
         if (CommonUtils.hasShortCode(webhook.getHttpRequestBody()) && Lists.newArrayList("POST", "PUT", "PATCH").contains(webhook.getHttpMethod())) {
-            webhook.setHttpRequestBody(CommonUtils.replacePlaceholders(webhook.getHttpRequestBody(), shortCodeObj.getShortCodes()));
+            webhook.setHttpRequestBody(CommonUtils.replacePlaceholders(webhook.getHttpRequestBody(), shortCodeObj.getShortcodeValueMap()));
         }
     }
 

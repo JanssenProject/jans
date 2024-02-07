@@ -5,10 +5,10 @@ import io.jans.orm.annotation.JsonObject;
 import java.io.Serializable;
 import java.util.Map;
 
-public class ShortCode implements Serializable {
+public class ShortCodeRequest implements Serializable {
     private String webhookId;
     @JsonObject
-    Map<String, Object> shortCodes;
+    Map<String, Object> shortcodeValueMap;
 
     public String getWebhookId() {
         return webhookId;
@@ -18,19 +18,19 @@ public class ShortCode implements Serializable {
         this.webhookId = webhookId;
     }
 
-    public Map<String, Object> getShortCodes() {
-        return shortCodes;
+    public Map<String, Object> getShortcodeValueMap() {
+        return shortcodeValueMap;
     }
 
-    public void setShortCodes(Map<String, Object> shortCodes) {
-        this.shortCodes = shortCodes;
+    public void setShortcodeValueMap(Map<String, Object> shortcodeValueMap) {
+        this.shortcodeValueMap = shortcodeValueMap;
     }
 
     @Override
     public String toString() {
-        return "ShortCode{" +
+        return "ShortCodeRequest{" +
                 "webhookId='" + webhookId + '\'' +
-                ", shortCodes=" + shortCodes +
+                ", shortcodeValueMap=" + shortcodeValueMap +
                 '}';
     }
 }
