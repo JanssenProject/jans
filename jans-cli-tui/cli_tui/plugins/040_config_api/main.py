@@ -142,14 +142,19 @@ class Plugin():
                         DynamicContainer(lambda: self.adminui_permissions_container_buttons)
                      ],style='class:outh_containers_clients')
 
+        self.adminui_mappings_container = JansVerticalNav(
+                myparent=self.app,
+                headers=['Role', '# Permissions'],
+                preferred_size= [0,0],
+                on_enter=self.edit_adminui_mapping,
+                on_display=self.app.data_display_dialog,
+                selectes=0,
+                headerColor='class:outh-verticalnav-headcolor',
+                entriesColor='class:outh-verticalnav-entriescolor',
+            )
+
         self.containers['mapping'] = HSplit([
                     VSplit([
-                        self.app.getButton(
-                            text=_("Get adminui mapping"), 
-                            name='oauth:clients:get', 
-                            jans_help=_("Get all admin ui mapping"),
-                            handler=self.get_adminui_mapping),
-                        
                         self.app.getTitledText(
                             _("Search"), 
                             name='oauth:scopes:search', 
@@ -160,9 +165,9 @@ class Plugin():
                         padding=3,
                         width=D(),
                         ),
-                        DynamicContainer(lambda: self.config_data_container['mapping'])
+                        self.adminui_mappings_container
                      ],style='class:outh_containers_clients')
-                                
+
         self.nav_selection_changed(list(self.containers)[0])
 
     def get_adminui_roles(self) -> None:
@@ -501,19 +506,7 @@ class Plugin():
             return result  ### TODO >> Role cannot be deleted. Please set ‘deletable’ property of role to true.
 
         asyncio.ensure_future(coroutine())
-  
-    def get_adminui_mapping(self, pattern: Optional[str]= '') -> None:
-        """Method to get the adminui_permissions data from server
-        """
-        async def coroutine():
-            cli_args = {'operation_id': 'get-all-adminui-role-permissions'}
-            self.app.start_progressing()
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-            self.adminui_role_permissions_data = response.json()
-            self.adminui_update_mapping(pattern)
 
-        asyncio.ensure_future(coroutine())
 
     def adminui_update_mapping(self, pattern: Optional[str]= '') -> None:
         """update the current adminui_permissions data to server
@@ -522,51 +515,40 @@ class Plugin():
             pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
         """
 
-        if not hasattr(self, 'adminui_role_permissions_data'):
-            self.get_adminui_mapping(pattern)
-            return
+        async def coroutine():
 
-        data =[]
+            cli_args = {'operation_id': 'get-all-adminui-role-permissions'}
+            self.app.start_progressing()
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+            self.adminui_role_permissions_data = response.json()
 
-        if pattern:
-            for k in self.adminui_role_permissions_data:
-                if pattern.lower() in k.get('role').lower():
-                    data.append(
-                        [
-                        k.get('role'),
-                        len(k.get('permissions')),
-                        ]
-                    )
-        else:
-            for d in self.adminui_role_permissions_data:
-                data.append(
+            all_data = response.json()
+
+            if pattern:
+                for k in all_data[:]:
+                    if pattern.lower() in k.get('role').lower():
+                        all_data.remove(k)
+
+            self.adminui_mappings_container.clear()
+            self.adminui_mappings_container.all_data = all_data
+
+            if not all_data:
+                self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
+                return
+
+            for d in all_data:
+                self.adminui_mappings_container.add_item(
                     [
                     d.get('role'),
                     len(d.get('permissions')),
                     ]
                 )
 
-        if data:
-            adminui_permissions = JansVerticalNav(
-                myparent=self.app,
-                headers=['role', 'permissions',],
-                preferred_size= [0,0],
-                data=data,
-                on_enter=self.edit_adminui_mapping,
-                on_display=self.app.data_display_dialog,
-                # get_help=(self.get_help,'AdminRole'),
-                selectes=0,
-                headerColor='class:outh-verticalnav-headcolor',
-                entriesColor='class:outh-verticalnav-entriescolor',
-                all_data=self.adminui_role_permissions_data
-            )
-            self.app.layout.focus(adminui_permissions)   # clients.focuse..!? TODO >> DONE
-            self.config_data_container['mapping'] = adminui_permissions
-            self.app.invalidate()
-            self.app.layout.focus(adminui_permissions)
+            self.app.layout.focus(self.adminui_mappings_container)
 
-        else:
-            self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
+
+        asyncio.ensure_future(coroutine())
 
     def search_adminui_mapping(self, tbuffer:Buffer,) -> None:
         """This method handel the search for adminui_mapping
@@ -580,6 +562,7 @@ class Plugin():
     def edit_adminui_mapping(self, **params: Any) -> None:
         """Method to display the dialog of adminui_mapping
         """
+        open("/tmp/a.txt", "w").write(str(params))
         role_data = params.get('data', [])
         permission = role_data.get('role')
         defaultPermissionInToken = []
@@ -587,15 +570,13 @@ class Plugin():
         for i in role_data.get('permissions'):
             defaultPermissionInToken.append([i])
 
-
         self.adminui_role_permissions= JansVerticalNav(
                         myparent=self.app,
                         headers=['permission'],
                         preferred_size= [0],
-                        data= defaultPermissionInToken,#'defaultPermissionInToken',
+                        data= defaultPermissionInToken,
                         on_enter=self.edit_adminui_mapping,
                         on_display=self.app.data_display_dialog,
-                        # get_help=(self.get_help,'AdminRole'),
                         selectes=0,
                         headerColor='red',
                         entriesColor='green',
