@@ -37,7 +37,7 @@ public class WebhookEntry extends Entry implements Serializable {
     private String url;
     @AttributeName(name = "httpRequestBody")
     @JsonObject
-    private Map<String, Object> httpRequestBody;
+    private transient Map<String, Object> httpRequestBody;
     @NotNull
     @AttributeName(name = "httpMethod")
     private String httpMethod;

@@ -81,11 +81,8 @@ public class CommonUtils {
 
         // Iterate through map keys and check for placeholders
         for (Object value : map.values()) {
-            System.out.println(value);
-            System.out.println(value.toString());
             Matcher matcher = placeholderPattern.matcher(value.toString());
             if (matcher.find()) {
-                System.out.println("True");
                 // Placeholder found in key
                 return true;
             }
