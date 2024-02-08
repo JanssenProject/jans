@@ -53,10 +53,6 @@ updated to be able to connect with Keycloak server. Configuration parameters
 change depending on the type of grant used by the client configuration on
 the Keycloak server. 
 
-TODO: Here we need to list steps that will update the janssen data store with
-keycloak configuration as below (described in this [comment](https://github.com/JanssenProject/jans/issues/6280#issuecomment-1765091635))
-and taken implemented by [this issue](https://github.com/JanssenProject/jans/issues/7667)
-
 If the Keycloak client uses [Client Credentials Grant](#using-client-credentials-grant)
 use the following steps to configure Jans Keycloak link.
 
@@ -64,7 +60,12 @@ use the following steps to configure Jans Keycloak link.
   ```shell
   /opt/jans/bin/encode.py {String to encrypt}
   ```
-- Add these values to 
+- Add these values to
+
+  TODO: Here we need to list steps that will update the janssen data store with
+  keycloak configuration as below (described in this [comment](https://github.com/JanssenProject/jans/issues/6280#issuecomment-1765091635))
+  and taken implemented by [this issue](https://github.com/JanssenProject/jans/issues/7667)
+
 ```json
 "keycloakConfiguration": {
 		"serverUrl": "keycloak-server-url",
@@ -80,6 +81,16 @@ use the following steps to configure Jans Keycloak link.
 If the Keycloak client uses [Resource Owner Password Credentials Grant](#using-resource-owner-password-credentials-grant)
 use the following steps to configure Jans Keycloak link.
 
+- Encode the user password with jans command
+  ```shell
+  /opt/jans/bin/encode.py {String to encrypt}
+  ```
+- Add these values to
+
+  TODO: Here we need to list steps that will update the janssen data store with
+  keycloak configuration as below (described in this [comment](https://github.com/JanssenProject/jans/issues/6280#issuecomment-1765091635))
+  and taken implemented by [this issue](https://github.com/JanssenProject/jans/issues/7667)
+
 ```json
 "keycloakConfiguration": {
  		"serverUrl": "keycloak-server-url",
@@ -91,12 +102,6 @@ use the following steps to configure Jans Keycloak link.
  		"password": "{check above step 4}"
  	}
 ```
-
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
-
-## Have questions in the meantime?
-
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 
