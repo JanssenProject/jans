@@ -4,22 +4,25 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.persistence.model.configuration;
+package io.jans.config;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.JsonNode;
-import io.jans.as.model.util.Util;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+
 import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.orm.couchbase.model.CouchbaseConnectionConfiguration;
 import io.jans.orm.sql.model.SqlConnectionConfiguration;
-
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * oxIDPAuthConf
@@ -123,10 +126,19 @@ public class IDPAuthConf {
         return read(SqlConnectionConfiguration.class);
     }
 
+    public static ObjectMapper createJsonMapper() {
+        final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
+
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.getDeserializationConfig().with(jackson);
+        mapper.getSerializationConfig().with(jackson);
+        return mapper;
+    }
+
     private <T> T read(Class<T> clazz) {
         try {
             if (config != null) {
-                return Util.createJsonMapper().treeToValue(config, clazz);
+                return createJsonMapper().treeToValue(config, clazz);
             }
         } catch (JsonProcessingException e) {
             // ignore
