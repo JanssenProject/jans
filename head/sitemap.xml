@@ -661,6 +661,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/developer/agama/agama-best-practices/</loc>
+         <lastmod>2024-02-08</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/engine-bridge-config/</loc>
          <lastmod>2024-02-08</lastmod>
          <changefreq>daily</changefreq>
@@ -687,11 +692,6 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/quick-start-using-agama-lab/</loc>
-         <lastmod>2024-02-08</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/recommended-practices/</loc>
          <lastmod>2024-02-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
