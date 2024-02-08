@@ -44,11 +44,6 @@ The properties of Agama engine configuration are described in the following:
 
 - `serializeRules`: A JSON object specifying the serialization rules, see below. It is not recommended to remove items from the out-of-the-box rules. Adding items is fine
 
-<!--
-- `defaultResponseHeaders`: A JSON object : {
-            "Expires": "0"
-        }-->    
-
 ### Serialization rules
 
 At certain points in the course of a flow, serialization of all its variables is required. The engine employs two mechanisms for this purpose: standard Java serialization and [KRYO](https://github.com/EsotericSoftware/kryo) serialization. Depending on the type of (Java) object to be serialized, administrators can specify when a mechanism is preferred over the other through a set of simple rules.
