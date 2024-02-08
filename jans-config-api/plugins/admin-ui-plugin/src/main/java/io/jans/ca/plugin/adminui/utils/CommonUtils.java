@@ -5,7 +5,6 @@ import com.google.common.base.Joiner;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 
 import java.io.UnsupportedEncodingException;
@@ -73,14 +72,6 @@ public class CommonUtils {
         genericResponse.setSuccess(result);
         genericResponse.setResponseObject(node);
         return genericResponse;
-    }
-
-    public static boolean isEmptyOrNullCollection(Collection<?> collection) {
-        return (collection == null || collection.isEmpty());
-    }
-
-    public static boolean isEmptyOrNullCollection(final Map<?, ?> m) {
-        return m == null || m.isEmpty();
     }
 
     public static boolean hasShortCode(Map<String, ?> map) {

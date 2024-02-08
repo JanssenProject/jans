@@ -30,6 +30,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.collections.CollectionUtils;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
 
@@ -332,12 +333,12 @@ public class WebhookResource extends BaseResource {
             HashSet<String> featureIdSet = Sets.newHashSet();
             featureIdSet.add(featureId);
             List<AuiFeature> featureList = webhookService.getAuiFeaturesByIds(featureIdSet);
-            if (CommonUtils.isEmptyOrNullCollection(featureList)) {
+            if (CollectionUtils.isEmpty(featureList)) {
                 log.error(ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
             }
             AuiFeature featureObj = featureList.get(0);
-            if (CommonUtils.isEmptyOrNullCollection(featureObj.getWebhookIdsMapped())) {
+            if (CollectionUtils.isEmpty(featureObj.getWebhookIdsMapped())) {
                 log.error(ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
             }

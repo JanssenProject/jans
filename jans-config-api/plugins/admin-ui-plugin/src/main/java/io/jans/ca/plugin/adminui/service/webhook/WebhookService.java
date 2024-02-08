@@ -23,7 +23,8 @@ import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
-
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import javax.validation.Valid;
 import java.util.*;
 import java.util.concurrent.*;
@@ -42,6 +43,8 @@ public class WebhookService {
     @Inject
     ConfigurationFactory configurationFactory;
 
+    public static final String AUI_FEATURE_ID = "auiFeatureId";
+
     /**
      * The function retrieves all AuiFeature objects from the entryManager and returns them as a List.
      *
@@ -49,7 +52,7 @@ public class WebhookService {
      */
     public List<AuiFeature> getAllAuiFeatures() throws ApplicationException {
         try {
-            final Filter filter = Filter.createPresenceFilter("auiFeatureId");
+            final Filter filter = Filter.createPresenceFilter(AUI_FEATURE_ID);
             return entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, filter);
         } catch (Exception e) {
             log.error(ErrorResponse.FETCH_DATA_ERROR.getDescription(), e);
@@ -136,15 +139,15 @@ public class WebhookService {
 
     public List<WebhookEntry> getWebhooksByFeatureId(String featureId) {
         try {
-            Filter filter = Filter.createSubstringFilter("auiFeatureId", null, new String[]{featureId}, null);
+            Filter filter = Filter.createSubstringFilter(AUI_FEATURE_ID, null, new String[]{featureId}, null);
             List<AuiFeature> features = entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, filter);
-            if (CommonUtils.isEmptyOrNullCollection(features)) {
+            if (CollectionUtils.isEmpty(features)) {
                 log.error(ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
             }
             AuiFeature feature = features.get(0);
             List<String> webhooksIds = feature.getWebhookIdsMapped();
-            if (CommonUtils.isEmptyOrNullCollection(webhooksIds)) {
+            if (CollectionUtils.isEmpty(webhooksIds)) {
                 log.error(ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
             }
@@ -167,7 +170,7 @@ public class WebhookService {
             Filter searchFilter = null;
             List<Filter> filters = new ArrayList<>();
             for (String id : ids) {
-                Filter filter = Filter.createSubstringFilter("auiFeatureId", null, new String[]{id}, null);
+                Filter filter = Filter.createSubstringFilter(AUI_FEATURE_ID, null, new String[]{id}, null);
                 filters.add(filter);
             }
             searchFilter = Filter.createORFilter(filters);
@@ -309,7 +312,7 @@ public class WebhookService {
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_HTTP_METHOD_EMPTY.getDescription());
         }
         if (Lists.newArrayList("POST", "PUT", "PATCH").contains(webhookEntry.getHttpMethod())) {
-            if (CommonUtils.isEmptyOrNullCollection(webhookEntry.getHttpRequestBody())) {
+            if (MapUtils.isEmpty(webhookEntry.getHttpRequestBody())) {
                 log.error(ErrorResponse.WEBHOOK_REQUEST_BODY_EMPTY.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_REQUEST_BODY_EMPTY.getDescription());
             }
@@ -377,7 +380,6 @@ public class WebhookService {
     private static String dnOfWebhook(String id, String baseDn) {
         return String.format("webhookId=%s,%s", id, baseDn);
     }
-
 
     public int getRecordMaxCount() {
         log.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",

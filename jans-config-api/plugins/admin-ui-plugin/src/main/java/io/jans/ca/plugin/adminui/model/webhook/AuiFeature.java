@@ -2,18 +2,16 @@ package io.jans.ca.plugin.adminui.model.webhook;
 
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 import org.python.google.common.collect.Lists;
 import org.python.google.common.collect.Sets;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@DataEntry(sortBy = { "auiFeatureId" })
+@DataEntry(sortBy = {"auiFeatureId"})
 @ObjectClass(value = "auiFeatures")
 public class AuiFeature extends Entry implements Serializable {
 
@@ -55,7 +53,7 @@ public class AuiFeature extends Entry implements Serializable {
     }
 
     public void setWebhookIdsMapped(List<String> webhookIdsMapped) {
-        if(webhookIdsMapped != null) {
+        if (webhookIdsMapped != null) {
             this.webhookIdsMapped = Lists.newArrayList(Sets.newHashSet(webhookIdsMapped));
         }
     }

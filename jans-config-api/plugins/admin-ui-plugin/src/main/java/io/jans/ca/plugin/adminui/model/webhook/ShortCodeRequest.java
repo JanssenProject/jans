@@ -8,7 +8,7 @@ import java.util.Map;
 public class ShortCodeRequest implements Serializable {
     private String webhookId;
     @JsonObject
-    Map<String, Object> shortcodeValueMap;
+    transient  Map<String, Object> shortcodeValueMap;
 
     public String getWebhookId() {
         return webhookId;

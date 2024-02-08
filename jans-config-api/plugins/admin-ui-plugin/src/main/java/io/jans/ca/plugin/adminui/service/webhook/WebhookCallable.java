@@ -16,7 +16,7 @@ import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
-
+import org.apache.commons.collections.MapUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -82,7 +82,7 @@ public class WebhookCallable implements Callable<GenericResponse> {
             case "POST":
             case "PUT":
             case "PATCH":
-                if (CommonUtils.isEmptyOrNullCollection(webhook.getHttpRequestBody())) {
+                if (MapUtils.isEmpty(webhook.getHttpRequestBody())) {
                     break;
                 }
                 Map<String, Object> requestBody = setRequestBody(webhook);
@@ -112,5 +112,4 @@ public class WebhookCallable implements Callable<GenericResponse> {
             return Maps.newHashMap();
         }
     }
-
 }
