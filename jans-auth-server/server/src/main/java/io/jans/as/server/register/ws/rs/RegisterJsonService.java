@@ -154,7 +154,7 @@ public class RegisterJsonService {
         // Logout params
         Util.addToJSONObjectIfNotNull(responseJsonObject, FRONT_CHANNEL_LOGOUT_URI.toString(), client.getFrontChannelLogoutUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), client.getFrontChannelLogoutSessionRequired());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, BACKCHANNEL_LOGOUT_URI.toString(), client.getAttributes().getBackchannelLogoutUri());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, BACKCHANNEL_LOGOUT_URI.toString(), client.getAttributes().getBackchannelLogoutUri().iterator().next());
         Util.addToJSONObjectIfNotNull(responseJsonObject, BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), client.getAttributes().getBackchannelLogoutSessionRequired());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REDIRECT_URIS_REGEX.toString(), client.getAttributes().getRedirectUrisRegex());
 

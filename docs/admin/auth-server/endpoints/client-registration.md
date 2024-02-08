@@ -79,7 +79,7 @@ in example below:
     "scope": "profile work_phone phone user_name device_sso openid permission uma_protection address email clientinfo org_name offline_access https://jans.io/auth/ssa.portal test https://jans.io/auth/ssa.admin https://jans.io/auth/ssa.developer",
     "client_secret": "4148f812-92d6-4245-80e0-243524b3b6a4",
     "client_id_issued_at": 1678700818,
-    "backchannel_logout_uri": [],
+    "backchannel_logout_uri": "",
     "backchannel_logout_session_required": false,
     "client_name": "my.jans.client",
     "par_lifetime": 600,
