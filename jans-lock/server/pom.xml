@@ -124,11 +124,6 @@
 
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-auth-persistence-model</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>io.jans</groupId>
 			<artifactId>jans-core-timer-weld</artifactId>
 		</dependency>
 
