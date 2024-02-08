@@ -180,4 +180,4 @@ You can assign this value to a variable at the top of your loop declaration. See
 
 ### Can Agama code be called from Java?
 
-No. These two languages are supposed to play roles that should not be mixed, check [here](./recommended-practices.md#about-flow-design).
+No. These two languages are supposed to play roles that should not be mixed, check [here](./agama-best-practices#about-flow-design).
