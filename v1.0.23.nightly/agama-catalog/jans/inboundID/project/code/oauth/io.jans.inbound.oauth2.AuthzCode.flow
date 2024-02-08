@@ -1,0 +1,29 @@
+Flow io.jans.inbound.oauth2.AuthzCode
+    Basepath ""
+    Inputs oauthParams  //See class io.jans.inbound.oauth2.OAuthParams for reference
+
+When oauthParams.redirectUri is null
+    issuer = Call io.jans.util.NetworkUtils#urlBeforeContextPath
+    list = [ issuer, "/jans-auth/fl/callback" ]
+    oauthParams.redirectUri = Call java.lang.String#join "" list
+
+codeGrantUtil = Call io.jans.inbound.oauth2.CodeGrantUtil#new oauthParams
+
+Log "Creating an authorization request"
+url = Call codeGrantUtil makeAuthzRequest
+
+state = url.second
+url = url.first
+
+Log "Redirecting to external site"
+responseParams = RFAC url
+Log "Browser taken back to redirect URI"
+
+code = Call codeGrantUtil parseCode responseParams state
+response = Call codeGrantUtil getTokenResponse code
+//response looks like in RFC 6749 section 4.1.4
+
+Log "An access token has been obtained"
+obj = { success: true, data: response }
+
+Finish obj
