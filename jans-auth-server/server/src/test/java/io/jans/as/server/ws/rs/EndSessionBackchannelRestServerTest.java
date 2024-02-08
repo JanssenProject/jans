@@ -18,7 +18,6 @@ import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.TClientService;
-import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
@@ -58,7 +57,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
         io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
-        registerRequest.setBackchannelLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
+        registerRequest.setBackchannelLogoutUri(Lists.newArrayList(postLogoutRedirectUri));
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         registerResponse = TClientService.register(registerRequest, getApiTagetURL(url));
