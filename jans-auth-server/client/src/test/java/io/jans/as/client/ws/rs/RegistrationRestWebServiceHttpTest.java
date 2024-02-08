@@ -157,7 +157,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setRequestUris(Arrays.asList("http://www.gluu.org/request"));
         registerRequest.setFrontChannelLogoutUri(logoutUri);
         registerRequest.setFrontChannelLogoutSessionRequired(true);
-        registerRequest.setBackchannelLogoutUris(Lists.newArrayList(logoutUri));
+        registerRequest.setBackchannelLogoutUri(logoutUri);
         registerRequest.setBackchannelLogoutSessionRequired(true);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
