@@ -153,7 +153,6 @@ nav:
       - LDAP Operation: admin/reference/database/ldap-ops.md
       - LDAP Namespace Diagram: admin/reference/database/ldap-namespace.md
     - Couchbase:
-      - Couchbase Schema: admin/reference/database/cb-schema.md
       - Couchbase Configuration: admin/reference/database/cb-config.md
       - Couchbase Operation: admin/reference/database/cb-ops.md
       - Couchbase Buckets: admin/reference/database/cb-buckets.md
