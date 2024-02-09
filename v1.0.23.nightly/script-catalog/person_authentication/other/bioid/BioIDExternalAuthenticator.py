@@ -3,7 +3,7 @@
 
 import sys
 from java.util import Collections, HashMap, HashSet, ArrayList, Arrays, Date
-from org.oxauth.persistence.model.configuration import GluuConfiguration
+from io.jans.config import GluuConfiguration
 from io.jans.orm import PersistenceEntryManager
 from java.nio.charset import Charset
 from io.jans.service.cdi.util import CdiUtil
