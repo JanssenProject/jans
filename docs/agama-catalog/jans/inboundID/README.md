@@ -39,7 +39,7 @@ To facilitate administrators' work, the following flows are already implemented:
 
 ### Main flow
 
-The actual process of inbound identity occurs here. This flow is already [implemented](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/project/io.jans.inbound.ExternalSiteLogin) and ready to use. The following is a summary of the steps involved:
+The actual process of inbound identity occurs here. This flow is already [implemented](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/project/code/io.jans.inbound.ExternalSiteLogin.flow) and ready to use. The following is a summary of the steps involved:
 
 1. A provider selection page is displayed. The list includes all (*enabled*) providers defined in the configuration of this flow. Additionally an option to use an existing local account is displayed (i.e. no inbound identity)
 
@@ -118,7 +118,7 @@ Edit the file with the properties you consider relevant for every provider. Gene
 
 ### Supply the main flow configurations
 
-The main flow (`io.jans.inbound.ExternalSiteLogin`) has to be parameterized as well. The configuration is held in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by [this](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java) Java class.
+The main flow (`io.jans.inbound.ExternalSiteLogin`) has to be parameterized as well. The configuration is held in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by [this](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java) Java class.
 
 This is an example of a configuration for a couple of identity providers:
 
