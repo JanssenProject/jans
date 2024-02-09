@@ -354,6 +354,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether idToken filters claims based on accessToken")
     private Boolean idTokenFilterClaimsBasedOnAccessToken;
 
+    @DocProperty(description = "Boolean value specifying whether to save access_token, id_token and refresh_token in cache (with cacheKey=sha256Hex(token_code))")
+    private Boolean saveTokensInCache;
+
+    @DocProperty(description = "Boolean value specifying whether to save access_token, id_token and refresh_token in cache and skip persistence in DB at the same time (with cacheKey=sha256Hex(token_code))")
+    private Boolean saveTokensInCacheAndDontSaveInPersistence;
+
     @DocProperty(description = "The lifetime of the short lived Access Token")
     private int accessTokenLifetime;
 
@@ -2292,6 +2298,22 @@ public class AppConfiguration implements Configuration {
 
     public void setAccessTokenLifetime(int accessTokenLifetime) {
         this.accessTokenLifetime = accessTokenLifetime;
+    }
+
+    public Boolean getSaveTokensInCache() {
+        return saveTokensInCache;
+    }
+
+    public void setSaveTokensInCache(Boolean saveTokensInCache) {
+        this.saveTokensInCache = saveTokensInCache;
+    }
+
+    public Boolean getSaveTokensInCacheAndDontSaveInPersistence() {
+        return saveTokensInCacheAndDontSaveInPersistence;
+    }
+
+    public void setSaveTokensInCacheAndDontSaveInPersistence(Boolean saveTokensInCacheAndDontSaveInPersistence) {
+        this.saveTokensInCacheAndDontSaveInPersistence = saveTokensInCacheAndDontSaveInPersistence;
     }
 
     public int getUmaRptLifetime() {
