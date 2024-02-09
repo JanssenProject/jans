@@ -81,7 +81,7 @@ Depending on the package `your` class belongs to, the message may not appear in 
 
 Call method `log` of class `io.jans.agama.engine.script.LogUtils`. This method receives a variable number of arguments as DSL's `Log` does. Thus you can do `LogUtils.log("@w Today is Friday %th", 13)`, as in the logging [examples](../../../agama/language-reference.md#logging).
 
-## How to use Contexts and Dependency Injection (CDI)?
+### How to use Contexts and Dependency Injection (CDI)?
 
 Jans server uses Weld (a CDI reference implementation), and as such makes heavy use of managed beans, scopes, dependency injection, events, etc. Unless the code added is part of a jar [library](#how-to-add-third-party-libraries), annotations related to scopes or dependency injection won't take any effect in your code. This is because the Java container does a thorough scanning of classes upon start, but the source code files in `lib` directory are compiled upon use and modification, as expected in a scripting scenario.
 
