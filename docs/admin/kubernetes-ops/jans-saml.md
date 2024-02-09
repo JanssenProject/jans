@@ -7,7 +7,12 @@ tags:
   - keycloak
 ---
 
-To deploy jans-saml/keycloak, you have to make the following changes in your `values.yaml`:
+
+Jans-SAML/Keycloak has the flexibility to be deployed using either MySQL or PostgreSQL as its backend.
+
+# MySQL
+
+Make the following changes in your `values.yaml`:
 
 ```yaml
 global:
@@ -26,7 +31,6 @@ config:
     kcDbUrlDatabase: keycloak
 ```
 
-You need a database as a backend for keycloak.
 
 If you provide a non-root MySQL user to Keycloak, you will encounter the following error and warnings:
 
@@ -37,3 +41,26 @@ WARNING - jans-saml - 2024-02-05 16:54:04,256 - Got insufficient permission, ple
 ```
 
 To resolve this issue, it's necessary to adhere to the guidance provided in the logs.
+
+
+# PostgreSQL
+
+Make the following changes in your `values.yaml`:
+
+```yaml
+global:
+  saml:
+   enabled: true
+   ingress:
+    samlEnabled: true
+config:
+  configmap:    
+    kcDbVendor: postgres
+    kcDbUsername: keycloak
+    kcDbPassword: Test1234#
+    kcDbSchema: public
+    kcDbUrlHost: postgres.kc.svc.cluster.local
+    kcDbUrlPort: 5432
+    kcDbUrlDatabase: keycloak
+    kcDbUrlProperties: ""
+```
