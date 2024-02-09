@@ -1671,11 +1671,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/reference/database/cb-schema/</loc>
-         <lastmod>2024-02-09</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/reference/database/converting-data/</loc>
          <lastmod>2024-02-09</lastmod>
          <changefreq>daily</changefreq>
