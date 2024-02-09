@@ -11,7 +11,7 @@ from io.jans.as.server.service.net import HttpService
 from io.jans.as.server.security import Identity
 from io.jans.as.server.util import ServerUtil
 from io.jans.orm import PersistenceEntryManager
-from io.jans.as.persistence.model.configuration import GluuConfiguration
+from io.jans.config import GluuConfiguration
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
