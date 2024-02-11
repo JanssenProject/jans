@@ -270,7 +270,7 @@ class AuthHandler(BaseHandler):
 
         for jwk in old_jwks:
             # exclude alg if it's not allowed
-            if jwk["alg"] not in self.allowed_key_algs:
+            if jwk.get("alg") not in self.allowed_key_algs:
                 continue
 
             ops_type = key_ops_from_jwk(jwk)
