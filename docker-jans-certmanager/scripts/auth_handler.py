@@ -210,8 +210,7 @@ class AuthHandler(BaseHandler):
 
     @property
     def allowed_key_algs(self):
-        algs = self.sig_keys.split() + self.enc_keys.split()
-        return algs
+        return self.sig_keys.split() + self.enc_keys.split()
 
     def get_merged_keys(self, exp_hours):
         # get previous JWKS
@@ -248,7 +247,7 @@ class AuthHandler(BaseHandler):
 
         if retcode != 0:
             logger.error(f"Unable to generate keys; reason={err.decode()}")
-            return
+            return "", ""
 
         new_jwks = deque(json.loads(out).get("keys", []))
 
@@ -263,6 +262,12 @@ class AuthHandler(BaseHandler):
             if key_ops_from_jwk(jwk) == "connect"
         )
 
+        # counter for `ssa` keys
+        cnt_ssa = Counter(
+            jwk["alg"] for jwk in new_jwks
+            if key_ops_from_jwk(jwk) == "ssa"
+        )
+
         for jwk in old_jwks:
             # exclude alg if it's not allowed
             if jwk["alg"] not in self.allowed_key_algs:
@@ -270,8 +275,16 @@ class AuthHandler(BaseHandler):
 
             ops_type = key_ops_from_jwk(jwk)
 
+            # exclude unsupported key_ops_type
+            if ops_type not in ["ssa", "connect"]:
+                continue
+
             # cannot have more than 2 connect keys for same algorithm in new JWKS
             if ops_type == "connect" and cnt[jwk["alg"]] > 1:
+                continue
+
+            # cannot have more than 1 connect keys for same algorithm in new JWKS
+            if ops_type == "ssa" and cnt_ssa[jwk["alg"]] > 0:
                 continue
 
             # insert old key to new keys
@@ -279,6 +292,9 @@ class AuthHandler(BaseHandler):
 
             if ops_type == "connect":
                 cnt[jwk["alg"]] += 1
+
+            if ops_type == "ssa":
+                cnt_ssa[jwk["alg"]] += 1
 
             # import key to new JKS
             keytool_import_key(old_jks_fn, jks_fn, jwk["kid"], jks_pass)
@@ -523,9 +539,14 @@ class AuthHandler(BaseHandler):
             if key_ops_from_jwk(jwk) == "connect"
         )
 
+        cnt_ssa = Counter(
+            jwk["alg"] for jwk in new_jwks
+            if key_ops_from_jwk(jwk) == "ssa"
+        )
+
         for jwk in old_jwks:
             # exclude alg if it's not allowed
-            if jwk["alg"] not in self.allowed_key_algs:
+            if jwk.get("alg") not in self.allowed_key_algs:
                 keytool_delete_key(jks_fn, jwk["kid"], jks_pass)
                 continue
 
@@ -536,11 +557,19 @@ class AuthHandler(BaseHandler):
                 keytool_delete_key(jks_fn, jwk["kid"], jks_pass)
                 continue
 
+            # cannot have more than 1 key for same algorithm in new JWKS
+            if ops_type == "ssa" and cnt_ssa[jwk["alg"]]:
+                keytool_delete_key(jks_fn, jwk["kid"], jks_pass)
+                continue
+
             # preserve the key
             new_jwks.append(jwk)
 
             if ops_type == "connect":
                 cnt[jwk["alg"]] += 1
+
+            if ops_type == "ssa":
+                cnt_ssa[jwk["alg"]] += 1
 
         web_keys["keys"] = new_jwks
 
@@ -665,7 +694,17 @@ def resolve_enc_keys(keys: str) -> str:
 
 def key_ops_from_jwk(jwk):
     """Resolve key_ops_type first value."""
-    return (jwk.get("key_ops_type") or ["connect"])[0]
+    types = jwk.get("key_ops_type") or []
+    try:
+        type_ = types[0]
+    except IndexError:
+        if jwk["kid"].startswith("connect_"):
+            type_ = "connect"
+        elif jwk["kid"].startswith("ssa_"):
+            type_ = "ssa"
+        else:
+            type_ = ""
+    return type_
 
 
 def has_ext_jwks_uri(conf_dynamic, manager) -> bool:
