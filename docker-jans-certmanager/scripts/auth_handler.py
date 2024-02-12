@@ -230,6 +230,7 @@ class AuthHandler(BaseHandler):
 
         # a counter to determine value of `key_ops_type` to be passed to `KeyGenerator`
         ops_type_cnt = Counter(key_ops_from_jwk(jwk) for jwk in old_jwks)
+        logger.info(f"Detected key_ops_type={dict(ops_type_cnt)}")
 
         # if we have ssa key, use `connect` keys
         if ops_type_cnt["ssa"]:
@@ -371,7 +372,7 @@ class AuthHandler(BaseHandler):
             web_keys = config["jansConfWebKeys"]
         except json.decoder.JSONDecodeError as exc:
             # probably corrupted JSON
-            logger.warning(f"Unable to load jansConfWebKeys; reason={exc}. New JWKS will be created and overwrite existing value.")
+            logger.warning(f"Unable to load existing JWKS; reason={exc}. New JWKS will be created.")
             web_keys = {"keys": []}
 
         with open("/etc/certs/auth-keys.old.json", "w") as f:
@@ -526,7 +527,7 @@ class AuthHandler(BaseHandler):
             web_keys = config["jansConfWebKeys"]
         except json.decoder.JSONDecodeError as exc:
             # probably corrupted JSON
-            logger.warning(f"Unable to load jansConfWebKeys; reason={exc}. Existing JWKS will be deleted.")
+            logger.warning(f"Unable to load existing JWKS; reason={exc}. Existing JWKS will be deleted.")
             web_keys = {"keys": []}
 
         logger.info("Cleaning up keys (if any)")
@@ -712,7 +713,7 @@ def key_ops_from_jwk(jwk):
             type_ = "ssa"
         else:
             type_ = ""
-    return type_
+    return type_.lower()
 
 
 def has_ext_jwks_uri(conf_dynamic, manager) -> bool:
