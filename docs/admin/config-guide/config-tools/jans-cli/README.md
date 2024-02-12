@@ -9,22 +9,59 @@ tags:
 
 # Janssen CLI
 
-`jans-cli` module is a command line interface for configuring the Janssen software, providing both interactive and simple single line options for configuration. This module interacts with Janssen server via RESTful configuration APIs that server exposes. Using these REST APIs, `jans-cli` allows configuration of authorization server and its major modules for FIDO2, SCIM, OpenID Connect etc. 
-</br>
-</br>
+`jans-cli` module is a command line interface for configuring the Janssen 
+Server. This module interacts with Janssen Server via 
+[RESTful configuration APIs](./config-api/README.md)
+that server exposes. `jans-cli` can be used to retrieve and update configuration
+of Janssen Server.
 
-<p align="center">
- <img src="../../../../assets/image-using-jans-cli-comp-04222022.png">
-</p>
+## Installation
 
-Using this mode is more difficult than the TUI. If needed, help options are available by typing:  
+### On The Janssen Server
 
+`jans-cli` gets installed automatically with the Janssen Server instance. 
+It can be invoked executing following command on Janssen Server.
+
+```shell
+/opt/jans/jans-cli/config-cli.py
 ```
+
+### Stand-alone Installation
+
+`jans-cli` can be installed on any other machine and then use it to configure
+remote server where Janssen Server is installed.
+
+- Follow [these instructions](../jans-tui/README.md#1-build-pyz-self-executable-file) and create a self-executable file
+- Run the file as shown in the example below to enter CLI mode. Here, supplying the argument `--no-tui` is necessary,
+  otherwise it will switch to TUI mode.
+   ```
+   $ ./jans-cli-tui.pyz --no-tui --host test.jans.io --client-id 2000.562981df-1623-4136-b1d0-aaa277edc48c --client-secret KU6ydImJZK6S --operation-id get-acrs
+   Please wait while retrieving data ...
+   Access token was not found.
+   Please visit verification url https://test.jans.io/device-code?user_code=LKHC-PBTR and authorize this device within 1800 secods
+   Please press «Enter» when ready
+   {
+     "defaultAcr": "simple_password_auth"
+   }
+   ```
+
+## CLI Tool Configuration
+
+Janssen CLI tool stores its configuration under `<install-path>/.config`
+directory. Various settings for CLI tool can be found under this directory,
+for example [logging levels](../../../../contribute/developer-faq.md#how-to-enable-debug-logs-for-jans-cli-and-tui-configuration-tools).
+
+This directory also contains SALT used by Janssen CLI tool.
+
+## Getting Help
+
+CLI `--help` switch prints all options available from CLI to configure Janssen
+Server. Run command below
+
+```shell
 /opt/jans/jans-cli/config-cli.py --help
 ```
-
-It will print all information about how to configure Janssen Server using CLI mode:
-
+To see all options as below:
 ```
 usage: config-cli.py [-h] [--host HOST] [--client-id CLIENT_ID]
                      [--client_secret CLIENT_SECRET] [--plugins PLUGINS] [-debug]
@@ -82,6 +119,13 @@ optional arguments:
   --output-access-token Prints jwt access token and exits
 root@testjans:~# 
 ```
+
+## CLI Command Structure
+
+jans-cli's unit of work, or a command, is known as `operation-id`. Each 
+operation id is a configuration action on Janssen Server. These operation ids
+are clubbed together 
+
 We start with getting information about tasks, tasks are options of argument `--info`:
 
 ```
@@ -337,26 +381,3 @@ To run operations on Janssen Server, CLI client will need to be authenticated an
 5. After successful code validation, the user is presented with OAuth permissions screen. This screen would list all the permissions requested by Jans CLI. The user can choose to `Allow` or `Not Allow` granting of these permissions.
 6. After allowing the grant of requested permissions, the user should come back to the command-line interface and hit <<Enter>> as instructed. This will enable CLI to run operations on the corresponding Janssen server.
 
-## Stand-alone Installation
-
-- Follow [these instructions](../jans-tui/README.md#1-build-pyz-self-executable-file) and create a self-executable file
-- Run the file as shown in the example below to enter CLI mode. Here, supplying the argument `--no-tui` is necessary, 
-otherwise it will switch to TUI mode.
-```
-$ ./jans-cli-tui.pyz --no-tui --host test.jans.io --client-id 2000.562981df-1623-4136-b1d0-aaa277edc48c --client-secret KU6ydImJZK6S --operation-id get-acrs
-Please wait while retrieving data ...
-Access token was not found.
-Please visit verification url https://test.jans.io/device-code?user_code=LKHC-PBTR and authorize this device within 1800 secods
-Please press «Enter» when ready
-{
-  "defaultAcr": "simple_password_auth"
-}
-```
-
-## CLI Tool Configuration
-
-Janssen CLI tool stores its configuration under `<install-path>/.config` 
-directory. Various settings for CLI tool can be found under this directory, 
-for example [logging levels](../../../../contribute/developer-faq.md#how-to-enable-debug-logs-for-jans-cli-and-tui-configuration-tools).
-
-This directory also contains SALT used by Janssen CLI tool. 
