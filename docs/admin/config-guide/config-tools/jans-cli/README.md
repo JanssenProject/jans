@@ -19,7 +19,8 @@ of Janssen Server.
 
 ### On The Janssen Server
 
-`jans-cli` gets installed automatically with the Janssen Server instance. 
+On a Janssen Server instance, the `jans-cli` will be already installed.
+
 It can be invoked executing following command on Janssen Server.
 
 ```shell
@@ -122,35 +123,78 @@ root@testjans:~#
 
 ## CLI Command Structure
 
+### Understanding Operation IDs and Tasks
 jans-cli's unit of work, or a command, is known as `operation-id`. Each 
-operation id is a configuration action on Janssen Server. These operation ids
-are clubbed together 
+operation id is a configuration retrieval/update action on the Janssen Server. 
+For example: `get-attributes` is an operation that `Gets a list of Janssen
+Server attributes`.
 
-We start with getting information about tasks, tasks are options of argument `--info`:
+`Tasks` are logical grouping of operation-ids so that users can easily list
+all the operational-ids relevant to a particular aspect of Janssen Server
+configuration. For instance,
+all the operation-ids related to attribute management are grouped under
+`attribute` task. As mentioned, tasks are logical groupings, they don't perform
+any operation on the server. Tasks can only be used with `--info` switch.
 
-```
-Attribute, CacheConfiguration, CacheConfigurationInMemory, CacheConfigurationMemcached, CacheConfigurationNativePersistence, CacheConfigurationRedis, ConfigurationFido2, ConfigurationJWKJSONWebKeyJWK, ConfigurationLogging, ConfigurationProperties, ConfigurationSMTP, CustomScripts, DatabaseCouchbaseConfiguration, DatabaseLDAPConfiguration, DefaultAuthenticationMethod, OAuthOpenIDConnectClients, OAuthOpenIDConnectSectorIdentifiers, OAuthScopes, OAuthUMAResources
+Execute following command to see what all tasks are offered by jans-cli:
+
+```shell
+/opt/jans/jans-cli/config-cli.py --help
 ```
 
-To get information for a specific task we run command as below: 
-```
-/opt/jans/jans-cli/config-cli.py --info [task]
-``` 
-for example: 
-```
-/opt/jans/jans-cli/config-cli.py --info DefaultAuthenticationMethod
-``` 
+Options listed for `--info` switch are tasks groups available. For example:
 
-It returns with some `operation id`:
+```shell
+usage: config-cli.py [-h] [--host HOST] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET] [--access-token ACCESS_TOKEN] [--plugins PLUGINS]
+                     [-debug] [--debug-log-file DEBUG_LOG_FILE] [--operation-id OPERATION_ID] [--url-suffix URL_SUFFIX]
+                     [--info {AdminUiLicense,AdminUiPermission,AdminUiRole,AdminUiRolePermissionsMapping,AdminUiWebhooks,Agama,AgamaConfiguration,Attribute,AuthServerHealthCheck,AuthSessionManagement,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ClientAuthorization,ConfigurationConfigApi,ConfigurationJwkJsonWebKeyJwk,ConfigurationLogging,ConfigurationProperties,ConfigurationSmtp,ConfigurationUserManagement,CustomScripts,DatabaseLdapConfiguration,DefaultAuthenticationMethod,Fido2Configuration,Fido2Registration,HealthCheck,JansLinkConfiguration,MessageConfiguration,MessageConfigurationPostgres,MessageConfigurationRedis,OauthOpenidConnectClients,OauthScopes,OauthUmaResources,OrganizationConfiguration,Plugins,SamlConfiguration,SamlIdentityBroker,SamlTrustRelationship,ScimConfigManagement,StatisticsUser}]
+                     [--op-mode {get,post,put,patch,delete}] [--endpoint-args ENDPOINT_ARGS] [--schema SCHEMA] [-CC CONFIG_API_MTLS_CLIENT_CERT]
+                     [-CK CONFIG_API_MTLS_CLIENT_KEY] [--key-password KEY_PASSWORD] [-noverify] [-use-test-client] [--patch-add PATCH_ADD]
+                     [--patch-replace PATCH_REPLACE] [--patch-remove PATCH_REMOVE] [-no-color] [--log-dir LOG_DIR] [--tmp-dir TMP_DIR]
+                     [-revoke-session] [-scim] [-auth] [--data DATA] [--output-access-token]
 ```
-Operation ID: get-acrs
-  Description: Gets default authentication method.
-Operation ID: put-acrs
-  Description: Updates default authentication method.
-  Schema: /components/schemas/AuthenticationMethod
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/AuthenticationMethod
+To see operation-id available under a task, execute the command below with
+the task name as an argument:
+
+```shell
+/opt/jans/jans-cli/config-cli.py --info Attribute
 ```
+
+Above will list all the operations under `Attribute` group.
+
+```shell
+Operation ID: get-attributes
+  Description: Gets a list of Jans attributes.
+  Parameters:
+  limit: Search size - max size of the results to return [integer]
+  pattern: Search pattern [string]
+  status: Status of the attribute [string]
+  startIndex: The 1-based index of the first query result [integer]
+  sortBy: Attribute whose value will be used to order the returned response [string]
+  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
+  fieldValuePair: Field and value pair for seraching [string]
+Operation ID: put-attributes
+  Description: Updates an existing attribute
+  Schema: JansAttribute
+Operation ID: post-attributes
+  Description: Adds a new attribute
+  Schema: JansAttribute
+Operation ID: get-attributes-by-inum
+  Description: Gets an attribute based on inum
+  Parameters:
+  inum: Attribute Id [string]
+Operation ID: delete-attributes-by-inum
+  Description: Deletes an attribute based on inum
+  Parameters:
+  inum: Attribute Id [string]
+Operation ID: patch-attributes-by-inum
+  Description: Partially modify a JansAttribute
+  Parameters:
+  inum: Attribute Id [string]
+  Schema: Array of PatchRequest
+```
+
 To perform any operation, you have to run command line with the operation id. for example:
 
 ```
@@ -165,10 +209,9 @@ Getting access token for scope https://jans.io/oauth/config/acrs.readonly
 }
 ```
 
-This is how we can execute single line command to get information about the Janssen Server. 
-
 ## Operation Modes
-Default operation mode is **jca**, i.e., all queries are done to Jans Config Api Server. CLI has also SCIM and OAUTH modes:
+Default operation mode is **jca**, i.e., all queries are done to Jans Config Api
+Server. CLI has also SCIM and OAUTH modes:
 
 ### SCIM Mode
 To switch SCIM mode user `-scim` switch. For example to get help for SCIM mode:
@@ -184,7 +227,7 @@ Only `--info` arguments will be different from **jca** mode:
 You can get information about operation `Discovery`:
 
 ```
-/opt/jans/jans-cli/config-cli.py -scim --info Fido2Devices
+`/opt/jans/jans-cli/config-cli.py -scim --info Fido2Devices`
 Operation ID: get-fido2-devices
   Description: Query Fido 2 resources
   Parameters:
