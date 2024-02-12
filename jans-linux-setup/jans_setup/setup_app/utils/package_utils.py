@@ -21,7 +21,7 @@ class PackageUtils(SetupUtils):
 
         elif base.clone_type == 'rpm':
             if base.os_type == 'suse':
-                install_command = 'zypper install -y {0}'
+                install_command = 'zypper --no-gpg-checks install -y {0}'
                 update_command = ''
             else:
                 install_command = 'yum install -y {0}'
@@ -63,7 +63,7 @@ class PackageUtils(SetupUtils):
                 if base.os_type == 'suse':
                     self.run(['rpm', '-i', f'https://dev.mysql.com/get/mysql80-community-release-sl{base.os_version}-{base.os_subversion}.noarch.rpm'])
                     self.run(['rpm', '--import', '/etc/RPM-GPG-KEY-mysql'])
-                    self.run(['zypper', '--gpg-auto-import-keys', 'refresh'])
+                    self.run(['zypper', '--no-gpg-checks', '--gpg-auto-import-keys', 'refresh'])
                     package_list[os_type_version]['mandatory'] += ' mysql-community-server'
                 else:
                     package_list[os_type_version]['mandatory'] += ' mysql-server'
