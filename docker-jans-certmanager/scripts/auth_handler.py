@@ -280,11 +280,11 @@ class AuthHandler(BaseHandler):
                 continue
 
             # cannot have more than 2 connect keys for same algorithm in new JWKS
-            if ops_type == "connect" and cnt[jwk["alg"]] > 1:
+            if ops_type == "connect" and cnt[jwk["alg"]] >= 2:
                 continue
 
             # cannot have more than 1 connect keys for same algorithm in new JWKS
-            if ops_type == "ssa" and cnt_ssa[jwk["alg"]] > 0:
+            if ops_type == "ssa" and cnt_ssa[jwk["alg"]] >= 1:
                 continue
 
             # insert old key to new keys
@@ -369,6 +369,10 @@ class AuthHandler(BaseHandler):
             web_keys = json.loads(config["jansConfWebKeys"])
         except TypeError:
             web_keys = config["jansConfWebKeys"]
+        except json.decoder.JSONDecodeError as exc:
+            # probably corrupted JSON
+            logger.warning(f"Unable to load jansConfWebKeys; reason={exc}. New JWKS will be created and overwrite existing value.")
+            web_keys = {"keys": []}
 
         with open("/etc/certs/auth-keys.old.json", "w") as f:
             f.write(json.dumps(web_keys, indent=2))
@@ -520,6 +524,10 @@ class AuthHandler(BaseHandler):
             web_keys = json.loads(config["jansConfWebKeys"])
         except TypeError:
             web_keys = config["jansConfWebKeys"]
+        except json.decoder.JSONDecodeError as exc:
+            # probably corrupted JSON
+            logger.warning(f"Unable to load jansConfWebKeys; reason={exc}. Existing JWKS will be deleted.")
+            web_keys = {"keys": []}
 
         logger.info("Cleaning up keys (if any)")
 
