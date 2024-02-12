@@ -125,8 +125,7 @@ nav:
         - Using Logs: admin/config-guide/config-tools/jans-tui/using-command-line-log.md
       - Command Line Interface (CLI):
         - admin/config-guide/config-tools/jans-cli/README.md
-      - CLI For Agama: admin/config-guide/agama-configuration.md
-      - SCIM CLI: admin/config-guide/config-tools/scim-cli.md
+    - Agama: admin/config-guide/agama-configuration.md
     - Attribute: admin/config-guide/attribute-configuration.md
     - Default Authentication: admin/config-guide/default-authentication-method-config.md
     - Cache Configuration: admin/config-guide/cache-configuration.md
@@ -8826,9 +8825,9 @@ plugins:
 - search
 - exclude-search:
     exclude_unreferenced: true
-- git-revision-date-localized:
-    enable_creation_date: true
-    type: timeago
+#- git-revision-date-localized:
+#    enable_creation_date: true
+#    type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
