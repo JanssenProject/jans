@@ -110,7 +110,13 @@ nav:
     - admin/terraform/README.md   
   - Configuration Guide:
     - Configuration Tools:
-      - Config API:
+      - TUI - Text-Based UI:
+          - admin/config-guide/config-tools/jans-tui/README.md
+          - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
+          - Using Logs: admin/config-guide/config-tools/jans-tui/using-command-line-log.md
+      - CLI - Command Line:
+          - admin/config-guide/config-tools/jans-cli/README.md
+      - REST API:
         - admin/config-guide/config-tools/config-api/README.md
         - Settings: admin/config-guide/config-tools/config-api/config.md
         - Attributes: admin/config-guide/config-tools/config-api/attribute.md
@@ -118,14 +124,8 @@ nav:
         - Logs: admin/config-guide/config-tools/config-api/logs.md
         - Monitoring: admin/config-guide/config-tools/config-api/monitoring.md
         - Plugins: admin/config-guide/config-tools/config-api/plugins.md
-      - CURL Guide: admin/config-guide/config-tools/curl-guide.md
-      - Text-Based User Interface (TUI):
-        - admin/config-guide/config-tools/jans-tui/README.md
-        - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
-        - Using Logs: admin/config-guide/config-tools/jans-tui/using-command-line-log.md
-      - Command Line Interface (CLI):
-        - admin/config-guide/config-tools/jans-cli/README.md
-    - Agama: admin/config-guide/agama-configuration.md
+      - CURL: admin/config-guide/config-tools/curl-guide.md
+    - Agama Configuration: admin/config-guide/agama-configuration.md
     - Attribute: admin/config-guide/attribute-configuration.md
     - Default Authentication: admin/config-guide/default-authentication-method-config.md
     - Cache Configuration: admin/config-guide/cache-configuration.md
