@@ -1,6 +1,6 @@
-Flow io.jans.inbound.Github
+Flow io.jans.inbound.GenericProvider
     Basepath ""
-    Configs oauthParams
+    Inputs oauthParams
     
 obj = Trigger io.jans.inbound.oauth2.AuthzCodeWithUserInfo oauthParams
 When obj.success is true
