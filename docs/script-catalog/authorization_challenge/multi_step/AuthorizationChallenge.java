@@ -144,6 +144,16 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
             deviceSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
         }
 
+        String clientId = context.getHttpRequest().getParameter("client_id");
+        if (StringUtils.isNotBlank(clientId)) {
+            deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
+        }
+
+        String acrValues = context.getHttpRequest().getParameter("acr_values");
+        if (StringUtils.isNotBlank(acrValues)) {
+            deviceSessionObject.getAttributes().getAttributes().put("acr_values", acrValues);
+        }
+
         if (newSave) {
             deviceSessionService.persist(deviceSessionObject);
         } else {
