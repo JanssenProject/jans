@@ -5,13 +5,11 @@ from functools import partial
 from typing import Any, Optional
 
 from prompt_toolkit.application import Application
-from prompt_toolkit.layout.containers import HSplit, VSplit, HorizontalAlign, DynamicContainer, Window, ConditionalContainer
-from prompt_toolkit.application.current import get_app
+from prompt_toolkit.layout.containers import HSplit, VSplit, HorizontalAlign, DynamicContainer
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.widgets import Button, Label, Box, Dialog, TextArea, CheckboxList, Frame
-from prompt_toolkit.filters import Condition
+from prompt_toolkit.widgets import Button, Label, Box, Dialog, Frame
 
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_cli_dialog import JansGDialog
@@ -526,56 +524,6 @@ class Plugin():
         data = {'role': role, 'permissions': self.role_permission_mappings.get(role, [])}
         self.edit_adminui_mapping(data=data)
 
-
-    def adminui_update_mapping(self, pattern: Optional[str]= '') -> None:
-        """update the current adminui_permissions data to server
-
-        Args:
-            pattern (str, optional): endpoint arguments for the client data. Defaults to ''.
-        """
-
-        async def coroutine():
-
-            cli_args = {'operation_id': 'get-all-adminui-role-permissions'}
-            self.app.start_progressing()
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-
-            all_data = response.json()
-
-            if pattern:
-                for k in all_data[:]:
-                    if pattern.lower() in k.get('role').lower():
-                        all_data.remove(k)
-
-            self.adminui_mappings_container.clear()
-            self.adminui_mappings_container.all_data = all_data
-
-            if not all_data:
-                self.app.show_message(_("Oops"), _("No matching result"), tobefocused=self.app.center_container)
-                return
-
-            for d in all_data:
-                self.adminui_mappings_container.add_item(
-                    [
-                    d.get('role'),
-                    len(d.get('permissions')),
-                    ]
-                )
-
-            self.app.layout.focus(self.adminui_mappings_container)
-
-
-        asyncio.ensure_future(coroutine())
-
-    def search_adminui_mapping(self, tbuffer:Buffer,) -> None:
-        """This method handel the search for adminui_mapping
-
-        Args:
-            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
-        """
-
-        self.adminui_update_mapping(tbuffer.text)
 
     def edit_adminui_mapping(self, **params: Any) -> None:
         """Method to display the dialog for editing role-permissions maping

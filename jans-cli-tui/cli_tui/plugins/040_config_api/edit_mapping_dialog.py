@@ -1,20 +1,15 @@
 import asyncio
 
-from collections import OrderedDict
-from functools import partial
-from typing import Any, Optional
+from typing import Any
 
-from prompt_toolkit.application import Application
-from prompt_toolkit.layout.containers import HSplit, VSplit, HorizontalAlign, DynamicContainer, Window, ConditionalContainer
+from prompt_toolkit.layout.containers import HSplit, VSplit, ConditionalContainer
 from prompt_toolkit.application.current import get_app
-from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.widgets import Button, Label, Box, Dialog, TextArea, CheckboxList, Frame
+from prompt_toolkit.widgets import Button, Label, Dialog, TextArea, CheckboxList, Frame
 from prompt_toolkit.filters import Condition
 
 from utils.utils import DialogUtils, common_data
-from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
