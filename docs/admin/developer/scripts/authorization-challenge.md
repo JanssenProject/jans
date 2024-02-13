@@ -198,6 +198,16 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         if (StringUtils.isNotBlank(password)) {
             deviceSessionObject.getAttributes().getAttributes().put(PASSWORD_PARAMETER, password);
         }
+        
+        String clientId = context.getHttpRequest().getParameter("client_id");
+        if (StringUtils.isNotBlank(clientId)) {
+            deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
+        }
+        
+        String acrValues = context.getHttpRequest().getParameter("acr_values");
+        if (StringUtils.isNotBlank(acrValues)) {
+            deviceSessionObject.getAttributes().getAttributes().put("acr_values", acrValues);
+        }
 
         if (newSave) {
             deviceSessionService.persist(deviceSessionObject);
@@ -391,6 +401,16 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         String otp = context.getHttpRequest().getParameter(OTP_PARAMETER);
         if (StringUtils.isNotBlank(otp)) {
             deviceSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
+        }
+        
+        String clientId = context.getHttpRequest().getParameter("client_id");
+        if (StringUtils.isNotBlank(clientId)) {
+            deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
+        }
+        
+        String acrValues = context.getHttpRequest().getParameter("acr_values");
+        if (StringUtils.isNotBlank(acrValues)) {
+            deviceSessionObject.getAttributes().getAttributes().put("acr_values", acrValues);
         }
 
         if (newSave) {
