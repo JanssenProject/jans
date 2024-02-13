@@ -1,6 +1,6 @@
 Flow io.jans.inbound.Apple
     Basepath ""
-    Configs p
+    Inputs p
 
 issuer = "https://appleid.apple.com"
 //See https://developer.apple.com/documentation/sign_in_with_apple/generate_and_validate_tokens#create-the-client-secret
