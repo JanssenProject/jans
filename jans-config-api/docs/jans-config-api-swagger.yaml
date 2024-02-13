@@ -7890,19 +7890,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
+        userCanAccess:
+          type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        userCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8240,6 +8240,10 @@ components:
           format: int32
         idTokenFilterClaimsBasedOnAccessToken:
           type: boolean
+        saveTokensInCache:
+          type: boolean
+        saveTokensInCacheAndDontSaveInPersistence:
+          type: boolean
         accessTokenLifetime:
           type: integer
           format: int32
@@ -8351,10 +8355,10 @@ components:
           type: boolean
         disablePromptConsent:
           type: boolean
-        sessionIdLifetime:
+        sessionIdCookieLifetime:
           type: integer
           format: int32
-        sessionIdCookieLifetime:
+        sessionIdLifetime:
           type: integer
           format: int32
         activeSessionAuthorizationScope:
@@ -8712,8 +8716,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8723,6 +8725,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
