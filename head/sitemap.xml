@@ -556,11 +556,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/config-guide/config-tools/scim-cli/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/config-guide/config-tools/config-api/</loc>
          <lastmod>2024-02-13</lastmod>
          <changefreq>daily</changefreq>
