@@ -153,7 +153,6 @@ nav:
       - LDAP Operation: admin/reference/database/ldap-ops.md
       - LDAP Namespace Diagram: admin/reference/database/ldap-namespace.md
     - Couchbase:
-      - Couchbase Schema: admin/reference/database/cb-schema.md
       - Couchbase Configuration: admin/reference/database/cb-config.md
       - Couchbase Operation: admin/reference/database/cb-ops.md
       - Couchbase Buckets: admin/reference/database/cb-buckets.md
@@ -283,7 +282,7 @@ nav:
       - Agama engine: admin/developer/agama/jans-agama-engine.md
       - Navigation, UI pages and assets: admin/developer/agama/flows-navigation-ui.md
       - Projects deployment: admin/developer/agama/projects-deployment.md
-      - Recommended practices:  admin/developer/agama/recommended-practices.md
+      - Agama Best Practices:  admin/developer/agama/agama-best-practices.md
       - Advanced usages: admin/developer/agama/advanced-usages.md
       - Engine and bridge configurations: admin/developer/agama/engine-bridge-config.md
       - FAQ: admin/developer/agama/faq.md      

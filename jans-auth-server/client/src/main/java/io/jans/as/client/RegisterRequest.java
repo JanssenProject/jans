@@ -74,7 +74,7 @@ public class RegisterRequest extends BaseRequest {
     private final LocalizedString tosUri;
     private String frontChannelLogoutUri;
     private Boolean frontChannelLogoutSessionRequired;
-    private List<String> backchannelLogoutUris;
+    private String backchannelLogoutUri;
     private Boolean backchannelLogoutSessionRequired;
     private String jwksUri;
     private String jwks;
@@ -303,12 +303,22 @@ public class RegisterRequest extends BaseRequest {
         this.registrationAccessToken = registrationAccessToken;
     }
 
-    public List<String> getBackchannelLogoutUris() {
-        return backchannelLogoutUris;
+    /**
+     * Returns backchannel logout uri
+     *
+     * @return backchannel logout uri
+     */
+    public String getBackchannelLogoutUri() {
+        return backchannelLogoutUri;
     }
 
-    public void setBackchannelLogoutUris(List<String> backchannelLogoutUris) {
-        this.backchannelLogoutUris = backchannelLogoutUris;
+    /**
+     * Sets backchannel logout uri
+     *
+     * @param backchannelLogoutUri backchannel logout uri
+     */
+    public void setBackchannelLogoutUri(String backchannelLogoutUri) {
+        this.backchannelLogoutUri = backchannelLogoutUri;
     }
 
     public Boolean getBackchannelLogoutSessionRequired() {
@@ -1827,7 +1837,7 @@ public class RegisterRequest extends BaseRequest {
         result.setMinimumAcrPriorityList(extractListByKey(requestObject, MINIMUM_ACR_PRIORITY_LIST.toString()));
         result.setFrontChannelLogoutUri(requestObject.optString(FRONT_CHANNEL_LOGOUT_URI.toString()));
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
-        result.setBackchannelLogoutUris(extractListByKey(requestObject, BACKCHANNEL_LOGOUT_URI.toString()));
+        result.setBackchannelLogoutUri(requestObject.optString(BACKCHANNEL_LOGOUT_URI.toString()));
         result.setBackchannelLogoutSessionRequired(requestObject.optBoolean(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setAccessTokenLifetime(integerOrNull(requestObject, ACCESS_TOKEN_LIFETIME.toString()));
         result.setParLifetime(integerOrNull(requestObject, PAR_LIFETIME.toString()));
@@ -2106,8 +2116,8 @@ public class RegisterRequest extends BaseRequest {
         if (frontChannelLogoutSessionRequired != null) {
             function.apply(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
         }
-        if (backchannelLogoutUris != null && !backchannelLogoutUris.isEmpty()) {
-            function.apply(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris));
+        if (backchannelLogoutUri != null && !backchannelLogoutUri.isEmpty()) {
+            function.apply(BACKCHANNEL_LOGOUT_URI.toString(), backchannelLogoutUri);
         }
         if (backchannelLogoutSessionRequired != null) {
             function.apply(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());

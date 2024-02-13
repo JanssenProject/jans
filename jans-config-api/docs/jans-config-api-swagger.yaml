@@ -8354,7 +8354,7 @@ components:
         sessionIdLifetime:
           type: integer
           format: int32
-        serverSessionIdLifetime:
+        sessionIdCookieLifetime:
           type: integer
           format: int32
         activeSessionAuthorizationScope:
