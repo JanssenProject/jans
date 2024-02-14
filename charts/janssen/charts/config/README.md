@@ -81,7 +81,7 @@ Kubernetes: `>=v1.22.0-0`
 | fullNameOverride | string | `""` |  |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"janssenproject/configurator"` | Image  to use for deploying. |
-| image.tag | string | `"1.0.21-1"` | Image  tag to use for deploying. |
+| image.tag | string | `"1.0.21-4"` | Image  tag to use for deploying. |
 | ldapPassword | string | `"P@ssw0rds"` | LDAP admin password if OpennDJ is used for persistence. |
 | ldapTruststorePassword | string | `"changeit"` | LDAP truststore password if OpenDJ is used for persistence |
 | lifecycle | object | `{}` |  |

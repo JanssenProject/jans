@@ -5,23 +5,23 @@ annotations:
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: auth-server
-      image: ghcr.io/janssenproject/jans/auth-server:1.0.21-1
+      image: ghcr.io/janssenproject/jans/auth-server:1.0.21-4
     - name: auth-server-key-rotation
-      image: ghcr.io/janssenproject/jans/certmanager:1.0.21-1
+      image: ghcr.io/janssenproject/jans/certmanager:1.0.21-4
     - name: configuration-manager
-      image: ghcr.io/janssenproject/jans/configurator:1.0.21-1
+      image: ghcr.io/janssenproject/jans/configurator:1.0.21-4
     - name:  config-api
-      image: ghcr.io/janssenproject/jans/config-api:1.0.21-1
+      image: ghcr.io/janssenproject/jans/config-api:1.0.21-4
     - name: fido2
-      image: ghcr.io/janssenproject/jans/fido2:1.0.21-1
+      image: ghcr.io/janssenproject/jans/fido2:1.0.21-4
     - name: opendj
       image: gluufederation/opendj:5.0.0_dev
     - name: persistence
-      image: ghcr.io/janssenproject/jans/persistence-loader:1.0.21-1
+      image: ghcr.io/janssenproject/jans/persistence-loader:1.0.21-4
     - name: casa
-      image: ghcr.io/janssenproject/jans/casa:1.0.21-1
+      image: ghcr.io/janssenproject/jans/casa:1.0.21-4
     - name: scim
-      image: ghcr.io/janssenproject/jans/scim:1.0.21-1
+      image: ghcr.io/janssenproject/jans/scim:1.0.21-4
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
