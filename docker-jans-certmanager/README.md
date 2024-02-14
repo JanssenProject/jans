@@ -214,7 +214,7 @@ spec:
         spec:
           containers:
             - name: auth-key-rotation
-              image: ghcr.io/janssenproject/jans/certmanager:1.0.23_dev
+              image: ghcr.io/janssenproject/jans/certmanager:1.1.0_dev
               resources:
                 requests:
                   memory: "300Mi"
