@@ -11,7 +11,7 @@ from cli_style import style
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_spinner import Spinner
 from wui_components.jans_vetrical_nav import JansVerticalNav
-from utils.static import cli_style
+from utils.static import cli_style, common_strings
 from wui_components.jans_date_picker import DateSelectWidget
 from utils.multi_lang import _
 
@@ -190,3 +190,14 @@ def fromisoformat(dt_str):
 
 def check_email(email):
     return re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$', email, re.IGNORECASE)
+
+def get_help_with(helps: str='', without: list[str]=None):
+    if not without:
+        without = []
+    help_list = []
+    for key_ in common_strings.__dict__:
+        if key_.startswith('help_') and key_[5:] not in without:
+            help_list.append(common_strings.__dict__[key_])
+    if helps:
+        help_list.insert(-1, helps)
+    return '\n'.join(help_list)
