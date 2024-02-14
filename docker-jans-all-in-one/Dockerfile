@@ -46,7 +46,7 @@ FROM ${JANS_SAML_IMAGE} AS jans-saml-src
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.8@sha256:e82fb905ca6efffcdb1b0ed58f207b0ce91aeada78c218ae7dbb16bb31635728
+FROM bellsoft/liberica-openjdk-alpine:17.0.9@sha256:915d7a6c5874638a735296a99ac28c4a9cefb9bfda2bef796fc564449d44d6cc
 
 # hadolint ignore=DL3018
 RUN apk update \
