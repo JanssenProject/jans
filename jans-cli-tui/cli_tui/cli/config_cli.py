@@ -1318,7 +1318,7 @@ class JCA_CLI:
         if call_method in ('post', 'put', 'patch'):
             self.log_cmd(operation_id, url_suffix, endpoint_args, cmd_data)
 
-        if path['__path__'] == '/admin-ui/adminUIPermissions' and 'permission' in data:
+        if path['__path__'] == '/admin-ui/adminUIPermissions' and data and 'permission' in data:
             tag, _ = os.path.splitext(os.path.basename(data['permission']))
             if tag:
                 data['tag'] = tag

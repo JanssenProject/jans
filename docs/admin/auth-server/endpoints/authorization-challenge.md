@@ -141,7 +141,16 @@ Full sample script can be found [here](../../../script-catalog/authorization_cha
 
 Device session is optional. AS does not return it by default. 
 It's possible to pass in request `use_device_session=true` which makes AS return it in error response.
+If it is desired to use `device_session` and don't pass `client_id` (or other parameters) in next request, 
+it should be put in attributes of `device_session` object.
 
+Example
+```java
+String clientId = context.getHttpRequest().getParameter("client_id");
+deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
+``` 
+
+Full sample script can be found [here](../../../script-catalog/authorization_challenge/AuthorizationChallenge.java)
 
 ## Multi-step example
 
@@ -223,6 +232,16 @@ In custom script it's easy to code what data has to be kept in `device_session`.
         String otp = context.getHttpRequest().getParameter(OTP_PARAMETER);
         if (StringUtils.isNotBlank(otp)) {
             deviceSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
+        }
+        
+        String clientId = context.getHttpRequest().getParameter("client_id");
+        if (StringUtils.isNotBlank(clientId)) {
+            deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
+        }
+        
+        String acrValues = context.getHttpRequest().getParameter("acr_values");
+        if (StringUtils.isNotBlank(acrValues)) {
+            deviceSessionObject.getAttributes().getAttributes().put("acr_values", acrValues);
         }
 
         if (newSave) {
