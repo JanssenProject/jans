@@ -516,8 +516,9 @@ class Plugin(DialogUtils):
                 self.app.show_message(_("Error getting response"), str(response))
                 return
 
-            self.scopes_container.clear()
             all_data = result.get('entries', [])
+            self.scopes_container.clear()
+            self.scopes_container.all_data = all_data
 
             for d in all_data: 
                 self.scopes_container.add_item(
