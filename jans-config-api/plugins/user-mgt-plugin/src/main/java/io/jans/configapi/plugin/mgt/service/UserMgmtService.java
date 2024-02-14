@@ -3,6 +3,7 @@ package io.jans.configapi.plugin.mgt.service;
 import com.github.fge.jsonpatch.JsonPatchException;
 
 import io.jans.model.GluuStatus;
+import io.jans.model.attribute.AttributeValidation;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.core.service.ConfigUserService;
@@ -12,6 +13,7 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.AuthUtil;
+import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
@@ -24,6 +26,7 @@ import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections.CollectionUtils;
@@ -34,6 +37,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -52,6 +57,9 @@ public class UserMgmtService {
 
     @Inject
     ConfigurationService configurationService;
+
+    @Inject
+    AttributeService attributeService;
 
     @Inject
     PersistenceEntryManager persistenceEntryManager;
@@ -93,11 +101,12 @@ public class UserMgmtService {
             searchFilter = Filter.createORFilter(filters);
         }
         logger.info("Users searchFilter:{}", searchFilter);
-        PagedResult<User>  pagedResult = persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(), User.class, searchFilter, null,
-                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
-                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
-        
-        //remove inactive claims
+        PagedResult<User> pagedResult = persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(),
+                User.class, searchFilter, null, searchRequest.getSortBy(),
+                SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex(),
+                searchRequest.getCount(), searchRequest.getMaxCount());
+
+        // remove inactive claims
         List<User> users = this.verifyCustomAttributes(pagedResult.getEntries());
         pagedResult.setEntries(users);
         return pagedResult;
@@ -140,15 +149,15 @@ public class UserMgmtService {
         // persist user
         ignoreCustomObjectClassesForNonLDAP(user);
         user = userService.updateUser(user);
-        
-        //remove inactive claims
-        if(user!=null) {
+
+        // remove inactive claims
+        if (user != null) {
             List<User> users = new ArrayList<>();
             users.add(user);
             users = this.verifyCustomAttributes(users);
             user = users.get(0);
         }
-        
+
         logger.info("User after patch user:{}", user);
         return user;
 
@@ -158,9 +167,9 @@ public class UserMgmtService {
         User result = null;
         try {
             result = userService.getUserByInum(inum);
-            
-            //remove inactive claims
-            if(result!=null) {
+
+            // remove inactive claims
+            if (result != null) {
                 List<User> users = new ArrayList<>();
                 users.add(result);
                 users = this.verifyCustomAttributes(users);
@@ -375,8 +384,8 @@ public class UserMgmtService {
 
     public User addUser(User user, boolean active) {
         user = userService.addUser(user, active);
-        //remove inactive claims
-        if(user!=null) {
+        // remove inactive claims
+        if (user != null) {
             List<User> users = new ArrayList<>();
             users.add(user);
             users = this.verifyCustomAttributes(users);
@@ -387,8 +396,8 @@ public class UserMgmtService {
 
     public User updateUser(User user) {
         user = userService.updateUser(user);
-        //remove inactive claims
-        if(user!=null) {
+        // remove inactive claims
+        if (user != null) {
             List<User> users = new ArrayList<>();
             users.add(user);
             users = this.verifyCustomAttributes(users);
@@ -396,7 +405,7 @@ public class UserMgmtService {
         }
         return user;
     }
-    
+
     public List<User> verifyCustomAttributes(List<User> users) {
         logger.info("Verify CustomAttributes for users: {}", users);
         if (users == null || users.isEmpty()) {
@@ -406,7 +415,7 @@ public class UserMgmtService {
             List<CustomObjectAttribute> customAttributes = user.getCustomAttributes();
             logger.debug("customAttributes: {}", customAttributes);
             // remove inactive attributes
-            removeInActiveCustomAttribute(customAttributes);         
+            removeInActiveCustomAttribute(customAttributes);
         }
         return users;
     }
@@ -416,16 +425,18 @@ public class UserMgmtService {
         if (customAttributes == null || customAttributes.isEmpty()) {
             return customAttributes;
         }
-        
-        //remove attribute that are not active
+
+        // remove attribute that are not active
         for (Iterator<CustomObjectAttribute> it = customAttributes.iterator(); it.hasNext();) {
             String attributeName = it.next().getName();
             logger.debug("Verify status of attributeName: {}", attributeName);
             List<JansAttribute> attList = findAttributeByName(attributeName);
             logger.debug("attributeName:{} data is attList: {}", attributeName, attList);
-       
-            if (CollectionUtils.isNotEmpty(attList) && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {
-                logger.info("Removing attribute as it is not active attributeName: {} , status:{}", attributeName, attList.get(0).getStatus().getValue());
+
+            if (CollectionUtils.isNotEmpty(attList)
+                    && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {
+                logger.info("Removing attribute as it is not active attributeName: {} , status:{}", attributeName,
+                        attList.get(0).getStatus().getValue());
                 it.remove();
             }
         }
@@ -444,4 +455,86 @@ public class UserMgmtService {
         }
         return String.format("inum=%s,%s", inum, attributesDn);
     }
+
+    public void validateAttributes(List<CustomObjectAttribute> customAttributes) {
+        logger.info("**** Validate customAttributes: {}", customAttributes);
+        if (customAttributes == null || customAttributes.isEmpty()) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (CustomObjectAttribute customObjectAttribute : customAttributes) {
+            logger.info("customObjectAttribute:{}", customObjectAttribute, customObjectAttribute.getName());
+            AttributeValidation validation = attributeService.getAttributeByName(customObjectAttribute.getName())
+                    .getAttributeValidation();
+
+            logger.info("validation:{}", validation);
+
+            String errorMsg = validateCustomAttributes(customObjectAttribute, validation);
+
+            if (StringUtils.isNotBlank(errorMsg)) {
+                sb.append(errorMsg);
+            }
+        }
+
+        if (StringUtils.isNotBlank(sb.toString())) {
+            throw new WebApplicationException(sb.toString());
+        }
+
+    }
+
+    private String validateCustomAttributes(CustomObjectAttribute customObjectAttribute,
+            AttributeValidation attributeValidation) {
+        logger.info("Validate customObjectAttribute:{}, attributeValidation:{}", customObjectAttribute,
+                attributeValidation);
+        StringBuilder sb = new StringBuilder();
+        if (customObjectAttribute == null || attributeValidation == null) {
+            return sb.toString();
+        }
+
+        String attributeName = customObjectAttribute.getName();
+        try {
+
+            String attributeValue = String.valueOf(customObjectAttribute.getValue());
+            logger.info("Validate attributeName:{}, attributeValue:{}", attributeName, attributeValue);
+            if (StringUtils.isBlank(attributeValue)) {
+                return sb.toString();
+
+            }
+            Integer minvalue = attributeValidation.getMinLength();
+            Integer maxValue = attributeValidation.getMaxLength();
+            String regexpValue = attributeValidation.getRegexp();
+            logger.info(
+                    "Validate attributeValue:{}, attributeValue.length():{}, attributeValidation.getMinLength():{}, attributeValidation.getMaxLength():{}, attributeValidation.getRegexp():{}",
+                    attributeValue, attributeValue.length(), attributeValidation.getMinLength(),
+                    attributeValidation.getMaxLength(), attributeValidation.getRegexp());
+
+            // minvalue Validation
+            if (minvalue != null && attributeValue.length() < minvalue) {
+                sb.append(",must be at least " + minvalue + " characters.");
+            }
+
+            // maxValue Validation
+            if (maxValue != null && attributeValue.length() > maxValue) {
+                sb.append(",must be less than " + maxValue + " characters.");
+            }
+
+            // regexpValue
+            if (StringUtils.isNotBlank(regexpValue)) {
+                Pattern pattern = Pattern.compile(regexpValue);
+                Matcher matcher = pattern.matcher(attributeValue);
+                if (!matcher.matches()) {
+                    sb.append(",must match (" + regexpValue + ") pattern.");
+                }
+            }
+        } catch (Exception ex) {
+            logger.error("Error while validating attributeName:{}", attributeName);
+        }
+        logger.info("Validate reuslt - sb :{} ", sb);
+
+        if (StringUtils.isNotBlank(sb.toString())) {
+            sb.insert(0, attributeName+" ");
+        }
+        return sb.toString();
+    }
+
 }

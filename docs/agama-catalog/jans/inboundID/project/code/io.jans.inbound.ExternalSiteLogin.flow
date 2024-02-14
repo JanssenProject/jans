@@ -24,7 +24,7 @@ When provider is null or provider.enabled is false
 
 //Launch matching flow and retrieve profile
 Log "Initiating external authentication for identity provider '%'" providerId
-obj = Trigger $provider.flowQname
+obj = Trigger $provider.flowQname provider.oauthParams
 
 When obj.success is false
     Finish obj

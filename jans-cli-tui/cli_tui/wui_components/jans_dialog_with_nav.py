@@ -29,10 +29,11 @@ class JansDialogWithNav():
         self,
         content: AnyContainer,
         width: AnyDimension,
-        navbar: AnyContainer=None,
-        height: AnyDimension= None,
-        title: Optional[str]= '',
+        navbar: AnyContainer = None,
+        height: AnyDimension = None,
+        title: Optional[str] = '',
         button_functions: Optional[list] = [],
+        show_scrollbar:Optional[bool] = True,
         )-> Dialog:
 
         """init for JansDialogWithNav
@@ -64,6 +65,7 @@ class JansDialogWithNav():
         self.height = height
         self.width = width
         self.content = content
+        self.show_scrollbar = show_scrollbar
         self.create_window()
 
     def create_window(self)-> None:
@@ -87,13 +89,14 @@ class JansDialogWithNav():
 
                 ]) if self.navbar else VSplit([]),
                     VSplit([
-                        ScrollablePane(content=self.content, height=height,display_arrows=False),
+                        ScrollablePane(content=self.content, height=height, display_arrows=False, show_scrollbar=self.show_scrollbar),
                     ],key_bindings=self.get_nav_bar_key_bindings()) 
                 ], width=self.width, padding=1),
 
             buttons=[
                 Button(
                     text=str(self.button_functions[k][1]),
+                    width=len(str(self.button_functions[k][1]))+2,
                     handler=self.button_functions[k][0],
                 ) for k in range(len(self.button_functions))
             ],
