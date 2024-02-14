@@ -5,7 +5,7 @@ annotations:
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: all-in-one
-      image: ghcr.io/janssenproject/jans/all-in-one:1.0.22-1
+      image: ghcr.io/janssenproject/jans/all-in-one:1.0.22-2
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner

@@ -27,7 +27,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/casa
   # -- Image  tag to use for deploying.
-  tag: 1.0.22-1
+  tag: 1.0.22-2
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.

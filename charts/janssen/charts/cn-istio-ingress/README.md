@@ -4,7 +4,7 @@
 
 Istio Gateway
 
-**Homepage:** <https://docs.gluu.org/>
+**Homepage:** <https://jans.io>
 
 ## Maintainers
 
@@ -14,7 +14,7 @@ Istio Gateway
 
 ## Source Code
 
-* <https://docs.jans.io>
+* <https://docs.jans.io/>
 * <https://github.com/JanssenProject/jans/tree/main/charts/janssen/charts/cn-istio-ingress>
 
 ## Requirements
