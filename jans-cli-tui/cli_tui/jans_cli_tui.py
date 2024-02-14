@@ -81,7 +81,7 @@ from prompt_toolkit.keys import Keys
 from cli_style import style
 from utils.multi_lang import _
 from utils.static import cli_style, common_strings
-from utils.utils import common_data
+from utils.utils import common_data, get_help_with
 from utils.validators import IntegerValidator
 from utils import background_tasks
 from wui_components.jans_cli_dialog import JansGDialog
@@ -126,18 +126,7 @@ class JansCliApp(Application):
         self.browse_path = '/'
         self.app_configuration = {}
         self.current_page = None
-        self.jans_help = ("<Enter>          {} \n"
-                "<Esc>            {}\n"
-                "<Alt + letter>   {}\n"
-                "<d>              {}\n"
-                "<Delete>         {}\n"
-                "For More Visit  {}").format(
-                    _("Confirm or Edit current selection"),
-                    _("Close the current dialog"),
-                    _("Navigate to an other tab"),
-                    _("Display current item in JSON format if possible"),
-                    _("Delete current selection if possible"),
-                    "https://docs.jans.io/v1.0.6/admin/config-guide/tui/")
+        self.jans_help = get_help_with()
 
         self.not_implemented = Frame(
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
@@ -631,13 +620,12 @@ class JansCliApp(Application):
         focus_previous(ev)
 
     def help(self,ev: KeyPressEvent) -> None:
-        
         plugin = self._plugins[self.nav_bar.cur_navbar_selection]
         if callable(getattr(plugin, "help", None)):
             plugin.help()
         else:
-            self.show_message(_("Help"),
-                self.jans_help,tobefocused=self.center_container)
+            help_msg = getattr(plugin, "jans_help", None) or self.jans_help
+            self.show_message(_("Help"), help_msg, tobefocused=self.center_container)
 
     def escape(self,ev: KeyPressEvent) -> None:
         try:
@@ -1030,6 +1018,9 @@ class JansCliApp(Application):
             message: AnyFormattedText,
             confirm_handler: Optional[Callable]=None
         ) -> Dialog:
+
+        if isinstance(message, str):
+            message = HTML(message)
         body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
         buttons = [Button(_("No")), Button(_("Yes"), handler=confirm_handler)]
         dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons, width=self.dialog_width-20)
