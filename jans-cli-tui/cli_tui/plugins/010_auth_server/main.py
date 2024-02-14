@@ -584,7 +584,8 @@ class Plugin(DialogUtils):
                         selectes=0,
                         headerColor=cli_style.navbar_headcolor,
                         entriesColor=cli_style.navbar_entriescolor,
-                        all_data=missing_properties
+                        all_data=missing_properties,
+                        on_display=lambda **params: None
                     )
         ])
 
