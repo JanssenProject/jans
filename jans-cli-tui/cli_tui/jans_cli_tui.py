@@ -235,7 +235,6 @@ class JansCliApp(Application):
 
     def _load_plugins(self) -> None:
         # check if admin-ui plugin is available:
-
         plugin_dir = os.path.join(cur_dir, 'plugins')
         for plugin_file in sorted(Path(plugin_dir).glob('*/main.py')):
             if plugin_file.parent.joinpath('.enabled').exists():
@@ -245,6 +244,7 @@ class JansCliApp(Application):
                 spec.loader.exec_module(plugin)
                 plugin_object = plugin.Plugin(self)
                 self._plugins.append(plugin_object)
+
 
     def init_plugins(self) -> None:
         """Initilizse plugins
@@ -407,7 +407,9 @@ class JansCliApp(Application):
 
 
     def check_available_plugins(self) -> None:
-        """Disables plugins when cli object is ready"""
+        """Disables plugins when cli object is ready.
+        If a plugin is not deployed on config-api-server, it should be removed from TUI.
+        """
 
         if self.cli_object_ok:
             self.create_background_task(background_tasks.get_attributes_coroutine(self))
@@ -417,7 +419,7 @@ class JansCliApp(Application):
                 for plugin in plugins:
                     self.available_plugins.append(plugin['name'])
 
-                for pp in self._plugins:
+                for pp in self._plugins[:]:
                     if getattr(pp, 'server_side_plugin', False) and pp.pid not in self.available_plugins:
                         self.disable_plugin(pp.pid)
                     if hasattr(pp, 'on_cli_object_ready'):
