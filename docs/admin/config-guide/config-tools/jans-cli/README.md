@@ -54,6 +54,21 @@ for example [logging levels](../../../../contribute/developer-faq.md#how-to-enab
 
 This directory also contains SALT used by Janssen CLI tool.
 
+### CLI Authorization
+To run operations on Janssen Server, CLI client will need to be authenticated and authorized by the server. Since CLI has limited input capabilities, it uses [Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628) flow to get required permissions in form of an access token. After successfully receiving the token, CLI can run operations on the Janssen server while the token is valid. The steps below will summarize this process.
+
+1. Execution of CLI command will return the following message if a valid token is not found.
+   ```
+   Access token was not found.
+   Please visit verification url <Janssen-server-device-code-url> and enter user code CGFZ-RTZR in 1800 seconds
+   Please press <<Enter>> when ready
+   ```
+2. Take `<Janssen-server-device-code-url>` from the message above and use any browser to access it from a different device
+3. User will be presented with a page where the user has to authenticate using id and password
+4. After successful user authentication, the next screen allows the user to enter the user code. Use the user code presented on command-line instruction in step 1 above.
+5. After successful code validation, the user is presented with OAuth permissions screen. This screen would list all the permissions requested by Jans CLI. The user can choose to `Allow` or `Not Allow` granting of these permissions.
+6. After allowing the grant of requested permissions, the user should come back to the command-line interface and hit <<Enter>> as instructed. This will enable CLI to run operations on the corresponding Janssen server.
+
 ## Getting Help
 
 CLI `--help` switch prints all options available from CLI to configure Janssen
@@ -123,15 +138,29 @@ root@testjans:~#
 
 ## CLI Command Structure
 
-### Understanding Operation IDs and Tasks
-jans-cli's unit of work, or a command, is known as `operation-id`. Each 
-operation id is a configuration retrieval/update action on the Janssen Server. 
-For example: `get-attributes` is an operation that `Gets a list of Janssen
-Server attributes`.
+CLI operations are structurally grouped by `Operation Modes` and within 
+these modes, they are logically grouped together by tasks. Diagram below 
+depicts this structure.
 
+![](../../../../assets/jans-cli-structure.png)
+
+### Operation Modes
+
+CLI offer three operation modes, JCA, SCIM and AUTH. JCA is the default mode.
+To use SCIM and AUTH modes, the CLI command specifies `-scim` or `-auth` 
+switches. Use `-h` switch to get help on each mode.
+
+```shell
+/opt/jans/jans-cli/config-cli.py -scim -h
+```
+
+The modes usually have different task(and hence operations).
+
+
+### Tasks
 `Tasks` are logical grouping of operation-ids so that users can easily list
 all the operational-ids relevant to a particular aspect of Janssen Server
-configuration. For instance,
+configuration using `--info` switch. For instance,
 all the operation-ids related to attribute management are grouped under
 `attribute` task. As mentioned, tasks are logical groupings, they don't perform
 any operation on the server. Tasks can only be used with `--info` switch.
@@ -194,12 +223,19 @@ Operation ID: patch-attributes-by-inum
   inum: Attribute Id [string]
   Schema: Array of PatchRequest
 ```
+### Operation-ids
+jans-cli's unit of work, or a command, is known as `operation-id`. Each
+operation id is a configuration retrieval/update action on the Janssen Server.
+For example: `get-attributes` is an operation that `Gets a list of Janssen
+Server attributes`.
 
-To perform any operation, you have to run command line with the operation id. for example:
+To perform any operation, you have to run command line with the operation id. 
+For example:
 
-```
+```shell
 /opt/jans/jans-cli/config-cli.py --operation-id get-acrs
 ```
+
 It returns:
 
 ```text
@@ -209,116 +245,23 @@ Getting access token for scope https://jans.io/oauth/config/acrs.readonly
 }
 ```
 
-## Operation Modes
-Default operation mode is **jca**, i.e., all queries are done to Jans Config Api
-Server. CLI has also SCIM and OAUTH modes:
+Certain operations need data to be able to execute while for others just the 
+operation id is enough. For instance in above example `get-acrs` operation did
+not require any data to be passed and worked only with operation id. While 
+operations like `delete-attributes-by-inum`, `post-attributes` need additional
+data to be able to execute. For example, for `delete-attributes-by-inum` to 
+execute, it needs to know the `inum` of the attribute to be deleted.
 
-### SCIM Mode
-To switch SCIM mode user `-scim` switch. For example to get help for SCIM mode:
+For operations which need data the data elements are
+passed to the operation in form of `parameters` and/or `schema`.
+Operation description provided by `--info` switch details out what parameters
+and schemas are applicable to each operation.
 
-`/opt/jans/jans-cli/config-cli.py -scim -h`
-
-Only `--info` arguments will be different from **jca** mode:
-
-```
---info {Discovery,Fido2Devices,FidoDevices,GlobalSearch,Group,User}
-```
-
-You can get information about operation `Discovery`:
-
-```
-`/opt/jans/jans-cli/config-cli.py -scim --info Fido2Devices`
-Operation ID: get-fido2-devices
-  Description: Query Fido 2 resources
-  Parameters:
-  attributes: A comma-separated list of attribute names to return in the response [string]
-  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-  userId: Used to restrict the search to fido 2 resources owned by a specific user [string]
-  filter: An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644 [string]
-  startIndex: The 1-based index of the first query result [integer]
-  count: Specifies the desired maximum number of query results per page [integer]
-  sortBy: The attribute whose value will be used to order the returned responses [string]
-  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
-Operation ID: get-fido2-device-by-id
-  Description: Retrieves a Fido 2 device by Id
-  Parameters:
-  attributes: A comma-separated list of attribute names to return in the response [string]
-  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-  userId: Identifier (inum) of the device owner. This param is not required when underlying database is LDAP [string]
-  id: No description is provided for this parameter [string]
-Operation ID: update-fido2-device-by-id
-  Description: Updates a Fido 2 resource. Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes not passed in the payload will be left intact.
-
-  Parameters:
-  attributes: A comma-separated list of attribute names to return in the response [string]
-  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-  id: No description is provided for this parameter [string]
-  Schema: Fido2DeviceResource
-  Schema: Fido2DeviceResource
-Operation ID: delete-fido2-device-by-id
-  Description: Deletes a Fido 2 resource
-  Parameters:
-  id: Identifier of the resource to delete [string]
-Operation ID: search-fido2-device
-  Description: Query Fido 2 resources
-  Parameters:
-  userId: Used to restrict the search to fido 2 resources owned by a specific user [string]
-  Schema: SearchRequest
-  Schema: SearchRequest
-
-To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema <schma>, for example /opt/jans/jans-cli/config-cli.py -scim --schema SearchRequest
-```
-
-Here is how you can get sample schema for **SearchRequest**:
-
-```
-/opt/jans/jans-cli/config-cli.py -scim --schema SearchRequest
-{
-  "schemas": [
-    "string"
-  ],
-  "attributes": [
-    "string"
-  ],
-  "excludedAttributes": [
-    "string"
-  ],
-  "filter": "userName eq \"jhon\" and meta.lastModified gt \"2011-05-13T04:42:34Z\"",
-  "sortBy": "string",
-  "sortOrder": "string",
-  "startIndex": 143,
-  "count": 58
-}
-```
-
-### AUTH Mode
-To switch AUTH mode user `-auth` switch. For example to get help for AUTH mode:
-
-`/opt/jans/jans-cli/config-cli.py -auth -h`
-
-`--info` arguments will be:
-
-```
---info {Authorization,ClientInfo,ClientRegistration,FidoU2F,JwkJsonWebKeySetJwks,Registration,ServerConfiguration,SessionManagement,Ssa,Token,TokenIntrospection,Uma2Resource,UmaScope,UmaUserManagedAccess,UserInfo}
-```
-
-To get information about operation `ClientRegistration`:
-
-```
-/opt/jans/jans-cli/config-cli.py -auth --info ClientInfo
-Operation ID: get_clientinfo
-  Description: The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.
-  Parameters:
-  access_token: No description is provided for this parameter [string]
-  Authorization: No description is provided for this parameter [string]
-Operation ID: post_clientinfo
-  Description: The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.
-  Parameters:
-  Authorization: No description is provided for this parameter [string]
-  Parameters:
-    access_token*: Client-specific access token.
-```
-
+`Parameters` allow simple string based values to be passed to the operation, 
+while `schema` allows JSON structured data to be passed to the operation. 
+For examples of how operations can be used with parameters and schema, refer to
+[Attribute](../../attribute-configuration.md). Read more about schema in [this
+detail section](#about-schemas).
 
 ## Basic command-line switches
 
@@ -328,8 +271,11 @@ Operation ID: post_clientinfo
 4. `--endpoint-args` advanced usage for operation-id
 5. `--data` usage to share data in operations
 
+## About Schemas
 
-## Patch Request (schema)
+
+
+### Patch Request (schema)
 
 This schema file can be found in `/components/schemas/PatchRequest` for those which one support this operation.
 
@@ -339,7 +285,7 @@ When you examine this sample schema, you will see three properties in an object:
 * __path__: Path of the property to be changed. use path separator `/` for config or `.` for SCIM to change a property inside an object.
 * __value__: New value to be assigned for each property defined in `path`
 
-## Multiple Patch Request (schema)
+### Multiple Patch Request (schema)
 
 When we need to perform multiple patch operations on any configuration endpoint, Instead of doing one by one, we can create a json file including all individual operation into an array. To clarify, please see below json file:
 
@@ -380,7 +326,7 @@ After creating the json file, just run the patch operation command.
 /opt/jans/jans-cli/config-cli.py --operation-id [patch operation id name] --data [json file absolute url]
 ```
 
-## Quick Patch Operations
+### Quick Patch Operations
 
 There is another patch request feature. It is a single line patch-request command line. It supports three types of operations:
 
@@ -409,18 +355,5 @@ Multi valued arguments can be privede as `key:value1,key:vlaue2`, for example
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id=get-config-scripts  --endpoint-args="fieldValuePair:scriptType=dynamic_scope,fieldValuePair:level=100"
 ```
-## CLI Authorization
-To run operations on Janssen Server, CLI client will need to be authenticated and authorized by the server. Since CLI has limited input capabilities, it uses [Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628) flow to get required permissions in form of an access token. After successfully receiving the token, CLI can run operations on the Janssen server while the token is valid. The steps below will summarize this process.
 
-1. Execution of CLI command will return the following message if a valid token is not found.
-   ```
-   Access token was not found.
-   Please visit verification url <Janssen-server-device-code-url> and enter user code CGFZ-RTZR in 1800 seconds
-   Please press <<Enter>> when ready
-   ```
-2. Take `<Janssen-server-device-code-url>` from the message above and use any browser to access it from a different device
-3. User will be presented with a page where the user has to authenticate using id and password
-4. After successful user authentication, the next screen allows the user to enter the user code. Use the user code presented on command-line instruction in step 1 above.
-5. After successful code validation, the user is presented with OAuth permissions screen. This screen would list all the permissions requested by Jans CLI. The user can choose to `Allow` or `Not Allow` granting of these permissions.
-6. After allowing the grant of requested permissions, the user should come back to the command-line interface and hit <<Enter>> as instructed. This will enable CLI to run operations on the corresponding Janssen server.
 
