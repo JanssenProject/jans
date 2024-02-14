@@ -176,6 +176,8 @@ components:
           type: boolean
         skipValidateMdsInAttestationEnabled:
           type: boolean
+        assertionOptionsGenerateEndpointEnabled:
+          type: boolean
     RequestedParty:
       type: object
       properties:
