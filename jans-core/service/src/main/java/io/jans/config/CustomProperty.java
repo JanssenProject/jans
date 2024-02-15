@@ -4,15 +4,16 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.persistence.model.configuration;
+package io.jans.config;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Custom Attributes

@@ -36,7 +36,7 @@ if no_tui:
     sys.exit()
 
 import prompt_toolkit
-from asyncio import get_event_loop
+from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.application import Application, get_app_session
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
@@ -81,7 +81,7 @@ from prompt_toolkit.keys import Keys
 from cli_style import style
 from utils.multi_lang import _
 from utils.static import cli_style, common_strings
-from utils.utils import common_data
+from utils.utils import common_data, get_help_with
 from utils.validators import IntegerValidator
 from utils import background_tasks
 from wui_components.jans_cli_dialog import JansGDialog
@@ -126,18 +126,7 @@ class JansCliApp(Application):
         self.browse_path = '/'
         self.app_configuration = {}
         self.current_page = None
-        self.jans_help = ("<Enter>          {} \n"
-                "<Esc>            {}\n"
-                "<Alt + letter>   {}\n"
-                "<d>              {}\n"
-                "<Delete>         {}\n"
-                "For More Visit  {}").format(
-                    _("Confirm or Edit current selection"),
-                    _("Close the current dialog"),
-                    _("Navigate to an other tab"),
-                    _("Display current item in JSON format if possible"),
-                    _("Delete current selection if possible"),
-                    "https://docs.jans.io/v1.0.6/admin/config-guide/tui/")
+        self.jans_help = get_help_with()
 
         self.not_implemented = Frame(
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
@@ -189,6 +178,8 @@ class JansCliApp(Application):
 
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
         self.plugins_initialised = False
+
+        self.create_background_task(self.check_jans_cli_ini())
 
 
     async def progress_coroutine(self) -> None:
@@ -244,7 +235,6 @@ class JansCliApp(Application):
 
     def _load_plugins(self) -> None:
         # check if admin-ui plugin is available:
-
         plugin_dir = os.path.join(cur_dir, 'plugins')
         for plugin_file in sorted(Path(plugin_dir).glob('*/main.py')):
             if plugin_file.parent.joinpath('.enabled').exists():
@@ -254,6 +244,7 @@ class JansCliApp(Application):
                 spec.loader.exec_module(plugin)
                 plugin_object = plugin.Plugin(self)
                 self._plugins.append(plugin_object)
+
 
     def init_plugins(self) -> None:
         """Initilizse plugins
@@ -416,7 +407,9 @@ class JansCliApp(Application):
 
 
     def check_available_plugins(self) -> None:
-        """Disables plugins when cli object is ready"""
+        """Disables plugins when cli object is ready.
+        If a plugin is not deployed on config-api-server, it should be removed from TUI.
+        """
 
         if self.cli_object_ok:
             self.create_background_task(background_tasks.get_attributes_coroutine(self))
@@ -426,7 +419,7 @@ class JansCliApp(Application):
                 for plugin in plugins:
                     self.available_plugins.append(plugin['name'])
 
-                for pp in self._plugins:
+                for pp in self._plugins[:]:
                     if getattr(pp, 'server_side_plugin', False) and pp.pid not in self.available_plugins:
                         self.disable_plugin(pp.pid)
                     if hasattr(pp, 'on_cli_object_ready'):
@@ -629,13 +622,12 @@ class JansCliApp(Application):
         focus_previous(ev)
 
     def help(self,ev: KeyPressEvent) -> None:
-        
         plugin = self._plugins[self.nav_bar.cur_navbar_selection]
         if callable(getattr(plugin, "help", None)):
             plugin.help()
         else:
-            self.show_message(_("Help"),
-                self.jans_help,tobefocused=self.center_container)
+            help_msg = getattr(plugin, "jans_help", None) or self.jans_help
+            self.show_message(_("Help"), help_msg, tobefocused=self.center_container)
 
     def escape(self,ev: KeyPressEvent) -> None:
         try:
@@ -1028,6 +1020,9 @@ class JansCliApp(Application):
             message: AnyFormattedText,
             confirm_handler: Optional[Callable]=None
         ) -> Dialog:
+
+        if isinstance(message, str):
+            message = HTML(message)
         body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
         buttons = [Button(_("No")), Button(_("Yes"), handler=confirm_handler)]
         dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons, width=self.dialog_width-20)
@@ -1038,7 +1033,7 @@ application = JansCliApp()
 
 def run():
     with patch_stdout(application):
-        result = application.run(pre_run=lambda: application.create_background_task(application.check_jans_cli_ini()))
+        result = application.run()
     print("See you next time.")
 
 

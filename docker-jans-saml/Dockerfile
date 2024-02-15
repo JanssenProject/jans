@@ -23,8 +23,8 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.0.22
-ENV CN_BUILD_DATE='2024-01-13 08:47'
+ENV CN_VERSION=1.1.0-SNAPSHOT
+ENV CN_BUILD_DATE='2024-01-23 17:42'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
@@ -40,7 +40,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=e6d8566897fab9598897b6a7e02670ea1d794c78
+ENV JANS_SOURCE_VERSION=06b1a7a14e5f0b01d47eb5121d68bbf162905e66
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -188,7 +188,7 @@ EXPOSE $CN_SAML_HTTP_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.22" \
+    org.opencontainers.image.version="1.1.0" \
     org.opencontainers.image.title="Janssen SAML" \
     org.opencontainers.image.description=""
 

@@ -11,7 +11,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.IdType;
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.config.GluuConfiguration;
 import io.jans.model.JansAttribute;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DummyEntry;

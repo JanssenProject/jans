@@ -4,7 +4,10 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.persistence.model.configuration;
+package io.jans.config;
+
+import java.io.Serializable;
+import java.util.List;
 
 import io.jans.model.SmtpConfiguration;
 import io.jans.orm.annotation.AttributeName;
@@ -15,9 +18,6 @@ import io.jans.orm.model.base.InumEntry;
 import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.service.message.model.config.MessageConfiguration;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * Gluu Configuration

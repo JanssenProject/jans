@@ -176,7 +176,7 @@ X-Xss-Protection: 1; mode=block
     "scope": "openid",
     "client_secret": "9a62ce88-e35f-4516-9724-1437b07bccb2",
     "client_id_issued_at": 1705054359,
-    "backchannel_logout_uri": [],
+    "backchannel_logout_uri": "",
     "backchannel_logout_session_required": false,
     "client_name": "tx token test",
     "par_lifetime": 600,
