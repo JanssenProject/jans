@@ -1315,7 +1315,7 @@ class JCA_CLI:
             else:
                 cmd_data = self.get_json_from_file(data_fn)
 
-        if call_method in ('post', 'put', 'patch'):
+        if call_method in ('post', 'put', 'patch', 'delete'):
             self.log_cmd(operation_id, url_suffix, endpoint_args, cmd_data)
 
         if path['__path__'] == '/admin-ui/adminUIPermissions' and data and 'permission' in data:
