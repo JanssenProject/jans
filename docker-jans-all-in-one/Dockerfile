@@ -4,14 +4,14 @@
 
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
-ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:1.0.21-3
-ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:1.0.21-3
-ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:1.0.21-3
-ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:1.0.21-3
-ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:1.0.21-3
-ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:1.0.21-3
-ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:1.0.21-3
-ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:1.0.21-3
+ARG JANS_CONFIGURATOR_IMAGE=ghcr.io/janssenproject/jans/configurator:1.0.21-4
+ARG JANS_PERSISTENCE_LOADER_IMAGE=ghcr.io/janssenproject/jans/persistence-loader:1.0.21-4
+ARG JANS_AUTH_IMAGE=ghcr.io/janssenproject/jans/auth-server:1.0.21-4
+ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:1.0.21-4
+ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:1.0.21-4
+ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:1.0.21-4
+ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:1.0.21-4
+ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:1.0.21-4
 
 # original Janssen version
 ARG CN_VERSION=1.0.21
