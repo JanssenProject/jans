@@ -3,6 +3,7 @@ package io.jans.as.server.authorize.ws.rs;
 import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.DeviceSession;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.authorize.AuthorizationChallengeResponse;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
@@ -114,7 +115,25 @@ public class AuthorizationChallengeService {
         authzRequest.setScope(ServerUtil.urlDecode(authzRequest.getScope()));
 
         if (StringUtils.isNotBlank(authzRequest.getDeviceSession())) {
-            authzRequest.setDeviceSessionObject(deviceSessionService.getDeviceSession(authzRequest.getDeviceSession()));
+            final DeviceSession deviceSession = deviceSessionService.getDeviceSession(authzRequest.getDeviceSession());
+
+            authzRequest.setDeviceSessionObject(deviceSession);
+            if (deviceSession != null) {
+                final Map<String, String> deviceSessionAttributes = deviceSession.getAttributes().getAttributes();
+
+                final String clientId = deviceSessionAttributes.get("client_id");
+                if (StringUtils.isNotBlank(clientId) && StringUtils.isBlank(authzRequest.getClientId())) {
+                    authzRequest.setClientId(clientId);
+                }
+
+                String acrValues = deviceSession.getAttributes().getAcrValues();
+                if (StringUtils.isBlank(acrValues)) {
+                    acrValues = deviceSessionAttributes.get("acr_values");
+                }
+                if (StringUtils.isNotBlank(acrValues) && StringUtils.isBlank(authzRequest.getAcrValues())) {
+                    authzRequest.setAcrValues(acrValues);
+                }
+            }
         }
     }
 

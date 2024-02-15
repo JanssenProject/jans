@@ -425,7 +425,6 @@ class PersistenceSetup:
         scope_mapping = get_config_api_scope_mapping()
         for inum, meta in scope_mapping.items():
             attrs = {
-                "creatorAttrs": [json.dumps({})],
                 "description": [f"Config API {meta['level']} {meta['name']}"],
                 "displayName": [f"Config API {meta['name']}"],
                 "inum": [inum],

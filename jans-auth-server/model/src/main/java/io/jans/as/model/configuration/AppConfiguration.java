@@ -354,6 +354,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether idToken filters claims based on accessToken")
     private Boolean idTokenFilterClaimsBasedOnAccessToken;
 
+    @DocProperty(description = "Boolean value specifying whether to save access_token, id_token and refresh_token in cache (with cacheKey=sha256Hex(token_code))")
+    private Boolean saveTokensInCache;
+
+    @DocProperty(description = "Boolean value specifying whether to save access_token, id_token and refresh_token in cache and skip persistence in DB at the same time (with cacheKey=sha256Hex(token_code))")
+    private Boolean saveTokensInCacheAndDontSaveInPersistence;
+
     @DocProperty(description = "The lifetime of the short lived Access Token")
     private int accessTokenLifetime;
 
@@ -495,11 +501,11 @@ public class AppConfiguration implements Configuration {
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
-    @DocProperty(description = "The lifetime of session id in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends")
-    private Integer sessionIdLifetime = DEFAULT_SESSION_ID_LIFETIME;
+    @DocProperty(description = "The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends")
+    private Integer sessionIdCookieLifetime = DEFAULT_SESSION_ID_LIFETIME;
 
-    @DocProperty(description = "Dedicated property to control lifetime of the server side OP session object in seconds. Overrides sessionIdLifetime. By default value is 0, so object lifetime equals sessionIdLifetime (which sets both cookie and object expiration). It can be useful if goal is to keep different values for client cookie and server object")
-    private Integer serverSessionIdLifetime = sessionIdLifetime; // by default same as sessionIdLifetime
+    @DocProperty(description = "The lifetime of session_id server object in seconds. If not set falls back to session_id cookie expiration set by 'sessionIdCookieLifetime' configuration property")
+    private Integer sessionIdLifetime = sessionIdCookieLifetime;
 
     @DocProperty(description = "Authorization Scope for active session")
     private String activeSessionAuthorizationScope;
@@ -2294,6 +2300,22 @@ public class AppConfiguration implements Configuration {
         this.accessTokenLifetime = accessTokenLifetime;
     }
 
+    public Boolean getSaveTokensInCache() {
+        return saveTokensInCache;
+    }
+
+    public void setSaveTokensInCache(Boolean saveTokensInCache) {
+        this.saveTokensInCache = saveTokensInCache;
+    }
+
+    public Boolean getSaveTokensInCacheAndDontSaveInPersistence() {
+        return saveTokensInCacheAndDontSaveInPersistence;
+    }
+
+    public void setSaveTokensInCacheAndDontSaveInPersistence(Boolean saveTokensInCacheAndDontSaveInPersistence) {
+        this.saveTokensInCacheAndDontSaveInPersistence = saveTokensInCacheAndDontSaveInPersistence;
+    }
+
     public int getUmaRptLifetime() {
         return umaRptLifetime;
     }
@@ -2848,14 +2870,37 @@ public class AppConfiguration implements Configuration {
     }
 
     /**
-     * @return session_id lifetime. If null or value is zero or less then session_id lifetime is not set and will expire when browser session ends.
+     * @return session_id lifetime. If value is zero or less then session_id lifetime is set to Integer.MAX_VALUE. If null then falls back to 86400 seconds.
      */
     public Integer getSessionIdLifetime() {
         return sessionIdLifetime;
     }
 
+    /**
+     * Sets session id lifetime
+     *
+     * @param sessionIdLifetime session id lifetime
+     */
     public void setSessionIdLifetime(Integer sessionIdLifetime) {
         this.sessionIdLifetime = sessionIdLifetime;
+    }
+
+    /**
+     * Gets session id cookie lifetime
+     *
+     * @return session id cookie lifetime
+     */
+    public Integer getSessionIdCookieLifetime() {
+        return sessionIdCookieLifetime;
+    }
+
+    /**
+     * Sets session id cookie lifetime
+     *
+     * @param sessionIdCookieLifetime session id cookie lifetime
+     */
+    public void setSessionIdCookieLifetime(Integer sessionIdCookieLifetime) {
+        this.sessionIdCookieLifetime = sessionIdCookieLifetime;
     }
 
     public String getActiveSessionAuthorizationScope() {
@@ -2864,14 +2909,6 @@ public class AppConfiguration implements Configuration {
 
     public void setActiveSessionAuthorizationScope(String activeSessionAuthorizationScope) {
         this.activeSessionAuthorizationScope = activeSessionAuthorizationScope;
-    }
-
-    public Integer getServerSessionIdLifetime() {
-        return serverSessionIdLifetime;
-    }
-
-    public void setServerSessionIdLifetime(Integer serverSessionIdLifetime) {
-        this.serverSessionIdLifetime = serverSessionIdLifetime;
     }
 
     public Boolean getLogClientIdOnClientAuthentication() {

@@ -4,7 +4,7 @@ from functools import partial
 from typing import Any
 
 import prompt_toolkit
-from asyncio import get_event_loop
+from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
     VSplit, Window, HorizontalAlign, Window
 from prompt_toolkit.layout.dimension import D

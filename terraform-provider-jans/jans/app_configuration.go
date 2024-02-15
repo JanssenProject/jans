@@ -246,7 +246,7 @@ type AppConfiguration struct {
 	DisablePromptLogin                                        bool                                  `schema:"disable_prompt_login" json:"disablePromptLogin"`
 	DisablePromptConsent                                      bool                                  `schema:"disable_prompt_consent" json:"disablePromptConsent"`
 	SessionIdLifetime                                         int                                   `schema:"session_id_lifetime" json:"sessionIdLifetime"`
-	ServerSessionIdLifetime                                   int                                   `schema:"server_session_id_lifetime" json:"serverSessionIdLifetime"`
+	SessionIdCookieLifetime                                   int                                   `schema:"session_id_cookie_lifetime" json:"sessionIdCookieLifetime"`
 	ActiveSessionAuthorizationScope                           string                                `schema:"active_session_authorization_scope" json:"activeSessionAuthorizationScope"`
 	ConfigurationUpdateInterval                               int                                   `schema:"configuration_update_interval" json:"configurationUpdateInterval"`
 	LogNotFoundEntityAsError                                  bool                                  `schema:"log_not_found_entity_as_error" json:"logNotFoundEntityAsError"`

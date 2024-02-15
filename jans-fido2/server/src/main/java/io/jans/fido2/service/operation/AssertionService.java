@@ -228,6 +228,66 @@ public class AssertionService {
 		return optionsResponseNode;
 	}
 
+	public ObjectNode generateOptions(JsonNode params) {
+        log.debug("Generate assertion options: {}", params);
+
+		// Create result object
+		ObjectNode optionsResponseNode = dataMapperService.createObjectNode();
+
+		// Put userVerification
+		UserVerification userVerification = commonVerifiers.prepareUserVerification(params);
+		optionsResponseNode.put("userVerification", userVerification.name());
+
+		// Generate and put challenge
+		String challenge = challengeGenerator.getAssertionChallenge();
+		optionsResponseNode.put("challenge", challenge);
+		log.debug("Put challenge {}", challenge);
+
+		// Put RP
+		String documentDomain = commonVerifiers.verifyRpDomain(params);
+		log.debug("Put rpId {}", documentDomain);
+		optionsResponseNode.put("rpId", documentDomain);
+
+		// Put timeout
+		int timeout = commonVerifiers.verifyTimeout(params);
+		log.debug("Put timeout {}", timeout);
+		optionsResponseNode.put("timeout", timeout);
+
+		// Copy extensions
+		if (params.hasNonNull("extensions")) {
+			JsonNode extensions = params.get("extensions");
+
+			optionsResponseNode.set("extensions", extensions);
+			log.debug("Put extensions {}", extensions);
+		}
+
+		optionsResponseNode.put("status", "ok");
+
+		Fido2AuthenticationData entity = new Fido2AuthenticationData();
+		entity.setUsername(null);
+		entity.setChallenge(challenge);
+		entity.setDomain(documentDomain);
+		entity.setUserVerificationOption(userVerification);
+		entity.setStatus(Fido2AuthenticationStatus.pending);
+		entity.setApplicationId(documentDomain);
+
+		// Store original request
+		entity.setAssertionRequest(params.toString());
+
+		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity, true);
+		if (params.hasNonNull("session_id")) {
+			authenticationEntity.setSessionStateId(params.get("session_id").asText());
+		}
+
+		// Set expiration
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+		authenticationEntity.setExpiration(unfinishedRequestExpiration);
+
+		authenticationPersistenceService.save(authenticationEntity);
+
+		return optionsResponseNode;
+	}
+
 	public ObjectNode verify(JsonNode params) {
 		log.debug("authenticateResponse {}", params);
 
@@ -329,6 +389,7 @@ public class AssertionService {
 
 		finishResponseNode.put("status", "ok");
 		finishResponseNode.put("errorMessage", "");
+		finishResponseNode.put("username", registrationData.getUsername());
 
 		externalFido2InterceptionContext.addToContext(registrationEntry, authenticationEntity);
 		externalFido2InterceptionService.verifyAssertionFinish(finishResponseNode, externalFido2InterceptionContext);

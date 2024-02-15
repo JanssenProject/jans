@@ -388,8 +388,8 @@ public class RegisterService {
         }
         client.setFrontChannelLogoutSessionRequired(requestObject.getFrontChannelLogoutSessionRequired());
 
-        if (requestObject.getBackchannelLogoutUris() != null && !requestObject.getBackchannelLogoutUris().isEmpty()) {
-            client.getAttributes().setBackchannelLogoutUri(requestObject.getBackchannelLogoutUris());
+        if (requestObject.getBackchannelLogoutUri() != null && !requestObject.getBackchannelLogoutUri().isEmpty()) {
+            client.getAttributes().setBackchannelLogoutUri(Lists.newArrayList(requestObject.getBackchannelLogoutUri()));
         }
         client.getAttributes().setBackchannelLogoutSessionRequired(requestObject.getBackchannelLogoutSessionRequired());
 

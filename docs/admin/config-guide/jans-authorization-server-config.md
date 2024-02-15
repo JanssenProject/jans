@@ -425,7 +425,7 @@ It returns all the information of the Jans Authorization server.
   "disablePromptLogin": false,
   "disablePromptConsent": false,
   "sessionIdLifetime": 86400,
-  "serverSessionIdLifetime": 86400,
+  "sessionIdCookieLifetime": 86400,
   "configurationUpdateInterval": 3600,
   "enableClientGrantTypeUpdate": true,
   "dynamicGrantTypeDefault": [
@@ -435,7 +435,8 @@ It returns all the information of the Jans Authorization server.
     "urn:ietf:params:oauth:grant-type:device_code",
     "client_credentials",
     "refresh_token",
-    "authorization_code"
+    "authorization_code",
+    "tx_token"
   ],
   "metricReporterInterval": 300,
   "metricReporterKeepDataDays": 15,
