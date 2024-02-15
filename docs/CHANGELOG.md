@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.0.22](https://github.com/JanssenProject/jans/compare/docs-v1.0.21...docs-v1.0.22) (2024-01-22)
+
+
+### Features
+
+* **docs:** ssa lifetime docs updated ([#7172](https://github.com/JanssenProject/jans/issues/7172)) ([be59efe](https://github.com/JanssenProject/jans/commit/be59efe027235157be3ccaec78397163e40bf094))
+* **jans-auth-server:** support for OAuth 2.0 Rich Authorization Requests ([#7145](https://github.com/JanssenProject/jans/issues/7145)) ([c7d99c8](https://github.com/JanssenProject/jans/commit/c7d99c81efbaffd31b1b7d2963cd4f77768fd40e))
+* use Bearer token if OPA started with it ([#7353](https://github.com/JanssenProject/jans/issues/7353)) ([4c47afd](https://github.com/JanssenProject/jans/commit/4c47afde485406c283abea7c82b1854672bd1124))
+
+
+### Bug Fixes
+
+* **docs:** add section for schema setup ([#7231](https://github.com/JanssenProject/jans/issues/7231)) ([7d36b24](https://github.com/JanssenProject/jans/commit/7d36b24aba0d3e877503ac76d90f54c0c2cfbc4a))
+* **docs:** minor updates to the README ([#7366](https://github.com/JanssenProject/jans/issues/7366)) ([4859057](https://github.com/JanssenProject/jans/commit/4859057bd0bf505d6d96a027962f52de42c7e221))
+* **docs:** remove mariadb from docs ([#7232](https://github.com/JanssenProject/jans/issues/7232)) ([6bf4860](https://github.com/JanssenProject/jans/commit/6bf48601ea5ce4743bad0202d0a73aa70db9b379))
+* **docs:** remove oxtrust references ([#7390](https://github.com/JanssenProject/jans/issues/7390)) ([018423f](https://github.com/JanssenProject/jans/commit/018423fcad12d2e8c1926baf6bbd12cda56321e2))
+* **jans-auth-server:** replace Gluu branding with jans branding ([#7225](https://github.com/JanssenProject/jans/issues/7225)) ([e11f454](https://github.com/JanssenProject/jans/commit/e11f454979eec898c3b62e56f6295e26e6e7351e))
+* **kc-saml-plugin:** fixed IDP creation issue, enum values and removed kc lib dependency ([#7238](https://github.com/JanssenProject/jans/issues/7238)) ([d3401e3](https://github.com/JanssenProject/jans/commit/d3401e3b695f21a61c5ddc5675d242a30839ef06))
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+* re-engineer how calls work in the engine ([#7152](https://github.com/JanssenProject/jans/issues/7152)) ([a940e7d](https://github.com/JanssenProject/jans/commit/a940e7dbc7da77c9f896dbe7bd73d7f9056231af))
+
 ## [1.0.21](https://github.com/JanssenProject/jans/compare/docs-v1.0.20...docs-v1.0.21) (2023-12-14)
 
 

@@ -23,8 +23,8 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.0.22-SNAPSHOT
-ENV CN_BUILD_DATE='2024-01-03 08:47'
+ENV CN_VERSION=1.1.0-SNAPSHOT
+ENV CN_BUILD_DATE='2024-01-23 17:42'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
@@ -40,7 +40,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=d3401e3b695f21a61c5ddc5675d242a30839ef06
+ENV JANS_SOURCE_VERSION=06b1a7a14e5f0b01d47eb5121d68bbf162905e66
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -161,22 +161,34 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
-    CN_SAML_PORT=8083 \
-    CN_SAML_HOST=0.0.0.0 \
+    CN_SAML_HTTP_PORT=8083 \
+    CN_SAML_HTTP_HOST=0.0.0.0 \
     CN_SAML_JAVA_OPTIONS="" \
-    KC_HEALTH_ENABLED=true
-    # KC_METRICS_ENABLED=true
+    CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
+    CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
+    KC_HEALTH_ENABLED=true \
+    KC_METRICS_ENABLED=true \
+    KC_LOG_LEVEL=INFO \
+    KC_PROXY=edge \
+    KC_DB=mysql \
+    KC_DB_USERNAME=keycloak \
+    KC_DB_SCHEMA=keycloak \
+    KC_DB_URL_HOST=localhost \
+    KC_DB_URL_PORT=3306 \
+    KC_DB_URL_DATABASE=keycloak \
+    KC_DB_URL_PROPERTIES=?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4 \
+    QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=false
 
 # ==========
 # misc stuff
 # ==========
 
-EXPOSE $CN_SAML_PORT
+EXPOSE $CN_SAML_HTTP_PORT
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.22" \
+    org.opencontainers.image.version="1.1.0" \
     org.opencontainers.image.title="Janssen SAML" \
     org.opencontainers.image.description=""
 

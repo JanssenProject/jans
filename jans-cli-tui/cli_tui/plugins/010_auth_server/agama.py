@@ -17,7 +17,7 @@ from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.widgets import Button, Label, TextArea, Box
 
 from utils.multi_lang import _
-from utils.utils import DialogUtils, fromisoformat
+from utils.utils import DialogUtils, fromisoformat, get_help_with
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
@@ -35,18 +35,12 @@ class Agama(DialogUtils):
         self.app = app
         self.data = []
         self.first_enter = False
-        self.jans_help = ("<d>              {}\n"
-                "<c>              {}\n"
-                "<Esc>            {}\n"
-                "<Alt + letter>   {}\n"
-                "<Delete>         {}\n"
-                "For More Visit  {}").format(
-                    _("display agama project config"),
-                    _("Manage agama project Configuration"),
-                    _("Close the current dialog"),
-                    _("Navigate to an other tab"),
-                    _("Delete current agama project if possible"),
-                    "https://docs.jans.io/v1.0.6/admin/config-guide/tui/")
+        self.jans_help = get_help_with(
+                f'<d>              {_("Display agama project config")}\n'
+                f'<c>              {_("Manage agama project Configuration")}\n'
+                f'<Delete>         {_("Delete current agama project")}',
+                without=['d', 'delete']
+                )
 
         self.working_container = JansVerticalNav(
                 myparent=app,

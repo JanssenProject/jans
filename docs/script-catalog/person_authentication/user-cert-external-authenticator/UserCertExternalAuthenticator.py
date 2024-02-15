@@ -13,7 +13,7 @@ from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService
 from io.jans.util import StringHelper
 from io.jans.as.server.util import ServerUtil
-from io.jans.as.common.service.common import EncryptionService
+from io.jans.service import EncryptionService
 from java.util import Arrays
 from io.jans.as.common.cert.fingerprint import FingerprintHelper
 from io.jans.as.common.cert.validation import GenericCertificateVerifier

@@ -58,9 +58,7 @@ spec:
               {{- with .Values.customScripts }}
               {{- toYaml . | replace "- " "" | nindent 14}}
               {{- end }}
-              {{- if not .Values.isFqdnRegistered }}
-              /usr/bin/python3 /scripts/updatelbip.py &
-              {{- end}}
+              python3 /scripts/tls_generator.py &
               /app/bin/entrypoint.sh
         {{- end}}
         ports:
@@ -128,6 +126,11 @@ spec:
           - name: sql-pass
             mountPath: {{ .Values.cnSqlPasswordFile }}
             subPath: sql_password
+        {{- end }}
+        {{- if .Values.saml.enabled }}
+          - name: kc-db-pass
+            mountPath: {{ .Values.kcDbPasswordFile }}
+            subPath: kc_db_password
         {{- end }}
         livenessProbe:
 {{- toYaml .Values.livenessProbe | nindent 10 }}
@@ -206,3 +209,8 @@ spec:
             secretName: {{ .Release.Name }}-sql-pass
       {{- end }}
 
+      {{- if .Values.saml.enabled }}
+        - name: kc-db-pass
+          secret:
+            secretName: {{ .Release.Name }}-kc-db-pass
+      {{- end }}

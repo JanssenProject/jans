@@ -6,18 +6,7 @@
 
 package io.jans.as.server.service;
 
-import static org.apache.commons.lang.BooleanUtils.isTrue;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import com.google.common.collect.Lists;
-
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.LockMessageConfig;
@@ -35,6 +24,15 @@ import io.jans.util.StringHelper;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -93,19 +91,42 @@ public class GrantService {
         }
     }
 
+    public boolean shouldPersist() {
+        if (isTrue(appConfiguration.getSaveTokensInCacheAndDontSaveInPersistence())) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean shouldSaveInCache() {
+        return isTrue(appConfiguration.getSaveTokensInCache()) || isTrue(appConfiguration.getSaveTokensInCacheAndDontSaveInPersistence());
+    }
+
     public void persist(TokenEntity token) {
-        persistenceEntryManager.persist(token);
-        
+        if (shouldPersist()) {
+            persistenceEntryManager.persist(token);
+        }
+
+        if (shouldSaveInCache()) {
+            saveInCache(token);
+        }
+
         if (TokenType.ID_TOKEN.getValue().equals(token.getTokenType())) {
         	publishIdTokenLockMessage(token, "add");
         }
+    }
+
+    private void saveInCache(TokenEntity token) {
+        long lifeTimeAsMillis = token.getExpirationDate().getTime() - System.currentTimeMillis();
+        int lifetimeInSeconds = (int) (lifeTimeAsMillis / 1000);
+        cacheService.put(lifetimeInSeconds, TokenHashUtil.hash(token.getTokenCode()), token.getTokenCode());
     }
 
     public void remove(TokenEntity token) {
         persistenceEntryManager.remove(token);
         log.trace("Removed token from LDAP, code: {}", token.getTokenCode());
 
-        if (TokenType.ID_TOKEN.equals(token.getTokenType())) {
+        if (TokenType.ID_TOKEN == token.getTokenTypeEnum()) {
         	publishIdTokenLockMessage(token, "del");
         }
     }
@@ -128,6 +149,9 @@ public class GrantService {
 
             if (StringUtils.isNotBlank(token.getAuthorizationCode())) {
                 cacheService.remove(CacheGrant.cacheKey(token.getAuthorizationCode(), token.getGrantId()));
+            }
+            if (shouldSaveInCache()) {
+                cacheService.remove(token.getTokenCode());
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

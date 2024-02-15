@@ -7,7 +7,7 @@ tags:
 # Jans Casa Quick Start Guide
 
 !!! Note
-    This document is intended for administrators only
+    This document is intended for administrators only. Learn [here](../index.md#user-roles) how to "grant" administrative privileges for Casa.
 
 Use this guide to install and configure your Casa deployment.
 
@@ -32,7 +32,6 @@ First, the custom authentication scripts corresponding to the authentication met
 
 Scripts can be more easily looked up by display name. The below table shows the display names of the scripts previously listed:
 
-|-|-|
 |Script|Display name|
 |-|-|
 |OTP (SMS)|twilio_sms|

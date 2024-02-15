@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.22-SNAPSHOT</version>
+		<version>1.1.0-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -367,16 +367,6 @@
             <groupId>io.jans</groupId>
             <artifactId>jans-core-script</artifactId>
         </dependency>
-
-		<!-- Eleven -->
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-eleven-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-eleven-client</artifactId>
-		</dependency>
 
 		<!-- jans-notify -->
 		<dependency>

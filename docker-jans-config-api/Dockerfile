@@ -40,8 +40,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Config API
 # ==========
 
-ENV CN_VERSION=1.0.22-SNAPSHOT
-ENV CN_BUILD_DATE='2024-01-03 16:26'
+ENV CN_VERSION=1.1.0
+ENV CN_BUILD_DATE='2024-02-02 12:43'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -77,7 +77,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=d3401e3b695f21a61c5ddc5675d242a30839ef06
+ENV JANS_SOURCE_VERSION=d1be3487234a2f369f07a0105d15e451eae7048d
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -94,7 +94,8 @@ RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
     /app/schema \
     /app/templates/jans-config-api \
-    /usr/share/java
+    /usr/share/java \
+    /opt/jans/bin
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
@@ -107,6 +108,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/dynamic-conf.json /app/templates/jans-config-api/ \
+    && cp ${JANS_SETUP_DIR}/setup_app/utils/printVersion.py /opt/jans/bin/printVersion.py \
+    && ln -s /opt/jans/bin/printVersion.py /opt/jans/bin/show_version.py \
     && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/templates/jans-config-api/
 
 # ======
@@ -216,7 +219,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_CONFIG_API_CREATE_SCOPES=true \
     CN_CONFIG_API_JETTY_PORT=8074 \
-    CN_CONFIG_API_JETTY_HOST=0.0.0.0
+    CN_CONFIG_API_JETTY_HOST=0.0.0.0 \
+    CN_JETTY_ARGS=""
 
 # ==========
 # misc stuff
@@ -227,7 +231,7 @@ EXPOSE $CN_CONFIG_API_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.22" \
+    org.opencontainers.image.version="1.1.0" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 
@@ -239,7 +243,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase \
     ${JETTY_HOME}/temp \
     /usr/share/java \
-    /var/log
+    /var/log/adminui
 
 RUN touch /etc/hosts.back
 COPY templates /app/templates/
@@ -252,7 +256,7 @@ RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans
 
 RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
 
-RUN sed -i 's/\${sys:log.base}\/logs/\/var\/log/g' /app/templates/jans-config-api/log4j2-adminui.xml
+RUN sed -i 's/\${sys:log.base}\/logs/\/var\/log\/adminui/g' /app/templates/jans-config-api/log4j2-adminui.xml
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
 
@@ -274,7 +278,7 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/_plugins \
     && chown 1000:0 ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.xml \
     && chown -R 1000:0 ${JETTY_HOME}/temp \
-    && chown -R 1000:0 /var/log
+    && chown -R 1000:0 /var/log/adminui
 
 USER 1000
 

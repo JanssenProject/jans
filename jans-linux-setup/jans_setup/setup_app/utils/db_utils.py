@@ -8,6 +8,8 @@ import copy
 import hashlib
 import ldap3
 import pymysql
+import time
+
 from ldap3.utils import dn as dnutils
 from pathlib import PurePath
 
@@ -139,15 +141,6 @@ class DBUtils:
 
 
     def set_mysql_version(self):
-        try:
-            base.logIt("Determining MySQL version")
-            qresult = self.exec_rdbm_query('select version()', getresult=1)
-            self.mysql_version = self.get_version(qresult[0])
-            base.logIt("MySQL version was found as {}".format(self.mysql_version))
-        except Exception as e:
-            base.logIt("Cant determine MySQL version due to {}. Set to unknown".format(e))
-            self.mysql_version = (0, 0, 0)
-
         # are we on MariDB?
         version_query = self.engine.execute(sqlalchemy.text('SELECT VERSION()'))
         version_query_result = version_query.fetchone()

@@ -240,6 +240,7 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
             addFormParameterIfNotBlank(ACTOR_TOKEN, getRequest().getActorToken());
             addFormParameterIfNotBlank(ACTOR_TOKEN_TYPE, getRequest().getActorTokenType());
             addFormParameterIfNotBlank(REQUESTED_TOKEN_TYPE, getRequest().getRequestedTokenType());
+            addFormParameterIfNotBlank(RCTX, getRequest().getRctx());
 
             for (String key : getRequest().getCustomParameters().keySet()) {
                 addFormParameterIfNotBlank(key, getRequest().getCustomParameters().get(key));

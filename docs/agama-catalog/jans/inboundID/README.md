@@ -33,13 +33,11 @@ For every provider to support there has to be an Agama flow that must:
 To facilitate administrators' work, the following flows are already implemented:
 
 - Apple
-- Facebook
-- Github
-- Google
+- Facebook, Github, Google (through the "Generic provider" flow)
 
 ### Main flow
 
-The actual process of inbound identity occurs here. This flow is already [implemented](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/project/io.jans.inbound.ExternalSiteLogin) and ready to use. The following is a summary of the steps involved:
+The actual process of inbound identity occurs here. This flow is already [implemented](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/project/code/io.jans.inbound.ExternalSiteLogin.flow) and ready to use. The following is a summary of the steps involved:
 
 1. A provider selection page is displayed. The list includes all (*enabled*) providers defined in the configuration of this flow. Additionally an option to use an existing local account is displayed (i.e. no inbound identity)
 
@@ -74,7 +72,16 @@ Let's add the required libraries to the authentication server:
 
 [gama files](https://docs.jans.io/head/agama/gama-format/) are deployable units in the Agama engine. To create one, simply zip the contents of [project](./project) subdirectory. The resulting archive must have three folders at top-level: `web`, `lib`, and `code`. The file extension does not matter in the end.
 
-To quickly collect the contents of _project_, you can download the whole Jans repository or make a shallow clone of main branch using `git`. Using `git` is probably a faster way.
+To quickly collect the contents of _project_, you can do the following (requires `git` 2.25 or higher):
+
+```
+git clone --depth 1 --branch main --no-checkout https://github.com/JanssenProject/jans.git
+cd jans
+git sparse-checkout init --cone
+git sparse-checkout set docs/agama-catalog/jans/inboundID/project
+git checkout main
+cd docs/agama-catalog/jans/inboundID/project
+```
 
 ### Deploy the archive
 
@@ -95,11 +102,57 @@ For every provider flow (see `code/provider` directory of the `project` folder) 
 
 For Apple, some guidelines are included at the end of this document.
 
-### Supply providers flows configurations
+### Supply configurations
 
 Still in TUI, press the `c` key and then choose to export the sample configurations locally. Inspect the generated file. It provides "dummy" placeholders to supply the actual configurations.
 
-Providers flows adhere to the following structure:
+The configuration is held in a JSON object whose keys are identifiers of identity providers. The associated value for a key is a JSON object itself and follows the structure represented by [this](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java) Java class.
+
+This is an example of a configuration for a couple of identity providers:
+
+```
+{
+
+"github": {
+  "flowQname": "io.jans.inbound.GenericProvider",
+  "displayName": "Github",
+  "mappingClassField": "io.jans.inbound.Mappings.GITHUB",
+  "oauthParams": { ... }
+},
+
+"google": {
+  "flowQname": "io.jans.inbound.GenericProvider",
+  "displayName": "Google",
+  "mappingClassField": "io.jans.inbound.Mappings.GOOGLE"
+  "enabled": false,
+  "skipProfileUpdate": true,
+  "oauthParams": { ... }
+}
+
+}
+```
+
+The table below explains the meaning of properties:
+
+|Name|Description|Mandatory|
+|-|-|-|
+|`flowQname`|The qualified name of the Agama flow associated to this provider (must exist in `code` directory)|Yes|
+|`displayName`|Short name of the provider (will be shown in the selector page)|Yes|
+|`oauthParams`|The actual OAuth configuration for the given provider. See below|Yes|
+|`mappingClassField`|The qualified name of the [attribute mapping](#attribute-mappings) for this provider|Yes|
+|`logoImg`|Relative path to the logo image (will be shown in the selector page)|No|
+|`enabled`|A boolean value indicating whether this provider can be shown (and triggered) from the main flow or not. Default value is `true`|No|
+|`skipProfileUpdate`|Determines if profile data should not be updated for a user if an entry already exists locally for him. Default value is `false`|No|
+|`cumulativeUpdate`|When `true`, existing value(s) of an attribute are preserved when the incoming profile data already contains value(s) for such attribute, otherwise its values are replaced by the incoming ones entirely. Default value is `false`|No|
+|`requestForEmail`|Whether to prompt the user to enter his e-mail if the data supplied by the identity provider does not contain one. Default value is `false`|No|
+|`emailLinkingSafe`|Determines if an existing account with the same e-mail of the user about to be provisioned can be treated as the same person|No|
+
+**Notes:**
+
+- `logoImg` path is relative to the base path of the main flow, i.e. `inboundID`
+- Set `emailLinkingSafe` to true only if you trust the provider, i.e. the incoming e-mail data is securely verified. For security, never set it to `true` when `requestForEmail` is also `true`
+
+Property `oauthParams` adheres to the following structure:
 
 |Name|Description|
 |-|-|
@@ -114,52 +167,7 @@ Providers flows adhere to the following structure:
 |`custParamsAuthReq`|A JSON object (keys and values expected to be strings) with extra parameters to pass to the authorization endpoint if desired|
 |`custParamsTokenReq`|A JSON object (keys and values expected to be strings) with extra parameters to pass to the token endpoint if desired|
 
-Edit the file with the properties you consider relevant for every provider. Generally, the first six are the only needed.
-
-### Supply the main flow configurations
-
-The main flow (`io.jans.inbound.ExternalSiteLogin`) has to be parameterized as well. The configuration is held in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by [this](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java) Java class.
-
-This is an example of a configuration for a couple of identity providers:
-
-```
-{
-
-"github": {
-  "flowQname": "io.jans.inbound.Github",
-  "displayName": "Github",
-  "mappingClassField": "io.jans.inbound.Mappings.GITHUB",
-},
-
-"google": {
-  "flowQname": "io.jans.inbound.Google",
-  "displayName": "Google",
-  "mappingClassField": "io.jans.inbound.Mappings.GOOGLE",
-  "enabled": false,
-  "skipProfileUpdate": true
-}
-
-}
-```
-
-The table below explains the meaning of properties:
-
-|Name|Description|Mandatory|
-|-|-|-|
-|`flowQname`|The qualified name of the Agama flow associated to this provider|Yes|
-|`displayName`|Short name of the provider (will be shown in the selector page)|Yes|
-|`mappingClassField`|The qualified name of the [attribute mapping](#attribute-mappings) for this provider|Yes|
-|`logoImg`|Relative path to the logo image (will be shown in the selector page)|No|
-|`enabled`|A boolean value indicating whether this provider can be shown (and triggered) from the main flow or not. Default value is `true`|No|
-|`skipProfileUpdate`|Determines if profile data should not be updated for a user if an entry already exists locally for him. Default value is `false`|No|
-|`cumulativeUpdate`|When `true`, existing value(s) of an attribute are preserved when the incoming profile data already contains value(s) for such attribute, otherwise its values are replaced by the incoming ones entirely. Default value is `false`|No|
-|`requestForEmail`|Whether to prompt the user to enter his e-mail if the data supplied by the identity provider does not contain one. Default value is `false`|No|
-|`emailLinkingSafe`|Determines if an existing account with the same e-mail of the user about to be provisioned can be treated as the same person|No|
-
-**Notes:**
-
-- `logoImg` path is relative to the base path of the main flow, i.e. `inboundID`
-- Set `emailLinkingSafe` to true only if you trust the provider, i.e. the incoming e-mail data is securely verified. For security, never set it to `true` when `requestForEmail` is also `true`
+Edit the properties you consider relevant for every provider. Generally, from the above table, the first six are the only needed.
 
 #### Attribute mappings
 
@@ -192,26 +200,27 @@ Launch the main flow (learn about this topic [here](https://docs.jans.io/head/ad
 
 ## How to add another provider?
 
-<!-- **Note**: If you want to integrate Apple, guidelines are included at the end of this document. -->
+**Note**: If you want to integrate Apple Sign In, skip this section: guidelines are included at the end of this document.
 
-In practice most identity providers adhere to the OAuth2 `code` grant and require configurations similar to the flows already bundled here like Facebook or Google. In this case, follow these steps:
+In practice most identity providers adhere to the OAuth2 `code` grant and require configurations similar to the sample provided. Follow these steps: 
 
 1. In your local machine, create a new project with the required layout: directories `web`, `code` and `lib`
-1. Add a `.flow` file in `code`. Probably you can reuse the Facebook flow as is; rename it as needed
-1. If an existing attribute mapping cannot be reused, [implement](#writing-your-own-mapping) one for this provider and put the class in `lib` directory 
 1. Place the logo inside `web`
+1. If an [existing](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java) attribute mapping cannot be reused, [implement](#writing-your-own-mapping) one for this provider and put the source (Java/Groovy) in `lib` directory 
 1. Create the archive and deploy it in the server using TUI
-1. Set the configuration properties for this new project
-1. In the bigger project (the one containing the main flow), include the new provider, for instance:
+1. Include the configuration for the new provider in the main's flow (`io.jans.inbound.ExternalSiteLogin`) config, for instance:
 
 ```
 "new-provider-ID": {
-  "flowQname": "flow filename omitting the .flow extension)",
+  "flowQname": "io.jans.inbound.GenericProvider",
   "displayName": "...",
   "mappingClassField": "Qualified name of the attribute mapping",
   "logoImg": "path to the logo image relative to the base path of the main flow (you can use things like ../)"
+  "oauthParams": { ... }
 }
 ```
+
+Do your tests. If you consider the "generic" provider flow does not cope, add a new flow to the recently created project (in folder `code`) to better suit the provider requirements. Redeploy and test again.
 
 ## Writing your own mapping
 
@@ -222,12 +231,16 @@ Ensure you went through [this](#attribute-mappings) already. Some important cons
 
 While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can place the source (java) file in the _lib_ directory of your project and leverage hot reloading. Ensure to create the usual directory hierarchy in _lib_ corresponding to your class package. 
 
-A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension and edit the body of the lambda expression. Also you have to update the main flow as follows:
+A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension and edit the body of the lambda expression. 
+
+<!--
+Also you have to update the main flow as follows:
 
 - Add an instruction like `Call io.jans.inbound.CustomMappings#class` at the beginning of the provider flow body (`.flow` file) for the class to be effectively reloaded when the file is modified
 - Set `mappingClassField` to `io.jans.inbound.CustomMappings.SAMPLE_MAPPING` for the provider of interest. You may like the idea of using a different name for the field - update the java file accordingly
 
 From there onwards, you only need to re-upload the file as many times as needed.
+-->
 
 If you use `DEBUG` level in your server, you will see in the log the result of the mapping every time it is applied. Check for a message like "Mapped profile is".
 
@@ -246,31 +259,26 @@ You will be prompted to provide a domain name and a return URL. Provide `<your-j
 The configuration for this provider would look like: 
 
 ```
-{
-  "authzEndpoint": "https://appleid.apple.com/auth/authorize",
-  "tokenEndpoint": "https://appleid.apple.com/auth/token",
-  "clientId": "<SERVICE ID>",
-  "key": "<ONE-LINER CONTENTS OF KEY FILE>",
-  "keyId": "<KEY ID>",
-  "teamId": "<TEAM ID>",
-  "scopes": ["email", "name"],
-  "custParamsAuthReq": { "response_mode": "form_post" },
-  "clientCredsInRequestBody": true
-}
-```
-
-For the `key`, remove the lines regarding begin/end of the private key entirely. Also remove any line breaks: a one-liner is required. 
-
-For the main flow configuration, this should suffice:
-
-```
 "apple": {
   "flowQname": "io.jans.inbound.Apple",
   "displayName": "Apple",
   "mappingClassField": "io.jans.inbound.Mappings.APPLE",
-  "logoImg": "apple.png"
+  "logoImg": "apple.png",
+  "oauthParams": {
+      "authzEndpoint": "https://appleid.apple.com/auth/authorize",
+      "tokenEndpoint": "https://appleid.apple.com/auth/token",
+      "clientId": "<SERVICE ID>",
+      "key": "<ONE-LINER CONTENTS OF KEY FILE>",
+      "keyId": "<KEY ID>",
+      "teamId": "<TEAM ID>",
+      "scopes": ["email", "name"],
+      "custParamsAuthReq": { "response_mode": "form_post" },
+      "clientCredsInRequestBody": true
+  }
 }
 ```
+
+For `key`, remove the lines regarding begin/end of the private key entirely. Also remove any line breaks: a one-liner is required.
 
 ### Expected journey
 

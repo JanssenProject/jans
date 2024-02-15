@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.util.exception.InvalidAttributeException;
-import io.jans.util.exception.ConfigurationException;
 import io.jans.configapi.plugin.saml.util.Constants;
 
 import io.jans.configapi.core.util.Jackson;
@@ -24,6 +23,7 @@ import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -48,9 +48,8 @@ public class IdpClientFactory {
     public static String getAccessToken(final String tokenUrl, final String clientId, final String clientSecret,
             final String grantType, final String scope, final String username, final String password,
             final String serverUrl) throws JsonProcessingException {
-        logger.info(
-                "Get  tokenUrl:{}, clientId:{}, clientSecret:{}, grantType:{}, scope:{}, username:{}, password:{}, serverUrl:{}",
-                tokenUrl, clientId, clientSecret, grantType, scope, username, password, serverUrl);
+        logger.info("Get  tokenUrl:{}, clientId:{}, grantType:{}, scope:{}, username:{}, serverUrl:{}", tokenUrl,
+                clientId, grantType, scope, username, serverUrl);
 
         Builder request = getClientBuilder(tokenUrl);
         request.header(AUTHORIZATION, "Basic " + clientId + ":" + clientSecret);
@@ -77,7 +76,7 @@ public class IdpClientFactory {
                 token = Jackson.getElement(entity, Constants.ACCESS_TOKEN);
             } else {
                 throw new WebApplicationException(
-                        "Error while Access Token is " + response.getStatusInfo() + " - " + entity);
+                        "Error while Access Token is " + response.getStatusInfo() + " - " + entity, response);
             }
         }
 
@@ -105,7 +104,7 @@ public class IdpClientFactory {
                 identityProviderJsonList = entity;
             } else {
                 throw new WebApplicationException(
-                        "Error while fetching All IDP is " + response.getStatusInfo() + " - " + entity);
+                        "Error while fetching All IDP is " + response.getStatusInfo() + " - " + entity, response);
             }
         }
 
@@ -130,7 +129,7 @@ public class IdpClientFactory {
 
             } else {
                 throw new WebApplicationException(
-                        "Error while fetching IDP is " + response.getStatusInfo() + " - " + entity);
+                        "Error while fetching IDP is " + response.getStatusInfo() + " - " + entity, response);
             }
         }
 
@@ -138,9 +137,9 @@ public class IdpClientFactory {
     }
 
     public Map<String, String> extractSamlMetadata(final String idpMetadataConfigUrl, final String token,
-            final String providerId, String realmName, InputStream idpMetadataStream) throws JsonProcessingException {
+            final String providerId, String realmName, InputStream idpMetadataStream) throws IOException {
         Map<String, String> config = null;
-        try {
+       
             logger.info("Saml Idp Metadata idpMetadataConfigUrl:{}, providerId:{}, realmName:{}, idpMetadataStream:{}",
                     idpMetadataConfigUrl, providerId, realmName, idpMetadataStream);
 
@@ -179,13 +178,11 @@ public class IdpClientFactory {
 
                 } else {
                     throw new WebApplicationException(
-                            "Error while validating SAML IDP Metadata " + response.getStatusInfo() + " - " + entity);
+                            "Error while validating SAML IDP Metadata " + response.getStatusInfo() + " - " + entity, response);
                 }
             }
 
-        } catch (Exception ex) {
-            throw new WebApplicationException("Error while validating SAML IDP Metadata", ex);
-        }
+       
 
         return config;
     }
@@ -193,7 +190,7 @@ public class IdpClientFactory {
     public String createUpdateIdp(final String idpUrl, final String token, boolean isUpdate,
             JSONObject identityProviderJson) {
         String idpJson = null;
-        try {
+       
             logger.info("Add/modify IDP idpUrl:{}, isUpdate:{}, identityProviderJson:{}", idpUrl, isUpdate,
                     identityProviderJson);
 
@@ -254,23 +251,21 @@ public class IdpClientFactory {
                     logger.error("Error while creating/updating IDP - identityProviderJson:{}, status:{}, entity:{}",
                             identityProviderJson, response.getStatusInfo(), entity);
                     throw new WebApplicationException("Error while creating/updating IDP" + identityProviderJson
-                            + ", Status is " + response.getStatusInfo() + " - " + entity);
+                            + ", Status is " + response.getStatusInfo() + " - " + entity, response);
                 }
 
                 idpJson = getIdp(url, token);
                 logger.debug("Added/Updated IDP -  idpJson:{}", idpJson);
             }
 
-        } catch (Exception ex) {
-            throw new ConfigurationException("Error while add/updating SAML IDP", ex);
-        }
+       
 
         return idpJson;
     }
 
     public boolean deleteIdp(final String idpUrl, final String token) {
         boolean isDeleted = false;
-        try {
+       
             logger.info("Delete IDP idpUrl:{}", idpUrl);
 
             if (StringUtils.isBlank(idpUrl)) {
@@ -296,13 +291,11 @@ public class IdpClientFactory {
                     isDeleted = true;
                 } else {
                     throw new WebApplicationException(
-                            "Error while deleting IDP " + response.getStatusInfo() + " - " + entity);
+                            "Error while deleting IDP " + response.getStatusInfo() + " - " + entity, response);
                 }
             }
 
-        } catch (Exception ex) {
-            throw new ConfigurationException("Error while deleting SAML IDP", ex);
-        }
+      
 
         return isDeleted;
     }
@@ -325,7 +318,7 @@ public class IdpClientFactory {
                 jsonStrn = response.readEntity(String.class);
             } else {
                 throw new WebApplicationException(
-                        "Error while fetching SP Metadata " + response.getStatusInfo() + " - " + jsonStrn);
+                        "Error while fetching SP Metadata " + response.getStatusInfo() + " - " + jsonStrn, response);
             }
         }
         return jsonStrn;

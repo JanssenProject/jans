@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.link.rest;
 
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.link.util.Constants;
@@ -14,6 +13,7 @@ import io.jans.configapi.plugin.link.service.JansLinkService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.link.model.config.AppConfiguration;
 import io.jans.model.ldap.GluuLdapConfiguration;
+import io.jans.service.EncryptionService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import io.swagger.v3.oas.annotations.Operation;

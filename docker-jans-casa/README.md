@@ -54,7 +54,7 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
 - `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
 - `CN_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
-- `CN_DOCUMENT_STORE_TYPE`: Document store type (one of `LOCAL` or `JCA`; default to `LOCAL`).
+- `CN_DOCUMENT_STORE_TYPE`: Document store type (one of `LOCAL` or `DB`; default to `DB`).
 - `CN_JACKRABBIT_URL`: URL to remote repository (default to `http://localhost:8080`).
 - `CN_JACKRABBIT_SYNC_INTERVAL`: Interval between files sync (default to `300` seconds).
 - `CN_JACKRABBIT_ADMIN_ID`: Admin username (default to `admin`).
@@ -154,4 +154,3 @@ Hybrid persistence supports all available persistence types. To configure hybrid
         "session": "spanner",
     }
     ```
-

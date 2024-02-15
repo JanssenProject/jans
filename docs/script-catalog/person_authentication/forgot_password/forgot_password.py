@@ -14,7 +14,7 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 from io.jans.as.server.util import ServerUtil
 from io.jans.as.common.service.common import ConfigurationService
-from io.jans.as.common.service.common import EncryptionService
+from io.jans.service import EncryptionService
 from io.jans.jsf2.message import FacesMessages
 from jakarta.faces.application import FacesMessage
 from io.jans.orm.exception import AuthenticationException

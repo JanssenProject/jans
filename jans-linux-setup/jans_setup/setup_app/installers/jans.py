@@ -82,14 +82,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('Install Scim Server', 'install_scim_server'),
                         ('Install Jans Link Server', 'install_jans_link'),
                         ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
-                        ('Install Jans Casa Server', 'install_casa'),
+                        ('Install Jans Casa', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
-                        ('Install Jans SAML', 'install_jans_saml')):
+                        ('Install Jans KC', 'install_jans_saml')):
                     txt += get_install_string(prompt_str, install_var)
-
-
-            if Config.profile == 'jans' and Config.installEleven:
-                txt += get_install_string('Install Eleven Server', 'installEleven')
 
             if base.argsp.t:
                 txt += 'Load Test Data '.ljust(30) + repr( base.argsp.t).rjust(35) + "\n"
@@ -338,9 +334,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chown, 'root:root', target_fn])
             self.run([paths.cmd_chmod, '+x', target_fn])
 
-            print_version_scr_fn = os.path.join(Config.install_dir, 'setup_app/utils/printVersion.py')
-            self.run(['cp', '-f', print_version_scr_fn , Config.jansOptBinFolder])
-            self.run([paths.cmd_ln, '-s', 'printVersion.py' , 'show_version.py'], cwd=Config.jansOptBinFolder)
+            print_version_s = 'printVersion.py'
+            show_version_s = 'show_version.py'
+            print_version_scr_fn = os.path.join(Config.install_dir, f'setup_app/utils/{print_version_s}')
+            self.run(['cp', '-f', print_version_scr_fn , Config.jansOptFolder])
+            target_fn = os.path.join(Config.jansOptFolder, print_version_s)
+            self.run([paths.cmd_ln, '-s', target_fn, os.path.join(Config.jansOptBinFolder, show_version_s)])
+            self.chown(target_fn, Config.jetty_user, Config.root_user)
+            self.run([paths.cmd_chmod, '0550', target_fn])
 
         for scr in Path(Config.jansOptBinFolder).glob('*'):
             scr_path = scr.as_posix()
@@ -352,7 +353,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 else:
                     scr_content.insert(0, first_line)
                 self.writeFile(scr_path, '\n'.join(scr_content), backup=False)
-
+            if scr.name == show_version_s:
+                continue
             self.run([paths.cmd_chmod, '700', scr_path])
 
     def update_hostname(self):
@@ -579,6 +581,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
         #enable scripts
         self.enable_scripts(base.argsp.enable_script)
 
+        # write default Lock Configuration to DB
+        base.current_app.JansLockInstaller.configure_message_conf()
+
     def apply_selinux_plicies(self):
         self.logIt("Applying SELinux Policies")
         setsebool_cmd = shutil.which('setsebool')
@@ -633,7 +638,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def order_services(self):
 
         service_list = [
-                        ('jans-eleven', 'installEleven'),
                         ('jans-auth', 'installOxAuth'),
                         ('jans-config-api', 'install_config_api'),
                         ('jans-casa', 'install_casa'),
@@ -641,6 +645,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-link', 'install_jans_link'),
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),
+                        ('opa', 'install_opa'),
                         ('saml', 'install_jans_saml'),
                         ('jans-keycloak-link', 'install_jans_keycloak_link'),
                         ]
@@ -648,12 +653,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
         service_listr.reverse()
         for i, service in enumerate(service_listr):
             order_var_str = 'order_{}_service'.format(service[0].replace('-','_'))
+            if service[0] == 'jans-auth':
+                Config.templateRenderingDict[order_var_str] = Config.backend_service
+                continue
             for sservice in (service_listr[i+1:]):
                 if Config.get(sservice[1]):
                     Config.templateRenderingDict[order_var_str] = sservice[0]+'.service'
                     break
-                else:
-                    if service[0] != 'jans-auth':
-                        Config.templateRenderingDict[order_var_str] = 'jans-auth.service'
-                    else:
-                        Config.templateRenderingDict['order_jans_auth_service'] =  'jans-eleven.service' if Config.installEleven else  Config.backend_service
+

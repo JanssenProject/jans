@@ -19,11 +19,8 @@ import org.slf4j.Logger;
 import com.google.common.collect.Lists;
 
 import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.as.persistence.model.configuration.IDPAuthConf;
 import io.jans.as.server.model.auth.AuthenticationMode;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.service.cdi.event.AuthConfigurationEvent;
@@ -35,6 +32,8 @@ import io.jans.as.server.service.logger.LoggerService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.service.stat.StatTimer;
 import io.jans.as.server.service.status.ldap.LdapStatusTimer;
+import io.jans.config.GluuConfiguration;
+import io.jans.config.IDPAuthConf;
 import io.jans.exception.ConfigurationException;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleProperty;
@@ -48,6 +47,7 @@ import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.service.ApplicationConfigurationFactory;
+import io.jans.service.EncryptionService;
 import io.jans.service.PythonService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ApplicationInitialized;
@@ -247,6 +247,7 @@ public class AppInitializer {
 
         // Schedule timer tasks
         metricService.initTimer();
+        configurationFactory.initTimer();
         loggerService.initTimer(true);
         ldapStatusTimer.initTimer();
         cleanerTimer.initTimer();

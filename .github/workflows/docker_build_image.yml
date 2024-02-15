@@ -134,23 +134,24 @@ jobs:
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "build=${BUILD}" >> $GITHUB_OUTPUT
           echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
-          
-          # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
-          if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
-            TEMP_IMG="auth-server certmanager config-api configurator fido2 persistence-loader scim monolith loadtesting-jmeter link casa saml keycloak-link"
-            for i in $TEMP_IMG; do
-              TEMP_TOKEN=$(curl https://ghcr.io/token\?scope\="repository:janssenproject/jans/$i:pull" | jq -r '.token')
-              while [[ $(curl -s -H "Authorization: Bearer ${TEMP_TOKEN}" https://ghcr.io/v2/janssenproject/jans/$i/tags/list | jq -r '.tags' | grep "$VERSION" | tr -d '[:space:]"') != "$VERSION" ]]; do
-                echo "Waiting for $i to be built"
-                sleep 30
+          if [[ ! $VERSION =~ "_dev" ]]; then
+            # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
+            if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
+              TEMP_IMG="auth-server certmanager config-api configurator fido2 persistence-loader scim monolith loadtesting-jmeter link casa saml keycloak-link"
+              for i in $TEMP_IMG; do
+                TEMP_TOKEN=$(curl https://ghcr.io/token\?scope\="repository:janssenproject/jans/$i:pull" | jq -r '.token')
+                while [[ $(curl -s -H "Authorization: Bearer ${TEMP_TOKEN}" https://ghcr.io/v2/janssenproject/jans/$i/tags/list | jq -r '.tags' | grep "$VERSION" | tr -d '[:space:]"') != "$VERSION" ]]; do
+                  echo "Waiting for $i to be built"
+                  sleep 30
+                done
               done
-            done
+            fi
           fi
 
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
       - name: Setup Python 3.7
         if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
-        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
           python-version: 3.7
 
@@ -173,7 +174,7 @@ jobs:
 
       - name: Set up QEMU
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
-        uses: docker/setup-qemu-action@326560df218a7ea9cf6ab49bbc88b8b306bb437e # master
+        uses: docker/setup-qemu-action@5306bad0baa6b616b9934712d4eba8da2112606d # master
         with:
           image: tonistiigi/binfmt:master
           platforms: all

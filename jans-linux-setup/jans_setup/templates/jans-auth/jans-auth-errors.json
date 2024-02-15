@@ -204,6 +204,16 @@
             "uri":null
         },
         {
+            "id":"invalid_requested_token_type",
+            "description":"The requested_token_type in the request is not valid.",
+            "uri":null
+        },
+        {
+            "id":"invalid_subject_token_type",
+            "description":"The subject_token_type in the request is not valid.",
+            "uri":null
+        },
+        {
              "id":"use_new_dpop_nonce",
              "description":"Authorization server requires new nonce in DPoP proof.",
              "uri":null

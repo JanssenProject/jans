@@ -8,9 +8,9 @@ package io.jans.as.server.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.as.common.service.common.ConfigurationService;
-import io.jans.as.persistence.model.configuration.CustomProperty;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.as.persistence.model.configuration.IDPAuthConf;
+import io.jans.config.CustomProperty;
+import io.jans.config.GluuConfiguration;
+import io.jans.config.IDPAuthConf;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.config.CustomAuthenticationConfiguration;

@@ -1516,6 +1516,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			resultValue[0] = propertyValue;
 		} else if (propertyValue instanceof Long) {
 			resultValue[0] = propertyValue;
+		} else if (hasMapSupport() && propertyValue instanceof Map<?, ?>) {
+			resultValue[0] = propertyValue;
 		} else if (propertyValue instanceof Date) {
 			if (multiValued) {
 				resultValue[0] = getNativeDateMultiAttributeValue((Date) propertyValue);
@@ -1527,6 +1529,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		}
 
 		return true;
+	}
+
+	protected boolean hasMapSupport() {
+		return false;
 	}
 
 	protected abstract Object getNativeDateAttributeValue(Date dateValue);

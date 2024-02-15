@@ -157,6 +157,7 @@ public class UserResource extends BaseResource {
         // checking mandatory attributes
         checkMissingAttributes(user, null);
         ignoreCustomAttributes(user, removeNonLDAPAttributes);
+        validateAttributes(user);
 
         user = userMgmtSrv.addUser(user, true);
         logger.debug("User created {}", user);
@@ -202,6 +203,7 @@ public class UserResource extends BaseResource {
         List<String> excludeAttributes = List.of(USER_PWD);
         checkMissingAttributes(user, excludeAttributes);
         ignoreCustomAttributes(user, removeNonLDAPAttributes);
+        validateAttributes(user);
 
         try {
             user = userMgmtSrv.updateUser(user);
@@ -338,6 +340,14 @@ public class UserResource extends BaseResource {
         }
 
         throwMissingAttributeError(missingAttributes);
+    }
+    
+    private void validateAttributes(User user) {
+        try {
+            userMgmtSrv.validateAttributes(user.getCustomAttributes());
+        } catch (WebApplicationException wexp) {
+            throwBadRequestException("VALIDATE_ATTRIBUTE", wexp.getMessage());
+        }
     }
 
     private List<CustomUser> getCustomUserList(List<User> users, boolean removeNonLDAPAttributes) {

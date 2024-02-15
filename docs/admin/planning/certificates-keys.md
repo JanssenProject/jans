@@ -56,12 +56,6 @@ Janssen projects ships and tests with the
 may substitute your own JCE as long as it has implementations for the algorithms
 used by Auth Server.
 
-## Using a Hardware Security Module (HSM)
-
-Janssen Auth Server can utilize an external REST API,
-[Jans Eleven](https://github.com/JanssenProject/jans/tree/main/jans-eleven),
-which leverages an HSM that exposes a `PKCS #11` interface.
-
 ## Key Rotation
 
 OpenID Connect clients must support the rotation of both

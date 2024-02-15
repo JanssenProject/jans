@@ -458,7 +458,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, "", state, clientId));
         } catch (WebApplicationException e) {
             if (pair.getFirst() != null) {
-                log.error(e.getMessage(), e);
+                log.debug(e.getMessage(), e);
                 throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, "", state, clientId));
             } else {
                 throw e;

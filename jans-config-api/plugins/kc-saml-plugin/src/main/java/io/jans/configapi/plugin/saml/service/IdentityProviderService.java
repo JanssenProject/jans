@@ -201,10 +201,12 @@ public class IdentityProviderService {
         if (file != null) {
             log.info("Save IDP metadatfile on server");
             saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
+            log.info("After saving IDP metadatfile on server");
         }
-
+        
+        log.info("Persist IDP in DB identityProvider:{}:{}", identityProvider);
         persistenceEntryManager.persist(identityProvider);
-
+        log.info("After Persisting IDP");
         return getIdentityProviderByInum(identityProvider.getInum());
     }
 
@@ -318,6 +320,7 @@ public class IdentityProviderService {
         String result = samlIdpService.saveMetadataFile(getIdpMetadataTempDirFilePath(), idpMetaDataFN,
                 Constants.IDP_MODULE, targetStream);
         log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
+        
         if (StringHelper.isNotEmpty(result)) {
             metadataValidationTimer.idpQueue(result);
             // process files in temp that were not processed earlier
@@ -325,7 +328,8 @@ public class IdentityProviderService {
         } else {
             log.error("Failed to save IDP meta-data file. Please check if you provide correct file");
         }
-
+        
+        log.info("Successfully saved IDP Metadata file - idpMetaDataFN:{}", idpMetaDataFN);
         return false;
 
     }
@@ -361,17 +365,17 @@ public class IdentityProviderService {
     public void processUnprocessedIdpMetadataFiles() {
         log.info("Processing unprocessed IDP Metadata files ");
         String directory = samlConfigService.getIdpMetadataTempDir();
-        log.trace("IDP Metadata directory:{}, Files.exists(Paths.get(directory):{}", directory,
+        log.info("IDP Metadata directory:{}, Files.exists(Paths.get(directory):{}", directory,
                 Files.exists(Paths.get(directory)));
 
         if (Files.exists(Paths.get(directory))) {
-            log.trace("IDP Metadata directory:{} does exists)", directory);
+            log.info("IDP Metadata directory:{} does exists)", directory);
             File folder = new File(directory);
             File[] files = folder.listFiles();
             if (files != null && files.length > 0) {
 
                 for (File file : files) {
-                    log.trace("IDPMetadatafile:{}, file.getName():{}", file, file.getName());
+                    log.info("IDPMetadatafile:{}, file.getName():{}", file, file.getName());
                     metadataValidationTimer.idpQueue(file.getName());
                 }
             }

@@ -622,13 +622,18 @@ def get_password_from_file(password_file: str) -> str:
     with open(password_file) as f:
         raw_passwd = f.read().strip()
 
-    salt_file = os.environ.get("CN_OCI_LOCK_SALT_FILE", "/etc/jans/conf/oci_lock_salt")
+    decoder = os.environ.get("CN_OCI_LOCK_DECODER", "")
 
-    # probably sprig-aes format
-    if os.path.isfile(salt_file):
-        logger.info(f"Found salt file {salt_file} to decode password file {password_file}")
+    # sprig-aes format
+    if decoder == "sprig-aes":
+        salt_file = os.environ.get("CN_OCI_LOCK_SALT_FILE", "/etc/jans/conf/oci_lock_salt")
+
+        if not os.path.isfile(salt_file):
+            raise RuntimeError(f"Unable to find salt file {salt_file} to decode password file {password_file}")
+
         with open(salt_file) as f:
             salt = f.read().strip()
+
         try:
             passwd = sprig_decrypt_aes(raw_passwd, salt).decode()
             logger.info(f"Using sprig-aes to load password from {password_file}")
@@ -638,19 +643,19 @@ def get_password_from_file(password_file: str) -> str:
                 f"(either {salt_file} or {password_file} is incompatible with sprig-aes); error={exc}"
             )
 
-    # non sprig-aes format
-    else:
+    # base64 format
+    elif decoder == "base64":
         try:
             # maybe vanilla base64
             passwd = base64.b64decode(raw_passwd).decode()
             logger.warning(f"Using base64 to load password from {password_file}")
-        except UnicodeDecodeError as exc:
-            # tried to decode from sprig-aes format
-            raise ValueError(f"Unable to load password from {password_file}; error={exc}")
-        except binascii.Error:
-            # fallback to plain text
-            passwd = raw_passwd
-            logger.warning(f"Using insecure method to load password from {password_file}")
+        except (UnicodeDecodeError, binascii.Error) as exc:
+            raise ValueError(f"Unable to load password from {password_file} using base64; error={exc}")
+
+    # other formats
+    else:
+        passwd = raw_passwd
+        logger.warning(f"Using insecure method to load password from {password_file}")
 
     # returns plain text
     return passwd.strip()

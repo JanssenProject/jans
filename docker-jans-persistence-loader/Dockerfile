@@ -26,7 +26,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=d3401e3b695f21a61c5ddc5675d242a30839ef06
+ENV JANS_SOURCE_VERSION=ce6582f4cd01ec2ff5b06b1e78e3e0a8a76bc6ef
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -145,7 +145,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_SCIM_ENABLED=false \
     CN_PERSISTENCE_SKIP_INITIALIZED=false \
-    CN_DOCUMENT_STORE_TYPE=LOCAL \
+    CN_DOCUMENT_STORE_TYPE=DB \
     CN_JACKRABBIT_RMI_URL="" \
     CN_JACKRABBIT_URL=http://localhost:8080 \
     CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
@@ -157,7 +157,8 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
-    CN_DUO_ENABLED=true
+    CN_DUO_ENABLED=true \
+    CN_LOCK_ENABLED=false
 
 # ====
 # misc
@@ -166,7 +167,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/persistence-loader" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.22" \
+    org.opencontainers.image.version="1.1.0" \
     org.opencontainers.image.title="Janssen Authorization Server Persistence loader" \
     org.opencontainers.image.description="Generate initial data for persistence layer"
 

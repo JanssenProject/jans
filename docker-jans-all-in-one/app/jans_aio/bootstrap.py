@@ -210,24 +210,32 @@ class App:
                 "java_opts_env": "CN_AUTH_JAVA_OPTIONS",
             },
             "jans-config-api": {
-                "mem_ratio": 0.15,
+                "mem_ratio": 0.10,
                 "java_opts_env": "CN_CONFIG_API_JAVA_OPTIONS",
             },
             "jans-fido2": {
-                "mem_ratio": 0.15,
+                "mem_ratio": 0.08,
                 "java_opts_env": "CN_FIDO2_JAVA_OPTIONS",
             },
             "jans-scim": {
-                "mem_ratio": 0.2,
+                "mem_ratio": 0.15,
                 "java_opts_env": "CN_SCIM_JAVA_OPTIONS",
             },
             "jans-casa": {
-                "mem_ratio": 0.1,
+                "mem_ratio": 0.10,
                 "java_opts_env": "CN_CASA_JAVA_OPTIONS",
             },
             "jans-link": {
-                "mem_ratio": 0.1,
+                "mem_ratio": 0.08,
                 "java_opts_env": "CN_LINK_JAVA_OPTIONS",
+            },
+            "jans-keycloak-link": {
+                "mem_ratio": 0.08,
+                "java_opts_env": "CN_KEYCLOAK_LINK_JAVA_OPTIONS",
+            },
+            "jans-saml": {
+                "mem_ratio": 0.10,
+                "java_opts_env": "CN_SAML_JAVA_OPTIONS",
             },
         }
 
@@ -246,6 +254,8 @@ class App:
             "jans-scim": ["upstream", "location"],
             "jans-casa": ["upstream", "location"],
             "jans-link": ["upstream", "location"],
+            "jans-keycloak-link": ["upstream"],
+            "jans-saml": ["upstream", "location"],
         }
 
         plugin_includes = self.plugin_manager.hook.add_nginx_includes()

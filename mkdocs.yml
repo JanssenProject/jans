@@ -110,7 +110,13 @@ nav:
     - admin/terraform/README.md   
   - Configuration Guide:
     - Configuration Tools:
-      - Config API:
+      - TUI - Text-Based UI:
+          - admin/config-guide/config-tools/jans-tui/README.md
+          - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
+          - Using Logs: admin/config-guide/config-tools/jans-tui/using-command-line-log.md
+      - CLI - Command Line:
+          - admin/config-guide/config-tools/jans-cli/README.md
+      - REST API:
         - admin/config-guide/config-tools/config-api/README.md
         - Settings: admin/config-guide/config-tools/config-api/config.md
         - Attributes: admin/config-guide/config-tools/config-api/attribute.md
@@ -118,15 +124,8 @@ nav:
         - Logs: admin/config-guide/config-tools/config-api/logs.md
         - Monitoring: admin/config-guide/config-tools/config-api/monitoring.md
         - Plugins: admin/config-guide/config-tools/config-api/plugins.md
-      - CURL Guide: admin/config-guide/config-tools/curl-guide.md
-      - Text-Based User Interface (TUI):
-        - admin/config-guide/config-tools/jans-tui/README.md
-        - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
-        - Using Logs: admin/config-guide/config-tools/jans-tui/using-command-line-log.md
-      - Command Line Interface (CLI):
-        - admin/config-guide/config-tools/jans-cli/README.md
-      - CLI For Agama: admin/config-guide/agama-configuration.md
-      - SCIM CLI: admin/config-guide/config-tools/scim-cli.md
+      - CURL: admin/config-guide/config-tools/curl-guide.md
+    - Agama Configuration: admin/config-guide/agama-configuration.md
     - Attribute: admin/config-guide/attribute-configuration.md
     - Default Authentication: admin/config-guide/default-authentication-method-config.md
     - Cache Configuration: admin/config-guide/cache-configuration.md
@@ -153,7 +152,6 @@ nav:
       - LDAP Operation: admin/reference/database/ldap-ops.md
       - LDAP Namespace Diagram: admin/reference/database/ldap-namespace.md
     - Couchbase:
-      - Couchbase Schema: admin/reference/database/cb-schema.md
       - Couchbase Configuration: admin/reference/database/cb-config.md
       - Couchbase Operation: admin/reference/database/cb-ops.md
       - Couchbase Buckets: admin/reference/database/cb-buckets.md
@@ -182,6 +180,7 @@ nav:
       - admin/auth-server/tokens/README.md
       - OAuth Access Tokens: admin/auth-server/tokens/oauth-access-tokens.md
       - OAuth Refresh Tokens: admin/auth-server/tokens/oauth-refresh-tokens.md
+      - OAuth Transaction Tokens: admin/auth-server/tokens/oauth-tx-tokens.md
       - OpenID id_token: admin/auth-server/tokens/openid-id-token.md
       - OpenID Userinfo Token: admin/auth-server/tokens/openid-userinfo-token.md
       - UMA RPT Token: admin/auth-server/tokens/uma-rpt-token.md
@@ -282,7 +281,7 @@ nav:
       - Agama engine: admin/developer/agama/jans-agama-engine.md
       - Navigation, UI pages and assets: admin/developer/agama/flows-navigation-ui.md
       - Projects deployment: admin/developer/agama/projects-deployment.md
-      - Recommended practices:  admin/developer/agama/recommended-practices.md
+      - Agama Best Practices:  admin/developer/agama/agama-best-practices.md
       - Advanced usages: admin/developer/agama/advanced-usages.md
       - Engine and bridge configurations: admin/developer/agama/engine-bridge-config.md
       - FAQ: admin/developer/agama/faq.md      
@@ -3688,7 +3687,6 @@ nav:
                     - KeyFactory: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/KeyFactory.html
                     - CryptoProviderFactory: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/CryptoProviderFactory.html
                     - package-use: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/package-use.html
-                    - ElevenCryptoProvider: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/ElevenCryptoProvider.html
                     - signature:
                       - EDDSAKeyFactory: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/signature/EDDSAKeyFactory.html
                       - ECDSAPrivateKey: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/signature/ECDSAPrivateKey.html
@@ -3759,7 +3757,6 @@ nav:
                       - PublicKey: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/class-use/PublicKey.html
                       - KeyFactory: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/class-use/KeyFactory.html
                       - CryptoProviderFactory: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/class-use/CryptoProviderFactory.html
-                      - ElevenCryptoProvider: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/class-use/ElevenCryptoProvider.html
                       - Certificate: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/class-use/Certificate.html
                       - Key: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/class-use/Key.html
                       - AuthCryptoProvider: admin/reference/javadocs/jans-auth-server/model/io/jans/as/model/crypto/class-use/AuthCryptoProvider.html
@@ -8755,6 +8752,12 @@ nav:
     - admin/link/README.md
     - Jans Link: admin/link/jans-link.md
     - Keycloak Synch: admin/link/keycloak-synch.md
+  - Lock Guide:
+      - admin/lock/README.md
+      - Auth Server Configuration: admin/lock/lock_auth_server_config.md
+      - Lock Client Configuration: admin/lock/lock_client_config.md
+      - Implement Lock PDP Plugin: admin/lock/lock_pdp_plugin.md
+      - Policy Store Integration: admin/lock/lock_opa.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md
@@ -8780,7 +8783,6 @@ nav:
     - jans-cli: contribute/implementation-design/jans-cli.md
     - jans-config-api: contribute/implementation-design/jans-config-api.md
     - jans-core: contribute/implementation-design/jans-core.md
-    - jans-eleven: contribute/implementation-design/jans-eleven.md
     - jans-fido2: contribute/implementation-design/jans-fido2.md
     - jans-orm: contribute/implementation-design/jans-orm.md
     - jans-scim: contribute/implementation-design/jans-scim.md
@@ -8815,10 +8817,14 @@ nav:
             - 'Consent Management': 'casa/plugins/consent-management.md'
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'
+    - Developer Guide:
+        - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
     - User Guide: 'casa/user-guide.md'
 plugins:
 - tags
 - search
+- exclude-search:
+    exclude_unreferenced: true
 - git-revision-date-localized:
     enable_creation_date: true
     type: timeago

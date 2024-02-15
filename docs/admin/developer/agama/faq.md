@@ -56,9 +56,44 @@ This is a limitation of the scripting engine. Here, classes have to be imported 
 
 This is because the JVM does not support unloading: even if a given source file is removed, its corresponding class will still be accessible - it remains in the classpath. The classpath will be clean again after a service restart.
 
+### How to add log statements?
+
+The Jans server uses [slf4j](https://slf4j.org) and [log4j2](https://logging.apache.org/log4j/2.x/) logging frameworks. Below is a simple usage example for Java/Groovy code:
+
+```
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+...
+Logger logger = LoggerFactory.getLogger(your.class);
+logger.info("ahoy, ahoy");
+```
+
+!!! Note
+    The logging descriptor used by the server can be found [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/resources/log4j2.xml)
+
+Depending on the package `your` class belongs to, the message may not appear in the server log. In this case, you have two choices:
+
+- Supply a [custom log4j](../../auth-server/logging/custom-logs.md) descriptor
+- Use a class in package `io.jans` when calling `getLogger`. A good example would be using `io.jans.agama.model.Flow`
+
 ### How to append data to a flow's log directly?
 
 Call method `log` of class `io.jans.agama.engine.script.LogUtils`. This method receives a variable number of arguments as DSL's `Log` does. Thus you can do `LogUtils.log("@w Today is Friday %th", 13)`, as in the logging [examples](../../../agama/language-reference.md#logging).
+
+### How to use Contexts and Dependency Injection (CDI)?
+
+Jans server uses Weld (a CDI reference implementation), and as such makes heavy use of managed beans, scopes, dependency injection, events, etc. Unless the code added is part of a jar [library](#how-to-add-third-party-libraries), annotations related to scopes or dependency injection won't take any effect in your code. This is because the Java container does a thorough scanning of classes upon start, but the source code files in `lib` directory are compiled upon use and modification, as expected in a scripting scenario.
+
+Java/Groovy files can however reuse any of the (application-scoped) managed beans available in the server's classpath. To obtain a reference to a bean, use a call like:
+
+```
+import io.jans.service.cdi.util.CdiUtil;
+...
+ref = CdiUtil.bean(managedBean.class);
+```
+
+More advanced bean lookup capabilities are provided by method `instance` of [this](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/service/ManagedBeanService.java) class where you can supply qualifiers.
 
 ## Templates
 
@@ -145,4 +180,4 @@ You can assign this value to a variable at the top of your loop declaration. See
 
 ### Can Agama code be called from Java?
 
-No. These two languages are supposed to play roles that should not be mixed, check [here](./recommended-practices.md#about-flow-design).
+No. These two languages are supposed to play roles that should not be mixed, check [here](./agama-best-practices#about-flow-design).

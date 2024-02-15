@@ -17,7 +17,6 @@ def get_setup_options():
         'install_scim_server': True if base.current_app.profile == 'jans' else False,
         'installOxd': False,
         'installFido2': True,
-        'installEleven': False,
         'install_jans_link': True,
         'install_jans_keycloak_link': False,
         'install_casa': False,
@@ -29,25 +28,25 @@ def get_setup_options():
         'loadTestDataExit': False,
         'loadData': True,
         'properties_password': None,
+        'opendj_install': 0,
     }
 
-    if not (getattr(base.argsp, 'remote_couchbase', None) or base.argsp.remote_rdbm or base.argsp.local_rdbm):
+    if base.argsp.local_ldap:
         setupOptions['opendj_install'] = InstallTypes.LOCAL
+        setupOptions['rdbm_install'] = False
+        setupOptions['rdbm_install_type'] = InstallTypes.NONE
     else:
-        setupOptions['opendj_install'] = InstallTypes.NONE
-
         if getattr(base.argsp, 'remote_couchbase', None):
             setupOptions['cb_install'] = InstallTypes.REMOTE
+            setupOptions['rdbm_install'] = False
 
         if base.argsp.remote_rdbm:
-            setupOptions['rdbm_install'] = True
             setupOptions['rdbm_install_type'] = InstallTypes.REMOTE
             setupOptions['rdbm_type'] = base.argsp.remote_rdbm
             if not base.argsp.remote_rdbm == 'spanner':
                 setupOptions['rdbm_host'] = base.argsp.rdbm_host
 
-        if base.argsp.local_rdbm:
-            setupOptions['rdbm_install'] = True
+        else:
             setupOptions['rdbm_install_type'] = InstallTypes.LOCAL
             setupOptions['rdbm_type'] = base.argsp.local_rdbm
             setupOptions['rdbm_host'] = 'localhost'
@@ -79,11 +78,10 @@ def get_setup_options():
 
 
     if base.current_app.profile == 'jans':
-        if base.argsp.disable_local_ldap:
-            setupOptions['opendj_install'] = InstallTypes.NONE
 
         if base.argsp.local_couchbase:
             setupOptions['cb_install'] = InstallTypes.LOCAL
+            setupOptions['rdbm_install'] = False
 
         setupOptions['couchbase_bucket_prefix'] = base.argsp.couchbase_bucket_prefix
         setupOptions['cb_password'] = base.argsp.couchbase_admin_password
@@ -103,11 +101,8 @@ def get_setup_options():
         if base.argsp.no_fido2:
             setupOptions['installFido2'] = False
 
-        if base.argsp.install_eleven:
-            setupOptions['installEleven'] = True
-
-        if base.argsp.install_jans_link:
-            setupOptions['install_jans_link'] = True
+        if base.argsp.no_link:
+            setupOptions['install_jans_link'] = False
 
         if base.argsp.install_jans_keycloak_link:
             setupOptions['install_jans_keycloak_link'] = True
@@ -147,6 +142,7 @@ def get_setup_options():
 
         if base.argsp.remote_ldap:
             setupOptions['opendj_install'] = InstallTypes.REMOTE
+            setupOptions['rdbm_install'] = False
 
         if base.argsp.no_data:
             setupOptions['loadData'] = False

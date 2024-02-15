@@ -17,21 +17,19 @@ from setup_app.utils.ldif_utils import create_client_ldif
 # Config
 Config.idp_config_http_port = '8083'
 Config.jans_idp_enabled = 'true'
-Config.jans_idp_realm = 'jans-api'
-Config.jans_idp_client_id = f'jans-api-{uuid.uuid4()}'
+Config.jans_idp_realm = 'jans'
+Config.jans_idp_client_id = f'jans-{uuid.uuid4()}'
 Config.jans_idp_client_secret = os.urandom(10).hex()
 Config.jans_idp_grant_type = 'PASSWORD'
-Config.jans_idp_user_name = 'jans-api'
+Config.jans_idp_user_name = 'jans'
 Config.jans_idp_user_password = os.urandom(10).hex()
 Config.jans_idp_idp_root_dir = os.path.join(Config.jansOptFolder, 'idp')
-Config.jans_idp_idp_metadata_file_pattern = '%s-idp-metadata.xml'
 Config.jans_idp_ignore_validation = 'true'
 Config.jans_idp_idp_metadata_file = 'idp-metadata.xml'
 
 class JansSamlInstaller(JettyInstaller):
 
     install_var = 'install_jans_saml'
-    setattr(Config, install_var + '_pre_released', True)
 
     source_files = [
         (os.path.join(Config.dist_jans_dir, 'kc-jans-storage-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-storage-plugin/{0}/kc-jans-storage-plugin-{0}.jar').format(base.current_app.app_info['jans_version'])),
@@ -70,7 +68,7 @@ class JansSamlInstaller(JettyInstaller):
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
         self.config_json_fn = os.path.join(self.templates_folder, 'jans-saml-config.json')
         self.idp_config_fn = os.path.join(self.templates_folder, 'keycloak.conf')
-        self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
+        self.clients_json_fn = os.path.join(self.templates_folder, 'clients.json')
 
         Config.jans_idp_idp_metadata_root_dir = os.path.join(self.idp_config_root_dir, 'idp/metadata')
         Config.jans_idp_idp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'idp/temp_metadata')
@@ -83,7 +81,7 @@ class JansSamlInstaller(JettyInstaller):
 
     def install(self):
         """installation steps"""
-        self.create_scim_client()
+        self.create_clients()
         self.install_keycloack()
 
 
@@ -110,31 +108,38 @@ class JansSamlInstaller(JettyInstaller):
         self.chown(self.idp_root_dir, Config.jetty_user, Config.jetty_group, recursive=True)
         self.run([paths.cmd_chmod, '0760', saml_dir])
 
-    def create_scim_client(self):
-        result = self.check_clients([('saml_scim_client_id', '2100.')])
-        if result.get('2100.') == -1:
-
-            scopes = ['inum=F0C4,ou=scopes,o=jans']
-            users_write_search_result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(jansId=https://jans.io/scim/users.write)')
-            if users_write_search_result:
-                scopes.append(users_write_search_result['dn'])
-            users_read_search_result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(jansId=https://jans.io/scim/users.read)')
-            if users_read_search_result:
-                scopes.append(users_read_search_result['dn'])
-
-            create_client_ldif(
-                ldif_fn=self.clients_ldif_fn,
-                client_id=Config.saml_scim_client_id,
-                encoded_pw=Config.saml_scim_client_encoded_pw,
-                scopes=scopes,
-                redirect_uri=['https://{}/admin-ui'.format(Config.hostname), 'http://localhost:4100'],
-                display_name="Jans SCIM Client for SAML",
-                grant_types=['authorization_code', 'client_credentials', 'password', 'refresh_token'],
-                authorization_methods=['client_secret_basic', 'client_secret_post']
-                )
-
-            self.dbUtils.import_ldif([self.clients_ldif_fn])
-
+    def create_clients(self):
+        clients_data =  base.readJsonFile(self.clients_json_fn)
+        client_ldif_fns = []
+        for client_info in clients_data:
+                check_client = self.check_clients([(client_info['client_var'], client_info['client_prefix'])])
+                if check_client.get(client_info['client_prefix']) == -1:
+                    scopes = client_info['scopes_dns']
+                    for scope_id in client_info['scopes_ids']:
+                        scope_info = self.dbUtils.search('ou=scopes,o=jans', search_filter=f'(jansId=scope_id)')
+                        if scope_info:
+                            scopes.append(scope_info['dn'])
+                    client_id = getattr(Config, client_info['client_var'])
+                    client_ldif_fn = os.path.join(self.output_folder, f'clients-{client_id}.ldif')
+                    client_ldif_fns.append(client_ldif_fn)
+                    encoded_pw_var = '_'.join(client_info["client_var"].split('_')[:-1])+'_encoded_pw'
+                    if client_info['redirect_uri']:
+                        for i, redirect_uri in enumerate(client_info['redirect_uri']):
+                            client_info['redirect_uri'][i] = self.fomatWithDict(redirect_uri, Config.__dict__)
+                    create_client_ldif(
+                        ldif_fn=client_ldif_fn,
+                        client_id=client_id,
+                        description=client_info['description'],
+                        display_name=client_info['display_name'],
+                        encoded_pw=getattr(Config, encoded_pw_var),
+                        scopes=scopes,
+                        redirect_uri=client_info['redirect_uri'] ,
+                        grant_types=client_info['grant_types'],
+                        authorization_methods=client_info['authorization_methods'],
+                        application_type=client_info['application_type'],
+                        response_types=client_info['response_types']
+                        )
+        self.dbUtils.import_ldif(client_ldif_fns)
 
     def install_keycloack(self):
         self.logIt("Installing KC", pbar=self.service_name)
@@ -171,10 +176,12 @@ class JansSamlInstaller(JettyInstaller):
         jans_api_openid_client_fn = 'jans.api-openid-client.json'
         jans_api_realm_fn = 'jans.api-realm.json'
         jans_api_user_fn = 'jans.api-user.json'
+        jans_browser_auth_flow_fn = 'jans.browser-auth-flow.json'
+        jans_execution_config_jans_fn = 'jans.execution-config-jans.json'
 
         self.idp_config_fn = os.path.join(self.templates_folder, 'keycloak.conf')
 
-        for tmp_fn in (jans_api_openid_client_fn, jans_api_realm_fn, jans_api_user_fn):
+        for tmp_fn in (jans_api_openid_client_fn, jans_api_realm_fn, jans_api_user_fn, jans_browser_auth_flow_fn):
             self.renderTemplateInOut(os.path.join(jans_api_tmp_dir, tmp_fn), jans_api_tmp_dir, jans_api_output_dir, pystring=True)
 
         self.logIt("Starting KC for config api idp plugin configurations")
@@ -210,9 +217,8 @@ class JansSamlInstaller(JettyInstaller):
             # create realm
             self.run([kcadm_cmd, 'create', 'realms', '-f', os.path.join(jans_api_output_dir, jans_api_realm_fn),'--config', kc_tmp_config], env=env)
 
-
             # create client
-            self.run([kcadm_cmd, 'create', 'clients', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_api_openid_client_fn),'--config', kc_tmp_config], env=env)
+            self.run([kcadm_cmd, 'create', 'clients', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_api_openid_client_fn), '--config', kc_tmp_config], env=env)
 
             # create user and change password
             self.run([kcadm_cmd, 'create', 'users', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_api_user_fn),'--config', kc_tmp_config], env=env)
@@ -220,3 +226,24 @@ class JansSamlInstaller(JettyInstaller):
 
             # assign roles to jans-api-user
             self.run([kcadm_cmd, 'add-roles', '-r', Config.jans_idp_realm, '--uusername', Config.jans_idp_user_name, '--cclientid', 'realm-management', '--rolename', 'manage-identity-providers', '--rolename', 'view-identity-providers', '--rolename', 'view-identity-providers', '--config', kc_tmp_config], env=env)
+
+            # Create authentication flow in the jans-api realm used for saml clients
+            _, result = self.run([kcadm_cmd, 'create', 'authentication/flows', '-r',  Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_browser_auth_flow_fn), '--config', kc_tmp_config], env=env, get_stderr=True)
+            Config.templateRenderingDict['jans_browser_auth_flow_id'] = result.strip().split()[-1].strip("'").strip('"')
+
+            jans_execution_auth_cookie_fn = 'jans.execution-auth-cookie.json'
+            jans_execution_auth_jans_fn = 'jans.execution-auth-jans.json'
+
+            for tmp_fn in (jans_execution_auth_cookie_fn, jans_execution_auth_jans_fn):
+                self.renderTemplateInOut(os.path.join(jans_api_tmp_dir, tmp_fn), jans_api_tmp_dir, jans_api_output_dir, pystring=True)
+
+            # Add execution steps to the flow created in the jansapi realm
+            self.run([kcadm_cmd, 'create', 'authentication/executions', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_execution_auth_cookie_fn), '--config', kc_tmp_config], env=env)
+            _, result = self.run([kcadm_cmd, 'create', 'authentication/executions', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_execution_auth_jans_fn), '--config', kc_tmp_config], env=env, get_stderr=True)
+            jans_execution_auth_jans_id = result.strip().split()[-1].strip("'").strip('"')
+            self.renderTemplateInOut(os.path.join(jans_api_tmp_dir, jans_execution_config_jans_fn), jans_api_tmp_dir, jans_api_output_dir, pystring=True)
+
+            # Configure the jans auth execution step in realm jans-api
+            self.run([kcadm_cmd, 'create', f'authentication/executions/{jans_execution_auth_jans_id}/config', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_execution_config_jans_fn), '--config', kc_tmp_config], env=env)
+
+
