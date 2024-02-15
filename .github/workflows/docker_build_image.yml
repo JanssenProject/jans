@@ -137,9 +137,9 @@ jobs:
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "build=${BUILD}" >> $GITHUB_OUTPUT
           echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
-          if [[ ! $VERSION =~ "_dev" ]]; then
-            # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
-            if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
+          # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
+          if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
+            if [[ ${{ github.event_name != 'pull_request' }} ]]; then
               TEMP_IMG="auth-server certmanager config-api configurator fido2 persistence-loader scim monolith loadtesting-jmeter link casa saml keycloak-link"
               for i in $TEMP_IMG; do
                 TEMP_TOKEN=$(curl https://ghcr.io/token\?scope\="repository:janssenproject/jans/$i:pull" | jq -r '.token')
