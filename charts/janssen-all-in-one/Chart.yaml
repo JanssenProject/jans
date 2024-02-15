@@ -24,4 +24,4 @@ maintainers:
     email: support@jans.io
 description: Janssen Access and Identity Management All-in-One Chart. This chart deploys the selected janssen microservice all in one deployment.
 name: janssen-all-in-one
-version: 1.0.21
+version: 1.0.21-1

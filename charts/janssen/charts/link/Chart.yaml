@@ -1,6 +1,6 @@
 apiVersion: v2
 name: link
-version: 1.0.21
+version: 1.0.21-1
 kubeVersion: ">=v1.22.0-0"
 description: Jans Link
 type: application

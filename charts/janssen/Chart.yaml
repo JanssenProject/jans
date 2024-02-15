@@ -40,48 +40,48 @@ maintainers:
     email: support@jans.io
 description: Janssen Access and Identity Management Microservices Chart. This chart deploys each janssen microservice as a separate deployment.
 name: janssen
-version: 1.0.21
+version: 1.0.21-1
 dependencies:
     - name: casa
-      version: 1.0.21
+      version: 1.0.21-1
       condition: global.casa.enabled
 
     - name: config
       condition: global.config.enabled
-      version: 1.0.21
+      version: 1.0.21-1
 
     - name: config-api
       condition: global.config-api.enabled
-      version: 1.0.21
+      version: 1.0.21-1
 
     - name: opendj
       condition: global.opendj.enabled
-      version: 1.0.21
+      version: 1.0.21-1
 
     - name: auth-server
       condition: global.auth-server.enabled
-      version: 1.0.21
+      version: 1.0.21-1
 
     - name: fido2
       condition: global.fido2.enabled
-      version: 1.0.21
+      version: 1.0.21-1
 
     - name: scim
       condition: global.scim.enabled
-      version: 1.0.21
+      version: 1.0.21-1
 
     - name: nginx-ingress
       condition: global.nginx-ingress.enabled
-      version: 1.0.21
+      version: 1.0.21-1
 
     - name: auth-server-key-rotation
       condition: global.auth-server-key-rotation.enabled
-      version: 1.0.21
+      version: 1.0.21-1
 
     - name: persistence
       condition: global.persistence.enabled
-      version: 1.0.21
+      version: 1.0.21-1
 
     - name: link
       condition: global.link.enabled
-      version: 1.0.21
+      version: 1.0.21-1
