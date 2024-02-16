@@ -456,7 +456,7 @@ public class SpannerConnectionProvider {
 		return getTableMappingByKey(key, objectClass, objectClass);
 	}
 
-	 public TableMapping getChildTableMappingByKey(String key, TableMapping tableMapping, String columnName) {
+	public TableMapping getChildTableMappingByKey(String key, TableMapping tableMapping, String columnName) {
 		String childTableName = tableMapping.getTableName() + "_" + columnName;
 
 		if (!tableColumnsMap.containsKey(childTableName)) {
