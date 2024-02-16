@@ -65,7 +65,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 - Install the package
 
 ```
-sudo apt install  ./jans_replace-janssen-version.ubuntu22.04_amd64.deb
+sudo apt install  /tmp/jans_replace-janssen-version.ubuntu22.04_amd64.deb
 ```
 
 ### Ubuntu 20.04
