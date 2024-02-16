@@ -379,7 +379,7 @@ class JansVerticalNav():
             if self.change_password:
                 self.change_password(data=self.all_data[self.selectes])
 
-        @kb.add('d')
+        @kb.add('v')
         def _(event):
             if not self.data:
                 return
@@ -392,6 +392,7 @@ class JansVerticalNav():
                 size=size,
                 data=self.all_data[self.selectes])
 
+        @kb.add('d')
         @kb.add('delete')
         def _(event):
             if self.data and self.on_delete:
