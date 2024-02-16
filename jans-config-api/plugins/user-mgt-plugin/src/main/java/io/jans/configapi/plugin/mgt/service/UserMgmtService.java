@@ -84,19 +84,38 @@ public class UserMgmtService {
             logger.info("Search Users with searchRequest:{}, getPeopleBaseDn():{}", escapeLog(searchRequest),
                     getPeopleBaseDn());
         }
-        Filter searchFilter = null;
+
+        boolean useLowercaseFilter = configurationService.isLowercaseFilter(userService.getPeopleBaseDn());
+        logger.info("For searching user user useLowercaseFilter?:{}", useLowercaseFilter);
+
+        Filter displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter, searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
                 String[] targetArray = new String[] { assertionValue };
-                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
-                        targetArray, null);
-                Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
-                        targetArray, null);
-                Filter uidFilter = Filter.createSubstringFilter("uid", null, targetArray, null);
-                Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, uidFilter, inumFilter));
+
+                if (useLowercaseFilter) {
+                    displayNameFilter = Filter.createSubstringFilter(
+                            Filter.createLowercaseFilter(AttributeConstants.DISPLAY_NAME), null, targetArray, null);
+                    descriptionFilter = Filter.createSubstringFilter(
+                            Filter.createLowercaseFilter(AttributeConstants.DESCRIPTION), null, targetArray, null);
+                    mailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.MAIL),
+                            null, targetArray, null);
+                    uidFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray,
+                            null);
+                } else {
+                    displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
+                            null);
+                    descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
+                            null);
+                    mailFilter = Filter.createSubstringFilter(AttributeConstants.MAIL, null, targetArray, null);
+                    uidFilter = Filter.createSubstringFilter("uid", null, targetArray, null);
+                }
+
+                inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+                filters.add(
+                        Filter.createORFilter(displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
