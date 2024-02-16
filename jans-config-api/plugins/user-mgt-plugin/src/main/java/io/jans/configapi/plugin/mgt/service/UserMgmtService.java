@@ -93,7 +93,10 @@ public class UserMgmtService {
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                String[] targetArray = new String[] { assertionValue };
+                logger.info("For searching user - assertionValue:{}", assertionValue);
+                assertionValue = StringHelper.toLowerCase(assertionValue);
+                String[] targetArray = new String[] {  assertionValue };
+                logger.info("For searching user - targetArray?:{}", targetArray);
 
                 if (useLowercaseFilter) {
                     displayNameFilter = Filter.createSubstringFilter(
