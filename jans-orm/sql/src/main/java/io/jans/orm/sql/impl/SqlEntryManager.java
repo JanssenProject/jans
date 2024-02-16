@@ -993,7 +993,12 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
         SqlConnectionProvider sqlConnectionProvider = getOperationService().getConnectionProvider();
 		TableMapping tableMapping = sqlConnectionProvider.getTableMappingByKey(primaryKey, getBaseObjectClass(objectClasses));
+
 		Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
+		if (columTypes == null) {
+			return null;
+		}
+
 		AttributeType attributeType = columTypes.get(propertyName.toLowerCase());
 		
 		return attributeType;
