@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:23.0.3@sha256:4f72a5b0c076755e806457d96404dd28dc1394013933d7170c154c26db9b6a16 as kc-src
+FROM quay.io/keycloak/keycloak:23.0.6@sha256:14e21c6f73e61adb75d268e85028485b3f92beae7c1278213ba12868f3e54599 as kc-src
 
 FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
 
