@@ -126,6 +126,15 @@ public class AttributesResource extends ConfigBaseResource {
         checkNotNull(attribute.getName(), AttributeNames.NAME);
         checkNotNull(attribute.getDisplayName(), AttributeNames.DISPLAY_NAME);
         checkResourceNotNull(attribute.getDataType(), AttributeNames.DATA_TYPE);
+        
+        // check if attribute exists in schema
+        boolean attributeValidation = attributeService.validateAttributeDefinition(attribute.getName());
+        log.debug("Validate attribute while creation - attribute.getName():{}, attributeValidation:{}", attribute.getName(), attributeValidation);
+        if (!attributeValidation) {
+            throw new WebApplicationException(getNotAcceptableException("The attribute type '" + attribute.getName() + "' not defined in DB schema"));
+        }
+        
+        
         String inum = attributeService.generateInumForNewAttribute();
         attribute.setInum(inum);
         attribute.setDn(attributeService.getDnForAttribute(inum));
@@ -152,6 +161,15 @@ public class AttributesResource extends ConfigBaseResource {
         checkNotNull(attribute.getName(), AttributeNames.NAME);
         checkNotNull(attribute.getDisplayName(), AttributeNames.DISPLAY_NAME);
         checkResourceNotNull(attribute.getDataType(), AttributeNames.DATA_TYPE);
+        
+        // check if attribute exists in schema
+        boolean attributeValidation = attributeService.validateAttributeDefinition(attribute.getName());
+        log.debug("Validate attribute - attribute.getName():{}, attributeValidation:{}", attribute.getName(), attributeValidation);
+        if (!attributeValidation) {
+            throw new WebApplicationException(getNotAcceptableException(
+                    "The attribute type '" + attribute.getName() + "' not defined in DB schema"));
+        }        
+        
         JansAttribute existingAttribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(existingAttribute, JANS_ATTRIBUTE);
         attribute.setInum(existingAttribute.getInum());
