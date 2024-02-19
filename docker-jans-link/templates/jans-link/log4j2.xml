@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
     <Properties>
-        <Property name="link.log.console.prefix" value="link" />
+        <Property name="link.log.console.prefix" value="jans-link" />
     </Properties>
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">
