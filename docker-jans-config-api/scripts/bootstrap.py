@@ -38,7 +38,7 @@ from plugins import discover_plugins
 from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("config-api")
+logger = logging.getLogger("jans-config-api")
 
 
 def main():
