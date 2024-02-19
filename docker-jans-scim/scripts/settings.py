@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "scim": {
+        "jans-scim": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
