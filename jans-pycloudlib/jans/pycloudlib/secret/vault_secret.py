@@ -34,8 +34,9 @@ class VaultSecret(BaseSecret):
     - `CN_SECRET_VAULT_CACERT_FILE`: path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
     - `CN_SECRET_VAULT_NAMESPACE`: namespace used to access secrets (default to empty string).
     - `CN_SECRET_VAULT_KV_PATH`: path to KV secrets engine (default to `secret`).
-    - `CN_SECRET_VAULT_PREFIX`: prefixed name used to create the config tree (default to `jans`)
+    - `CN_SECRET_VAULT_PREFIX`: base prefix name used to build secret path (default to `jans`).
     - `CN_SECRET_VAULT_KV_VERSION`: KV version (default to `1`).
+    - `CN_SECRET_VAULT_APPROLE_PATH`: path to AppRole (default to `approle`).
     """
 
     def __init__(self) -> None:
@@ -75,6 +76,7 @@ class VaultSecret(BaseSecret):
         self.settings.setdefault("CN_SECRET_VAULT_NAMESPACE", "")
         self.settings.setdefault("CN_SECRET_VAULT_PREFIX", "jans")
         self.settings.setdefault("CN_SECRET_VAULT_KV_PATH", "secret")
+        self.settings.setdefault("CN_SECRET_VAULT_APPROLE_PATH", "approle")
 
         cert, verify = self._verify_cert(
             self.settings["CN_SECRET_VAULT_SCHEME"],
@@ -94,7 +96,11 @@ class VaultSecret(BaseSecret):
         }
 
         self.client = hvac.Client(**client_opts)
-        self.client.secrets.kv.default_kv_version = int(os.environ.get("CN_SECRET_VAULT_KV_VERSION", "1"))
+        self.client.secrets.kv.default_kv_version = self.kv_version
+
+    @property
+    def kv_version(self):
+        return int(os.environ.get("CN_SECRET_VAULT_KV_VERSION", "1"))
 
     @property
     def role_id(self) -> str:
@@ -129,7 +135,7 @@ class VaultSecret(BaseSecret):
         if self.client.is_authenticated():
             return
 
-        creds = self.client.auth.approle.login(self.role_id, self.secret_id, use_token=False)
+        creds = self.client.auth.approle.login(self.role_id, self.secret_id, use_token=False, mount_point=self.settings["CN_SECRET_VAULT_APPROLE_PATH"])
         self.client.token = creds["auth"]["client_token"]
 
     def get(self, key: str, default: _t.Any = "") -> _t.Any:
@@ -143,13 +149,21 @@ class VaultSecret(BaseSecret):
             Value based on given key or default one.
         """
         self._authenticate()
-        sc = self.client.secrets.kv.read_secret(
-            path=f"{self.settings['CN_SECRET_VAULT_PREFIX']}/{key}",
-            mount_point=self.settings["CN_SECRET_VAULT_KV_PATH"],
-        )
+
+        try:
+            sc = self.client.secrets.kv.read_secret(
+                path=f"{self.settings['CN_SECRET_VAULT_PREFIX']}/{key}",
+                mount_point=self.settings["CN_SECRET_VAULT_KV_PATH"],
+            )
+        except hvac.exceptions.InvalidPath:
+            # maybe deleted/destroyed
+            sc = {}
 
         if not sc:
             return default
+
+        if self.kv_version == 2:
+            return sc["data"]["data"]["value"]
         return sc["data"]["value"]
 
     def set(self, key: str, value: _t.Any) -> bool:
@@ -170,6 +184,8 @@ class VaultSecret(BaseSecret):
             mount_point=self.settings["CN_SECRET_VAULT_KV_PATH"],
             secret=val,
         )
+        if self.kv_version == 2:
+            return bool(response["data"]["created_time"])
         return bool(response.status_code == 204)
 
     def _request_warning(self, scheme: str, verify: _t.Union[bool, str]) -> None:
@@ -240,10 +256,14 @@ class VaultSecret(BaseSecret):
             A mapping of secrets (if any).
         """
         self._authenticate()
-        result = self.client.secrets.kv.list_secrets(
-            path=self.settings["CN_SECRET_VAULT_PREFIX"],
-            mount_point=self.settings["CN_SECRET_VAULT_KV_PATH"],
-        )
+        try:
+            result = self.client.secrets.kv.list_secrets(
+                path=self.settings["CN_SECRET_VAULT_PREFIX"],
+                mount_point=self.settings["CN_SECRET_VAULT_KV_PATH"],
+            )
+        except hvac.exceptions.InvalidPath:
+            # maybe deleted/destroyed
+            result = {}
 
         if not result:
             return {}
