@@ -485,7 +485,7 @@ public class UserMgmtService {
         }
         StringBuilder sb = new StringBuilder();
         for (CustomObjectAttribute customObjectAttribute : customAttributes) {
-            logger.info("customObjectAttribute:{}", customObjectAttribute, customObjectAttribute.getName());
+            logger.info("customObjectAttribute:{}, customObjectAttribute.getName():{}", customObjectAttribute, customObjectAttribute.getName());
             AttributeValidation validation = attributeService.getAttributeByName(customObjectAttribute.getName())
                     .getAttributeValidation();
 
