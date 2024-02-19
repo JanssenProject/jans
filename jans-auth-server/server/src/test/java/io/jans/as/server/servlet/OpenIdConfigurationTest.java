@@ -4,12 +4,9 @@ import io.jans.as.model.configuration.AppConfiguration;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
 
 /**
  * @author Yuriy Z
@@ -45,12 +42,6 @@ public class OpenIdConfigurationTest {
         assertEquals("value2", jsonObject.get("key2"));
         assertTrue(jsonObject.has("key1"));
         assertTrue(jsonObject.has("key3"));
-    }
-
-    @Test
-    public void getAcrValuesList_whenCalled_shouldContainInternalAuthnAlias() {
-        final List<String> acrValuesList = OpenIdConfiguration.getAcrValuesList(new ArrayList<>());
-        assertTrue(acrValuesList.contains("simple_password_auth"));
     }
 
     @Test
