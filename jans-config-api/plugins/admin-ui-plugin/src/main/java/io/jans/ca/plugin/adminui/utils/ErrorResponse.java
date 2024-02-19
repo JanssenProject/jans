@@ -1,13 +1,8 @@
 package io.jans.ca.plugin.adminui.utils;
 
 public enum ErrorResponse {
-    GET_ACCESS_TOKEN_ERROR("Error in getting access token."),
     GET_API_PROTECTION_TOKEN_ERROR("Error in generating token to access Jans Config Api endpoints."),
-    GET_USER_INFO_ERROR("Error in getting User-Info."),
-    AUTHORIZATION_CODE_BLANK("Bad Request: Authourization `code` blank or empty."),
     USER_INFO_JWT_BLANK("User-Info jwt is blank or empty. Generating token with default scopes."),
-    CODE_OR_TOKEN_REQUIRED("Bad Request: Either `code` or `access_token` is required."),
-    CODE_VERIFIER_REQUIRED("Bad Request: `code_verifier` is required."),
     CHECK_LICENSE_ERROR("Error in checking license status. Check logs for further details."),
     ERROR_IN_LICENSE_CONFIGURATION_VALIDATION("Error in validating license configuration."),
     ACTIVATE_LICENSE_ERROR("Error in activating License. Check logs for further details."),
@@ -53,6 +48,7 @@ public enum ErrorResponse {
     WEBHOOK_REQUEST_BODY_EMPTY("HTTP request-body for webhook is required for POST/PUT/PATCH request."),
     WEBHOOK_SAVE_ERROR("Error in saving webhook."),
     WEBHOOK_SEARCH_ERROR("Error in fetching webhook."),
+    WEBHOOK_TRIGGER_ERROR("Error in triggering webhook."),
     WEBHOOK_UPDATE_ERROR("Error in updating webhook."),
     WEBHOOK_ID_MISSING("Webhook Id is missing in request."),
     WEBHOOK_DELETE_ERROR("Error in removing webhook."),
