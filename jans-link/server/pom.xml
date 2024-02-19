@@ -31,6 +31,16 @@
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+        	<groupId>io.jans</groupId>
+        	<artifactId>jans-core-service</artifactId>
+        	<exclusions>
+        		<exclusion>
+        			<groupId>io.jans</groupId>
+        			<artifactId>jans-core-document-store</artifactId>
+        		</exclusion>
+        	</exclusions>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
