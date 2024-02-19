@@ -1,5 +1,6 @@
 """This module contains secret adapter class to interact with Vault."""
 
+import contextlib
 import typing as _t
 import logging
 import os
@@ -158,19 +159,17 @@ class VaultSecret(BaseSecret):
         """
         self._authenticate()
 
-        try:
+        sc = {}
+        with contextlib.suppress(hvac.exceptions.InvalidPath):
             sc = self.client.secrets.kv.read_secret(
                 path=f"{self.settings['CN_SECRET_VAULT_PREFIX']}/{key}",
                 mount_point=self.settings["CN_SECRET_VAULT_KV_PATH"],
             )
-        except hvac.exceptions.InvalidPath:
-            # maybe deleted/destroyed
-            sc = {}
 
         if not sc:
             return default
 
-        if self.kv_version == 2:
+        if self.kv_version == 2:  # pragma: no cover
             return sc["data"]["data"]["value"]
         return sc["data"]["value"]
 
@@ -192,7 +191,7 @@ class VaultSecret(BaseSecret):
             mount_point=self.settings["CN_SECRET_VAULT_KV_PATH"],
             secret=val,
         )
-        if self.kv_version == 2:
+        if self.kv_version == 2:  # pragma: no cover
             return bool(response["data"]["created_time"])
         return bool(response.status_code == 204)
 
@@ -264,14 +263,13 @@ class VaultSecret(BaseSecret):
             A mapping of secrets (if any).
         """
         self._authenticate()
-        try:
+
+        result = {}
+        with contextlib.suppress(hvac.exceptions.InvalidPath):
             result = self.client.secrets.kv.list_secrets(
                 path=self.settings["CN_SECRET_VAULT_PREFIX"],
                 mount_point=self.settings["CN_SECRET_VAULT_KV_PATH"],
             )
-        except hvac.exceptions.InvalidPath:
-            # maybe deleted/destroyed
-            result = {}
 
         if not result:
             return {}

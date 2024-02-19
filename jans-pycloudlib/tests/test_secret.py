@@ -160,6 +160,26 @@ def test_vault_secret_set_all(gvault_secret, monkeypatch):
     assert gvault_secret.set_all({"a": 1}) is True
 
 
+def test_vault_deprecated_envs(gvault_secret, monkeypatch, caplog):
+    monkeypatch.setenv("CN_SECRET_VAULT_HOST", "localhost")
+    monkeypatch.setenv("CN_SECRET_VAULT_PORT", "8200")
+    monkeypatch.setenv("CN_SECRET_VAULT_SCHEME", "http")
+
+    gvault_secret.addr
+    assert "Specifying host via CN_SECRET_VAULT_HOST environment variable is deprecated" in caplog.records[0].message
+
+
+@pytest.mark.parametrize("host, port, scheme", [
+    ("localhost", "8200", "https"),
+    ("localhost", "8200", "http"),
+])
+def test_vault_scheme(gvault_secret, monkeypatch, host, port, scheme):
+    monkeypatch.setenv("CN_SECRET_VAULT_HOST", host)
+    monkeypatch.setenv("CN_SECRET_VAULT_PORT", port)
+    monkeypatch.setenv("CN_SECRET_VAULT_SCHEME", scheme)
+    assert gvault_secret.scheme == scheme
+
+
 # =================
 # kubernetes secret
 # =================
