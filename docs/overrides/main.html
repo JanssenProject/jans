@@ -8,7 +8,14 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- TODO: Update the src link by what we get with Jans registration with scarf
- -->
-<img src="https://static.scarf.sh/a.png" width="1" height="1"/>
+
+<!--Release automation scripts should replace the placeholder with actual URL-->
+<!--for Scarf pixel. This will be done when docs are released into PROD. Not-->
+<!--when releasing for HEAD or nightly builds. This is to ensure that Scarf -->
+<!--is only tracking the user behaviour on the PROD release docs. HEAD and -->
+<!--nightly docs may be used extensively by development team and contributors-->
+<!--for testing purposes-->
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="<placeholder-scarf-pixel-url>"
+     width="0" height="0"/>
 {% endblock %}
