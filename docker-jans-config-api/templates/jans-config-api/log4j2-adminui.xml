@@ -2,7 +2,7 @@
 
 <Configuration packages="io.jans.log">
     <Properties>
-        <Property name="admin_ui.log.console.prefix" value="config-api" />
+        <Property name="admin_ui.log.console.prefix" value="jans-config-api" />
     </Properties>
     <Appenders>
         <Console name="AdminUI_Console" target="SYSTEM_OUT">
