@@ -60,6 +60,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
+          sparse-checkout: docker-jans-${{ matrix.docker-images }}
 
       - name: Check docker directories that changed
         id: build_docker_image
@@ -118,6 +119,7 @@ jobs:
           if [ ! -z "$MANUAL_IMAGE_TAG" ]
           then
             TAGS="$TAGS,${DOCKER_IMAGE}:${MANUAL_IMAGE_TAG}"
+            VERSION=$MANUAL_IMAGE_TAG
             echo "Manual image tag has been inputted by the user"
           else
             echo "$TAGS"
