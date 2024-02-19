@@ -36,7 +36,7 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("link")
+logger = logging.getLogger("jans-link")
 
 manager = get_manager()
 

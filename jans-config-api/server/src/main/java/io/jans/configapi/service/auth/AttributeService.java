@@ -2,7 +2,9 @@
 package io.jans.configapi.service.auth;
 
 import static io.jans.as.model.util.Util.escapeLog;
+import io.jans.as.common.model.common.SimpleUser;
 import io.jans.as.common.util.AttributeConstants;
+import io.jans.orm.model.AttributeType;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
@@ -11,6 +13,7 @@ import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +25,9 @@ import java.util.Map;
 public class AttributeService extends io.jans.as.common.service.AttributeService {
 
     private static final long serialVersionUID = -820393743995746612L;
+    
+    @Inject
+    transient ConfigurationService configurationService;
     
     @Override
     protected boolean isUseLocalCache() {
@@ -102,6 +108,28 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
             log.error("Failed to load attribute with name:{}, ex:{}", claimName, ex);
         }
         return jansAttribute;
+    }
+    
+    public boolean validateAttributeDefinition(String attributeName) {
+        log.info(" Validate attributeName:{}, getPersistenceType():{}", attributeName, getPersistenceType());
+        boolean isValidAttribute = false;
+        try {
+            AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", SimpleUser.class,
+                    "uid");
+            log.info(" attributeName:{}, attributeType():{}", attributeName, attributeType);
+
+            if (attributeType != null) {
+                isValidAttribute = true;
+            }
+        } catch (Exception ex) {
+            log.error("Exception by ORM while validating attribute is:{}", ex);
+            isValidAttribute = true;
+        }
+        return isValidAttribute;
+    }
+
+    private String getPersistenceType() {
+        return configurationService.getPersistenceType();
     }
 
 }
