@@ -174,7 +174,7 @@ X-Xss-Protection: 1; mode=block
     "scope": "openid",
     "client_secret": "1af17da1-57a3-416b-a358-c84bb0ef0fad",
     "client_id_issued_at": 1702922353,
-    "backchannel_logout_uri": [],
+    "backchannel_logout_uri": "",
     "backchannel_logout_session_required": false,
     "client_name": "jans test app",
     "par_lifetime": 600,

@@ -9,7 +9,7 @@ package io.jans.configapi.service.auth;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.config.GluuConfiguration;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.model.status.StatsData;
 import io.jans.orm.PersistenceEntryManager;
@@ -73,4 +73,7 @@ public class ConfigurationService {
         this.statsData = statsData;
     }    
   
+    public boolean isLowercaseFilter(String baseDn) {        
+        return !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceManager.getPersistenceType(baseDn));
+    }
 }
