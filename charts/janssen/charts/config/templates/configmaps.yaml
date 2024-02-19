@@ -50,16 +50,16 @@ data:
   {{- end }}
   # [vault_envs] Envs related to Hashicorp vault 
   {{ if eq .Values.global.configSecretAdapter "vault" }}
-  CN_SECRET_VAULT_SCHEME: {{ .Values.configmap.cnSecretVaultScheme }}
-  CN_SECRET_VAULT_HOST: {{ .Values.configmap.cnSecretVaultHost }}
-  CN_SECRET_VAULT_PORT: {{ .Values.configmap.cnSecretVaultPort }}
-  CN_SECRET_VAULT_VERIFY: {{ .Values.configmap.cnSecretVaultVerify }}
-  CN_SECRET_VAULT_ROLE_ID_FILE: {{ .Values.configmap.cnSecretVaultRoleIdFile }}
-  CN_SECRET_VAULT_SECRET_ID_FILE: {{ .Values.configmap.cnSecretVaultSecretIdFile }}
-  CN_SECRET_VAULT_CERT_FILE: {{ .Values.configmap.cnSecretVaultCertFile }}
-  CN_SECRET_VAULT_KEY_FILE: {{ .Values.configmap.cnSecretVaultKeyFile }}
-  CN_SECRET_VAULT_CACERT_FILE: {{ .Values.configmap.cnSecretVaultCACertFile }}
-  CN_SECRET_VAULT_NAMESPACE: {{ .Values.configmap.cnSecretVaultNamespace }}  
+  CN_SECRET_VAULT_SCHEME: {{ .Values.configmap.cnSecretVaultScheme | quote }}
+  CN_SECRET_VAULT_HOST: {{ .Values.configmap.cnSecretVaultHost | quote }}
+  CN_SECRET_VAULT_PORT: {{ .Values.configmap.cnSecretVaultPort | quote }}
+  CN_SECRET_VAULT_VERIFY: {{ .Values.configmap.cnSecretVaultVerify | quote }}
+  CN_SECRET_VAULT_ROLE_ID_FILE: {{ .Values.configmap.cnSecretVaultRoleIdFile | quote }}
+  CN_SECRET_VAULT_SECRET_ID_FILE: {{ .Values.configmap.cnSecretVaultSecretIdFile | quote }}
+  CN_SECRET_VAULT_CERT_FILE: {{ .Values.configmap.cnSecretVaultCertFile | quote }}
+  CN_SECRET_VAULT_KEY_FILE: {{ .Values.configmap.cnSecretVaultKeyFile | quote }}
+  CN_SECRET_VAULT_CACERT_FILE: {{ .Values.configmap.cnSecretVaultCACertFile | quote }}
+  CN_SECRET_VAULT_NAMESPACE: {{ .Values.configmap.cnSecretVaultNamespace | quote }}  
   # [vault_envs] END
   {{- end }}
   CN_SQL_DB_SCHEMA: {{ .Values.configmap.cnSqlDbSchema | quote }}
