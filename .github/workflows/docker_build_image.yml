@@ -63,6 +63,7 @@ jobs:
           sparse-checkout: |
             docker-jans-${{ matrix.docker-images }}
             automation
+            demos
       - name: Check docker directories that changed
         id: build_docker_image
         run: |
