@@ -18,7 +18,7 @@ build-dev:
 
 trivy-scan:
 	@echo "[I] Scanning OCI image ${IMAGE} using trivy"
-	@trivy image --security-checks vuln ${ARGS} ${IMAGE}
+	@trivy image --scanners vuln ${ARGS} ${IMAGE}
 
 grype-scan:
 	@echo "[I] Scanning OCI image ${IMAGE} using grype"

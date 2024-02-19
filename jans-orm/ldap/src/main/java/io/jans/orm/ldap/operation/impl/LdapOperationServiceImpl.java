@@ -15,10 +15,13 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -47,6 +50,7 @@ import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
 import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
+import com.unboundid.ldap.sdk.schema.ObjectClassDefinition;
 import com.unboundid.ldif.LDIFChangeRecord;
 import com.unboundid.util.StaticUtils;
 
@@ -88,6 +92,8 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 
 	private PersistenceExtension persistenceExtension;
 
+    private static Map<String, List<String>> OBJECT_CLASS_DATA_TYPES = new HashMap<String, List<String>>();
+    private static Map<String, List<String>> OBJECT_CLASS_TREE = new HashMap<String, List<String>>();
     private static Map<String, Class<?>> ATTRIBUTE_DATA_TYPES = new HashMap<String, Class<?>>();
     private static final Map<String, Class<?>> OID_SYNTAX_CLASS_MAPPING;
 
@@ -1033,52 +1039,101 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         try {
             if (ATTRIBUTE_DATA_TYPES.size() == 0) {
                 //schemaEntryDn="ou=schema";
-                SearchResultEntry entry = getConnectionPool().getEntry(schemaEntryDn, "attributeTypes");
+                SearchResultEntry entry = getConnectionPool().getEntry(schemaEntryDn, "attributeTypes", "objectClasses");
                 Attribute attrAttributeTypes = entry.getAttribute("attributeTypes");
+                Attribute objectClassAttributeTypes = entry.getAttribute("objectClasses");
 
-                Map<String, Pair<String, String>> tmpMap = new HashMap<String, Pair<String, String>>();
-
-                for (String strAttributeType : attrAttributeTypes.getValues()) {
-                    AttributeTypeDefinition attrTypeDef = new AttributeTypeDefinition(strAttributeType);
-                    String[] names = attrTypeDef.getNames();
-
-                    if (names != null) {
-                        for (String name : names) {
-                            tmpMap.put(name, new Pair<String, String>(attrTypeDef.getBaseSyntaxOID(), attrTypeDef.getSuperiorType()));
-                        }
-                    }
-                }
-
-                //Fill missing values
-                for (String name : tmpMap.keySet()) {
-                    Pair<String, String> currPair = tmpMap.get(name);
-                    String sup = currPair.getSecond();
-
-                    if (currPair.getFirst() == null && sup != null) {     //No OID syntax?
-                        //Try to lookup superior type
-                        Pair<String, String> pair = tmpMap.get(sup);
-                        if (pair != null) {
-                            currPair.setFirst(pair.getFirst());
-                        }
-                    }
-                }
-
-                //Populate map of attribute names vs. Java classes
-                for (String name : tmpMap.keySet()) {
-                    String syntaxOID = tmpMap.get(name).getFirst();
-
-                    if (syntaxOID != null) {
-                        Class<?> cls = OID_SYNTAX_CLASS_MAPPING.get(syntaxOID);
-                        if (cls != null) {
-                            ATTRIBUTE_DATA_TYPES.put(name.toLowerCase(), cls);
-                        }
-                    }
-                }
+                populateAttributeTypes(attrAttributeTypes);
+                populateObjectClassTypes(objectClassAttributeTypes);
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
     }
+
+	private void populateAttributeTypes(Attribute attrAttributeTypes) throws LDAPException {
+		Map<String, Pair<String, String>> tmpMap = new HashMap<String, Pair<String, String>>();
+
+		for (String strAttributeType : attrAttributeTypes.getValues()) {
+		    AttributeTypeDefinition attrTypeDef = new AttributeTypeDefinition(strAttributeType);
+		    String[] names = attrTypeDef.getNames();
+
+		    if (names != null) {
+		        for (String name : names) {
+		            tmpMap.put(name, new Pair<String, String>(attrTypeDef.getBaseSyntaxOID(), attrTypeDef.getSuperiorType()));
+		        }
+		    }
+		}
+
+		//Fill missing values
+		for (String name : tmpMap.keySet()) {
+		    Pair<String, String> currPair = tmpMap.get(name);
+		    String sup = currPair.getSecond();
+
+		    if (currPair.getFirst() == null && sup != null) {     //No OID syntax?
+		        //Try to lookup superior type
+		        Pair<String, String> pair = tmpMap.get(sup);
+		        if (pair != null) {
+		            currPair.setFirst(pair.getFirst());
+		        }
+		    }
+		}
+
+		//Populate map of attribute names vs. Java classes
+		for (String name : tmpMap.keySet()) {
+		    String syntaxOID = tmpMap.get(name).getFirst();
+
+		    if (syntaxOID != null) {
+		        Class<?> cls = OID_SYNTAX_CLASS_MAPPING.get(syntaxOID);
+		        if (cls != null) {
+		            ATTRIBUTE_DATA_TYPES.put(name.toLowerCase(), cls);
+		        }
+		    }
+		}
+	}
+
+	private void populateObjectClassTypes(Attribute objectClassAttributeTypes) throws LDAPException {
+		for (String strObjectClassAttributeType : objectClassAttributeTypes.getValues()) {
+			ObjectClassDefinition objectClassTypeDef = new ObjectClassDefinition(strObjectClassAttributeType);
+		    
+		    Set<String> attributeNamesSet = new HashSet<>();
+		    attributeNamesSet.addAll(Arrays.asList(objectClassTypeDef.getRequiredAttributes()));
+		    attributeNamesSet.addAll(Arrays.asList(objectClassTypeDef.getOptionalAttributes()));
+		    
+		    List<String> attributeNamesList = new ArrayList<String>(attributeNamesSet);
+
+		    String[] objectClassNames = objectClassTypeDef.getNames();
+		    for (String objectClassName : objectClassNames) {
+		    	String objectClassNameLower = objectClassName.toLowerCase();
+			    OBJECT_CLASS_DATA_TYPES.put(objectClassNameLower, attributeNamesList);
+			    OBJECT_CLASS_TREE.put(objectClassNameLower, Arrays.asList(objectClassTypeDef.getSuperiorClasses()));
+		    }
+		    
+		}
+	}
+
+	@Override
+	public Set<String> getAttributes(String objectClass) {
+    	String objectClassNameLower = objectClass.toLowerCase();
+
+    	Set<String> attributeNamesSet = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+	    
+	    List<String> attributNames = OBJECT_CLASS_DATA_TYPES.get(objectClassNameLower);
+	    attributeNamesSet.addAll(attributNames);
+
+	    List<String> subObjectClasses = OBJECT_CLASS_TREE.get(objectClassNameLower);
+		for (String subObjectClass : subObjectClasses) {
+		    List<String> subAttributeNames = OBJECT_CLASS_DATA_TYPES.get(subObjectClass.toLowerCase());
+		    attributeNamesSet.addAll(subAttributeNames);
+		}
+		
+		return attributeNamesSet;
+	}
+
+	@Override
+	public String getAttributeType(String attributeName) {
+		return ATTRIBUTE_DATA_TYPES.get(attributeName.toLowerCase()).getSimpleName();
+	}
 
     private static final class SearchResultEntryComparator<T> implements Comparator<T>, Serializable {
 

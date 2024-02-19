@@ -8,6 +8,7 @@ package io.jans.orm.ldap.operation;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Control;
@@ -24,6 +25,7 @@ import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.ldap.impl.LdapBatchOperationWraper;
 import io.jans.orm.ldap.operation.impl.LdapConnectionProvider;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -126,5 +128,9 @@ public interface LdapOperationService extends PersistenceOperationService {
     String getCertificateAttributeName(String attributeName);
 
     <T> List<T> sortListByAttributes(List<T> searchResultEntries, Class<T> cls, boolean caseSensitive, boolean ascending, String... sortByAttributes);
+
+    Set<String> getAttributes(String objectClass);
+
+	String getAttributeType(String attributeName);
 
 }

@@ -89,7 +89,7 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
         Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, userInum, registrationData, challenge);
         registrationEntry.setRegistrationStatus(registrationData.getStatus());
         if (StringUtils.isNotEmpty(challenge)) {
-        	registrationEntry.setChallengeHash(String.valueOf(getChallengeHashCode(challenge)));
+        	registrationEntry.setChallengeHash(getChallengeHashCode(challenge));
         }
         registrationEntry.setRpId(registrationData.getApplicationId());
 
@@ -177,7 +177,7 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
         String baseDn = oneStep ? getDnForRegistrationEntry(null, null) : getBaseDnForFido2RegistrationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("jansCodeChallenge", challenge);
-        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
+        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", getChallengeHashCode(challenge));
         Filter filter = Filter.createANDFilter(codeChallengFilter, codeChallengHashCodeFilter);
 
         List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);

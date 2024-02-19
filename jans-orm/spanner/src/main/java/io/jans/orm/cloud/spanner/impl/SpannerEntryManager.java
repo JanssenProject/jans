@@ -19,11 +19,16 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.cloud.spanner.Type;
+import com.google.cloud.spanner.Type.Code;
+import com.google.cloud.spanner.Type.StructField;
+
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.cloud.spanner.model.ConvertedExpression;
 import io.jans.orm.cloud.spanner.model.SearchReturnDataType;
 import io.jans.orm.cloud.spanner.model.TableMapping;
 import io.jans.orm.cloud.spanner.operation.SpannerOperationService;
+import io.jans.orm.cloud.spanner.operation.impl.SpannerConnectionProvider;
 import io.jans.orm.event.DeleteNotifier;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.EntryDeleteException;
@@ -35,13 +40,14 @@ import io.jans.orm.impl.GenericKeyConverter;
 import io.jans.orm.impl.model.ParsedKey;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
+import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.Sort;
 import io.jans.orm.model.SortOrder;
-import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.search.filter.FilterProcessor;
@@ -946,6 +952,50 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
 
 	public String[] fromInternalAttributes(String[] internalAttributeNames) {
 		return ((SpannerOperationService) operationService).fromInternalAttributes(internalAttributeNames);
+	}
+
+	@Override
+	public <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName) {
+		// Check entry class
+		checkEntryClass(entryClass, false);
+		String[] objectClasses = getTypeObjectClasses(entryClass);
+
+		SpannerConnectionProvider spannerConnectionProvider = getOperationService().getConnectionProvider();
+		TableMapping tableMapping = spannerConnectionProvider.getTableMappingByKey(primaryKey, getBaseObjectClass(objectClasses));
+
+		AttributeType attributeType = getAttributeType(propertyName, tableMapping);
+		if (attributeType != null) {
+			return attributeType;
+		}
+
+		Map<String, TableMapping> childTablesMapping = spannerConnectionProvider.getChildTablesMapping(primaryKey, tableMapping);
+		tableMapping = childTablesMapping.get(propertyName.toLowerCase());
+		attributeType = getAttributeType(propertyName, tableMapping);
+
+		return attributeType;
+	}
+
+	private AttributeType getAttributeType(String propertyName, TableMapping tableMapping) {
+		if (tableMapping == null) {
+			return null;
+		}
+
+		Map<String, StructField> columTypes = tableMapping.getColumTypes();
+		if (columTypes != null) {
+			StructField structField = columTypes.get(propertyName.toLowerCase());
+			if (structField != null) {
+				Code code = structField.getType().getCode();
+
+				boolean multiValued = (Code.ARRAY == code) || (Code.JSON == code) || (Code.PG_JSONB == code);
+
+				AttributeType attributeType = new AttributeType(structField.getName(),
+						structField.getName().toLowerCase(), code.name(), multiValued);
+
+				return attributeType;
+			}
+		}
+		
+		return null;
 	}
 
 	protected boolean isSupportForceUpdate() {

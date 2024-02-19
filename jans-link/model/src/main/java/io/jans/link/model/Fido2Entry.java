@@ -30,7 +30,7 @@ public class Fido2Entry extends BaseEntry implements Serializable {
     private String challenge;
 
     @AttributeName(ignoreDuringUpdate = true, name = "jansCodeChallengeHash")
-    private String challengeHash;
+    private Integer challengeHash;
 
     @AttributeName(ignoreDuringUpdate = true, name = "creationDate")
     private Date creationDate;
@@ -83,11 +83,11 @@ public class Fido2Entry extends BaseEntry implements Serializable {
         this.challenge = challenge;
     }
 
-    public String getChallengeHash() {
+    public Integer getChallengeHash() {
         return challengeHash;
     }
 
-    public void setChallengeHash(String challengeHash) {
+    public void setChallengeHash(Integer challengeHash) {
         this.challengeHash = challengeHash;
     }
 
