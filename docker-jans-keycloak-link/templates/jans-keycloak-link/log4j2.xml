@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
     <Properties>
-        <Property name="keycloak_link.log.console.prefix" value="keycloak-link" />
+        <Property name="keycloak_link.log.console.prefix" value="jans-keycloak-link" />
     </Properties>
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">

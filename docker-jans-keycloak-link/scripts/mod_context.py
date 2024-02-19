@@ -14,7 +14,7 @@ from jans.pycloudlib.utils import exec_cmd
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("keycloak-link")
+logger = logging.getLogger("jans-keycloak-link")
 
 
 Library = namedtuple("Library", ["path", "basename", "meta"])

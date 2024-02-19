@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
     <Properties>
-        <Property name="lock.log.console.prefix" value="auth-lock" />
+        <Property name="lock.log.console.prefix" value="jans-auth-lock" />
     </Properties>
     <Appenders>
         <Console name="Lock_Console" target="SYSTEM_OUT">

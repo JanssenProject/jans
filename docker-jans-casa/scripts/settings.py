@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "casa": {
+        "jans-casa": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,

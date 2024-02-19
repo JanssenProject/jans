@@ -60,8 +60,10 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
-          sparse-checkout: docker-jans-${{ matrix.docker-images }}
-
+          sparse-checkout: |
+            docker-jans-${{ matrix.docker-images }}
+            automation
+            demos
       - name: Check docker directories that changed
         id: build_docker_image
         run: |
@@ -136,9 +138,9 @@ jobs:
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "build=${BUILD}" >> $GITHUB_OUTPUT
           echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
-          if [[ ! $VERSION =~ "_dev" ]]; then
-            # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
-            if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
+          # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
+          if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
+            if [[ ${{ github.event_name != 'pull_request' }} ]]; then
               TEMP_IMG="auth-server certmanager config-api configurator fido2 persistence-loader scim monolith loadtesting-jmeter link casa saml keycloak-link"
               for i in $TEMP_IMG; do
                 TEMP_TOKEN=$(curl https://ghcr.io/token\?scope\="repository:janssenproject/jans/$i:pull" | jq -r '.token')

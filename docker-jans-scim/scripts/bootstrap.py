@@ -41,7 +41,7 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("scim")
+logger = logging.getLogger("jans-scim")
 
 manager = get_manager()
 

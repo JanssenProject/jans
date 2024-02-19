@@ -16,7 +16,7 @@ from settings import LOGGING_CONFIG
 from utils import parse_swagger_file
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("scim")
+logger = logging.getLogger("jans-scim")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 

@@ -17,7 +17,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("auth")
+logger = logging.getLogger("jans-auth")
 
 manager = get_manager()
 

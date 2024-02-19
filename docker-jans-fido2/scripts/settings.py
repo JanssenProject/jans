@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "fido2": {
+        "jans-fido2": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,

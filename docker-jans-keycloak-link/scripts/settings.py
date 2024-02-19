@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "keycloak-link": {
+        "jans-keycloak-link": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,

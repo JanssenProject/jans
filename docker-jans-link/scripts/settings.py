@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "link": {
+        "jans-link": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,

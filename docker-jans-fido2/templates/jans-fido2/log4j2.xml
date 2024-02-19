@@ -2,7 +2,7 @@
 
 <Configuration packages="io.jans.log">
     <Properties>
-        <Property name="fido2.log.console.prefix" value="fido2" />
+        <Property name="fido2.log.console.prefix" value="jans-fido2" />
     </Properties>
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">
