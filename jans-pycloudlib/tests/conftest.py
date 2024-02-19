@@ -29,7 +29,8 @@ def gvault_secret():
     from jans.pycloudlib.secret import VaultSecret
 
     secret = VaultSecret()
-    secret.prefix = "secret/testing"
+    secret.settings["CN_SECRET_VAULT_NAMESPACE"] = "testing"
+    secret.settings["CN_SECRET_VAULT_KV_PATH"] = "secret"
     yield secret
 
 

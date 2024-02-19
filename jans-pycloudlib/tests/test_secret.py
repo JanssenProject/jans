@@ -83,8 +83,8 @@ def test_vault_secret_get(gvault_secret, monkeypatch):
     )
 
     monkeypatch.setattr(
-        "hvac.Client.read",
-        lambda cls, key: {"data": {"value": "bar"}},
+        "hvac.api.secrets_engines.KvV1.read_secret",
+        lambda cls, path, mount_point: {"data": {"value": "bar"}},
     )
     assert gvault_secret.get("foo") == "bar"
 
@@ -96,8 +96,8 @@ def test_vault_secret_get_default(gvault_secret, monkeypatch):
     )
 
     monkeypatch.setattr(
-        "hvac.Client.read",
-        lambda cls, key: {},
+        "hvac.api.secrets_engines.KvV1.read_secret",
+        lambda cls, path, mount_point: {},
     )
     assert gvault_secret.get("foo", "default") == "default"
 
@@ -108,8 +108,8 @@ def test_vault_secret_set(gvault_secret, monkeypatch):
         lambda cls: True,
     )
     monkeypatch.setattr(
-        "hvac.adapters.Request.post",
-        lambda cls, url, json: VaultResponse(204),
+        "hvac.api.secrets_engines.KvV1.create_or_update_secret",
+        lambda cls, path, mount_point, secret: VaultResponse(204),
     )
     assert gvault_secret.set("foo", "bar") is True
 
@@ -120,13 +120,13 @@ def test_vault_secret_get_all(gvault_secret, monkeypatch):
         lambda cls: True,
     )
     monkeypatch.setattr(
-        "hvac.Client.list",
-        lambda cls, key: {"data": {"keys": ["foo"]}},
+        "hvac.api.secrets_engines.KvV1.list_secrets",
+        lambda cls, path, mount_point: {"data": {"keys": ["foo"]}},
     )
 
     monkeypatch.setattr(
-        "hvac.Client.read",
-        lambda cls, key: {"data": {"value": "bar"}},
+        "hvac.api.secrets_engines.KvV1.read_secret",
+        lambda cls, path, mount_point: {"data": {"value": "bar"}},
     )
     assert gvault_secret.all() == {"foo": "bar"}
 
@@ -137,8 +137,8 @@ def test_vault_secret_get_all_empty(gvault_secret, monkeypatch):
         lambda cls: True,
     )
     monkeypatch.setattr(
-        "hvac.Client.list",
-        lambda cls, key: None,
+        "hvac.api.secrets_engines.KvV1.list_secrets",
+        lambda cls, path, mount_point: None,
     )
     assert gvault_secret.all() == {}
 
@@ -154,8 +154,8 @@ def test_vault_secret_set_all(gvault_secret, monkeypatch):
         lambda cls: True,
     )
     monkeypatch.setattr(
-        "hvac.adapters.Request.post",
-        lambda cls, url, json: VaultResponse(204),
+        "hvac.api.secrets_engines.KvV1.create_or_update_secret",
+        lambda cls, path, mount_point, secret: VaultResponse(204),
     )
     assert gvault_secret.set_all({"a": 1}) is True
 

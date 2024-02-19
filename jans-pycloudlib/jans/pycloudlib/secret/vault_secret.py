@@ -32,7 +32,10 @@ class VaultSecret(BaseSecret):
     - `CN_SECRET_VAULT_CERT_FILE`: path to Vault cert file (default to `/etc/certs/vault_client.crt`).
     - `CN_SECRET_VAULT_KEY_FILE`: path to Vault key file (default to `/etc/certs/vault_client.key`).
     - `CN_SECRET_VAULT_CACERT_FILE`: path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
-    - `CN_SECRET_VAULT_NAMESPACE`: namespace used to create the config tree, i.e. `secret/jans` (default to `jans`).
+    - `CN_SECRET_VAULT_NAMESPACE`: namespace used to access secrets (default to empty string).
+    - `CN_SECRET_VAULT_KV_PATH`: path to KV secrets engine (default to `secret`).
+    - `CN_SECRET_VAULT_PREFIX`: prefixed name used to create the config tree (default to `jans`)
+    - `CN_SECRET_VAULT_KV_VERSION`: KV version (default to `1`).
     """
 
     def __init__(self) -> None:
@@ -69,7 +72,9 @@ class VaultSecret(BaseSecret):
             "CN_SECRET_VAULT_CACERT_FILE", "/etc/certs/vault_ca.crt",
         )
 
-        self.settings.setdefault("CN_SECRET_VAULT_NAMESPACE", "jans")
+        self.settings.setdefault("CN_SECRET_VAULT_NAMESPACE", "")
+        self.settings.setdefault("CN_SECRET_VAULT_PREFIX", "jans")
+        self.settings.setdefault("CN_SECRET_VAULT_KV_PATH", "secret")
 
         cert, verify = self._verify_cert(
             self.settings["CN_SECRET_VAULT_SCHEME"],
@@ -81,16 +86,15 @@ class VaultSecret(BaseSecret):
 
         self._request_warning(self.settings["CN_SECRET_VAULT_SCHEME"], verify)
 
-        self.client = hvac.Client(
-            url="{}://{}:{}".format(
-                self.settings["CN_SECRET_VAULT_SCHEME"],
-                self.settings["CN_SECRET_VAULT_HOST"],
-                int(self.settings["CN_SECRET_VAULT_PORT"]),
-            ),
-            cert=cert,
-            verify=verify,
-        )
-        self.prefix = f"secret/{self.settings['CN_SECRET_VAULT_NAMESPACE']}"
+        client_opts = {
+            "url": f"{self.settings['CN_SECRET_VAULT_SCHEME']}://{self.settings['CN_SECRET_VAULT_HOST']}:{self.settings['CN_SECRET_VAULT_PORT']}",
+            "cert": cert,
+            "verify": verify,
+            "namespace": self.settings["CN_SECRET_VAULT_NAMESPACE"],
+        }
+
+        self.client = hvac.Client(**client_opts)
+        self.client.secrets.kv.default_kv_version = int(os.environ.get("CN_SECRET_VAULT_KV_VERSION", "1"))
 
     @property
     def role_id(self) -> str:
@@ -101,7 +105,7 @@ class VaultSecret(BaseSecret):
         """
         try:
             with open(self.settings["CN_SECRET_VAULT_ROLE_ID_FILE"]) as f:
-                role_id = f.read()
+                role_id = f.read().strip()
         except FileNotFoundError:
             role_id = ""
         return role_id
@@ -115,7 +119,7 @@ class VaultSecret(BaseSecret):
         """
         try:
             with open(self.settings["CN_SECRET_VAULT_SECRET_ID_FILE"]) as f:
-                secret_id = f.read()
+                secret_id = f.read().strip()
         except FileNotFoundError:
             secret_id = ""  # nosec: B105
         return secret_id
@@ -139,7 +143,10 @@ class VaultSecret(BaseSecret):
             Value based on given key or default one.
         """
         self._authenticate()
-        sc = self.client.read(f"{self.prefix}/{key}")
+        sc = self.client.secrets.kv.read_secret(
+            path=f"{self.settings['CN_SECRET_VAULT_PREFIX']}/{key}",
+            mount_point=self.settings["CN_SECRET_VAULT_KV_PATH"],
+        )
 
         if not sc:
             return default
@@ -158,11 +165,10 @@ class VaultSecret(BaseSecret):
         self._authenticate()
         val = {"value": safe_value(value)}
 
-        # hvac.v1.Client.write checks for status code 200,
-        # but Vault HTTP API returns 204 if request succeeded;
-        # hence we're using lower level of `hvac.v1.Client` API to set key-val
-        response = self.client._adapter.post(
-            f"/v1/{self.prefix}/{key}", json=val,
+        response = self.client.secrets.kv.create_or_update_secret(
+            path=f"{self.settings['CN_SECRET_VAULT_PREFIX']}/{key}",
+            mount_point=self.settings["CN_SECRET_VAULT_KV_PATH"],
+            secret=val,
         )
         return bool(response.status_code == 204)
 
@@ -234,7 +240,11 @@ class VaultSecret(BaseSecret):
             A mapping of secrets (if any).
         """
         self._authenticate()
-        result = self.client.list(self.prefix)
+        result = self.client.secrets.kv.list_secrets(
+            path=self.settings["CN_SECRET_VAULT_PREFIX"],
+            mount_point=self.settings["CN_SECRET_VAULT_KV_PATH"],
+        )
+
         if not result:
             return {}
         return {key: self.get(key) for key in result["data"]["keys"]}
