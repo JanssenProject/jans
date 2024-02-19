@@ -81,17 +81,19 @@ public class KcLinkConfigResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT    @ProtectedApi(scopes = { Constants.KC_LINK_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    public Response updatekcLinkConf(@Valid io.jans.keycloak.link.model.config.AppConfiguration kcLinkConf) {
-        logger.info("Update KC Link conf details kcLinkConf():{}", kcLinkConf);
-        io.jans.keycloak.link.model.config.AppConfiguration kcLinkConfiguration = kcLinkConfigService.find();
-        logger.info("KC Link conf details kcLinkConfiguration():{}", kcLinkConfiguration);
-        if(kcLinkConfiguration==null) {
+    public Response updatekcLinkConf(@Valid io.jans.keycloak.link.model.config.AppConfiguration kcLinkAppConf) {
+        logger.info("Update KC Link conf details kcLinkAppConf():{}", kcLinkAppConf);
+        Conf conf = kcLinkConfigService.findKcLinkConf();
+        logger.info("KC Link conf:{} ", conf);
+        if(conf==null) {
             throwInternalServerException("It seems Kc Link module is not setup, kindly check.");
         }
-        kcLinkConfigService.mergeKcLinkConfig(kcLinkConf);
-        kcLinkConf = kcLinkConfigService.find();
-        logger.info("KC Link conf, post update - kcLinkConf:{}", kcLinkConf);
-        return Response.ok(kcLinkConf).build();
+       
+        conf.setDynamic(kcLinkAppConf);
+        kcLinkConfigService.mergeKcLinkConfig(conf);
+        kcLinkAppConf = kcLinkConfigService.find();
+        logger.info("KC Link conf, post update - kcLinkAppConf:{}", kcLinkAppConf);
+        return Response.ok(kcLinkAppConf).build();
 
     }
 
@@ -108,18 +110,20 @@ public class KcLinkConfigResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.KC_LINK_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchkcLinkConf(@NotNull String jsonPatchString) throws JsonPatchException, IOException {
-        logger.info("Config API - jsonPatchString:{} ", jsonPatchString);
-        io.jans.keycloak.link.model.config.AppConfiguration kcLinkConfiguration = kcLinkConfigService.find();
-        logger.info("KC Link conf details kcLinkConfiguration():{}", kcLinkConfiguration);
-        if(kcLinkConfiguration==null) {
+        logger.info("KC Link Config - jsonPatchString:{} ", jsonPatchString);
+        Conf conf = kcLinkConfigService.findKcLinkConf();
+        logger.info("KC Link conf:{} ", conf);
+        if(conf==null) {
             throwInternalServerException("It seems Kc Link module is not setup, kindly check.");
         }
-        Conf conf = kcLinkConfigService.getDynamic();
-        kcLinkConfiguration = Jackson.applyPatch(jsonPatchString, conf.getDynamicConf());
-        conf.setDynamicConf(kcLinkConfiguration);
+       
+        io.jans.keycloak.link.model.config.AppConfiguration kcLinkAppConf = Jackson.applyPatch(jsonPatchString, conf.getDynamic());
+        logger.info("KC Link conf details kcLinkAppConf():{}", kcLinkAppConf);
+        
+        conf.setDynamic(kcLinkAppConf);
         kcLinkConfigService.mergeKcLinkConfig(conf);
-        kcLinkConfiguration = kcLinkConfigService.find();
-        logger.info("KC KC Link post patch - kcLinkConfiguration:{}", kcLinkConfiguration);
-        return Response.ok(kcLinkConfiguration).build();
+        kcLinkAppConf = kcLinkConfigService.find();
+        logger.info("KC KC Link post patch - kcLinkAppConf:{}", kcLinkAppConf);
+        return Response.ok(kcLinkAppConf).build();
     }
 }

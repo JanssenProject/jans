@@ -545,6 +545,89 @@ paths:
   /kc/kc-link-config:
     get:
       tags:
+      - KC Link - Configuration
+      summary: Gets KC Link configuration properties
+      description: Gets KC Link configuration properties
+      operationId: get-kc-link-properties
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/kc-link-config.readonly
+    put:
+      tags:
+      - KC Link - Configuration
+      summary: Update KC Link configuration properties
+      description: Update KC Link configuration properties
+      operationId: put-kc-link-properties
+      requestBody:
+        description: GluuAttribute object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppConfiguration'
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/kc-link-config.write
+    patch:
+      tags:
+      - KC Link - Configuration
+      summary: Partially modifies KC Link configuration properties.
+      description: Partially modifies KC Link configuration properties.
+      operationId: patch-kc-link-properties
+      requestBody:
+        description: String representing patch-document.
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/kc-link-config.write
+  /kc/samlConfig:
+    get:
+      tags:
       - SAML - Configuration
       summary: Gets SAML configuration properties
       description: Gets SAML configuration properties
@@ -618,126 +701,6 @@ paths:
       summary: Partially modifies SAML configuration properties.
       description: Partially modifies SAML Configuration properties.
       operationId: patch-saml-properties
-      requestBody:
-        description: String representing patch-document.
-        content:
-          application/json-patch+json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/JsonPatch'
-            examples:
-              Request json example:
-                description: Request json example
-                value: |
-                  [{
-                      "op": "replace",
-                      "path": "/samlEnabled",
-                      "value": false
-                  },
-                  {
-                     "op": "add",
-                      "path": "/idpConfigs/1",
-                      "value":  {
-                              "configId": "shibboleth",
-                              "rootDir": "/opt/idp/configs/shibboleth",
-                              "enabled": false,
-                              "metadataTempDir": "/opt/idp/configs/shibboleth/temp_metadata",
-                              "metadataDir": "/opt/idp/configs/shibboleth/metadata",
-                              "metadataFilePattern": "%s-idp-metadata.xml"
-                          }
-                  }
-                  ]
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SamlAppConfiguration'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml-config.write
-  /kc/samlConfig:
-    get:
-      tags:
-      - SAML - Configuration
-      summary: Gets SAML configuration properties
-      description: Gets SAML configuration properties
-      operationId: get-saml-properties_1
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SamlAppConfiguration'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml-config.readonly
-    put:
-      tags:
-      - SAML - Configuration
-      summary: Update SAML configuration properties
-      description: Update SAML configuration properties
-      operationId: put-saml-properties_1
-      requestBody:
-        description: GluuAttribute object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SamlAppConfiguration'
-            examples:
-              Request example:
-                description: Request example
-                value: |
-                  {
-                    "applicationName":"saml",
-                    "samlTrustRelationshipDn":"ou=trustRelationships,o=jans",
-                    "samlEnabled": "true",
-                    "selectedIdp": "keycloak",
-                    "idpRootDir": "/opt/idp/configs/",
-                    "idpMetadataFilePattern":"%s-idp-metadata.xml",
-                    "spMetadataFilePattern":"%s-sp-metadata.xml",
-                    "idpConfigs":[
-                      {
-                        "configId":"keycloak",
-                        "rootDir":"/opt/idp/configs/keycloak",
-                        "enabled": "true",
-                        "metadataTempDir": "/opt/idp/configs/keycloak/temp_metadata",
-                        "metadataDir":"/opt/idp/configs/keycloak/metadata",
-                        "metadataFilePattern":"%s-idp-metadata.xml"
-                      }
-                    ]
-                  }
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SamlAppConfiguration'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml-config.write
-    patch:
-      tags:
-      - SAML - Configuration
-      summary: Partially modifies SAML configuration properties.
-      description: Partially modifies SAML Configuration properties.
-      operationId: patch-saml-properties_1
       requestBody:
         description: String representing patch-document.
         content:
@@ -1053,6 +1016,167 @@ components:
             $ref: '#/components/schemas/IdentityProvider'
     JsonNode:
       type: object
+    AppConfiguration:
+      type: object
+      properties:
+        sourceConfigs:
+          type: array
+          items:
+            $ref: '#/components/schemas/GluuLdapConfiguration'
+        inumConfig:
+          $ref: '#/components/schemas/GluuLdapConfiguration'
+        targetConfig:
+          $ref: '#/components/schemas/GluuLdapConfiguration'
+        ldapSearchSizeLimit:
+          type: integer
+          format: int32
+        keyAttributes:
+          type: array
+          items:
+            type: string
+        keyObjectClasses:
+          type: array
+          items:
+            type: string
+        sourceAttributes:
+          type: array
+          items:
+            type: string
+        customLdapFilter:
+          type: string
+        updateMethod:
+          type: string
+        defaultInumServer:
+          type: boolean
+        keepExternalPerson:
+          type: boolean
+        useSearchLimit:
+          type: boolean
+        attributeMapping:
+          type: array
+          items:
+            $ref: '#/components/schemas/CacheRefreshAttributeMapping'
+        snapshotFolder:
+          type: string
+        snapshotMaxCount:
+          type: integer
+          format: int32
+        keycloakConfiguration:
+          $ref: '#/components/schemas/KeycloakConfiguration'
+        baseDN:
+          type: string
+        personObjectClassTypes:
+          type: array
+          items:
+            type: string
+        personCustomObjectClass:
+          type: string
+        contactObjectClassTypes:
+          type: array
+          items:
+            type: string
+        allowPersonModification:
+          type: boolean
+        supportedUserStatus:
+          type: array
+          items:
+            type: string
+        loggingLevel:
+          type: string
+        loggingLayout:
+          type: string
+        externalLoggerConfiguration:
+          type: string
+        metricReporterInterval:
+          type: integer
+          format: int32
+        metricReporterKeepDataDays:
+          type: integer
+          format: int32
+        metricReporterEnabled:
+          type: boolean
+        disableJdkLogger:
+          type: boolean
+        cleanServiceInterval:
+          type: integer
+          format: int32
+        keycloakLinkEnabled:
+          type: boolean
+        keycloakLinkServerIpAddress:
+          type: string
+        keycloakLinkPollingInterval:
+          type: string
+        keycloakLinkLastUpdate:
+          type: string
+          format: date-time
+        keycloakLinkLastUpdateCount:
+          type: string
+        keycloakLinkProblemCount:
+          type: string
+        useLocalCache:
+          type: boolean
+    CacheRefreshAttributeMapping:
+      type: object
+      properties:
+        source:
+          type: string
+        destination:
+          type: string
+    GluuLdapConfiguration:
+      type: object
+      properties:
+        configId:
+          type: string
+        bindDN:
+          type: string
+        bindPassword:
+          type: string
+        servers:
+          type: array
+          items:
+            type: string
+        maxConnections:
+          type: integer
+          format: int32
+        useSSL:
+          type: boolean
+        baseDNs:
+          type: array
+          items:
+            type: string
+        primaryKey:
+          type: string
+        localPrimaryKey:
+          type: string
+        useAnonymousBind:
+          type: boolean
+        enabled:
+          type: boolean
+        version:
+          type: integer
+          format: int32
+        level:
+          type: integer
+          format: int32
+    KeycloakConfiguration:
+      type: object
+      properties:
+        serverUrl:
+          type: string
+        realm:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+        grantType:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    JsonPatch:
+      type: object
     SamlAppConfiguration:
       type: object
       properties:
@@ -1118,8 +1242,6 @@ components:
           type: array
           items:
             type: string
-    JsonPatch:
-      type: object
     ProfileConfiguration:
       type: object
       properties:
