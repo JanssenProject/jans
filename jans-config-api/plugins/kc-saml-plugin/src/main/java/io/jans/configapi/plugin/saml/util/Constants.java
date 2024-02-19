@@ -22,6 +22,7 @@ public class Constants {
     public static final String IDP_METADATA_FILE_PATTERN = "%s-idp-metadata.xml";
 
     public static final String SAML_CONFIG = "/samlConfig";
+    public static final String KC_LINK_CONFIG = "/kc-link-config";
     public static final String TRUST_RELATIONSHIP = "/trust-relationship";
     public static final String SCOPE = "/scope";
     public static final String PROCESS_SP_META_FILE = "/process-sp-meta-file";
@@ -88,4 +89,8 @@ public class Constants {
 
     public static final String JANS_IDP_SAML_WRITE_ACCESS = "https://jans.io/idp/saml.write";
     public static final String JANS_IDP_SAML_DELETE_ACCESS = "https://jans.io/idp/saml.delete";
+    
+    public static final String KC_LINK_CONFIG_READ_ACCESS = "https://jans.io/oauth/kc-link-config.readonly";
+    public static final String KC_LINK_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/kc-link-config.write";
+
 }

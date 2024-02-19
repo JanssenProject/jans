@@ -46,6 +46,18 @@
 			<artifactId>jans-core-saml</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
+		<dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-keycloak-link-model</artifactId>
+            <version>${jans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-link-model</artifactId>
+            <version>${jans.version}</version>
+        </dependency>
+
+
 
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
