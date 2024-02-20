@@ -3688,10 +3688,10 @@
       "x_origin":"Jans created attribute"
   },
   {
-      "desc":"idpEntityId",
+      "desc":"entityId",
       "equality":"caseIgnoreMatch",
       "names":[
-        "idpEntityId"
+        "entityId"
       ],
       "oid":"jansAttr",
       "substr":"caseIgnoreSubstringsMatch",
@@ -5010,6 +5010,9 @@
         "jansRedirectURI",
         "jansWebOrigins",
         "consentRequired",
+		"nameIDPolicyFormat",
+		"entityId",
+		"singleLogoutServiceUrl",
         "jansSAMLMetaDataFilter",
         "jansSAMLspMetaDataSourceTyp",
         "jansSAMLspMetaDataFN",
@@ -5054,7 +5057,7 @@
 		"validateSignature",
 		"singleLogoutServiceUrl",
 		"nameIDPolicyFormat",
-		"idpEntityId",
+		"entityId",
 		"singleSignOnServiceUrl",
 		"encryptionPublicKey",
         "trustEmail",
