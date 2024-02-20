@@ -234,6 +234,8 @@ jans_lock_installer.start_installation()
 if set_provider_type:
     jans_lock_installer.configure_message_conf()
 
+jans_lock_installer.chown(Config.jansBaseFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
+
 print("Starting services")
 jans_lock_installer.start()
 jans_lock_installer.start('opa')
