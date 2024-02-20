@@ -33,7 +33,7 @@ jobs:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - name: Build the Container image
       run: docker build ./docker-jans-${{ matrix.docker-images }} --file ./docker-jans-${{ matrix.docker-images }}/Dockerfile --tag localbuild/scanimage:latest
-    - uses: anchore/scan-action@1c57367e29d11f99ae56571e49f95f1a1991945e # v3.6.3
+    - uses: anchore/scan-action@3343887d815d7b07465f6fdcd395bd66508d486a # v3.6.4
       id: scan
       with:
         image: "localbuild/scanimage:latest"
