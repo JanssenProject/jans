@@ -135,9 +135,6 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName(name = "jansMetaLocation")
     private String metaLocation;
 
-    @AttributeName(name = "jansEntityId")
-    private List<String> jansEntityId;
-
     @AttributeName(name = "jansReleasedAttr")
     private List<String> releasedAttributes;
 
