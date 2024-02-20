@@ -102,6 +102,14 @@ SetupUtils.init()
 
 if not argsp.n:
     propertiesUtils.prompt_for_http_cert_info()
+else:
+    Config.hostname = argsp.host_name
+    Config.ip = argsp.ip_address
+    Config.orgName = argsp.org_name
+    Config.countryCode = argsp.country
+    Config.city = argsp.city
+    Config.state = argsp.state
+    Config.admin_email = argsp.email
 
 if not (argsp.pgsql_host or argsp.pgsql_password):
     argsp.encode_salt = propertiesUtils.getPrompt("Encode salt")
@@ -118,13 +126,6 @@ if not argsp.n:
         argsp.redis_host = propertiesUtils.getPrompt("Redis host", argsp.redis_host)
         argsp.redis_port = propertiesUtils.getPrompt("Redis port", argsp.redis_port)
 
-Config.hostname = argsp.host_name
-Config.ip = argsp.ip_address
-Config.orgName = argsp.org_name
-Config.countryCode = argsp.country
-Config.city = argsp.city
-Config.state = argsp.state
-Config.admin_email = argsp.email
 Config.rdbm_host = argsp.pgsql_host
 Config.rdbm_port = argsp.pgsql_port
 Config.rdbm_db = argsp.pgsql_db
