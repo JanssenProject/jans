@@ -1075,10 +1075,6 @@ components:
           type: string
         metaLocation:
           type: string
-        jansEntityId:
-          type: array
-          items:
-            type: string
         releasedAttributes:
           type: array
           items:

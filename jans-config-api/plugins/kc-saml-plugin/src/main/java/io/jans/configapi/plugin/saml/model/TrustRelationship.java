@@ -341,14 +341,6 @@ public class TrustRelationship extends Entry implements Serializable {
         this.metaLocation = metaLocation;
     }
 
-    public List<String> getJansEntityId() {
-        return jansEntityId;
-    }
-
-    public void setJansEntityId(List<String> jansEntityId) {
-        this.jansEntityId = jansEntityId;
-    }
-
     public List<String> getReleasedAttributes() {
         return releasedAttributes;
     }
@@ -416,7 +408,6 @@ public class TrustRelationship extends Entry implements Serializable {
     public static void sortByDataSourceType(List<TrustRelationship> trustRelationships) {
         Collections.sort(trustRelationships, new SortByDatasourceTypeComparator());
     }
-    
 
     @Override
     public String toString() {
@@ -429,10 +420,9 @@ public class TrustRelationship extends Entry implements Serializable {
                 + spMetaDataSourceType + ", nameIDPolicyFormat=" + nameIDPolicyFormat + ", entityId=" + entityId
                 + ", singleLogoutServiceUrl=" + singleLogoutServiceUrl + ", redirectUris="
                 + Arrays.toString(redirectUris) + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL
-                + ", metaLocation=" + metaLocation + ", jansEntityId=" + jansEntityId + ", releasedAttributes="
-                + releasedAttributes + ", url=" + url + ", spLogoutURL=" + spLogoutURL + ", status=" + status
-                + ", validationStatus=" + validationStatus + ", validationLog=" + validationLog
-                + ", profileConfigurations=" + profileConfigurations + "]";
+                + ", metaLocation=" + metaLocation + ", releasedAttributes=" + releasedAttributes + ", url=" + url
+                + ", spLogoutURL=" + spLogoutURL + ", status=" + status + ", validationStatus=" + validationStatus
+                + ", validationLog=" + validationLog + ", profileConfigurations=" + profileConfigurations + "]";
     }
-        
+     
 }

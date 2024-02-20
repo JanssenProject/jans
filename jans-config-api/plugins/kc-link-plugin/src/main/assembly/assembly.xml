@@ -15,11 +15,7 @@
 			<includes>
 			    <include>io.jans:jans-keycloak-link-model</include>
                 <include>io.jans:jans-link-model</include>
-				<include>org.jboss.resteasy:resteasy-multipart-provider</include>
-				<include>org.apache.james:apache-mime4j-dom</include>
-				<include>org.apache.james:apache-mime4j-storage</include>
-				<include>org.apache.james:apache-mime4j-core</include>
-				</includes>
+			</includes>
 			<scope>runtime</scope>
 		</dependencySet>
 	</dependencySets>
