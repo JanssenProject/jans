@@ -50,6 +50,7 @@ data:
   {{- end }}
   # [vault_envs] Envs related to Hashicorp vault 
   {{ if eq .Values.global.configSecretAdapter "vault" }}
+  CN_SECRET_VAULT_ADDR: {{ .Values.configmap.cnSecretVaultAddr | quote }}
   CN_SECRET_VAULT_VERIFY: {{ .Values.configmap.cnSecretVaultVerify | quote }}
   CN_SECRET_VAULT_ROLE_ID_FILE: {{ .Values.configmap.cnSecretVaultRoleIdFile | quote }}
   CN_SECRET_VAULT_SECRET_ID_FILE: {{ .Values.configmap.cnSecretVaultSecretIdFile | quote }}
