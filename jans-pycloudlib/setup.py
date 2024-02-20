@@ -48,6 +48,7 @@ setup(
         "oauthlib>=3.2.1",
         "boto3",
         "sprig-aes>=0.4.0",
+        "javaproperties>=0.8.1",
     ],
     classifiers=[
         "Intended Audience :: Developers",

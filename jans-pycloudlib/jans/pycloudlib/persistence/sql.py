@@ -12,6 +12,7 @@ from collections import defaultdict
 from functools import cached_property
 from tempfile import NamedTemporaryFile
 
+import javaproperties
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.exc import SAWarning
 from sqlalchemy import create_engine
@@ -573,7 +574,9 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
         dest: Absolute path where generated file is located.
     """
     with open(src) as f:
-        txt = f.read()
+        data = javaproperties.loads(f.read())
+        overrides = javaproperties.loads(os.environ.get("CN_SQL_DB_PROPS_OVERRIDES", ""))
+        data.update(overrides)
 
     with open(dest, "w") as f:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
@@ -587,6 +590,7 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
             default_schema = "public"
         db_schema = os.environ.get("CN_SQL_DB_SCHEMA", "") or default_schema
 
+        txt = javaproperties.dumps(data, timestamp=None)
         rendered_txt = txt % {
             "rdbm_db": db_name,
             "rdbm_schema": db_schema,
