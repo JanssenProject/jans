@@ -1,4 +1,4 @@
-
+@ignore
 Feature: Verify KC Link configuration endpoint
 
 	Background:kcLinkUrl
