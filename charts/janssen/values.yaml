@@ -259,12 +259,8 @@ config:
     # [aws_secret_manager_envs] END
     # [aws_envs] END
     # [vault_envs] Envs related to Hashicorp vault 
-    # supported Vault scheme (`http` or `https`).
-    cnSecretVaultScheme: ""
-    # hostname or IP of Vault (default to `localhost`).
-    cnSecretVaultHost: localhost
-    # port of Vault (default to `8200`).
-    cnSecretVaultPort: 8200
+    # base URL of Vault (default to `http://localhost:8200`).
+    cnSecretVaultAddr: http://localhost:8200
     # whether to verify cert or not (default to `false`).
     cnSecretVaultVerify: false
     # path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
@@ -277,8 +273,14 @@ config:
     cnSecretVaultKeyFile: /etc/certs/vault_client.key
     # path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
     cnSecretVaultCACertFile: /etc/certs/vault_ca.crt
-    # namespace used to create the config tree, i.e. `secret/jans` (default to `jans`).
-    cnSecretVaultNamespace: jans
+    # namespace used to create the config tree, i.e. `secret/jans` (default to empty string).
+    cnSecretVaultNamespace: ""
+    # path to KV secrets engine (default to `secret`).
+    cnSecretVaultKvPath: secret 
+    # base prefix name used to build secret path (default to `jans`).
+    cnSecretVaultPrefix: jans
+    # path to AppRole (default to `approle`).
+    cnSecretVaultAppRolePath: approle
     # [vault_envs] END
     # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
     cnLdapUrl: "opendj:1636"
