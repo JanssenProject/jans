@@ -27,7 +27,7 @@ public class KcLinkUtil {
 
     public Map<String, String> getProperties() {
         logger.debug("   KcLinkUtil - kcLinkConfigSource.getProperties():{}", kcLinkConfigSource.getProperties());
-        return KcLinkConfigSource.getProperties();
+        return kcLinkConfigSource.getProperties();
     }
 
     public Set<String> getPropertyNames() {
