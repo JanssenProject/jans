@@ -336,6 +336,7 @@ def do_install():
 
 
 def lock_setup():
+    extract_setup()
     lock_setup_cmd = '{} {}/lock_setup.py'.format(sys.executable, argsp.setup_dir)
     setup_args = argsp.args or ''
     if setup_args:

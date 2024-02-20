@@ -69,6 +69,10 @@ base.current_app.app_info['jans_version'] = base.current_app.app_info['JANS_APP_
 # download pre-required apps
 from setup_app import downloads
 #downloads.download_apps()
+downloads.download_sqlalchemy()
+downloads.download_cryptography()
+downloads.download_pyjwt()
+downloads.download_pymysql()
 
 sys.path.insert(0, base.pylib_dir)
 
@@ -136,6 +140,7 @@ Config.install_opa = True
 if Config.lock_message_provider_type == message_provider_types[1]:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
+        print("Connecting to Redis server...")
         s.connect((Config.lock_redis_host, int(Config.lock_redis_port)))
     except Exception as e:
         print(f"{colors.DANGER}Can't connect to REDIS server.{colors.ENDC}")
