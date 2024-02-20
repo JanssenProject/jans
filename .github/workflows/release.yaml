@@ -35,7 +35,7 @@ jobs:
         simple: [ "docs" ]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
       with:
         egress-policy: audit
 
@@ -78,7 +78,7 @@ jobs:
         maven: [ "jans-scim", "jans-orm", "jans-fido2", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama", "jans-link", "jans-keycloak-link", "jans-keycloak-integration", "jans-casa", "jans-lock" ]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
       with:
         egress-policy: audit
 
@@ -121,7 +121,7 @@ jobs:
         simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim", "docker-jans-monolith", "docker-jans-link", "docker-jans-casa", "docker-jans-all-in-one", "docker-jans-saml", "docker-jans-keycloak-link" ]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
       with:
         egress-policy: audit
 
@@ -164,7 +164,7 @@ jobs:
         python-projects: ["jans-pycloudlib", "jans-cli-tui", "jans-linux-setup"]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
       with:
         egress-policy: audit
 
@@ -202,7 +202,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
       with:
         egress-policy: audit
 
