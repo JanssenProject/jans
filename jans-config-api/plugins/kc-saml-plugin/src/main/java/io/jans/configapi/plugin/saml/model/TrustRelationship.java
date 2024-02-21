@@ -16,6 +16,7 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 import io.swagger.v3.oas.annotations.Hidden;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Comparator;
@@ -42,6 +43,8 @@ public class TrustRelationship extends Entry implements Serializable {
     private String owner;
 
     @AttributeName(name = "jansClntId")
+    @NotNull
+    @Size(min = 0, max = 60, message = "Length of the Client Id should not exceed 60")
     private String clientId;
 
     @NotNull
@@ -107,6 +110,18 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName(name = "jansSAMLspMetaDataSourceTyp")
     private MetadataSourceType spMetaDataSourceType;
 
+    @AttributeName(name = "nameIDPolicyFormat")
+    private String nameIDPolicyFormat;
+
+    @AttributeName(name = "entityId")
+    private String entityId;
+
+    @AttributeName(name = "singleLogoutServiceUrl")
+    private String singleLogoutServiceUrl;
+
+    @AttributeName(name = "jansRedirectURI")
+    private String[] redirectUris;
+
     /**
      * Trust Relationship file location of metadata
      */
@@ -119,9 +134,6 @@ public class TrustRelationship extends Entry implements Serializable {
 
     @AttributeName(name = "jansMetaLocation")
     private String metaLocation;
-
-    @AttributeName(name = "jansEntityId")
-    private List<String> jansEntityId;
 
     @AttributeName(name = "jansReleasedAttr")
     private List<String> releasedAttributes;
@@ -144,7 +156,7 @@ public class TrustRelationship extends Entry implements Serializable {
     private List<String> validationLog;
 
     private Map<String, ProfileConfiguration> profileConfigurations = new HashMap<String, ProfileConfiguration>();
-    
+
     public String getInum() {
         return inum;
     }
@@ -273,6 +285,38 @@ public class TrustRelationship extends Entry implements Serializable {
         this.spMetaDataSourceType = spMetaDataSourceType;
     }
 
+    public String getNameIDPolicyFormat() {
+        return nameIDPolicyFormat;
+    }
+
+    public void setNameIDPolicyFormat(String nameIDPolicyFormat) {
+        this.nameIDPolicyFormat = nameIDPolicyFormat;
+    }
+
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
+    }
+
+    public String getSingleLogoutServiceUrl() {
+        return singleLogoutServiceUrl;
+    }
+
+    public void setSingleLogoutServiceUrl(String singleLogoutServiceUrl) {
+        this.singleLogoutServiceUrl = singleLogoutServiceUrl;
+    }
+
+    public String[] getRedirectUris() {
+        return redirectUris;
+    }
+
+    public void setRedirectUris(String[] redirectUris) {
+        this.redirectUris = redirectUris;
+    }
+
     public String getSpMetaDataFN() {
         return spMetaDataFN;
     }
@@ -295,14 +339,6 @@ public class TrustRelationship extends Entry implements Serializable {
 
     public void setMetaLocation(String metaLocation) {
         this.metaLocation = metaLocation;
-    }
-
-    public List<String> getJansEntityId() {
-        return jansEntityId;
-    }
-
-    public void setJansEntityId(List<String> jansEntityId) {
-        this.jansEntityId = jansEntityId;
     }
 
     public List<String> getReleasedAttributes() {
@@ -372,7 +408,6 @@ public class TrustRelationship extends Entry implements Serializable {
     public static void sortByDataSourceType(List<TrustRelationship> trustRelationships) {
         Collections.sort(trustRelationships, new SortByDatasourceTypeComparator());
     }
-    
 
     @Override
     public String toString() {
@@ -382,11 +417,12 @@ public class TrustRelationship extends Entry implements Serializable {
                 + ", alwaysDisplayInConsole=" + alwaysDisplayInConsole + ", clientAuthenticatorType="
                 + clientAuthenticatorType + ", secret=" + secret + ", registrationAccessToken="
                 + registrationAccessToken + ", consentRequired=" + consentRequired + ", spMetaDataSourceType="
-                + spMetaDataSourceType + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL
-                + ", metaLocation=" + metaLocation + ", jansEntityId=" + jansEntityId + ", releasedAttributes="
-                + releasedAttributes + ", url=" + url + ", spLogoutURL=" + spLogoutURL + ", status=" + status
-                + ", validationStatus=" + validationStatus + ", validationLog=" + validationLog
-                + ", profileConfigurations=" + profileConfigurations + "]";
+                + spMetaDataSourceType + ", nameIDPolicyFormat=" + nameIDPolicyFormat + ", entityId=" + entityId
+                + ", singleLogoutServiceUrl=" + singleLogoutServiceUrl + ", redirectUris="
+                + Arrays.toString(redirectUris) + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL
+                + ", metaLocation=" + metaLocation + ", releasedAttributes=" + releasedAttributes + ", url=" + url
+                + ", spLogoutURL=" + spLogoutURL + ", status=" + status + ", validationStatus=" + validationStatus
+                + ", validationLog=" + validationLog + ", profileConfigurations=" + profileConfigurations + "]";
     }
-    
+     
 }
