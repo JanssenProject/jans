@@ -1007,6 +1007,15 @@ components:
           type: string
         signResponses:
           type: string
+    SAMLMetadata:
+      type: object
+      properties:
+        nameIDPolicyFormat:
+          type: string
+        entityId:
+          type: string
+        singleLogoutServiceUrl:
+          type: string
     TrustRelationship:
       required:
       - clientId
@@ -1061,12 +1070,8 @@ components:
           - federation
           - manual
           - mdq
-        nameIDPolicyFormat:
-          type: string
-        entityId:
-          type: string
-        singleLogoutServiceUrl:
-          type: string
+        samlMetadata:
+          $ref: '#/components/schemas/SAMLMetadata'
         redirectUris:
           type: array
           items:
