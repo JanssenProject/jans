@@ -128,12 +128,9 @@ public class SamlService {
     
     public List<TrustRelationship> getAllTrustRelationshipByName(String name) {
         log.info("Search TrustRelationship with name:{}", name);
-
-        String[] targetArray = new String[] { name };
-        Filter nameFilter = Filter.createEqualityFilter("name", targetArray);
+        Filter nameFilter = Filter.createEqualityFilter("name", name);
         log.debug("Search TrustRelationship with nameFilter:{}", nameFilter);
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
-                nameFilter);
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, nameFilter);
     }
     
     public TrustRelationship getTrustContainerFederation(TrustRelationship trustRelationship) {
