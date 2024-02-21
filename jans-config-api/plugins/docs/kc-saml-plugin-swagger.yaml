@@ -1009,6 +1009,7 @@ components:
           type: string
     TrustRelationship:
       required:
+      - clientId
       - description
       - displayName
       - spMetaDataSourceType
@@ -1021,6 +1022,8 @@ components:
         owner:
           type: string
         clientId:
+          maxLength: 60
+          minLength: 0
           type: string
         displayName:
           maxLength: 60
@@ -1058,14 +1061,20 @@ components:
           - federation
           - manual
           - mdq
+        nameIDPolicyFormat:
+          type: string
+        entityId:
+          type: string
+        singleLogoutServiceUrl:
+          type: string
+        redirectUris:
+          type: array
+          items:
+            type: string
         spMetaDataURL:
           type: string
         metaLocation:
           type: string
-        jansEntityId:
-          type: array
-          items:
-            type: string
         releasedAttributes:
           type: array
           items:

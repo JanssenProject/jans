@@ -22,7 +22,8 @@
 		<module>user-mgt-plugin</module>
 		<module>fido2-plugin</module>
 		<module>kc-saml-plugin</module>
-	
+	    <module>kc-link-plugin</module>
+		
 	</modules>
 
 	<dependencies>
