@@ -1018,9 +1018,9 @@ components:
           type: string
     TrustRelationship:
       required:
-      - clientId
       - description
       - displayName
+      - name
       - spMetaDataSourceType
       type: object
       properties:
@@ -1030,7 +1030,7 @@ components:
           type: string
         owner:
           type: string
-        clientId:
+        name:
           maxLength: 60
           minLength: 0
           type: string

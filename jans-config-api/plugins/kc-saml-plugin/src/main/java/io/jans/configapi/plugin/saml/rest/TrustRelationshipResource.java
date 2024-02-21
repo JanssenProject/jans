@@ -111,13 +111,13 @@ public class TrustRelationshipResource extends BaseResource {
                 
         //validation
         checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
-        checkNotNull(trustRelationship.getClientId(), "Client Id");
+        checkNotNull(trustRelationship.getName(), "Name");
 
         // check if TrustRelationship with same name already exists
-        List<TrustRelationship> existingTrustRelationship = samlService.getAllTrustRelationshipByName(trustRelationship.getClientId());
+        List<TrustRelationship> existingTrustRelationship = samlService.getAllTrustRelationshipByName(trustRelationship.getName());
         logger.debug(" existingTrustRelationship:{} ", existingTrustRelationship);
         if (existingTrustRelationship != null && !existingTrustRelationship.isEmpty()) {
-            throwBadRequestException(NAME_CONFLICT,String.format(NAME_CONFLICT_MSG, trustRelationship.getClientId()));
+            throwBadRequestException(NAME_CONFLICT,String.format(NAME_CONFLICT_MSG, trustRelationship.getName()));
         }
 
         InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
@@ -159,7 +159,7 @@ public class TrustRelationshipResource extends BaseResource {
         
         //validation
         checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
-        checkNotNull(trustRelationship.getClientId(), "ClientId");
+        checkNotNull(trustRelationship.getName(), "Name");
         checkNotNull(trustRelationship.getInum(), AttributeNames.INUM);
                
         // check if TrustRelationship exists
@@ -172,12 +172,12 @@ public class TrustRelationshipResource extends BaseResource {
 
         // check if another TrustRelationship with same name already exists
         final String inum = trustRelationship.getInum();
-        List<TrustRelationship> trustRelationshipList = samlService.getAllTrustRelationshipByName(trustRelationship.getClientId());
+        List<TrustRelationship> trustRelationshipList = samlService.getAllTrustRelationshipByName(trustRelationship.getName());
         logger.info(" trustRelationshipList:{} ", trustRelationshipList);
         if (trustRelationshipList != null && !trustRelationshipList.isEmpty()) {
             boolean flag = trustRelationshipList.stream().anyMatch(e -> e.getInum() != inum);
-            logger.info("Another TrustRelationship with same clientID:{}, exists:{}", trustRelationship.getClientId(), flag);
-            throwBadRequestException(NAME_CONFLICT,String.format(NAME_CONFLICT_MSG, trustRelationship.getClientId()));
+            logger.info("Another TrustRelationship with same name:{}, exists:{}", trustRelationship.getName(), flag);
+            throwBadRequestException(NAME_CONFLICT,String.format(NAME_CONFLICT_MSG, trustRelationship.getName()));
         }
         
         InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
@@ -208,7 +208,7 @@ public class TrustRelationshipResource extends BaseResource {
             @Parameter(description = "Unique Id of Trust Relationship") @PathParam(Constants.ID) @NotNull String id) {
 
         if (logger.isInfoEnabled()) {
-            logger.info("Delete client identified by id:{}", escapeLog(id));
+            logger.info("Delete TrustRelationship identified by id:{}", escapeLog(id));
         }
 
         TrustRelationship trustRelationship = samlService.getTrustRelationshipByInum(id);

@@ -43,10 +43,10 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName
     private String owner;
 
-    @AttributeName(name = "jansClntId")
+    @AttributeName(name = "name")
     @NotNull
-    @Size(min = 0, max = 60, message = "Length of the Client Id should not exceed 60")
-    private String clientId;
+    @Size(min = 0, max = 60, message = "Length of the name should not exceed 60")
+    private String name;
 
     @NotNull
     @Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
@@ -87,7 +87,7 @@ public class TrustRelationship extends Entry implements Serializable {
     private boolean enabled;
 
     /**
-     * Always list this client in the Account UI, even if the user does not have an
+     * Always list this in the Account UI, even if the user does not have an
      * active session.
      */
     @AttributeName(name = "displayInConsole")
@@ -169,12 +169,12 @@ public class TrustRelationship extends Entry implements Serializable {
         this.owner = owner;
     }
 
-    public String getClientId() {
-        return clientId;
+    public String getName() {
+        return name;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDisplayName() {
@@ -391,7 +391,7 @@ public class TrustRelationship extends Entry implements Serializable {
 
     @Override
     public String toString() {
-        return "TrustRelationship [inum=" + inum + ", owner=" + owner + ", clientId=" + clientId + ", displayName="
+        return "TrustRelationship [inum=" + inum + ", owner=" + owner + ", name=" + name + ", displayName="
                 + displayName + ", description=" + description + ", rootUrl=" + rootUrl + ", adminUrl=" + adminUrl
                 + ", baseUrl=" + baseUrl + ", surrogateAuthRequired=" + surrogateAuthRequired + ", enabled=" + enabled
                 + ", alwaysDisplayInConsole=" + alwaysDisplayInConsole + ", clientAuthenticatorType="
@@ -403,4 +403,5 @@ public class TrustRelationship extends Entry implements Serializable {
                 + ", spLogoutURL=" + spLogoutURL + ", status=" + status + ", validationStatus=" + validationStatus
                 + ", validationLog=" + validationLog + ", profileConfigurations=" + profileConfigurations + "]";
     }
+
 }

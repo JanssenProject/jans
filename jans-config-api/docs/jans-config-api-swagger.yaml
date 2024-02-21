@@ -7894,34 +7894,22 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-<<<<<<< HEAD
-=======
         selected:
           type: boolean
-        adminCanEdit:
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanView:
-          type: boolean
->>>>>>> f8442579cb0e7c8983310dce872b0d2eac736170
-        userCanEdit:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
-          type: boolean
         adminCanEdit:
-          type: boolean
-<<<<<<< HEAD
-        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-=======
->>>>>>> f8442579cb0e7c8983310dce872b0d2eac736170
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
         baseDn:
           type: string
     PatchRequest:
@@ -8734,6 +8722,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8743,8 +8733,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10192,10 +10180,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

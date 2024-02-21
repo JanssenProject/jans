@@ -5006,7 +5006,7 @@
       "may": [
         "inum",
         "owner",
-        "jansClntId",
+        "name",
         "displayName",
         "description",
         "rootUrl",
