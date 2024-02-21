@@ -32,6 +32,16 @@ public class AUIConfiguration {
     private String auiBackendApiServerEndSessionEndpoint;
     // LicenseSpring
     private LicenseConfiguration licenseConfiguration;
+    //UI session timeout
+    private Integer sessionTimeoutInMins;
+
+    public Integer getSessionTimeoutInMins() {
+        return sessionTimeoutInMins;
+    }
+
+    public void setSessionTimeoutInMins(Integer sessionTimeoutInMins) {
+        this.sessionTimeoutInMins = sessionTimeoutInMins;
+    }
 
     public String getAppType() {
         return appType;

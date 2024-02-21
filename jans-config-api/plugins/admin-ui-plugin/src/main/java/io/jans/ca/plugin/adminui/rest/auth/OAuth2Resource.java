@@ -58,6 +58,7 @@ public class OAuth2Resource {
             oauth2Config.setFrontChannelLogoutUrl(auiConfiguration.getAuiWebServerFrontChannelLogoutUrl());
             oauth2Config.setPostLogoutRedirectUri(auiConfiguration.getAuiWebServerPostLogoutRedirectUri());
             oauth2Config.setEndSessionEndpoint(auiConfiguration.getAuiWebServerEndSessionEndpoint());
+            oauth2Config.setSessionTimeoutInMins(auiConfiguration.getSessionTimeoutInMins());
 
             return Response.ok(oauth2Config).build();
         } catch (ApplicationException e) {
