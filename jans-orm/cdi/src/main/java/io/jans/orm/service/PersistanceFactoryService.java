@@ -187,7 +187,7 @@ public class PersistanceFactoryService implements BaseFactoryService {
 		Iterator<?> keys = propertiesConfiguration.getKeys();
         while (keys.hasNext()) {
             String key = (String) keys.next();
-            String envKey = key.toUpperCase().replaceAll(".", "_").replaceAll("-", "_");
+            String envKey = key.toUpperCase().replaceAll("\\.", "\\_").replaceAll("\\-", "\\_");
 			if (System.getenv(envKey) != null) {
 				propertiesConfiguration.setProperty(key, System.getenv(envKey));
 			}
