@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.model.GluuStatus;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -30,7 +31,7 @@ import jakarta.validation.constraints.Size;
 
 
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(value = "jansSAMLconfig")
+@ObjectClass(value = "jansTrustRelationship")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TrustRelationship extends Entry implements Serializable {
 
@@ -42,10 +43,10 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName
     private String owner;
 
-    @AttributeName(name = "jansClntId")
+    @AttributeName(name = "name")
     @NotNull
-    @Size(min = 0, max = 60, message = "Length of the Client Id should not exceed 60")
-    private String clientId;
+    @Size(min = 0, max = 60, message = "Length of the name should not exceed 60")
+    private String name;
 
     @NotNull
     @Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
@@ -86,7 +87,7 @@ public class TrustRelationship extends Entry implements Serializable {
     private boolean enabled;
 
     /**
-     * Always list this client in the Account UI, even if the user does not have an
+     * Always list this in the Account UI, even if the user does not have an
      * active session.
      */
     @AttributeName(name = "displayInConsole")
@@ -110,14 +111,9 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName(name = "jansSAMLspMetaDataSourceTyp")
     private MetadataSourceType spMetaDataSourceType;
 
-    @AttributeName(name = "nameIDPolicyFormat")
-    private String nameIDPolicyFormat;
-
-    @AttributeName(name = "entityId")
-    private String entityId;
-
-    @AttributeName(name = "singleLogoutServiceUrl")
-    private String singleLogoutServiceUrl;
+    @JsonObject
+    @AttributeName(name = "samlMetadata")
+    private SAMLMetadata samlMetadata;
 
     @AttributeName(name = "jansRedirectURI")
     private String[] redirectUris;
@@ -173,12 +169,12 @@ public class TrustRelationship extends Entry implements Serializable {
         this.owner = owner;
     }
 
-    public String getClientId() {
-        return clientId;
+    public String getName() {
+        return name;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDisplayName() {
@@ -285,28 +281,12 @@ public class TrustRelationship extends Entry implements Serializable {
         this.spMetaDataSourceType = spMetaDataSourceType;
     }
 
-    public String getNameIDPolicyFormat() {
-        return nameIDPolicyFormat;
+    public SAMLMetadata getSamlMetadata() {
+        return samlMetadata;
     }
 
-    public void setNameIDPolicyFormat(String nameIDPolicyFormat) {
-        this.nameIDPolicyFormat = nameIDPolicyFormat;
-    }
-
-    public String getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(String entityId) {
-        this.entityId = entityId;
-    }
-
-    public String getSingleLogoutServiceUrl() {
-        return singleLogoutServiceUrl;
-    }
-
-    public void setSingleLogoutServiceUrl(String singleLogoutServiceUrl) {
-        this.singleLogoutServiceUrl = singleLogoutServiceUrl;
+    public void setSamlMetadata(SAMLMetadata samlMetadata) {
+        this.samlMetadata = samlMetadata;
     }
 
     public String[] getRedirectUris() {
@@ -411,18 +391,17 @@ public class TrustRelationship extends Entry implements Serializable {
 
     @Override
     public String toString() {
-        return "TrustRelationship [inum=" + inum + ", owner=" + owner + ", clientId=" + clientId + ", displayName="
+        return "TrustRelationship [inum=" + inum + ", owner=" + owner + ", name=" + name + ", displayName="
                 + displayName + ", description=" + description + ", rootUrl=" + rootUrl + ", adminUrl=" + adminUrl
                 + ", baseUrl=" + baseUrl + ", surrogateAuthRequired=" + surrogateAuthRequired + ", enabled=" + enabled
                 + ", alwaysDisplayInConsole=" + alwaysDisplayInConsole + ", clientAuthenticatorType="
                 + clientAuthenticatorType + ", secret=" + secret + ", registrationAccessToken="
                 + registrationAccessToken + ", consentRequired=" + consentRequired + ", spMetaDataSourceType="
-                + spMetaDataSourceType + ", nameIDPolicyFormat=" + nameIDPolicyFormat + ", entityId=" + entityId
-                + ", singleLogoutServiceUrl=" + singleLogoutServiceUrl + ", redirectUris="
+                + spMetaDataSourceType + ", samlMetadata=" + samlMetadata + ", redirectUris="
                 + Arrays.toString(redirectUris) + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL
                 + ", metaLocation=" + metaLocation + ", releasedAttributes=" + releasedAttributes + ", url=" + url
                 + ", spLogoutURL=" + spLogoutURL + ", status=" + status + ", validationStatus=" + validationStatus
                 + ", validationLog=" + validationLog + ", profileConfigurations=" + profileConfigurations + "]";
     }
-     
+
 }
