@@ -29,6 +29,7 @@ import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.*;
 
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class TrustRelationshipResource extends BaseResource {
     private static final String SAML_TRUST_RELATIONSHIP_FORM = "Trust Relationship From";
     private static final String SAML_TRUST_RELATIONSHIP_CHECK_STR = "Trust Relationship identified by '";
     private static final String NAME_CONFLICT = "NAME_CONFLICT";
-    private static final String NAME_CONFLICT_MSG = "Trust Relationship with same name %s already exists!";
+    private static final String NAME_CONFLICT_MSG = "Trust Relationship with same name `%s` already exists!";
     
     @Inject
     Logger logger;
@@ -172,12 +173,19 @@ public class TrustRelationshipResource extends BaseResource {
 
         // check if another TrustRelationship with same name already exists
         final String inum = trustRelationship.getInum();
-        List<TrustRelationship> trustRelationshipList = samlService.getAllTrustRelationshipByName(trustRelationship.getName());
+        List<TrustRelationship> trustRelationshipList = samlService
+                .getAllTrustRelationshipByName(trustRelationship.getName());
         logger.info(" trustRelationshipList:{} ", trustRelationshipList);
         if (trustRelationshipList != null && !trustRelationshipList.isEmpty()) {
-            boolean flag = trustRelationshipList.stream().anyMatch(e -> e.getInum() != inum);
-            logger.info("Another TrustRelationship with same name:{}, exists:{}", trustRelationship.getName(), flag);
-            throwBadRequestException(NAME_CONFLICT,String.format(NAME_CONFLICT_MSG, trustRelationship.getName()));
+            List<String> inumList = trustRelationshipList.stream().map(TrustRelationship::getInum)
+                    .collect(Collectors.toList());
+            logger.info("TrustRelationship's with name:{}, inumList:{}", trustRelationship.getName(), inumList);
+            List<TrustRelationship> list = trustRelationshipList.stream().filter(e -> !e.getInum().equalsIgnoreCase(inum))
+                    .collect(Collectors.toList());
+            logger.info("Other TrustRelationship's with same name:{} list:{}", trustRelationship.getName(), list);
+            if (list != null && !list.isEmpty()) {
+                throwBadRequestException(NAME_CONFLICT, String.format(NAME_CONFLICT_MSG, trustRelationship.getName()));
+            }
         }
         
         InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
