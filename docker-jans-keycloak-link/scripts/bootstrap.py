@@ -35,7 +35,7 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("keycloak-link")
+logger = logging.getLogger("jans-keycloak-link")
 
 manager = get_manager()
 

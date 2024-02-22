@@ -17,7 +17,7 @@ from settings import LOGGING_CONFIG
 from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("config-api")
+logger = logging.getLogger("jans-config-api")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 

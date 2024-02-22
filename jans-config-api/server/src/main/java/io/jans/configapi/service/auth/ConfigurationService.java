@@ -73,4 +73,7 @@ public class ConfigurationService {
         this.statsData = statsData;
     }    
   
+    public boolean isLowercaseFilter(String baseDn) {        
+        return !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceManager.getPersistenceType(baseDn));
+    }
 }

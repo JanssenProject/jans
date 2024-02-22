@@ -3,7 +3,7 @@ import sys
 import datetime
 
 from types import SimpleNamespace
-from typing import Optional
+from typing import Optional, List
 
 import prompt_toolkit
 
@@ -191,7 +191,7 @@ def fromisoformat(dt_str):
 def check_email(email):
     return re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$', email, re.IGNORECASE)
 
-def get_help_with(helps: str='', without: list[str]=None):
+def get_help_with(helps: str='', without: List[str]=None):
     if not without:
         without = []
     help_list = []
