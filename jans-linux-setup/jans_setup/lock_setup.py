@@ -153,8 +153,10 @@ result = dbUtils.sqlconnection()
 if result[0]:
     print("Successfully connected to PostgreSQL")
 else:
-    print("Fail to connect PostgreSQL")
-    print(result[1])
+    print(f"{colors.DANGER}Fail to connect PostgreSQL at host {Config.rdbm_host}:{Config.rdbm_port} {colors.ENDC}")
+    print("Reason is", ' '.join(result[1].args))
+    print(f" * Please check if PostgreSQL is accepting remote connection.")
+    print(f" * User {colors.BOLD}{Config.rdbm_user}{colors.ENDC} is allowed to connect from this host to database {colors.BOLD}{Config.rdbm_db}{colors.ENDC}.")
     sys.exit()
 
 dbUtils.rdm_automapper()
@@ -192,24 +194,18 @@ def clean_httpd_config():
 
 clean_httpd_config()
 
-
-
 result = dbUtils.dn_exists('ou=configuration,o=jans')
 if not result:
     print("Jannsen was not configured on this PostgreSQL server")
     sys.exit()
 
-set_provider_type = True
 if 'jansMessageConf' in result and result['jansMessageConf']:
     message_config_s = result['jansMessageConf']
     message_config = json.loads(message_config_s)
     current_message_provider_type = message_config['messageProviderType']
     if current_message_provider_type != 'DISABLED' and current_message_provider_type != Config.lock_message_provider_type:
         print(f"{colors.WARNING}Message provider type was set to {colors.BOLD}{current_message_provider_type}{colors.ENDC}. {colors.WARNING}NOT CHANING TO {colors.BOLD}{Config.lock_message_provider_type}{colors.ENDC}")
-        set_provider_type = False
-
-    if current_message_provider_type == Config.lock_message_provider_type:
-        set_provider_type = False
+        Config.lock_message_provider_type = current_message_provider_type
 
 base.current_app.proceed_installation = True
 jansProgress.queue = queue
@@ -229,10 +225,8 @@ jreInstaller.start_installation()
 jettyInstaller.start_installation()
 jansInstaller.order_services()
 
-jans_lock_installer.set_provider_type = False
 jans_lock_installer.start_installation()
-if set_provider_type:
-    jans_lock_installer.configure_message_conf()
+jans_lock_installer.configure_message_conf()
 
 jans_lock_installer.chown(Config.jansBaseFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
 
