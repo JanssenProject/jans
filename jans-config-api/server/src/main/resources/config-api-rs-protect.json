@@ -2772,13 +2772,13 @@
           "scopes": [
             {
               "inum": "1800.01.71",
-              "name": "https://jans.io/oauth/config/saml-config.readonly"
+              "name": "https://jans.io/oauth/kc-link-config.readonly"
             }
           ],
           "groupScopes": [
             {
               "inum": "1800.01.72",
-              "name": "https://jans.io/oauth/config/saml-config.write"
+              "name": "https://jans.io/oauth/kc-link-config.write"
             }
           ],
           "superScopes": [
@@ -2796,7 +2796,7 @@
           "scopes": [
             {
               "inum": "1800.01.72",
-              "name": "https://jans.io/oauth/config/saml-config.write"
+              "name": "https://jans.io/oauth/kc-link-config.write"
             }
           ],
           "groupScopes": [],
