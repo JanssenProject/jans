@@ -1,5 +1,5 @@
 ## Overview
-   This guide shows how to store and retrieve jans `configmaps` and `secrets` externally in `AWS Secrets Manager` and `GCP Secret Manager`.  
+   This guide shows how to store and retrieve jans `configmaps` and `secrets` externally in `AWS Secrets Manager`, `GCP Secret Manager` and `Vault`.  
 
 !!! Note
     Configmaps and Secrets are stored as a collection of key-value pairs. A secret in AWS/GCP Secret Manager has a max size of 65536 bytes. So the collection of key-value pairs is splitted between secrets, and thus note that during secrets [retrieval](#retrieve-secrets-) it's possible that a single key-value pair is to be splitted between 2 AWS/GCP secrets.
@@ -123,19 +123,30 @@ kubectl get configmap -n <namespace> cn -o json
 From the console, Go to `Secret Manager`> Click on `Create Secret` > Add a `name` > Upload a `json` file or add the json to the `Secret value` field > Create
 
 ### Vault
-Add the following configuration to your `override.yaml`:
+
+You need a secret named `vault` in your namespace storing the `role-id` and `secret-id` so that workloads/services can use it to authenticate to Vault.
+
+```yaml
+apiVersion: v1
+data:
+  vault_role_id: <Base64-encoded-role-id>
+  vault_secret_id: <Base64-encoded-secret-id>
+kind: Secret
+metadata:
+  name: vault
+  namespace: <helm-release-namespace>
+```
+
+
+After creating the secret, add the following configuration to your `override.yaml`:
 
 ```yaml
 global:
   configSecretAdapter: vault
 config:
   configmap:  
-    # supported Vault scheme (`http` or `https`).
-    cnSecretVaultScheme: ""
-    # hostname or IP of Vault (default to `localhost`).
-    cnSecretVaultHost: localhost
-    # port of Vault (default to `8200`).
-    cnSecretVaultPort: 8200
+    # base URL of Vault (default to `http://localhost:8200`).
+    cnSecretVaultAddr: http://localhost:8200
     # whether to verify cert or not (default to `false`).
     cnSecretVaultVerify: false
     # path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
@@ -148,8 +159,14 @@ config:
     cnSecretVaultKeyFile: /etc/certs/vault_client.key
     # path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
     cnSecretVaultCACertFile: /etc/certs/vault_ca.crt
-    # namespace used to create the config tree, i.e. `secret/jans` (default to `jans`).
-    cnSecretVaultNamespace: jans
+    # namespace used to create the config tree, i.e. `secret/jans` (default to empty string).
+    cnSecretVaultNamespace: ""
+    # path to KV secrets engine (default to `secret`).
+    cnSecretVaultKvPath: secret 
+    # base prefix name used to build secret path (default to `jans`).
+    cnSecretVaultPrefix: jans
+    # path to AppRole (default to `approle`).
+    cnSecretVaultAppRolePath: approle
 ```
 
 ## Retrieve Secrets 
