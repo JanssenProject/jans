@@ -1,7 +1,7 @@
 package io.jans.ca.plugin.adminui.rest.auth;
 
 import io.jans.ca.plugin.adminui.model.auth.ApiTokenRequest;
-import io.jans.ca.plugin.adminui.model.auth.OAuth2ConfigResponse;
+import io.jans.ca.plugin.adminui.model.auth.AppConfigResponse;
 import io.jans.ca.plugin.adminui.model.auth.TokenResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
@@ -24,9 +24,7 @@ import org.slf4j.Logger;
 public class OAuth2Resource {
     //appType: admin-ui, ads
     static final String OAUTH2_CONFIG = "/{appType}/oauth2/config";
-    static final String OAUTH2_ACCESS_TOKEN = "/{appType}/oauth2/access-token";
     static final String OAUTH2_API_PROTECTION_TOKEN = "/{appType}/oauth2/api-protection-token";
-    static final String OAUTH2_API_USER_INFO = "/{appType}/oauth2/user-info";
 
     public static final String SCOPE_OPENID = "openid";
 
@@ -47,20 +45,20 @@ public class OAuth2Resource {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
-            OAuth2ConfigResponse oauth2Config = new OAuth2ConfigResponse();
-            oauth2Config.setAuthServerHost(auiConfiguration.getAuiWebServerHost());
-            oauth2Config.setAuthzBaseUrl(auiConfiguration.getAuiWebServerAuthzBaseUrl());
-            oauth2Config.setClientId(auiConfiguration.getAuiWebServerClientId());
-            oauth2Config.setResponseType("code");
-            oauth2Config.setScope(auiConfiguration.getAuiWebServerScope());
-            oauth2Config.setRedirectUrl(auiConfiguration.getAuiWebServerRedirectUrl());
-            oauth2Config.setAcrValues(auiConfiguration.getAuiWebServerAcrValues());
-            oauth2Config.setFrontChannelLogoutUrl(auiConfiguration.getAuiWebServerFrontChannelLogoutUrl());
-            oauth2Config.setPostLogoutRedirectUri(auiConfiguration.getAuiWebServerPostLogoutRedirectUri());
-            oauth2Config.setEndSessionEndpoint(auiConfiguration.getAuiWebServerEndSessionEndpoint());
-            oauth2Config.setSessionTimeoutInMins(auiConfiguration.getSessionTimeoutInMins());
+            AppConfigResponse appConfigResponse = new AppConfigResponse();
+            appConfigResponse.setAuthServerHost(auiConfiguration.getAuiWebServerHost());
+            appConfigResponse.setAuthzBaseUrl(auiConfiguration.getAuiWebServerAuthzBaseUrl());
+            appConfigResponse.setClientId(auiConfiguration.getAuiWebServerClientId());
+            appConfigResponse.setResponseType("code");
+            appConfigResponse.setScope(auiConfiguration.getAuiWebServerScope());
+            appConfigResponse.setRedirectUrl(auiConfiguration.getAuiWebServerRedirectUrl());
+            appConfigResponse.setAcrValues(auiConfiguration.getAuiWebServerAcrValues());
+            appConfigResponse.setFrontChannelLogoutUrl(auiConfiguration.getAuiWebServerFrontChannelLogoutUrl());
+            appConfigResponse.setPostLogoutRedirectUri(auiConfiguration.getAuiWebServerPostLogoutRedirectUri());
+            appConfigResponse.setEndSessionEndpoint(auiConfiguration.getAuiWebServerEndSessionEndpoint());
+            appConfigResponse.setSessionTimeoutInMins(auiConfiguration.getSessionTimeoutInMins());
 
-            return Response.ok(oauth2Config).build();
+            return Response.ok(appConfigResponse).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ERROR_IN_READING_CONFIGURATION.getDescription(), e);
             return Response

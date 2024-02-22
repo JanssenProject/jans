@@ -1,11 +1,15 @@
-package io.jans.ca.plugin.adminui.service.user;
+package io.jans.ca.plugin.adminui.service.adminui;
 
-import com.google.api.client.util.Lists;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.config.adminui.AdminPermission;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
+import io.jans.ca.plugin.adminui.model.auth.AppConfigResponse;
+import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
+import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
@@ -20,13 +24,59 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Singleton
-public class UserManagementService {
+public class AdminUIService {
 
     @Inject
     Logger log;
 
     @Inject
     private PersistenceEntryManager entryManager;
+
+    @Inject
+    AUIConfigurationService auiConfigurationService;
+
+    public AppConfigResponse getAdminUIEditableConfiguration() throws ApplicationException {
+        try {
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+
+            AppConfigResponse appConfigResponse = new AppConfigResponse();
+            appConfigResponse.setAuthServerHost(auiConfiguration.getAuiWebServerHost());
+            appConfigResponse.setAuthzBaseUrl(auiConfiguration.getAuiWebServerAuthzBaseUrl());
+            appConfigResponse.setClientId(auiConfiguration.getAuiWebServerClientId());
+            appConfigResponse.setResponseType("code");
+            appConfigResponse.setScope(auiConfiguration.getAuiWebServerScope());
+            appConfigResponse.setRedirectUrl(auiConfiguration.getAuiWebServerRedirectUrl());
+            appConfigResponse.setAcrValues(auiConfiguration.getAuiWebServerAcrValues());
+            appConfigResponse.setFrontChannelLogoutUrl(auiConfiguration.getAuiWebServerFrontChannelLogoutUrl());
+            appConfigResponse.setPostLogoutRedirectUri(auiConfiguration.getAuiWebServerPostLogoutRedirectUri());
+            appConfigResponse.setEndSessionEndpoint(auiConfiguration.getAuiWebServerEndSessionEndpoint());
+            appConfigResponse.setSessionTimeoutInMins(auiConfiguration.getSessionTimeoutInMins());
+
+            return appConfigResponse;
+        } catch (Exception e) {
+            log.error(ErrorResponse.GET_ADMIUI_CONFIG_ERROR.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+        }
+    }
+
+    public AppConfigResponse editAdminUIEditableConfiguration(AppConfigResponse appConfigResponse) throws ApplicationException {
+        try {
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+            if (!Strings.isNullOrEmpty(appConfigResponse.getAcrValues())) {
+                adminConf.getMainSettings().getOidcConfig().getAuiWebClient().setAcrValues(Lists.newArrayList(appConfigResponse.getAcrValues()));
+                auiConfigurationService.getAUIConfiguration().setAuiWebServerAcrValues(appConfigResponse.getAcrValues());
+            }
+            if (appConfigResponse.getSessionTimeoutInMins() != null) {
+                adminConf.getMainSettings().getUiConfig().setSessionTimeoutInMins(appConfigResponse.getSessionTimeoutInMins());
+                auiConfigurationService.getAUIConfiguration().setSessionTimeoutInMins(appConfigResponse.getSessionTimeoutInMins());
+            }
+            entryManager.merge(adminConf);
+            return getAdminUIEditableConfiguration();
+        } catch (Exception e) {
+            log.error(ErrorResponse.SAVE_ADMIUI_CONFIG_ERROR.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+        }
+    }
 
     public List<AdminRole> getAllRoles() throws ApplicationException {
         try {
