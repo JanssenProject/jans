@@ -55,7 +55,7 @@ public class AdminUIService {
             return appConfigResponse;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_ADMIUI_CONFIG_ERROR.getDescription(), e);
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.GET_ADMIUI_CONFIG_ERROR.getDescription());
         }
     }
 
@@ -74,7 +74,7 @@ public class AdminUIService {
             return getAdminUIEditableConfiguration();
         } catch (Exception e) {
             log.error(ErrorResponse.SAVE_ADMIUI_CONFIG_ERROR.getDescription(), e);
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.SAVE_ADMIUI_CONFIG_ERROR.getDescription());
         }
     }
 
@@ -92,11 +92,11 @@ public class AdminUIService {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             List<AdminRole> roles = adminConf.getDynamic().getRoles().stream().filter(ele -> ele.getRole().equals(role)).collect(Collectors.toList());
-            if (roles.isEmpty()) {
-                log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
-                throw new ApplicationException(Response.Status.NOT_FOUND.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
+            if (!roles.isEmpty()) {
+                return roles.stream().findFirst().get();
             }
-            return roles.stream().findFirst().get();
+            log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
+            throw new ApplicationException(Response.Status.NOT_FOUND.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
         } catch (ApplicationException e) {
             log.error(ErrorResponse.GET_ADMIUI_ROLES_ERROR.getDescription());
             throw e;
@@ -173,7 +173,7 @@ public class AdminUIService {
             }
 
             List<AdminRole> roles = adminConf.getDynamic().getRoles();
-            if (isFalse(getRoleObjByName(role).getDeletable())) {
+            if (!Optional.ofNullable(getRoleObjByName(role).getDeletable()).orElse(false)) {
                 log.error(ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
             }
@@ -382,15 +382,16 @@ public class AdminUIService {
     public RolePermissionMapping getAdminUIRolePermissionsMapping(String role) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-            List<RolePermissionMapping> roleScopeMapping = adminConf.getDynamic().getRolePermissionMapping()
+            List<RolePermissionMapping> roleScopeMappings = adminConf.getDynamic().getRolePermissionMapping()
                     .stream().filter(ele -> ele.getRole().equalsIgnoreCase(role))
                     .collect(Collectors.toList());
 
-            if (roleScopeMapping.isEmpty()) {
-                log.error(ErrorResponse.ROLE_PERMISSION_MAP_NOT_FOUND.getDescription());
-                throw new ApplicationException(Response.Status.NOT_FOUND.getStatusCode(), ErrorResponse.ROLE_PERMISSION_MAP_NOT_FOUND.getDescription());
+            if (!roleScopeMappings.isEmpty()) {
+                return roleScopeMappings.stream().findFirst().get();
             }
-            return roleScopeMapping.stream().findFirst().get();
+            log.error(ErrorResponse.ROLE_PERMISSION_MAP_NOT_FOUND.getDescription());
+            throw new ApplicationException(Response.Status.NOT_FOUND.getStatusCode(), ErrorResponse.ROLE_PERMISSION_MAP_NOT_FOUND.getDescription());
+
         } catch (ApplicationException e) {
             log.error(ErrorResponse.GET_ADMIUI_PERMISSIONS_ERROR.getDescription());
             throw e;
@@ -403,7 +404,7 @@ public class AdminUIService {
     public List<RolePermissionMapping> removePermissionsFromRole(String role) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-            if (isFalse(getRoleObjByName(role).getDeletable())) {
+            if (!Optional.ofNullable(getRoleObjByName(role).getDeletable()).orElse(false)) {
                 log.error(ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
             }
@@ -443,12 +444,5 @@ public class AdminUIService {
             log.error(ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
         }
-    }
-
-    private static boolean isFalse(Boolean bool) {
-        if (bool == null) {
-            return true;
-        }
-        return bool.booleanValue() ? false : true;
     }
 }
