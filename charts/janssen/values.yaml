@@ -259,27 +259,31 @@ config:
     # [aws_secret_manager_envs] END
     # [aws_envs] END
     # [vault_envs] Envs related to Hashicorp vault 
-    # base URL of Vault (default to `http://localhost:8200`).
+    # -- base64 encoded role id.
+    cnSecretVaultRoleId: ""
+    # -- base64 encoded secret id.
+    cnSecretVaultSecretId: ""
+    # -- base URL of Vault (default to `http://localhost:8200`).
     cnSecretVaultAddr: http://localhost:8200
-    # whether to verify cert or not (default to `false`).
+    # -- whether to verify cert or not (default to `false`).
     cnSecretVaultVerify: false
-    # path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
+    # -- path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
     cnSecretVaultRoleIdFile: /etc/certs/vault_role_id
-    # path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
+    # -- path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
     cnSecretVaultSecretIdFile: /etc/certs/vault_secret_id
-    # path to Vault cert file (default to `/etc/certs/vault_client.crt`).
+    # -- path to Vault cert file (default to `/etc/certs/vault_client.crt`).
     cnSecretVaultCertFile: /etc/certs/vault_client.crt
-    # path to Vault key file (default to `/etc/certs/vault_client.key`).
+    # -- path to Vault key file (default to `/etc/certs/vault_client.key`).
     cnSecretVaultKeyFile: /etc/certs/vault_client.key
-    # path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
+    # -- path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
     cnSecretVaultCACertFile: /etc/certs/vault_ca.crt
-    # namespace used to create the config tree, i.e. `secret/jans` (default to empty string).
+    # -- namespace used to create the config tree, i.e. `secret/jans` (default to empty string).
     cnSecretVaultNamespace: ""
-    # path to KV secrets engine (default to `secret`).
+    # -- path to KV secrets engine (default to `secret`).
     cnSecretVaultKvPath: secret 
-    # base prefix name used to build secret path (default to `jans`).
+    # -- base prefix name used to build secret path (default to `jans`).
     cnSecretVaultPrefix: jans
-    # path to AppRole (default to `approle`).
+    # -- path to AppRole (default to `approle`).
     cnSecretVaultAppRolePath: approle
     # [vault_envs] END
     # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.

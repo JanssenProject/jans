@@ -188,7 +188,7 @@ spec:
       {{ if eq .Values.global.configSecretAdapter "vault" }}
         - name: vault
           secret:
-            secretName: vault
+            secretName: {{ .Release.Name }}-vault
             items:
             - key: vault_role_id
               path: vault_role_id
