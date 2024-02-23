@@ -1,20 +1,20 @@
 package io.jans.ca.plugin.adminui.rest.auth;
 
 import io.jans.ca.plugin.adminui.model.auth.ApiTokenRequest;
-import io.jans.ca.plugin.adminui.model.auth.AppConfigResponse;
 import io.jans.ca.plugin.adminui.model.auth.TokenResponse;
-import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.service.auth.OAuth2Service;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
-import io.jans.configapi.core.rest.ProtectedApi;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -36,43 +36,6 @@ public class OAuth2Resource {
 
     @Inject
     OAuth2Service oAuth2Service;
-
-    @GET
-    @Path(OAUTH2_CONFIG)
-    @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SCOPE_OPENID})
-    public Response getOAuth2Config(@PathParam("appType") String appType) {
-        try {
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
-
-            AppConfigResponse appConfigResponse = new AppConfigResponse();
-            appConfigResponse.setAuthServerHost(auiConfiguration.getAuiWebServerHost());
-            appConfigResponse.setAuthzBaseUrl(auiConfiguration.getAuiWebServerAuthzBaseUrl());
-            appConfigResponse.setClientId(auiConfiguration.getAuiWebServerClientId());
-            appConfigResponse.setResponseType("code");
-            appConfigResponse.setScope(auiConfiguration.getAuiWebServerScope());
-            appConfigResponse.setRedirectUrl(auiConfiguration.getAuiWebServerRedirectUrl());
-            appConfigResponse.setAcrValues(auiConfiguration.getAuiWebServerAcrValues());
-            appConfigResponse.setFrontChannelLogoutUrl(auiConfiguration.getAuiWebServerFrontChannelLogoutUrl());
-            appConfigResponse.setPostLogoutRedirectUri(auiConfiguration.getAuiWebServerPostLogoutRedirectUri());
-            appConfigResponse.setEndSessionEndpoint(auiConfiguration.getAuiWebServerEndSessionEndpoint());
-            appConfigResponse.setSessionTimeoutInMins(auiConfiguration.getSessionTimeoutInMins());
-
-            return Response.ok(appConfigResponse).build();
-        } catch (ApplicationException e) {
-            log.error(ErrorResponse.ERROR_IN_READING_CONFIGURATION.getDescription(), e);
-            return Response
-                    .status(e.getErrorCode())
-                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            log.error(ErrorResponse.ERROR_IN_READING_CONFIGURATION.getDescription(), e);
-            return Response
-                    .serverError()
-                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_READING_CONFIGURATION.getDescription()))
-                    .build();
-        }
-    }
 
     @POST
     @Path(OAUTH2_API_PROTECTION_TOKEN)

@@ -385,7 +385,7 @@ public class AdminUIService {
             List<RolePermissionMapping> roleScopeMappings = adminConf.getDynamic().getRolePermissionMapping()
                     .stream().filter(ele -> ele.getRole().equalsIgnoreCase(role))
                     .collect(Collectors.toList());
-            if(!CommonUtils.isEmptyOrNullCollection(roleScopeMappings) && roleScopeMappings.stream().findFirst().isPresent()) {
+            if (!CommonUtils.isEmptyOrNullCollection(roleScopeMappings) && roleScopeMappings.stream().findFirst().isPresent()) {
                 return roleScopeMappings.stream().findFirst().get();
             }
             log.error(ErrorResponse.ROLE_PERMISSION_MAP_NOT_FOUND.getDescription());
