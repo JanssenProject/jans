@@ -31,13 +31,17 @@ public class OIDCClientSettings {
         this.clientSecret = clientSecret;
     }
 
-    public OIDCClientSettings(String opHost, String clientId, String clientSecret, String tokenEndpoint, String introspectionEndpoint) {
-
-        this.opHost = opHost;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
-        this.tokenEndpoint = tokenEndpoint;
-        this.introspectionEndpoint = introspectionEndpoint;
+    public OIDCClientSettings(OIDCClientSettings oidcClientSettings) {
+        this.introspectionEndpoint = oidcClientSettings.getIntrospectionEndpoint();
+        this.tokenEndpoint = oidcClientSettings.getTokenEndpoint();
+        this.redirectUri = oidcClientSettings.getRedirectUri();
+        this.postLogoutUri = oidcClientSettings.getPostLogoutUri();
+        this.frontchannelLogoutUri = oidcClientSettings.getFrontchannelLogoutUri();
+        this.scopes = oidcClientSettings.getScopes();
+        this.acrValues = oidcClientSettings.getAcrValues();
+        this.opHost = oidcClientSettings.getOpHost();
+        this.clientId = oidcClientSettings.getClientId();
+        this.clientSecret = oidcClientSettings.getClientSecret();
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -63,24 +67,12 @@ public class OIDCClientSettings {
         return redirectUri;
     }
 
-    public void setRedirectUri(String redirectUri) {
-        this.redirectUri = redirectUri;
-    }
-
     public String getPostLogoutUri() {
         return postLogoutUri;
     }
 
-    public void setPostLogoutUri(String postLogoutUri) {
-        this.postLogoutUri = postLogoutUri;
-    }
-
     public List<String> getScopes() {
         return scopes;
-    }
-
-    public void setScopes(List<String> scopes) {
-        this.scopes = scopes;
     }
 
     public List<String> getAcrValues() {
@@ -95,16 +87,8 @@ public class OIDCClientSettings {
         return frontchannelLogoutUri;
     }
 
-    public void setFrontchannelLogoutUri(String frontchannelLogoutUri) {
-        this.frontchannelLogoutUri = frontchannelLogoutUri;
-    }
-
     public String getIntrospectionEndpoint() {
         return introspectionEndpoint;
-    }
-
-    public void setIntrospectionEndpoint(String introspectionEndpoint) {
-        this.introspectionEndpoint = introspectionEndpoint;
     }
 
     @Override
