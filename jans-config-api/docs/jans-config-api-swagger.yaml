@@ -686,6 +686,8 @@ paths:
                     }
         "401":
           description: Unauthorized
+        "406":
+          description: NotAcceptable
         "500":
           description: InternalServerError
       security:
@@ -772,8 +774,12 @@ paths:
                         ],
                         "whitePagesCanView": false
                     }
+        "400":
+          description: BadRequest
         "401":
           description: Unauthorized
+        "406":
+          description: NotAcceptable
         "500":
           description: InternalServerError
       security:
@@ -7888,21 +7894,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
         selected:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        userCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9520,6 +9526,8 @@ components:
       properties:
         configOauthEnabled:
           type: boolean
+        customAttributeValidationEnabled:
+          type: boolean
         apiApprovedIssuer:
           type: array
           items:
@@ -10172,10 +10180,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
