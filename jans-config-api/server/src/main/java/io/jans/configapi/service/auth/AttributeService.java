@@ -115,7 +115,7 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
     }
     
     public boolean validateAttributeDefinition(String attributeName) {
-        log.info(" Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName, getPersistenceType(), appConfiguration);
+        log.error("\n Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName, getPersistenceType(), appConfiguration);
         boolean isValidAttribute = false;
         try {
             
@@ -124,18 +124,17 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
                 return true;                
             }
 
-            log.info(" attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, SimpleUser.class,attributeName)():{}", attributeName, persistenceEntryManager.getAttributeType("ou=people,o=jans", SimpleUser.class,
+            log.error("\n attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, SimpleUser.class,attributeName)():{}", attributeName, persistenceEntryManager.getAttributeType("ou=people,o=jans", SimpleUser.class,
                     attributeName));
             AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", SimpleUser.class,
                     attributeName);
-            log.info(" attributeName:{}, attributeType():{}", attributeName, attributeType);
+            log.error("\n attributeName:{}, attributeType():{}", attributeName, attributeType);
 
             if (attributeType != null) {
                 isValidAttribute = true;
             }
         } catch (Exception ex) {
-            log.error("Exception by ORM while validating attribute is:{}", ex);
-            isValidAttribute = true;
+            log.error("Exception by ORM while validating attribute is:", ex);
         }
         return isValidAttribute;
     }
