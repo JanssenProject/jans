@@ -12,6 +12,15 @@ public class OAuth2ConfigResponse {
     private String frontChannelLogoutUrl;
     private String postLogoutRedirectUri;
     private String endSessionEndpoint;
+    private Integer sessionTimeoutInMins;
+
+    public Integer getSessionTimeoutInMins() {
+        return sessionTimeoutInMins;
+    }
+
+    public void setSessionTimeoutInMins(Integer sessionTimeoutInMins) {
+        this.sessionTimeoutInMins = sessionTimeoutInMins;
+    }
 
     public String getAuthServerHost() {
         return authServerHost;

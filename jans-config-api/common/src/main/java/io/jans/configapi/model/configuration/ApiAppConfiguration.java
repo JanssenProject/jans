@@ -10,6 +10,7 @@ import java.util.List;
 public class ApiAppConfiguration implements Configuration {
 
     private boolean configOauthEnabled;
+    private boolean customAttributeValidationEnabled;
     private List<String> apiApprovedIssuer;
     private String apiProtectionType;
     private String apiClientId;
@@ -46,6 +47,14 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setConfigOauthEnabled(boolean configOauthEnabled) {
         this.configOauthEnabled = configOauthEnabled;
+    }
+
+    public boolean isCustomAttributeValidationEnabled() {
+        return customAttributeValidationEnabled;
+    }
+
+    public void setCustomAttributeValidationEnabled(boolean customAttributeValidationEnabled) {
+        this.customAttributeValidationEnabled = customAttributeValidationEnabled;
     }
 
     public List<String> getApiApprovedIssuer() {
@@ -260,24 +269,20 @@ public class ApiAppConfiguration implements Configuration {
 
     @Override
     public String toString() {
-        return "ApiAppConfiguration [" + " apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
+        return "ApiAppConfiguration [configOauthEnabled=" + configOauthEnabled + ", customAttributeValidationEnabled="
+                + customAttributeValidationEnabled + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
                 + apiProtectionType + ", apiClientId=" + apiClientId + ", apiClientPassword=" + apiClientPassword
                 + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl
                 + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="
                 + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="
-                + authOpenidRevokeUrl + ", smallryeHealthRootPath=" + smallryeHealthRootPath
-                + ", corsConfigurationFilters=" + corsConfigurationFilters + ", exclusiveAuthScopes="
-                + exclusiveAuthScopes + ", loggingLevel=" + loggingLevel + " , loggingLayout=" + loggingLayout
-                + " , externalLoggerConfiguration=" + externalLoggerConfiguration + " , disableJdkLogger="
-                + disableJdkLogger + " , maxCount =" + maxCount
-                + " , userExclusionAttributes="+ userExclusionAttributes
-                + " , userMandatoryAttributes="+ userMandatoryAttributes
-                + " , agamaConfiguration="+ agamaConfiguration
-                + " , auditLogConf="+ auditLogConf
-                + " , dataFormatConversionConf="+ dataFormatConversionConf
-                + " , plugins="+ plugins
+                + authOpenidRevokeUrl + ", smallryeHealthRootPath=" + smallryeHealthRootPath + ", exclusiveAuthScopes="
+                + exclusiveAuthScopes + ", corsConfigurationFilters=" + corsConfigurationFilters + ", loggingLevel="
+                + loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
+                + externalLoggerConfiguration + ", disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount
+                + ", userExclusionAttributes=" + userExclusionAttributes + ", userMandatoryAttributes="
+                + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf="
+                + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf + ", plugins=" + plugins
                 + "]";
     }
-
 }
 

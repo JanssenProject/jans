@@ -38,4 +38,4 @@ class common_strings:
     help_alt_letter = f'<Alt + letter>   {_("Navigate to an other tab")}'
     help_d          = f'<v>              {_("View current item in JSON format if possible")}'
     help_delete     = f'<d> <Delete>     {_("Delete current item project if possible")}'
-    help_link_str   = f'{_("For More Visit")} https://docs.jans.io/v1.0.6/admin/config-guide/tui/'
+    help_link_str   = f'{_("For More Visit")} https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/'
