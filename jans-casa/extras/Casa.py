@@ -1,4 +1,4 @@
-from io.jans.as.persistence.model.configuration import GluuConfiguration
+from io.jans.config import GluuConfiguration
 from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService

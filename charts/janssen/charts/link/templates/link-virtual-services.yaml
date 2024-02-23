@@ -5,7 +5,7 @@ metadata:
   name: {{ .Release.Name }}-istio-link
   namespace: {{.Release.Namespace}}
   labels:
-    APP_NAME:link
+    APP_NAME: link
 {{ include "link.labels" . | indent 4 }}
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}

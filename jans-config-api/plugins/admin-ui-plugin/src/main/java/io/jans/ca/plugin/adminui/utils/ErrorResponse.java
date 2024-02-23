@@ -19,6 +19,8 @@ public enum ErrorResponse {
     ROLE_PERMISSION_MAPPING_PRESENT("Role permission mapping already present. Please use HTTP PUT request to modify mapping."),
     GET_ADMIUI_ROLES_ERROR("Error in fetching Admin UI roles."),
     SAVE_ADMIUI_ROLES_ERROR("Error in saving Admin UI roles."),
+    GET_ADMIUI_CONFIG_ERROR("Error in fetching Admin UI configuration."),
+    SAVE_ADMIUI_CONFIG_ERROR("Error in saving Admin UI configuration."),
     ADMIUI_ROLE_ALREADY_PRESENT("Admin UI role already present."),
     EDIT_ADMIUI_ROLES_ERROR("Error in editing Admin UI roles."),
     DELETE_ADMIUI_ROLES_ERROR("Error in deleting Admin UI roles."),

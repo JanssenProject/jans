@@ -22,8 +22,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g."v1.0.22")'
-        default: "v1.0.22"
+        description: 'Version tag (e.g."v1.1.0")'
+        default: "v1.1.0"
         required: false
 concurrency:
   group: run-once
@@ -227,7 +227,9 @@ jobs:
             if [[ $folder != "${STABLE}/" ]]; then
               git rm -r $folder/admin/reference/javadocs || echo "Nothing to remove"
             fi
-          done          
+          done
+          # Replace scarf url
+          sed -i -e "s/placeholder-scarf-pixel-url/https:\/\/static.scarf.sh\/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9/g" ${STABLE}/overrides/main.html
           echo "${STABLE}" > stable.txt
           git add stable.txt && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"

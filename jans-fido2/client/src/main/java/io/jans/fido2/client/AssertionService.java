@@ -29,6 +29,12 @@ public interface AssertionService {
     @POST
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
+    @Path("/options/generate")
+    public Response generateAuthenticate(String content);
+
+    @POST
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
     @Path("/result")
     public Response verify(String content);
 

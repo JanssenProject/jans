@@ -24,6 +24,7 @@ import io.jans.util.security.StringEncrypter;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.collections.CollectionUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -151,10 +152,12 @@ public class RegisterJsonService {
             Util.addToJSONObjectIfNotNull(responseJsonObject, JWKS.toString(), new JSONObject(client.getJwks()));
         }
 
+        final List<String> backchannelLogoutUris = client.getAttributes().getBackchannelLogoutUri();
+
         // Logout params
         Util.addToJSONObjectIfNotNull(responseJsonObject, FRONT_CHANNEL_LOGOUT_URI.toString(), client.getFrontChannelLogoutUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), client.getFrontChannelLogoutSessionRequired());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, BACKCHANNEL_LOGOUT_URI.toString(), client.getAttributes().getBackchannelLogoutUri());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, BACKCHANNEL_LOGOUT_URI.toString(), CollectionUtils.isNotEmpty(backchannelLogoutUris) ? backchannelLogoutUris.iterator().next() : null);
         Util.addToJSONObjectIfNotNull(responseJsonObject, BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), client.getAttributes().getBackchannelLogoutSessionRequired());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REDIRECT_URIS_REGEX.toString(), client.getAttributes().getRedirectUrisRegex());
 

@@ -76,7 +76,7 @@ public class BaseResource {
     }
 
     public static void checkNotNull(String attribute, String attributeName) {
-        if (attribute == null) {
+        if (StringUtils.isBlank(attribute)) {
             throw new BadRequestException(getMissingAttributeError(attributeName));
         }
     }

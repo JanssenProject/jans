@@ -17,7 +17,7 @@ from jans.pycloudlib.persistence import id_from_dn
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("fido2")
+logger = logging.getLogger("jans-fido2")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
@@ -34,6 +34,7 @@ def _transform_fido2_dynamic_config(conf):
         ("skipDownloadMdsEnabled", False),
         ("skipValidateMdsInAttestationEnabled", False),
         ("sessionIdPersistInCache", False),
+        ("assertionOptionsGenerateEndpointEnabled", True),
     ]:
         # dont update if key exists
         if k in conf:

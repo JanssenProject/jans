@@ -27,7 +27,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("fido2")
+logger = logging.getLogger("jans-fido2")
 
 manager = get_manager()
 

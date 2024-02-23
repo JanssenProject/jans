@@ -1,6 +1,9 @@
 package io.jans.configapi.plugin.mgt.service;
 
 import com.github.fge.jsonpatch.JsonPatchException;
+
+import io.jans.model.GluuStatus;
+import io.jans.model.attribute.AttributeValidation;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.core.service.ConfigUserService;
@@ -10,7 +13,9 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.AuthUtil;
+import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.service.auth.ConfigurationService;
+import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
@@ -21,8 +26,10 @@ import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -30,6 +37,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -48,6 +57,9 @@ public class UserMgmtService {
 
     @Inject
     ConfigurationService configurationService;
+
+    @Inject
+    AttributeService attributeService;
 
     @Inject
     PersistenceEntryManager persistenceEntryManager;
@@ -72,26 +84,54 @@ public class UserMgmtService {
             logger.info("Search Users with searchRequest:{}, getPeopleBaseDn():{}", escapeLog(searchRequest),
                     getPeopleBaseDn());
         }
-        Filter searchFilter = null;
+
+        boolean useLowercaseFilter = configurationService.isLowercaseFilter(userService.getPeopleBaseDn());
+        logger.info("For searching user user useLowercaseFilter?:{}", useLowercaseFilter);
+
+        Filter displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter, searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                String[] targetArray = new String[] { assertionValue };
-                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
-                        targetArray, null);
-                Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
-                        targetArray, null);
-                Filter uidFilter = Filter.createSubstringFilter("uid", null, targetArray, null);
-                Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, uidFilter, inumFilter));
+                logger.info("For searching user - assertionValue:{}", assertionValue);
+                assertionValue = StringHelper.toLowerCase(assertionValue);
+                String[] targetArray = new String[] {  assertionValue };
+                logger.info("For searching user - targetArray?:{}", targetArray);
+
+                if (useLowercaseFilter) {
+                    displayNameFilter = Filter.createSubstringFilter(
+                            Filter.createLowercaseFilter(AttributeConstants.DISPLAY_NAME), null, targetArray, null);
+                    descriptionFilter = Filter.createSubstringFilter(
+                            Filter.createLowercaseFilter(AttributeConstants.DESCRIPTION), null, targetArray, null);
+                    mailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.MAIL),
+                            null, targetArray, null);
+                    uidFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray,
+                            null);
+                } else {
+                    displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
+                            null);
+                    descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
+                            null);
+                    mailFilter = Filter.createSubstringFilter(AttributeConstants.MAIL, null, targetArray, null);
+                    uidFilter = Filter.createSubstringFilter("uid", null, targetArray, null);
+                }
+
+                inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+                filters.add(
+                        Filter.createORFilter(displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
         logger.info("Users searchFilter:{}", searchFilter);
-        return persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(), User.class, searchFilter, null,
-                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
-                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
+        PagedResult<User> pagedResult = persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(),
+                User.class, searchFilter, null, searchRequest.getSortBy(),
+                SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex(),
+                searchRequest.getCount(), searchRequest.getMaxCount());
+
+        // remove inactive claims
+        List<User> users = this.verifyCustomAttributes(pagedResult.getEntries());
+        pagedResult.setEntries(users);
+        return pagedResult;
 
     }
 
@@ -131,6 +171,15 @@ public class UserMgmtService {
         // persist user
         ignoreCustomObjectClassesForNonLDAP(user);
         user = userService.updateUser(user);
+
+        // remove inactive claims
+        if (user != null) {
+            List<User> users = new ArrayList<>();
+            users.add(user);
+            users = this.verifyCustomAttributes(users);
+            user = users.get(0);
+        }
+
         logger.info("User after patch user:{}", user);
         return user;
 
@@ -140,6 +189,15 @@ public class UserMgmtService {
         User result = null;
         try {
             result = userService.getUserByInum(inum);
+
+            // remove inactive claims
+            if (result != null) {
+                List<User> users = new ArrayList<>();
+                users.add(result);
+                users = this.verifyCustomAttributes(users);
+                result = users.get(0);
+            }
+
         } catch (Exception ex) {
             logger.error("Failed to load user entry", ex);
         }
@@ -333,12 +391,13 @@ public class UserMgmtService {
     }
 
     public boolean isLDAP() {
+        boolean isLDAP = false;
         String persistenceType = getPersistenceType();
         logger.debug("persistenceType: {}", persistenceType);
         if (PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)) {
-            return true;
+            isLDAP = true;
         }
-        return false;
+        return isLDAP;
     }
 
     public String getPersistenceType() {
@@ -346,10 +405,158 @@ public class UserMgmtService {
     }
 
     public User addUser(User user, boolean active) {
-        return userService.addUser(user, active);
+        user = userService.addUser(user, active);
+        // remove inactive claims
+        if (user != null) {
+            List<User> users = new ArrayList<>();
+            users.add(user);
+            users = this.verifyCustomAttributes(users);
+            user = users.get(0);
+        }
+        return user;
     }
 
     public User updateUser(User user) {
-        return userService.updateUser(user);
+        user = userService.updateUser(user);
+        // remove inactive claims
+        if (user != null) {
+            List<User> users = new ArrayList<>();
+            users.add(user);
+            users = this.verifyCustomAttributes(users);
+            user = users.get(0);
+        }
+        return user;
     }
+
+    public List<User> verifyCustomAttributes(List<User> users) {
+        logger.info("Verify CustomAttributes for users: {}", users);
+        if (users == null || users.isEmpty()) {
+            return users;
+        }
+        for (User user : users) {
+            List<CustomObjectAttribute> customAttributes = user.getCustomAttributes();
+            logger.debug("customAttributes: {}", customAttributes);
+            // remove inactive attributes
+            removeInActiveCustomAttribute(customAttributes);
+        }
+        return users;
+    }
+
+    public List<CustomObjectAttribute> removeInActiveCustomAttribute(List<CustomObjectAttribute> customAttributes) {
+        logger.info("User customAttributes: {}", customAttributes);
+        if (customAttributes == null || customAttributes.isEmpty()) {
+            return customAttributes;
+        }
+
+        // remove attribute that are not active
+        for (Iterator<CustomObjectAttribute> it = customAttributes.iterator(); it.hasNext();) {
+            String attributeName = it.next().getName();
+            logger.debug("Verify status of attributeName: {}", attributeName);
+            List<JansAttribute> attList = findAttributeByName(attributeName);
+            logger.debug("attributeName:{} data is attList: {}", attributeName, attList);
+
+            if (CollectionUtils.isNotEmpty(attList)
+                    && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {
+                logger.info("Removing attribute as it is not active attributeName: {} , status:{}", attributeName,
+                        attList.get(0).getStatus().getValue());
+                it.remove();
+            }
+        }
+        return customAttributes;
+    }
+
+    public List<JansAttribute> findAttributeByName(String name) {
+        return persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
+                Filter.createEqualityFilter(AttributeConstants.JANS_ATTR_NAME, name));
+    }
+
+    private String getDnForAttribute(String inum) {
+        String attributesDn = staticConfiguration.getBaseDn().getAttributes();
+        if (StringHelper.isEmpty(inum)) {
+            return attributesDn;
+        }
+        return String.format("inum=%s,%s", inum, attributesDn);
+    }
+
+    public void validateAttributes(List<CustomObjectAttribute> customAttributes) {
+        logger.info("**** Validate customAttributes: {}", customAttributes);
+        if (customAttributes == null || customAttributes.isEmpty()) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (CustomObjectAttribute customObjectAttribute : customAttributes) {
+            logger.info("customObjectAttribute:{}", customObjectAttribute, customObjectAttribute.getName());
+            AttributeValidation validation = attributeService.getAttributeByName(customObjectAttribute.getName())
+                    .getAttributeValidation();
+
+            logger.info("validation:{}", validation);
+
+            String errorMsg = validateCustomAttributes(customObjectAttribute, validation);
+
+            if (StringUtils.isNotBlank(errorMsg)) {
+                sb.append(errorMsg);
+            }
+        }
+
+        if (StringUtils.isNotBlank(sb.toString())) {
+            throw new WebApplicationException(sb.toString());
+        }
+
+    }
+
+    private String validateCustomAttributes(CustomObjectAttribute customObjectAttribute,
+            AttributeValidation attributeValidation) {
+        logger.info("Validate customObjectAttribute:{}, attributeValidation:{}", customObjectAttribute,
+                attributeValidation);
+        StringBuilder sb = new StringBuilder();
+        if (customObjectAttribute == null || attributeValidation == null) {
+            return sb.toString();
+        }
+
+        String attributeName = customObjectAttribute.getName();
+        try {
+
+            String attributeValue = String.valueOf(customObjectAttribute.getValue());
+            logger.info("Validate attributeName:{}, attributeValue:{}", attributeName, attributeValue);
+            if (StringUtils.isBlank(attributeValue)) {
+                return sb.toString();
+
+            }
+            Integer minvalue = attributeValidation.getMinLength();
+            Integer maxValue = attributeValidation.getMaxLength();
+            String regexpValue = attributeValidation.getRegexp();
+            logger.info(
+                    "Validate attributeValue:{}, attributeValue.length():{}, attributeValidation.getMinLength():{}, attributeValidation.getMaxLength():{}, attributeValidation.getRegexp():{}",
+                    attributeValue, attributeValue.length(), attributeValidation.getMinLength(),
+                    attributeValidation.getMaxLength(), attributeValidation.getRegexp());
+
+            // minvalue Validation
+            if (minvalue != null && attributeValue.length() < minvalue) {
+                sb.append(",must be at least " + minvalue + " characters.");
+            }
+
+            // maxValue Validation
+            if (maxValue != null && attributeValue.length() > maxValue) {
+                sb.append(",must be less than " + maxValue + " characters.");
+            }
+
+            // regexpValue
+            if (StringUtils.isNotBlank(regexpValue)) {
+                Pattern pattern = Pattern.compile(regexpValue);
+                Matcher matcher = pattern.matcher(attributeValue);
+                if (!matcher.matches()) {
+                    sb.append(",must match (" + regexpValue + ") pattern.");
+                }
+            }
+        } catch (Exception ex) {
+            logger.error("Error while validating attributeName:{}", attributeName);
+        }
+        logger.info("Validate reuslt - sb :{} ", sb);
+
+        if (StringUtils.isNotBlank(sb.toString())) {
+            sb.insert(0, attributeName+" ");
+        }
+        return sb.toString();
+    }
+
 }

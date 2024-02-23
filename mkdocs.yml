@@ -110,7 +110,13 @@ nav:
     - admin/terraform/README.md   
   - Configuration Guide:
     - Configuration Tools:
-      - Config API:
+      - TUI - Text-Based UI:
+          - admin/config-guide/config-tools/jans-tui/README.md
+          - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
+          - Using Logs: admin/config-guide/config-tools/jans-tui/using-command-line-log.md
+      - CLI - Command Line:
+          - admin/config-guide/config-tools/jans-cli/README.md
+      - REST API:
         - admin/config-guide/config-tools/config-api/README.md
         - Settings: admin/config-guide/config-tools/config-api/config.md
         - Attributes: admin/config-guide/config-tools/config-api/attribute.md
@@ -118,15 +124,8 @@ nav:
         - Logs: admin/config-guide/config-tools/config-api/logs.md
         - Monitoring: admin/config-guide/config-tools/config-api/monitoring.md
         - Plugins: admin/config-guide/config-tools/config-api/plugins.md
-      - CURL Guide: admin/config-guide/config-tools/curl-guide.md
-      - Text-Based User Interface (TUI):
-        - admin/config-guide/config-tools/jans-tui/README.md
-        - Navigation Guide: admin/config-guide/config-tools/jans-tui/navigation-guide.md
-        - Using Logs: admin/config-guide/config-tools/jans-tui/using-command-line-log.md
-      - Command Line Interface (CLI):
-        - admin/config-guide/config-tools/jans-cli/README.md
-      - CLI For Agama: admin/config-guide/agama-configuration.md
-      - SCIM CLI: admin/config-guide/config-tools/scim-cli.md
+      - CURL: admin/config-guide/config-tools/curl-guide.md
+    - Agama Configuration: admin/config-guide/agama-configuration.md
     - Attribute: admin/config-guide/attribute-configuration.md
     - Default Authentication: admin/config-guide/default-authentication-method-config.md
     - Cache Configuration: admin/config-guide/cache-configuration.md
@@ -153,7 +152,6 @@ nav:
       - LDAP Operation: admin/reference/database/ldap-ops.md
       - LDAP Namespace Diagram: admin/reference/database/ldap-namespace.md
     - Couchbase:
-      - Couchbase Schema: admin/reference/database/cb-schema.md
       - Couchbase Configuration: admin/reference/database/cb-config.md
       - Couchbase Operation: admin/reference/database/cb-ops.md
       - Couchbase Buckets: admin/reference/database/cb-buckets.md
@@ -283,7 +281,7 @@ nav:
       - Agama engine: admin/developer/agama/jans-agama-engine.md
       - Navigation, UI pages and assets: admin/developer/agama/flows-navigation-ui.md
       - Projects deployment: admin/developer/agama/projects-deployment.md
-      - Recommended practices:  admin/developer/agama/recommended-practices.md
+      - Agama Best Practices:  admin/developer/agama/agama-best-practices.md
       - Advanced usages: admin/developer/agama/advanced-usages.md
       - Engine and bridge configurations: admin/developer/agama/engine-bridge-config.md
       - FAQ: admin/developer/agama/faq.md      

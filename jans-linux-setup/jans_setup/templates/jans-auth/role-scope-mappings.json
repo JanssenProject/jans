@@ -485,6 +485,18 @@
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "webhook"
+    },
+    {
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
+      "description": "",
+      "defaultPermissionInToken": true,
+      "tag": "properties"
+    },
+    {
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/properties.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "properties"
     }
   ],
   "rolePermissionMapping": [
@@ -507,7 +519,8 @@
         "https://jans.io/oauth/jans-auth-server/config/properties.readonly",
         "https://jans.io/oauth/config/database/couchbase.readonly",
         "https://jans.io/oauth/config/database/sql.readonly",
-        "https://jans.io/oauth/config/stats.readonly"
+        "https://jans.io/oauth/config/stats.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly"
       ]
     },
     {
@@ -545,7 +558,8 @@
         "https://jans.io/oauth/config/database/sql.write",
         "readonly",
         "https://jans.io/oauth/config/stats.readonly",
-        "jans_stat"
+        "jans_stat",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly"
       ]
     },
     {
@@ -591,7 +605,8 @@
         "https://jans.io/oauth/config/database/sql.write",
         "readonly",
         "https://jans.io/oauth/config/stats.readonly",
-        "jans_stat"
+        "jans_stat",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly"
       ]
     },
     {
@@ -662,7 +677,9 @@
         "https://jans.io/auth/ssa.developer",
         "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write",
-        "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete"
+        "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.write"
       ]
     }
   ]

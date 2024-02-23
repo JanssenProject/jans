@@ -932,7 +932,10 @@ class JCA_CLI:
         try:
             return response.json()
         except:
-            return {'server_error': response.text}
+            if response.status_code in (200, 201, 202, 203):
+                return {'message': response.text}
+            else:
+                return {'server_error': response.text}
 
 
     def delete_requests(self, endpoint, url_param_dict):
@@ -1265,7 +1268,15 @@ class JCA_CLI:
         endpoint_params = self.parse_command_args(endpoint_args)
 
         if path.get('__urlsuffix__') and not path['__urlsuffix__'] in suffix_param:
-            self.exit_with_error("This operation requires a value for url-suffix {}".format(path['__urlsuffix__']))
+            suffix_str = f"A value for {path['__urlsuffix__']}"
+            parameters_ = 'parameters'
+            if parameters_ in path and path[parameters_] and path[parameters_][0].get('description'):
+                suffix_str = path[parameters_][0]['description']
+            self.exit_with_error(
+            f"This operation requires a value for url-suffix {path['__urlsuffix__']}\n"
+            f"For example: --url-suffix=\"{path['__urlsuffix__']}:{suffix_str}\""
+            
+            )
 
         if not data:
             op_path = self.get_path_by_id(operation_id)
@@ -1304,10 +1315,10 @@ class JCA_CLI:
             else:
                 cmd_data = self.get_json_from_file(data_fn)
 
-        if call_method in ('post', 'put', 'patch'):
+        if call_method in ('post', 'put', 'patch', 'delete'):
             self.log_cmd(operation_id, url_suffix, endpoint_args, cmd_data)
 
-        if path['__path__'] == '/admin-ui/adminUIPermissions' and 'permission' in data:
+        if path['__path__'] == '/admin-ui/adminUIPermissions' and data and 'permission' in data:
             tag, _ = os.path.splitext(os.path.basename(data['permission']))
             if tag:
                 data['tag'] = tag
