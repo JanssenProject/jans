@@ -46,6 +46,7 @@ class JansLockInstaller(JettyInstaller):
         self.config_ldif = os.path.join(self.output_dir, 'config.ldif')
         self.opa_dir = os.path.join(Config.opt_dir, 'opa')
         self.opa_bin_dir = os.path.join(self.opa_dir, 'bin')
+        self.opa_log_dir = os.path.join(self.opa_dir, 'logs')
 
 
     def install(self):
@@ -107,6 +108,7 @@ class JansLockInstaller(JettyInstaller):
         opa_fn = 'opa'
         self.systemd_units.append(opa_fn)
         self.createDirs(self.opa_bin_dir)
+        self.createDirs(self.opa_log_dir)
         self.copyFile(self.source_files[2][0], self.opa_bin_dir)
         self.run([paths.cmd_chmod, '755', os.path.join(self.opa_bin_dir, opa_fn)])
         self.chown(self.opa_dir, Config.jetty_user, Config.jetty_group, recursive=True)
