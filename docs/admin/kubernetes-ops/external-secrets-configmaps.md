@@ -124,50 +124,67 @@ From the console, Go to `Secret Manager`> Click on `Create Secret` > Add a `name
 
 ### Vault
 
-You need a secret named `vault` in your namespace storing the `role-id` and `secret-id` so that workloads/services can use it to authenticate to Vault.
+1.  Enable the KV secrets engine version 1 in Vault. For example:
+    `vault secrets enable -path=secret -version=1 kv`
 
-```yaml
-apiVersion: v1
-data:
-  vault_role_id: <Base64-encoded-role-id>
-  vault_secret_id: <Base64-encoded-secret-id>
-kind: Secret
-metadata:
-  name: vault
-  namespace: <helm-release-namespace>
-```
+    Note that the `path` i.e. `secret` will be mapped to `cnSecretVaultKvPath` later.
+
+2.  Create a `policy`, which will be attached later to the `appRole`.
+
+    Create first a file named `policy.hcl` with the required capabilities.
+    ```
+    path "secret/<name>/*" {
+     capabilities = ["create", "list", "read", "delete", "update"]
+    }  
+    ```
+
+    Note that `<name>` will be mapped to `cnSecretVaultPrefix` later.
+
+    Create the policy:
+    `vault policy write <name> /path/to/policy.hcl`
 
 
-After creating the secret, add the following configuration to your `override.yaml`:
+3.  Enable and configure [appRole](https://developer.hashicorp.com/vault/docs/auth/approle#configuration). You have also to reference the previously created policy. For example:
+    ```
+    vault auth enable approle
+    vault write auth/approle/role/<role-name> token_policies="<policy-name>"
+    ```
 
-```yaml
-global:
-  configSecretAdapter: vault
-config:
-  configmap:  
-    # base URL of Vault (default to `http://localhost:8200`).
-    cnSecretVaultAddr: http://localhost:8200
-    # whether to verify cert or not (default to `false`).
-    cnSecretVaultVerify: false
-    # path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
-    cnSecretVaultRoleIdFile: /etc/certs/vault_role_id
-    # path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
-    cnSecretVaultSecretIdFile: /etc/certs/vault_secret_id
-    # path to Vault cert file (default to `/etc/certs/vault_client.crt`).
-    cnSecretVaultCertFile: /etc/certs/vault_client.crt
-    # path to Vault key file (default to `/etc/certs/vault_client.key`).
-    cnSecretVaultKeyFile: /etc/certs/vault_client.key
-    # path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
-    cnSecretVaultCACertFile: /etc/certs/vault_ca.crt
-    # namespace used to create the config tree, i.e. `secret/jans` (default to empty string).
-    cnSecretVaultNamespace: ""
-    # path to KV secrets engine (default to `secret`).
-    cnSecretVaultKvPath: secret 
-    # base prefix name used to build secret path (default to `jans`).
-    cnSecretVaultPrefix: jans
-    # path to AppRole (default to `approle`).
-    cnSecretVaultAppRolePath: approle
-```
+    The default appRole path is `approle` which will be mapped to `cnSecretVaultAppRolePath` later.
+
+4.  Add the following configuration to your `override.yaml`:
+
+    ```yaml
+    global:
+      configSecretAdapter: vault
+    config:
+      configmap:  
+        cnSecretVaultRoleId: ""
+        cnSecretVaultSecretId: ""
+        # base URL of Vault (default to `http://localhost:8200`).
+        cnSecretVaultAddr: http://localhost:8200
+        # whether to verify cert or not (default to `false`).
+        cnSecretVaultVerify: false
+        # path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
+        cnSecretVaultRoleIdFile: /etc/certs/vault_role_id
+        # path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
+        cnSecretVaultSecretIdFile: /etc/certs/vault_secret_id
+        # path to Vault cert file (default to `/etc/certs/vault_client.crt`).
+        cnSecretVaultCertFile: /etc/certs/vault_client.crt
+        # path to Vault key file (default to `/etc/certs/vault_client.key`).
+        cnSecretVaultKeyFile: /etc/certs/vault_client.key
+        # path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
+        cnSecretVaultCACertFile: /etc/certs/vault_ca.crt
+        # namespace used to create the config tree, i.e. `secret/jans` (default to empty string).
+        cnSecretVaultNamespace: ""
+        # path to KV secrets engine (default to `secret`).
+        cnSecretVaultKvPath: secret 
+        # base prefix name used to build secret path (default to `jans`).
+        cnSecretVaultPrefix: jans
+        # path to AppRole (default to `approle`).
+        cnSecretVaultAppRolePath: approle
+    ```
+5.  Run `helm install` or `helm upgrade`
 
 ## Retrieve Secrets 
 ### AWS
