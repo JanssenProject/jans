@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.saml.service;
 
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
@@ -117,7 +116,7 @@ public class SamlService {
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(inum), TrustRelationship.class, null);
     }
 
-    public List<TrustRelationship> getAllTrustRelationshipByName(String name) {
+    public List<TrustRelationship> getAllTrustRelationshipByDisplayName(String name) {
         log.info("Search TrustRelationship with name:{}", name);
 
         String[] targetArray = new String[] { name };
@@ -126,7 +125,14 @@ public class SamlService {
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 displayNameFilter);
     }
-
+    
+    public List<TrustRelationship> getAllTrustRelationshipByName(String name) {
+        log.info("Search TrustRelationship with name:{}", name);
+        Filter nameFilter = Filter.createEqualityFilter("name", name);
+        log.debug("Search TrustRelationship with nameFilter:{}", nameFilter);
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, nameFilter);
+    }
+    
     public TrustRelationship getTrustContainerFederation(TrustRelationship trustRelationship) {
         return getRelationshipByDn(trustRelationship.getDn());
     }
@@ -171,7 +177,7 @@ public class SamlService {
                 sizeLimit);
     }
 
-    public PagedResult<Client> getTrustRelationship(SearchRequest searchRequest) {
+    public PagedResult<TrustRelationship> getTrustRelationship(SearchRequest searchRequest) {
         log.info("Search TrustRelationship with searchRequest:{}", searchRequest);
 
         Filter searchFilter = null;
@@ -204,7 +210,7 @@ public class SamlService {
 
         log.info("TrustRelationship searchFilter:{}", searchFilter);
 
-        return persistenceEntryManager.findPagedEntries(getDnForTrustRelationship(null), Client.class, searchFilter,
+        return persistenceEntryManager.findPagedEntries(getDnForTrustRelationship(null), TrustRelationship.class, searchFilter,
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 

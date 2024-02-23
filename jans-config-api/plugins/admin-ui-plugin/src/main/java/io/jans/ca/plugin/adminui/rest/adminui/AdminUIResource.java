@@ -1,11 +1,12 @@
-package io.jans.ca.plugin.adminui.rest.user;
+package io.jans.ca.plugin.adminui.rest.adminui;
 
 import io.jans.as.model.config.adminui.AdminPermission;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
+import io.jans.ca.plugin.adminui.model.auth.AppConfigResponse;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
-import io.jans.ca.plugin.adminui.service.user.UserManagementService;
+import io.jans.ca.plugin.adminui.service.adminui.AdminUIService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
@@ -30,8 +31,8 @@ import org.slf4j.Logger;
 import java.util.List;
 
 @Path("/admin-ui")
-public class UserManagementResource {
-
+public class AdminUIResource {
+    static final String CONFIG = "/config";
     static final String ROLES = "/adminUIRoles";
     static final String ROLE_PATH_VARIABLE = "/{adminUIRole}";
     static final String ROLE_CONST = "adminUIRole";
@@ -48,12 +49,81 @@ public class UserManagementResource {
     static final String SCOPE_ROLE_PERMISSION_MAPPING_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly";
     static final String SCOPE_ROLE_PERMISSION_MAPPING_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write";
     static final String SCOPE_ROLE_PERMISSION_MAPPING_DELETE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete";
+    public static final String ADMINUI_CONF_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly";
+    public static final String ADMINUI_CONF_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/properties.write";
 
     @Inject
     Logger log;
 
     @Inject
-    UserManagementService userManagementService;
+    AdminUIService adminUIService;
+
+    @Operation(summary = "Get Admin UI editable configuration", description = "Get Admin UI editable configuration", operationId = "get-adminui-conf", tags = {
+            "Admin UI - Configuration"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            SCOPE_ROLE_READ}))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AppConfigResponse.class, description = "Admin UI editable configuration")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
+    @GET
+    @Path(CONFIG)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ProtectedApi(scopes = {ADMINUI_CONF_READ}, groupScopes = {ADMINUI_CONF_WRITE}, superScopes = {ADMINUI_CONF_READ})
+    public Response getConf() {
+        try {
+            log.info("Get Admin UI editable configuration.");
+            AppConfigResponse appConf = adminUIService.getAdminUIEditableConfiguration();
+            log.info("Configuration received.");
+            return Response.ok(appConf).build();
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.GET_ADMIUI_CONFIG_ERROR.getDescription(), e);
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.GET_ADMIUI_CONFIG_ERROR.getDescription(), e);
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, e.getMessage()))
+                    .build();
+        }
+    }
+
+    @Operation(summary = "Edit Admin UI editable configuration", description = "Edit Admin UI editable configuration", operationId = "edit-adminui-conf", tags = {
+            "Admin UI - Configuration"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            ADMINUI_CONF_WRITE}))
+    @RequestBody(description = "Admin Config object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfigResponse.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AppConfigResponse.class, description = "Admin UI editable configuration")))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
+    @PUT
+    @Path(CONFIG)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ProtectedApi(scopes = {ADMINUI_CONF_WRITE}, superScopes = {ADMINUI_CONF_WRITE})
+    public Response editConf(@Valid @NotNull AppConfigResponse appConfigResponse) {
+        try {
+            log.info("Editing Admin UI editable configuration.");
+            AppConfigResponse appConf = adminUIService.editAdminUIEditableConfiguration(appConfigResponse);
+            log.info("Configuration edited");
+            return Response.ok(appConf).build();
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.SAVE_ADMIUI_CONFIG_ERROR.getDescription(), e);
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.SAVE_ADMIUI_CONFIG_ERROR.getDescription(), e);
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, e.getMessage()))
+                    .build();
+        }
+    }
 
     @Operation(summary = "Get all admin ui roles", description = "Get all admin ui roles", operationId = "get-all-adminui-roles", tags = {
             "Admin UI - Role"}, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -70,7 +140,7 @@ public class UserManagementResource {
     public Response getAllRoles() {
         try {
             log.info("Get all Admin-UI roles.");
-            List<AdminRole> roles = userManagementService.getAllRoles();
+            List<AdminRole> roles = adminUIService.getAllRoles();
             log.info("Roles received from Auth Server.");
             return Response.ok(roles).build();
         } catch (ApplicationException e) {
@@ -104,7 +174,7 @@ public class UserManagementResource {
     public Response addRole(@Valid @NotNull AdminRole roleArg) {
         try {
             log.info("Adding Admin-UI role.");
-            List<AdminRole> savedRoles = userManagementService.addRole(roleArg);
+            List<AdminRole> savedRoles = adminUIService.addRole(roleArg);
             log.info("Added Admin-UI role..");
             return Response.ok(savedRoles).build();
         } catch (ApplicationException e) {
@@ -138,7 +208,7 @@ public class UserManagementResource {
     public Response editRole(@Valid @NotNull AdminRole roleArg) {
         try {
             log.info("Editing Admin-UI role.");
-            List<AdminRole> savedRoles = userManagementService.editRole(roleArg);
+            List<AdminRole> savedRoles = adminUIService.editRole(roleArg);
             log.info("Edited Admin-UI role..");
             return Response.ok(savedRoles).build();
         } catch (ApplicationException e) {
@@ -171,7 +241,7 @@ public class UserManagementResource {
     public Response getRole(@Parameter(description = "Admin UI role") @PathParam(ROLE_CONST) @NotNull String adminUIRole) {
         try {
             log.info("Get all Admin-UI roles.");
-            AdminRole roleObj = userManagementService.getRoleObjByName(adminUIRole);
+            AdminRole roleObj = adminUIService.getRoleObjByName(adminUIRole);
             log.info("Roles received from Auth Server.");
             return Response.ok(roleObj).build();
         } catch (ApplicationException e) {
@@ -204,7 +274,7 @@ public class UserManagementResource {
     public Response deleteRole(@Parameter(description = "Admin UI role") @PathParam(ROLE_CONST) @NotNull String adminUIRole) {
         try {
             log.info("Deleting Admin-UI role.");
-            List<AdminRole> roles = userManagementService.deleteRole(adminUIRole);
+            List<AdminRole> roles = adminUIService.deleteRole(adminUIRole);
             log.info("Deleted Admin-UI role..");
             return Response.ok(roles).build();
         } catch (ApplicationException e) {
@@ -237,7 +307,7 @@ public class UserManagementResource {
     public Response getAllPermissions() {
         try {
             log.info("Get all Admin-UI permissions.");
-            List<AdminPermission> permissions = userManagementService.getPermissions();
+            List<AdminPermission> permissions = adminUIService.getPermissions();
             log.info("Permissions received from Auth Server.");
             return Response.ok(permissions).build();
         } catch (ApplicationException e) {
@@ -271,7 +341,7 @@ public class UserManagementResource {
     public Response addPermission(@Valid @NotNull AdminPermission permissionArg) {
         try {
             log.info("Adding Admin-UI permissions.");
-            List<AdminPermission> savedPermissions = userManagementService.addPermission(permissionArg);
+            List<AdminPermission> savedPermissions = adminUIService.addPermission(permissionArg);
             log.info("Added Admin-UI permissions..");
             return Response.ok(savedPermissions).build();
         } catch (ApplicationException e) {
@@ -305,7 +375,7 @@ public class UserManagementResource {
     public Response editPermission(@Valid @NotNull AdminPermission permissionArg) {
         try {
             log.info("Editing Admin-UI permissions.");
-            List<AdminPermission> savedPermissions = userManagementService.editPermission(permissionArg);
+            List<AdminPermission> savedPermissions = adminUIService.editPermission(permissionArg);
             log.info("Edited Admin-UI permissions..");
             return Response.ok(savedPermissions).build();
         } catch (ApplicationException e) {
@@ -338,7 +408,7 @@ public class UserManagementResource {
     public Response getPermission(@Parameter(description = "Admin UI Permission") @PathParam(PERMISSION_CONST) @NotNull String adminUIPermission) {
         try {
             log.info("Get Admin-UI permission.");
-            AdminPermission permissionObj = userManagementService.getPermissionObjByName(adminUIPermission);
+            AdminPermission permissionObj = adminUIService.getPermissionObjByName(adminUIPermission);
             log.info("Permission received from Auth Server.");
             return Response.ok(permissionObj).build();
         } catch (ApplicationException e) {
@@ -371,7 +441,7 @@ public class UserManagementResource {
     public Response deletePermission(@Parameter(description = "Admin UI Permission") @PathParam(PERMISSION_CONST) @NotNull String adminUIPermission) {
         try {
             log.info("Deleting Admin-UI permission.");
-            List<AdminPermission> permissions = userManagementService.deletePermission(adminUIPermission);
+            List<AdminPermission> permissions = adminUIService.deletePermission(adminUIPermission);
             log.info("Deleted Admin-UI permission..");
             return Response.ok(permissions).build();
         } catch (ApplicationException e) {
@@ -404,7 +474,7 @@ public class UserManagementResource {
     public Response getAllAdminUIRolePermissionsMapping() {
         try {
             log.info("Get all Admin-UI role-permissions mapping.");
-            List<RolePermissionMapping> roleScopeMapping = userManagementService.getAllAdminUIRolePermissionsMapping();
+            List<RolePermissionMapping> roleScopeMapping = adminUIService.getAllAdminUIRolePermissionsMapping();
             log.info("Role-Permissions mapping received from Auth Server.");
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
@@ -438,7 +508,7 @@ public class UserManagementResource {
     public Response addPermissionsToRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
         try {
             log.info("Adding role-permissions to Admin-UI.");
-            List<RolePermissionMapping> roleScopeMapping = userManagementService.addPermissionsToRole(rolePermissionMappingArg);
+            List<RolePermissionMapping> roleScopeMapping = adminUIService.addPermissionsToRole(rolePermissionMappingArg);
             log.info("Added role-permissions to Admin-UI..");
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
@@ -472,7 +542,7 @@ public class UserManagementResource {
     public Response mapPermissionsToRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
         try {
             log.info("Mapping permissions to Admin-UI role.");
-            List<RolePermissionMapping> roleScopeMapping = userManagementService.mapPermissionsToRole(rolePermissionMappingArg);
+            List<RolePermissionMapping> roleScopeMapping = adminUIService.mapPermissionsToRole(rolePermissionMappingArg);
             log.info("Mapped permissions to Admin-UI role..");
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
@@ -505,7 +575,7 @@ public class UserManagementResource {
     public Response getAdminUIRolePermissionsMapping(@Parameter(description = "Admin UI Role") @PathParam(ROLE_CONST) @NotNull String adminUIRole) {
         try {
             log.info("Get Admin-UI role-permissions mapping by role-name.");
-            RolePermissionMapping roleScopeMapping = userManagementService.getAdminUIRolePermissionsMapping(adminUIRole);
+            RolePermissionMapping roleScopeMapping = adminUIService.getAdminUIRolePermissionsMapping(adminUIRole);
             log.info("Role-Permissions mapping received from Auth Server.");
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
@@ -538,7 +608,7 @@ public class UserManagementResource {
     public Response removePermissionsFromRole(@Parameter(description = "role") @PathParam(ROLE_CONST) @NotNull String role) {
         try {
             log.info("Removing permissions to Admin-UI role.");
-            List<RolePermissionMapping> roleScopeMapping = userManagementService.removePermissionsFromRole(role);
+            List<RolePermissionMapping> roleScopeMapping = adminUIService.removePermissionsFromRole(role);
             log.info("Removed permissions to Admin-UI role..");
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
