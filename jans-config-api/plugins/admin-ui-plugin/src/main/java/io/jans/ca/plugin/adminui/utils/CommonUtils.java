@@ -141,29 +141,4 @@ public class CommonUtils {
         matcher.appendTail(sb); // Append remaining string
         return sb.toString();
     }
-
-    /*public static void main(String[] args) {
-        String url = "https://example.com/users/${userId}/profile?name=${userName}";
-        Map<String, Object> map = new HashMap<>();
-        Map<String, Object> map1 = new HashMap<>();
-        map1.put("id",1);
-        map1.put("price","${price}");
-        map1.put("add","${add}");
-
-        map.put("id",1);
-        map.put("price","${price}");
-        map.put("add",map1);
-        map.put("userId","11111111111111111111111111");
-        map.put("userName","Arnab");
-
-
-
-        Map<String, Object> values = new HashMap<>();
-        values.put("price",10);
-        values.put("add","+");
-        values.put("userId","11111111111111111111111111");
-        values.put("userName","Arnab");
-        System.out.println("============"+replacePlaceholders(map, values));
-        System.out.println("============"+replacePlaceholders(url, values));
-    }*/
 }
