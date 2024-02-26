@@ -39,6 +39,7 @@ tags:
 - name: Plugins
 - name: Configuration – Config API
 - name: Client Authorization
+- name: Configuration – Jans Assets
 paths:
   /api/v1/health/app-version:
     get:
@@ -455,6 +456,191 @@ paths:
         - https://jans.io/oauth/config/agama.readonly
         - https://jans.io/oauth/config/agama.write
         - https://jans.io/oauth/config/read-all
+  /api/v1/jans-assets/upload-asset:
+    post:
+      tags:
+      - Jans Assets
+      summary: Upload new asset
+      description: Upload new asset
+      operationId: post-new-asset
+      requestBody:
+        description: String multipart form.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssetForm'
+            examples:
+              Response json example:
+                description: Response json example
+                value: ""
+      responses:
+        "201":
+          description: Newly created Trust IDP
+          content:
+            application/json-patch+json:
+              schema:
+                $ref: '#/components/schemas/Document'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/attributes.write
+  /api/v1/jans-assets:
+    get:
+      tags:
+      - Jans Assets
+      summary: Gets all Jans assets.
+      description: Gets all Jans assets.
+      operationId: get-all-assets
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: pattern
+        in: query
+        description: Search pattern
+        schema:
+          type: string
+          default: ""
+      - name: status
+        in: query
+        description: Status of the attribute
+        schema:
+          type: string
+          default: all
+      - name: startIndex
+        in: query
+        description: The 1-based index of the first query result
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: sortBy
+        in: query
+        description: Attribute whose value will be used to order the returned response
+        schema:
+          type: string
+          default: inum
+      - name: sortOrder
+        in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
+        schema:
+          type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "adminCanEdit=true,dataType=string"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResult'
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "start": 0,
+                        "totalEntriesCount": 78,
+                        "entriesCount": 2,
+                        "entries": [
+                            {
+                                "dn": "inum=08E2,ou=attributes,o=jans",
+                                "selected": false,
+                                "inum": "08E2",
+                                "name": "departmentNumber",
+                                "displayName": "Department",
+                                "description": "Organizational Department",
+                                "origin": "jansCustomPerson",
+                                "dataType": "string",
+                                "editType": [
+                                    "admin"
+                                ],
+                                "viewType": [
+                                    "user",
+                                    "admin"
+                                ],
+                                "claimName": "department_number",
+                                "status": "inactive",
+                                "saml1Uri": "urn:mace:dir:attribute-def:departmentNumber",
+                                "saml2Uri": "urn:oid:2.16.840.1.113730.3.1.2",
+                                "urn": "urn:mace:dir:attribute-def:departmentNumber",
+                                "oxMultiValuedAttribute": false,
+                                "custom": false,
+                                "requred": false,
+                                "whitePagesCanView": false,
+                                "adminCanEdit": true,
+                                "userCanView": true,
+                                "userCanEdit": false,
+                                "adminCanAccess": true,
+                                "adminCanView": true,
+                                "userCanAccess": true,
+                                "baseDn": "inum=08E2,ou=attributes,o=jans"
+                            },
+                            {
+                                "dn": "inum=0C18,ou=attributes,o=jans",
+                                "selected": false,
+                                "inum": "0C18",
+                                "name": "telephoneNumber",
+                                "displayName": "Home Telephone Number",
+                                "description": "Home Telephone Number",
+                                "origin": "jansCustomPerson",
+                                "dataType": "string",
+                                "editType": [
+                                    "user",
+                                    "admin"
+                                ],
+                                "viewType": [
+                                    "user",
+                                    "admin"
+                                ],
+                                "claimName": "phone_number",
+                                "status": "inactive",
+                                "saml1Uri": "urn:mace:dir:attribute-def:telephoneNumber",
+                                "saml2Uri": "urn:oid:2.5.4.20",
+                                "urn": "urn:mace:dir:attribute-def:phone_number",
+                                "oxMultiValuedAttribute": false,
+                                "custom": false,
+                                "requred": false,
+                                "whitePagesCanView": false,
+                                "adminCanEdit": true,
+                                "userCanView": true,
+                                "userCanEdit": true,
+                                "adminCanAccess": true,
+                                "adminCanView": true,
+                                "userCanAccess": true,
+                                "baseDn": "inum=0C18,ou=attributes,o=jans"
+                            }
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans_asset-read
   /api/v1/attributes:
     get:
       tags:
@@ -7783,6 +7969,49 @@ components:
           type: array
           items:
             type: object
+    AssetForm:
+      required:
+      - assetFile
+      - document
+      type: object
+      properties:
+        document:
+          $ref: '#/components/schemas/Document'
+        assetFile:
+          type: string
+          format: binary
+    Document:
+      type: object
+      properties:
+        dn:
+          type: string
+        inum:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        document:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        jansModuleProperty:
+          type: array
+          items:
+            type: string
+        jansLevel:
+          type: string
+        jansRevision:
+          type: string
+        jansEnabled:
+          type: string
+        jansAliass:
+          type: string
+        selected:
+          type: boolean
+        baseDn:
+          type: string
     AttributeValidation:
       type: object
       properties:
@@ -7896,19 +8125,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8722,6 +8951,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8731,8 +8962,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9744,14 +9973,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -10349,3 +10578,6 @@ components:
               configuration properties
             https://jans.io/oauth/client/authorizations.readonly: View ClientAuthorizations
             https://jans.io/oauth/client/authorizations.delete: Revoke ClientAuthorizations
+            https://jans.io/oauth/jans_asset-read: View Jans Assets
+            https://jans.io/oauth/config/jans_asset-write: Manage Jans Assets
+            https://jans.io/oauth/config/jans_asset-delete: Delete Jans Assets

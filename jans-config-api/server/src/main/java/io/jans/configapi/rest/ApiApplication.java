@@ -47,7 +47,8 @@ import jakarta.ws.rs.ApplicationPath;
                 @Tag(name = "Statistics - User"), @Tag(name = "Health - Check"), @Tag(name = "Server Stats"),
                 @Tag(name = "Auth - Session Management"), @Tag(name = "Organization Configuration"),
                 @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins"),
-                @Tag(name = "Configuration – Config API"), @Tag(name = "Client Authorization")},
+                @Tag(name = "Configuration – Config API"), @Tag(name = "Client Authorization"),
+                @Tag(name = "Configuration – Jans Assets")},
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })
 
@@ -105,7 +106,11 @@ import jakarta.ws.rs.ApplicationPath;
         @OAuthScope(name = ApiAccessConstants.CONFIG_READ_ACCESS, description = "View Config-API related configuration properties"),
         @OAuthScope(name = ApiAccessConstants.CONFIG_WRITE_ACCESS, description = "Manage Config-API related configuration properties"),
         @OAuthScope(name = ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS, description = "View ClientAuthorizations"),
-        @OAuthScope(name = ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS, description = "Revoke ClientAuthorizations") }
+        @OAuthScope(name = ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS, description = "Revoke ClientAuthorizations"),
+        @OAuthScope(name = ApiAccessConstants.JANS_ASSET_READ_ACCESS, description = "View Jans Assets"),
+        @OAuthScope(name = ApiAccessConstants.JANS_ASSET_WRITE_ACCESS, description = "Manage Jans Assets"),
+        @OAuthScope(name = ApiAccessConstants.JANS_ASSET_DELETE_ACCESS, description = "Delete Jans Assets"),
+        }
 
 )))
 public class ApiApplication extends BaseApiApplication {
@@ -142,6 +147,7 @@ public class ApiApplication extends BaseApiApplication {
         classes.add(PluginResource.class);
         classes.add(ConfigApiResource.class);
         classes.add(ClientAuthResource.class);
+        classes.add(AssetResource.class);
 
         return classes;
     }
