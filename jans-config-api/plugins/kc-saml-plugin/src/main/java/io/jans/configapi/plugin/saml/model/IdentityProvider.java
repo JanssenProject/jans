@@ -68,7 +68,7 @@ public class IdentityProvider extends Entry implements Serializable {
     @AttributeName(name = "nameIDPolicyFormat")
     private String nameIDPolicyFormat;
     
-    @AttributeName(name = "idpEntityId")
+    @AttributeName(name = "entityId")
     private String idpEntityId;
     
     @AttributeName(name = "singleSignOnServiceUrl")

@@ -116,7 +116,9 @@ public class AttributesResource extends ConfigBaseResource {
     @RequestBody(description = "JansAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Request example", value = "example/attribute/attribute.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute.json"))),
+            @ApiResponse(responseCode = "400", description = "BadRequest"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "406", description = "NotAcceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = {
@@ -129,7 +131,7 @@ public class AttributesResource extends ConfigBaseResource {
         
         // check if attribute exists in schema
         boolean attributeValidation = attributeService.validateAttributeDefinition(attribute.getName());
-        log.debug("Validate attribute while creation - attribute.getName():{}, attributeValidation:{}", attribute.getName(), attributeValidation);
+        log.info("Validate attribute while creation - attribute.getName():{}, attributeValidation:{}", attribute.getName(), attributeValidation);
         if (!attributeValidation) {
             throw new WebApplicationException(getNotAcceptableException("The attribute type '" + attribute.getName() + "' not defined in DB schema"));
         }
@@ -150,6 +152,7 @@ public class AttributesResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "406", description = "NotAcceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = {
@@ -164,7 +167,7 @@ public class AttributesResource extends ConfigBaseResource {
         
         // check if attribute exists in schema
         boolean attributeValidation = attributeService.validateAttributeDefinition(attribute.getName());
-        log.debug("Validate attribute - attribute.getName():{}, attributeValidation:{}", attribute.getName(), attributeValidation);
+        log.info("Validate attribute - attribute.getName():{}, attributeValidation:{}", attribute.getName(), attributeValidation);
         if (!attributeValidation) {
             throw new WebApplicationException(getNotAcceptableException(
                     "The attribute type '" + attribute.getName() + "' not defined in DB schema"));
