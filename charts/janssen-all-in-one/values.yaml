@@ -279,6 +279,8 @@ auth-server-key-rotation:
   additionalAnnotations: {}
   # -- Boolean flag to enable/disable the auth-server-key rotation cronjob.
   enabled: true
+  # -- The initial auth server key rotation keys life in hours
+  initKeysLife: 48
   # -- Add custom scripts that have been mounted to run before the entrypoint.
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
