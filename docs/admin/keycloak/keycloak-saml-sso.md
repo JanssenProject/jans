@@ -15,7 +15,38 @@ and an active SSO session.
 
 ## Installation
 
+  During installation of `Janssen`, simply select the option `Install KC SAML` to install and setup SAML SSO for keycloak.
+Instructions on how to setup SAML SSO with keycloak post-install will eventually be provided.
 
+
+## Managing SAML Service Providers Through the Jans-Cli 
+
+  In order to act as an IDP to various SAML SPs (Service Providers), the latter need to be added to janssen. This can be done via 
+the `jans-cli` which is what we will cover in this section.
+
+###  Adding a SAML SP 
+
+  This assumed jans-cli is open. Select the menu item `Jans SAML` > `Service Providers`. Then navigate and select `<Add Service Provider>`.
+The configurable options are kept to the bare functional minimum but will be expanded gradually.
+Input the folowing:
+- `Display Name` : An identifiable name for the Service Provider 
+- `Enable TR`: Whether or not the Service Provider should be enabled
+- `Metadata Location`: The location of the metadata. The supported options so far are `file` and `manual`.
+- `Released Attributes`: The user attributes to be released via the SAML response if authentication is succesful
+
+The `manual` metadata option for `Metadata Location` , allows the possibility to specify SP metadata information manually.
+
+## IDP Metadata Location 
+
+  In order for SAML authentication to work , there is a need for the SPs to trust the IDP, which usually is done by using an IDP metadata file 
+that will be used on the SP side. The metadata can be found at `https://<server-hostname>/kc/realms/jans/protocol/saml/descriptor`  where 
+`<server-hostname>` is the hostname of the Janssen server specified during installation.
+
+## IDP Initiated Flows
+TBD
+
+## IDP Key Management 
+TBD 
 
 ## Have questions in the meantime?
 
