@@ -484,7 +484,7 @@ lbIp: 22.22.22.22
 testEnviroment: false
 # -- The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes
 configAdapterName: kubernetes
-# -- The config backend adapter that will hold Janssen secret layer. aws|google|kubernetes
+# -- The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes
 configSecretAdapter: kubernetes
 # -- Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner. Leave as this is a sensible default.
 cnGoogleApplicationCredentials: /etc/jans/conf/google-credentials.json
