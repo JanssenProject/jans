@@ -2,7 +2,7 @@
 package io.jans.configapi.service.auth;
 
 import static io.jans.as.model.util.Util.escapeLog;
-import io.jans.as.common.model.common.SimpleUser;
+import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.util.ApiConstants;
@@ -124,9 +124,9 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
                 return true;                
             }
 
-            log.error("\n attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, SimpleUser.class,attributeName)():{}", attributeName, persistenceEntryManager.getAttributeType("ou=people,o=jans", SimpleUser.class,
+            log.error("\n attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, User.class,attributeName)():{}", attributeName, persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
                     attributeName));
-            AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", SimpleUser.class,
+            AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
                     attributeName);
             log.error("\n attributeName:{}, attributeType():{}", attributeName, attributeType);
 
