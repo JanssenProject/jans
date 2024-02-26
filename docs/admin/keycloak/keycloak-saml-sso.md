@@ -6,9 +6,14 @@ tags:
   - SSO
 ---
 
-## This content is in progress
+## Overview
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Janssen acts as a SAML Identity Provider to support outbound SAML single sign-on (SSO).
+It does this by leveraging the feature of the same name available in keycloak, while leveraging `jans-auth` to handle the 
+user authentication part of SSO. Once authentication is successful, the user is redirected to the SP with personnal attributes 
+and an active SSO session.
+
+## Installation 
 
 ## Have questions in the meantime?
 
