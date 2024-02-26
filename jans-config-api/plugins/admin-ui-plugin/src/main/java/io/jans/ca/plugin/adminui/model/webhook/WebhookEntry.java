@@ -37,7 +37,7 @@ public class WebhookEntry extends Entry implements Serializable {
     private String url;
     @AttributeName(name = "httpRequestBody")
     @JsonObject
-    private Map<String, String> httpRequestBody;
+    private transient Map<String, Object> httpRequestBody;
     @NotNull
     @AttributeName(name = "httpMethod")
     private String httpMethod;
@@ -125,14 +125,14 @@ public class WebhookEntry extends Entry implements Serializable {
         this.description = description;
     }
 
-    public Map<String, String> getHttpRequestBody() {
+    public Map<String, Object> getHttpRequestBody() {
         if (httpRequestBody == null) {
             httpRequestBody = new HashMap<>();
         }
         return httpRequestBody;
     }
 
-    public void setHttpRequestBody(Map<String, String> httpRequestBody) {
+    public void setHttpRequestBody(Map<String, Object> httpRequestBody) {
         this.httpRequestBody = httpRequestBody;
     }
 
