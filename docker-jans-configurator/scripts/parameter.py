@@ -10,9 +10,11 @@ from marshmallow import ValidationError
 from marshmallow.fields import Email
 from marshmallow.fields import List
 from marshmallow.fields import Str
+from marshmallow.fields import Int
 from marshmallow.validate import ContainsOnly
 from marshmallow.validate import Length
 from marshmallow.validate import Predicate
+from marshmallow.validate import Range
 
 PASSWD_RGX = re.compile(
     r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$"
@@ -82,6 +84,15 @@ class ParamSchema(Schema):
     auth_enc_keys = Str(load_default="")
 
     salt = Str(load_default="", dump_default="")
+
+    init_keys_exp = Int(
+        validate=[
+            Range(1),
+        ],
+        load_default=48,
+        dump_default=48,
+        strict=True,
+    )
 
     @validates("hostname")
     def validate_fqdn(self, value):
