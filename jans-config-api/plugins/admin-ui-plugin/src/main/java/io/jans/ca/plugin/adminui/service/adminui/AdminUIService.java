@@ -92,7 +92,7 @@ public class AdminUIService {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             List<AdminRole> roles = adminConf.getDynamic().getRoles().stream().filter(ele -> ele.getRole().equals(role)).collect(Collectors.toList());
-            if (!CommonUtils.isEmptyOrNullCollection(roles)) {
+            if (!CollectionUtils.isEmpty(roles)) {
                 return roles.get(0);
             }
             log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
@@ -208,7 +208,7 @@ public class AdminUIService {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             List<AdminPermission> permissions = adminConf.getDynamic().getPermissions().stream().filter(ele -> ele.getPermission().equals(permission)).collect(Collectors.toList());
-            if (!CommonUtils.isEmptyOrNullCollection(permissions)) {
+            if (!CollectionUtils.isEmpty(permissions)) {
                 return permissions.get(0);
             }
             log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
@@ -385,7 +385,7 @@ public class AdminUIService {
             List<RolePermissionMapping> roleScopeMappings = adminConf.getDynamic().getRolePermissionMapping()
                     .stream().filter(ele -> ele.getRole().equalsIgnoreCase(role))
                     .collect(Collectors.toList());
-            if (!CommonUtils.isEmptyOrNullCollection(roleScopeMappings)) {
+            if (!CollectionUtils.isEmpty(roleScopeMappings)) {
                 return roleScopeMappings.get(0);
             }
             log.error(ErrorResponse.ROLE_PERMISSION_MAP_NOT_FOUND.getDescription());
