@@ -93,6 +93,34 @@ configmap:
   cnAwsSecretsReplicaRegions: []
   # [aws_secret_manager_envs] END
   # [aws_envs] END
+  # [vault_envs] Envs related to Hashicorp vault 
+  # -- AppRole RoleID.
+  cnVaultRoleId: ""
+  # -- AppRole SecretID.
+  cnVaultSecretId: ""
+  # -- base URL of Vault (default to `http://localhost:8200`).
+  cnVaultAddr: http://localhost:8200
+  # -- whether to verify cert or not (default to `false`).
+  cnVaultVerify: false
+  # -- path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
+  cnVaultRoleIdFile: /etc/certs/vault_role_id
+  # -- path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
+  cnVaultSecretIdFile: /etc/certs/vault_secret_id
+  # -- path to Vault cert file (default to `/etc/certs/vault_client.crt`).
+  cnVaultCertFile: /etc/certs/vault_client.crt
+  # -- path to Vault key file (default to `/etc/certs/vault_client.key`).
+  cnVaultKeyFile: /etc/certs/vault_client.key
+  # -- path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
+  cnVaultCACertFile: /etc/certs/vault_ca.crt
+  # -- namespace used to create the config tree, i.e. `secret/jans` (default to empty string).
+  cnVaultNamespace: ""
+  # -- path to KV secrets engine (default to `secret`).
+  cnVaultKvPath: secret 
+  # -- base prefix name used to build secret path (default to `jans`).
+  cnVaultPrefix: jans
+  # -- path to AppRole (default to `approle`).
+  cnVaultAppRolePath: approle
+  # [vault_envs] END  
   # -- Value passed to Java option -XX:MaxRAMPercentage
   cnMaxRamPercent: "75.0"
   # -- SCIM protection mode OAUTH|TEST|UMA
