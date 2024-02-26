@@ -13,7 +13,9 @@ It does this by leveraging the feature of the same name available in keycloak, w
 user authentication part of SSO. Once authentication is successful, the user is redirected to the SP with personnal attributes 
 and an active SSO session.
 
-## Installation 
+## Installation
+
+
 
 ## Have questions in the meantime?
 
