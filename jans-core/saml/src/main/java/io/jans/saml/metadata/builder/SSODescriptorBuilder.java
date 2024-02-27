@@ -1,6 +1,5 @@
 package io.jans.saml.metadata.builder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.jans.saml.metadata.model.Endpoint;
@@ -8,7 +7,7 @@ import io.jans.saml.metadata.model.SSODescriptor;
 
 public abstract class SSODescriptorBuilder extends RoleDescriptorBuilder {
 
-    public SSODescriptorBuilder(final SSODescriptor descriptor) {
+    protected SSODescriptorBuilder(final SSODescriptor descriptor) {
         super(descriptor);
     }
 
