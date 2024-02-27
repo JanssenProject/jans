@@ -31,15 +31,15 @@ will cover in this section.
 
 ###  Adding a SAML SP
 
-- Open Jans-TUI
-- Select the menu item `Jans SAML` > `Service Providers`
-- Then navigate and select `<Add Service Provider>`
-- Input the following:
-    - `Display Name` : An identifiable name for the Service Provider
-    - `Enable TR`: Whether or not the Service Provider should be enabled
-    - `Metadata Location`: The location of the metadata. The supported options
+1. Open Jans-TUI
+1. Select the menu item `Jans SAML` > `Service Providers`
+1. Then navigate and select `<Add Service Provider>`
+1. Input the following:
+    1. `Display Name` : An identifiable name for the Service Provider
+    1. `Enable TR`: Whether or not the Service Provider should be enabled
+    1. `Metadata Location`: The location of the metadata. The supported options
       so far are `file` and `manual`.
-    - `Released Attributes`: The user attributes to be released via the SAML
+    1. `Released Attributes`: The user attributes to be released via the SAML
       response if authentication is successful
 
 The configurable options are kept to the bare functional minimum but will be
