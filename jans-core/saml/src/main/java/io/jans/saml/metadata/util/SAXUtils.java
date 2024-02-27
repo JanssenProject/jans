@@ -23,6 +23,7 @@ public class SAXUtils  {
 
     public static final SAXParser createParser() throws ParserConfigurationException, SAXException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
         factory.setSchema(newSchemaFactory().newSchema(schemasources));
         factory.setNamespaceAware(true);
         return factory.newSAXParser();
@@ -31,10 +32,10 @@ public class SAXUtils  {
     private static final SchemaFactory newSchemaFactory() throws SAXException {
         
         final SchemaFactory schemafactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        schemafactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
         schemafactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA,"");
         schemafactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
         schemafactory.setResourceResolver(new LSResourceResolverImpl());
-        schemafactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
         return schemafactory;
     }
 
