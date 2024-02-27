@@ -2819,13 +2819,13 @@
           "scopes": [
             {
               "inum": "1800.01.73",
-              "name": "https://jans.io/oauth/kc-lock-config.readonly"
+              "name": "https://jans.io/oauth/lock-config.readonly"
             }
           ],
           "groupScopes": [
             {
               "inum": "1800.01.74",
-              "name": "https://jans.io/oauth/kc-lock-config.write"
+              "name": "https://jans.io/oauth/lock-config.write"
             }
           ],
           "superScopes": [
@@ -2843,7 +2843,7 @@
           "scopes": [
             {
               "inum": "1800.01.74",
-              "name": "https://jans.io/oauth/kc-lock-config.write"
+              "name": "https://jans.io/oauth/lock-config.write"
             }
           ],
           "groupScopes": [],
