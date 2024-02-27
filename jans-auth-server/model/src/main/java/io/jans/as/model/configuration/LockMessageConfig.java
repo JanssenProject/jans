@@ -15,32 +15,32 @@ public class LockMessageConfig implements Serializable {
 
 	private static final long serialVersionUID = 8732855593629219229L;
 
-	@DocProperty(description = "Enable Publish messages on id_token issue/revoke")
-    private Boolean enableIdTokenMessages;
+	@DocProperty(description = "Enable Publish messages on access token issue/revoke")
+    private Boolean enableTokenMessages;
 
-	@DocProperty(description = "Channel for id_token messages")
-    private String idTokenMessagesChannel;
+	@DocProperty(description = "Channel for token messages")
+    private String tokenMessagesChannel;
 
-	
-    public Boolean getEnableIdTokenMessages() {
-		return enableIdTokenMessages;
+
+	public Boolean getEnableTokenMessages() {
+		return enableTokenMessages;
 	}
 
-	public void setEnableIdTokenMessages(Boolean enableIdTokenMessages) {
-		this.enableIdTokenMessages = enableIdTokenMessages;
+	public void setEnableTokenMessages(Boolean enableTokenMessages) {
+		this.enableTokenMessages = enableTokenMessages;
 	}
 
-	public String getIdTokenMessagesChannel() {
-		return idTokenMessagesChannel;
+	public String getTokenMessagesChannel() {
+		return tokenMessagesChannel;
 	}
 
-	public void setIdTokenMessagesChannel(String idTokenMessagesChannel) {
-		this.idTokenMessagesChannel = idTokenMessagesChannel;
+	public void setTokenMessagesChannel(String tokenMessagesChannel) {
+		this.tokenMessagesChannel = tokenMessagesChannel;
 	}
 
 	@Override
 	public String toString() {
-		return "LockMessageConfig [enableIdTokenMessages=" + enableIdTokenMessages + ", idTokenMessagesChannel="
-				+ idTokenMessagesChannel + "]";
+		return "LockMessageConfig [enableTokenMessages=" + enableTokenMessages + ", tokenMessagesChannel="
+				+ tokenMessagesChannel + "]";
 	}
 }
