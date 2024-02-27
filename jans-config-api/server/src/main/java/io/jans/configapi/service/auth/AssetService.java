@@ -38,7 +38,7 @@ public class AssetService {
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
-    PersistenceEntryManager persistenceManager;
+    PersistenceEntryManager persistenceEntryManager;
 
     @Inject
     DBDocumentStoreProvider dBDocumentStoreProvider;
@@ -97,10 +97,26 @@ public class AssetService {
 
         log.info("Document final searchFilter:{}", searchFilter);
 
-        return persistenceManager.findPagedEntries(getDnForDocument(null), Document.class, searchFilter, null,
+        return persistenceEntryManager.findPagedEntries(getDnForDocument(null), Document.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
+    }
+
+    public Document getDocumentByInum(String inum) throws Exception {
+        log.info("Get Document by inum:{}", inum);
+        Document document = dbDocumentService.getDocumentByInum(inum);
+        log.info("Document by inum:{} is document:{}", inum, document);
+        return document;
+    }
+
+    public List<Document> getDocumentByName(String name) throws Exception {
+        log.info("Get Document by name:{}", name);
+        Filter nameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, name);
+        List<Document> documents = persistenceEntryManager.findEntries(getDnForDocument(null), Document.class,
+                nameFilter);
+        log.info("Document by name:{} are documents:{}", name, documents);
+        return documents;
     }
 
     public boolean saveAsset(Document document, InputStream documentStream) {

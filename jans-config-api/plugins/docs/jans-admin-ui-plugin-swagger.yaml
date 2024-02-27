@@ -1645,10 +1645,6 @@ components:
           type: string
         url:
           type: string
-        httpRequestBody:
-          type: object
-          additionalProperties:
-            type: object
         httpMethod:
           type: string
         jansEnabled:
@@ -1662,6 +1658,10 @@ components:
           type: array
           items:
             type: string
+        httpRequestBody:
+          type: object
+          additionalProperties:
+            type: object
         baseDn:
           type: string
     Scope:

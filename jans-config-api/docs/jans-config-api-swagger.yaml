@@ -456,13 +456,51 @@ paths:
         - https://jans.io/oauth/config/agama.readonly
         - https://jans.io/oauth/config/agama.write
         - https://jans.io/oauth/config/read-all
-  /api/v1/jans-assets/upload-asset:
-    post:
+  /api/v1/jans-assets/{inum}:
+    get:
       tags:
       - Jans Assets
-      summary: Upload new asset
-      description: Upload new asset
-      operationId: post-new-asset
+      summary: Gets Jans asset by inum - unique identifier
+      description: Gets Jans asset by inum - unique identifier
+      operationId: get-asset-by-inum
+      parameters:
+      - name: inum
+        in: path
+        description: Asset Id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResult'
+              examples:
+                Response example:
+                  description: Response example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans_asset-read
+    delete:
+      tags:
+      - Jans Assets
+      summary: Delete an asset
+      description: Delete an asset
+      operationId: delete-asset
+      parameters:
+      - name: inum
+        in: path
+        description: Asset identifier
+        required: true
+        schema:
+          type: string
       requestBody:
         description: String multipart form.
         content:
@@ -492,7 +530,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/attributes.write
+        - https://jans.io/oauth/config/jans_asset-delete
   /api/v1/jans-assets:
     get:
       tags:
@@ -560,80 +598,7 @@ paths:
               examples:
                 Response example:
                   description: Response example
-                  value: |
-                    {
-                        "start": 0,
-                        "totalEntriesCount": 78,
-                        "entriesCount": 2,
-                        "entries": [
-                            {
-                                "dn": "inum=08E2,ou=attributes,o=jans",
-                                "selected": false,
-                                "inum": "08E2",
-                                "name": "departmentNumber",
-                                "displayName": "Department",
-                                "description": "Organizational Department",
-                                "origin": "jansCustomPerson",
-                                "dataType": "string",
-                                "editType": [
-                                    "admin"
-                                ],
-                                "viewType": [
-                                    "user",
-                                    "admin"
-                                ],
-                                "claimName": "department_number",
-                                "status": "inactive",
-                                "saml1Uri": "urn:mace:dir:attribute-def:departmentNumber",
-                                "saml2Uri": "urn:oid:2.16.840.1.113730.3.1.2",
-                                "urn": "urn:mace:dir:attribute-def:departmentNumber",
-                                "oxMultiValuedAttribute": false,
-                                "custom": false,
-                                "requred": false,
-                                "whitePagesCanView": false,
-                                "adminCanEdit": true,
-                                "userCanView": true,
-                                "userCanEdit": false,
-                                "adminCanAccess": true,
-                                "adminCanView": true,
-                                "userCanAccess": true,
-                                "baseDn": "inum=08E2,ou=attributes,o=jans"
-                            },
-                            {
-                                "dn": "inum=0C18,ou=attributes,o=jans",
-                                "selected": false,
-                                "inum": "0C18",
-                                "name": "telephoneNumber",
-                                "displayName": "Home Telephone Number",
-                                "description": "Home Telephone Number",
-                                "origin": "jansCustomPerson",
-                                "dataType": "string",
-                                "editType": [
-                                    "user",
-                                    "admin"
-                                ],
-                                "viewType": [
-                                    "user",
-                                    "admin"
-                                ],
-                                "claimName": "phone_number",
-                                "status": "inactive",
-                                "saml1Uri": "urn:mace:dir:attribute-def:telephoneNumber",
-                                "saml2Uri": "urn:oid:2.5.4.20",
-                                "urn": "urn:mace:dir:attribute-def:phone_number",
-                                "oxMultiValuedAttribute": false,
-                                "custom": false,
-                                "requred": false,
-                                "whitePagesCanView": false,
-                                "adminCanEdit": true,
-                                "userCanView": true,
-                                "userCanEdit": true,
-                                "adminCanAccess": true,
-                                "adminCanView": true,
-                                "userCanAccess": true,
-                                "baseDn": "inum=0C18,ou=attributes,o=jans"
-                            }
-                    }
+                  value: ""
         "401":
           description: Unauthorized
         "500":
@@ -641,6 +606,79 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans_asset-read
+  /api/v1/jans-assets/upload-asset:
+    put:
+      tags:
+      - Jans Assets
+      summary: Update existing asset
+      description: Upload new asset
+      operationId: put-asset
+      requestBody:
+        description: String multipart form.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssetForm'
+            examples:
+              Response json example:
+                description: Response json example
+                value: ""
+      responses:
+        "201":
+          description: Newly created Trust IDP
+          content:
+            application/json-patch+json:
+              schema:
+                $ref: '#/components/schemas/Document'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/jans_asset-write
+    post:
+      tags:
+      - Jans Assets
+      summary: Upload new asset
+      description: Upload new asset
+      operationId: post-new-asset
+      requestBody:
+        description: String multipart form.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssetForm'
+            examples:
+              Response json example:
+                description: Response json example
+                value: ""
+      responses:
+        "201":
+          description: Newly created Trust IDP
+          content:
+            application/json-patch+json:
+              schema:
+                $ref: '#/components/schemas/Document'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/jans_asset-write
   /api/v1/attributes:
     get:
       tags:
@@ -8129,15 +8167,15 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
-        userCanAccess:
+        adminCanEdit:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8951,8 +8989,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8962,6 +8998,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9973,14 +10011,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
