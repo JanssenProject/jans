@@ -2,9 +2,7 @@ package io.jans.saml.metadata.builder;
 
 import java.time.Duration;
 import java.util.Date;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import io.jans.saml.metadata.model.ContactPerson;
 import io.jans.saml.metadata.model.KeyDescriptor;
@@ -16,7 +14,7 @@ public abstract class RoleDescriptorBuilder {
 
     protected RoleDescriptor descriptor; 
 
-    public RoleDescriptorBuilder(final RoleDescriptor descriptor) {
+    protected RoleDescriptorBuilder(final RoleDescriptor descriptor) {
 
         this.descriptor = descriptor;
     }
