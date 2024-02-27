@@ -13,7 +13,7 @@ Output will look like:
 **salt** is 24 character strings used for encoding/decoding secret data
 
 ## Enable remote connection to PostgreSQL
-Since Lock Client will use PostgreSQL server on main Jannsen Server, you need to enable remote connection.
+Since Lock Client will use PostgreSQL server on main Janssen Server, you need to enable remote connection.
  1. Get location of configuration file (execute as root):
   `su - postgres -c 'psql -U postgres -d postgres -t -c "SHOW config_file;"'`
  2. Set **listen_address** to `*` as:
