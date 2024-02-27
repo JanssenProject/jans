@@ -20,6 +20,7 @@ class JansLockInstaller(JettyInstaller):
                 (os.path.join(Config.dist_jans_dir, 'jans-lock.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-server/{0}/jans-lock-server-{0}.war').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_jans_dir, 'jans-lock-service.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-service/{0}/jans-lock-service-{0}.jar').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_app_dir, 'opa'), 'https://openpolicyagent.org/downloads/{}/opa_linux_amd64_static'.format(base.current_app.app_info['OPA_VERSION'])),
+                (os.path.join(Config.dist_jans_dir, 'lock-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/lock-plugin/{0}/lock-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 ]
 
     def __init__(self):
@@ -57,6 +58,11 @@ class JansLockInstaller(JettyInstaller):
         if Config.persistence_type == 'sql' and Config.rdbm_type == 'pgsql':
             self.dbUtils.set_oxAuthConfDynamic({'lockMessageConfig': {'enableTokenMessages': True, 'tokenMessagesChannel': 'jans_token'}})
             Config.lock_message_provider_type = 'POSTGRES'
+
+        # deploy config-api plugin
+        base.current_app.ConfigApiInstaller.source_files.append(self.source_files[3])
+        base.current_app.ConfigApiInstaller.install_plugin('lock-plugin')
+
 
     def install_as_server(self):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
