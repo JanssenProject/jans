@@ -21,6 +21,7 @@ class JansLockInstaller(JettyInstaller):
                 (os.path.join(Config.dist_jans_dir, 'jans-lock-service.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-service/{0}/jans-lock-service-{0}.jar').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_app_dir, 'opa'), 'https://openpolicyagent.org/downloads/{}/opa_linux_amd64_static'.format(base.current_app.app_info['OPA_VERSION'])),
                 (os.path.join(Config.dist_jans_dir, 'lock-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/lock-plugin/{0}/lock-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'jans-lock-model.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-model/{0}/jans-lock-model-{0}.jar'.format(base.current_app.app_info['jans_version']))),
                 ]
 
     def __init__(self):
@@ -71,13 +72,13 @@ class JansLockInstaller(JettyInstaller):
         self.enable()
 
     def install_as_service(self):
-        plugin_name = os.path.basename(self.source_files[1][0])
-        self.logIt(f"Adding plugin {plugin_name} to jans-auth")
-        self.copyFile(self.source_files[1][0], base.current_app.JansAuthInstaller.custom_lib_dir)
-        plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
-        base.current_app.JansAuthInstaller.add_extra_class(plugin_class_path)
-        self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
-
+        for plugin in (self.source_files[1][0], self.source_files[4][0]):
+            plugin_name = os.path.basename(plugin)
+            self.logIt(f"Adding plugin {plugin_name} to jans-auth")
+            self.copyFile(plugin, base.current_app.JansAuthInstaller.custom_lib_dir)
+            plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
+            base.current_app.JansAuthInstaller.add_extra_class(plugin_class_path)
+            self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
 
     def render_import_templates(self):
         for tmp in (self.dynamic_conf_json, self.error_json, self.static_conf_json):
