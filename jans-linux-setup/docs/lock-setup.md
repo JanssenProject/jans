@@ -6,7 +6,7 @@ Server with PostgreSQL backend [see docs](https://docs.jans.io/v1.0.22/admin/ins
 
 
 ## Obtain salt
-On your main Jannsen Server, execute the following command to get salt:
+On your main Janssen Server, execute the following command to get salt:
 `cat /etc/jans/conf/salt`
 Output will look like:
 `encodeSalt = Qm0MCPh20QGsE21ZovVnUIb8`
