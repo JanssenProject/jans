@@ -196,7 +196,7 @@ clean_httpd_config()
 
 result = dbUtils.dn_exists('ou=configuration,o=jans')
 if not result:
-    print("Jannsen was not configured on this PostgreSQL server")
+    print("Janssen was not configured on this PostgreSQL server")
     sys.exit()
 
 if 'jansMessageConf' in result and result['jansMessageConf']:
