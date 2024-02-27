@@ -7896,17 +7896,17 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8722,6 +8722,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8731,8 +8733,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8876,9 +8876,9 @@ components:
     LockMessageConfig:
       type: object
       properties:
-        enableIdTokenMessages:
+        enableTokenMessages:
           type: boolean
-        idTokenMessagesChannel:
+        tokenMessagesChannel:
           type: string
     SsaConfiguration:
       type: object
