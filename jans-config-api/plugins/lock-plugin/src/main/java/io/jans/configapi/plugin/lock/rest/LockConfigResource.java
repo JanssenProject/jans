@@ -50,8 +50,8 @@ public class LockConfigResource extends BaseResource {
     @Inject
     LockConfigService lockConfigService;
 
-    @Operation(summary = "Gets KC Lock configuration properties", description = "Gets KC Lock configuration properties", operationId = "get-lock-properties", tags = {
-            "KC Lock - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+    @Operation(summary = "Gets Lock configuration properties", description = "Gets Lock configuration properties", operationId = "get-lock-properties", tags = {
+            "Lock - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.LOCK_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
@@ -64,7 +64,7 @@ public class LockConfigResource extends BaseResource {
     public Response getlockConf() {
        
         AppConfiguration lockConfiguration = lockConfigService.find();
-        logger.info("KC Lock details lockConfiguration():{}", lockConfiguration);
+        logger.info("Lock details lockConfiguration():{}", lockConfiguration);
         if(lockConfiguration==null) {
             throwInternalServerException("It seems Lock module is not setup, kindly check.");
         }
@@ -72,8 +72,8 @@ public class LockConfigResource extends BaseResource {
         
     }
 
-    @Operation(summary = "Update KC Lock configuration properties", description = "Update KC Lock configuration properties", operationId = "put-lock-properties", tags = {
-            "KC Lock - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+    @Operation(summary = "Update Lock configuration properties", description = "Update Lock configuration properties", operationId = "put-lock-properties", tags = {
+            "Lock - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.LOCK_CONFIG_WRITE_ACCESS }))
     @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class), examples = @ExampleObject(name = "Request example", value = "example/lock/config/lock-put.json")))
     @ApiResponses(value = {
@@ -83,9 +83,9 @@ public class LockConfigResource extends BaseResource {
     @PUT    @ProtectedApi(scopes = { Constants.LOCK_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updatelockConf(@Valid AppConfiguration lockAppConf) {
-        logger.info("Update KC Lock conf details lockAppConf():{}", lockAppConf);
+        logger.info("Update Lock conf details lockAppConf():{}", lockAppConf);
         Conf conf = lockConfigService.findLockConf();
-        logger.info("KC Lock conf:{} ", conf);
+        logger.info("Lock conf:{} ", conf);
         if(conf==null) {
             throwInternalServerException("It seems Lock module is not setup, kindly check.");
         }
@@ -93,13 +93,13 @@ public class LockConfigResource extends BaseResource {
         conf.setDynamic(lockAppConf);
         lockConfigService.mergeLockConfig(conf);
         lockAppConf = lockConfigService.find();
-        logger.info("KC Lock conf, post update - lockAppConf:{}", lockAppConf);
+        logger.info("Lock conf, post update - lockAppConf:{}", lockAppConf);
         return Response.ok(lockAppConf).build();
 
     }
 
-    @Operation(summary = "Partially modifies KC Lock configuration properties.", description = "Partially modifies KC Lock configuration properties.", operationId = "patch-lock-properties", tags = {
-            "KC Lock - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+    @Operation(summary = "Partially modifies Lock configuration properties.", description = "Partially modifies Lock configuration properties.", operationId = "patch-lock-properties", tags = {
+            "Lock - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.LOCK_CONFIG_WRITE_ACCESS }))
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/lock/config/lock-patch.json")))
     @ApiResponses(value = {
@@ -111,20 +111,20 @@ public class LockConfigResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.LOCK_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchlockConf(@NotNull String jsonPatchString) throws JsonPatchException, IOException {
-        logger.info("KC Lock Config - jsonPatchString:{} ", jsonPatchString);
+        logger.info("Lock Config - jsonPatchString:{} ", jsonPatchString);
         Conf conf = lockConfigService.findLockConf();
-        logger.info("KC Lock conf:{} ", conf);
+        logger.info("Lock conf:{} ", conf);
         if(conf==null) {
             throwInternalServerException("It seems Lock module is not setup, kindly check.");
         }
        
         AppConfiguration lockAppConf = Jackson.applyPatch(jsonPatchString, conf.getDynamic());
-        logger.info("KC Lock conf details lockAppConf():{}", lockAppConf);
+        logger.info("Lock conf details lockAppConf():{}", lockAppConf);
         
         conf.setDynamic(lockAppConf);
         lockConfigService.mergeLockConfig(conf);
         lockAppConf = lockConfigService.find();
-        logger.info("KC KC Lock post patch - lockAppConf:{}", lockAppConf);
+        logger.info("KC Lock post patch - lockAppConf:{}", lockAppConf);
         return Response.ok(lockAppConf).build();
     }
 }
