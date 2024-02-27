@@ -387,7 +387,6 @@ public class XPathUtils {
             DateFormat df = createDateTimeFormat();
             return df.parse(strvalue);
         }catch(ParseException e) {
-            e.printStackTrace();
             return null;
         }
     }
