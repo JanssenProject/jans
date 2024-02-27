@@ -119,7 +119,7 @@ public class SAMLMetadataParser  {
                 XPathUtils.RoleDescriptorNodeType.SPSSO_DESCRIPTOR_NODE, xpath, node);
         
         for(int i = 0 ; i < spssodescriptors_n.getLength() ; i++) {
-            parseSPSSODescriptor(xpath, spssodescriptors_n.item(i),builder.SPSSODescriptor());
+            parseSPSSODescriptor(xpath, spssodescriptors_n.item(i),builder.spssoDescriptor());
         }
     }
 

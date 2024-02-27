@@ -2,8 +2,6 @@ package io.jans.saml.metadata.builder;
 
 import java.util.Date;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 
 import io.jans.saml.metadata.model.EntityDescriptor;
 import io.jans.saml.metadata.model.SPSSODescriptor;
@@ -41,7 +39,7 @@ public class EntityDescriptorBuilder {
         return this;
     }
 
-    public SPSSODescriptorBuilder SPSSODescriptor() {
+    public SPSSODescriptorBuilder spssoDescriptor() {
 
         SPSSODescriptor spssodescriptor = new SPSSODescriptor();
         this.entityDescriptor.addSpssoDescriptor(spssodescriptor);
