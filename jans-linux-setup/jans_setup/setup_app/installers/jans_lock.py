@@ -8,11 +8,15 @@ from setup_app.utils import base
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
+from setup_app.utils.ldif_utils import myLdifParser
 
 Config.jans_lock_port = '8076'
 Config.jans_opa_host = 'localhost'
 Config.jans_opa_port = '8181'
 Config.lock_message_provider_type = 'DISABLED'
+Config.lock_redis_host = 'localhost'
+Config.lock_redis_port = '6379'
+
 
 class JansLockInstaller(JettyInstaller):
 
@@ -32,7 +36,7 @@ class JansLockInstaller(JettyInstaller):
         self.register_progess()
 
         self.systemd_units = []
-
+        self.set_provider_type = True
         self.output_dir = os.path.join(Config.output_dir, self.service_name)
         self.template_dir = os.path.join(Config.templateFolder, self.service_name)
         self.dynamic_conf_json = os.path.join(self.output_dir, 'dynamic-conf.json')
@@ -43,6 +47,7 @@ class JansLockInstaller(JettyInstaller):
         self.opa_dir = os.path.join(Config.opt_dir, 'opa')
         self.opa_bin_dir = os.path.join(self.opa_dir, 'bin')
         self.opa_log_dir = os.path.join(self.opa_dir, 'logs')
+
 
     def install(self):
         if Config.get('install_jans_lock_as_server'):
@@ -83,9 +88,13 @@ class JansLockInstaller(JettyInstaller):
 
         self.renderTemplateInOut(self.config_ldif, self.template_dir, self.output_dir)
 
-        ldif_files = [self.config_ldif]
-        self.dbUtils.import_ldif(ldif_files)
+        config_parser = myLdifParser(self.config_ldif)
+        config_parser.parse()
+        dn = config_parser.entries[0][0]
 
+        if not self.dbUtils.dn_exists(dn):
+            ldif_files = [self.config_ldif]
+            self.dbUtils.import_ldif(ldif_files)
 
     def configure_message_conf(self):
         # this function is called in JansInstaller.post_install_tasks
