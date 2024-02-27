@@ -48,19 +48,16 @@ data:
   #AWS_PROFILE
   # [aws_envs] END
   {{- end }}
-  # [vault_envs] Envs related to Hashicorp vault 
+  # [vault_envs] Envs related to Hashicorp vault
   {{ if eq .Values.global.configSecretAdapter "vault" }}
   CN_SECRET_VAULT_ADDR: {{ .Values.configmap.cnVaultAddr | quote }}
   CN_SECRET_VAULT_VERIFY: {{ .Values.configmap.cnVaultVerify | quote }}
   CN_SECRET_VAULT_ROLE_ID_FILE: {{ .Values.configmap.cnVaultRoleIdFile | quote }}
   CN_SECRET_VAULT_SECRET_ID_FILE: {{ .Values.configmap.cnVaultSecretIdFile | quote }}
-  CN_SECRET_VAULT_CERT_FILE: {{ .Values.configmap.cnVaultCertFile | quote }}
-  CN_SECRET_VAULT_KEY_FILE: {{ .Values.configmap.cnVaultKeyFile | quote }}
-  CN_SECRET_VAULT_CACERT_FILE: {{ .Values.configmap.cnVaultCACertFile | quote }}
   CN_SECRET_VAULT_NAMESPACE: {{ .Values.configmap.cnVaultNamespace | quote }}
   CN_SECRET_VAULT_KV_PATH: {{ .Values.configmap.cnVaultKvPath | quote }}
   CN_SECRET_VAULT_PREFIX: {{ .Values.configmap.cnVaultPrefix | quote }}
-  CN_SECRET_VAULT_APPROLE_PATH: {{ .Values.configmap.cnVaultAppRolePath | quote }}  
+  CN_SECRET_VAULT_APPROLE_PATH: {{ .Values.configmap.cnVaultAppRolePath | quote }}
   # [vault_envs] END
   {{- end }}
   CN_SQL_DB_SCHEMA: {{ .Values.configmap.cnSqlDbSchema | quote }}

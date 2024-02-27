@@ -176,9 +176,6 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected the secrets . |
 | configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
 | configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |
-| configmap.cnVaultCACertFile | string | `"/etc/certs/vault_ca.crt"` | Path to Vault CA cert file. |
-| configmap.cnVaultCertFile | string | `"/etc/certs/vault_client.crt"` | Path to Vault client cert file. |
-| configmap.cnVaultKeyFile | string | `"/etc/certs/vault_client.key"` | Path to Vault client key file. |
 | configmap.cnVaultKvPath | string | `"secret"` | Path to Vault KV secrets engine. |
 | configmap.cnVaultNamespace | string | `""` | Vault namespace used to access the secrets. |
 | configmap.cnVaultPrefix | string | `"jans"` | Base prefix name used to access secrets. |

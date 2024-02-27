@@ -106,12 +106,6 @@ configmap:
   cnVaultRoleIdFile: /etc/certs/vault_role_id
   # -- Path to file contains Vault AppRole secret ID.
   cnVaultSecretIdFile: /etc/certs/vault_secret_id
-  # -- Path to Vault client cert file.
-  cnVaultCertFile: /etc/certs/vault_client.crt
-  # -- Path to Vault client key file.
-  cnVaultKeyFile: /etc/certs/vault_client.key
-  # -- Path to Vault CA cert file.
-  cnVaultCACertFile: /etc/certs/vault_ca.crt
   # -- Vault namespace used to access the secrets.
   cnVaultNamespace: ""
   # -- Path to Vault KV secrets engine.

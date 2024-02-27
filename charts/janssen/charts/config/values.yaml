@@ -88,7 +88,7 @@ configmap:
   cnAwsSecretsReplicaRegions: []
   # [aws_secret_manager_envs] END
   # [aws_envs] END
-  # [vault_envs] Envs related to Hashicorp vault 
+  # [vault_envs] Envs related to Hashicorp vault
   # -- Vault AppRole RoleID.
   cnVaultRoleId: ""
   # -- Vault AppRole SecretID.
@@ -101,12 +101,6 @@ configmap:
   cnVaultRoleIdFile: /etc/certs/vault_role_id
   # -- Path to file contains Vault AppRole secret ID.
   cnVaultSecretIdFile: /etc/certs/vault_secret_id
-  # -- Path to Vault client cert file.
-  cnVaultCertFile: /etc/certs/vault_client.crt
-  # -- Path to Vault client key file.
-  cnVaultKeyFile: /etc/certs/vault_client.key
-  # -- Path to Vault CA cert file.
-  cnVaultCACertFile: /etc/certs/vault_ca.crt
   # -- Vault namespace used to access the secrets.
   cnVaultNamespace: ""
   # -- Path to Vault KV secrets engine.
@@ -115,7 +109,7 @@ configmap:
   cnVaultPrefix: jans
   # -- Path to Vault AppRole.
   cnVaultAppRolePath: approle
-  # [vault_envs] END  
+  # [vault_envs] END
   # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
   cnLdapUrl: "opendj:1636"
   # -- Value passed to Java option -XX:MaxRAMPercentage
