@@ -12,7 +12,7 @@ public class SAMLMetadataBuilder {
 
     public SAMLMetadataBuilder() {
 
-        this.entityDescriptors = new ArrayList<EntityDescriptor>();
+        this.entityDescriptors = new ArrayList<>();
     }
     
     public EntityDescriptorBuilder entityDescriptor() {
