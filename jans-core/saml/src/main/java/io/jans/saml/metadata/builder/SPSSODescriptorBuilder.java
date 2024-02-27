@@ -3,8 +3,6 @@ package io.jans.saml.metadata.builder;
 import io.jans.saml.metadata.model.IndexedEndpoint;
 import io.jans.saml.metadata.model.SPSSODescriptor;
 
-import java.util.List;
-
 public class SPSSODescriptorBuilder extends SSODescriptorBuilder {
 
     public SPSSODescriptorBuilder(final SPSSODescriptor descriptor) {
@@ -13,24 +11,24 @@ public class SPSSODescriptorBuilder extends SSODescriptorBuilder {
 
     public SPSSODescriptorBuilder authnRequestsSigned(final Boolean authnRequestsSigned) {
 
-        SPSSODescriptor().setAuthnRequestsSigned(authnRequestsSigned);
+        spssoDescriptor().setAuthnRequestsSigned(authnRequestsSigned);
         return this;
     }
 
     public SPSSODescriptorBuilder wantAssertionsSigned(final Boolean wantAssertionsSigned) {
         
-        SPSSODescriptor().setWantAssertionsSigned(wantAssertionsSigned);
+        spssoDescriptor().setWantAssertionsSigned(wantAssertionsSigned);
         return this;
     }
 
     public IndexedEndpointBuilder assersionConsumerService() {
 
         IndexedEndpoint endpoint = new IndexedEndpoint();
-        SPSSODescriptor().addAssertionConsumerService(endpoint);
+        spssoDescriptor().addAssertionConsumerService(endpoint);
         return new IndexedEndpointBuilder(endpoint);
     }
 
-    private final SPSSODescriptor SPSSODescriptor() {
+    private final SPSSODescriptor spssoDescriptor() {
 
         return (SPSSODescriptor) descriptor;
     }
