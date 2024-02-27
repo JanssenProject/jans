@@ -146,7 +146,7 @@ From the console, Go to `Secret Manager`> Click on `Create Secret` > Add a `name
 
 3.  Enable and configure [appRole](https://developer.hashicorp.com/vault/docs/auth/approle#configuration). You have also to reference the previously created policy. For example:
     ```
-    vault auth enable approle
+    vault auth enable -path=approle approle
     vault write auth/approle/role/<role-name> token_policies="<policy-name>"
     ```
 
