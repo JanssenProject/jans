@@ -267,7 +267,7 @@
 							<contextId>${project.artifactId}</contextId>
 							<prettyPrint>true</prettyPrint>
 							<resourcePackages>
-								<package>io.jans.configapi.plugin.kc.link.rest</package>
+								<package>io.jans.configapi.plugin.lock.rest</package>
 							</resourcePackages>
 						</configuration>
 					</execution>
