@@ -73,6 +73,19 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbTimezone | string | `"UTC"` | SQL database timezone. |
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected in the secrets. |
+| configmap.cnVaultAddr | string | `"http://localhost:8200"` | base URL of Vault (default to `http://localhost:8200`). |
+| configmap.cnVaultAppRolePath | string | `"approle"` | path to AppRole (default to `approle`). |
+| configmap.cnVaultCACertFile | string | `"/etc/certs/vault_ca.crt"` | path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`. |
+| configmap.cnVaultCertFile | string | `"/etc/certs/vault_client.crt"` | path to Vault cert file (default to `/etc/certs/vault_client.crt`). |
+| configmap.cnVaultKeyFile | string | `"/etc/certs/vault_client.key"` | path to Vault key file (default to `/etc/certs/vault_client.key`). |
+| configmap.cnVaultKvPath | string | `"secret"` | path to KV secrets engine (default to `secret`). |
+| configmap.cnVaultNamespace | string | `""` | namespace used to create the config tree, i.e. `secret/jans` (default to empty string). |
+| configmap.cnVaultPrefix | string | `"jans"` | base prefix name used to build secret path (default to `jans`). |
+| configmap.cnVaultRoleId | string | `""` | AppRole RoleID. |
+| configmap.cnVaultRoleIdFile | string | `"/etc/certs/vault_role_id"` | path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`). |
+| configmap.cnVaultSecretId | string | `""` | AppRole SecretID. |
+| configmap.cnVaultSecretIdFile | string | `"/etc/certs/vault_secret_id"` | path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`). |
+| configmap.cnVaultVerify | bool | `false` | whether to verify cert or not (default to `false`). |
 | configmap.containerMetadataName | string | `"kubernetes"` |  |
 | configmap.kcDbPassword | string | `"Test1234#"` | Password for Keycloak database access |
 | configmap.kcDbSchema | string | `"keycloak"` | Keycloak database schema name (note that PostgreSQL may using "public" schema). |

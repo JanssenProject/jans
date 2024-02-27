@@ -129,7 +129,7 @@ Kubernetes: `>=v1.22.0-0`
 | config-api.plugins | string | `"admin-ui,fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml") |
 | config.enabled | bool | `true` | Boolean flag to enable/disable the configuration job. This normally should never be false |
 | configAdapterName | string | `"kubernetes"` | The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes |
-| configSecretAdapter | string | `"kubernetes"` | The config backend adapter that will hold Janssen secret layer. aws|google|kubernetes |
+| configSecretAdapter | string | `"kubernetes"` | The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes |
 | configmap.cnAwsAccessKeyId | string | `""` |  |
 | configmap.cnAwsDefaultRegion | string | `"us-west-1"` |  |
 | configmap.cnAwsProfile | string | `"janssen"` |  |
@@ -174,6 +174,19 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbTimezone | string | `"UTC"` | SQL database timezone. |
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected the secrets . |
+| configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
+| configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |
+| configmap.cnVaultCACertFile | string | `"/etc/certs/vault_ca.crt"` | Path to Vault CA cert file. |
+| configmap.cnVaultCertFile | string | `"/etc/certs/vault_client.crt"` | Path to Vault client cert file. |
+| configmap.cnVaultKeyFile | string | `"/etc/certs/vault_client.key"` | Path to Vault client key file. |
+| configmap.cnVaultKvPath | string | `"secret"` | Path to Vault KV secrets engine. |
+| configmap.cnVaultNamespace | string | `""` | Vault namespace used to access the secrets. |
+| configmap.cnVaultPrefix | string | `"jans"` | Base prefix name used to access secrets. |
+| configmap.cnVaultRoleId | string | `""` | Vault AppRole RoleID. |
+| configmap.cnVaultRoleIdFile | string | `"/etc/certs/vault_role_id"` | Path to file contains Vault AppRole role ID. |
+| configmap.cnVaultSecretId | string | `""` | Vault AppRole SecretID. |
+| configmap.cnVaultSecretIdFile | string | `"/etc/certs/vault_secret_id"` | Path to file contains Vault AppRole secret ID. |
+| configmap.cnVaultVerify | bool | `false` | Verify connection to Vault. |
 | configmap.kcDbPassword | string | `"Test1234#"` | Password for Keycloak database access |
 | configmap.kcDbSchema | string | `"keycloak"` | Keycloak database schema name (note that PostgreSQL may using "public" schema). |
 | configmap.kcDbUrlDatabase | string | `"keycloak"` | Keycloak database name |
