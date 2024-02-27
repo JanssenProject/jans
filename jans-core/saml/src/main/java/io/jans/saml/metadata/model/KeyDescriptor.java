@@ -16,7 +16,7 @@ public class KeyDescriptor {
 
         this.use = null;
         this.keyInfo = null;
-        this.encryptionMethods = new ArrayList<EncryptionMethod>();
+        this.encryptionMethods = new ArrayList<>();
     }
 
     public String getUse() {

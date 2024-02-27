@@ -19,7 +19,7 @@ public class SAXUtils  {
         new StreamSource(SAXUtils.class.getResourceAsStream("/schema/saml/saml-schema-metadata-2.0.xsd"))
     };
 
-    private static SchemaFactory SCHEMA_FACTORY_INSTANCE = null;
+    private static SchemaFactory instance = null;
 
     public static final SAXParser createParser() throws ParserConfigurationException, SAXException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -30,13 +30,17 @@ public class SAXUtils  {
 
     private static final Schema createSchema() throws SAXException {
 
-        if(SCHEMA_FACTORY_INSTANCE == null) {
-            SCHEMA_FACTORY_INSTANCE = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            SCHEMA_FACTORY_INSTANCE.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA,"");
-            SCHEMA_FACTORY_INSTANCE.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
-            SCHEMA_FACTORY_INSTANCE.setResourceResolver(new LSResourceResolverImpl());
+        if(instance == null) {
+            instance = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            instance.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA,"");
+            instance.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
+            instance.setResourceResolver(new LSResourceResolverImpl());
         }
 
-        return SCHEMA_FACTORY_INSTANCE.newSchema(SCHEMA_SOURCES);
+        return instance.newSchema(SCHEMA_SOURCES);
+    }
+
+    private SAXUtils() {
+
     }
 }

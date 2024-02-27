@@ -22,7 +22,7 @@ public class EntityDescriptor {
         this.entityId = null;
         this.cacheDuration = null;
         this.validUntil = null;
-        this.spssoDescriptors = new ArrayList<SPSSODescriptor>();
+        this.spssoDescriptors = new ArrayList<>();
     }
 
     public void setId(final String id) {

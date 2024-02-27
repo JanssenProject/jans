@@ -11,9 +11,9 @@ public class Organization {
 
     public Organization() {
 
-        this.names = new ArrayList<LocalizedText>();
-        this.displayNames = new ArrayList<LocalizedText>();
-        this.urls = new ArrayList<LocalizedText>();
+        this.names = new ArrayList<>();
+        this.displayNames = new ArrayList<>();
+        this.urls = new ArrayList<>();
     }
 
     public List<LocalizedText> getNames() {

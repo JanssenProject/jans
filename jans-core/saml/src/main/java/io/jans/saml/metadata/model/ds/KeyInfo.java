@@ -11,7 +11,7 @@ public class KeyInfo {
     public KeyInfo() {
 
         this.id = null;
-        this.datalist = new ArrayList<X509Data>();
+        this.datalist = new ArrayList<>();
     }
 
     public String getId() {

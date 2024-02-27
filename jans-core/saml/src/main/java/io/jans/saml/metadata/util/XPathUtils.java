@@ -12,12 +12,10 @@ import java.util.List;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -218,8 +216,7 @@ public class XPathUtils {
 
     public static NodeList keyDescriptorListFromParentNode(final XPath xpath, final Node parent) throws XPathExpressionException {
 
-        NodeList nodes = (NodeList) xpath.evaluate(KEYDESCRIPTOR_SELECTOR,parent,XPathConstants.NODESET);
-        return nodes;
+        return (NodeList) xpath.evaluate(KEYDESCRIPTOR_SELECTOR,parent,XPathConstants.NODESET);
     }
 
     public static Node keyInfoFromParentNode(final XPath xpath, final Node parent) throws XPathExpressionException {
@@ -277,7 +274,7 @@ public class XPathUtils {
         return (NodeList) xpath.evaluate(ASSERTION_CONSUMER_SERVICE_SELECTOR,parent,XPathConstants.NODESET);
     }
 
-    public static String IDAttributeValue(final XPath xpath, final Node node) throws XPathExpressionException {
+    public static String idAttributeValue(final XPath xpath, final Node node) throws XPathExpressionException {
 
         return stringAttributeValue(xpath,ID_ATTR_SELECTOR,node);
     }
@@ -408,7 +405,7 @@ public class XPathUtils {
 
         String strvalue = stringAttributeValue(xpath, selector, node);
         if(strvalue == null) {
-            return null;
+            return false;
         }
         return Boolean.parseBoolean(strvalue);
     }
@@ -439,7 +436,7 @@ public class XPathUtils {
 
     private static List<String> nodesAsStringList(final NodeList nodes) {
 
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         for(int i = 0; i < nodes.getLength(); i++) {
             ret.add(nodeValueAsString(nodes.item(i)));
         }

@@ -7,8 +7,8 @@ public class LocalizedText {
     
     public LocalizedText() {
 
-        this.language = language;
-        this.text = text;
+        this.language = null;
+        this.text = null;
     }
 
     public String getLanguage() {

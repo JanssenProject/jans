@@ -18,8 +18,8 @@ public class ContactPerson {
         this.type = null;
         this.company = null;
         this.surName = null;
-        this.emailAddresses = new ArrayList<String>();
-        this.telephoneNumbers = new ArrayList<String>();
+        this.emailAddresses = new ArrayList<>();
+        this.telephoneNumbers = new ArrayList<>();
     }
 
     public String getType() {

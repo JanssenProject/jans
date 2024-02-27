@@ -10,8 +10,8 @@ public class SSODescriptor extends RoleDescriptor  {
 
     public  SSODescriptor() {
 
-        this.singleLogoutServices = new ArrayList<Endpoint>();
-        this.nameIDFormats = new ArrayList<String>();
+        this.singleLogoutServices = new ArrayList<>();
+        this.nameIDFormats = new ArrayList<>();
     }
 
     public List<Endpoint> getSingleLogoutServices() {

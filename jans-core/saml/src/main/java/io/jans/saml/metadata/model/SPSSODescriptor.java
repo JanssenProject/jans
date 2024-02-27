@@ -13,7 +13,7 @@ public class SPSSODescriptor extends SSODescriptor {
 
         this.authnRequestsSigned = false;
         this.wantAssertionsSigned = false;
-        this.assertionConsumerServices = new ArrayList<IndexedEndpoint>();
+        this.assertionConsumerServices = new ArrayList<>();
     }
 
     public void setAuthnRequestsSigned(final Boolean authnRequestsSigned) {

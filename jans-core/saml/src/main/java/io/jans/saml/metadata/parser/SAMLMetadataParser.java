@@ -2,8 +2,6 @@ package io.jans.saml.metadata.parser;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,20 +13,14 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.Validator;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.SAXException;
 
 import io.jans.saml.metadata.model.*;
-import io.jans.saml.metadata.model.ds.*;
 import io.jans.saml.metadata.builder.EntityDescriptorBuilder;
 import io.jans.saml.metadata.builder.IndexedEndpointBuilder;
 import io.jans.saml.metadata.builder.KeyDescriptorBuilder;
@@ -86,9 +78,9 @@ public class SAMLMetadataParser  {
             }
 
             return builder.build();
-        }catch(IllegalArgumentException | IOException e) {
-            throw new ParseError("Metadata parsing failed",e);
-        }catch(SAXException | XPathExpressionException | ParserConfigurationException e) {
+
+        }catch(IllegalArgumentException | IOException | SAXException | XPathExpressionException | ParserConfigurationException e) {
+
             throw new ParseError("Metadata parsing failed",e);
         }
     }
@@ -96,30 +88,30 @@ public class SAMLMetadataParser  {
     private final void flattenEntitiesDescriptor(final XPath xpath, 
         final Node entitiescdescriptor, final SAMLMetadataBuilder builder) throws XPathExpressionException {
         
-        NodeList entitydescriptor_list  = XPathUtils.entityDescriptorListFromParentNode(xpath, entitiescdescriptor);
-        for(int i=0; i < entitydescriptor_list.getLength(); i++) {
-            parseEntityDescriptor(xpath,entitydescriptor_list.item(i),builder.entityDescriptor());
+        NodeList entitydescriptorlist  = XPathUtils.entityDescriptorListFromParentNode(xpath, entitiescdescriptor);
+        for(int i=0; i < entitydescriptorlist.getLength(); i++) {
+            parseEntityDescriptor(xpath,entitydescriptorlist.item(i),builder.entityDescriptor());
         }
 
-        NodeList entitiesdescriptor_list = XPathUtils.entitiesDescriptorListFromParentNode(xpath, entitiescdescriptor);
-        for(int i=0; i< entitiesdescriptor_list.getLength(); i++) {
-            flattenEntitiesDescriptor(xpath,entitiesdescriptor_list.item(i), builder);
+        NodeList entitiesdescriptorlist = XPathUtils.entitiesDescriptorListFromParentNode(xpath, entitiescdescriptor);
+        for(int i=0; i< entitiesdescriptorlist.getLength(); i++) {
+            flattenEntitiesDescriptor(xpath,entitiesdescriptorlist.item(i), builder);
         }
     }
 
     private final void parseEntityDescriptor(final XPath xpath, 
         final Node node,final EntityDescriptorBuilder builder) throws XPathExpressionException {
 
-        builder.id(XPathUtils.IDAttributeValue(xpath,node))
+        builder.id(XPathUtils.idAttributeValue(xpath,node))
                .entityId(XPathUtils.entityIDAttributeValue(xpath,node))
                .cacheDuration(XPathUtils.cacheDurationAttributeValue(xpath, node))
                .validUntil(XPathUtils.validUntilAttributeValue(xpath, node));
         
-        NodeList spssodescriptors_n = XPathUtils.roleDescriptorFromParentNode(
+        NodeList spssodescriptorslist = XPathUtils.roleDescriptorFromParentNode(
                 XPathUtils.RoleDescriptorNodeType.SPSSO_DESCRIPTOR_NODE, xpath, node);
         
-        for(int i = 0 ; i < spssodescriptors_n.getLength() ; i++) {
-            parseSPSSODescriptor(xpath, spssodescriptors_n.item(i),builder.spssoDescriptor());
+        for(int i = 0 ; i < spssodescriptorslist.getLength() ; i++) {
+            parseSPSSODescriptor(xpath, spssodescriptorslist.item(i),builder.spssoDescriptor());
         }
     }
 
@@ -131,9 +123,9 @@ public class SAMLMetadataParser  {
 
         parseSSODescriptor(xpath,node,builder);
 
-        NodeList assertionconsumerservice_list = XPathUtils.assertionConsumerServiceListFromParentNode(xpath, node);
-        for(int i=0; i < assertionconsumerservice_list.getLength(); i++) {
-            parseIndexedEndpoint(xpath,assertionconsumerservice_list.item(i),builder.assersionConsumerService());
+        NodeList assertionconsumerservicelist = XPathUtils.assertionConsumerServiceListFromParentNode(xpath, node);
+        for(int i=0; i < assertionconsumerservicelist.getLength(); i++) {
+            parseIndexedEndpoint(xpath,assertionconsumerservicelist.item(i),builder.assersionConsumerService());
         }
     }
 
@@ -142,9 +134,9 @@ public class SAMLMetadataParser  {
         
         parseRoleDescriptor(xpath,node,builder);
 
-        NodeList sloservice_nodes = XPathUtils.singleLogoutServiceListFromParentNode(xpath, node);
-        for(int i = 0; i < sloservice_nodes.getLength(); i++) {
-            parseEndpoint(xpath,sloservice_nodes.item(i),builder.singleLogoutService());
+        NodeList sloservicelist = XPathUtils.singleLogoutServiceListFromParentNode(xpath, node);
+        for(int i = 0; i < sloservicelist.getLength(); i++) {
+            parseEndpoint(xpath,sloservicelist.item(i),builder.singleLogoutService());
         }
 
         builder.nameIDFormats(XPathUtils.nameIDFormatListFromParentNode(xpath, node));
@@ -155,43 +147,43 @@ public class SAMLMetadataParser  {
         
         //todo implement
 
-        builder.id(XPathUtils.IDAttributeValue(xpath,node))
+        builder.id(XPathUtils.idAttributeValue(xpath,node))
                 .cacheDuration(XPathUtils.cacheDurationAttributeValue(xpath, node))
                 .validUntil(XPathUtils.validUntilAttributeValue(xpath, node))
                 .supportedProtocols(XPathUtils.protocolSupportEnumerationAttributeValue(xpath, node))
                 .errorUrl(XPathUtils.errorUrlAttributeValue(xpath,node));
         
-        Node organization_node = XPathUtils.organizationFromParentNode(xpath, node);
-        if(organization_node != null) {
-            parseOrganization(xpath, organization_node,builder.organization());
+        Node organization = XPathUtils.organizationFromParentNode(xpath, node);
+        if(organization != null) {
+            parseOrganization(xpath, organization,builder.organization());
         }
 
-        NodeList contactperson_node_list = XPathUtils.contactPersonListFromParentNode(xpath, node);
-        for(int i = 0; i < contactperson_node_list.getLength(); i++) {
-            parseContactPerson(xpath,contactperson_node_list.item(i),builder.contactPerson());
+        NodeList contactpersonlist = XPathUtils.contactPersonListFromParentNode(xpath, node);
+        for(int i = 0; i < contactpersonlist.getLength(); i++) {
+            parseContactPerson(xpath,contactpersonlist.item(i),builder.contactPerson());
         }
 
-        NodeList keydescriptor_node_list = XPathUtils.keyDescriptorListFromParentNode(xpath,node);
-        for(int i =0; i < keydescriptor_node_list.getLength(); i++) {
-            parseKeyDescriptor(xpath,keydescriptor_node_list.item(i),builder.keyDescriptor());
+        NodeList keydescriptorlist = XPathUtils.keyDescriptorListFromParentNode(xpath,node);
+        for(int i =0; i < keydescriptorlist.getLength(); i++) {
+            parseKeyDescriptor(xpath,keydescriptorlist.item(i),builder.keyDescriptor());
         }
     }
 
     private final void parseOrganization(final XPath xpath, final Node node, final OrganizationBuilder builder) throws XPathExpressionException {
 
-        NodeList namenodes = XPathUtils.organizationNameListFromParentNode(xpath, node);
-        for(int i = 0; i < namenodes.getLength(); i++) {
-            parseLocalizedText(xpath,namenodes.item(i),builder.name());
+        NodeList orgnamelist = XPathUtils.organizationNameListFromParentNode(xpath, node);
+        for(int i = 0; i < orgnamelist.getLength(); i++) {
+            parseLocalizedText(xpath,orgnamelist.item(i),builder.name());
         }
 
-        NodeList displaynamenodes = XPathUtils.organizationDisplayNameListFromParentNode(xpath, node);
-        for(int i = 0; i < displaynamenodes.getLength(); i++) {
-            parseLocalizedText(xpath,displaynamenodes.item(i),builder.diplayName());
+        NodeList displaynamelist = XPathUtils.organizationDisplayNameListFromParentNode(xpath, node);
+        for(int i = 0; i < displaynamelist.getLength(); i++) {
+            parseLocalizedText(xpath,displaynamelist.item(i),builder.diplayName());
         }
 
-        NodeList urlnodes  = XPathUtils.organizationUrlListFromParentNode(xpath, node);
-        for(int i = 0; i < urlnodes.getLength(); i++) {
-            parseLocalizedText(xpath,urlnodes.item(i),builder.url());
+        NodeList urls  = XPathUtils.organizationUrlListFromParentNode(xpath, node);
+        for(int i = 0; i < urls.getLength(); i++) {
+            parseLocalizedText(xpath,urls.item(i),builder.url());
         }
     }
 
@@ -220,9 +212,9 @@ public class SAMLMetadataParser  {
             parseEncryptionMethod(xpath,encmethods.item(i),builder.encryptionMethod());
         }
 
-        Node keyinfo_node = XPathUtils.keyInfoFromParentNode(xpath, node);
-        if(keyinfo_node != null) {
-            parseKeyInfo(xpath, keyinfo_node,builder.keyInfo());
+        Node keyinfo = XPathUtils.keyInfoFromParentNode(xpath, node);
+        if(keyinfo != null) {
+            parseKeyInfo(xpath, keyinfo,builder.keyInfo());
         }
     }
 
@@ -236,9 +228,9 @@ public class SAMLMetadataParser  {
     private final void parseKeyInfo(final XPath xpath, final Node node, final KeyInfoBuilder builder) throws XPathExpressionException {
         
         builder.id(XPathUtils.dsigIdAttributeValue(xpath, node));
-        NodeList x509data_nodes = XPathUtils.x509DataListFromParentNode(xpath, node);
-        for(int i = 0; i < x509data_nodes.getLength(); i++) {
-            parseX509Data(xpath,x509data_nodes.item(i),builder.x509Data());
+        NodeList x509datalist = XPathUtils.x509DataListFromParentNode(xpath, node);
+        for(int i = 0; i < x509datalist.getLength(); i++) {
+            parseX509Data(xpath,x509datalist.item(i),builder.x509Data());
         }
     }
 

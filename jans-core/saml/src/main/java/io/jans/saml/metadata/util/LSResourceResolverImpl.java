@@ -11,19 +11,21 @@ import org.w3c.dom.ls.LSResourceResolver;
 
 public class LSResourceResolverImpl implements LSResourceResolver {
     
-    private static final Map<String,String> namespacemap = new HashMap<String,String>() {{
-        put("http://www.w3.org/XML/1998/namespace","/schema/www.w3.org/xml.xsd");
-        put("urn:oasis:names:tc:SAML:2.0:assertion","/schema/saml/saml-schema-assertion-2.0.xsd");
-        put("http://www.w3.org/2000/09/xmldsig#","/schema/www.w3.org/xmldsig-core-schema.xsd");
-        put("http://www.w3.org/2001/04/xmlenc#","/schema/www.w3.org/xenc-schema.xsd");
-    }};
-
-    private static final Map<String,String> publicidmap = new HashMap<String,String>() {{
-        put("-//W3C//DTD XMLSchema 200102//EN","/schema/www.w3.org/XMLSchema.dtd");
-        put("datatypes","/schema/www.w3.org/datatypes.dtd");
-    }};
-
+    private static final Map<String,String> namespacemap;
+    private static final Map<String,String> publicidmap;
     private static final String CHARACTER_ENCODING = "UTF-8";
+
+    static {
+        namespacemap = new HashMap<>();
+        namespacemap.put("http://www.w3.org/XML/1998/namespace","/schema/www.w3.org/xml.xsd");
+        namespacemap.put("urn:oasis:names:tc:SAML:2.0:assertion","/schema/saml/saml-schema-assertion-2.0.xsd");
+        namespacemap.put("http://www.w3.org/2000/09/xmldsig#","/schema/www.w3.org/xmldsig-core-schema.xsd");
+        namespacemap.put("http://www.w3.org/2001/04/xmlenc#","/schema/www.w3.org/xenc-schema.xsd");
+
+        publicidmap = new HashMap<>();
+        publicidmap.put("-//W3C//DTD XMLSchema 200102//EN","/schema/www.w3.org/XMLSchema.dtd");
+        publicidmap.put("datatypes","/schema/www.w3.org/datatypes.dtd");
+    }
 
     @Override
     public LSInput resolveResource(String type, String nameSpaceURI, String publicId, String systemId, String baseURI) {
@@ -74,7 +76,7 @@ public class LSResourceResolverImpl implements LSResourceResolver {
 
         @Override
         public void setByteStream(InputStream byteStream) {
-
+            //this method isn't relevant
         }
 
         @Override
@@ -106,7 +108,7 @@ public class LSResourceResolverImpl implements LSResourceResolver {
 
         @Override
         public void setEncoding(String encoding) {
-
+            //this method isn't relevant
         }
 
         @Override
@@ -117,7 +119,7 @@ public class LSResourceResolverImpl implements LSResourceResolver {
 
         @Override
         public void setSystemId(String systemId) {
-
+            //this method isn't relevant
         }
 
         @Override
@@ -128,7 +130,7 @@ public class LSResourceResolverImpl implements LSResourceResolver {
 
         @Override
         public void setBaseURI(String baseURI) {
-
+            //this method isn't relevant
         }
 
         @Override
@@ -139,7 +141,7 @@ public class LSResourceResolverImpl implements LSResourceResolver {
 
         @Override
         public void setStringData(String stringData) {
-
+            //this method isn't relevant
         }
     }
 }

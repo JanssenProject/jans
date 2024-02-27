@@ -9,23 +9,23 @@ import javax.xml.namespace.NamespaceContext;
 
 public class SAMLMetadataNamespaceContext implements NamespaceContext {
 
-    private static Map<String,String> PREFIX_TO_NAMESPACE = new HashMap<String,String>(){{
-        put("md","urn:oasis:names:tc:SAML:2.0:metadata");
-        put("ds","http://www.w3.org/2000/09/xmldsig#");
-        put("xenc","http://www.w3.org/2001/04/xmlenc#");
-        put("saml","urn:oasis:names:tc:SAML:2.0:assertion");
-    }};
+    private static final Map<String,String> prefixes;
+
+    static {
+        prefixes = new HashMap<>();
+        prefixes.put("md","urn:oasis:names:tc:SAML:2.0:metadata");
+        prefixes.put("ds","http://www.w3.org/2000/09/xmldsig#");
+        prefixes.put("xenc","http://www.w3.org/2001/04/xmlenc#");
+        prefixes.put("saml","urn:oasis:names:tc:SAML:2.0:assertion");
+    }
 
     @Override
     public String getNamespaceURI(String prefix) {
 
         if(XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-            System.out.println("Default namespace");
-            return PREFIX_TO_NAMESPACE.get("md");
+            return prefixes.get("md");
         }
-
-        String ret = PREFIX_TO_NAMESPACE.get(prefix);
-        return ret;
+        return prefixes.get(prefix);
     }
 
     @Override

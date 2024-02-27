@@ -21,11 +21,11 @@ public class RoleDescriptor {
         this.id = null;
         this.validUntil = null;
         this.cacheDuration = null;
-        this.supportedProtocols = new ArrayList<String>();
+        this.supportedProtocols = new ArrayList<>();
         this.errorUrl = null;
-        this.keyDescriptors = new ArrayList<KeyDescriptor>();
+        this.keyDescriptors = new ArrayList<>();
         this.organization = null;
-        this.contacts = new ArrayList<ContactPerson>();
+        this.contacts = new ArrayList<>();
     }
 
     public String getId() {
