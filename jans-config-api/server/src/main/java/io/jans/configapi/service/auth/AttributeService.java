@@ -104,18 +104,34 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
         return result;
     }
 
-    public JansAttribute getAttributeUsingName(String claimName) {
+    public JansAttribute getAttributeUsingName(String name) {
         JansAttribute jansAttribute = null;
         try {
-            jansAttribute = getByClaimName(claimName);
+            jansAttribute = getByClaimName(name);
         } catch (Exception ex) {
-            log.error("Failed to load attribute with name:{}, ex:{}", claimName, ex);
+            log.error("Failed to load attribute with name:{}, ex:{}", name, ex);
         }
         return jansAttribute;
     }
-    
+	
+    public List<JansAttribute> getAttributeWithName(String name) {
+        log.info("Get attribute by name:{}", name);
+        List<JansAttribute> jansAttributes = null;
+        try {
+            Filter nameFilter = Filter.createEqualityFilter("jansAttrName", name);
+			log.info("JansAttribute nameFilter:{}", nameFilter);
+            jansAttributes = persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
+                    nameFilter);
+            log.info("JansAttribute by name:{} are jansAttributes:{}", name, jansAttributes);
+
+        } catch (Exception ex) {
+            log.error("Failed to load attribute with name:{}, ex:{}", name, ex);
+        }
+        return jansAttributes;
+    }
+
     public boolean validateAttributeDefinition(String attributeName) {
-        log.error("\n Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName, getPersistenceType(), appConfiguration);
+        log.info(" Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName, getPersistenceType(), appConfiguration);
         boolean isValidAttribute = false;
         try {
             
@@ -124,7 +140,7 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
                 return true;                
             }
 
-            log.error("\n attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, User.class,attributeName)():{}", attributeName, persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
+            log.info("attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, User.class,attributeName)():{}", attributeName, persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
                     attributeName));
             AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
                     attributeName);
