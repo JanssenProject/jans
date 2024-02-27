@@ -583,7 +583,7 @@
         "birthdate": "yyyy-MM-dd"
     },
     "lockMessageConfig": {
-        "enableIdTokenMessages" : false,
-        "idTokenMessagesChannel": "id_token"
+        "enableTokenMessages" : false,
+        "tokenMessagesChannel": "jans_token"
     }
 }
