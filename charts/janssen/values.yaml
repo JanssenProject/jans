@@ -796,6 +796,8 @@ global:
   auth-server-key-rotation:
     # -- Boolean flag to enable/disable the auth-server-key rotation cronjob chart.
     enabled: true
+    # -- The initial auth server key rotation keys life in hours
+    initKeysLife: 48
   # -- Volume storage type if using AWS volumes.
   awsStorageType: io1
   # -- Volume storage type if using Azure disks.

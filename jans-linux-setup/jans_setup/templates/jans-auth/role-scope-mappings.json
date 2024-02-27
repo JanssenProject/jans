@@ -342,131 +342,149 @@
       "defaultPermissionInToken": false,
       "tag": "ssa"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/organization.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "organization"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/organization.write",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "organization"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/user.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "user"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/user.write",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "user"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/user.delete",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "user"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/agama.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "agama"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/agama.write",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "agama"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/agama.delete",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "agama"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/jans-auth-server/session.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "session"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/jans-auth-server/session.delete",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "session"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/plugin.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "plugin"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/properties.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "properties"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/properties.write",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "properties"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/client/authorizations.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "authorizations"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/client/authorizations.delete",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "authorizations"
     },
-   {
+    {
       "permission":"https://jans.io/oauth/config/jans-link.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "jans-link"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/jans-link.write",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "jans-link"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/saml-config.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "saml-config"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/saml-config.write",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "saml-config"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/saml-scope.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "saml-scope"
     },
-   {
+    {
       "permission": "https://jans.io/oauth/config/saml-scope.write",
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "saml-scope"
+    },
+    {
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "webhook"
+    },
+    {
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "webhook"
+    },
+    {
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "webhook"
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
@@ -657,6 +675,9 @@
         "https://jans.io/auth/ssa.admin",
         "https://jans.io/auth/ssa.portal",
         "https://jans.io/auth/ssa.developer",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete",
         "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/properties.write"
       ]

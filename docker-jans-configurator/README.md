@@ -97,6 +97,7 @@ For fresh installation, generate the initial configuration and secret by creatin
 - `couchbase_pw`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
 - `couchbase_superuser_pw`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
 - `salt`: user-defined salt (24 characters length); if omitted, salt will be generated automatically
+- `init_keys_exp`: the initial keys expiration time in hours (default to `48`; extra 1 hour will be added for hard limit)
 
 Example of generating `salt` value:
 
