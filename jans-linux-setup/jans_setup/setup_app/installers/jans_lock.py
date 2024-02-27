@@ -61,8 +61,7 @@ class JansLockInstaller(JettyInstaller):
 
         if Config.persistence_type == 'sql' and Config.rdbm_type == 'pgsql':
             self.dbUtils.set_oxAuthConfDynamic({'lockMessageConfig': {'enableIdTokenMessages': True, 'idTokenMessagesChannel': 'id_token'}})
-            if self.set_provider_type:
-                Config.lock_message_provider_type = 'POSTGRES'
+            Config.lock_message_provider_type = 'POSTGRES'
 
     def install_as_server(self):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
