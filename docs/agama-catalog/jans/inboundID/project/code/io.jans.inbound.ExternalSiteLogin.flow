@@ -24,15 +24,13 @@ When provider is null or provider.enabled is false
 
 //Launch matching flow and retrieve profile
 Log "Initiating external authentication for identity provider '%'" providerId
-obj = Trigger $provider.flowQname provider.oauthParams
+obj = Trigger $provider.flowQname provider
 
 When obj.success is false
     Finish obj
 
 idProc = Call io.jans.inbound.IdentityProcessor#new provider
-temp = Call io.jans.agama.engine.service.ActionService#class
-temp = Call io.jans.service.cdi.util.CdiUtil#bean temp
-temp = Call temp getClassLoader
+temp = Call io.jans.agama.Utils#agamaClassLoader
 
 profile = Call idProc applyMapping obj.data temp
 //In profile, every key is associated to a list
