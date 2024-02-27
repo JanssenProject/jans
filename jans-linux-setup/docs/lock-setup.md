@@ -1,8 +1,8 @@
 # Installing Janssen Lock Client
 
 This document explains how to install Janssen Lock Client on a remote machine.
-To be able to install Jannsen Lock Client, you have to install a main Jannsen
-Server with PostgreSQL backend (see docs)[https://docs.jans.io/v1.0.22/admin/install/vm-install/]
+To be able to install Janssen Lock Client, you have to install a main Janssen
+Server with PostgreSQL backend [see docs](https://docs.jans.io/v1.0.22/admin/install/vm-install/)
 
 
 ## Obtain salt
