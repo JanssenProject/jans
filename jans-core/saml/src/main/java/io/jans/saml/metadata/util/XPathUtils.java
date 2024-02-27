@@ -30,7 +30,7 @@ public class XPathUtils {
         PDP_DESCRIPTOR_NODE
     }
 
-    private static final String XPATH_FACTORY_SYNC = "XPATH";
+    private static final Object xpathFactorysync = new Object();
 
     private static final String ENTITIES_DESCRIPTOR_SELECTOR = "md:EntitiesDescriptor";
     private static final String ENTITY_DESCRIPTOR_SELECTOR = "md:EntityDescriptor";
@@ -85,7 +85,7 @@ public class XPathUtils {
     
     public static final XPath newXPath() {
 
-        synchronized(XPATH_FACTORY_SYNC) {
+        synchronized(xpathFactorysync) {
             XPath xpath = XPathFactory.newInstance().newXPath();
             xpath.setNamespaceContext(new SAMLMetadataNamespaceContext());
             return xpath;
