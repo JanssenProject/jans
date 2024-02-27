@@ -34,6 +34,7 @@ public class SAXUtils  {
         final SchemaFactory schemafactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         schemafactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
         schemafactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA,"");
+        schemafactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         schemafactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
         schemafactory.setResourceResolver(new LSResourceResolverImpl());
         return schemafactory;
