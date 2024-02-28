@@ -89,8 +89,8 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "ssa"
         ]),
         ("lockMessageConfig", {
-            "enableIdTokenMessages": False,
-            "idTokenMessagesChannel": "id_token"
+            "enableTokenMessages": False,
+            "tokenMessagesChannel": "jans_token"
         }),
         ("txTokenSigningAlgValuesSupported", [
             "HS256",
