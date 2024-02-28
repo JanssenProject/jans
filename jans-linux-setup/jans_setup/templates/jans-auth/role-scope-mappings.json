@@ -497,6 +497,12 @@
       "description": "",
       "defaultPermissionInToken": false,
       "tag": "properties"
+    },
+    {
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "tag": "logging"
     }
   ],
   "rolePermissionMapping": [
@@ -520,7 +526,8 @@
         "https://jans.io/oauth/config/database/couchbase.readonly",
         "https://jans.io/oauth/config/database/sql.readonly",
         "https://jans.io/oauth/config/stats.readonly",
-        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly"
+        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write"
       ]
     },
     {
@@ -559,7 +566,8 @@
         "readonly",
         "https://jans.io/oauth/config/stats.readonly",
         "jans_stat",
-        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly"
+        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write"
       ]
     },
     {
@@ -606,7 +614,8 @@
         "readonly",
         "https://jans.io/oauth/config/stats.readonly",
         "jans_stat",
-        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly"
+        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write"
       ]
     },
     {
@@ -679,7 +688,8 @@
         "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write",
         "https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete",
         "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
-        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.write"
+        "https://jans.io/oauth/jans-auth-server/config/adminui/properties.write",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write"
       ]
     }
   ]
