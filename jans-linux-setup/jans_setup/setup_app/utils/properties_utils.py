@@ -1005,7 +1005,7 @@ class PropertiesUtils(SetupUtils):
             if promptForMITLicense != 'y':
                 sys.exit(0)
 
-            prompt_for_http_cert_info()
+            self.prompt_for_http_cert_info()
             Config.jans_max_mem = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.jans_max_mem))
 
 
