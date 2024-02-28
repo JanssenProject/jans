@@ -68,7 +68,22 @@ passing them as a JVM parameter or as an environment variable.
 
 #### Cloud-native Helm Installations
 
-For Janssen Server installations that leverage Helm, Docker or local Kubernetes
+For Janssen Server installations using Helm, Docker or local Kubernetes
+installations, dynamically passing DB configuration properties can be done by
+specifiying environment variables. For example:
+
+- Override connection URI for `jans-auth` component
+  ```shell
+  CN_AUTH_JAVA_OPTIONS=-Dconnection.uri=random-mysql-uri
+  ```
+- Override connection URI for globally for all Janssen Server modules
+  ```shell
+  CN_JAVA_OPTIONS=-Dconnection.uri=random-mysql-uri
+  ```
+  or by exporting system level environment variable as below 
+  ```shell
+  CONNECTION_URI=random-mysql-uri
+  ```
 
 
 
