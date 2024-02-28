@@ -66,23 +66,24 @@ Configuration properties and the values specified under `.properties` files
 discussed in [above](#configuration) section, can be overriden by dynamically
 passing them as a JVM parameter or as an environment variable.
 
-#### Cloud-native Helm Installations
+#### Cloud-native Installations
 
-For Janssen Server installations using Helm, Docker or local Kubernetes
-installations, dynamically passing DB configuration properties can be done by
+For Janssen Server installations using Helm, Docker or local Kubernetes, 
+dynamically passing DB configuration properties can be done by
 specifiying environment variables. For example:
 
-- Override connection URI for `jans-auth` component
+- Override connection URI for one specific component. For instance, 
+  `jans-auth` component
   ```shell
-  CN_AUTH_JAVA_OPTIONS=-Dconnection.uri=random-mysql-uri
+  CN_AUTH_JAVA_OPTIONS=-Dconnection.uri=new-mysql-uri
   ```
 - Override connection URI for globally for all Janssen Server modules
   ```shell
-  CN_JAVA_OPTIONS=-Dconnection.uri=random-mysql-uri
+  CN_JAVA_OPTIONS=-Dconnection.uri=new-mysql-uri
   ```
   or by exporting system level environment variable as below 
   ```shell
-  CONNECTION_URI=random-mysql-uri
+  CONNECTION_URI=new-mysql-uri
   ```
 
 
