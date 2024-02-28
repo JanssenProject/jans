@@ -547,42 +547,46 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.writeFile(os.path.join(base.snap_common, 'etc/hosts.jans'), Config.ip + '\t' + Config.hostname)
 
         else:
-            self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
-            self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
-            self.run([paths.cmd_chmod, 'u+X', Config.certFolder])
-
-            self.chown(Config.jansBaseFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
-            for p in Path(Config.jansBaseFolder).rglob("*"):
-                if p.is_dir():
-                    self.run([paths.cmd_chmod, '750', p.as_posix()])
-                elif p.is_file():
-                    self.run([paths.cmd_chmod, '640', p.as_posix()])
-
-            if not Config.installed_instance:
-                cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
-                self.restart(cron_service)
-
-
-            # if we are running inside shiv package, copy site pacakages to /opt/dist/jans-setup-packages and add to sys path
-
-            gluu_site_dir = '/opt/dist/jans-setup-packages'
-
-            for p in sys.path:
-                ps = str(p)
-                if '/.shiv/' in ps and ps.endswith('site-packages'):
-                    if not gluu_site_dir in sys.path:
-                        if not os.path.exists(site.USER_SITE):
-                            os.makedirs(site.USER_SITE)
-                        with open(os.path.join(site.USER_SITE, 'jans_setup_site.pth'), 'w') as site_file:
-                            site_file.write(gluu_site_dir)
-                        self.logIt("Copying site packages to {}".format(gluu_site_dir))
-                        shutil.copytree(p, gluu_site_dir, dirs_exist_ok=True)
+            self.secure_files()
 
         #enable scripts
         self.enable_scripts(base.argsp.enable_script)
 
         # write default Lock Configuration to DB
         base.current_app.JansLockInstaller.configure_message_conf()
+
+    def secure_files(self):
+        self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
+        self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
+        self.run([paths.cmd_chmod, 'u+X', Config.certFolder])
+
+        self.chown(Config.jansBaseFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
+        for p in Path(Config.jansBaseFolder).rglob("*"):
+            if p.is_dir():
+                self.run([paths.cmd_chmod, '750', p.as_posix()])
+            elif p.is_file():
+                self.run([paths.cmd_chmod, '640', p.as_posix()])
+
+        if not Config.installed_instance:
+            cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
+            self.restart(cron_service)
+
+        # if we are running inside shiv package, copy site pacakages to /opt/dist/jans-setup-packages and add to sys path
+
+        gluu_site_dir = '/opt/dist/jans-setup-packages'
+
+        for p in sys.path:
+            ps = str(p)
+            if '/.shiv/' in ps and ps.endswith('site-packages'):
+                if not gluu_site_dir in sys.path:
+                    if not os.path.exists(site.USER_SITE):
+                        os.makedirs(site.USER_SITE)
+                    with open(os.path.join(site.USER_SITE, 'jans_setup_site.pth'), 'w') as site_file:
+                        site_file.write(gluu_site_dir)
+                    self.logIt("Copying site packages to {}".format(gluu_site_dir))
+                    shutil.copytree(p, gluu_site_dir, dirs_exist_ok=True)
+
+
 
     def apply_selinux_plicies(self):
         self.logIt("Applying SELinux Policies")
