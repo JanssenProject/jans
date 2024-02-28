@@ -39,7 +39,6 @@ tags:
 - name: Plugins
 - name: Configuration – Config API
 - name: Client Authorization
-- name: Configuration – Jans Assets
 paths:
   /api/v1/health/app-version:
     get:
@@ -456,229 +455,6 @@ paths:
         - https://jans.io/oauth/config/agama.readonly
         - https://jans.io/oauth/config/agama.write
         - https://jans.io/oauth/config/read-all
-  /api/v1/jans-assets/{inum}:
-    get:
-      tags:
-      - Jans Assets
-      summary: Gets Jans asset by inum - unique identifier
-      description: Gets Jans asset by inum - unique identifier
-      operationId: get-asset-by-inum
-      parameters:
-      - name: inum
-        in: path
-        description: Asset Id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PagedResult'
-              examples:
-                Response example:
-                  description: Response example
-                  value: ""
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans_asset-read
-    delete:
-      tags:
-      - Jans Assets
-      summary: Delete an asset
-      description: Delete an asset
-      operationId: delete-asset
-      parameters:
-      - name: inum
-        in: path
-        description: Asset identifier
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: String multipart form.
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AssetForm'
-            examples:
-              Response json example:
-                description: Response json example
-                value: ""
-      responses:
-        "201":
-          description: Newly created Trust IDP
-          content:
-            application/json-patch+json:
-              schema:
-                $ref: '#/components/schemas/Document'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: ""
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/jans_asset-delete
-  /api/v1/jans-assets:
-    get:
-      tags:
-      - Jans Assets
-      summary: Gets all Jans assets.
-      description: Gets all Jans assets.
-      operationId: get-all-assets
-      parameters:
-      - name: limit
-        in: query
-        description: Search size - max size of the results to return
-        schema:
-          type: integer
-          format: int32
-          default: 50
-      - name: pattern
-        in: query
-        description: Search pattern
-        schema:
-          type: string
-          default: ""
-      - name: status
-        in: query
-        description: Status of the attribute
-        schema:
-          type: string
-          default: all
-      - name: startIndex
-        in: query
-        description: The 1-based index of the first query result
-        schema:
-          type: integer
-          format: int32
-          default: 0
-      - name: sortBy
-        in: query
-        description: Attribute whose value will be used to order the returned response
-        schema:
-          type: string
-          default: inum
-      - name: sortOrder
-        in: query
-        description: Order in which the sortBy param is applied. Allowed values are
-          "ascending" and "descending"
-        schema:
-          type: string
-          default: ascending
-      - name: fieldValuePair
-        in: query
-        description: Field and value pair for seraching
-        schema:
-          type: string
-          default: ""
-        examples:
-          Field value example:
-            description: Field value example
-            value: "adminCanEdit=true,dataType=string"
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PagedResult'
-              examples:
-                Response example:
-                  description: Response example
-                  value: ""
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans_asset-read
-  /api/v1/jans-assets/upload-asset:
-    put:
-      tags:
-      - Jans Assets
-      summary: Update existing asset
-      description: Upload new asset
-      operationId: put-asset
-      requestBody:
-        description: String multipart form.
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AssetForm'
-            examples:
-              Response json example:
-                description: Response json example
-                value: ""
-      responses:
-        "201":
-          description: Newly created Trust IDP
-          content:
-            application/json-patch+json:
-              schema:
-                $ref: '#/components/schemas/Document'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: ""
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/jans_asset-write
-    post:
-      tags:
-      - Jans Assets
-      summary: Upload new asset
-      description: Upload new asset
-      operationId: post-new-asset
-      requestBody:
-        description: String multipart form.
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AssetForm'
-            examples:
-              Response json example:
-                description: Response json example
-                value: ""
-      responses:
-        "201":
-          description: Newly created Trust IDP
-          content:
-            application/json-patch+json:
-              schema:
-                $ref: '#/components/schemas/Document'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: ""
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/jans_asset-write
   /api/v1/attributes:
     get:
       tags:
@@ -8007,49 +7783,6 @@ components:
           type: array
           items:
             type: object
-    AssetForm:
-      required:
-      - assetFile
-      - document
-      type: object
-      properties:
-        document:
-          $ref: '#/components/schemas/Document'
-        assetFile:
-          type: string
-          format: binary
-    Document:
-      type: object
-      properties:
-        dn:
-          type: string
-        inum:
-          type: string
-        displayName:
-          type: string
-        description:
-          type: string
-        document:
-          type: string
-        creationDate:
-          type: string
-          format: date-time
-        jansModuleProperty:
-          type: array
-          items:
-            type: string
-        jansLevel:
-          type: string
-        jansRevision:
-          type: string
-        jansEnabled:
-          type: string
-        jansAliass:
-          type: string
-        selected:
-          type: boolean
-        baseDn:
-          type: string
     AttributeValidation:
       type: object
       properties:
@@ -8163,19 +7896,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanView:
+        adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanAccess:
+          type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8989,6 +8722,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8998,8 +8733,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10011,14 +9744,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -10616,6 +10349,3 @@ components:
               configuration properties
             https://jans.io/oauth/client/authorizations.readonly: View ClientAuthorizations
             https://jans.io/oauth/client/authorizations.delete: Revoke ClientAuthorizations
-            https://jans.io/oauth/jans_asset-read: View Jans Assets
-            https://jans.io/oauth/config/jans_asset-write: Manage Jans Assets
-            https://jans.io/oauth/config/jans_asset-delete: Delete Jans Assets

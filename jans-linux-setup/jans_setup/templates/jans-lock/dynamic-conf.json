@@ -1,6 +1,6 @@
 {
    "tokenChannels":[
-         "id_token"
+         "jans_token"
       ],
 
    "cleanServiceInterval":60,
