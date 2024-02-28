@@ -54,8 +54,8 @@ public class SsaGetJwtTest extends BaseTest {
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void getJwtSsaWithJtiWrongResponse422(final String redirectUris, final String sectorIdentifierUri) {
-        showTitle("getJwtSsaWithJtiWrongResponse422");
+    public void getJwtSsaWithJtiWrongResponse400(final String redirectUris, final String sectorIdentifierUri) {
+        showTitle("getJwtSsaWithJtiWrongResponse400");
         List<String> scopes = Collections.singletonList(SsaScopeType.SSA_ADMIN.getValue());
 
         // Register client
@@ -74,7 +74,7 @@ public class SsaGetJwtTest extends BaseTest {
         SsaGetJwtClient ssaGetJwtClient = new SsaGetJwtClient(ssaEndpoint);
         SsaGetJwtResponse ssaGetJwtResponse = ssaGetJwtClient.execGetJwtSsa(accessToken, jti);
         showClient(ssaGetJwtClient);
-        AssertBuilder.ssaGetJwt(ssaGetJwtResponse).status(422).check();
+        AssertBuilder.ssaGetJwt(ssaGetJwtResponse).status(400).check();
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})

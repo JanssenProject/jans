@@ -55,14 +55,14 @@ public class SsaGetJwtAction {
      * <p>
      * Method will return the following exceptions:
      * - {@link WebApplicationException} with status {@code 401} if this functionality is not enabled, request has to have at least scope "ssa.admin".
-     * - {@link WebApplicationException} with status {@code 422} if the SSA does not exist, is expired or used.
+     * - {@link WebApplicationException} with status {@code 400 (Bad Request) with <b>invalid_jti<b/> key}, when jti does not exist, is invalid or state is in (expired, used or revoked).
      * - {@link WebApplicationException} with status {@code 500} in case an uncontrolled error occurs when processing the method.
      * </p>
      *
      * @param jti Unique identifier
      * @return {@link Response} with status {@code 200 (Ok)} and the body containing JWT of SSA.
      */
-    public Response getJwtSsa(String jti) {
+    public Response getJwtSsa(String jti) throws WebApplicationException {
         log.debug("Attempting to get JWT of SSA, jti: {}", jti);
 
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
