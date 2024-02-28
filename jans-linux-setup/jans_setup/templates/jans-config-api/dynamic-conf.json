@@ -1,6 +1,6 @@
 {
   "configOauthEnabled": ${configOauthEnabled},
-  "customAttributeValidationEnabled": false,
+  "customAttributeValidationEnabled": true,
   "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",
   "apiClientId": "${jca_client_id}",

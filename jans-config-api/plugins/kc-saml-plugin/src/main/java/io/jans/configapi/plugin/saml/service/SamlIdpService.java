@@ -24,6 +24,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javax.xml.validation.Schema;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.*;
@@ -81,10 +82,7 @@ public class SamlIdpService {
             documentStoreModuleName = "SAML";
         }
 
-        String tempFileName = getTempMetadataFilename(metadataTempDir, metadataFileName);
-        logger.debug("metadataTempDir:{}, metadataFileName:{}", metadataTempDir, metadataFileName);
-
-        String metadataFile = metadataTempDir + tempFileName;
+        String metadataFile = metadataTempDir + File.separator + metadataFileName;
         logger.debug("documentStoreService:{}, metadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
                 metadataFile, localDocumentStoreService);
         try {
@@ -96,7 +94,7 @@ public class SamlIdpService {
             logger.debug("SAML file read newFile:{}", newFile);
 
             if (result) {
-                return tempFileName;
+                return metadataFile;
             }
         } catch (Exception ex) {
             logger.error("Failed to write SAML metadata file '{}'", metadataFile, ex);

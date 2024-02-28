@@ -230,7 +230,8 @@ public class SamlService {
         if (file != null && file.available() > 0) {
             saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
         }
-
+        persistenceEntryManager.merge(trustRelationship);
+        log.info("After saving new trustRelationship:{}", trustRelationship);
         return getTrustRelationshipByInum(trustRelationship.getInum());
     }
 
@@ -240,13 +241,14 @@ public class SamlService {
 
     public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship, InputStream file)
             throws IOException {
+        log.info("Update trustRelationship:{}, file:{}", trustRelationship, file);
         setTrustRelationshipDefaultValue(trustRelationship, true);
-        persistenceEntryManager.merge(trustRelationship);
-
+        
         if (file != null && file.available() > 0) {
             saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
         }
-
+        persistenceEntryManager.merge(trustRelationship);
+        log.info("After updating trustRelationship:{}", trustRelationship);
         return getTrustRelationshipByInum(trustRelationship.getInum());
 
     }
@@ -316,17 +318,17 @@ public class SamlService {
             return true;
         }
         if (emptySpMetadataFileName) {
-            log.debug("emptySpMetadataFileName:{}", emptySpMetadataFileName);
+            log.info("emptySpMetadataFileName:{}", emptySpMetadataFileName);
             spMetadataFileName = getSpNewMetadataFileName(trustRelationship);
-            log.debug("spMetadataFileName:{}", spMetadataFileName);
+            log.info("***spMetadataFileName:{}***", spMetadataFileName);
             trustRelationship.setSpMetaDataFN(spMetadataFileName);
 
         }
         InputStream targetStream = file;
-        log.debug("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
+        log.info("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
 
-        String result = samlIdpService.saveMetadataFile(samlConfigService.getSpMetadataTempDir(), spMetadataFileName, Constants.SP_MODULE, targetStream);
-        log.debug("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
+        String result = samlIdpService.saveMetadataFile(samlConfigService.getSpMetadataDir(), spMetadataFileName, Constants.SP_MODULE, targetStream);
+        log.info("targetStream:{}, spMetadataFileName:{}, result:{}, trustRelationship.getSpMetaDataFN():{}", targetStream, spMetadataFileName, result, trustRelationship.getSpMetaDataFN());
         if (StringHelper.isNotEmpty(result)) {
             metadataValidationTimer.spQueue(result);
             //process files in temp that were not processed earlier
