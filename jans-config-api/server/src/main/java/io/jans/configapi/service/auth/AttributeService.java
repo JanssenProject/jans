@@ -2,7 +2,7 @@
 package io.jans.configapi.service.auth;
 
 import static io.jans.as.model.util.Util.escapeLog;
-import io.jans.as.common.model.common.SimpleUser;
+import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.util.ApiConstants;
@@ -104,16 +104,32 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
         return result;
     }
 
-    public JansAttribute getAttributeUsingName(String claimName) {
+    public JansAttribute getAttributeUsingName(String name) {
         JansAttribute jansAttribute = null;
         try {
-            jansAttribute = getByClaimName(claimName);
+            jansAttribute = getByClaimName(name);
         } catch (Exception ex) {
-            log.error("Failed to load attribute with name:{}, ex:{}", claimName, ex);
+            log.error("Failed to load attribute with name:{}, ex:{}", name, ex);
         }
         return jansAttribute;
     }
-    
+	
+    public List<JansAttribute> getAttributeWithName(String name) {
+        log.info("Get attribute by name:{}", name);
+        List<JansAttribute> jansAttributes = null;
+        try {
+            Filter nameFilter = Filter.createEqualityFilter("jansAttrName", name);
+			log.info("JansAttribute nameFilter:{}", nameFilter);
+            jansAttributes = persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
+                    nameFilter);
+            log.info("JansAttribute by name:{} are jansAttributes:{}", name, jansAttributes);
+
+        } catch (Exception ex) {
+            log.error("Failed to load attribute with name:{}, ex:{}", name, ex);
+        }
+        return jansAttributes;
+    }
+
     public boolean validateAttributeDefinition(String attributeName) {
         log.info(" Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName, getPersistenceType(), appConfiguration);
         boolean isValidAttribute = false;
@@ -124,18 +140,17 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
                 return true;                
             }
 
-            log.info(" attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, SimpleUser.class,attributeName)():{}", attributeName, persistenceEntryManager.getAttributeType("ou=people,o=jans", SimpleUser.class,
+            log.info("attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, User.class,attributeName)():{}", attributeName, persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
                     attributeName));
-            AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", SimpleUser.class,
+            AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
                     attributeName);
-            log.info(" attributeName:{}, attributeType():{}", attributeName, attributeType);
+            log.error("\n attributeName:{}, attributeType():{}", attributeName, attributeType);
 
             if (attributeType != null) {
                 isValidAttribute = true;
             }
         } catch (Exception ex) {
-            log.error("Exception by ORM while validating attribute is:{}", ex);
-            isValidAttribute = true;
+            log.error("Exception by ORM while validating attribute is:", ex);
         }
         return isValidAttribute;
     }
