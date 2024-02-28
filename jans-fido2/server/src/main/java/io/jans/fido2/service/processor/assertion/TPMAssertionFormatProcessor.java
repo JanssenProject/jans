@@ -29,6 +29,8 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.processors.AssertionFormatProcessor;
+import io.jans.fido2.service.util.DigestUtilService;
+import io.jans.fido2.service.util.HexUtilService;
 import io.jans.fido2.service.verifier.AuthenticatorDataVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.UserVerificationVerifier;
@@ -36,8 +38,6 @@ import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 
 import java.security.PublicKey;
@@ -72,6 +72,12 @@ public class TPMAssertionFormatProcessor implements AssertionFormatProcessor {
     @Inject
     private Base64Service base64Service;
 
+    @Inject
+    private DigestUtilService digestUtilService;
+
+    @Inject
+    private HexUtilService hexUtilService;
+
     @Override
     public AttestationFormat getAttestationFormat() {
         return AttestationFormat.tpm;
@@ -86,7 +92,7 @@ public class TPMAssertionFormatProcessor implements AssertionFormatProcessor {
         log.debug("User verification option {}", authenticationEntity.getUserVerificationOption());
         userVerificationVerifier.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(), authData);
 
-        byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
+        byte[] clientDataHash = digestUtilService.sha256Digest(base64Service.urlDecode(clientDataJson));
 
         try {
             int counter = authenticatorDataParser.parseCounter(authData.getCounters());
@@ -97,7 +103,7 @@ public class TPMAssertionFormatProcessor implements AssertionFormatProcessor {
             PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
 
             log.debug("Uncompressed ECPoint node {}", uncompressedECPointNode);
-            log.debug("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
+            log.debug("EC Public key hex {}", hexUtilService.encodeHexString(publicKey.getEncoded()));
             // apple algorithm = -7
             // windows hello algorithm is -257
             int algorithm = registration.getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()) ? -257 : registration.getSignatureAlgorithm();
