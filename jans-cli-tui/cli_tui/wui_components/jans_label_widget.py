@@ -12,7 +12,10 @@ from utils.static import cli_style
 
 
 class JansLabelWidget:
-    def __init__(self, title, values, data):
+    def __init__(self, title, values, data, label_width=None):
+
+        if not label_width:
+            label_width = int(common_data.app.dialog_width*1.1) - 26
 
         self.data = data
         self.values = values
@@ -24,9 +27,11 @@ class JansLabelWidget:
             entry = self.get_label_entry(value_id)
             initial_labels.append(entry)
 
+
         self.container = JansLabelContainer(
             title=title,
             width=int(common_data.app.dialog_width*1.1) - 26,
+            label_width=label_width,
             on_display=common_data.app.data_display_dialog,
             on_delete=self.delete_value,
             buttonbox=add_button_container,
@@ -117,7 +122,7 @@ class JansLabelWidget:
 
         dialog = common_data.app.get_confirm_dialog(
             message=_(
-                _("Are you sure want to delete \n {} ?").format(value[1])),
+                _("Are you sure want to delete \n<b>{}</b> ?").format(value[1])),
             confirm_handler=do_delete_value
         )
 
