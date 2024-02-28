@@ -36,6 +36,11 @@ public enum SsaErrorResponseType implements IErrorType {
      * When the signature has expired or the algorithm for signing does not exist
      */
     INVALID_SIGNATURE("invalid_signature"),
+
+    /**
+     * When jti does not exist or is invalid
+     */
+    INVALID_JTI("invalid_jti"),
     ;
 
     private final String paramName;
