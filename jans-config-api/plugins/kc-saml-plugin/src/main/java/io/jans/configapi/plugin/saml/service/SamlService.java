@@ -325,7 +325,7 @@ public class SamlService {
 
         }
         InputStream targetStream = file;
-        log.info("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
+        log.info("targetStream:{}, samlConfigService.getSpMetadataDir():{}, spMetadataFileName:{}", targetStream, samlConfigService.getSpMetadataDir(), spMetadataFileName);
 
         String result = samlIdpService.saveMetadataFile(samlConfigService.getSpMetadataDir(), spMetadataFileName, Constants.SP_MODULE, targetStream);
         log.info("targetStream:{}, spMetadataFileName:{}, result:{}, trustRelationship.getSpMetaDataFN():{}", targetStream, spMetadataFileName, result, trustRelationship.getSpMetaDataFN());
@@ -360,12 +360,14 @@ public class SamlService {
     }
 
     public String getSpNewMetadataFileName(String inum) {
+        log.info("Generate SP Metadata FileName with inum:{}",inum);
         String relationshipInum = StringHelper.removePunctuation(inum);
+        log.info("inum with punctuation is:{}",inum);
         return String.format(samlConfigService.getSpMetadataFilePattern(), relationshipInum);
     }
 
     public void processUnprocessedSpMetadataFiles() {
-        log.debug("Processing unprocessed SP Metadata files ");
+        log.info("Processing unprocessed SP Metadata files ");
         String directory = samlConfigService.getSpMetadataTempDir();
         log.debug("Check SP Metadata file in directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
 

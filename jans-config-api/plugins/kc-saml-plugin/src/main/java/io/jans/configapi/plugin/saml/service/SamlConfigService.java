@@ -294,7 +294,10 @@ public class SamlConfigService {
     }
 
     public String getSpMetadataFilePattern() {
-        return Constants.SP_METADATA_FILE_PATH;
+        StringBuilder sb = new StringBuilder();
+        sb.append("%s_");
+        sb.append(getSpMetadataFile());
+        return sb.toString();
     }
 
     public String getSpMetadataFile() {
