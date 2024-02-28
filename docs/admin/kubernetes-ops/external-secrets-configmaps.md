@@ -125,7 +125,7 @@ From the console, Go to `Secret Manager`> Click on `Create Secret` > Add a `name
 ### Vault
 
 !!! Note
-    The deployment of Vault is hosted on-premises, not within the Vault Cloud service
+    The deployment of Vault is hosted on-premises, not within the HashiCorp Cloud Platform service
 
 1.  Enable the KV secrets engine version 1 in Vault. For example:
     `vault secrets enable -path=secret -version=1 kv`
