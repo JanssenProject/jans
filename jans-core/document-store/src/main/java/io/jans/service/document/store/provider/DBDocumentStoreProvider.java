@@ -93,7 +93,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 				oxDocument.setInum(documentService.generateInumForNewDocument());	
 				String dn = "inum="+ oxDocument.getInum() +",ou=document,o=jans";
 				oxDocument.setDn(dn);
-				oxDocument.setDisplayName(name);
+				oxDocument.setDescription(name);
 				oxDocument.setJansEnabled("true");
 				oxDocument.setJansModuleProperty(moduleList);	  
 				documentService.addDocument(oxDocument);
