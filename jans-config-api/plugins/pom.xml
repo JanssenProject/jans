@@ -23,6 +23,7 @@
 		<module>fido2-plugin</module>
 		<module>kc-saml-plugin</module>
 	    <module>kc-link-plugin</module>
+	    <module>lock-plugin</module>
 		
 	</modules>
 

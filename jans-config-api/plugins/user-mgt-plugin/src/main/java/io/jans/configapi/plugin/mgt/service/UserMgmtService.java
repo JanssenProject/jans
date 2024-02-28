@@ -485,10 +485,12 @@ public class UserMgmtService {
         }
         StringBuilder sb = new StringBuilder();
         for (CustomObjectAttribute customObjectAttribute : customAttributes) {
-            logger.info("customObjectAttribute:{}", customObjectAttribute, customObjectAttribute.getName());
-            AttributeValidation validation = attributeService.getAttributeByName(customObjectAttribute.getName())
-                    .getAttributeValidation();
-
+            logger.info("customObjectAttribute:{}, customObjectAttribute.getName():{}", customObjectAttribute, customObjectAttribute.getName());
+            JansAttribute attribute = attributeService.getAttributeByName(customObjectAttribute.getName());
+            AttributeValidation validation = null;
+            if(attribute!=null) {
+                validation = attribute.getAttributeValidation();
+            }
             logger.info("validation:{}", validation);
 
             String errorMsg = validateCustomAttributes(customObjectAttribute, validation);
