@@ -18,9 +18,9 @@ paths:
   /lock/lockConfig:
     get:
       tags:
-      - KC Lock - Configuration
-      summary: Gets KC Lock configuration properties
-      description: Gets KC Lock configuration properties
+      - Lock - Configuration
+      summary: Gets Lock configuration properties
+      description: Gets Lock configuration properties
       operationId: get-lock-properties
       responses:
         "200":
@@ -38,9 +38,9 @@ paths:
         - https://jans.io/oauth/lock-config.readonly
     put:
       tags:
-      - KC Lock - Configuration
-      summary: Update KC Lock configuration properties
-      description: Update KC Lock configuration properties
+      - Lock - Configuration
+      summary: Update Lock configuration properties
+      description: Update Lock configuration properties
       operationId: put-lock-properties
       requestBody:
         description: GluuAttribute object
@@ -68,9 +68,9 @@ paths:
         - https://jans.io/oauth/lock-config.write
     patch:
       tags:
-      - KC Lock - Configuration
-      summary: Partially modifies KC Lock configuration properties.
-      description: Partially modifies KC Lock configuration properties.
+      - Lock - Configuration
+      summary: Partially modifies Lock configuration properties.
+      description: Partially modifies Lock configuration properties.
       operationId: patch-lock-properties
       requestBody:
         description: String representing patch-document.
