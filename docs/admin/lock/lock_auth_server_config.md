@@ -34,26 +34,23 @@ It has 2 section for PostgreSQL (`postgresConfiguration`) and Redis (`redisConfi
 Full list of properties defined in jans-config-api-swagger.yaml.
 
 
-Second configuration is needed for Jans Auth. In current version Jans Auth calls message API after id_token persistence/removal from/to DB from `GarntService`. Jans Messages API library provides generic API to hide actual PubSub messages publishing/receiving implementation.
+Second configuration is needed for Jans Auth. In current version Jans Auth calls message API after access_token persistence/removal from/to DB from `GarntService`. Jans Messages API library provides generic API to hide actual PubSub messages publishing/receiving implementation.
 
 This is default configuration after server install:
 
 ```
     "lockMessageConfig": {
-        "enableIdTokenMessages" : false,
-        "idTokenMessagesChannel": "id_token"
+        "enableTokenMessages" : false,
+        "tokenMessagesChannel": "jans_token"
     }
 ```
-First property control sending messages to PubSub server. Second one `idTokenMessagesChannel` specify channel name to send id_token messages.
+First property control sending messages to PubSub server. Second one `tokenMessagesChannel` specify channel name to send token messages.
 
 The format of messages which Jans Auth issue is JSON. And it has minimum data for quick processing. Here is message pattern:
 
 ```
-{"tknTyp" : "id_token", "tknCde" : "id_token identifier", "tknOp" : "add/del"}
+{"tknTyp" : "access_token", "tknId" : "token_identifier", "tknOp" : "add/del"}
 ```
 
-Also In order to enable messages it's mandatory to enable id_token persistence because Lock server loads tokens from DB by their identifiers.
-
-
-Note: For demo purposes in Jans CE with PostgreSQL and Lock server selected to install messages enabled by default. In order to start using it we only need to enable id_token persistence in Jans Auth.
+Note: For demo purposes in Jans CE with PostgreSQL and Lock server selected to install messages enabled by default.
 

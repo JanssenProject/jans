@@ -50,6 +50,7 @@ parser.add_argument('--setup-dir', help="Setup directory", default=os.path.join(
 parser.add_argument('-force-download', help="Force downloading files", action='store_true')
 parser.add_argument('--github-access-token', help="Github access token to retrieve openbanking setup profile")
 parser.add_argument('--openbanking-setup-branch', help="Openbanking setup github branch", default="main")
+parser.add_argument('--lock-setup', help="Launch Janssen Lock Setup", action='store_true')
 argsp = parser.parse_args()
 
 
@@ -163,6 +164,9 @@ def extract_from_zip(zip_fn, source_dir, target_dir):
     shutil.rmtree(unpack_dir)
 
 def extract_setup():
+    if os.environ.get('JANS_INSTALLER'):
+        return
+
     if os.path.exists(argsp.setup_dir):
         shutil.move(argsp.setup_dir, argsp.setup_dir + bacup_ext)
 
@@ -330,15 +334,29 @@ def do_install():
     print("Executing", setup_cmd)
     os.system(setup_cmd)
 
+
+def lock_setup():
+    extract_setup()
+    lock_setup_cmd = '{} {}/lock_setup.py'.format(sys.executable, argsp.setup_dir)
+    setup_args = argsp.args or ''
+    if setup_args:
+        lock_setup_cmd += ' ' + setup_args
+
+    print("Executing", lock_setup_cmd)
+    os.system(lock_setup_cmd)
+
+
 def main():
 
     if not argsp.uninstall or argsp.download_exit:
         check_install_dependencies()
 
-    if not (argsp.use_downloaded or argsp.uninstall):
+    if not (argsp.use_downloaded or argsp.uninstall or os.environ.get('JANS_INSTALLER')):
         download_jans_acrhieve()
 
-    if argsp.upgrade:
+    if argsp.lock_setup:
+        lock_setup()
+    elif argsp.upgrade:
         upgrade()
     elif argsp.uninstall:
         uninstall_jans()

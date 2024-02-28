@@ -45,17 +45,12 @@ public class SsaValidateAction {
     /**
      * Validates an existing SSA for a given "jti".
      *
-     * <p>
-     * Method will return a {@link WebApplicationException} with status {@code 422} if the SSA does not exist,
-     * has been expired or is no longer active,
-     * it will also return a {@link WebApplicationException} with status {@code 500} in case an uncontrolled
-     * error occurs when processing the method.
-     * </p>
-     *
      * @param jti Unique identifier
-     * @return {@link Response} with status {@code 200} (Ok) if SSA has been validated.
+     * @return {@link Response} with status {@code 200 (Ok)} if SSA has been validated or
+     * {@code 400 (Bad Request) with <b>invalid_jti<b/> key}, when jti does not exist, is invalid or state is in (expired, used or revoked) or
+     * {@code 500 (Internal Server Error) with <b>unknown_error<b/> key}, in case an uncontrolled error occurs when processing the method.
      */
-    public Response validate(String jti) {
+    public Response validate(String jti) throws WebApplicationException {
         log.debug("Attempting to validate ssa jti: '{}'", jti);
 
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
