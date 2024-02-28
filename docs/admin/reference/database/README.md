@@ -63,37 +63,37 @@ files date time modification after initialization.
 ### Overriding DB Configuration Properties
 
 Configuration properties and the values specified under `.properties` files
-discussed in [above](#configuration) section, can be overriden by dynamically
+discussed in [above](#configuration) section, can be overridden by dynamically
 passing them as a JVM parameter or as an environment variable.
 
 #### Cloud-native Installations
 
-For Janssen Server installations using Helm, Docker or local Kubernetes, 
+For Janssen Server installations using Helm, Docker, or local Kubernetes,
 dynamically passing DB configuration properties can be done by
-specifiying environment variables. For example:
+specifying environment variables.
 
-- Override connection URI for one specific component. For instance, 
+For example:
+
+- Override connection URI for one specific component. For instance,
   `jans-auth` component
   ```shell
   CN_AUTH_JAVA_OPTIONS=-Dconnection.uri=new-mysql-uri
   ```
-- Override connection URI for globally for all Janssen Server modules
+- Override connection URI globally for all Janssen Server modules
   ```shell
   CN_JAVA_OPTIONS=-Dconnection.uri=new-mysql-uri
   ```
-  or by exporting system level environment variable as below 
+  or by exporting system-level environment variable as below
   ```shell
   CONNECTION_URI=new-mysql-uri
   ```
 
-
-
 #### VM Installations
 
-For Janssen Server installed on a VM, a new parameter or parameters with override
-values, can be added either at global level for all modules or specific to 
-certain modules only. Steps 
-below show how to override DB connection URI:
+For the Janssen Server installed on a VM, a new parameter or parameters with override
+values can be added either at the global level for all modules or specific to
+certain modules only. The steps
+below show how to override the DB connection URI:
 
 ##### Globally For All Modules
 
@@ -103,32 +103,32 @@ Define environment variable at the VM level, such as shown in the example below:
 export CONNECTION_URI=jdbc:postgresql://localhost:5432/jansdb
 ```
 
-This will affect all Janssen Server modules, where properties like 
-`connection.uri` or `connection-uri` will be overriden with new value.
+This will affect all Janssen Server modules, where properties like
+`connection.uri` or `connection-uri` will be overridden with the new value.
 
-##### Module Specific 
+##### Module Specific
 
-Properties can also be added/overriden at module level as well. To do this, 
-pass new values either as JVM parameters or as environment variables at 
+Properties can also be added/overridden at the module level as well. To do this,
+pass new values either as JVM parameters or as environment variables at
 the module level.
 
-Janssen Server module level configuration is stored under `/etc/default/` 
-directory which contains config files for Janssen modules. For example 
+Janssen Server module level configuration is stored under `/etc/default/`
+directory which contains config files for Janssen modules. For example
 `/etc/default/jans-auth` file contains configuration for `jans-auth` module.
 
-  - Update the `JAVA_OPTIONS` parameter to add the value of new connection
-    URI against the `connection.uri` parameter. 
-    For example:
-    ```shell
-    -Dconnection.uri=jdbc:postgresql://localhost:5432/jansdb`
-    ```
-  - Using environment variable, export a new variable, as shown in the example 
-    below:
-    ```shell
-    export CONNECTION_URI=jdbc:postgresql://localhost:5432/jansdb
-    ```
-    The exported variable above, `CONNECTION_URI`, will override the value 
-    provided by `connection.uri` or `connection-uri` parameters.
+- Update the `JAVA_OPTIONS` parameter to add the value of the new connection
+  URI against the `connection.uri` parameter.
+  For example:
+  ```shell
+  -Dconnection.uri=jdbc:postgresql://localhost:5432/jansdb`
+  ```
+- Using the environment variable, export a new variable, as shown in the example
+  below:
+  ```shell
+  export CONNECTION_URI=jdbc:postgresql://localhost:5432/jansdb
+  ```
+  The exported variable above, `CONNECTION_URI`, will override the value
+  provided by `connection.uri` or `connection-uri` parameters.
 
 ## Architecture
 
