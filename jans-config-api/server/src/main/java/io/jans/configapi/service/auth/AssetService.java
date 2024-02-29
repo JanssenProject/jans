@@ -21,12 +21,15 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.provider.DBDocumentStoreProvider;
 import io.jans.service.document.store.service.DBDocumentService;
 import io.jans.service.document.store.service.Document;
+import io.jans.util.exception.InvalidAttributeException;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 
@@ -71,8 +74,9 @@ public class AssetService {
                         targetArray, null);
                 Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
                         targetArray, null);
+                Filter aliasFilter = Filter.createSubstringFilter("jansAlias", null, targetArray, null);
                 Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter));
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, aliasFilter, inumFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
@@ -119,23 +123,50 @@ public class AssetService {
         return documents;
     }
 
-    public boolean saveAsset(Document document, InputStream documentStream) {
+    public Document saveAsset(Document document, InputStream documentStream) throws Exception{
         log.info("Save new asset - document:{}, documentStream:{}", document, documentStream);
-        return dBDocumentStoreProvider.saveDocumentStream(document.getDisplayName(), documentStream,
+        
+        if(document==null) {
+            throw new InvalidAttributeException(" Document object is null!!!");
+        }
+        
+        if(documentStream==null) {
+            throw new InvalidAttributeException(" Document data stream object is null!!!");
+        }
+        
+        boolean status = dBDocumentStoreProvider.saveDocumentStream(document.getDisplayName(), documentStream,
                 document.getJansModuleProperty());
+        log.info("status on saving new document is :{}", status);
+        
+        if(status) {
+            document = dbDocumentService.getDocumentByDisplayName(document.getDisplayName());
+        }
+        log.info("New document saved :{}", document);
+        return document;
     }
 
-    /*
-     * public void updateAsset(Document document, InputStream documentStream) {
-     * log.info("Update new asset - document:{}, documentStream:{}", document,
-     * documentStream); return
-     * dBDocumentStoreProvider.updateDocumentStream(document.getDisplayName(),
-     * documentStream, document.getJansModuleProperty()); }
-     */
+    
+    public Document updateAsset(Document document, InputStream documentStream) throws Exception {
+        log.info("Update new asset - document:{}, documentStream:{}", document, documentStream);
+        if (document == null) {
+            throw new InvalidAttributeException(" Document object is null!!!");
+        }
+
+        if (documentStream == null) {
+            throw new InvalidAttributeException(" Document data stream object is null!!!");
+        }
+
+        String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
+        document.setDocument(documentContent);
+        dbDocumentService.updateDocument(document);
+        document = dbDocumentService.getDocumentByDisplayName(document.getDisplayName());
+        log.info("Updated document:{}", document);
+        return document;
+    }
+     
 
     public InputStream readAssetStream(String name) {
         log.info("Read asset as stream identified by name:{}", name);
-
         InputStream inputStream = dBDocumentStoreProvider.readDocumentAsStream(name);
         log.info("Asset as stream identified by name:{}, inputStream:{}", name, inputStream);
         return inputStream;
@@ -143,7 +174,9 @@ public class AssetService {
 
     public boolean removeAsset(String inum) {
         log.info("Remove new asset - inum:{}", inum);
-        return dBDocumentStoreProvider.removeDocument(inum);
+        boolean status = dBDocumentStoreProvider.removeDocument(inum);
+        log.info("Status on removing a document identified by inum is:{}", status);
+        return status;
     }
 
 }

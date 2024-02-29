@@ -40,7 +40,7 @@ public abstract class BaseDocumentStoreService implements DocumentStore {
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream, List moduleList) {
+	public boolean saveDocumentStream(String path, InputStream documentStream, List moduleList) throws Exception{
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
 		return documentStoreProvider.saveDocumentStream(path, documentStream, moduleList);

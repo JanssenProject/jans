@@ -8043,8 +8043,8 @@ components:
         jansRevision:
           type: string
         jansEnabled:
-          type: string
-        jansAliass:
+          type: boolean
+        jansAlias:
           type: string
         selected:
           type: boolean
@@ -8163,32 +8163,20 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-<<<<<<< HEAD
-=======
+        userCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanView:
->>>>>>> 0ea56e158bb7fd9eb0fa299e1bc81610806b2aa3
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-<<<<<<< HEAD
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
-=======
->>>>>>> 0ea56e158bb7fd9eb0fa299e1bc81610806b2aa3
         baseDn:
           type: string
     PatchRequest:
@@ -9001,6 +8989,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9010,8 +9000,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn

@@ -9,7 +9,6 @@ package io.jans.configapi.rest.resource.auth;
 import io.jans.configapi.service.auth.AssetService;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.form.AssetForm;
-import io.jans.configapi.core.util.Jackson;
 
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
@@ -165,12 +164,11 @@ public class AssetResource extends ConfigBaseResource {
 
         // upload document
         try {
-            boolean status = assetService.saveAsset(document, assetFile);
-            log.debug(" Upload asset status:{} ", status);
-        } catch (WebApplicationException wex) {
-            log.error("Application Error while creating document is - status:{}, message:{}",
-                    wex.getResponse().getStatus(), wex.getMessage());
-            throwInternalServerException(APPLICATION_ERROR, wex.getMessage());
+            document = assetService.saveAsset(document, assetFile);
+            log.debug(" Upload asset document:{} ", document);
+        } catch (Exception ex) {
+            log.error("Application Error while creating document is - status:{}", ex.getMessage());
+            throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
         }
 
         log.info("Create IdentityProvider - document:{}", document);
@@ -222,12 +220,12 @@ public class AssetResource extends ConfigBaseResource {
 
         // upload document
         try {
-            boolean status = assetService.saveAsset(document, assetFile);
-            log.debug(" Upload asset status:{} ", status);
-        } catch (WebApplicationException wex) {
-            log.error("Application Error while creating document is - status:{}, message:{}",
-                    wex.getResponse().getStatus(), wex.getMessage());
-            throwInternalServerException(APPLICATION_ERROR, wex.getMessage());
+            document = assetService.updateAsset(document, assetFile);
+            log.debug(" Upload asset document:{} ", document);
+        } catch (Exception ex) {
+            log.error("Application Error while creating document is:{}",
+                    ex.getMessage());
+            throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
         }
 
         log.info("Create IdentityProvider - document:{}", document);

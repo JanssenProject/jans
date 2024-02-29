@@ -94,7 +94,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 				String dn = "inum="+ oxDocument.getInum() +",ou=document,o=jans";
 				oxDocument.setDn(dn);
 				oxDocument.setDescription(name);
-				oxDocument.setJansEnabled("true");
+				oxDocument.setJansEnabled(true);
 				oxDocument.setJansModuleProperty(moduleList);	  
 				documentService.addDocument(oxDocument);
 				return true;
@@ -108,7 +108,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	}
 
 	@Override
-	public boolean saveDocumentStream(String name, InputStream documentStream, List <String> moduleList) {
+	public boolean saveDocumentStream(String name, InputStream documentStream, List <String> moduleList) throws Exception  {
 		
 		Document oxDocument = new Document();
 		oxDocument.setDisplayName(name);
@@ -121,12 +121,13 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			String dn = "inum="+ oxDocument.getInum() +",ou=document,o=jans";
 			oxDocument.setDn(dn);
 			oxDocument.setDescription(name);
-			oxDocument.setJansEnabled("true");
+			oxDocument.setJansEnabled(true);
 			oxDocument.setJansModuleProperty(moduleList);
 			documentService.addDocument(oxDocument);
 			return true;
 		} catch (Exception e) {
 			log.error("Failed to write document from stream to file '{}'", name, e);
+		    throw e;
 		}	
 
 		return false;

@@ -30,7 +30,7 @@ public interface DocumentStore<T> {
 	/**
 	 * Save document stream into store
 	 */
-	boolean saveDocumentStream(String path, InputStream documentStream, List<String> moduleList);
+	boolean saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) throws Exception;
 
 	/**
 	 * Load document from store
