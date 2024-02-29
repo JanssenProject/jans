@@ -73,6 +73,7 @@ def get_default_custom_libs(app_name):
     if not as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
         cn_version = os.environ.get("CN_VERSION", "")
         excludes.append(f"{root}/custom/libs/jans-lock-service-{cn_version}.jar")
+        excludes.append(f"{root}/custom/libs/jans-lock-model-{cn_version}.jar")
 
     libs = []
     for jar in glob.iglob(f"{root}/custom/libs/*.jar"):
