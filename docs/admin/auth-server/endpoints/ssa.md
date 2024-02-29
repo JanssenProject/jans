@@ -388,7 +388,7 @@ Method returns status 200 with an empty body if the corresponding SSA exists and
 ### Example:
 
 ```
-HEAD {{your-url}}/ssa
+POST {{your-url}}/ssa/validation
 jti: {{your-jti}}
 ```
 

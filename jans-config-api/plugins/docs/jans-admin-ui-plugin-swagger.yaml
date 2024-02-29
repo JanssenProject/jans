@@ -19,235 +19,6 @@ tags:
 - name: Admin UI - License
 - name: Admin UI - Webhooks
 paths:
-  /admin-ui/license/activate:
-    post:
-      tags:
-      - Admin UI - License
-      summary: Activate license using license-key
-      description: Activate license using license-key
-      operationId: activate-adminui-license
-      requestBody:
-        description: LicenseRequest object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LicenseRequest'
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
-  /admin-ui/license/details:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Get admin ui license details
-      description: Get admin ui license details
-      operationId: get-adminui-license
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-  /admin-ui/license/isActive:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Check if admin-ui license is active
-      description: Check if admin-ui license is active
-      operationId: is-license-active
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-  /admin-ui/license/isConfigValid:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Is license configuration valid
-      description: Is license configuration valid
-      operationId: check-adminui-license-config
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-  /admin-ui/license/retrieve:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Retrieve license from SCAN
-      description: Retrieve license from SCAN
-      operationId: retrieve-license
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-  /admin-ui/license/ssa:
-    post:
-      tags:
-      - Admin UI - License
-      summary: Save SSA in configuration
-      description: Save SSA in configuration
-      operationId: adminui-post-ssa
-      requestBody:
-        description: SSARequest object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SSARequest'
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
-  /admin-ui/license/trial:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Generate trial license
-      description: Generate trial license
-      operationId: get-trial-license
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
   /admin-ui/adminUIPermissions:
     get:
       tags:
@@ -733,6 +504,77 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete
+  /admin-ui/config:
+    get:
+      tags:
+      - Admin UI - Configuration
+      summary: Get Admin UI editable configuration
+      description: Get Admin UI editable configuration
+      operationId: get-adminui-conf
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppConfigResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
+    put:
+      tags:
+      - Admin UI - Configuration
+      summary: Edit Admin UI editable configuration
+      description: Edit Admin UI editable configuration
+      operationId: edit-adminui-conf
+      requestBody:
+        description: Admin Config object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppConfigResponse'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppConfigResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/properties.write
   /admin-ui/adminUIRolePermissionsMapping/{adminUIRole}:
     get:
       tags:
@@ -812,6 +654,235 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete
+  /admin-ui/license/activate:
+    post:
+      tags:
+      - Admin UI - License
+      summary: Activate license using license-key
+      description: Activate license using license-key
+      operationId: activate-adminui-license
+      requestBody:
+        description: LicenseRequest object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LicenseRequest'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+  /admin-ui/license/details:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Get admin ui license details
+      description: Get admin ui license details
+      operationId: get-adminui-license
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/isActive:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Check if admin-ui license is active
+      description: Check if admin-ui license is active
+      operationId: is-license-active
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/isConfigValid:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Is license configuration valid
+      description: Is license configuration valid
+      operationId: check-adminui-license-config
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/retrieve:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Retrieve license from SCAN
+      description: Retrieve license from SCAN
+      operationId: retrieve-license
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/ssa:
+    post:
+      tags:
+      - Admin UI - License
+      summary: Save SSA in configuration
+      description: Save SSA in configuration
+      operationId: adminui-post-ssa
+      requestBody:
+        description: SSARequest object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SSARequest'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+  /admin-ui/license/trial:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Generate trial license
+      description: Generate trial license
+      operationId: get-trial-license
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
   /admin-ui/webhook:
     get:
       tags:
@@ -1341,7 +1412,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
   /admin-ui/webhook/trigger/{featureId}:
-    get:
+    post:
       tags:
       - Admin UI - Webhooks
       summary: Trigger webhooks mapped to featureId
@@ -1354,6 +1425,20 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        description: Webhook object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShortCodeRequest'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  [{
+                    "webhookId": "0a8e784b-2394-3a34-89d3-4a09d245aa32",
+                    "shortcodeValueMap": {"price": 100}
+                  }]
       responses:
         "200":
           description: Ok
@@ -1367,24 +1452,23 @@ paths:
                   value: |
                     [{
                       "success": true,
-                      "responseMessage": "{\n  \"id\": 101\n}",
-                      "responseCode": 201
+                      "responseMessage": "{\"id\":101,\"title\":\"iPhone 9\",\"price\":\"100\",\"description\":\"An apple mobile which is nothing like apple\"}",
+                      "responseCode": 200,
+                      "responseObject": {
+                        "webhookId": "0a8e784b-2394-3a34-89d3-4a09d245aa32",
+                        "webhookName": "Webhook1",
+                        "webhookMethod": "POST",
+                        "webhookRequestBody": "{dummy={a=b}, price=100, description=An apple mobile which is nothing like apple, id=1, title=iPhone 9}"
+                      }
                     }, {
                       "success": true,
-                      "responseMessage": "{\n  \"id\": 102\n}",
-                      "responseCode": 200
-                    }, {
-                      "success": true,
-                      "responseMessage": "{\n  \"id\": 103\n}",
-                      "responseCode": 200
-                    }, {
-                      "success": true,
-                      "responseMessage": "{\n  \"id\": 104\n}",
-                      "responseCode": 201
-                    }, {
-                      "success": true,
-                      "responseMessage": "{\n  \"id\": 105\n}",
-                      "responseCode": 201
+                      "responseMessage": "{\"users\":[{\"id\":1,\"firstName\":\"Terry\",\"lastName\":\"Medhurst\",\"maidenName\":\"Smitham\",\"age\":50,\"gender\":\"male\",\"email\":\"atuny0@sohu.com\",\"phone\":\"+63 791 675 8914\",\"username\":\"atuny0\",\"password\":\"9uQFF1Lh\",\"birthDate\":\"2000-12-25\",\"image\":\"https://robohash.org/Terry.png?set=set4\",\"bloodGroup\":\"A-\",\"height\":189,\"weight\":75.4,\"eyeColor\":\"Green\",\"hair\":{\"color\":\"Black\",\"type\":\"Strands\"},\"domain\":\"slashdot.org\",\"ip\":\"117.29.86.254\",\"address\":{\"address\":\"1745 T Street Southeast\",\"city\":\"Washington\",\"coordinates\":{\"lat\":38.867033,\"lng\":-76.979235},\"postalCode\":\"20020\",\"state\":\"DC\"},\"macAddress\":\"13:69:BA:56:A3:74\",\"university\":\"Capitol University\",\"bank\":{\"cardExpire\":\"06/22\",\"cardNumber\":\"50380955204220685\",\"cardType\":\"maestro\",\"currency\":\"Peso\",\"iban\":\"NO17 0695 2754 967\"},\"company\":{\"address\":{\"address\":\"629 Debbie Drive\",\"city\":\"Nashville\",\"coordinates\":{\"lat\":36.208114,\"lng\":-86.58621199999999},\"postalCode\":\"37076\",\"state\":\"TN\"},\"department\":\"Marketing\",\"name\":\"Blanda-O'Keefe\",\"title\":\"Help Desk Operator\"},\"ein\":\"20-9487066\",\"ssn\":\"661-64-2976\",\"userAgent\":\"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/12.0.702.0 Safari/534.24\",\"crypto\":{\"coin\":\"Bitcoin\",\"wallet\":\"0xb9fc2fe63b2a6c003f1c324c3bfa53259162181a\",\"network\":\"Ethereum (ERC20)\"}},{\"id\":2,\"firstName\":\"Sheldon\",\"lastName\":\"Quigley\",\"maidenName\":\"Cole\",\"age\":28,\"gender\":\"male\",\"email\":\"hbingley1@plala.or.jp\",\"phone\":\"+7 813 117 7139\",\"username\":\"hbingley1\",\"password\":\"CQutx25i8r\",\"birthDate\":\"2003-08-02\",\"image\":\"https://robohash.org/Sheldon.png?set=set4\",\"bloodGroup\":\"O+\",\"height\":187,\"weight\":74,\"eyeColor\":\"Brown\",\"hair\":{\"color\":\"Blond\",\"type\":\"Curly\"},\"domain\":\"51.la\",\"ip\":\"253.240.20.181\",\"address\":{\"address\":\"6007 Applegate Lane\",\"city\":\"Louisville\",\"coordinates\":{\"lat\":38.1343013,\"lng\":-85.6498512},\"postalCode\":\"40219\",\"state\":\"KY\"}",
+                      "responseCode": 200,
+                      "responseObject": {
+                        "webhookId": "bf21de5b-adb9-3581-82f5-76bb335f1cbd",
+                        "webhookName": "Dummyuser-test",
+                        "webhookMethod": "GET"
+                      }
                     }]
         "400":
           description: Bad Request
@@ -1407,11 +1491,17 @@ paths:
         - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
 components:
   schemas:
-    LicenseRequest:
+    AdminPermission:
       type: object
       properties:
-        licenseKey:
+        tag:
           type: string
+        permission:
+          type: string
+        description:
+          type: string
+        defaultPermissionInToken:
+          type: boolean
     GenericResponse:
       type: object
       properties:
@@ -1426,6 +1516,75 @@ components:
           $ref: '#/components/schemas/JsonNode'
     JsonNode:
       type: object
+    RolePermissionMapping:
+      type: object
+      properties:
+        role:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+    AdminRole:
+      type: object
+      properties:
+        role:
+          type: string
+        description:
+          type: string
+        deletable:
+          type: boolean
+    AppConfigResponse:
+      type: object
+      properties:
+        authServerHost:
+          type: string
+          description: Auth Server host
+          readOnly: true
+        authzBaseUrl:
+          type: string
+          description: Authorization base URL
+          readOnly: true
+        clientId:
+          type: string
+          description: OIDC Client ID
+          readOnly: true
+        responseType:
+          type: string
+          description: OIDC Client Secret
+          readOnly: true
+        scope:
+          type: string
+          description: Scope
+          readOnly: true
+        redirectUrl:
+          type: string
+          description: Redirect URL
+          readOnly: true
+        acrValues:
+          type: string
+          description: ACR Value
+        frontChannelLogoutUrl:
+          type: string
+          description: Front Channel Logout URL
+          readOnly: true
+        postLogoutRedirectUri:
+          type: string
+          description: Post Logout Redirect URL
+          readOnly: true
+        endSessionEndpoint:
+          type: string
+          description: End Session Endpoint
+          readOnly: true
+        sessionTimeoutInMins:
+          type: integer
+          description: Admin UI Session Timeout
+          format: int32
+    LicenseRequest:
+      type: object
+      properties:
+        licenseKey:
+          type: string
     LicenseResponse:
       type: object
       properties:
@@ -1459,35 +1618,6 @@ components:
       properties:
         ssa:
           type: string
-    AdminPermission:
-      type: object
-      properties:
-        tag:
-          type: string
-        permission:
-          type: string
-        description:
-          type: string
-        defaultPermissionInToken:
-          type: boolean
-    RolePermissionMapping:
-      type: object
-      properties:
-        role:
-          type: string
-        permissions:
-          type: array
-          items:
-            type: string
-    AdminRole:
-      type: object
-      properties:
-        role:
-          type: string
-        description:
-          type: string
-        deletable:
-          type: boolean
     KeyValuePair:
       type: object
       properties:
@@ -1515,10 +1645,6 @@ components:
           type: string
         url:
           type: string
-        httpRequestBody:
-          type: object
-          additionalProperties:
-            type: string
         httpMethod:
           type: string
         jansEnabled:
@@ -1532,6 +1658,10 @@ components:
           type: array
           items:
             type: string
+        httpRequestBody:
+          type: object
+          additionalProperties:
+            type: object
         baseDn:
           type: string
     Scope:
@@ -1641,6 +1771,15 @@ components:
         entries:
           type: array
           items:
+            type: object
+    ShortCodeRequest:
+      type: object
+      properties:
+        webhookId:
+          type: string
+        shortcodeValueMap:
+          type: object
+          additionalProperties:
             type: object
   securitySchemes:
     oauth2:
