@@ -1,10 +1,13 @@
 import copy
 import asyncio
+import importlib
+
 from collections import OrderedDict
 from typing import Any, Optional
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
-    VSplit, Window, HorizontalAlign, ConditionalContainer
-from prompt_toolkit.filters import Condition
+    VSplit, Window, HorizontalAlign
+
+from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Box, Dialog
 from prompt_toolkit.application import Application
@@ -12,13 +15,13 @@ from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.widget_collections import get_ldap_config_widgets
-
-from utils.utils import common_data
+from wui_components.jans_label_widget import JansLabelWidget
+from wui_components.widget_collections import get_ldap_config_widgets, get_data_for_ldap_widgets
 
 from utils.multi_lang import _
-from utils.utils import DialogUtils
+from utils.utils import DialogUtils, common_data
 from utils.static import cli_style
+
 
 SOURCE_ATTRIBUTE_S = _("Source Attribute")
 
@@ -35,11 +38,10 @@ class Plugin(DialogUtils):
             app (Generic): The main Application class
         """
         self.app = app
-        self.pid = 'jans-link'
-        self.name = 'Jans Lin[k]'
+        self.pid = 'kc-link'
+        self.name = 'Ja[n]s KC Link'
         self.server_side_plugin = True
         self.page_entered = False
-
         self.data = {}
 
         self.prepare_navbar()
@@ -193,9 +195,9 @@ class Plugin(DialogUtils):
         self.edit_source_config_dialog()
 
     def create_widgets(self):
-        self.schema = self.app.cli_object.get_schema_from_reference('Jans Link Plugin', '#/components/schemas/AppConfiguration')
+        self.schema = self.app.cli_object.get_schema_from_reference('Keycloak Link', '#/components/schemas/AppConfiguration')
 
-        mappings_title = _("Mappings:")
+        mappings_title = _("Attribute Mappings:")
         add_mapping_title = _("Add Mapping")
 
         save_config_buttonc = VSplit([Button(_("Save"), handler=self.save_config)], align=HorizontalAlign.CENTER)
@@ -220,36 +222,71 @@ class Plugin(DialogUtils):
                 max_height=4
                 )
 
-        self.tabs['configuration'] = HSplit([
-                                self.app.getTitledCheckBox(_("Enabled"), name='linkEnabled', checked=self.data.get('linkEnabled'), jans_help=self.app.get_help_from_schema(self.schema, 'linkEnabled'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
-                                self.app.getTitledWidget(
-                                    _("Refresh Method"),
-                                    name='updateMethod',
-                                    widget=DropDownWidget(
-                                        values=[('copy', 'Copy'), ('vds', 'VDS')],
-                                        value=self.data.get('updateMethod'),
-                                        select_one_option=False
-                                        ),
-                                    jans_help=self.app.get_help_from_schema(self.schema, 'updateMethod'),
-                                    style=cli_style.edit_text
-                                    ),
-                                VSplit([
-                                    Label(text=mappings_title, style=cli_style.titled_text, width=len(mappings_title)+1),
-                                    self.mappings_container,
-                                    Window(width=2),
-                                    HSplit([
-                                        Window(height=1),
-                                        Button(text=add_mapping_title, width=len(add_mapping_title)+4, handler=self.edit_mapping),
-                                    ]),
-                                    ],
-                                    height=5, width=D(),
-                                    ),
-                                self.app.getTitledText(_("Polling Interval (minutes)"), name='pollingInterval', value=self.data.get('pollingInterval') or '20', jans_help=self.app.get_help_from_schema(self.schema, 'pollingInterval'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, text_type='integer'),
-                                self.app.getTitledText(_("Snapshot Directory"), name='snapshotFolder', value=self.data.get('snapshotFolder',''), jans_help=self.app.get_help_from_schema(self.schema, 'snapshotFolder'), style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget),
-                                self.app.getTitledText(_("Snapshot Count"), name='snapshotMaxCount', value=self.data.get('snapshotMaxCount', '10'), jans_help=self.app.get_help_from_schema(self.schema, 'snapshotMaxCount'), style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget, text_type='integer'),
-                                self.app.getTitledCheckBox(_("Keep External Persons"), name='keepExternalPerson', checked=self.data.get('keepExternalPerson'), jans_help=self.app.get_help_from_schema(self.schema, 'keepExternalPerson'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
-                                self.app.getTitledCheckBox(_("Load Source Data withLimited Search"), name='useSearchLimit', checked=self.data.get('useSearchLimit'), jans_help=self.app.get_help_from_schema(self.schema, 'useSearchLimit'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
-                                self.app.getTitledWidget(
+        attributes_data = [(attribute['name'], attribute['name']) for attribute in common_data.jans_attributes]
+
+        label_widget_width = common_data.app.output.get_size().columns - 3
+        self.key_attributes = JansLabelWidget(
+                        title=_("Key Attributes"), 
+                        values=self.data.get('keyAttributes', []),
+                        data=attributes_data,
+                        label_width=label_widget_width
+                        )
+        self.source_attributes = JansLabelWidget(
+                        title=_("Source Attributes"), 
+                        values=self.data.get('sourceAttributes', []),
+                        data=attributes_data,
+                        label_width=label_widget_width
+                        )
+
+        self.basic_config_content = HSplit([
+            self.app.getTitledCheckBox(_("Enable Jannssen Keycloak Link"), name='keycloakLinkEnabled', checked=self.data.get('keycloakLinkEnabled'), jans_help=self.app.get_help_from_schema(self.schema, 'keycloakLinkEnabled'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
+            self.app.getTitledText(_("LDAP Search Size Limit"), name='ldapSearchSizeLimit', value=self.data.get('ldapSearchSizeLimit') or '25', jans_help=self.app.get_help_from_schema(self.schema, 'ldapSearchSizeLimit'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, text_type='integer'),
+            self.app.getTitledText(_("Custom LDAP Filter"), name='customLdapFilter', value=self.data.get('customLdapFilter') or '', jans_help=self.app.get_help_from_schema(self.schema, 'ldapSearchSizeLimit'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget),
+            self.key_attributes,
+            self.source_attributes,
+
+            self.app.getTitledText(_("Snapshot Directory"), name='snapshotFolder', value=self.data.get('snapshotFolder',''), jans_help=self.app.get_help_from_schema(self.schema, 'snapshotFolder'), style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget),
+
+            self.app.getTitledWidget(
+                _("Update Method"),
+                name='updateMethod',
+                widget=DropDownWidget(
+                    values=[('vds', 'VDS'), ('copy', 'Copy')],
+                    value=self.data.get('updateMethod', 'copy'),
+                    select_one_option=False
+                    ),
+                jans_help=self.app.get_help_from_schema(self.schema, 'updateMethod'),
+                style=cli_style.edit_text
+                ),
+            self.app.getTitledCheckBox(_("Default Inum Server"), name='defaultInumServer', checked=self.data.get('defaultInumServer'), jans_help=self.app.get_help_from_schema(self.schema, 'defaultInumServer'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
+            self.app.getTitledCheckBox(_("Keep External Person"), name='keepExternalPerson', checked=self.data.get('keepExternalPerson'), jans_help=self.app.get_help_from_schema(self.schema, 'keepExternalPerson'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
+            self.app.getTitledCheckBox(_("Use Search Limit"), name='useSearchLimit', checked=self.data.get('useSearchLimit'), jans_help=self.app.get_help_from_schema(self.schema, 'useSearchLimit'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
+            self.app.getTitledCheckBox(_("Allow Person Modification"), name='allowPersonModification', checked=self.data.get('allowPersonModification'), jans_help=self.app.get_help_from_schema(self.schema, 'allowPersonModification'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
+
+            VSplit([
+                    Label(text=mappings_title, style=cli_style.titled_text, width=len(mappings_title)+1),
+                    self.mappings_container,
+                    Window(width=2),
+                    HSplit([
+                        Window(height=1),
+                        Button(text=add_mapping_title, width=len(add_mapping_title)+4, handler=self.edit_mapping),
+                    ]),
+                    ],
+                    height=5, width=D(),
+                    ),
+            #supportedUserStatus
+            self.app.getTitledText(_("Metric Reporter Interval"), name='metricReporterInterval', value=self.data.get('metricReporterInterval') or '0', jans_help=self.app.get_help_from_schema(self.schema, 'metricReporterInterval'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, text_type='integer'),
+            self.app.getTitledText(_("Metric Reporter Keep Data Days"), name='metricReporterKeepDataDays', value=self.data.get('metricReporterKeepDataDays') or '0', jans_help=self.app.get_help_from_schema(self.schema, 'metricReporterKeepDataDays'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, text_type='integer'),
+            self.app.getTitledText(_("Clean Service Interval"), name='cleanServiceInterval', value=self.data.get('cleanServiceInterval') or '0', jans_help=self.app.get_help_from_schema(self.schema, 'cleanServiceInterval'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, text_type='integer'),
+            self.app.getTitledCheckBox(_("Disable Jdk Logger"), name='disableJdkLogger', checked=self.data.get('disableJdkLogger'), jans_help=self.app.get_help_from_schema(self.schema, 'disableJdkLogger'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
+            self.app.getTitledCheckBox(_("useLocalCache"), name='useLocalCache', checked=self.data.get('useLocalCache'), jans_help=self.app.get_help_from_schema(self.schema, 'useLocalCache'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
+
+            self.app.getTitledText(_("Keycloak Link Server Ip Address"), name='keycloakLinkServerIpAddress', value=self.data.get('keycloakLinkServerIpAddress') or '255.255.255.255', jans_help=self.app.get_help_from_schema(self.schema, 'keycloakLinkServerIpAddress'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget),
+            self.app.getTitledText(_("Keycloak Link Last Update"), name='keycloakLinkLastUpdate', value=self.data.get('keycloakLinkLastUpdate') or '', jans_help=self.app.get_help_from_schema(self.schema, 'keycloakLinkLastUpdate'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, read_only=True),
+            self.app.getTitledText(_("Keycloak Link Last Update Count"), name='keycloakLinkLastUpdateCount', value=self.data.get('keycloakLinkLastUpdateCount') or '5', jans_help=self.app.get_help_from_schema(self.schema, 'keycloakLinkLastUpdateCount'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, read_only=True),
+            self.app.getTitledText(_("Keycloak Link Problem Count"), name='keycloakLinkProblemCount', value=self.data.get('keycloakLinkProblemCount') or '0', jans_help=self.app.get_help_from_schema(self.schema, 'keycloakLinkProblemCount'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, read_only=True),
+
+            self.app.getTitledWidget(
                                     _("Logging Level"),
                                     name='loggingLevel',
                                     widget=DropDownWidget(
@@ -260,48 +297,43 @@ class Plugin(DialogUtils):
                                     jans_help=self.app.get_help_from_schema(self.schema, 'loggingLevel'),
                                     style=cli_style.edit_text
                                     ),
+            Window(height=1),
+            save_config_buttonc,
+            ]
 
-                                Window(height=1),
-                                save_config_buttonc,
-                                ],
-                                width=D()
-                                )
-
-
-        self.tabs['customer_backend'] = HSplit([
-                                self.app.getTitledText(
-                                    _("Key Attributes"),
-                                    name='keyAttributes',
-                                    value=' '.join(self.data.get('keyAttributes', [])),
-                                    style=cli_style.titled_text,
-                                    widget_style=cli_style.black_bg_widget,
-                                    jans_help=_("Space seperated key attributes")
-                                ),
-                                self.app.getTitledText(
-                                    _("Key Object Classes"),
-                                    name='keyObjectClasses',
-                                    value=' '.join(self.data.get('keyObjectClasses', [])),
-                                    style=cli_style.titled_text,
-                                    widget_style=cli_style.black_bg_widget,
-                                    jans_help=_("Space seperated key object classes")
-                                ),
-                                self.app.getTitledText(
-                                    _("Source Attributes"),
-                                    name='sourceAttributes',
-                                    value=' '.join(self.data.get('sourceAttributes', [])),
-                                    style=cli_style.titled_text,
-                                    widget_style=cli_style.black_bg_widget,
-                                    jans_help=_("Space seperated source attributes")
-                                ),
-                                self.app.getTitledText(_("Custom LDAP Filter"), name='customLdapFilter', value=self.data.get('customLdapFilter',''), jans_help=self.app.get_help_from_schema(self.schema, 'customLdapFilter'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget),
-                                Window(height=1),
-                                save_config_buttonc,
-                                ],
-                                width=D()
-                                )
+            )
 
 
-        self.source_backends_container = JansVerticalNav(
+        self.tabs['basic_config'] = ScrollablePane(content=self.basic_config_content, height=D(), display_arrows=False, show_scrollbar=True)
+        self.tabs['inum_config'] = HSplit(get_ldap_config_widgets(self.data.get('inumConfig'), widget_style=cli_style.black_bg_widget) +[Window(height=1), save_config_buttonc], width=D())
+        self.tabs['target_config'] = HSplit(get_ldap_config_widgets(self.data.get('targetConfig'), widget_style=cli_style.black_bg_widget) +[Window(height=1), save_config_buttonc], width=D())
+
+
+        keycloak_config_data = self.data.get('keycloakConfiguration', {})
+        keycloak_config_widgets = []
+        for label_, var_ in (
+                        (_("Server URL"), 'serverUrl'),
+                        (_("Rrealm"), 'realm'),
+                        (_("Client ID"), 'clientId'),
+                        (_("Client Secret"), 'clientSecret'),
+                        (_("Grant Type"), 'grantType'),
+                        (_("Username"), 'username'),
+                        (_("Password"), 'password'),
+                        ):
+
+            keycloak_config_widgets.append(
+                        self.app.getTitledText(
+                            label_, 
+                            name=var_, value=keycloak_config_data.get(var_) or '',
+                            jans_help=self.app.get_help_from_schema(self.schema, var_),
+                            style=cli_style.titled_text, widget_style=cli_style.black_bg_widget
+                        )
+                )
+
+        self.tabs['keycloak_config'] = HSplit(keycloak_config_widgets +[Window(height=1), save_config_buttonc], width=D())
+
+
+        self.source_config_container = JansVerticalNav(
                 myparent=self.app,
                 headers=[_("Name"), _("Enabled")],
                 preferred_size= self.app.get_column_sizes(.7, .3),
@@ -317,45 +349,23 @@ class Plugin(DialogUtils):
             )
 
         add_source_config_button_label = _("Add Source LDAP Server")
-        self.tabs['source_backend'] = HSplit([
-                                self.source_backends_container,
+        self.tabs['source_config'] = HSplit([
+                                self.source_config_container,
                                 Window(height=1),
                                 VSplit([Button(_("Add Source LDAP Server"), handler=self.add_source_config, width=len(add_source_config_button_label)+4)], align=HorizontalAlign.CENTER),
                                 ],
                                 width=D()
                                 )
 
-        self.inum_db_server_container = HSplit(get_ldap_config_widgets(self.data.get('inumConfig'), widget_style=cli_style.black_bg_widget), width=D())
-
-        self.default_inum_db_server_checkbox = self.app.getTitledCheckBox(
-                                title=_("Default Inum Server"), 
-                                name='defaultInumServer', 
-                                checked=self.data.get('defaultInumServer', False),
-                                style=cli_style.check_box
-                                )
-
-
-        self.tabs['inum_db_server'] = HSplit([
-                                self.default_inum_db_server_checkbox ,
-                                ConditionalContainer(
-                                    content=self.inum_db_server_container,
-                                    filter=Condition(lambda: not self.default_inum_db_server_checkbox.me.checked),
-                                ),
-                                Window(height=1),
-                                save_config_buttonc,
-                                ],
-                                width=D()
-                                )
-
-
 
         self.nav_selection_changed(list(self.tabs)[0])
+        self.app.invalidate()
 
     async def get_configuration(self) -> None:
-        'Coroutine for getting Janssen Link configuration.'
+        'Coroutine for getting Janssen KC Link configuration.'
         try:
             response = self.app.cli_object.process_command_by_id(
-                        operation_id='get-jans-link-properties',
+                        operation_id='get-kc-link-properties',
                         url_suffix='',
                         endpoint_args='',
                         data_fn=None,
@@ -363,18 +373,21 @@ class Plugin(DialogUtils):
                         )
 
         except Exception as e:
-            self.app.show_message(_("Error getting Janssen Link configuration"), str(e), tobefocused=self.app.center_container)
+            self.app.show_message(_("Error getting Janssen KC Link configuration"), str(e), tobefocused=self.app.center_container)
             self.app.disable_plugin(self.pid)
             return
 
         if response.status_code not in (200, 201):
-            self.app.show_message(_("Error getting Janssen Link configuration"), str(response.text), tobefocused=self.app.center_container)
+            self.app.show_message(_("Error getting Janssen KC Link configuration"), str(response.text), tobefocused=self.app.center_container)
             self.app.disable_plugin(self.pid)
             return
 
         self.data = response.json()
+        for i in range(5):
+            if not common_data.jans_attributes:
+                await asyncio.sleep(1)
         self.create_widgets()
-        self.update_source_backends_container()
+        self.update_source_config_container()
 
     def prepare_navbar(self) -> None:
         """prepare the navbar for the current Plugin 
@@ -382,14 +395,15 @@ class Plugin(DialogUtils):
         self.nav_bar = JansNavBar(
                     self.app,
                     entries=[
-                            ('configuration', 'C[o]nfiguration'),
-                            ('customer_backend', 'Customer [B]ackend Key Attributes'),
-                            ('source_backend', 'Source Backend [L]DAP Server'),
-                            ('inum_db_server', '[I]num DB Server'),
+                            ('basic_config', '[B]asic Configuration'),
+                            ('inum_config', '[I]num Configuration'),
+                            ('source_config', ' [S]ources'),
+                            ('target_config', '[T]arget Configuration'),
+                            ('keycloak_config', 'K[e]ycloak Configuration'),
                             ],
                     selection_changed=self.nav_selection_changed,
                     select=0,
-                    jans_name='fido:nav_bar'
+                    jans_name='kc:nav_bar'
                     )
 
     def prepare_containers(self) -> None:
@@ -397,14 +411,14 @@ class Plugin(DialogUtils):
         """
 
         self.tabs = OrderedDict()
-        self.main_area = HSplit([Label("configuration")],width=D())
+        self.main_area = HSplit([Label("Please waith while retreiving attributes from server")], width=D())
 
         self.main_container = HSplit([
-                                        Box(self.nav_bar.nav_window, style='class:sub-navbar', height=1),
+                                        Box(self.nav_bar.nav_window, style=cli_style.sub_navbar, height=1),
                                         DynamicContainer(lambda: self.main_area),
                                         ],
                                     height=D(),
-                                    style='class:outh_maincontainer'
+                                    style=cli_style.navbar_headcolor
                                     )
 
     def nav_selection_changed(
@@ -423,74 +437,60 @@ class Plugin(DialogUtils):
         else:
             self.main_area = self.app.not_implemented
 
-    def update_source_backends_container(self):
-        self.source_backends_container.clear()
+
+
+    def update_source_config_container(self):
+        self.source_config_container.clear()
         source_configs = self.data.get('sourceConfigs', [])
         if source_configs:
-            self.source_backends_container.hide_headers = False
+            self.source_config_container.hide_headers = False
             for sc in source_configs:
-                self.source_backends_container.add_item((sc.get('configId', ''), str(sc.get('enabled', False))))
-            self.source_backends_container.all_data = source_configs
+                self.source_config_container.add_item((sc.get('configId', ''), str(sc.get('enabled', False))))
+            self.source_config_container.all_data = source_configs
 
     def save_config(self, delete_source_config:Optional[int]=None) -> None:
         """This method for saving the configuration
         """
 
-        configuration = self.make_data_from_dialog(tabs={'configuration': self.tabs['configuration']})
-        customer_backend = self.make_data_from_dialog(tabs={'customer_backend': self.tabs['customer_backend']})
+        #configuration = self.make_data_from_dialog(tabs={'configuration': self.tabs['source_config']})
+        #customer_backend = self.make_data_from_dialog(tabs={'customer_backend': self.tabs['customer_backend']})
 
         new_data = copy.deepcopy(self.data)
-        new_data['defaultInumServer'] = self.default_inum_db_server_checkbox.me.checked
-        if not self.default_inum_db_server_checkbox.me.checked:
-            inum_config = self.make_data_from_dialog(tabs={'inum_config': self.inum_db_server_container})
-            inum_config['servers'] = inum_config['servers'].split()
-            inum_config['baseDNs'] = inum_config['baseDNs'].split()
+        new_data['inumConfig'] = get_data_for_ldap_widgets(self.tabs['inum_config'])
+        new_data['targetConfig'] = get_data_for_ldap_widgets(self.tabs['target_config'])
+        basic_config = self.make_data_from_dialog(tabs={'basic_config': self.basic_config_content})
+        new_data.update(basic_config)
 
-            if 'inumConfig' in new_data:
-                new_data['inumConfig'].update(inum_config)
-            else:
-                new_data['inumConfig'] = inum_config
+        new_data['keyAttributes'] = self.key_attributes.get_values()
+        new_data['sourceAttributes'] = self.source_attributes.get_values()
+        new_data['attributeMapping'] = [ {'source': source, 'destination': destination} for source, destination in self.mappings_container.data ]
+        new_data['keycloakConfiguration'] = self.make_data_from_dialog(tabs={'keycloak_config': self.tabs['keycloak_config']})
 
-            if not 'useAnonymousBind' in new_data['inumConfig']:
-                new_data['inumConfig']['useAnonymousBind'] = False
-
-            if not 'level' in new_data['inumConfig']:
-                new_data['inumConfig']['level'] = 0
-
-            if not 'version' in new_data['inumConfig']:
-                new_data['inumConfig']['version'] = 0
-            else:
-                new_data['inumConfig']['version'] += 1
 
         if 'sourceConfigs' not in new_data:
             new_data['sourceConfigs'] = []
 
-        if delete_source_config is None:
-            configuration['attributeMapping'] = [ {'source': source, 'destination': destination} for source, destination in self.mappings_container.data ]
-            configuration['keyAttributes'] = customer_backend['keyAttributes'].split()
-            configuration['keyObjectClasses'] = customer_backend['keyObjectClasses'].split()
-            configuration['sourceAttributes'] = customer_backend['sourceAttributes'].split()
-            configuration['customLdapFilter'] = customer_backend['customLdapFilter']
-            new_data.update(configuration)
-        else:
+        if delete_source_config is not None:
             try:
-                new_data['sourceConfigs'].pop(delete_source_config)
+                 new_data['sourceConfigs'].pop(delete_source_config)
             except Exception as e:
                 self.app.show_message(_('Error Deleting Source Config'), str(e))
+                return
+
+        new_data.pop('keycloakLinkLastUpdate')
 
         async def coroutine():
-            cli_args = {'operation_id': 'put-jans-link-properties', 'data': new_data}
-            self.app.start_progressing(_("Saving Jans Link Configuration..."))
+            cli_args = {'operation_id': 'put-kc-link-properties', 'data': new_data}
+            self.app.start_progressing(_("Saving KC Link Configuration..."))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             if response.status_code == 200:
-                self.app.stop_progressing(_("Jans Link Configuration was saved."))
+                self.app.stop_progressing(_("Jans KC Link Configuration was saved."))
                 self.data = response.json()
-                self.update_source_backends_container()
+                self.update_source_config_container()
             else:
                 self.app.show_message(_('Error Saving Config'), response.text + '\n' + response.reason)
 
         asyncio.ensure_future(coroutine())
-
 
 
     def edit_source_config_dialog(self, data=None, selected=None):
@@ -503,18 +503,9 @@ class Plugin(DialogUtils):
         body = HSplit(get_ldap_config_widgets(data), width=D())
 
         def save_source_config(dialog):
-            sc_data = self.make_data_from_dialog(tabs={'sc': dialog.body})
-            sc_data['primaryKey'] = None
-            sc_data['localPrimaryKey'] = None
-            sc_data['useAnonymousBind'] = False
-            sc_data['version'] = data['version']+1 if 'version' in data else 0
-            sc_data['level'] = 0
-            sc_data['servers'] = sc_data['servers'].split()
-            sc_data['baseDNs'] = sc_data['baseDNs'].split()
-
+            sc_data = get_data_for_ldap_widgets(dialog.body)
             if 'sourceConfigs' not in self.data:
                 self.data['sourceConfigs'] = []
-
             if selected is not None:
                 self.data['sourceConfigs'][selected] = sc_data
             else:

@@ -698,7 +698,8 @@ class JansCliApp(Application):
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 
-        titled_text_widgets = [Window(FormattedTextControl(title+': '), width=len(title)+1, style=style, height=height), ta]
+        label_widget = Window(FormattedTextControl(title+': '), width=len(title)+1, style=style, height=height)
+        titled_text_widgets = [label_widget, ta]
         if next_widget:
             titled_text_widgets.append(Window(width=1))
             titled_text_widgets.append(next_widget)
@@ -706,6 +707,7 @@ class JansCliApp(Application):
         v = VSplit(titled_text_widgets)
         v.me = ta
         v.title = title
+        v.label_widget = label_widget
 
         if jans_list_type:
             v.jans_list_type = True
