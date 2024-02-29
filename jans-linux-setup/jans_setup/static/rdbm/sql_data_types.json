@@ -3,6 +3,9 @@
     "mysql": {
       "type": "TEXT"
     },
+    "pgsql": {
+      "type": "TEXT"
+    },
     "spanner": {
       "type": "STRING(MAX)"
     }
@@ -1149,5 +1152,16 @@
     "spanner": {
       "type": "STRING(MAX)"
     }
-  }
+  },
+  "document": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
 }
