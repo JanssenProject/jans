@@ -8164,8 +8164,17 @@ components:
         selected:
           type: boolean
         whitePagesCanView:
+<<<<<<< HEAD
+=======
           type: boolean
         adminCanEdit:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanView:
+>>>>>>> 0ea56e158bb7fd9eb0fa299e1bc81610806b2aa3
+          type: boolean
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
@@ -8175,8 +8184,11 @@ components:
           type: boolean
         adminCanAccess:
           type: boolean
+<<<<<<< HEAD
         userCanAccess:
           type: boolean
+=======
+>>>>>>> 0ea56e158bb7fd9eb0fa299e1bc81610806b2aa3
         baseDn:
           type: string
     PatchRequest:
