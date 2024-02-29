@@ -20,6 +20,8 @@ public class SAMLMetadata implements Serializable {
     private String nameIDPolicyFormat;
     private String entityId;
     private String singleLogoutServiceUrl;
+    private String jansAssertionConsumerServiceGetURL;
+    private String jansAssertionConsumerServicePostURL;
     
     public String getNameIDPolicyFormat() {
         return nameIDPolicyFormat;
@@ -45,11 +47,28 @@ public class SAMLMetadata implements Serializable {
         this.singleLogoutServiceUrl = singleLogoutServiceUrl;
     }
     
+    public String getJansAssertionConsumerServiceGetURL() {
+        return jansAssertionConsumerServiceGetURL;
+    }
+    
+    public void setJansAssertionConsumerServiceGetURL(String jansAssertionConsumerServiceGetURL) {
+        this.jansAssertionConsumerServiceGetURL = jansAssertionConsumerServiceGetURL;
+    }
+    
+    public String getJansAssertionConsumerServicePostURL() {
+        return jansAssertionConsumerServicePostURL;
+    }
+    
+    public void setJansAssertionConsumerServicePostURL(String jansAssertionConsumerServicePostURL) {
+        this.jansAssertionConsumerServicePostURL = jansAssertionConsumerServicePostURL;
+    }
+    
     @Override
     public String toString() {
-        return "SPMetadata [nameIDPolicyFormat=" + nameIDPolicyFormat + ", entityId=" + entityId
-                + ", singleLogoutServiceUrl=" + singleLogoutServiceUrl + "]";
-    }
-     
+        return "SAMLMetadata [nameIDPolicyFormat=" + nameIDPolicyFormat + ", entityId=" + entityId
+                + ", singleLogoutServiceUrl=" + singleLogoutServiceUrl + ", jansAssertionConsumerServiceGetURL="
+                + jansAssertionConsumerServiceGetURL + ", jansAssertionConsumerServicePostURL="
+                + jansAssertionConsumerServicePostURL + "]";
+    }     
     
 }

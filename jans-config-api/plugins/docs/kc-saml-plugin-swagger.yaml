@@ -1016,6 +1016,10 @@ components:
           type: string
         singleLogoutServiceUrl:
           type: string
+        jansAssertionConsumerServiceGetURL:
+          type: string
+        jansAssertionConsumerServicePostURL:
+          type: string
     TrustRelationship:
       required:
       - description
