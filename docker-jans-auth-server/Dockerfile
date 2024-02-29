@@ -51,7 +51,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=1.1.0-SNAPSHOT
-ENV CN_BUILD_DATE='2024-02-07 08:30'
+ENV CN_BUILD_DATE='2024-02-29 12:37'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -88,7 +88,8 @@ RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSIO
     && wget -q https://jenkins.jans.io/maven/io/jans/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
     && wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
     && wget -q https://jenkins.jans.io/maven/io/jans/agama-inbound/${AGAMA_INBOUND_VERSION}/agama-inbound-${AGAMA_INBOUND_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
-    && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-service/${JANS_LOCK_VERSION}/jans-lock-service-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
+    && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-service/${JANS_LOCK_VERSION}/jans-lock-service-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
+    && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-model/${JANS_LOCK_VERSION}/jans-lock-model-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
 
 # =====================
 # jans-linux-setup sync
@@ -101,7 +102,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=892e35894c64d12f5c141b831e2e730f3abc77d1
+ENV JANS_SOURCE_VERSION=97aafe8efb77f1dca7080ed2b89284f3baf75c2e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
