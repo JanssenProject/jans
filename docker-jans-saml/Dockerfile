@@ -113,16 +113,17 @@ ENV CN_CONFIG_ADAPTER=consul \
 # ==========
 
 ENV CN_SECRET_ADAPTER=vault \
-    CN_SECRET_VAULT_SCHEME=http \
-    CN_SECRET_VAULT_HOST=localhost \
-    CN_SECRET_VAULT_PORT=8200 \
     CN_SECRET_VAULT_VERIFY=false \
     CN_SECRET_VAULT_ROLE_ID_FILE=/etc/certs/vault_role_id \
     CN_SECRET_VAULT_SECRET_ID_FILE=/etc/certs/vault_secret_id \
     CN_SECRET_VAULT_CERT_FILE=/etc/certs/vault_client.crt \
     CN_SECRET_VAULT_KEY_FILE=/etc/certs/vault_client.key \
     CN_SECRET_VAULT_CACERT_FILE=/etc/certs/vault_ca.crt \
-    CN_SECRET_VAULT_NAMESPACE=jans \
+    CN_SECRET_VAULT_NAMESPACE="" \
+    CN_SECRET_VAULT_ADDR=http://localhost:8200 \
+    CN_SECRET_VAULT_KV_PATH=secret \
+    CN_SECRET_VAULT_PREFIX=jans \
+    CN_SECRET_VAULT_APPROLE_PATH=approle \
     CN_SECRET_KUBERNETES_NAMESPACE=default \
     CN_SECRET_KUBERNETES_SECRET=jans \
     CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
