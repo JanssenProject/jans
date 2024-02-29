@@ -8,6 +8,7 @@ package io.jans.lock.model.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.jans.doc.annotation.DocProperty;
 import jakarta.enterprise.inject.Vetoed;
 
 /**
@@ -18,8 +19,10 @@ import jakarta.enterprise.inject.Vetoed;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OpaConfiguration implements Configuration {
 
+    @DocProperty(description = "Base OPA URL")
 	private String baseUrl;
 
+    @DocProperty(description = "OPA access token")
 	private String accessToken;
 
 	public String getBaseUrl() {
