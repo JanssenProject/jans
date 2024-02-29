@@ -61,13 +61,13 @@ public class SamlIdpService {
         return documentStoreService.getProviderType() == DocumentStoreType.LOCAL;
     }
 
-    public String saveMetadataFile(String metadataTempDir, String metadataFileName, String documentStoreModuleName,
+    public String saveMetadataFile(String metadataDir, String metadataFileName, String documentStoreModuleName,
             InputStream stream) {
-        logger.info("metadataTempDir:{}, metadataFileName:{}, documentStoreModuleName:{}, stream:{}", metadataTempDir,
+        logger.info("metadataDir:{}, metadataFileName:{}, documentStoreModuleName:{}, stream:{}", metadataDir,
                 metadataFileName, documentStoreModuleName, stream);
 
-        if (StringUtils.isBlank(metadataTempDir)) {
-            throw new InvalidConfigurationException("Failed to save file as metadataTempDir is null!");
+        if (StringUtils.isBlank(metadataDir)) {
+            throw new InvalidConfigurationException("Failed to save file as metadata directory provided is null!");
         }
 
         if (StringUtils.isBlank(metadataFileName)) {
@@ -82,7 +82,7 @@ public class SamlIdpService {
             documentStoreModuleName = "SAML";
         }
 
-        String metadataFile = metadataTempDir + File.separator + metadataFileName;
+        String metadataFile = metadataDir + File.separator + metadataFileName;
         logger.info("documentStoreService:{}, metadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
                 metadataFile, localDocumentStoreService);
         try {

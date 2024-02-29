@@ -284,60 +284,27 @@ public class SamlService {
 
     private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship, InputStream file) {
         log.info("trustRelationship:{}, file:{}", trustRelationship, file);
-
-        String spMetadataFileName = trustRelationship.getSpMetaDataFN();
-        boolean emptySpMetadataFileName = StringHelper.isEmpty(spMetadataFileName);
-        log.debug("emptySpMetadataFileName:{}", emptySpMetadataFileName);
-        if ((file == null)) {
-            log.trace("File is null");
-            if (emptySpMetadataFileName) {
-                log.debug("The trust relationship {} has an empty Metadata filename", trustRelationship.getInum());
-                return false;
-            }
-            String filePath = getSpMetadataFilePath(spMetadataFileName);
-            log.debug("filePath:{}", filePath);
-
-            if (filePath == null) {
-                log.debug("The trust relationship {} has an invalid Metadata file storage path",
-                        trustRelationship.getInum());
-                return false;
-            }
-
-            if (samlIdpService.isLocalDocumentStoreType()) {
-
-                File newFile = new File(filePath);
-                log.debug("newFile:{}", newFile);
-
-                if (!newFile.exists()) {
-                    log.debug(
-                            "The trust relationship {} metadata used local storage but the SP metadata file `{}` was not found",
-                            trustRelationship.getInum(), filePath);
-                    return false;
-                }
-            }
-            return true;
-        }
-        if (emptySpMetadataFileName) {
-            log.info("emptySpMetadataFileName:{}", emptySpMetadataFileName);
-            spMetadataFileName = getSpNewMetadataFileName(trustRelationship);
-            log.info("***spMetadataFileName:{}***", spMetadataFileName);
-            trustRelationship.setSpMetaDataFN(spMetadataFileName);
-
-        }
+        boolean status = false;
+        
+        String spMetadataFileName = this.getSpNewMetadataFileName(trustRelationship);
+        log.info("***spMetadataFileName:{}***", spMetadataFileName);        
+        trustRelationship.setSpMetaDataFN(spMetadataFileName);
         InputStream targetStream = file;
         log.info("targetStream:{}, samlConfigService.getSpMetadataDir():{}, spMetadataFileName:{}", targetStream, samlConfigService.getSpMetadataDir(), spMetadataFileName);
 
-        String result = samlIdpService.saveMetadataFile(samlConfigService.getSpMetadataDir(), spMetadataFileName, Constants.SP_MODULE, targetStream);
-        log.info("targetStream:{}, spMetadataFileName:{}, result:{}, trustRelationship.getSpMetaDataFN():{}", targetStream, spMetadataFileName, result, trustRelationship.getSpMetaDataFN());
-        if (StringHelper.isNotEmpty(result)) {
-            metadataValidationTimer.spQueue(result);
+        String metadataFilePath = samlIdpService.saveMetadataFile(samlConfigService.getSpMetadataDir(), spMetadataFileName, Constants.SP_MODULE, targetStream);
+        log.info("targetStream:{}, spMetadataFileName:{}, metadataFilePath:{}, trustRelationship.getSpMetaDataFN():{}", targetStream, spMetadataFileName, metadataFilePath, trustRelationship.getSpMetaDataFN());
+        if (StringHelper.isNotEmpty(metadataFilePath)) {
+            trustRelationship.setSpMetaDataFN(metadataFilePath);
+            metadataValidationTimer.spQueue(metadataFilePath);
             //process files in temp that were not processed earlier
             processUnprocessedSpMetadataFiles();
+            status = true;
         } else {
             log.error("Failed to save SP meta-data file. Please check if you provide correct file");
         }
-
-        return false;
+        log.info("Successfully saved SP Metadata file - spMetadataFileName:{}, status:{}", spMetadataFileName, status);
+        return status;
 
     }
     
@@ -362,7 +329,7 @@ public class SamlService {
     public String getSpNewMetadataFileName(String inum) {
         log.info("Generate SP Metadata FileName with inum:{}",inum);
         String relationshipInum = StringHelper.removePunctuation(inum);
-        log.info("inum with punctuation is:{}",inum);
+        log.info("inum after remove punctuation is:{}",relationshipInum);
         return String.format(samlConfigService.getSpMetadataFilePattern(), relationshipInum);
     }
 

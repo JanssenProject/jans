@@ -195,16 +195,16 @@ public class IdentityProviderService {
 
     }
 
-    public IdentityProvider addSamlIdentityProvider(IdentityProvider identityProvider, InputStream file) {
+    public IdentityProvider addSamlIdentityProvider(IdentityProvider identityProvider, InputStream file) throws IOException{
         log.info("Add new identityProvider:{}, file:{}", identityProvider, file);
 
-        if (file != null) {
+        if (file != null && file.available() > 0) {
             log.info("Save IDP metadatfile on server");
             saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
-            log.info("After saving IDP metadatfile on server");
+            log.info("After saving IDP metadatfile on server - identityProvider:{}", identityProvider);
         }
         
-        log.info("Persist IDP in DB identityProvider:{}:{}", identityProvider);
+        log.info("Persist IDP in DB identityProvider:{}", identityProvider);
         persistenceEntryManager.persist(identityProvider);
         log.info("After Persisting IDP");
         return getIdentityProviderByInum(identityProvider.getInum());
@@ -272,65 +272,34 @@ public class IdentityProviderService {
 
     private boolean saveIdpMetaDataFileSourceTypeFile(IdentityProvider identityProvider, InputStream file) {
         log.info("Saving file identityProvider:{}, file:{}", identityProvider, file);
-
-        String idpMetaDataFN = identityProvider.getIdpMetaDataFN();
-        log.debug("idpMetaDataFN:{}", idpMetaDataFN);
-
-        boolean emptyidpMetaDataFN = StringHelper.isEmpty(idpMetaDataFN);
-        log.debug("emptyidpMetaDataFN:{}", emptyidpMetaDataFN);
-        if ((file == null)) {
-            log.debug("File is null");
-            if (emptyidpMetaDataFN) {
-                log.debug("The trust relationship {} has an empty Metadata filename", identityProvider.getInum());
-                return false;
-            }
-            String filePath = getIdpMetadataTempDirFilePath(idpMetaDataFN);
-            log.debug("filePath:{}", filePath);
-
-            if (filePath == null) {
-                log.debug("The trust relationship {} has an invalid Metadata file storage path",
-                        identityProvider.getInum());
-                return false;
-            }
-
-            if (samlIdpService.isLocalDocumentStoreType()) {
-
-                File newFile = new File(filePath);
-                log.trace("newFile:{}", newFile);
-
-                if (!newFile.exists()) {
-                    log.info(
-                            "The trust relationship {} metadata used local storage but the IDP metadata file `{}` was not found",
-                            identityProvider.getInum(), filePath);
-                    return false;
-                }
-            }
-            return true;
+        boolean status = false;
+        if(identityProvider==null || file==null) {
+            return status;
         }
-        if (emptyidpMetaDataFN) {
-            log.info("File name is blank emptyidpMetaDataFN:{}", emptyidpMetaDataFN);
-            idpMetaDataFN = getIdpNewMetadataFileName(identityProvider);
-            log.debug("Final idpMetaDataFN:{}", idpMetaDataFN);
-            identityProvider.setIdpMetaDataFN(idpMetaDataFN);
-            identityProvider.setIdpMetaDataLocation(getIdpMetadataTempDirFilePath());
-        }
+
+        String idpMetaDataFN = getIdpNewMetadataFileName(identityProvider);
+        log.debug("Final idpMetaDataFN:{}", idpMetaDataFN);
+        identityProvider.setIdpMetaDataFN(idpMetaDataFN);
+        identityProvider.setIdpMetaDataLocation(getIdpMetadataTempDirFilePath());
+
         InputStream targetStream = file;
         log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
 
         String result = samlIdpService.saveMetadataFile(getIdpMetadataTempDirFilePath(), idpMetaDataFN,
                 Constants.IDP_MODULE, targetStream);
-        log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
+        log.debug("targetStream:{}, idpMetaDataFN:{}, result:{}", targetStream, idpMetaDataFN, result);
         
         if (StringHelper.isNotEmpty(result)) {
             metadataValidationTimer.idpQueue(result);
             // process files in temp that were not processed earlier
             processUnprocessedIdpMetadataFiles();
+            status = true;
         } else {
             log.error("Failed to save IDP meta-data file. Please check if you provide correct file");
         }
         
-        log.info("Successfully saved IDP Metadata file - idpMetaDataFN:{}", idpMetaDataFN);
-        return false;
+        log.info("Successfully saved IDP Metadata file - idpMetaDataFN:{}, status:{}", idpMetaDataFN, status);
+        return status;
 
     }
 
@@ -359,7 +328,7 @@ public class IdentityProviderService {
     }
 
     private String getIdpMetadataTempDirFilePath() {
-        return samlConfigService.getIdpMetadataTempDir() + File.separator;
+        return samlConfigService.getIdpMetadataTempDir();
     }
 
     public void processUnprocessedIdpMetadataFiles() {
