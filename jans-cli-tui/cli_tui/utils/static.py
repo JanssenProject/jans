@@ -25,6 +25,7 @@ class cli_style:
     textarea = 'class:textarea'
     drop_down = 'class:plugin-dropdown'
     sub_navbar = 'class:sub-navbar'
+    read_only = 'class:textarea-readonly'
 
 class common_strings:
     enter_to_search = "Press enter to perform search"
