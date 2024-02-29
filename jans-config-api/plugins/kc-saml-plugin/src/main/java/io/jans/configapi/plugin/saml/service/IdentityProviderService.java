@@ -202,6 +202,8 @@ public class IdentityProviderService {
             log.info("Save IDP metadatfile on server");
             saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
             log.info("After saving IDP metadatfile on server - identityProvider:{}", identityProvider);
+        }else {
+            identityProvider.setIdpMetaDataFN(null);
         }
         
         log.info("Persist IDP in DB identityProvider:{}", identityProvider);
@@ -222,6 +224,8 @@ public class IdentityProviderService {
         }
         if (file != null && file.available() > 0) {
             saveIdpMetaDataFileSourceTypeFile(identityProvider, file);
+        }else {
+            identityProvider.setIdpMetaDataFN(null);
         }
 
         persistenceEntryManager.merge(identityProvider);

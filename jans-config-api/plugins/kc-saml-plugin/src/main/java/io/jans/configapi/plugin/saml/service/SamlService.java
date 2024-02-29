@@ -229,7 +229,10 @@ public class SamlService {
 
         if (file != null && file.available() > 0) {
             saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
+        }else {
+            trustRelationship.setSpMetaDataFN(null);
         }
+        
         persistenceEntryManager.merge(trustRelationship);
         log.info("After saving new trustRelationship:{}", trustRelationship);
         return getTrustRelationshipByInum(trustRelationship.getInum());
@@ -246,7 +249,10 @@ public class SamlService {
         
         if (file != null && file.available() > 0) {
             saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
+        }else {
+            trustRelationship.setSpMetaDataFN(null);
         }
+        
         persistenceEntryManager.merge(trustRelationship);
         log.info("After updating trustRelationship:{}", trustRelationship);
         return getTrustRelationshipByInum(trustRelationship.getInum());
