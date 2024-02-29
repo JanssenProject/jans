@@ -15,9 +15,10 @@ import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
-import io.jans.doc.annotation.DocProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.jans.doc.annotation.DocProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
+
 import java.util.*;
 
 /**
