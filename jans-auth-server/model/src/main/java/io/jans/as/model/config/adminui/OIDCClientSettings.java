@@ -19,6 +19,7 @@ public class OIDCClientSettings {
     private String opHost;
     private String clientId;
     private String clientSecret;
+    private List<KeyValuePair> additionalParameters;
 
     public OIDCClientSettings() {
         //Do not remove
@@ -42,6 +43,7 @@ public class OIDCClientSettings {
         this.opHost = oidcClientSettings.getOpHost();
         this.clientId = oidcClientSettings.getClientId();
         this.clientSecret = oidcClientSettings.getClientSecret();
+        this.additionalParameters = oidcClientSettings.getAdditionalParameters();
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -91,6 +93,14 @@ public class OIDCClientSettings {
         return introspectionEndpoint;
     }
 
+    public List<KeyValuePair> getAdditionalParameters() {
+        return additionalParameters;
+    }
+
+    public void setAdditionalParameters(List<KeyValuePair> additionalParameters) {
+        this.additionalParameters = additionalParameters;
+    }
+
     @Override
     public String toString() {
         return "OIDCClientSettings{" +
@@ -104,6 +114,7 @@ public class OIDCClientSettings {
                 ", opHost='" + opHost + '\'' +
                 ", clientId='" + clientId + '\'' +
                 ", clientSecret='" + clientSecret + '\'' +
+                ", additionalParameters='" + additionalParameters + '\'' +
                 '}';
     }
 }
