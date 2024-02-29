@@ -117,7 +117,7 @@ public class AUIConfigurationService extends BaseService {
         auiConfig.setAuiBackendApiServerIntrospectionEndpoint(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getIntrospectionEndpoint());
 
         auiConfig.setSessionTimeoutInMins(appConf.getMainSettings().getUiConfig().getSessionTimeoutInMins());
-
+        auiConfig.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
         return auiConfig;
     }
 

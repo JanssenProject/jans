@@ -1,5 +1,10 @@
 package io.jans.ca.plugin.adminui.model.config;
 
+
+import io.jans.as.model.config.adminui.KeyValuePair;
+
+import java.util.List;
+
 public class AUIConfiguration {
 
     private String appType;
@@ -34,6 +39,15 @@ public class AUIConfiguration {
     private LicenseConfiguration licenseConfiguration;
     //UI session timeout
     private Integer sessionTimeoutInMins;
+    private List<KeyValuePair> additionalParameters;
+
+    public List<KeyValuePair> getAdditionalParameters() {
+        return additionalParameters;
+    }
+
+    public void setAdditionalParameters(List<KeyValuePair> additionalParameters) {
+        this.additionalParameters = additionalParameters;
+    }
 
     public Integer getSessionTimeoutInMins() {
         return sessionTimeoutInMins;
@@ -258,4 +272,5 @@ public class AUIConfiguration {
     public void setLicenseConfiguration(LicenseConfiguration licenseConfiguration) {
         this.licenseConfiguration = licenseConfiguration;
     }
+
 }
