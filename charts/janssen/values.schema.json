@@ -475,9 +475,9 @@
           "pattern": "^(kubernetes|google|aws)$"
         },
         "configSecretAdapter": {
-          "description": "The config backend adapter that will hold Janssen secret layer. aws|google|kubernetes",
+          "description": "The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes",
           "type": "string",
-          "pattern": "^(kubernetes|google|aws)$"
+          "pattern": "^(kubernetes|google|aws|vault)$"
         },
         "cnGoogleApplicationCredentials": {
           "description": "Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner.",
