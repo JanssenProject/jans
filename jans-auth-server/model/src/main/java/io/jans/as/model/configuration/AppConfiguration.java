@@ -7,9 +7,7 @@
 package io.jans.as.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.common.*;
@@ -17,9 +15,9 @@ import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.jans.doc.annotation.DocProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.*;
 
