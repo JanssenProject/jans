@@ -1,10 +1,9 @@
-package io.jans.ca.plugin.adminui.model.webhook;
+package io.jans.as.model.config.adminui;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.io.Serializable;
-
 @JsonPropertyOrder({"key", "value"})
 @JsonIgnoreProperties(
         ignoreUnknown = true

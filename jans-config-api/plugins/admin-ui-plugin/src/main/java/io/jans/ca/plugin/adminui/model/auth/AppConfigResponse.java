@@ -1,7 +1,11 @@
 package io.jans.ca.plugin.adminui.model.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.jans.as.model.config.adminui.KeyValuePair;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.List;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AppConfigResponse {
     @Schema(description = "Auth Server host", accessMode = Schema.AccessMode.READ_ONLY)
@@ -26,6 +30,16 @@ public class AppConfigResponse {
     private String endSessionEndpoint;
     @Schema(description = "Admin UI Session Timeout", accessMode = Schema.AccessMode.READ_WRITE)
     private Integer sessionTimeoutInMins;
+    @Schema(description = "Additional Authentication Parameters", accessMode = Schema.AccessMode.READ_WRITE)
+    private List<KeyValuePair> additionalParameters;
+
+    public List<KeyValuePair> getAdditionalParameters() {
+        return additionalParameters;
+    }
+
+    public void setAdditionalParameters(List<KeyValuePair> additionalParameters) {
+        this.additionalParameters = additionalParameters;
+    }
 
     public Integer getSessionTimeoutInMins() {
         return sessionTimeoutInMins;
