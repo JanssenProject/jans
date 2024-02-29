@@ -1138,5 +1138,16 @@
     "spanner": {
       "type": "STRING(MAX)"
     }
+  },
+  "samlMetadata": {
+    "mysql": {
+      "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
   }
 }
