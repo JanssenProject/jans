@@ -302,6 +302,8 @@ paths:
                       - session_selection_required
                       - consent_required
                       - user_mismatched
+                      - request_not_supported
+                      - request_uri_not_supported
                       - invalid_request_uri
                       - invalid_request_object
                       - authentication_session_invalid
@@ -451,6 +453,8 @@ paths:
                       - session_selection_required
                       - consent_required
                       - user_mismatched
+                      - request_not_supported
+                      - request_uri_not_supported
                       - invalid_request_uri
                       - invalid_request_object
                       - authentication_session_invalid
