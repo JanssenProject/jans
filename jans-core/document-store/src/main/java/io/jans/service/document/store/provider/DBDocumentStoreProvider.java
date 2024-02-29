@@ -108,7 +108,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	}
 
 	@Override
-	public boolean saveDocumentStream(String name, InputStream documentStream, List <String> moduleList) throws Exception  {
+	public boolean saveDocumentStream(String name, InputStream documentStream, List <String> moduleList) {
 		
 		Document oxDocument = new Document();
 		oxDocument.setDisplayName(name);
@@ -127,7 +127,6 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			return true;
 		} catch (Exception e) {
 			log.error("Failed to write document from stream to file '{}'", name, e);
-		    throw e;
 		}	
 
 		return false;
