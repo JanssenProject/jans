@@ -9,11 +9,13 @@ package io.jans.as.client.ssa;
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.ssa.create.SsaCreateResponse;
 import io.jans.as.client.ssa.validate.SsaValidateClient;
 import io.jans.as.client.ssa.validate.SsaValidateResponse;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.model.util.DateUtil;
 import org.apache.http.HttpStatus;
@@ -24,9 +26,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 public class SsaValidateTest extends BaseTest {
 
@@ -52,16 +51,15 @@ public class SsaValidateTest extends BaseTest {
 
         // Ssa first validation
         SsaValidateClient ssaValidateClient = new SsaValidateClient(ssaEndpoint);
-        SsaValidateResponse ssaGetResponseFirst = ssaValidateClient.execSsaValidate(jti);
+        SsaValidateResponse ssaValidateResponseFirst = ssaValidateClient.execSsaValidate(jti);
         showClient(ssaValidateClient);
-        assertNotNull(ssaGetResponseFirst, "Response is null");
-        assertEquals(ssaGetResponseFirst.getStatus(), HttpStatus.SC_OK);
+        AssertBuilder.ssaValidate(ssaValidateResponseFirst).status(HttpStatus.SC_OK).check();
 
         // Ssa second validation
         SsaValidateResponse ssaGetResponseSecond = ssaValidateClient.execSsaValidate(jti);
         showClient(ssaValidateClient);
-        assertNotNull(ssaGetResponseSecond, "Response is null");
-        assertEquals(ssaGetResponseSecond.getStatus(), 422);
+        AssertBuilder.ssaValidate(ssaGetResponseSecond).status(HttpStatus.SC_BAD_REQUEST)
+                .errorType(SsaErrorResponseType.INVALID_JTI).check();
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
@@ -86,22 +84,20 @@ public class SsaValidateTest extends BaseTest {
 
         // Ssa first validation
         SsaValidateClient ssaValidateClient = new SsaValidateClient(ssaEndpoint);
-        SsaValidateResponse ssaGetResponseFirst = ssaValidateClient.execSsaValidate(jti);
+        SsaValidateResponse ssaValidateResponseFirst = ssaValidateClient.execSsaValidate(jti);
         showClient(ssaValidateClient);
-        assertNotNull(ssaGetResponseFirst, "Response is null");
-        assertEquals(ssaGetResponseFirst.getStatus(), HttpStatus.SC_OK);
+        AssertBuilder.ssaValidate(ssaValidateResponseFirst).status(HttpStatus.SC_OK).check();
 
         // Ssa second validation
-        SsaValidateResponse ssaGetResponseSecond = ssaValidateClient.execSsaValidate(jti);
+        SsaValidateResponse ssaValidateResponseSecond = ssaValidateClient.execSsaValidate(jti);
         showClient(ssaValidateClient);
-        assertNotNull(ssaGetResponseSecond, "Response is null");
-        assertEquals(ssaGetResponseSecond.getStatus(), HttpStatus.SC_OK);
+        AssertBuilder.ssaValidate(ssaValidateResponseSecond).status(HttpStatus.SC_OK).check();
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void validateWithNotFoundSsaResponse422(final String redirectUris, final String sectorIdentifierUri) {
-        showTitle("validateWithNotFoundSsaResponse422");
+    public void validateWithNotFoundSsaResponse400(final String redirectUris, final String sectorIdentifierUri) {
+        showTitle("validateWithNotFoundSsaResponse400");
         List<String> scopes = Collections.singletonList(SsaScopeType.SSA_ADMIN.getValue());
 
         // Register client
@@ -118,15 +114,15 @@ public class SsaValidateTest extends BaseTest {
 
         // Ssa validation
         SsaValidateClient ssaValidateClient = new SsaValidateClient(ssaEndpoint);
-        SsaValidateResponse ssaGetResponse = ssaValidateClient.execSsaValidate(jti);
-        assertNotNull(ssaGetResponse, "Response is null");
-        assertEquals(ssaGetResponse.getStatus(), 422);
+        SsaValidateResponse ssaValidateResponse = ssaValidateClient.execSsaValidate(jti);
+        AssertBuilder.ssaValidate(ssaValidateResponse).status(HttpStatus.SC_BAD_REQUEST)
+                .errorType(SsaErrorResponseType.INVALID_JTI).check();
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void validateWithExpiredSsaResponse422(final String redirectUris, final String sectorIdentifierUri) {
-        showTitle("validateWithExpiredSsaResponse422");
+    public void validateWithExpiredSsaResponse400(final String redirectUris, final String sectorIdentifierUri) {
+        showTitle("validateWithExpiredSsaResponse400");
         List<String> scopes = Collections.singletonList(SsaScopeType.SSA_ADMIN.getValue());
 
         // Register client
@@ -147,8 +143,8 @@ public class SsaValidateTest extends BaseTest {
 
         // Ssa validation
         SsaValidateClient ssaValidateClient = new SsaValidateClient(ssaEndpoint);
-        SsaValidateResponse ssaGetResponse = ssaValidateClient.execSsaValidate(jti);
-        assertNotNull(ssaGetResponse, "Response is null");
-        assertEquals(ssaGetResponse.getStatus(), 422);
+        SsaValidateResponse ssaValidateResponse = ssaValidateClient.execSsaValidate(jti);
+        AssertBuilder.ssaValidate(ssaValidateResponse).status(HttpStatus.SC_BAD_REQUEST)
+                .errorType(SsaErrorResponseType.INVALID_JTI).check();
     }
 }

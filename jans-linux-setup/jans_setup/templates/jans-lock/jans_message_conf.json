@@ -9,6 +9,6 @@
     "messageSleepThreadTime": 200
   },
   "redisConfiguration": {
-    "servers": "localhost:6379"
+    "servers": "%(lock_redis_host)s:%(lock_redis_port)s"
   }
 }
