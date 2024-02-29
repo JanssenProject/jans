@@ -4421,29 +4421,6 @@ paths:
           $ref: '#/components/responses/UnauthorizedSSA'
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
-    head:
-      tags:
-        - SSA
-      summary: Validate SSA
-      description: |-
-        # Validates that a given SSA `jti` exists and is valid
-        ----
-        
-        This endpoint does not have any security, it is an open endpoint.
-      parameters:
-        - schema:
-            type: string
-          in: header
-          name: jti
-          description: Unique Identifier
-          required: true
-      responses:
-        200:
-          description: The API returns `200` status code, when token is valid.
-        422:
-          description: Not found.
-        500:
-          $ref: '#/components/responses/InternalServerErrorSSA'
     delete:
       tags:
         - SSA
@@ -4488,6 +4465,40 @@ paths:
           description: Not Acceptable. Check the query params. (When `jti` or `org_id` is not sent in the query param)
         422:
           description: Not found.
+        500:
+          $ref: '#/components/responses/InternalServerErrorSSA'
+
+  /ssa/validation:
+    post:
+      tags:
+        - SSA
+      summary: Validate SSA
+      description: |-
+        # Validates that a given SSA `jti` exists and is valid
+        ----
+
+        This endpoint does not have any security, it is an open endpoint.
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: jti
+          description: Unique Identifier
+          required: true
+      responses:
+        200:
+          description: The API returns `200` status code, when token is valid.
+        400:
+          description: When jti does not exist, is invalid or state is in (expired, used or revoked),
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalida_jti:
+                  value:
+                    error: invalid_jti
+                    error_description: Invalid JTI or not exists.
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
 
