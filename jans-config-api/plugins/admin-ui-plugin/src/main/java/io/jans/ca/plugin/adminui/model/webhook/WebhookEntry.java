@@ -1,5 +1,6 @@
 package io.jans.ca.plugin.adminui.model.webhook;
 
+import io.jans.as.model.config.adminui.KeyValuePair;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
