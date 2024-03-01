@@ -7894,21 +7894,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
         selected:
           type: boolean
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string

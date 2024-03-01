@@ -330,6 +330,10 @@ paths:
           description: Not Found
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.write
@@ -532,6 +536,10 @@ paths:
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.write
@@ -881,6 +889,15 @@ components:
         status:
           type: string
         baseDn:
+          type: string
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
           type: string
     UserPagedResult:
       type: object
