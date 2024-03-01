@@ -7896,19 +7896,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        whitePagesCanView:
+        userCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8876,9 +8876,9 @@ components:
     LockMessageConfig:
       type: object
       properties:
-        enableIdTokenMessages:
+        enableTokenMessages:
           type: boolean
-        idTokenMessagesChannel:
+        tokenMessagesChannel:
           type: string
     SsaConfiguration:
       type: object

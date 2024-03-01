@@ -24,7 +24,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # ==============
 
 ENV CN_VERSION=1.1.0-SNAPSHOT
-ENV CN_BUILD_DATE='2024-01-23 17:42'
+ENV CN_BUILD_DATE='2024-02-29 08:53'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
@@ -40,7 +40,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=06b1a7a14e5f0b01d47eb5121d68bbf162905e66
+ENV JANS_SOURCE_VERSION=97aafe8efb77f1dca7080ed2b89284f3baf75c2e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -113,16 +113,17 @@ ENV CN_CONFIG_ADAPTER=consul \
 # ==========
 
 ENV CN_SECRET_ADAPTER=vault \
-    CN_SECRET_VAULT_SCHEME=http \
-    CN_SECRET_VAULT_HOST=localhost \
-    CN_SECRET_VAULT_PORT=8200 \
     CN_SECRET_VAULT_VERIFY=false \
     CN_SECRET_VAULT_ROLE_ID_FILE=/etc/certs/vault_role_id \
     CN_SECRET_VAULT_SECRET_ID_FILE=/etc/certs/vault_secret_id \
     CN_SECRET_VAULT_CERT_FILE=/etc/certs/vault_client.crt \
     CN_SECRET_VAULT_KEY_FILE=/etc/certs/vault_client.key \
     CN_SECRET_VAULT_CACERT_FILE=/etc/certs/vault_ca.crt \
-    CN_SECRET_VAULT_NAMESPACE=jans \
+    CN_SECRET_VAULT_NAMESPACE="" \
+    CN_SECRET_VAULT_ADDR=http://localhost:8200 \
+    CN_SECRET_VAULT_KV_PATH=secret \
+    CN_SECRET_VAULT_PREFIX=jans \
+    CN_SECRET_VAULT_APPROLE_PATH=approle \
     CN_SECRET_KUBERNETES_NAMESPACE=default \
     CN_SECRET_KUBERNETES_SECRET=jans \
     CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false

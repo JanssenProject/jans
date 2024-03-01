@@ -25,31 +25,51 @@ public class AppConfiguration implements Configuration {
 
 	private String baseDN;
 
+    @DocProperty(description = "List of token channel names", defaultValue = "jans_token")
 	private List<String> tokenChannels;
 
 	@DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
 	private Boolean disableJdkLogger = true;
 
+    @DocProperty(description = "Specify the logging level of loggers")
 	private String loggingLevel;
-	private String loggingLayout;
-	private String externalLoggerConfiguration;
 
+    @DocProperty(description = "Logging layout used for Jans Authorization Server loggers")
+    private String loggingLayout;
+
+    @DocProperty(description = "The path to the external log4j2 logging configuration")
+    private String externalLoggerConfiguration;
+
+    @DocProperty(description = "The interval for metric reporter in seconds")
 	private int metricReporterInterval;
+
+    @DocProperty(description = "The days to keep metric reported data")
 	private int metricReporterKeepDataDays;
+
+    @DocProperty(description = "Enable metric reporter")
 	private Boolean metricReporterEnabled;
 
 	// Period in seconds
+    @DocProperty(description = "Time interval for the Clean Service in seconds")
 	private int cleanServiceInterval;
 	
 	private OpaConfiguration opaConfiguration;
 
+    @DocProperty(description = "PDP for data")
 	private String messageConsumerType;
+    @DocProperty(description = "PDP for policies")
 	private String policyConsumerType;
 
+    @DocProperty(description = "Access token to access Json Uris")
 	private String policiesJsonUrisAccessToken;
+
+    @DocProperty(description = "List of Json Uris with policies")
 	private List<String> policiesJsonUris;
 
+    @DocProperty(description = "Access token to access Zip Uris")
 	private String policiesZipUrisAccessToken;
+
+    @DocProperty(description = "List of Zip Uris with policies")
 	private List<String> policiesZipUris;
 
 	public String getBaseDN() {

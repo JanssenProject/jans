@@ -1,1 +1,1 @@
-<% out.print("Jans Link "); %>
+<% out.print("Jans Lock "); %>

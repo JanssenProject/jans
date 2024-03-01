@@ -89,8 +89,8 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "ssa"
         ]),
         ("lockMessageConfig", {
-            "enableIdTokenMessages": False,
-            "idTokenMessagesChannel": "id_token"
+            "enableTokenMessages": False,
+            "tokenMessagesChannel": "jans_token"
         }),
         ("txTokenSigningAlgValuesSupported", [
             "HS256",
@@ -264,6 +264,16 @@ def transform_auth_dynamic_config_hook(conf, manager):
     ]:
         if new_key not in conf["agamaConfiguration"]:
             conf["agamaConfiguration"][new_key] = value
+            should_update = True
+
+    # lockMessageConfig attribute rename
+    for new_attr, old_attr, default_val in [
+        ("enableTokenMessages", "enableIdTokenMessages", False),
+        ("tokenMessagesChannel", "idTokenMessagesChannel", "jans_token"),
+    ]:
+        if new_attr not in conf["lockMessageConfig"]:
+            conf["lockMessageConfig"][new_attr] = default_val
+            conf["lockMessageConfig"].pop(old_attr, None)
             should_update = True
 
     # return the conf and flag to determine whether it needs update or not
