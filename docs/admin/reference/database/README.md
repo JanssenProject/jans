@@ -87,6 +87,23 @@ For example:
   ```shell
   CONNECTION_URI=new-mysql-uri
   ```
+For a Helm installation you can globally override hte URI in the `values.yaml`
+
+```yaml
+global:
+  usrEnvs:
+    normal:
+      CN_JAVA_OPTIONS: -Dconnection.uri=jdbc:postgresql://postgresql.sql.svc.cluster.local:5432/jansdb
+```
+
+Or for a specific component like the auth server:
+
+```yaml
+auth-server:
+  usrEnvs:
+    normal:
+      CN_JAVA_OPTIONS: -Dconnection.uri=jdbc:postgresql://postgresql.sql.svc.cluster.local:5432/jansdb
+```
 
 #### VM Installations
 
