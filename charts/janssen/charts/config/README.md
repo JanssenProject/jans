@@ -73,6 +73,16 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbTimezone | string | `"UTC"` | SQL database timezone. |
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected in the secrets. |
+| configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
+| configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |
+| configmap.cnVaultKvPath | string | `"secret"` | Path to Vault KV secrets engine. |
+| configmap.cnVaultNamespace | string | `""` | Vault namespace used to access the secrets. |
+| configmap.cnVaultPrefix | string | `"jans"` | Base prefix name used to access secrets. |
+| configmap.cnVaultRoleId | string | `""` | Vault AppRole RoleID. |
+| configmap.cnVaultRoleIdFile | string | `"/etc/certs/vault_role_id"` | Path to file contains Vault AppRole role ID. |
+| configmap.cnVaultSecretId | string | `""` | Vault AppRole SecretID. |
+| configmap.cnVaultSecretIdFile | string | `"/etc/certs/vault_secret_id"` | Path to file contains Vault AppRole secret ID. |
+| configmap.cnVaultVerify | bool | `false` | Verify connection to Vault. |
 | configmap.containerMetadataName | string | `"kubernetes"` |  |
 | configmap.kcDbPassword | string | `"Test1234#"` | Password for Keycloak database access |
 | configmap.kcDbSchema | string | `"keycloak"` | Keycloak database schema name (note that PostgreSQL may using "public" schema). |

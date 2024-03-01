@@ -111,7 +111,7 @@ public class GrantService {
             saveInCache(token);
         }
 
-        if (TokenType.ID_TOKEN.getValue().equals(token.getTokenType())) {
+        if (TokenType.ACCESS_TOKEN.getValue().equals(token.getTokenType())) {
         	publishIdTokenLockMessage(token, "add");
         }
     }
@@ -126,7 +126,7 @@ public class GrantService {
         persistenceEntryManager.remove(token);
         log.trace("Removed token from LDAP, code: {}", token.getTokenCode());
 
-        if (TokenType.ID_TOKEN == token.getTokenTypeEnum()) {
+        if (TokenType.ACCESS_TOKEN == token.getTokenTypeEnum()) {
         	publishIdTokenLockMessage(token, "del");
         }
     }
@@ -137,9 +137,9 @@ public class GrantService {
         	return;
         }
         
-        if (Boolean.TRUE.equals(lockMessageConfig.getEnableIdTokenMessages()) && StringHelper.isNotEmpty(lockMessageConfig.getIdTokenMessagesChannel())) {
-        	String jsonMessage = String.format("{\"tknTyp\" : \"%s\", \"tknCde\" : \"%s\", \"tknOp\" : \"%s\"}", token.getTokenType(), token.getTokenCode(), opearation);
-            messageService.publish(lockMessageConfig.getIdTokenMessagesChannel(), jsonMessage);
+        if (Boolean.TRUE.equals(lockMessageConfig.getEnableTokenMessages()) && StringHelper.isNotEmpty(lockMessageConfig.getTokenMessagesChannel())) {
+        	String jsonMessage = String.format("{\"tknTyp\" : \"%s\", \"tknId\" : \"%s\", \"tknOp\" : \"%s\"}", token.getTokenType(), token.getTokenCode(), opearation);
+            messageService.publish(lockMessageConfig.getTokenMessagesChannel(), jsonMessage);
         }
 	}
 

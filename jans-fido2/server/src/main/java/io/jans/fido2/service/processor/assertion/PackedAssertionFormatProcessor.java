@@ -20,6 +20,8 @@ package io.jans.fido2.service.processor.assertion;
 
 import java.security.PublicKey;
 
+import io.jans.fido2.service.util.DigestUtilService;
+import io.jans.fido2.service.util.HexUtilService;
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -75,6 +77,12 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
     @Inject
     private Base64Service base64Service;
 
+    @Inject
+    private DigestUtilService digestUtilService;
+
+    @Inject
+    private HexUtilService hexUtilService;
+
     @Override
     public AttestationFormat getAttestationFormat() {
         return AttestationFormat.packed;
@@ -89,7 +97,7 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
         log.debug("User verification option {}", authenticationEntity.getUserVerificationOption());
         userVerificationVerifier.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(), authData);
 
-        byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
+        byte[] clientDataHash = digestUtilService.sha256Digest(base64Service.urlDecode(clientDataJson));
 
         try {
             int counter = authenticatorDataParser.parseCounter(authData.getCounters());
@@ -99,12 +107,12 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
             JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
             PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
 
-            log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
-            log.debug("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
-            // apple algorithm = -7
+            log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode);
+            log.debug("EC Public key hex {}", hexUtilService.encodeHexString(publicKey.getEncoded()));
+            // apple algorithm = -7preferred
             // windows hello algorithm is -257
             log.debug("registration.getSignatureAlgorithm(): "+registration.getSignatureAlgorithm());
-            log.debug("Platform authenticator: "+ String.valueOf(registration.getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()) ? -7 : registration.getSignatureAlgorithm()));
+            log.debug("Platform authenticator: "+ (registration.getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()) ? -7 : registration.getSignatureAlgorithm()));
             authenticatorDataVerifier.verifyAssertionSignature(authData, clientDataHash, signature, publicKey, registration.getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()) ? -7 : registration.getSignatureAlgorithm());
            
         } catch (Fido2CompromisedDevice ex) {

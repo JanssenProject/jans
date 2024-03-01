@@ -296,7 +296,11 @@ public class ClientsResource extends ConfigBaseResource {
     private List<Client> getClients(List<Client> clients) throws EncryptionException {
         if (clients != null && !clients.isEmpty()) {
             for (Client client : clients) {
-                client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+                try {
+                    client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+                } catch (Exception ex) {
+                    logger.error(" Error while decrypting ClientSecret for '" + client.getClientId() + "', exception is - ",ex);
+                }
             }
         }
         return clients;
