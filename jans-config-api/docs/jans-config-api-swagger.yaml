@@ -7906,9 +7906,9 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9499,10 +9499,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:

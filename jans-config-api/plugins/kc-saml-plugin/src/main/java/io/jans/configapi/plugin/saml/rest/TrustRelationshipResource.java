@@ -47,7 +47,6 @@ public class TrustRelationshipResource extends BaseResource {
     private static final String SAML_TRUST_RELATIONSHIP_CHECK_STR = "Trust Relationship identified by '";
     private static final String NAME_CONFLICT = "NAME_CONFLICT";
     private static final String NAME_CONFLICT_MSG = "Trust Relationship with same name `%s` already exists!";
-    private static final String OBJECT_NULL_MSG = "`%s` should not be null!";
     private static final String DATA_NULL_CHK = "RESOURCE_IS_NULL";
     private static final String DATA_NULL_MSG = "`%s` should not be null!";
     
@@ -259,31 +258,44 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.ok().build();
     }
     
-    private void validateSpMetaDataSourceType (TrustRelationship trustRelationship, InputStream metaDataFile) throws IOException {
-        logger.info("Validate SP MetaDataSourceType trustRelationship:{}, metaDataFile:{}", trustRelationship, metaDataFile);
-        
+    private void validateSpMetaDataSourceType(TrustRelationship trustRelationship, InputStream metaDataFile)
+            throws IOException {
+        logger.info("Validate SP MetaDataSourceType trustRelationship:{}, metaDataFile:{}", trustRelationship,
+                metaDataFile);
+
         checkResourceNotNull(trustRelationship.getSpMetaDataSourceType(), "SP MetaData Source Type");
+
+        logger.info("Validate trustRelationship.getSpMetaDataSourceType():{}",
+                trustRelationship.getSpMetaDataSourceType());
         
-        
-        logger.info("Validate trustRelationship.getSpMetaDataSourceType():{}", trustRelationship.getSpMetaDataSourceType());
-        if(trustRelationship.getSpMetaDataSourceType().equals(MetadataSourceType.FILE) && (metaDataFile==null || metaDataFile.available()<=0) ){
-            throwBadRequestException(DATA_NULL_CHK,String.format(DATA_NULL_MSG, "SP MetaData File"));
-   
-        }else if(trustRelationship.getSpMetaDataSourceType().equals(MetadataSourceType.MANUAL)){
-            
-            if(metaDataFile!=null && metaDataFile.available()>0) {
+        if (trustRelationship.getSpMetaDataSourceType().equals(MetadataSourceType.FILE)) {
+
+            if (metaDataFile == null || metaDataFile.available() <= 0) {
+                throwBadRequestException(DATA_NULL_CHK, String.format(DATA_NULL_MSG, "SP MetaData File"));
+            }
+
+            // Since SP Metadata source is File set SamlMetadata manual elements to null
+            trustRelationship.setSamlMetadata(null);
+
+        } else if (trustRelationship.getSpMetaDataSourceType().equals(MetadataSourceType.MANUAL)) {
+
+            if (metaDataFile != null && metaDataFile.available() > 0) {
                 throwBadRequestException("SP MetaData File should not be provided!");
             }
-            
-            checkResourceNotNull(trustRelationship.getSamlMetadata(), "SamlMetadata elements !");
-            checkNotNull(trustRelationship.getSamlMetadata().getEntityId(), "SamlMetadata element - 'EntityId'");
-            checkNotNull(trustRelationship.getSamlMetadata().getNameIDPolicyFormat(), "SamlMetadata element - 'NameIDPolicyFormat'");
-            checkNotNull(trustRelationship.getSamlMetadata().getSingleLogoutServiceUrl(), "SamlMetadata element - 'SingleLogoutServiceUrl'");
-            if(StringUtils.isBlank(trustRelationship.getSamlMetadata().getJansAssertionConsumerServiceGetURL()) &&  (StringUtils.isBlank(trustRelationship.getSamlMetadata().getJansAssertionConsumerServiceGetURL())) ) {
+
+            checkResourceNotNull(trustRelationship.getSamlMetadata(), "'SamlMetadata manual elements'");
+            checkNotNull(trustRelationship.getSamlMetadata().getEntityId(), "'EntityId'");
+            checkNotNull(trustRelationship.getSamlMetadata().getNameIDPolicyFormat(),
+                    "'NameIDPolicyFormat'");
+            checkNotNull(trustRelationship.getSamlMetadata().getSingleLogoutServiceUrl(),
+                    "'SingleLogoutServiceUrl'");
+            if (StringUtils.isBlank(trustRelationship.getSamlMetadata().getJansAssertionConsumerServiceGetURL())
+                    && (StringUtils
+                            .isBlank(trustRelationship.getSamlMetadata().getJansAssertionConsumerServiceGetURL()))) {
                 throwBadRequestException("Either of AssertionConsumerService GET or POST URL should be provided!");
-            }           
+            }
         }
-               
+
     }
 
 }
