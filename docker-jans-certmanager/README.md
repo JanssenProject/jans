@@ -148,21 +148,6 @@ Supported services:
     - `sig-keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
     - `enc-keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
 
-3. `ldap`
-
-    Re-generate:
-
-    - `/etc/certs/opendj.crt`
-    - `/etc/certs/opendj.key`
-    - `/etc/certs/opendj.pem`
-    - `/etc/certs/opendj.pkcs12`
-
-    Options:
-
-    - `subj-alt-name`: Subject Alternative Name (SAN) for certificate (default to `localhost`)
-    - `valid-to`: Validity length in days (default to `365`)
-
-
 #### prune
 
 Delete expired crypto keys (if any) related to the service.
