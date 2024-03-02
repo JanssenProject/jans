@@ -50,6 +50,15 @@ def _transform_lock_dynamic_config(conf):
             conf["opaConfiguration"][missing_key] = value
             should_update = True
 
+    # channel rename
+    if "jans_token" not in conf["tokenChannels"]:
+        conf["tokenChannels"].append("jans_token")
+
+        # remove old channel
+        with contextlib.suppress(ValueError):
+            conf["tokenChannels"].remove("id_token")
+        should_update = True
+
     # return modified config (if any) and update flag
     return conf, should_update
 
