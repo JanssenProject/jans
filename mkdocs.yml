@@ -8754,7 +8754,7 @@ nav:
     - Keycloak Synch: admin/link/keycloak-synch.md
   - Lock Guide:
       - admin/lock/README.md
-      - Lock Installation: admin/lock/lock_setup.md
+      - Lock Installation: admin/lock/lock_installation.md
       - Auth Server Configuration: admin/lock/lock_auth_server_config.md
       - Lock Client Configuration: admin/lock/lock_client_config.md
       - Implement Lock PDP Plugin: admin/lock/lock_pdp_plugin.md
