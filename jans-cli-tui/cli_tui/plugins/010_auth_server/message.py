@@ -4,20 +4,17 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign
 from prompt_toolkit.widgets import Button, Frame, RadioList
-from prompt_toolkit.layout import ScrollablePane
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils
 from utils.static import cli_style, common_strings
 from utils.utils import common_data
-from wui_components.widget_collections import get_logging_level_widget
 
 class Message(DialogUtils):
     def __init__(self) -> None:
 
         self.first_enter = False
         self.data = {}
-        self.lock_config_data = {}
         self.message_provider_container = VSplit([])
         self.working_container = VSplit([])
         self.main_container = DynamicContainer(lambda: self.working_container)
@@ -37,15 +34,10 @@ class Message(DialogUtils):
                     jans_help="Message provider Type",
                     on_selection_changed=self.display_message_provider_type,
                     style=cli_style.radio_button)
-            self.working_container = ScrollablePane(
-                    content = HSplit([
+            self.working_container = HSplit([
                             Frame(self.message_provider_type_widget),
                             DynamicContainer(lambda: self.message_provider_container)
-                            ]),
-                    height=D(),
-                    display_arrows=False,
-                    show_scrollbar=True
-                    )
+                            ])
 
         self.first_enter = True
 
@@ -90,7 +82,6 @@ class Message(DialogUtils):
 
         asyncio.ensure_future(provider_type_coroutine())
 
-
         # save prpvider data
 
         async def provider_coroutine(pcli_args):
@@ -106,15 +97,11 @@ class Message(DialogUtils):
             data = {}
             for widget in self.provider_widgets:
                 item_data = self.get_item_data(widget)
-                if item_data:
-                    data[item_data['key']] = item_data['value']
+                data[item_data['key']] = item_data['value']
+
             cli_args = {'operation_id': 'put-config-message-' + provider_type.lower(), 'data': data}
 
-
             asyncio.ensure_future(provider_coroutine(cli_args))
-
-
-
 
 
 
