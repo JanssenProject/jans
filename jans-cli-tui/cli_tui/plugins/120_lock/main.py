@@ -1,22 +1,15 @@
 import copy
 import asyncio
-import importlib
 
-from collections import OrderedDict
 from typing import Any, Optional
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
     VSplit, Window, HorizontalAlign
 
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Label, Box, Dialog
+from prompt_toolkit.widgets import Button
 from prompt_toolkit.application import Application
-from wui_components.jans_nav_bar import JansNavBar
-from wui_components.jans_drop_down import DropDownWidget
-from wui_components.jans_vetrical_nav import JansVerticalNav
-from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.jans_label_widget import JansLabelWidget
-from wui_components.widget_collections import get_ldap_config_widgets, get_data_for_ldap_widgets, get_logging_level_widget
+from wui_components.widget_collections import get_logging_level_widget
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, common_data
