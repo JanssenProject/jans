@@ -65,6 +65,22 @@ const chromeConfig = merge(commonConfig, {
                 to: path.resolve('dist/chrome')
             },
             {
+                from: path.resolve('src/static/tarpDocs1.png'),
+                to: path.resolve('dist/chrome')
+            },
+            {
+                from: path.resolve('src/static/tarpDocs2.png'),
+                to: path.resolve('dist/chrome')
+            },
+            {
+                from: path.resolve('src/static/tarpDocs3.png'),
+                to: path.resolve('dist/chrome')
+            },
+            {
+                from: path.resolve('src/static/tarpDocs4.png'),
+                to: path.resolve('dist/chrome')
+            },
+            {
                 from: path.resolve('src/static/chrome'),
                 to: path.resolve('dist/chrome')
             }]
@@ -90,6 +106,22 @@ const firefoxConfig = merge(commonConfig, {
             patterns: [{
                 from: path.resolve('src/static/icon.png'),
                 to: path.resolve('dist/firefox')
+            },
+            {
+                from: path.resolve('src/static/tarpDocs1.png'),
+                to: path.resolve('dist/chrome')
+            },
+            {
+                from: path.resolve('src/static/tarpDocs2.png'),
+                to: path.resolve('dist/chrome')
+            },
+            {
+                from: path.resolve('src/static/tarpDocs3.png'),
+                to: path.resolve('dist/chrome')
+            },
+            {
+                from: path.resolve('src/static/tarpDocs4.png'),
+                to: path.resolve('dist/chrome')
             },
             {
                 from: path.resolve('src/static/firefox'),
