@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.16
+ARG JETTY_VERSION=11.0.20
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.1.0-SNAPSHOT
-ENV CN_BUILD_DATE='2024-02-29 12:55'
+ENV CN_BUILD_DATE='2024-03-01 10:18'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
