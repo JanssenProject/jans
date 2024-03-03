@@ -911,6 +911,8 @@ global:
     ingress:
       # -- Enable endpoint /.well-known/fido2-configuration
       fido2ConfigEnabled: false
+      # -- Enable endpoint /jans-fido2
+      fido2Enabled: false
   # -- GCE storage kind if using Google disks
   gcePdStorageType: pd-standard
   # -- Boolean flag to enable mapping global.lbIp  to global.fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.
