@@ -1,6 +1,8 @@
 name: Build and Publish Releases to Hub
 
 on:
+  schedule:
+    - cron: "0 23 * * *"
   push:
     tags:
       - "*"
