@@ -7,6 +7,7 @@ on:
     branches:
       # below branch is triggered by jenkins which triggers dev image
       - update-source-build-date
+      - main
     paths:
       - "docker-jans-**/**"
       - "!**.md"
