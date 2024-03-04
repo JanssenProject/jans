@@ -105,9 +105,9 @@ public class DBDocumentService implements Serializable {
 	 */
 	public String getDnForDocument(String inum) throws Exception {
 		if (StringHelper.isEmpty(inum)) {
-			return String.format("ou=document,%s", "o=gluu");
+			return String.format("ou=document,%s", "o=jans");
 		}
-		return String.format("inum=%s,ou=document,%s", inum, "o=gluu");
+		return String.format("inum=%s,ou=document,%s", inum, "o=jans");
 	}
 
 	/**
