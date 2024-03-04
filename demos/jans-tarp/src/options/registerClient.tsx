@@ -9,6 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { ILooseObject } from './ILooseObject';
+import LinearProgress from '@mui/material/LinearProgress';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -23,9 +24,10 @@ export default function RegisterClient({ isOpen, handleDialog }) {
   const [selectedScopes, setSelectedScopes] = React.useState([])
   const [expireAt, setExpireAt] = React.useState(null);
   const [issuer, setIssuer] = React.useState(null);
-  const [scopeOptions, setScopeOptions] = React.useState([{name: "openid"}]);
+  const [scopeOptions, setScopeOptions] = React.useState([{ name: "openid" }]);
   const [issuerError, setIssuerError] = React.useState("")
   const [errorMessage, setErrorMessage] = React.useState("")
+  const [loading, setLoading] = React.useState(false);
 
   const REGISTRATION_ERROR = 'Error in registration. Check web console for logs.'
   const filter = createFilterOptions();
@@ -44,17 +46,22 @@ export default function RegisterClient({ isOpen, handleDialog }) {
   };
 
   const handleOpen = () => {
+    setIssuerError('');
+    setErrorMessage('');
+    setLoading(false);
     handleDialog(true)
     setOpen(true);
   };
 
   const validateIssuer = async (e) => {
+    
     setIssuerError('');
     let issuer = e.target.value;
     if (issuer.length === 0) {
-      setIssuerError('Invalid input. Either enter correct Issuer or OpenID Configuration URL.');
       e.target.value = '';
+      return;
     }
+    setLoading(true);
     const openIdConfigurationURL = generateOpenIdConfigurationURL(issuer);
     try {
       const opConfiguration = await getOpenidConfiguration(openIdConfigurationURL);
@@ -68,6 +75,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
       setIssuerError('Invalid input. Either enter correct Issuer or OpenID Configuration URL.');
       e.target.value = '';
     }
+    setLoading(false);
   };
 
   const generateOpenIdConfigurationURL = (issuer) => {
@@ -118,6 +126,11 @@ export default function RegisterClient({ isOpen, handleDialog }) {
 
   const registerClient = async () => {
     try {
+      setLoading(true);
+      if (issuer === 0) {
+        setIssuerError('Issuer cannot be left blank. Either enter correct Issuer or OpenID Configuration URL.');
+        return;
+      }
       const opConfigurationEndpoint = issuer;
       const opConfigurationEndpointURL = new URL(opConfigurationEndpoint);
       const issuerUrl = opConfigurationEndpointURL.protocol + '//' + opConfigurationEndpointURL.hostname;
@@ -142,7 +155,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
           client_name: 'jans-tarp-' + uuidv4(),
           token_endpoint_auth_method: 'client_secret_basic'
         };
-        
+
         if (!!expireAt) {
           registerObj.lifetime = ((expireAt.valueOf() - moment().valueOf()) / 1000);
         }
@@ -154,8 +167,8 @@ export default function RegisterClient({ isOpen, handleDialog }) {
             let clientArr = []
             if (!!result.oidcClients) {
               clientArr = result.oidcClients;
-            } 
-         
+            }
+
             clientArr.push({
               'opHost': issuerUrl,
               'clientId': registrationResp.data.client_id,
@@ -180,21 +193,18 @@ export default function RegisterClient({ isOpen, handleDialog }) {
           console.log("oidcClient is set for client_id: " + registrationResp.data.client_id);
           setErrorMessage('Regstration successful!')
           handleClose();
-          //return await { result: "success", message: "Regstration successful!" };
 
         } else {
           setErrorMessage(REGISTRATION_ERROR)
-          //return await { result: "error", message: REGISTRATION_ERROR };
         }
       } else {
         setErrorMessage('Error in fetching Openid configuration!')
-        //return await { result: "error", message: "Error in fetching Openid configuration!" };
       }
     } catch (err) {
       console.error(err)
       setErrorMessage(REGISTRATION_ERROR)
-      //return { result: "error", message: REGISTRATION_ERROR };
     }
+    setLoading(false);
   }
 
   return (
@@ -210,6 +220,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
         }}
       >
         <DialogTitle>Register OIDC Client</DialogTitle>
+        {loading ? <LinearProgress color="success" /> : ''}
         <DialogContent>
           <DialogContentText>
             Submit below details to create a new OIDC client.
@@ -224,7 +235,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
             autoComplete="off"
           >
             {(!!errorMessage || errorMessage !== '') ?
-            <Alert severity="error">{errorMessage}</Alert> : ''
+              <Alert severity="error">{errorMessage}</Alert> : ''
             }
             <TextField
               error={issuerError.length !== 0}
@@ -244,7 +255,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
             />
             <LocalizationProvider dateAdapter={AdapterMoment}>
               <DemoContainer components={['DateTimePicker']}>
-                <DateTimePicker  label="Client Expiry Date"
+                <DateTimePicker label="Client Expiry Date"
                   disablePast
                   onChange={(newValue) => setExpireAt(newValue)}
                 />

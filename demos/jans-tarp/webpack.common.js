@@ -54,36 +54,37 @@ const commonConfig = {
         }
     }
 }
+const assetArr = [{
+        from: path.resolve('src/static/icon.png'),
+        to: path.resolve('dist/chrome')
+    },
+    {
+        from: path.resolve('src/static/tarpDocs1.png'),
+        to: path.resolve('dist/chrome')
+    },
+    {
+        from: path.resolve('src/static/tarpDocs2.png'),
+        to: path.resolve('dist/chrome')
+    },
+    {
+        from: path.resolve('src/static/tarpDocs3.png'),
+        to: path.resolve('dist/chrome')
+    },
+    {
+        from: path.resolve('src/static/tarpDocs4.png'),
+        to: path.resolve('dist/chrome')
+    },
+    {
+        from: path.resolve('src/static/chrome'),
+        to: path.resolve('dist/chrome')
+    }];
 const chromeConfig = merge(commonConfig, {
     "plugins": [
         new CleanWebpackPlugin({
             cleanStaleWebpackAssets: false
         }),
         new CopyPlugin({
-            patterns: [{
-                from: path.resolve('src/static/icon.png'),
-                to: path.resolve('dist/chrome')
-            },
-            {
-                from: path.resolve('src/static/tarpDocs1.png'),
-                to: path.resolve('dist/chrome')
-            },
-            {
-                from: path.resolve('src/static/tarpDocs2.png'),
-                to: path.resolve('dist/chrome')
-            },
-            {
-                from: path.resolve('src/static/tarpDocs3.png'),
-                to: path.resolve('dist/chrome')
-            },
-            {
-                from: path.resolve('src/static/tarpDocs4.png'),
-                to: path.resolve('dist/chrome')
-            },
-            {
-                from: path.resolve('src/static/chrome'),
-                to: path.resolve('dist/chrome')
-            }]
+            patterns: assetArr
         }),
         ...getHtmlPlugins([
             'popup',
@@ -103,30 +104,7 @@ const firefoxConfig = merge(commonConfig, {
             cleanStaleWebpackAssets: false
         }),
         new CopyPlugin({
-            patterns: [{
-                from: path.resolve('src/static/icon.png'),
-                to: path.resolve('dist/firefox')
-            },
-            {
-                from: path.resolve('src/static/tarpDocs1.png'),
-                to: path.resolve('dist/chrome')
-            },
-            {
-                from: path.resolve('src/static/tarpDocs2.png'),
-                to: path.resolve('dist/chrome')
-            },
-            {
-                from: path.resolve('src/static/tarpDocs3.png'),
-                to: path.resolve('dist/chrome')
-            },
-            {
-                from: path.resolve('src/static/tarpDocs4.png'),
-                to: path.resolve('dist/chrome')
-            },
-            {
-                from: path.resolve('src/static/firefox'),
-                to: path.resolve('dist/firefox')
-            }]
+            patterns: assetArr
         }),
         ...getHtmlPlugins([
             'popup',
