@@ -91,10 +91,10 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		try {
 			try {
 				oxDocument.setInum(documentService.generateInumForNewDocument());	
-				String dn = "inum="+ oxDocument.getInum() +",ou=document,o=gluu";
+				String dn = "inum="+ oxDocument.getInum() +",ou=document,o=jans";
 				oxDocument.setDn(dn);
 				oxDocument.setDescription(name);
-				oxDocument.setJansEnabled("true");
+				oxDocument.setJansEnabled(true);
 				oxDocument.setJansModuleProperty(moduleList);	  
 				documentService.addDocument(oxDocument);
 				return true;
@@ -118,10 +118,10 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			oxDocument.setDocument(documentContent);
 			String inum = documentService.generateInumForNewDocument();
 			oxDocument.setInum(inum);	
-			String dn = "inum="+ oxDocument.getInum() +",ou=document,o=gluu";
+			String dn = "inum="+ oxDocument.getInum() +",ou=document,o=jans";
 			oxDocument.setDn(dn);
 			oxDocument.setDescription(name);
-			oxDocument.setJansEnabled("true");
+			oxDocument.setJansEnabled(true);
 			oxDocument.setJansModuleProperty(moduleList);
 			documentService.addDocument(oxDocument);
 			return true;
