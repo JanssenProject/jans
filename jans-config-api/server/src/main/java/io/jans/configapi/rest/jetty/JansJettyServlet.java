@@ -6,13 +6,16 @@
 
 package io.jans.configapi.rest.jetty;
 
+import jakarta.servlet.http.HttpServlet;
+import org.eclipse.jetty.servlet.*;
+
 
 import java.io.*;
 import java.util.*;
 import jakarta.ws.rs.ApplicationPath;
 
 import org.slf4j.*;
-public class JansJettyUtil {
+public class JansJettyServlet extends HttpServlet {
     
 }
 /*public class JansJettyUtil extends AppLifeCycle.Binding  {
