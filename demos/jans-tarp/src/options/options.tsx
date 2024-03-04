@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import './options.css'
 import Header from './header'
-import RegisterForm from './registerForm'
+import OIDCClients from './oidcClients'
 import UserDetails from './userDetails'
-import OIDCClientDetails from './oidcClientDetails'
 
 const Options = () => {
 
   const [optionType, setOptionType] = useState("");
   const [data, setdata] = useState({});
 
-  chrome.storage.local.get(["oidcClient"], (oidcClientResult) => {
-    if (!isEmpty(oidcClientResult) && Object.keys(oidcClientResult).length !== 0) {
+  chrome.storage.local.get(["oidcClients"], (oidcClientResults) => {
+
+    if (!isEmpty(oidcClientResults) && Object.keys(oidcClientResults).length !== 0) {
 
       chrome.storage.local.get(["loginDetails"], (loginDetailsResult) => {
         if (!isEmpty(loginDetailsResult) && Object.keys(loginDetailsResult).length !== 0) {
@@ -19,11 +19,11 @@ const Options = () => {
           setdata(loginDetailsResult);
         } else {
           setOptionType('oidcClientPage');
-          setdata(oidcClientResult);
+          setdata(oidcClientResults);
         }
       });
     } else {
-      setOptionType('clientRegistrationPage');
+      setOptionType('oidcClientPage');
       setdata({});
     }
   });
@@ -34,10 +34,8 @@ const Options = () => {
 
   function renderPage({ optionType, data }) {
     switch (optionType) {
-      case 'clientRegistrationPage':
-        return <RegisterForm data={data}/>
       case 'oidcClientPage':
-        return <OIDCClientDetails data={data.oidcClient} />
+        return <OIDCClients data={data.oidcClients}/>
       case 'loginPage':
         return <UserDetails data={data.loginDetails} />
       default:

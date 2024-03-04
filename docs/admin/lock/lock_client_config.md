@@ -1,3 +1,10 @@
+---
+tags:
+ - administration
+ - lock
+ - opa
+---
+
 ## Lock Client
 
 Lock client is Jans Message API consumer. This is middle point of join all Lock parts together. This part can be deployed as server or service. It subscribes to specified channels, process messages, send data to OPA or other PDP, send policies to OPA or other PDP and allows to customize data which server send to PDP with custom scripts.
