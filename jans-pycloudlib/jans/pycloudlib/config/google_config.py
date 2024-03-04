@@ -60,6 +60,9 @@ class GoogleConfig(BaseConfig):
         # secrets key value by default
         self.google_secret_name = f"{prefix}-configuration"
 
+        # allowed number of versions
+        self.max_versions_num = 5
+
     @cached_property
     def client(self) -> secretmanager.SecretManagerServiceClient:
         """Create the Secret Manager client."""
@@ -134,8 +137,7 @@ class GoogleConfig(BaseConfig):
 
         logger.info(f'Adding key {key} to google secret manager')
         logger.info(f'Size of secret payload : {sys.getsizeof(safe_value(all_))} bytes')
-        secret_version_bool = self.add_secret_version(safe_value(all_))
-        return secret_version_bool
+        return self.add_secret_version(safe_value(all_))
 
     def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Push a full dictionary to secrets.
@@ -156,8 +158,7 @@ class GoogleConfig(BaseConfig):
         self.create_secret()
 
         logger.info(f'Size of secret payload : {sys.getsizeof(safe_value(all_))} bytes')
-        secret_version_bool = self.add_secret_version(safe_value(all_))
-        return secret_version_bool
+        return self.add_secret_version(safe_value(all_))
 
     def create_secret(self) -> None:
         """Create a new secret with the given name.
@@ -203,4 +204,28 @@ class GoogleConfig(BaseConfig):
         )
 
         logger.info("Added secret version: {}".format(response.name))
+        self._disable_old_versions(parent)
         return bool(response)
+
+    def _disable_old_versions(self, parent):
+        # list of version.state enum
+        #
+        # - STATE_UNSPECIFIED = 0
+        # - ENABLED = 1
+        # - DISABLED = 2
+        # - DESTROYED = 3
+        response = self.client.list_secret_versions(
+            request={"parent": parent, "filter": "state:ENABLED"},
+        )
+
+        # versions that need to be kept as enabled
+        enabled_versions = []
+
+        for version in response:
+            # keep version as enabled (default max. is set by `max_versions_num` attribute)
+            if len(enabled_versions) < self.max_versions_num and version.name not in enabled_versions:
+                enabled_versions.append(version.name)
+                continue
+
+            logger.info(f"Disabling old version {version.name=}, {version.state.name=}")
+            self.client.disable_secret_version(request={"name": version.name})

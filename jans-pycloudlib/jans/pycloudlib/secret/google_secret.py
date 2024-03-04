@@ -93,6 +93,9 @@ class GoogleSecret(BaseSecret):
         # iterable contains multipart secret names
         self.multiparts: list[str] = []
 
+        # allowed number of versions
+        self.max_versions_num = 5
+
     @cached_property
     def client(self) -> secretmanager.SecretManagerServiceClient:
         """Create the Secret Manager client."""
@@ -267,6 +270,7 @@ class GoogleSecret(BaseSecret):
                 request={"parent": parent, "payload": {"data": fragment}}
             )
             logger.info(f"Added secret version: {response.name}")
+            self._disable_old_versions(parent)
         return True
 
     def _prepare_secret_multipart(self, part: int) -> str:
@@ -330,3 +334,31 @@ class GoogleSecret(BaseSecret):
         except binascii.Error:
             data = json.loads(payload_str)
         return data
+
+    def _disable_old_versions(self, parent):
+        # parent = self.client.secret_path(self.project_id, self.google_secret_name)
+
+        # list of version.state enum
+        #
+        # - STATE_UNSPECIFIED = 0
+        # - ENABLED = 1
+        # - DISABLED = 2
+        # - DESTROYED = 3
+        response = self.client.list_secret_versions(
+            request={
+                "parent": parent,
+                "filter": "state:ENABLED"  # " AND name:secrets/{self.google_secret_name}",
+            },
+        )
+
+        # versions that need to be kept as enabled
+        enabled_versions = []
+
+        for version in response:
+            # keep version as enabled (default max. is set by `max_versions_num` attribute)
+            if len(enabled_versions) < self.max_versions_num and version.name not in enabled_versions:
+                enabled_versions.append(version.name)
+                continue
+
+            logger.info(f"Disabling old version {version.name=}, {version.state.name=}")
+            self.client.disable_secret_version(request={"name": version.name})
