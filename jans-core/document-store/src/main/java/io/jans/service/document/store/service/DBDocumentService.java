@@ -45,6 +45,7 @@ public class DBDocumentService implements Serializable {
 	public static final String inum = "inum";
 	public static final String displayName = "displayName";
 	public static final String description = "description";
+	public static final String alias = "jansAlias";
 
 	@PostConstruct
 	public void init() {
@@ -152,7 +153,9 @@ public class DBDocumentService implements Serializable {
 					null);
 			Filter descriptionFilter = Filter.createSubstringFilter(description, null, targetArray,
 					null);
-			searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
+			 Filter aliasFilter = Filter.createSubstringFilter(alias, null, targetArray,
+	                    null);
+			searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, aliasFilter);
 		}
 		List<Document> result = new ArrayList<>();
 		try {
