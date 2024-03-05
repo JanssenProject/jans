@@ -94,7 +94,12 @@ class GoogleSecret(BaseSecret):
         self.multiparts: list[str] = []
 
         # allowed number of versions
-        self.max_versions_num = 5
+        try:
+            max_versions_num = int(os.environ.get("CN_GOOGLE_SECRET_MAX_VERSIONS", "5"))
+        except ValueError:
+            max_versions_num = 5
+            logger.warning("Unsupported value set to CN_GOOGLE_SECRET_MAX_VERSIONS environment variable. Falling back to default value.")
+        self.max_versions_num = max(1, max_versions_num)
 
     @cached_property
     def client(self) -> secretmanager.SecretManagerServiceClient:
