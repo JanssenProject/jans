@@ -159,5 +159,16 @@ default to `code`.
 Make sure appropriate grant types are configured in Janssen Server client configuration. Janssen Server will reject 
 authorization requests containing response types not permitted for respective client.
 
+## Client expiration
+
+Client expiration is set based on `dynamicRegistrationExpirationTime` AS configuration property or otherwise 
+if `dcrForbidExpirationTimeInRequest` is `false` then it is set with Dynamic Client Registration Request via `lifetime` parameter 
+which expected value in seconds.
+
+Client also can be cleaned up by inactivity period which is set via `cleanUpInactiveClientAfterHoursOfInactivity` AS configuration property.
+By default it has `0` value (which means it is off). 
+Client activity time is tracked/recorded each time client is used for authentication or authorization (date is written in `jansLastAccessTime` client attribute).
+
+
 !!! Contribute
 If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
