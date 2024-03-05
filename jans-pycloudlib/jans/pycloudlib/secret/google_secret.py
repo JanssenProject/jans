@@ -352,8 +352,6 @@ class GoogleSecret(BaseSecret):
         return data
 
     def _disable_old_versions(self, parent):
-        # parent = self.client.secret_path(self.project_id, self.google_secret_name)
-
         # list of version.state enum
         #
         # - STATE_UNSPECIFIED = 0
