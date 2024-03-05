@@ -392,6 +392,8 @@ fido2:
   ingress:
     # -- Enable endpoint /.well-known/fido2-configuration
     fido2ConfigEnabled: false
+    # -- Enable endpoint /jans-fido2
+    fido2Enabled: false
 scim:
   # -- Name of the scim service. Please keep it as default.
   scimServiceName: scim
@@ -577,6 +579,10 @@ nginx-ingress:
     fido2ConfigLabels: { }
     # -- fido2 config ingress resource additional annotations.
     fido2ConfigAdditionalAnnotations: { }
+    # -- fido2 ingress resource labels. key app is taken
+    fido2Labels: { }
+    # -- fido2 ingress resource additional annotations.
+    fido2AdditionalAnnotations: { }
     # -- Auth server ingress resource labels. key app is taken
     authServerLabels: { }
     # -- Auth server ingress resource additional annotations.
