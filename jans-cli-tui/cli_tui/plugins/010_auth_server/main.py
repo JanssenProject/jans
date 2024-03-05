@@ -284,11 +284,11 @@ class Plugin(DialogUtils):
                         ('keys', 'Ke[y]s'),
                         ('authn', 'Au[t]hn'),
                         ('properties', 'Properti[e]s'),
+                        ('message', 'Messa[g]es'),
                         ('logging', 'Lo[g]ging'),
                         ('ssa', '[S]SA'),
                         ('agama', 'Aga[m]a'),
                         ('attributes', 'Attri[b]utes'),
-                        ('message', 'Loc[k]')
                         ],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
