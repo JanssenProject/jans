@@ -124,7 +124,7 @@ public class LockConfigResource extends BaseResource {
         conf.setDynamic(lockAppConf);
         lockConfigService.mergeLockConfig(conf);
         lockAppConf = lockConfigService.find();
-        logger.info("KC Lock post patch - lockAppConf:{}", lockAppConf);
+        logger.info("Lock post patch - lockAppConf:{}", lockAppConf);
         return Response.ok(lockAppConf).build();
     }
 }
