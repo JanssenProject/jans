@@ -148,7 +148,25 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
                         value=self.data.get('encryptionPublicKey', ''),
                         height=3,
                         style=cli_style.edit_text,
-                        jans_help=_("Publick key for Encryption"),
+                        jans_help=_("Public key for Encryption"),
+                        widget_style=cli_style.white_bg_widget
+                    ),
+
+                    common_data.app.getTitledText(
+                        title=_("Consumer Service Get URL"),
+                        name='jansAssertionConsumerServiceGetURL',
+                        value=self.data.get('jansAssertionConsumerServiceGetURL', ''),
+                        style=cli_style.edit_text,
+                        jans_help=_("Janssen Assertion for Consumer Service Get URL"),
+                        widget_style=cli_style.white_bg_widget
+                    ),
+
+                    common_data.app.getTitledText(
+                        title=_("Consumer Service Post URL"),
+                        name='jansAssertionConsumerServicePostURL',
+                        value=self.data.get('jansAssertionConsumerServicePostURL', ''),
+                        style=cli_style.edit_text,
+                        jans_help=_("Janssen Assertion for Consumer Service Post URL"),
                         widget_style=cli_style.white_bg_widget
                     ),
 
