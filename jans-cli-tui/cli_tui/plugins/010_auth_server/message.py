@@ -18,7 +18,6 @@ class Message(DialogUtils):
         self.message_provider_container = VSplit([])
         self.working_container = VSplit([])
         self.main_container = DynamicContainer(lambda: self.working_container)
-
         self.main_container.on_page_enter = self.on_page_enter
 
     def on_page_enter(self) -> None:
@@ -36,13 +35,14 @@ class Message(DialogUtils):
                     on_selection_changed=self.display_message_provider_type,
                     style=cli_style.radio_button)
             self.working_container = HSplit([
-                        Frame(self.message_provider_type_widget),
-                        DynamicContainer(lambda: self.message_provider_container)
-                        ])
+                            Frame(self.message_provider_type_widget),
+                            DynamicContainer(lambda: self.message_provider_container)
+                            ])
 
         self.first_enter = True
 
     def display_message_provider_type(self, rlwidget: RadioList):
+
         provider_type = rlwidget.current_value
 
         save_button = Button(text=_("Save"), handler=self.save)
@@ -59,12 +59,13 @@ class Message(DialogUtils):
                 values=self.data.get(schema_prop_name),
                 styles=styles
                 )
-            widgets = [Frame(body=HSplit(self.provider_widgets),title=f'{provider_type} Configuration')]
+            widgets = [Frame(body=HSplit(self.provider_widgets),title=f"{provider_type} Configuration")]
 
         widgets.append(VSplit([save_button], align=HorizontalAlign.CENTER))
         self.message_provider_container = HSplit(widgets, width=D())
 
     def save(self):
+
         provider_type = self.message_provider_type_widget.me.current_value
 
         # save provider type
@@ -81,7 +82,6 @@ class Message(DialogUtils):
 
         asyncio.ensure_future(provider_type_coroutine())
 
-
         # save prpvider data
 
         async def provider_coroutine(pcli_args):
@@ -97,18 +97,19 @@ class Message(DialogUtils):
             data = {}
             for widget in self.provider_widgets:
                 item_data = self.get_item_data(widget)
-                if item_data:
-                    data[item_data['key']] = item_data['value']
-            cli_args = {'operation_id': 'put-config-message-' + provider_type.lower(), 'data': data}
+                data[item_data['key']] = item_data['value']
 
+            cli_args = {'operation_id': 'put-config-message-' + provider_type.lower(), 'data': data}
 
             asyncio.ensure_future(provider_coroutine(cli_args))
 
 
+
     def get_message_configuration(self):
         async def coroutine():
+
             cli_args = {'operation_id': 'get-config-message'}
-            common_data.app.start_progressing(_("Retreiving message configuration"))
+            common_data.app.start_progressing(_(f"Retreiving data for Messages"))
             response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
             common_data.app.stop_progressing()
 

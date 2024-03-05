@@ -698,7 +698,7 @@ class JansCliApp(Application):
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 
-        label_widget = Window(FormattedTextControl(title+': '), width=len(title)+1, style=style, height=height)
+        label_widget = Window(FormattedTextControl(title+': '), width=len(title)+2, style=style, height=height)
         titled_text_widgets = [label_widget, ta]
         if next_widget:
             titled_text_widgets.append(Window(width=1))
