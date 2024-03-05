@@ -133,6 +133,15 @@ class EditTRDialog(JansGDialog, DialogUtils):
 
         edit_tr_container_widgets = [
                 self.app.getTitledText(
+                    title=_("Name"),
+                    name='name',
+                    value=self.data.get('name', ''),
+                    style=cli_style.edit_text_required,
+                    jans_help=_("Name for TR"),
+                    widget_style=cli_style.white_bg_widget
+                ),
+
+                self.app.getTitledText(
                     title=_("Display Name"),
                     name='displayName',
                     value=self.data.get('displayName', ''),
@@ -386,6 +395,11 @@ class EditTRDialog(JansGDialog, DialogUtils):
         new_data = copy.deepcopy(self.data)
         new_data.update(tr_data)
 
+        cfr = self.check_required_fields(data=new_data, container=self.edit_tr_container, tobefocused=self.edit_tr_container)
+        if not cfr:
+            return
+
+
         sp_meta_data_source_type = tr_data.get('spMetaDataSourceType')
         if sp_meta_data_source_type == 'file':
             new_data['spMetaDataLocation'] = os.path.basename(self.metadata_file_path)
@@ -395,8 +409,15 @@ class EditTRDialog(JansGDialog, DialogUtils):
             new_data['spMetaDataURL'] = matadata_type_container_data['spMetaDataURL']
 
         data = {'trustRelationship': new_data}
-        if sp_meta_data_source_type == 'file': 
+        if sp_meta_data_source_type == 'file':
+            if not self.metadata_file_path:
+                self.app.show_message(_(common_strings.error), _("Please browse a metadata source file"), tobefocused=self.edit_tr_container)
+                return
+
+                self.app.stop_progressing(_("Failed to save Trust Relationship."))
+
             data['metaDataFile'] = self.metadata_file_path
+
 
         async def coroutine():
             operation_id = 'post-trust-relationship-metadata-file' if self.new_tr else 'put-trust-relationship'
