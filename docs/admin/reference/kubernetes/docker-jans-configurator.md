@@ -32,15 +32,17 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `jans`).
 - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
 - `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` (default), `kubernetes`, `google`, or `aws`.
-- `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
-- `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
-- `CN_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
 - `CN_SECRET_VAULT_VERIFY`: whether to verify cert or not (default to `false`).
 - `CN_SECRET_VAULT_ROLE_ID_FILE`: path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
 - `CN_SECRET_VAULT_SECRET_ID_FILE`: path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
 - `CN_SECRET_VAULT_CERT_FILE`: path to Vault cert file (default to `/etc/certs/vault_client.crt`).
 - `CN_SECRET_VAULT_KEY_FILE`: path to Vault key file (default to `/etc/certs/vault_client.key`).
 - `CN_SECRET_VAULT_CACERT_FILE`: path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
+- `CN_SECRET_VAULT_ADDR`: URL of Vault (default to `http://localhost:8200`).
+- `CN_SECRET_VAULT_NAMESPACE`: Namespace used to access secrets (default to empty string).
+- `CN_SECRET_VAULT_KV_PATH`: Path to KV secrets engine (default to `secret`).
+- `CN_SECRET_VAULT_PREFIX`: Base prefix name used to build secret path (default to `jans`).
+- `CN_SECRET_VAULT_APPROLE_PATH`: Path to AppRole (default to `approle`).
 - `CN_SECRET_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_SECRET_KUBERNETES_SECRET`: Kubernetes secrets name (default to `jans`).
 - `CN_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
@@ -95,6 +97,7 @@ For fresh installation, generate the initial configuration and secret by creatin
 - `couchbase_pw`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
 - `couchbase_superuser_pw`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
 - `salt`: user-defined salt (24 characters length); if omitted, salt will be generated automatically
+- `init_keys_exp`: the initial keys expiration time in hours (default to `48`; extra 1 hour will be added for hard limit)
 
 Example of generating `salt` value:
 
@@ -133,7 +136,7 @@ To generate initial config and secrets:
                 name: config-generate-params
           containers:
             - name: configurator-load
-              image: ghcr.io/janssenproject/jans/configurator:1.0.19_dev
+              image: ghcr.io/janssenproject/jans/configurator:1.1.0_dev
               volumeMounts:
                 - mountPath: /app/db/generate.json
                   name: config-generate-params
@@ -173,7 +176,7 @@ To restore configuration and secrets from a backup of `/path/to/host/volume/conf
                 name: secret-params
           containers:
             - name: configurator-load
-              image: ghcr.io/janssenproject/jans/configurator:1.0.19_dev
+              image: ghcr.io/janssenproject/jans/configurator:1.1.0_dev
               volumeMounts:
                 - mountPath: /app/db/config.json
                   name: config-params
@@ -203,7 +206,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: configurator-dump-job
-          image: ghcr.io/janssenproject/jans/configurator:1.0.19_dev
+          image: ghcr.io/janssenproject/jans/configurator:1.1.0_dev
           command:
             - /bin/sh
             - -c
@@ -218,4 +221,3 @@ spec:
 Copy over the files to host
 
 `kubectl cp config-init-load-job:/app/db .`
-

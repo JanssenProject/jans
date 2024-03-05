@@ -55,7 +55,7 @@ def _transform_api_dynamic_config(conf):
                 "@jakarta.ws.rs.GET()",
             ],
         }),
-        ("customAttributeValidationEnabled", False),
+        ("customAttributeValidationEnabled", True),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -102,6 +102,11 @@ def _transform_api_dynamic_config(conf):
             "name": "kc-link",
             "description": "kc-link plugin",
             "className": "io.jans.configapi.plugin.kc.link.rest.ApiApplication"
+        },
+        {
+            "name": "lock",
+            "description": "lock plugin",
+            "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
         }
     ]
 
