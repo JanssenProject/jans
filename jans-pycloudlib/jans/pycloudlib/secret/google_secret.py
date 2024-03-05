@@ -202,8 +202,14 @@ class GoogleSecret(BaseSecret):
             A boolean to mark whether secret is set or not.
         """
         all_ = self.get_all()
-        all_[key] = safe_value(value)
-        logger.info(f"Adding key {key}.")
+        new_value = safe_value(value)
+
+        # no changes, skip updating secret
+        if new_value == all_.get(key):
+            return False
+
+        all_[key] = new_value
+        logger.info(f"Adding/updating key {key} to google secret manager")
 
         payload = safe_value(all_)
         return self._add_secret_version_multipart(payload)
@@ -221,8 +227,13 @@ class GoogleSecret(BaseSecret):
         # note that existing value will be overwritten
         all_ = self.get_all()
 
-        for k, v in data.items():
-            all_[k] = safe_value(v)
+        safe_data = {k: safe_value(v) for k, v in data.items()}
+
+        # no changes, skip updating secrets
+        if safe_data == all_:
+            return False
+
+        all_.update(safe_data)
 
         payload = safe_value(all_)
         return self._add_secret_version_multipart(payload)
@@ -352,7 +363,7 @@ class GoogleSecret(BaseSecret):
         response = self.client.list_secret_versions(
             request={
                 "parent": parent,
-                "filter": "state:ENABLED"  # " AND name:secrets/{self.google_secret_name}",
+                "filter": "state:ENABLED"
             },
         )
 
@@ -365,5 +376,5 @@ class GoogleSecret(BaseSecret):
                 enabled_versions.append(version.name)
                 continue
 
-            logger.info(f"Disabling old version {version.name=}, {version.state.name=}")
+            logger.info(f"Disabling old version {version.name} (state={version.state.name})")
             self.client.disable_secret_version(request={"name": version.name})

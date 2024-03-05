@@ -136,11 +136,17 @@ class GoogleConfig(BaseConfig):
             A boolean to mark whether config is set or not.
         """
         all_ = self.get_all()
-        all_[key] = safe_value(value)
+        new_value = safe_value(value)
+
+        # no changes, skip updating secret
+        if new_value == all_.get(key):
+            return False
+
+        all_[key] = new_value
 
         self.create_secret()
 
-        logger.info(f'Adding key {key} to google secret manager')
+        logger.info(f'Adding/updating key {key} to google secret manager')
         logger.info(f'Size of secret payload : {sys.getsizeof(safe_value(all_))} bytes')
         return self.add_secret_version(safe_value(all_))
 
@@ -157,8 +163,13 @@ class GoogleConfig(BaseConfig):
         # note that existing value will be overwritten
         all_ = self.get_all()
 
-        for k, v in data.items():
-            all_[k] = safe_value(v)
+        safe_data = {k: safe_value(v) for k, v in data.items()}
+
+        # no changes, skip updating secret
+        if safe_data == all_:
+            return False
+
+        all_.update(safe_data)
 
         self.create_secret()
 
@@ -232,5 +243,5 @@ class GoogleConfig(BaseConfig):
                 enabled_versions.append(version.name)
                 continue
 
-            logger.info(f"Disabling old version {version.name=}, {version.state.name=}")
+            logger.info(f"Disabling old version {version.name} (state={version.state.name})")
             self.client.disable_secret_version(request={"name": version.name})
