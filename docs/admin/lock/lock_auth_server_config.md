@@ -1,3 +1,10 @@
+---
+tags:
+ - administration
+ - lock
+ - opa
+---
+
 ## Jans Lock Token Stream Service
 
 To enable Jans Auth PubSub messages 2 configuration should be configured:

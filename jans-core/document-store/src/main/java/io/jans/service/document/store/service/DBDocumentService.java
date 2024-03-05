@@ -45,6 +45,7 @@ public class DBDocumentService implements Serializable {
 	public static final String inum = "inum";
 	public static final String displayName = "displayName";
 	public static final String description = "description";
+	public static final String alias = "jansAlias";
 
 	@PostConstruct
 	public void init() {
@@ -104,9 +105,9 @@ public class DBDocumentService implements Serializable {
 	 */
 	public String getDnForDocument(String inum) throws Exception {
 		if (StringHelper.isEmpty(inum)) {
-			return String.format("ou=document,%s", "o=gluu");
+			return String.format("ou=document,%s", "o=jans");
 		}
-		return String.format("inum=%s,ou=document,%s", inum, "o=gluu");
+		return String.format("inum=%s,ou=document,%s", inum, "o=jans");
 	}
 
 	/**
@@ -152,7 +153,9 @@ public class DBDocumentService implements Serializable {
 					null);
 			Filter descriptionFilter = Filter.createSubstringFilter(description, null, targetArray,
 					null);
-			searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
+			 Filter aliasFilter = Filter.createSubstringFilter(alias, null, targetArray,
+	                    null);
+			searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, aliasFilter);
 		}
 		List<Document> result = new ArrayList<>();
 		try {

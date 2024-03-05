@@ -2,6 +2,7 @@ from utils.multi_lang import _
 from utils.utils import DialogUtils, common_data
 from utils.static import cli_style
 from wui_components.jans_spinner import Spinner
+from wui_components.jans_drop_down import DropDownWidget
 
 
 def get_ldap_config_widgets(data, widget_style=cli_style.white_bg_widget):
@@ -137,3 +138,16 @@ def get_data_for_ldap_widgets(container):
     du = DialogUtils()
     data = du.make_data_from_dialog(tabs={'_': container})
     return data
+
+def get_logging_level_widget(level='INFO', name='loggingLevel', style=cli_style.edit_text):
+    return common_data.app.getTitledWidget(
+                    _("Logging Level"),
+                    name=name,
+                    widget=DropDownWidget(
+                        values=[('TRACE', 'TRACE'), ('DEBUG', 'DEBUG'), ('INFO', 'INFO'), ('WARN', 'WARN'),('ERROR', 'ERROR'),('FATAL', 'FATAL'),('OFF', 'OFF')],
+                        value=level,
+                        select_one_option=False
+                        ),
+                    jans_help=_("Chose logging level for service"),
+                    style=style
+                )
