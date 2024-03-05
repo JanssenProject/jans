@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 public class IdentityProcessor {
 
     private Provider provider;
+    private static Logger logger = LoggerFactory.getLogger(IdentityProcessor.class);
     
     public IdentityProcessor() { }
     
@@ -61,7 +62,6 @@ public class IdentityProcessor {
         
         if (profile.isEmpty()) throw new IllegalArgumentException("Empty profile data");
 
-        Logger logger = LoggerFactory.getLogger(getClass());
         UserService userService = CdiUtil.bean(UserService.class);
         logger.info("User provisioning started");
 

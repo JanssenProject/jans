@@ -51,6 +51,7 @@ public class AdminUIService {
             appConfigResponse.setPostLogoutRedirectUri(auiConfiguration.getAuiWebServerPostLogoutRedirectUri());
             appConfigResponse.setEndSessionEndpoint(auiConfiguration.getAuiWebServerEndSessionEndpoint());
             appConfigResponse.setSessionTimeoutInMins(auiConfiguration.getSessionTimeoutInMins());
+            appConfigResponse.setAdditionalParameters(auiConfiguration.getAdditionalParameters());
 
             return appConfigResponse;
         } catch (Exception e) {
@@ -69,6 +70,10 @@ public class AdminUIService {
             if (appConfigResponse.getSessionTimeoutInMins() != null) {
                 adminConf.getMainSettings().getUiConfig().setSessionTimeoutInMins(appConfigResponse.getSessionTimeoutInMins());
                 auiConfigurationService.getAUIConfiguration().setSessionTimeoutInMins(appConfigResponse.getSessionTimeoutInMins());
+            }
+            if (!CollectionUtils.isEmpty(appConfigResponse.getAdditionalParameters())) {
+                adminConf.getMainSettings().getOidcConfig().getAuiWebClient().setAdditionalParameters(appConfigResponse.getAdditionalParameters());
+                auiConfigurationService.getAUIConfiguration().setAdditionalParameters(appConfigResponse.getAdditionalParameters());
             }
             entryManager.merge(adminConf);
             return getAdminUIEditableConfiguration();

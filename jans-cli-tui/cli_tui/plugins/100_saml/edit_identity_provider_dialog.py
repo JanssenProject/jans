@@ -100,7 +100,7 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
                         title=_("Entity ID"),
                         name='idpEntityId',
                         value=self.data.get('idpEntityId', ''),
-                        style=cli_style.edit_text,
+                        style=cli_style.edit_text_required,
                         jans_help=_("Entity ID for Identity Provider"),
                         widget_style=cli_style.white_bg_widget
                     ),
@@ -109,7 +109,7 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
                         title=_("NameID Policy Format "),
                         name='nameIDPolicyFormat',
                         value=self.data.get('nameIDPolicyFormat', ''),
-                        style=cli_style.edit_text,
+                        style=cli_style.edit_text_required,
                         jans_help=_("Policy Format for Identity Provider"),
                         widget_style=cli_style.white_bg_widget
                     ),
@@ -177,12 +177,11 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
                     style=cli_style.check_box
                 ),
 
-
                 common_data.app.getTitledText(
                     title=_("Display Name"),
                     name='displayName',
                     value=self.data.get('displayName', ''),
-                    style=cli_style.edit_text,
+                    style=cli_style.edit_text_required,
                     jans_help=_("Display Name for Identity Provider"),
                     widget_style=cli_style.white_bg_widget
                 ),
@@ -200,7 +199,7 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
                 common_data.app.getTitledText(
                     title=_("Realm"),
                     name='realm',
-                    value=self.data.get('realm', ''),
+                    value=self.data.get('realm', 'jans'),
                     style=cli_style.edit_text_required,
                     jans_help=_("realm"),
                     widget_style=cli_style.white_bg_widget
@@ -233,11 +232,10 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
     def save(self):
 
         new_data = self.make_data_from_dialog({'provider': self.edit_provider_container})
+
         provider_data = copy.deepcopy(self.data)
         provider_data.update(new_data)
-
         provider_data.pop('importMetadataFromFile', None)
-
 
         if self.metadata_file_path:
             data = {'identityProvider': provider_data, 'metaDataFile': self.metadata_file_path}
@@ -245,6 +243,10 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
             metadata_data = self.make_data_from_dialog({'metadata_data': self.matadata_container})
             provider_data.update(metadata_data)
             data = {'identityProvider': provider_data}
+
+        cfr = self.check_required_fields(data=provider_data, container=self.edit_provider_container, tobefocused=self.edit_provider_container)
+        if not cfr:
+            return
 
         async def coroutine():
             operation_id = 'post-saml-identity-provider' if self.new_provider else 'put-saml-identity-provider'
@@ -261,7 +263,6 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
             else:
                 common_data.app.show_message(_(common_strings.error), _("Save failed: Status {} - {}\n").format(response.status_code, response.text), tobefocused=self.edit_provider_container)
                 common_data.app.stop_progressing(_("Failed to save IDP Provider"))
-
 
         asyncio.ensure_future(coroutine())
 

@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.16
+ARG JETTY_VERSION=11.0.20
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.1.0-SNAPSHOT
-ENV CN_BUILD_DATE='2024-02-26 11:14'
+ENV CN_BUILD_DATE='2024-03-01 10:18'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -68,7 +68,7 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 # =======
 
 RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
-    && for plugin in scim admin-ui fido2 user-mgt jans-link kc-saml kc-link; \
+    && for plugin in scim admin-ui fido2 user-mgt jans-link kc-saml kc-link lock; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
     done
@@ -77,7 +77,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=4a725ffac8a7de1dd79f4323a4ead2473ffc2c5e
+ENV JANS_SOURCE_VERSION=97aafe8efb77f1dca7080ed2b89284f3baf75c2e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -165,16 +165,17 @@ ENV CN_CONFIG_ADAPTER=consul \
 # ==========
 
 ENV CN_SECRET_ADAPTER=vault \
-    CN_SECRET_VAULT_SCHEME=http \
-    CN_SECRET_VAULT_HOST=localhost \
-    CN_SECRET_VAULT_PORT=8200 \
     CN_SECRET_VAULT_VERIFY=false \
     CN_SECRET_VAULT_ROLE_ID_FILE=/etc/certs/vault_role_id \
     CN_SECRET_VAULT_SECRET_ID_FILE=/etc/certs/vault_secret_id \
     CN_SECRET_VAULT_CERT_FILE=/etc/certs/vault_client.crt \
     CN_SECRET_VAULT_KEY_FILE=/etc/certs/vault_client.key \
     CN_SECRET_VAULT_CACERT_FILE=/etc/certs/vault_ca.crt \
-    CN_SECRET_VAULT_NAMESPACE=jans \
+    CN_SECRET_VAULT_NAMESPACE="" \
+    CN_SECRET_VAULT_ADDR=http://localhost:8200 \
+    CN_SECRET_VAULT_KV_PATH=secret \
+    CN_SECRET_VAULT_PREFIX=jans \
+    CN_SECRET_VAULT_APPROLE_PATH=approle \
     CN_SECRET_KUBERNETES_NAMESPACE=default \
     CN_SECRET_KUBERNETES_SECRET=jans \
     CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false

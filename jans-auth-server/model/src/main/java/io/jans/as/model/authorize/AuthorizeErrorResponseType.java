@@ -11,9 +11,21 @@ import io.jans.as.model.error.IErrorType;
 /**
  * Error codes for authorization error responses.
  *
- * @author Javier Rojas Blum Date: 09.22.2011
+ * @author Javier Rojas Blum
  */
 public enum AuthorizeErrorResponseType implements IErrorType {
+
+    /**
+     * "request" parameter is supported by AS. But if it's switched off in configuration by setting
+     * requestParameterSupported=false then this error is returned from authorization endpoint.
+     */
+    REQUEST_NOT_SUPPORTED("request_not_supported"),
+
+    /**
+     * "request_uri" parameter is supported by AS. But if it's switched off in configuration by setting
+     * requestUriParameterSupported=false then this error is returned from authorization endpoint.
+     */
+    REQUEST_URI_NOT_SUPPORTED("request_uri_not_supported"),
 
     /**
      * The request is missing a required parameter, includes an
