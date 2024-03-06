@@ -203,7 +203,7 @@ public class TrustRelationshipResource extends BaseResource {
         InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
         logger.debug("metaDataFile for update is:{} ", metaDataFile);
         if (metaDataFile != null && metaDataFile.available() > 0) {
-            logger.debug(" Metad metaDataFile.available():{}", metaDataFile.available());
+            logger.debug("For update metaDataFile.available():{}", metaDataFile.available());
         }
         
         validateSpMetaDataSourceType(trustRelationship, metaDataFile);
