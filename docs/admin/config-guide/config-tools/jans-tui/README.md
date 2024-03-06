@@ -16,7 +16,7 @@ hoc* configuration of the Janssen Project software components.
 You can run it by executing:
 
 ```
-/opt/jans/jans-cli/jans_cli_tui.py
+sudo /opt/jans/jans-cli/jans_cli_tui.py
 ```
 
 The TUI calls the Jans Config API. A TUI client is configured out of the
