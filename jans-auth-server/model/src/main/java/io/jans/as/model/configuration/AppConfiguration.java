@@ -340,6 +340,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service")
     private String opTosUri;
 
+    @DocProperty(description = "Defines client inactivity period in hours which means that client will be removed once it is passed.")
+    public int cleanUpInactiveClientAfterHoursOfInactivity = -1;
+
+    @DocProperty(description = "Interval for client periodic update timer. Update timer is used to debounce frequent updates of the client to avoid performance degradation.")
+    public int clientPeriodicUpdateTimerInterval = 3;
+
     @DocProperty(description = "The lifetime of the Authorization Code")
     private int authorizationCodeLifetime;
 
@@ -2259,6 +2265,22 @@ public class AppConfiguration implements Configuration {
 
     public void setOpTosUri(String opTosUri) {
         this.opTosUri = opTosUri;
+    }
+
+    public int getCleanUpInactiveClientAfterHoursOfInactivity() {
+        return cleanUpInactiveClientAfterHoursOfInactivity;
+    }
+
+    public void setCleanUpInactiveClientAfterHoursOfInactivity(int cleanUpInactiveClientAfterHoursOfInactivity) {
+        this.cleanUpInactiveClientAfterHoursOfInactivity = cleanUpInactiveClientAfterHoursOfInactivity;
+    }
+
+    public int getClientPeriodicUpdateTimerInterval() {
+        return clientPeriodicUpdateTimerInterval;
+    }
+
+    public void setClientPeriodicUpdateTimerInterval(int clientPeriodicUpdateTimerInterval) {
+        this.clientPeriodicUpdateTimerInterval = clientPeriodicUpdateTimerInterval;
     }
 
     public int getAuthorizationCodeLifetime() {

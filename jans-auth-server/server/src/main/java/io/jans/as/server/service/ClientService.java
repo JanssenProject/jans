@@ -6,23 +6,8 @@
 
 package io.jans.as.server.service;
 
-import static org.apache.commons.lang3.BooleanUtils.isFalse;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-
-import org.apache.commons.lang3.BooleanUtils;
-import org.json.JSONArray;
-import org.slf4j.Logger;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.config.StaticConfiguration;
@@ -30,9 +15,6 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.orm.model.base.CustomAttribute;
-import io.jans.orm.model.base.CustomEntry;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
@@ -44,6 +26,15 @@ import io.jans.util.security.StringEncrypter.EncryptionException;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang3.BooleanUtils;
+import org.json.JSONArray;
+import org.slf4j.Logger;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * Provides operations with clients.
@@ -56,13 +47,11 @@ import jakarta.inject.Named;
 @Named
 public class ClientService {
 
-    protected static final String[] CLIENT_OBJECT_CLASSES = new String[]{"jansClnt"};
-
     @Inject
     private Logger log;
 
     @Inject
-    private PersistenceEntryManager ldapEntryManager;
+    private PersistenceEntryManager persistenceEntryManager;
 
     @Inject
     private CacheService cacheService;
@@ -82,13 +71,16 @@ public class ClientService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
+    @Inject
+    private ClientLastUpdateAtTimer clientLastUpdateAtTimer;
+
     public void persist(Client client) {
     	ignoreCustomObjectClassesForNonLDAP(client);
-        ldapEntryManager.persist(client);
+        persistenceEntryManager.persist(client);
     }
 
     private Client ignoreCustomObjectClassesForNonLDAP(Client client) {
-        String persistenceType = ldapEntryManager.getPersistenceType();
+        String persistenceType = persistenceEntryManager.getPersistenceType();
         log.debug("persistenceType: {}", persistenceType);
         if (!PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)) {
         	log.debug(
@@ -102,7 +94,7 @@ public class ClientService {
 
     public void merge(Client client) {
         ignoreCustomObjectClassesForNonLDAP(client);
-        ldapEntryManager.merge(client);
+        persistenceEntryManager.merge(client);
         removeFromCache(client);
     }
 
@@ -227,7 +219,7 @@ public class ClientService {
     public Client getClientByDn(String dn) {
         BaseCacheService usedCacheService = getCacheService();
         try {
-            return usedCacheService.getWithPut(dn, () -> ldapEntryManager.find(Client.class, dn), 60);
+            return usedCacheService.getWithPut(dn, () -> persistenceEntryManager.find(Client.class, dn), 60);
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
             return null;
@@ -258,13 +250,13 @@ public class ClientService {
     public List<Client> getAllClients(String[] returnAttributes) {
         String baseDn = staticConfiguration.getBaseDn().getClients();
 
-        return ldapEntryManager.findEntries(baseDn, Client.class, null, returnAttributes);
+        return persistenceEntryManager.findEntries(baseDn, Client.class, null, returnAttributes);
     }
 
     public List<Client> getAllClients(String[] returnAttributes, int size) {
         String baseDn = staticConfiguration.getBaseDn().getClients();
 
-        return ldapEntryManager.findEntries(baseDn, Client.class, null, returnAttributes, size);
+        return persistenceEntryManager.findEntries(baseDn, Client.class, null, returnAttributes, size);
     }
 
     public String buildClientDn(String clientId) {
@@ -279,7 +271,7 @@ public class ClientService {
             removeFromCache(client);
 
             String clientDn = client.getDn();
-            ldapEntryManager.removeRecursively(clientDn, Client.class);
+            persistenceEntryManager.removeRecursively(clientDn, Client.class);
         }
     }
 
@@ -293,35 +285,7 @@ public class ClientService {
     }
 
     public void updateAccessTime(Client client, boolean isUpdateLogonTime) {
-        if (isFalse(appConfiguration.getUpdateClientAccessTime())) {
-            return;
-        }
-
-        String clientDn = client.getDn();
-
-        CustomEntry customEntry = new CustomEntry();
-        customEntry.setDn(clientDn);
-        customEntry.setCustomObjectClasses(CLIENT_OBJECT_CLASSES);
-
-        Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-        String nowDateString = ldapEntryManager.encodeTime(customEntry.getDn(), now);
-
-        CustomAttribute customAttributeLastAccessTime = new CustomAttribute("jansLastAccessTime", nowDateString);
-        customEntry.getCustomAttributes().add(customAttributeLastAccessTime);
-
-        if (isUpdateLogonTime) {
-            CustomAttribute customAttributeLastLogonTime = new CustomAttribute("jansLastLogonTime", nowDateString);
-            customEntry.getCustomAttributes().add(customAttributeLastLogonTime);
-        }
-
-        try {
-            ldapEntryManager.merge(customEntry);
-        } catch (EntryPersistenceException epe) {
-            log.error("Failed to update jansLastAccessTime and jansLastLogonTime of client '{}'", clientDn);
-            log.trace("Failed to update user:", epe);
-        }
-
-        removeFromCache(client);
+        clientLastUpdateAtTimer.addLastUpdateAtTime(client, isUpdateLogonTime);
     }
 
     public Object getAttribute(Client client, String clientAttribute) {
