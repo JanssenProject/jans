@@ -169,8 +169,8 @@ public class AuthorizationChallengeService {
 
             user = executionContext.getUser() != null ? executionContext.getUser() : new User();
 
-            // generate session if not exist and if allowed by config
-            if (sessionUser == null) {
+            // generate session if not exist and if allowed by config (or if session is prepared by script)
+            if (sessionUser == null || executionContext.getAuthorizationChallengeSessionId() != null) {
                 sessionUser = generateAuthenticateSessionWithCookie(authzRequest, user, executionContext.getAuthorizationChallengeSessionId());
             }
         }
@@ -200,6 +200,7 @@ public class AuthorizationChallengeService {
             log.trace("Skip session_id generation because user is null");
             return null;
         }
+
         if (isFalse(appConfiguration.getAuthorizationChallengeShouldGenerateSession())) {
             log.trace("Skip session_id generation because it's not allowed by AS configuration ('authorizationChallengeShouldGenerateSession=false')");
             return null;
