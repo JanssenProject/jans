@@ -405,25 +405,33 @@ public class UserMgmtService {
     }
 
     public User addUser(User user, boolean active) {
+        logger.info("Creating user:{}, active:{}", user, active);
         user = userService.addUser(user, active);
+        logger.info("New user:{}", user);
         // remove inactive claims
         if (user != null) {
             List<User> users = new ArrayList<>();
             users.add(user);
             users = this.verifyCustomAttributes(users);
-            user = users.get(0);
+            if (users != null && !users.isEmpty()) {
+                user = users.get(0);
+            }           
         }
         return user;
     }
 
     public User updateUser(User user) {
+        logger.info("Updating user:{}", user);
         user = userService.updateUser(user);
+        logger.info("Updated user:{}", user);
         // remove inactive claims
         if (user != null) {
             List<User> users = new ArrayList<>();
             users.add(user);
             users = this.verifyCustomAttributes(users);
-            user = users.get(0);
+            if (users != null && !users.isEmpty()) {
+                user = users.get(0);
+            }  
         }
         return user;
     }
@@ -479,7 +487,7 @@ public class UserMgmtService {
     }
 
     public void validateAttributes(List<CustomObjectAttribute> customAttributes) {
-        logger.info("**** Validate customAttributes: {}", customAttributes);
+        logger.info("\n **** Validate customAttributes: {}", customAttributes);
         if (customAttributes == null || customAttributes.isEmpty()) {
             return;
         }
@@ -491,16 +499,17 @@ public class UserMgmtService {
             if(attribute!=null) {
                 validation = attribute.getAttributeValidation();
             }
-            logger.info("validation:{}", validation);
+            logger.info("customObjectAttribute.getName():{}, validation:{}", customObjectAttribute.getName(), validation);
 
             String errorMsg = validateCustomAttributes(customObjectAttribute, validation);
-
+            logger.info("customObjectAttribute.getName():{}, errorMsg:{}", customObjectAttribute.getName(), errorMsg);
             if (StringUtils.isNotBlank(errorMsg)) {
                 sb.append(errorMsg);
             }
         }
 
         if (StringUtils.isNotBlank(sb.toString())) {
+            logger.error("Attribute validation failed with error msg:{} \n",sb.toString());
             throw new WebApplicationException(sb.toString());
         }
 
@@ -553,7 +562,7 @@ public class UserMgmtService {
         } catch (Exception ex) {
             logger.error("Error while validating attributeName:{}", attributeName);
         }
-        logger.info("Validate reuslt - sb :{} ", sb);
+        logger.info("Validate reuslt for attributeName:{} is sb :{} ", attributeName, sb);
 
         if (StringUtils.isNotBlank(sb.toString())) {
             sb.insert(0, attributeName+" ");
