@@ -64,6 +64,7 @@ public class WebhookService {
      * The function retrieves a list of AuiFeatures that are associated with a specific webhookId.
      *
      * @param webhookId The parameter "webhookId" is a String that represents the ID of a webhook.
+     * @throws ApplicationException
      * @return The method is returning a list of AuiFeature objects that have a webhookId matching the provided webhookId
      * parameter.
      */
@@ -85,6 +86,7 @@ public class WebhookService {
      *
      * @param searchRequest The `searchRequest` parameter is an object of type `SearchRequest`. It contains information
      *                      about the search criteria and pagination for the webhooks search.
+     * @throws ApplicationException
      * @return The method is returning a PagedResult object containing a list of WebhookEntry objects.
      */
     public PagedResult<WebhookEntry> searchWebhooks(SearchRequest searchRequest) throws ApplicationException {
@@ -188,6 +190,7 @@ public class WebhookService {
      *
      * @param webhook The parameter "webhook" is an object of type WebhookEntry. It represents the webhook entry that needs
      *                to be added.
+     * @throws ApplicationException
      * @return The method is returning a WebhookEntry object.
      */
     public WebhookEntry addWebhook(@Valid WebhookEntry webhook) throws ApplicationException {
@@ -230,6 +233,7 @@ public class WebhookService {
      *
      * @param webhook The parameter "webhook" is of type WebhookEntry. It represents the webhook entry that needs to be
      *                removed.
+     * @throws ApplicationException
      */
     public void removeWebhook(WebhookEntry webhook) throws ApplicationException {
         try {
@@ -262,6 +266,7 @@ public class WebhookService {
      *
      * @param webhook The parameter "webhook" is an object of type WebhookEntry. It represents the webhook entry that needs
      *                to be updated.
+     * @throws ApplicationException
      * @return The method is returning a WebhookEntry object.
      */
     public WebhookEntry updateWebhook(WebhookEntry webhook) throws ApplicationException {
@@ -328,6 +333,7 @@ public class WebhookService {
      * concurrently.
      *
      * @param webhookIds A set of webhook IDs.
+     * @throws ApplicationException
      * @return The method is returning a List of Strings.
      */
     public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds, List<ShortCodeRequest> shortCodes) throws ApplicationException {
