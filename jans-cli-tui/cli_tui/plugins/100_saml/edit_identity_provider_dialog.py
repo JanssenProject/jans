@@ -152,24 +152,6 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
                         widget_style=cli_style.white_bg_widget
                     ),
 
-                    common_data.app.getTitledText(
-                        title=_("Consumer Service Get URL"),
-                        name='jansAssertionConsumerServiceGetURL',
-                        value=self.data.get('jansAssertionConsumerServiceGetURL', ''),
-                        style=cli_style.edit_text,
-                        jans_help=_("Janssen Assertion for Consumer Service Get URL"),
-                        widget_style=cli_style.white_bg_widget
-                    ),
-
-                    common_data.app.getTitledText(
-                        title=_("Consumer Service Post URL"),
-                        name='jansAssertionConsumerServicePostURL',
-                        value=self.data.get('jansAssertionConsumerServicePostURL', ''),
-                        style=cli_style.edit_text,
-                        jans_help=_("Janssen Assertion for Consumer Service Post URL"),
-                        widget_style=cli_style.white_bg_widget
-                    ),
-
                     ],
                     width=D()
                     )
@@ -259,16 +241,17 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
             common_data.app.show_message(_(common_strings.error), _("Please browse metadata file."), tobefocused=self.edit_provider_container)
             return
 
-        if self.metadata_file_path:
+        if import_metadata_from_file:
             data = {'identityProvider': provider_data, 'metaDataFile': self.metadata_file_path}
         else:
             metadata_data = self.make_data_from_dialog({'metadata_data': self.matadata_container})
             provider_data.update(metadata_data)
-            data = {'identityProvider': provider_data}
 
-        cfr = self.check_required_fields(data=provider_data, container=self.edit_provider_container, tobefocused=self.edit_provider_container)
-        if not cfr:
-            return
+            cfr = self.check_required_fields(data=provider_data, container=self.edit_provider_container, tobefocused=self.edit_provider_container)
+            if not cfr:
+                return
+
+            data = {'identityProvider': provider_data}
 
         async def coroutine():
             operation_id = 'post-saml-identity-provider' if self.new_provider else 'put-saml-identity-provider'

@@ -91,7 +91,51 @@ class EditTRDialog(JansGDialog, DialogUtils):
             self.app.show_jans_dialog(file_browser_dialog)
 
         def get_metadata_source_tpe(value):
-            if value == 'uri':
+            if value == 'manual':
+                self.matadata_type_container = HSplit([
+                    self.app.getTitledText(
+                        title=_("Entity ID"),
+                        name='entityId',
+                        value=self.data.get('samlMetadata', {}).get('entityId', ''),
+                        style=cli_style.edit_text_required,
+                        jans_help=_("Entity ID for Service Provider"),
+                        widget_style=cli_style.white_bg_widget
+                    ),
+                    self.app.getTitledText(
+                        title=_("NameID Policy Format "),
+                        name='nameIDPolicyFormat',
+                        value=self.data.get('samlMetadata', {}).get('nameIDPolicyFormat', ''),
+                        style=cli_style.edit_text_required,
+                        jans_help=_("Policy Format for Service Provider"),
+                        widget_style=cli_style.white_bg_widget
+                    ),
+                    self.app.getTitledText(
+                        title=_("Single Logout Service Endpoint"),
+                        name='singleLogoutServiceUrl',
+                        value=self.data.get('samlMetadata', {}).get('singleLogoutServiceUrl', ''),
+                        style=cli_style.edit_text_required,
+                        jans_help=_("Endpoint for Single Logout Service"),
+                        widget_style=cli_style.white_bg_widget
+                    ),
+                    self.app.getTitledText(
+                        title=_("Consumer Service Get URL"),
+                        name='jansAssertionConsumerServiceGetURL',
+                        value=self.data.get('samlMetadata', {}).get('jansAssertionConsumerServiceGetURL', ''),
+                        style=cli_style.edit_text,
+                        jans_help=_("Janssen Assertion for Consumer Service Get URL"),
+                        widget_style=cli_style.white_bg_widget
+                    ),
+                    self.app.getTitledText(
+                        title=_("Consumer Service Post URL"),
+                        name='jansAssertionConsumerServicePostURL',
+                        value=self.data.get('samlMetadata', {}).get('jansAssertionConsumerServicePostURL', ''),
+                        style=cli_style.edit_text,
+                        jans_help=_("Janssen Assertion for Consumer Service Post URL"),
+                        widget_style=cli_style.white_bg_widget
+                    ),
+                ], width=D())
+
+            elif value == 'uri':
                 self.matadata_type_container = HSplit([
                     self.app.getTitledText(title=_("Metadata URL"),
                         name='spMetaDataURL',
@@ -101,6 +145,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
                         widget_style=cli_style.white_bg_widget
                     )
                     ], width=D())
+
             elif value == 'file':
                 self.matadata_type_container = HSplit([
                 self.app.getTitledWidget(
@@ -129,7 +174,6 @@ class EditTRDialog(JansGDialog, DialogUtils):
             buttonbox=add_released_attribute_button,
             entries=self.tr_attribute_entries,
         )
-
 
         edit_tr_container_widgets = [
                 self.app.getTitledText(
@@ -207,13 +251,21 @@ class EditTRDialog(JansGDialog, DialogUtils):
                 ),
                 ]
 
+        metadata_types = (
+                        'file',
+                        #'uri',
+                        #'federation',
+                        'manual',
+                        #'mdq'
+                        )
+
         if self.data.get('spMetaDataSourceType') != 'file':
             edit_tr_container_widgets.append(
                 self.app.getTitledWidget(
                         _("Metadata Source Type"),
                         name='spMetaDataSourceType',
                         widget=DropDownWidget(
-                            values=[(dsp, dsp) for dsp in ('file', 'uri', 'federation', 'manual', 'mdq')],
+                            values=[(dsp, dsp) for dsp in metadata_types],
                             value=self.data.get('spMetaDataSourceType', 'file'),
                             select_one_option = False,
                             on_value_changed = get_metadata_source_tpe
@@ -224,7 +276,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
 
         edit_tr_container_widgets.append(self.released_attributes_container)
 
-        self.edit_tr_container = HSplit(edit_tr_container_widgets)
+        self.edit_tr_container = HSplit(edit_tr_container_widgets, width=D())
 
         self.dialog = JansDialogWithNav(
             title=self.title,
@@ -244,7 +296,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
                 cur_claims.append(w.me.window.jans_name)
 
         claims_list = []
-        for claim in common_data.users.claims:
+        for claim in self.users.claims:
             if not claim['oxMultiValuedAttribute'] and claim['name'] in cur_claims:
                 continue
             if claim['name'] in ('memberOf', 'userPassword', 'uid', 'jansStatus', 'jansActive', 'updatedAt'):
@@ -255,7 +307,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
 
         def add_claim(dialog) -> None:
             for claim_ in claims_checkbox.current_values:
-                for claim_prop in common_data.users.claims:
+                for claim_prop in self.users.claims:
                     if claim_prop['name'] == claim_:
                         break
                 display_name = claim_prop['displayName']
@@ -395,18 +447,28 @@ class EditTRDialog(JansGDialog, DialogUtils):
         new_data = copy.deepcopy(self.data)
         new_data.update(tr_data)
 
-        cfr = self.check_required_fields(data=new_data, container=self.edit_tr_container, tobefocused=self.edit_tr_container)
+        sp_meta_data_source_type = tr_data.get('spMetaDataSourceType')
+        check_data = copy.deepcopy(new_data)
+
+        if sp_meta_data_source_type == 'manual':
+            check_data.update(matadata_type_container_data)
+
+            if not (matadata_type_container_data['jansAssertionConsumerServiceGetURL'] or matadata_type_container_data['jansAssertionConsumerServicePostURL']):
+                self.app.show_message(_(common_strings.error), _("Please enter either jansAssertionConsumerServiceGetURL or jansAssertionConsumerServicePostURL"), tobefocused=self.edit_tr_container)
+                return
+
+        cfr = self.check_required_fields(data=check_data, container=self.edit_tr_container, tobefocused=self.edit_tr_container)
         if not cfr:
             return
 
-
-        sp_meta_data_source_type = tr_data.get('spMetaDataSourceType')
         if sp_meta_data_source_type == 'file':
             new_data['spMetaDataLocation'] = os.path.basename(self.metadata_file_path)
             new_data.pop('spMetaDataURL', None)
         elif sp_meta_data_source_type == 'uri':
             new_data.pop('spMetaDataLocation', None)
             new_data['spMetaDataURL'] = matadata_type_container_data['spMetaDataURL']
+        elif sp_meta_data_source_type == 'manual':
+            new_data['samlMetadata'] = matadata_type_container_data
 
         data = {'trustRelationship': new_data}
         if sp_meta_data_source_type == 'file':
