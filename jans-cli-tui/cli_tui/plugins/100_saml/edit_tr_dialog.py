@@ -251,6 +251,19 @@ class EditTRDialog(JansGDialog, DialogUtils):
                 ),
                 ]
 
+        if not self.new_tr and self.data.get('spMetaDataSourceType'):
+            edit_tr_container_widgets.append(
+                self.app.getTitledText(
+                    title=_("Metadata File"),
+                    name='spMetaDataFN',
+                    value=self.data.get('spMetaDataFN', ''),
+                    style=cli_style.read_only,
+                    jans_help=_("Service Provider Logout URL for TR"),
+                    widget_style=cli_style.read_only,
+                    read_only=True,
+                    )
+                )
+
         metadata_types = (
                         'file',
                         #'uri',
@@ -259,20 +272,20 @@ class EditTRDialog(JansGDialog, DialogUtils):
                         #'mdq'
                         )
 
-        if self.data.get('spMetaDataSourceType') != 'file':
-            edit_tr_container_widgets.append(
-                self.app.getTitledWidget(
-                        _("Metadata Source Type"),
-                        name='spMetaDataSourceType',
-                        widget=DropDownWidget(
-                            values=[(dsp, dsp) for dsp in metadata_types],
-                            value=self.data.get('spMetaDataSourceType', 'file'),
-                            select_one_option = False,
-                            on_value_changed = get_metadata_source_tpe
-                        )
-                )
+
+        edit_tr_container_widgets.append(
+            self.app.getTitledWidget(
+                    _("Metadata Source Type"),
+                    name='spMetaDataSourceType',
+                    widget=DropDownWidget(
+                        values=[(dsp, dsp) for dsp in metadata_types],
+                        value=self.data.get('spMetaDataSourceType', 'file'),
+                        select_one_option = False,
+                        on_value_changed = get_metadata_source_tpe
+                    )
             )
-            edit_tr_container_widgets.append(DynamicContainer(lambda: self.matadata_type_container))
+        )
+        edit_tr_container_widgets.append(DynamicContainer(lambda: self.matadata_type_container))
 
         edit_tr_container_widgets.append(self.released_attributes_container)
 
@@ -464,6 +477,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
         if sp_meta_data_source_type == 'file':
             new_data['spMetaDataLocation'] = os.path.basename(self.metadata_file_path)
             new_data.pop('spMetaDataURL', None)
+            new_data.pop('spMetaDataFN', None)
         elif sp_meta_data_source_type == 'uri':
             new_data.pop('spMetaDataLocation', None)
             new_data['spMetaDataURL'] = matadata_type_container_data['spMetaDataURL']
