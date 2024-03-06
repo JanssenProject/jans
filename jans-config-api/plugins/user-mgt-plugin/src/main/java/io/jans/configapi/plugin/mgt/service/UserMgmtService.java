@@ -88,7 +88,7 @@ public class UserMgmtService {
         boolean useLowercaseFilter = configurationService.isLowercaseFilter(userService.getPeopleBaseDn());
         logger.info("For searching user user useLowercaseFilter?:{}", useLowercaseFilter);
 
-        Filter displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter, searchFilter = null;
+        Filter displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter, givenNameFilter, middleNameFilter, nicknameFilter, snFilter, searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
@@ -105,6 +105,10 @@ public class UserMgmtService {
                             Filter.createLowercaseFilter(AttributeConstants.DESCRIPTION), null, targetArray, null);
                     mailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.MAIL),
                             null, targetArray, null);
+                    givenNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("givenName"), null, targetArray, null);
+                    middleNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("middleName"), null, targetArray, null);
+                    nicknameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("nickname"), null, targetArray, null);
+                    snFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("sn"), null, targetArray, null);
                     uidFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray,
                             null);
                 } else {
@@ -113,12 +117,16 @@ public class UserMgmtService {
                     descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
                             null);
                     mailFilter = Filter.createSubstringFilter(AttributeConstants.MAIL, null, targetArray, null);
+                    givenNameFilter = Filter.createSubstringFilter("givenName", null, targetArray, null);
+                    middleNameFilter = Filter.createSubstringFilter("middleName", null, targetArray, null);
+                    nicknameFilter = Filter.createSubstringFilter("nickname", null, targetArray, null);
+                    snFilter = Filter.createSubstringFilter("sn", null, targetArray, null);
                     uidFilter = Filter.createSubstringFilter("uid", null, targetArray, null);
                 }
 
                 inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
                 filters.add(
-                        Filter.createORFilter(displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter));
+                        Filter.createORFilter(displayNameFilter, descriptionFilter, mailFilter, uidFilter, givenNameFilter, middleNameFilter, nicknameFilter, snFilter, inumFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
