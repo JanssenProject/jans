@@ -517,7 +517,7 @@ public class UserMgmtService {
         }
 
         if (StringUtils.isNotBlank(sb.toString())) {
-            logger.error("Attribute validation failed with error msg:{} \n",sb.toString());
+            logger.error("Attribute validation failed with error msg:{} \n",sb);
             throw new WebApplicationException(sb.toString());
         }
 
