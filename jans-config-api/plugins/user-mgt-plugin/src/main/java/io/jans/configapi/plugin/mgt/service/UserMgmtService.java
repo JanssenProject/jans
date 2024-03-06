@@ -551,12 +551,12 @@ public class UserMgmtService {
 
             // minvalue Validation
             if (minvalue != null && attributeValue.length() < minvalue) {
-                sb.append(",must be at least " + minvalue + " characters.");
+                sb.append(",must be at least " + minvalue + " characters");
             }
 
             // maxValue Validation
             if (maxValue != null && attributeValue.length() > maxValue) {
-                sb.append(",must be less than " + maxValue + " characters.");
+                sb.append(",must be less than " + maxValue + " characters");
             }
 
             // regexpValue
@@ -564,7 +564,7 @@ public class UserMgmtService {
                 Pattern pattern = Pattern.compile(regexpValue);
                 Matcher matcher = pattern.matcher(attributeValue);
                 if (!matcher.matches()) {
-                    sb.append(",must match (" + regexpValue + ") pattern.");
+                    sb.append(",must match (" + regexpValue + ") pattern");
                 }
             }
         } catch (Exception ex) {
@@ -573,7 +573,8 @@ public class UserMgmtService {
         logger.info("Validate reuslt for attributeName:{} is sb :{} ", attributeName, sb);
 
         if (StringUtils.isNotBlank(sb.toString())) {
-            sb.insert(0, attributeName+" ");
+            sb.insert(0, "'"+attributeName+"' -> ");
+            sb.append("  ");        
         }
         return sb.toString();
     }
