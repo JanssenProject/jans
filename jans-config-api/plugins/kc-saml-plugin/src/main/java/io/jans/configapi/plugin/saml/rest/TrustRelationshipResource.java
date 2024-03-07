@@ -201,14 +201,14 @@ public class TrustRelationshipResource extends BaseResource {
         }
         
         InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
-        logger.debug(" Create metaDataFile:{} ", metaDataFile);
-        if (metaDataFile != null) {
-            logger.debug(" Create metaDataFile.available():{}", metaDataFile.available());
+        logger.debug("metaDataFile for update is:{} ", metaDataFile);
+        if (metaDataFile != null && metaDataFile.available() > 0) {
+            logger.debug("For update metaDataFile.available():{}", metaDataFile.available());
         }
         
         validateSpMetaDataSourceType(trustRelationship, metaDataFile);
         // Update
-        trustRelationship = samlService.updateTrustRelationship(trustRelationship);
+        trustRelationship = samlService.updateTrustRelationship(trustRelationship, metaDataFile);
 
         logger.info("Post update trustRelationship:{}", trustRelationship);
 
