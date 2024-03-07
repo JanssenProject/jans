@@ -240,6 +240,36 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.noContent().build();
     }
 
+    @Operation(summary="Get TrustRelationship file metadata", description="Get TrustRelationship file metadata",
+        operationId = "get-trust-relationship-file-metadata", tags = {"SAML - Trust Relationship"},
+        security = @SecurityRequirement(name = "oauth2", scopes= {Constants.SAML_READ_ACCESS}),
+        responses = {
+          @ApiResponse(responseCode="200",description="OK",content= @Content(mediaType = MediaType.APPLICATION_XML,schema = @Schema(type="string",format="binary"))),
+          @ApiResponse(responseCode="400",description="Bad Request",content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+          @ApiResponse(responseCode="401",description="Unauthorized"),
+          @ApiResponse(responseCode="404",description="Not Found",content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+          @ApiResponse(responseCode="500",description="Internal Server Error")
+        }
+    )
+    @Path(Constants.SP_METADATA_FILE_PATH+Constants.ID_PATH_PARAM)
+    @GET
+    @ProtectedApi(scopes = {Constants.SAML_READ_ACCESS})
+    public Response gettrustRelationshipFileMetadata(
+        @Parameter(description="TrustRelationship inum") @PathParam(Constants.ID) @NotNull String id) {
+        
+        logger.info("getTrustRelationshipFileMeta(). ID: - {}",id);
+        TrustRelationship trustrelationship = samlService.getTrustRelationshipByInum(id);
+        checkResourceNotNull(trustrelationship,SAML_TRUST_RELATIONSHIP);
+        if(trustrelationship.getSpMetaDataSourceType() != MetadataSourceType.FILE) {
+           throwBadRequestException("TrustRelationship metadatasource type isn't a FILE");
+        }
+        InputStream fs = samlService.getTrustRelationshipMetadataFile(trustrelationship);
+        if(fs == null) {
+            return getNotFoundError(String.format("metadata file for tr '%s' ",id));
+        }
+        return Response.ok(fs,MediaType.APPLICATION_XML).build();
+    }
+
     @Operation(summary = "Process unprocessed metadata files", description = "Process unprocessed metadata files", operationId = "post-metadata-files", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
