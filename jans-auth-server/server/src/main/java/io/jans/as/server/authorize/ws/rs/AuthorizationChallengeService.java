@@ -171,7 +171,7 @@ public class AuthorizationChallengeService {
 
             // generate session if not exist and if allowed by config (or if session is prepared by script)
             if (sessionUser == null || executionContext.getAuthorizationChallengeSessionId() != null) {
-                sessionUser = generateAuthenticateSessionWithCookie(authzRequest, user, executionContext.getAuthorizationChallengeSessionId());
+                sessionUser = generateAuthenticateSessionWithCookieIfNeeded(authzRequest, user, executionContext.getAuthorizationChallengeSessionId());
             }
         }
 
@@ -195,7 +195,7 @@ public class AuthorizationChallengeService {
         return createSuccessfulResponse(authorizationCode);
     }
 
-    private SessionId generateAuthenticateSessionWithCookie(AuthzRequest authzRequest, User user, SessionId scriptGeneratedSession) {
+    private SessionId generateAuthenticateSessionWithCookieIfNeeded(AuthzRequest authzRequest, User user, SessionId scriptGeneratedSession) {
         if (user == null) {
             log.trace("Skip session_id generation because user is null");
             return null;
