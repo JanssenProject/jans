@@ -131,6 +131,17 @@ public class SamlIdpService {
         return false;
     }
 
+    public InputStream getFileFromDocumentStore(String path) {
+
+        logger.debug("Get file from DocumentStore. Path: {}",path);
+        try {
+            return documentStoreService.readDocumentAsStream(path);
+        }catch(Exception e) {
+            logger.error("Failed to get file '{}' from DocumentStore",path);
+            return null;
+        }
+    }
+
     private String getTempMetadataFilename(String metadataFolder, String fileName) {
         logger.info("documentStoreService:{}, localDocumentStoreService:{}, metadataFolder:{}, fileName:{}",
                 documentStoreService, localDocumentStoreService, metadataFolder, fileName);
