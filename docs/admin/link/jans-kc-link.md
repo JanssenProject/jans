@@ -7,30 +7,43 @@ tags:
 
 # Jans Keycloak Link
 
-The Jans Keycloak Link is a [Jans Link](README.md) module that provide 
+The Jans Keycloak Link is a [Jans Link](README.md) module that provides 
 synchronization services to update the Janssen User Store from an external 
 Keycloak instance.
 
-Jans Keycloak Link integration with external Keycloak involves following 
-configuration steps. 
-
-## Configure Client on Keycloak
-
 Jans Keycloak Link accesses Keycloak data via Keycloak API. A new `confidential`
 client needs to be created on Keycloak in order to authorise Jans Keycloak Link
-for API access.
+for API access. The client can be configured to use one of the two 
+authentication mechanisms:
+- [Client Credentials Grant](#using-client-credentials-grant)
+- [Resource Owner Password Credentials Grant](#using-resource-owner-password-credentials-grant)
 
-### Using Client Credentials Grant
+## Using Client Credentials Grant
+
+### Configure Client on Keycloak
 
 - Create a new OpenId Connect client from Keycloak administration console
 - Configure this client as `confidential` access type by enabling `client 
   authentication`
 - Enable `Service Accounts Enabled` flag, which enables client credentials grant
   ![](../../assets/jans-kc-link-client-2.png)
-- Note the client ID and client secret. This detail will be required to be added
+- Keep a note of the client ID and client secret. This detail will be required to be added
   to the Janssen server
 
-### Using Resource Owner Password Credentials Grant
+### Configure Jans Keycloak Link Module
+
+On the Janssen server, Jans Keycloak Link module configuration need to be
+updated to be able to connect with Keycloak server.
+
+- Encode the client secret with jans command
+  ```shell
+  /opt/jans/bin/encode.py {String to encrypt}
+  ```
+- Using [TUI](../config-guide/config-tools/jans-tui/README.md), update the 
+  Jans KC Link module configuration as shown below:
+  ![](../../assets/tui-kc-link-kc-config-client-cred.png)
+
+## Using Resource Owner Password Credentials Grant
 
 !!! Note
       Use of this grant type is generally discouranged and [removed from OAuth
@@ -48,18 +61,9 @@ for API access.
 
 ## Configure Jans Keycloak Link Module 
 
-On the Janssen server, Jans Keycloak Link module configuration need to be
-updated to be able to connect with Keycloak server. Configuration parameters
-change depending on the type of grant used by the client configuration on
-the Keycloak server. 
-
 If the Keycloak client uses [Client Credentials Grant](#using-client-credentials-grant)
 use the following steps to configure Jans Keycloak link.
 
-- Encode the client secret with jans command 
-  ```shell
-  /opt/jans/bin/encode.py {String to encrypt}
-  ```
 - Add these values to
 
   TODO: Here we need to list steps that will update the janssen data store with
