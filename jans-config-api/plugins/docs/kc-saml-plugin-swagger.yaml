@@ -785,7 +785,7 @@ paths:
       - SAML - Trust Relationship
       summary: Get all Trust Relationship
       description: Get all TrustRelationship.
-      operationId: get-trust-relationship
+      operationId: get-trust-relationships
       responses:
         "200":
           description: Ok
