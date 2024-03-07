@@ -83,6 +83,14 @@ updated to be able to connect with Keycloak server.
  	}
 ```
 
+## Test The Integration
+
+To check if the integration is working, you can create a user on Keycloak server.
+This user should reflect in Janssen Server after polling interval has passed.
+
+Use [TUI](../config-guide/config-tools/jans-tui/README.md) to see the list of 
+available users in Janssen Server.
+
 ## Want to contribute?
 
 If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
