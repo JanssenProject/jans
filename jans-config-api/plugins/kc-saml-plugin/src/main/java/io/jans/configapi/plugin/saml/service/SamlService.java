@@ -359,5 +359,11 @@ public class SamlService {
 
         }
     }
+    
+    public InputStream getTrustRelationshipMetadataFile(TrustRelationship trustrelationship) {
+
+        log.debug("Get trustrelationship metadata file");
+        return samlIdpService.getFileFromDocumentStore(trustrelationship.getSpMetaDataFN());
+    }
 
 }
