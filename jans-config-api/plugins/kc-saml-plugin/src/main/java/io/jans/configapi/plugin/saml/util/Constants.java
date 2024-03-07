@@ -70,6 +70,7 @@ public class Constants {
     // Scopes
     public static final String SAML_READ_ACCESS = "https://jans.io/oauth/config/saml.readonly";
     public static final String SAML_WRITE_ACCESS = "https://jans.io/oauth/config/saml.write";
+    public static final String SAML_DELETE_ACCESS = "https://jans.io/oauth/config/saml.delete";
 
     public static final String SAML_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/saml-config.readonly";
     public static final String SAML_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/saml-config.write";
