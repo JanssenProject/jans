@@ -54,10 +54,10 @@ public class Document extends Entry implements Serializable {
 	private String jansRevision;
 	
 	@AttributeName
-	private String jansEnabled;
+	private boolean jansEnabled;
 	
 	@AttributeName
-	private String jansAliass;
+	private String jansAlias;
 
 	public String getInum() {
 		return inum;
@@ -131,28 +131,27 @@ public class Document extends Entry implements Serializable {
 		this.jansRevision = jansRevision;
 	}
 
-	public String getJansEnabled() {
-		return jansEnabled;
-	}
+    public boolean isJansEnabled() {
+        return jansEnabled;
+    }
 
-	public void setJansEnabled(String jansEnabled) {
-		this.jansEnabled = jansEnabled;
-	}
+    public void setJansEnabled(boolean jansEnabled) {
+        this.jansEnabled = jansEnabled;
+    }
 
-	public String getJansAliass() {
-		return jansAliass;
-	}
+    public String getJansAlias() {
+        return jansAlias;
+    }
 
-	public void setJansAliass(String jansAliass) {
-		this.jansAliass = jansAliass;
-	}
+    public void setJansAlias(String jansAlias) {
+        this.jansAlias = jansAlias;
+    }
 
-	@Override
-	public String toString() {
-		return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
-				+ ", document=" + document + ", creationDate=" + creationDate + ", jansModuleProperty="
-				+ jansModuleProperty + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled="
-				+ jansEnabled + ", jansAliass=" + jansAliass + "]";
-	}
-
+    @Override
+    public String toString() {
+        return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
+                + ", document=" + document + ", creationDate=" + creationDate + ", jansModuleProperty="
+                + jansModuleProperty + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled="
+                + jansEnabled + ", jansAlias=" + jansAlias + "]";
+    }
 }

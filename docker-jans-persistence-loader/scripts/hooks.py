@@ -266,6 +266,16 @@ def transform_auth_dynamic_config_hook(conf, manager):
             conf["agamaConfiguration"][new_key] = value
             should_update = True
 
+    # lockMessageConfig attribute rename
+    for new_attr, old_attr, default_val in [
+        ("enableTokenMessages", "enableIdTokenMessages", False),
+        ("tokenMessagesChannel", "idTokenMessagesChannel", "jans_token"),
+    ]:
+        if new_attr not in conf["lockMessageConfig"]:
+            conf["lockMessageConfig"][new_attr] = default_val
+            conf["lockMessageConfig"].pop(old_attr, None)
+            should_update = True
+
     # return the conf and flag to determine whether it needs update or not
     return conf, should_update
 
