@@ -49,41 +49,17 @@ updated to be able to connect with Keycloak server.
       Use of this grant type is generally discouranged and [removed from OAuth
       2.1](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-07#name-differences-from-oauth-20).
 
+### Configure Client on Keycloak
 
 - Create a new OpenId Connect client from Keycloak administration console
 - Configure this client as `confidential` access type by enabling `client
   authentication`
-
   ![](../../assets/jans-kc-link-client-2.png)
 - Create a user in the Keycloak server. The user should have permissions to 
   access Keycloak API in the Keycloak. For the instructions in this document,
   We will use the default Keycloak user which is `admin`.    
 
-## Configure Jans Keycloak Link Module 
-
-If the Keycloak client uses [Client Credentials Grant](#using-client-credentials-grant)
-use the following steps to configure Jans Keycloak link.
-
-- Add these values to
-
-  TODO: Here we need to list steps that will update the janssen data store with
-  keycloak configuration as below (described in this [comment](https://github.com/JanssenProject/jans/issues/6280#issuecomment-1765091635))
-  and taken implemented by [this issue](https://github.com/JanssenProject/jans/issues/7667)
-
-```json
-"keycloakConfiguration": {
-		"serverUrl": "keycloak-server-url",
-. 		"realm": "keycloak-realm",
- 		"clientId": "id-of-client-on-keycloak",
- 		"clientSecret": "{encoded-client-secret}",
- 		"grantType": "client_credentials",
- 		"username": "",
- 		"password": ""
- 	}
-```
-
-If the Keycloak client uses [Resource Owner Password Credentials Grant](#using-resource-owner-password-credentials-grant)
-use the following steps to configure Jans Keycloak link.
+### Configure Jans Keycloak Link Module 
 
 - Encode the user password with jans command
   ```shell
