@@ -7900,11 +7900,11 @@ components:
           type: boolean
         adminCanView:
           type: boolean
+        adminCanEdit:
+          type: boolean
         userCanView:
           type: boolean
         userCanEdit:
-          type: boolean
-        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean

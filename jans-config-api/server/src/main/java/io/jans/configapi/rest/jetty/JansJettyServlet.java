@@ -6,7 +6,12 @@
 
 package io.jans.configapi.rest.jetty;
 
-import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.*;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.servlet.*;
 
 
@@ -16,65 +21,18 @@ import jakarta.ws.rs.ApplicationPath;
 
 import org.slf4j.*;
 public class JansJettyServlet extends HttpServlet {
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response)
+    {
+
+         // Create a WebAppContext.
+         WebAppContext context = new WebAppContext();
+         // Configure the path of the packaged web application (file or directory).
+         context.setWar("/path/to/webapp.war");
+         // Configure the contextPath.
+         context.setContextPath("/app");
     
+         // Link the context to the server.
+         server.setHandler(context);
+    }
 }
-/*public class JansJettyUtil extends AppLifeCycle.Binding  {
-
-    private List<File> extraClasspath = new ArrayList<>();
-
-    public String[] getBindingTargets()
-    {
-        return new String[] { "deploying" };
-    }
-
-    public void addAllJars(File dir)
-    {
-        for (File file : dir.listFiles())
-        {
-            if (!file.isFile())
-            {
-                continue;
-            }
-            if (file.getName().toLowerCase(Locale.ENGLISH).equals(".jar"))
-            {
-                addJar(file);
-            }
-        }
-    }
-
-    public void addJar(File jar)
-    {
-        if (jar.exists() && jar.isFile())
-        {
-            extraClasspath.add(jar);
-        }
-    }
-
-    public void processBinding(Node node, App app) throws Exception
-    {
-        ContextHandler handler = app.getContextHandler();
-        if (handler == null)
-        {
-            throw new NullPointerException("No Handler created for App: " + app);
-        }
-
-        if (handler instanceof WebAppContext)
-        {
-            WebAppContext webapp = (WebAppContext)handler;
-
-            StringBuilder xtraCp = new StringBuilder();
-            boolean delim = false;
-            for (File cp : extraClasspath)
-            {
-                if (delim)
-                {
-                    xtraCp.append(File.pathSeparatorChar);
-                }
-                xtraCp.append(cp.getAbsolutePath());
-                delim = true;
-            }
-
-            webapp.setExtraClasspath(xtraCp.toString());
-        }
-    }
-}*/
