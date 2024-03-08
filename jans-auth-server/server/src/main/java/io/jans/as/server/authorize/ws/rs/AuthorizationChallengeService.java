@@ -153,6 +153,7 @@ public class AuthorizationChallengeService {
         authorizeRestWebServiceValidator.validateAuthorizationDetails(authzRequest, client);
 
         final ExecutionContext executionContext = ExecutionContext.of(authzRequest);
+        executionContext.setSessionId(sessionUser);
 
         if (user == null) {
             log.trace("Executing external authentication challenge");
@@ -168,9 +169,9 @@ public class AuthorizationChallengeService {
 
             user = executionContext.getUser() != null ? executionContext.getUser() : new User();
 
-            // generate session if not exist and if allowed by config
-            if (sessionUser == null) {
-                sessionUser = generateAuthenticateSessionWithCookie(authzRequest, user);
+            // generate session if not exist and if allowed by config (or if session is prepared by script)
+            if (sessionUser == null || executionContext.getAuthorizationChallengeSessionId() != null) {
+                sessionUser = generateAuthenticateSessionWithCookieIfNeeded(authzRequest, user, executionContext.getAuthorizationChallengeSessionId());
             }
         }
 
@@ -194,14 +195,22 @@ public class AuthorizationChallengeService {
         return createSuccessfulResponse(authorizationCode);
     }
 
-    private SessionId generateAuthenticateSessionWithCookie(AuthzRequest authzRequest, User user) {
+    private SessionId generateAuthenticateSessionWithCookieIfNeeded(AuthzRequest authzRequest, User user, SessionId scriptGeneratedSession) {
         if (user == null) {
             log.trace("Skip session_id generation because user is null");
             return null;
         }
+
         if (isFalse(appConfiguration.getAuthorizationChallengeShouldGenerateSession())) {
             log.trace("Skip session_id generation because it's not allowed by AS configuration ('authorizationChallengeShouldGenerateSession=false')");
             return null;
+        }
+
+        if (scriptGeneratedSession != null) {
+            log.trace("Authorization Challenge script generated session: {}.", scriptGeneratedSession.getId());
+            cookieService.createSessionIdCookie(scriptGeneratedSession, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
+            log.trace("Created cookie for authorization Challenge script generated session: {}.", scriptGeneratedSession.getId());
+            return scriptGeneratedSession;
         }
 
         Map<String, String> genericRequestMap = getGenericRequestMap(authzRequest.getHttpRequest());

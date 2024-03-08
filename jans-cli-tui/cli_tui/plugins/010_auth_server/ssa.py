@@ -200,11 +200,27 @@ class SSA(DialogUtils):
             data = {}
             title = _("Add new SSA")
 
+        
+            
+
+
         expiration_label = _("Expiration")
         never_expire_label = _("Never")
         self.never_expire_cb = Checkbox(never_expire_label)
+        never_expire_cb_handler_org = self.never_expire_cb._handle_enter
+
+        def hide_show_expire_widget():
+            never_expire_cb_handler_org()
+            if self.never_expire_cb.checked:
+                self.expire_widget = Window()
+            else:
+                self.expire_widget = DateSelectWidget(value=expiration_iso, parent=self)
+
+        self.never_expire_cb._handle_enter = hide_show_expire_widget
+
+        hide_show_expire_widget()
+
         expiration_iso = datetime.fromtimestamp(data['exp']).isoformat() if 'exp' in data else ''
-        self.expire_widget = DateSelectWidget(value=expiration_iso, parent=self)
 
         custom_claims_title = _("Custom Claims: ")
         add_custom_claim_title = _("Add Claim")
@@ -290,7 +306,7 @@ class SSA(DialogUtils):
                 VSplit([
                     Label(expiration_label + ': ', width=len(expiration_label)+2, style=cli_style.titled_text),
                     HSplit([self.never_expire_cb], width=len(never_expire_label)+7),
-                    self.expire_widget,
+                    DynamicContainer(lambda: self.expire_widget),
                     ], height=1),
 
             ])
