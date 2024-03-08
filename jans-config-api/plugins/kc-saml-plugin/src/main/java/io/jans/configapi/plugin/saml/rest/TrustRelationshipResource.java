@@ -1,10 +1,12 @@
 package io.jans.configapi.plugin.saml.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
-import io.jans.configapi.plugin.saml.model.TrustRelationship;
-import io.jans.configapi.plugin.saml.form.TrustRelationshipForm;
+import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.plugin.saml.model.MetadataSourceType;
+import io.jans.configapi.plugin.saml.model.TrustRelationship;
+import io.jans.configapi.plugin.saml.form.TrustRelationshipForm;
 import io.jans.configapi.plugin.saml.util.Constants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.plugin.saml.service.SamlService;
@@ -31,6 +33,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.*;
 
+import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.slf4j.Logger;
 
@@ -44,6 +47,8 @@ public class TrustRelationshipResource extends BaseResource {
     private static final String SAML_TRUST_RELATIONSHIP_CHECK_STR = "Trust Relationship identified by '";
     private static final String NAME_CONFLICT = "NAME_CONFLICT";
     private static final String NAME_CONFLICT_MSG = "Trust Relationship with same name `%s` already exists!";
+    private static final String DATA_NULL_CHK = "RESOURCE_IS_NULL";
+    private static final String DATA_NULL_MSG = "`%s` should not be null!";
     
     @Inject
     Logger logger;
@@ -51,7 +56,7 @@ public class TrustRelationshipResource extends BaseResource {
     @Inject
     SamlService samlService;
 
-    @Operation(summary = "Get all Trust Relationship", description = "Get all TrustRelationship.", operationId = "get-trust-relationship", tags = {
+    @Operation(summary = "Get all Trust Relationship", description = "Get all TrustRelationship.", operationId = "get-trust-relationships", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_READ_ACCESS }))
     @ApiResponses(value = {
@@ -95,8 +100,11 @@ public class TrustRelationshipResource extends BaseResource {
     @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationshipForm.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-post.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Newly created Trust Relationship", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))),
+            })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/upload")
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
@@ -127,6 +135,7 @@ public class TrustRelationshipResource extends BaseResource {
             logger.debug(" Create metaDataFile.available():{}", metaDataFile.available());
         }
 
+        validateSpMetaDataSourceType(trustRelationship, metaDataFile);
         String inum = samlService.generateInumForNewRelationship();
         trustRelationship.setInum(inum);
         trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
@@ -143,8 +152,11 @@ public class TrustRelationshipResource extends BaseResource {
     @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationshipForm.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-put.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))),
+            })
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/upload")
@@ -189,14 +201,14 @@ public class TrustRelationshipResource extends BaseResource {
         }
         
         InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
-        logger.debug(" Create metaDataFile:{} ", metaDataFile);
-        if (metaDataFile != null) {
-            logger.debug(" Create metaDataFile.available():{}", metaDataFile.available());
+        logger.debug("metaDataFile for update is:{} ", metaDataFile);
+        if (metaDataFile != null && metaDataFile.available() > 0) {
+            logger.debug("For update metaDataFile.available():{}", metaDataFile.available());
         }
-
-       
+        
+        validateSpMetaDataSourceType(trustRelationship, metaDataFile);
         // Update
-        trustRelationship = samlService.updateTrustRelationship(trustRelationship);
+        trustRelationship = samlService.updateTrustRelationship(trustRelationship, metaDataFile);
 
         logger.info("Post update trustRelationship:{}", trustRelationship);
 
@@ -228,6 +240,36 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.noContent().build();
     }
 
+    @Operation(summary="Get TrustRelationship file metadata", description="Get TrustRelationship file metadata",
+        operationId = "get-trust-relationship-file-metadata", tags = {"SAML - Trust Relationship"},
+        security = @SecurityRequirement(name = "oauth2", scopes= {Constants.SAML_READ_ACCESS}),
+        responses = {
+          @ApiResponse(responseCode="200",description="OK",content= @Content(mediaType = MediaType.APPLICATION_XML,schema = @Schema(type="string",format="binary"))),
+          @ApiResponse(responseCode="400",description="Bad Request",content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+          @ApiResponse(responseCode="401",description="Unauthorized"),
+          @ApiResponse(responseCode="404",description="Not Found",content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+          @ApiResponse(responseCode="500",description="Internal Server Error")
+        }
+    )
+    @Path(Constants.SP_METADATA_FILE_PATH+Constants.ID_PATH_PARAM)
+    @GET
+    @ProtectedApi(scopes = {Constants.SAML_READ_ACCESS})
+    public Response gettrustRelationshipFileMetadata(
+        @Parameter(description="TrustRelationship inum") @PathParam(Constants.ID) @NotNull String id) {
+        
+        logger.info("getTrustRelationshipFileMeta()");
+        TrustRelationship trustrelationship = samlService.getTrustRelationshipByInum(id);
+        checkResourceNotNull(trustrelationship,SAML_TRUST_RELATIONSHIP);
+        if(trustrelationship.getSpMetaDataSourceType() != MetadataSourceType.FILE) {
+           throwBadRequestException("TrustRelationship metadatasource type isn't a FILE");
+        }
+        InputStream fs = samlService.getTrustRelationshipMetadataFile(trustrelationship);
+        if(fs == null) {
+            return getNotFoundError(String.format("metadata file for tr '%s' ",id));
+        }
+        return Response.ok(fs,MediaType.APPLICATION_XML).build();
+    }
+
     @Operation(summary = "Process unprocessed metadata files", description = "Process unprocessed metadata files", operationId = "post-metadata-files", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
@@ -244,6 +286,46 @@ public class TrustRelationshipResource extends BaseResource {
         samlService.processUnprocessedSpMetadataFiles();
 
         return Response.ok().build();
+    }
+    
+    private void validateSpMetaDataSourceType(TrustRelationship trustRelationship, InputStream metaDataFile)
+            throws IOException {
+        logger.info("Validate SP MetaDataSourceType trustRelationship:{}, metaDataFile:{}", trustRelationship,
+                metaDataFile);
+
+        checkResourceNotNull(trustRelationship.getSpMetaDataSourceType(), "SP MetaData Source Type");
+
+        logger.info("Validate trustRelationship.getSpMetaDataSourceType():{}",
+                trustRelationship.getSpMetaDataSourceType());
+        
+        if (trustRelationship.getSpMetaDataSourceType().equals(MetadataSourceType.FILE)) {
+
+            if (metaDataFile == null || metaDataFile.available() <= 0) {
+                throwBadRequestException(DATA_NULL_CHK, String.format(DATA_NULL_MSG, "SP MetaData File"));
+            }
+
+            // Since SP Metadata source is File set SamlMetadata manual elements to null
+            trustRelationship.setSamlMetadata(null);
+
+        } else if (trustRelationship.getSpMetaDataSourceType().equals(MetadataSourceType.MANUAL)) {
+
+            if (metaDataFile != null && metaDataFile.available() > 0) {
+                throwBadRequestException("SP MetaData File should not be provided!");
+            }
+
+            checkResourceNotNull(trustRelationship.getSamlMetadata(), "'SamlMetadata manual elements'");
+            checkNotNull(trustRelationship.getSamlMetadata().getEntityId(), "'EntityId'");
+            checkNotNull(trustRelationship.getSamlMetadata().getNameIDPolicyFormat(),
+                    "'NameIDPolicyFormat'");
+            checkNotNull(trustRelationship.getSamlMetadata().getSingleLogoutServiceUrl(),
+                    "'SingleLogoutServiceUrl'");
+            if (StringUtils.isBlank(trustRelationship.getSamlMetadata().getJansAssertionConsumerServiceGetURL())
+                    && (StringUtils
+                            .isBlank(trustRelationship.getSamlMetadata().getJansAssertionConsumerServiceGetURL()))) {
+                throwBadRequestException("Either of AssertionConsumerService GET or POST URL should be provided!");
+            }
+        }
+
     }
 
 }

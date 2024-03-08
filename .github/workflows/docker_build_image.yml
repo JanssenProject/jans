@@ -1,12 +1,15 @@
 name: Build and Publish Releases to Hub
 
 on:
+  schedule:
+    - cron: "0 23 * * *"
   push:
     tags:
       - "*"
     branches:
       # below branch is triggered by jenkins which triggers dev image
       - update-source-build-date
+      - main
     paths:
       - "docker-jans-**/**"
       - "!**.md"

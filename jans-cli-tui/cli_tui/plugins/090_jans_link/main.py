@@ -12,7 +12,8 @@ from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.widget_collections import get_ldap_config_widgets
+from wui_components.widget_collections import get_ldap_config_widgets,\
+    get_data_for_ldap_widgets
 
 from utils.utils import common_data
 
@@ -503,14 +504,7 @@ class Plugin(DialogUtils):
         body = HSplit(get_ldap_config_widgets(data), width=D())
 
         def save_source_config(dialog):
-            sc_data = self.make_data_from_dialog(tabs={'sc': dialog.body})
-            sc_data['primaryKey'] = None
-            sc_data['localPrimaryKey'] = None
-            sc_data['useAnonymousBind'] = False
-            sc_data['version'] = data['version']+1 if 'version' in data else 0
-            sc_data['level'] = 0
-            sc_data['servers'] = sc_data['servers'].split()
-            sc_data['baseDNs'] = sc_data['baseDNs'].split()
+            sc_data = get_data_for_ldap_widgets(dialog.body)
 
             if 'sourceConfigs' not in self.data:
                 self.data['sourceConfigs'] = []

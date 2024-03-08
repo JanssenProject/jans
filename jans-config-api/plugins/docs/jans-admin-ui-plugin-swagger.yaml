@@ -1580,6 +1580,18 @@ components:
           type: integer
           description: Admin UI Session Timeout
           format: int32
+        additionalParameters:
+          type: array
+          description: Additional Authentication Parameters
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+    KeyValuePair:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
     LicenseRequest:
       type: object
       properties:
@@ -1617,13 +1629,6 @@ components:
       type: object
       properties:
         ssa:
-          type: string
-    KeyValuePair:
-      type: object
-      properties:
-        key:
-          type: string
-        value:
           type: string
     WebhookEntry:
       required:
