@@ -257,7 +257,7 @@ public class TrustRelationshipResource extends BaseResource {
     public Response gettrustRelationshipFileMetadata(
         @Parameter(description="TrustRelationship inum") @PathParam(Constants.ID) @NotNull String id) {
         
-        logger.info("getTrustRelationshipFileMeta(). ID: - {}",id);
+        logger.info("getTrustRelationshipFileMeta()");
         TrustRelationship trustrelationship = samlService.getTrustRelationshipByInum(id);
         checkResourceNotNull(trustrelationship,SAML_TRUST_RELATIONSHIP);
         if(trustrelationship.getSpMetaDataSourceType() != MetadataSourceType.FILE) {
