@@ -40,6 +40,10 @@ import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.*;
 
@@ -59,6 +63,8 @@ public class AssetResource extends ConfigBaseResource {
     private static final String DOCUMENT_NAME_CONFLICT = "NAME_CONFLICT";
     private static final String DOCUMENT_NAME_CONFLICT_MSG = "Document with same name %s already exists!";
     private static final String DOCUMENT_INUM = "Document Identifier Inum";
+    private static final String RESOURCE_NULL = "RESOURCE_NULL";
+    private static final String RESOURCE_NULL_MSG = "%s is null";
 
     @Inject
     Logger log;
@@ -140,7 +146,7 @@ public class AssetResource extends ConfigBaseResource {
         // validation
         checkResourceNotNull(assetForm, DOCUMENT_DATA_FORM);
         Document document = assetForm.getDocument();
-        log.debug(" Create document:{} ", document);
+        log.info(" Create document:{} ", document);
         checkResourceNotNull(document, DOCUMENT_DATA);
         checkNotNull(document.getDisplayName(), AttributeNames.DISPLAY_NAME);
 
@@ -153,18 +159,25 @@ public class AssetResource extends ConfigBaseResource {
 
         // check if IDP with same name already exists
         InputStream existingAssetStream = assetService.readAssetStream(document.getDisplayName());
-        log.debug("Check if asset with same name exists - existingAssetStream?:{} ", existingAssetStream);
+        log.info("Check if asset with same name exists - existingAssetStream?:{} ", existingAssetStream);
         if (existingAssetStream != null && existingAssetStream.available() > 0) {
             throwBadRequestException(DOCUMENT_NAME_CONFLICT,
                     String.format(DOCUMENT_NAME_CONFLICT_MSG, document.getDisplayName()));
         }
 
-        InputStream assetFile = assetForm.getAssetFile();
-        log.debug(" Upload assetFile:{} ", assetFile);
-
+        InputStream assetStream = assetForm.getAssetFile();
+        log.info(" Upload assetStream:{} ", assetStream);
+        
+        if(assetStream==null || assetStream.available()<=0) {
+            throwBadRequestException(RESOURCE_NULL,
+                    String.format(RESOURCE_NULL_MSG, "Asset File"));
+        }
+        log.info(" Save asset on Jetty Server");
+        this.saveAssetOnServer(document, assetStream);
+        log.info("After  Saving asset on Jetty Server");
         // upload document
         try {
-            document = assetService.saveAsset(document, assetFile);
+            document = assetService.saveAsset(document, assetStream);
             log.debug(" Upload asset document:{} ", document);
         } catch (Exception ex) {
             log.error("Application Error while creating document is - status:{}", ex.getMessage());
@@ -271,6 +284,25 @@ public class AssetResource extends ConfigBaseResource {
 
         logger.debug("Asset pagedResult:{} ", pagedResult);
         return pagedResult;
+    }
+    
+    private void saveAssetOnServer(Document document, InputStream assetFile) {
+        logger.info("Save asset on server document:{} , assetFile:{} ", document, assetFile);
+        if(document==null || assetFile==null) {
+           return;
+        }
+        try  {
+            File destFile = new File(document.getDescription());
+       
+            boolean movedSuccessfully = Files.copy(assetFile, destFile.toPath(), StandardCopyOption.REPLACE_EXISTING) > -1;
+            if (movedSuccessfully) {
+                logger.info("\n\n Asset successfully saved on server document.getDisplayName():{} , destFile.getPath():{} \n\n", document.getDisplayName(), destFile.getPath()); ;
+            } else {
+                logger.info("\n\n Could not save asset server - document.getDisplayName():{} , destFile.getPath():{} \n\n", document.getDisplayName(), destFile.getPath()); ;
+            }
+        }catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
 }
