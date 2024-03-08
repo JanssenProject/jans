@@ -86,14 +86,14 @@ public class SamlIdpService {
         logger.info("documentStoreService:{}, metadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
                 metadataFile, localDocumentStoreService);
         try {
-            boolean result = documentStoreService.saveDocumentStream(metadataFile, stream,
-                    List.of("jans-server", documentStoreModuleName));
+            String result = documentStoreService.saveDocumentStream(metadataFile, null,
+                    stream, List.of("jans-server", documentStoreModuleName));
             logger.info("SAML file saving result:{}", result);
 
             InputStream newFile = documentStoreService.readDocumentAsStream(metadataFile);
             logger.info("SAML file read newFile:{}", newFile);
 
-            if (result) {
+            if (result != null) {
                 return metadataFile;
             }
         } catch (Exception ex) {
@@ -123,7 +123,7 @@ public class SamlIdpService {
         logger.debug("Rename metadata file documentStoreService:{},metadataPath:{}, destinationMetadataPath:{}",
                 documentStoreService, metadataPath, destinationMetadataPath);
         try {
-            return documentStoreService.renameDocument(metadataPath, destinationMetadataPath);
+            return documentStoreService.renameDocument(metadataPath, destinationMetadataPath) != null;
         } catch (Exception ex) {
             logger.error("Failed to rename metadata '{}' to '{}'", metadataPath, destinationMetadataPath, ex);
         }
