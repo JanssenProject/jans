@@ -34,7 +34,18 @@ public class OAuth2Service extends BaseService {
     EncryptionService encryptionService;
 
     /**
-     * Calls token endpoint from the Identity Provider and returns a valid Access Token.
+     * The function `getApiProtectionToken` retrieves an API protection token based on the provided parameters and handles
+     * exceptions accordingly.
+     *
+     * @param apiTokenRequest The `getApiProtectionToken` method is responsible for obtaining an API protection token based
+     * on the provided `ApiTokenRequest` and `appType`. The method first retrieves the necessary configuration from
+     * `auiConfigurationService` based on the `appType`. It then constructs a `TokenRequest` object
+     * @param appType The `appType` parameter in the `getApiProtectionToken` method is used to specify the type of the
+     * application for which the API protection token is being requested. It is passed as a String parameter to the method.
+     * The `appType` parameter helps in determining the specific configuration settings and endpoints
+     * @throws ApplicationException
+     * @return The method `getApiProtectionToken` returns a `TokenResponse` object containing the access token, id token,
+     * refresh token, scopes, iat (issued at) timestamp, exp (expiration) timestamp, and issuer information.
      */
     public TokenResponse getApiProtectionToken(ApiTokenRequest apiTokenRequest, String appType) throws ApplicationException {
         try {

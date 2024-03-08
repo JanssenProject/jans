@@ -1,6 +1,5 @@
 import copy
 import asyncio
-import importlib
 
 from collections import OrderedDict
 from typing import Any, Optional
@@ -16,7 +15,7 @@ from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_label_widget import JansLabelWidget
-from wui_components.widget_collections import get_ldap_config_widgets, get_data_for_ldap_widgets
+from wui_components.widget_collections import get_ldap_config_widgets, get_data_for_ldap_widgets, get_logging_level_widget
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, common_data
@@ -282,32 +281,22 @@ class Plugin(DialogUtils):
             self.app.getTitledCheckBox(_("useLocalCache"), name='useLocalCache', checked=self.data.get('useLocalCache'), jans_help=self.app.get_help_from_schema(self.schema, 'useLocalCache'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
 
             self.app.getTitledText(_("Keycloak Link Server Ip Address"), name='keycloakLinkServerIpAddress', value=self.data.get('keycloakLinkServerIpAddress') or '255.255.255.255', jans_help=self.app.get_help_from_schema(self.schema, 'keycloakLinkServerIpAddress'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget),
+            self.app.getTitledText(_("Keycloak Link Polling Interval"), name='keycloakLinkPollingInterval', value=self.data.get('keycloakLinkPollingInterval') or '0', jans_help=self.app.get_help_from_schema(self.schema, 'keycloakLinkPollingInterval'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, text_type='integer'),
             self.app.getTitledText(_("Keycloak Link Last Update"), name='keycloakLinkLastUpdate', value=self.data.get('keycloakLinkLastUpdate') or '', jans_help=self.app.get_help_from_schema(self.schema, 'keycloakLinkLastUpdate'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, read_only=True),
             self.app.getTitledText(_("Keycloak Link Last Update Count"), name='keycloakLinkLastUpdateCount', value=self.data.get('keycloakLinkLastUpdateCount') or '5', jans_help=self.app.get_help_from_schema(self.schema, 'keycloakLinkLastUpdateCount'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, read_only=True),
             self.app.getTitledText(_("Keycloak Link Problem Count"), name='keycloakLinkProblemCount', value=self.data.get('keycloakLinkProblemCount') or '0', jans_help=self.app.get_help_from_schema(self.schema, 'keycloakLinkProblemCount'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, read_only=True),
 
-            self.app.getTitledWidget(
-                                    _("Logging Level"),
-                                    name='loggingLevel',
-                                    widget=DropDownWidget(
-                                        values=[('TRACE', 'TRACE'), ('DEBUG', 'DEBUG'), ('INFO', 'INFO'), ('WARN', 'WARN'),('ERROR', 'ERROR'),('FATAL', 'FATAL'),('OFF', 'OFF')],
-                                        value=self.data.get('loggingLevel', 'INFO'),
-                                        select_one_option=False
-                                        ),
-                                    jans_help=self.app.get_help_from_schema(self.schema, 'loggingLevel'),
-                                    style=cli_style.edit_text
-                                    ),
+            get_logging_level_widget(self.data.get('loggingLevel', 'INFO')),
+
             Window(height=1),
             save_config_buttonc,
             ]
 
             )
 
-
         self.tabs['basic_config'] = ScrollablePane(content=self.basic_config_content, height=D(), display_arrows=False, show_scrollbar=True)
         self.tabs['inum_config'] = HSplit(get_ldap_config_widgets(self.data.get('inumConfig'), widget_style=cli_style.black_bg_widget) +[Window(height=1), save_config_buttonc], width=D())
         self.tabs['target_config'] = HSplit(get_ldap_config_widgets(self.data.get('targetConfig'), widget_style=cli_style.black_bg_widget) +[Window(height=1), save_config_buttonc], width=D())
-
 
         keycloak_config_data = self.data.get('keycloakConfiguration', {})
         keycloak_config_widgets = []

@@ -1995,9 +1995,9 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			Object jsonValue = JSON_OBJECT_MAPPER.readValue(String.valueOf(propertyValue), parameterType);
 			return jsonValue;
 		} catch (Exception ex) {
-			LOG.error("Failed to convert json value '{}' to object `{}`", propertyValue, parameterType, ex);
-			throw new MappingException(String.format("Failed to convert json value '%s' to object of type %s",
-					propertyValue, parameterType));
+			final String msg = String.format("Failed to convert json value '%s' to object of type %s", propertyValue, parameterType);
+			LOG.error(msg, ex);
+			throw new MappingException(msg, ex);
 		}
 	}
 
