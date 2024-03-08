@@ -130,7 +130,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 	}
 
 	@Override
-	public boolean saveDocument(String path, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String documentContent, Charset charset, List<String> moduleList) {
 		log.debug("Save document: '{}'", path);
 		
 		String normalizedPath = getNormalizedPath(path);
@@ -142,7 +142,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 				contentNode.setProperty("jcr:data", value);
 
 				session.save();
-				return true;
+				return path;
 			} finally {
 				closeSession(session);
 			}
@@ -150,11 +150,11 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 			log.error("Failed to write document to file '{}'", path, ex);
 		}
 
-		return false;
+		return null;
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) {
 		log.debug("Save document from stream: '{}'", path);
 
 		String normalizedPath = getNormalizedPath(path);
@@ -166,7 +166,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 				contentNode.setProperty("jcr:data", value);
 
 				session.save();
-				return true;
+				return path;
 			} finally {
 				closeSession(session);
 			}
@@ -174,7 +174,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 			log.error("Failed to write document from stream to file '{}'", path, ex);
 		}
 
-		return false;
+		return null;
 	}
 
 
@@ -243,7 +243,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 	}
 
 	@Override
-	public boolean renameDocument(String currentPath, String destinationPath) {
+	public String renameDocument(String currentPath, String destinationPath) {
 		log.debug("Rename document: '{}' -> '{}'", currentPath, destinationPath);
 
 		String normalizedCurrentPath = getNormalizedPath(currentPath);
@@ -258,7 +258,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 				session.move(normalizedCurrentPath, normalizedDestinationPath);
 
 				session.save();
-				return true;
+				return destinationPath;
 			} finally {
 				closeSession(session);
 			}
@@ -266,7 +266,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 			log.error("Failed to rename to destination file '{}'", destinationPath, ex);
 		}
 		
-		return false;
+		return null;
 	}
 
 	@Override

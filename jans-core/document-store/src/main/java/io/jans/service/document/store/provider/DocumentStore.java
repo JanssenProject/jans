@@ -25,12 +25,12 @@ public interface DocumentStore<T> {
 	/**
 	 * Save document into store
 	 */
-	boolean saveDocument(String path, String documentContent, Charset charset, List<String> moduleList);
+	String saveDocument(String path, String documentContent, Charset charset, List<String> moduleList);
 
 	/**
 	 * Save document stream into store
 	 */
-	boolean saveDocumentStream(String path, InputStream documentStream, List<String> moduleList);
+	String saveDocumentStream(String path, InputStream documentStream, List<String> moduleList);
 
 	/**
 	 * Load document from store
@@ -50,7 +50,7 @@ public interface DocumentStore<T> {
 	/**
 	 * Rename an object in document store
 	 */
-	boolean renameDocument(String currentPath, String destinationPath);
+	String renameDocument(String currentPath, String destinationPath);
 
 	public abstract DocumentStoreType getProviderType();
 
