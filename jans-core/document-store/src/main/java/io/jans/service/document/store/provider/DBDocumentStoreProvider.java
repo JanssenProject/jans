@@ -84,7 +84,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	}
 
 	@Override
-	public String saveDocument(String path, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
 		log.debug("Save document: '{}'", path);
 		Document oxDocument = new Document();
 		oxDocument.setDocument(documentContent);
@@ -109,7 +109,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	}
 
 	@Override
-	public String saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
 
 		Document oxDocument = new Document();
 		oxDocument.setDisplayName(path);

@@ -71,13 +71,13 @@ public class WebDavDocumentStoreProvider extends DocumentStoreProvider<WebDavDoc
 	}
 
 	@Override
-	public String saveDocument(String path, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
 		// TODO Auto-generated method stub
 		return null;
 	}

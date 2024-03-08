@@ -130,7 +130,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 	}
 
 	@Override
-	public String saveDocument(String path, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
 		log.debug("Save document: '{}'", path);
 		
 		String normalizedPath = getNormalizedPath(path);
@@ -140,6 +140,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 				Node contentNode = getOrCreateContentNode(normalizedPath, session);
 				Value value = session.getValueFactory().createValue(documentContent);
 				contentNode.setProperty("jcr:data", value);
+				contentNode.setProperty(JcrConstants.JCR_DATA, description);
 
 				session.save();
 				return path;
@@ -154,7 +155,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 	}
 
 	@Override
-	public String saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
 		log.debug("Save document from stream: '{}'", path);
 
 		String normalizedPath = getNormalizedPath(path);
@@ -164,6 +165,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 				Node contentNode = getOrCreateContentNode(normalizedPath, session);
 				Binary value = session.getValueFactory().createBinary(documentStream);
 				contentNode.setProperty("jcr:data", value);
+				contentNode.setProperty(JcrConstants.JCR_DATA, description);
 
 				session.save();
 				return path;

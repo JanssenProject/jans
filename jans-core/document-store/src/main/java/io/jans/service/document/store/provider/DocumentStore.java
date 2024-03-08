@@ -24,13 +24,15 @@ public interface DocumentStore<T> {
 
 	/**
 	 * Save document into store
+	 * @param description TODO
 	 */
-	String saveDocument(String path, String documentContent, Charset charset, List<String> moduleList);
+	String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList);
 
 	/**
 	 * Save document stream into store
+	 * @param description TODO
 	 */
-	String saveDocumentStream(String path, InputStream documentStream, List<String> moduleList);
+	String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList);
 
 	/**
 	 * Load document from store

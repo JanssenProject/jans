@@ -33,17 +33,17 @@ public abstract class BaseDocumentStoreService implements DocumentStore {
 	}
 
 	@Override
-	public String saveDocument(String path, String documentContent, Charset charset, List moduleList) {
-    	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
+	public String saveDocument(String path, String description, String documentContent, Charset charset, List moduleList) {
+    	DocumentStoreProvider<?> documentStoreProvider = getDocumentStoreProvider();
 
-		return documentStoreProvider.saveDocument(path, documentContent, charset, moduleList);
+		return documentStoreProvider.saveDocument(path, description, documentContent, charset, moduleList);
 	}
 
 	@Override
-	public String saveDocumentStream(String path, InputStream documentStream, List moduleList) {
-    	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
+	public String saveDocumentStream(String path, String description, InputStream documentStream, List moduleList) {
+    	DocumentStoreProvider<?> documentStoreProvider = getDocumentStoreProvider();
 
-		return documentStoreProvider.saveDocumentStream(path, documentStream, moduleList);
+		return documentStoreProvider.saveDocumentStream(path, description, documentStream, moduleList);
 	}
 
 	@Override
