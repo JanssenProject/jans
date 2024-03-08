@@ -93,13 +93,13 @@ class GoogleSecret(BaseSecret):
         # iterable contains multipart secret names
         self.multiparts: list[str] = []
 
-        # allowed number of versions
+        # allowed number of ENABLED versions
         try:
-            max_versions_num = int(os.environ.get("CN_GOOGLE_SECRET_MAX_VERSIONS", "5"))
+            max_versions = int(os.environ.get("CN_GOOGLE_SECRET_MAX_VERSIONS", "5"))
         except ValueError:
-            max_versions_num = 5
+            max_versions = 5
             logger.warning("Unsupported value set to CN_GOOGLE_SECRET_MAX_VERSIONS environment variable. Falling back to default value.")
-        self.max_versions_num = max(1, max_versions_num)
+        self.max_versions = max(1, max_versions)
 
     @cached_property
     def client(self) -> secretmanager.SecretManagerServiceClient:
@@ -172,7 +172,7 @@ class GoogleSecret(BaseSecret):
 
         data = self._maybe_legacy_payload(payload)
         if not data:
-            logger.warning("Unable to load payload with zlib/lzma format; trying to load using new format.")
+            # logger.warning("Unable to load payload with zlib/lzma format; trying to load using new format.")
             data = json.loads(payload)
 
         # decoded payload
@@ -361,7 +361,8 @@ class GoogleSecret(BaseSecret):
         response = self.client.list_secret_versions(
             request={
                 "parent": parent,
-                "filter": "state:ENABLED"
+                "filter": "state:ENABLED",
+                "page_size": 1,
             },
         )
 
@@ -369,10 +370,16 @@ class GoogleSecret(BaseSecret):
         enabled_versions = []
 
         for version in response:
-            # keep version as enabled (default max. is set by `max_versions_num` attribute)
-            if len(enabled_versions) < self.max_versions_num and version.name not in enabled_versions:
+            # keep version as enabled (default max. is set by `max_versions` attribute)
+            if len(enabled_versions) < self.max_versions and version.name not in enabled_versions:
                 enabled_versions.append(version.name)
                 continue
 
-            logger.info(f"Disabling old version {version.name} (state={version.state.name})")
+            # secrets may have lots of versions; disabling them all could produce bottleneck
+            # hence we only disable 1 version after allowed enabled versions are reaching threshold
+            logger.info(
+                f"The soft-limit for max. versions (currently set to {self.max_versions}) has been reached; "
+                f"disabling previous version {version.name} (state={version.state.name})"
+            )
             self.client.disable_secret_version(request={"name": version.name})
+            break
