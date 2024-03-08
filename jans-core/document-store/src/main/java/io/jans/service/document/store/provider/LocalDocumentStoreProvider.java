@@ -142,6 +142,12 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 	}
 
 	@Override
+	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
+			List<String> moduleList) {
+		return saveDocumentStream(path, description, documentStream, moduleList);
+	}
+
+	@Override
 	public String readDocument(String path, Charset charset) {
 		log.debug("Read document: '{}'", path);
 
@@ -172,6 +178,11 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 		}
 		
 		return null;
+	}
+
+	@Override
+	public InputStream readBinaryDocumentAsStream(String path) {
+		return readDocumentAsStream(path);
 	}
 
 	@Override
@@ -227,5 +238,6 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 		String filePath = baseLocation + File.separator + path;
 		return new File(filePath);
 	}
+
 
 }

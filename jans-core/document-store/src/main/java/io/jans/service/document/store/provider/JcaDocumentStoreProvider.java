@@ -6,32 +6,49 @@
 
 package io.jans.service.document.store.provider;
 
-import io.jans.service.document.store.conf.DocumentStoreConfiguration;
-import io.jans.service.document.store.conf.JcaDocumentStoreConfiguration;
-import io.jans.util.security.StringEncrypter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+
+import javax.jcr.AccessDeniedException;
+import javax.jcr.Binary;
+import javax.jcr.Node;
+import javax.jcr.Property;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.SimpleCredentials;
+import javax.jcr.Value;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.NodeType;
+import javax.jcr.version.VersionException;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.rmi.repository.URLRemoteRepository;
-import io.jans.service.document.store.conf.DocumentStoreType;
-import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+import io.jans.service.document.store.conf.DocumentStoreType;
+import io.jans.service.document.store.conf.JcaDocumentStoreConfiguration;
+import io.jans.util.StringHelper;
+import io.jans.util.security.StringEncrypter;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import javax.jcr.*;
-import javax.jcr.lock.LockException;
-import javax.jcr.nodetype.ConstraintViolationException;
-import javax.jcr.nodetype.NodeType;
-import javax.jcr.version.VersionException;
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.concurrent.*;
 
 /**
  * @author Yuriy Movchan on 04/10/2020
@@ -179,6 +196,11 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 		return null;
 	}
 
+	@Override
+	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
+			List<String> moduleList) {
+		throw new UnsupportedOperationException("Method not implemented.");
+	}
 
 	@Override
 	public String readDocument(String path, Charset charset) {
@@ -242,6 +264,11 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 		}
 		
 		return null;
+	}
+
+	@Override
+	public InputStream readBinaryDocumentAsStream(String path) {
+		throw new UnsupportedOperationException("Method not implemented.");
 	}
 
 	@Override
@@ -395,5 +422,6 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 
 		return fileNode != null;
 	}
+
 
 }

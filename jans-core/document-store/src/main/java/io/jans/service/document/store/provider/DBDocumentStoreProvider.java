@@ -1,5 +1,17 @@
 package io.jans.service.document.store.provider;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.conf.DBDocumentStoreConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
@@ -10,14 +22,6 @@ import io.jans.util.StringHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 /**
  * @author Shekhar L. on 29/10/2022
@@ -94,7 +98,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 				oxDocument.setInum(documentService.generateInumForNewDocument());
 				String dn = "inum=" + oxDocument.getInum() + ",ou=document,o=jans";
 				oxDocument.setDn(dn);
-				oxDocument.setDescription(path);
+				oxDocument.setDescription(description);
 				oxDocument.setJansEnabled(true);
 				oxDocument.setJansModuleProperty(moduleList);
 				documentService.addDocument(oxDocument);
@@ -121,7 +125,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			oxDocument.setInum(inum);
 			String dn = "inum=" + oxDocument.getInum() + ",ou=document,o=jans";
 			oxDocument.setDn(dn);
-			oxDocument.setDescription(path);
+			oxDocument.setDescription(description);
 			oxDocument.setJansEnabled(true);
 			oxDocument.setJansModuleProperty(moduleList);
 			documentService.addDocument(oxDocument);
@@ -131,6 +135,12 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		}
 
 		return null;
+	}
+
+	@Override
+	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
+			List<String> moduleList) {
+		return saveDocumentStream(path, description, new Base64InputStream(documentStream, true), moduleList);
 	}
 
 	@Override
@@ -159,6 +169,11 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 
 		InputStream InputStream = new ByteArrayInputStream(filecontecnt.getBytes());
 		return InputStream;
+	}
+
+	@Override
+	public InputStream readBinaryDocumentAsStream(String path) {
+		return new Base64InputStream(readDocumentAsStream(path), false);
 	}
 
 	@Override

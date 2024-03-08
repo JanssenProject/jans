@@ -24,15 +24,18 @@ public interface DocumentStore<T> {
 
 	/**
 	 * Save document into store
-	 * @param description TODO
 	 */
 	String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList);
 
 	/**
 	 * Save document stream into store
-	 * @param description TODO
 	 */
 	String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList);
+
+	/**
+	 * Save binary document stream into store
+	 */
+	String saveBinaryDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList);
 
 	/**
 	 * Load document from store
@@ -43,6 +46,11 @@ public interface DocumentStore<T> {
 	 * Load document from store as stream
 	 */
 	public InputStream readDocumentAsStream(String path) ;
+
+	/**
+	 * Load binary document from store as stream
+	 */
+	public InputStream readBinaryDocumentAsStream(String path);
 
 	/**
 	 * Removes an object document from store

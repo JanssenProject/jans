@@ -46,6 +46,12 @@ public abstract class BaseDocumentStoreService implements DocumentStore {
 		return documentStoreProvider.saveDocumentStream(path, description, documentStream, moduleList);
 	}
 
+    @Override
+	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
+			List moduleList) {
+		return saveDocumentStream(path, description, documentStream, moduleList);
+	}
+
 	@Override
 	public String readDocument(String path, Charset charset)  {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
@@ -58,6 +64,11 @@ public abstract class BaseDocumentStoreService implements DocumentStore {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
 		return documentStoreProvider.readDocumentAsStream(path);
+	}
+
+	@Override
+	public InputStream readBinaryDocumentAsStream(String path) {
+		return readDocumentAsStream(path);
 	}
 
 	@Override

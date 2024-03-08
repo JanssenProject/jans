@@ -83,7 +83,20 @@ public class WebDavDocumentStoreProvider extends DocumentStoreProvider<WebDavDoc
 	}
 
 	@Override
+	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
+			List<String> moduleList) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public String readDocument(String path, Charset charset) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InputStream readBinaryDocumentAsStream(String path) {
 		// TODO Auto-generated method stub
 		return null;
 	}
