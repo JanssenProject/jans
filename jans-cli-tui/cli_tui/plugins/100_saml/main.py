@@ -175,7 +175,7 @@ class Plugin(DialogUtils):
         'Coroutine for getting SAML trust relationships.'
         try:
             response = self.app.cli_object.process_command_by_id(
-                        operation_id='get-trust-relationship',
+                        operation_id='get-trust-relationships',
                         url_suffix='',
                         endpoint_args='',
                         data_fn=None,

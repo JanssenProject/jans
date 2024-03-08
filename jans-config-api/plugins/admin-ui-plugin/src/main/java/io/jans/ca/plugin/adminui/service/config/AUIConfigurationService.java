@@ -52,6 +52,7 @@ public class AUIConfigurationService extends BaseService {
      * It reads the configuration from the LDAP server and stores it in a map
      *
      * @param appType The application type. This is either "adminUI" or "ads".
+     * @throws Exception
      * @return The AUIConfiguration object
      */
     public AUIConfiguration getAUIConfiguration(String appType) throws Exception {
@@ -117,7 +118,7 @@ public class AUIConfigurationService extends BaseService {
         auiConfig.setAuiBackendApiServerIntrospectionEndpoint(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getIntrospectionEndpoint());
 
         auiConfig.setSessionTimeoutInMins(appConf.getMainSettings().getUiConfig().getSessionTimeoutInMins());
-
+        auiConfig.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
         return auiConfig;
     }
 

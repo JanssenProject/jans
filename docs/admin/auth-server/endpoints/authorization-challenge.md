@@ -152,6 +152,29 @@ deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
 
 Full sample script can be found [here](../../../script-catalog/authorization_challenge/AuthorizationChallenge.java)
 
+## Web session
+
+Authorization challenge script is first-party flow and thus web session is not created by default. 
+However there can be cases when such session has to be created. Please set **authorizationChallengeShouldGenerateSession** configuration property to **true**
+to force session creation. 
+
+In case it is needed to prepare session with specific data, it is possible to create session
+in script and set it into context. Example:
+
+```java
+SessionIdService sessionIdService = CdiUtil.bean(SessionIdService.class);
+Identity identityService = CdiUtil.bean(Identity.class);
+
+Map<String, String> sessionStore = new HashMap<String, String>();
+sessionStore.put("login_id_token",login_id_token);
+sessionStore.put("login_access_token",login_access_token);
+sessionStore.put("transaction_status","PENDING");
+SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(context.getHttpRequest(), user.getDn(), sessionStore);
+
+context.getExecutionContext().setAuthorizationChallengeSessionId(sessionId);
+scriptLogger.trace("Created Authorization challenge session successfully");
+``` 
+
 ## Multi-step example
 
 Sometimes it's required to send data sequentially. Step by step. Calls to Authorization Challenge Endpoint must have 

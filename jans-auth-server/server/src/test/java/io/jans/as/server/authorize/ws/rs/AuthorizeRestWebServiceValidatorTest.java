@@ -60,6 +60,80 @@ public class AuthorizeRestWebServiceValidatorTest {
     private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
 
     @Test
+    public void validateRequestParameterSupported_whenRequestIsEmpty_shouldPass() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setState("state");
+        authzRequest.setRequest(null);
+
+        authorizeRestWebServiceValidator.validateRequestParameterSupported(authzRequest);
+
+        authzRequest.setRequest("");
+        authorizeRestWebServiceValidator.validateRequestParameterSupported(authzRequest);
+    }
+
+    @Test
+    public void validateRequestParameterSupported_whenRequestSupportIsSwitchedOn_shouldPass() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setState("state");
+
+        when(appConfiguration.getRequestParameterSupported()).thenReturn(true);
+
+        authzRequest.setRequest("{\"redirect_uri\":\"https://rp.example.com\"}");
+        authorizeRestWebServiceValidator.validateRequestParameterSupported(authzRequest);
+
+        authzRequest.setRequest(null);
+        authorizeRestWebServiceValidator.validateRequestParameterSupported(authzRequest);
+
+        authzRequest.setRequest("");
+        authorizeRestWebServiceValidator.validateRequestParameterSupported(authzRequest);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateRequestParameterSupported_whenRequestSupportIsSwitchedOff_shouldThrowException() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setState("state");
+        authzRequest.setRequest("{\"redirect_uri\":\"https://rp.example.com\"}");
+
+        when(appConfiguration.getRequestParameterSupported()).thenReturn(false);
+
+        authorizeRestWebServiceValidator.validateRequestParameterSupported(authzRequest);
+    }
+
+    @Test
+    public void validateRequestUriParameterSupported_whenRequestUriIsEmpty_shouldPass() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setState("state");
+        authzRequest.setRequestUri(null);
+
+        authorizeRestWebServiceValidator.validateRequestUriParameterSupported(authzRequest);
+
+        authzRequest.setRequestUri("");
+        authorizeRestWebServiceValidator.validateRequestUriParameterSupported(authzRequest);
+    }
+
+    @Test
+    public void validateRequestUriParameterSupported_whenRequestUriSupportIsSwitchedOn_shouldPass() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setState("state");
+        authzRequest.setRequestUri("https://rp.example.com");
+
+        when(appConfiguration.getRequestUriParameterSupported()).thenReturn(true);
+
+        authorizeRestWebServiceValidator.validateRequestUriParameterSupported(authzRequest);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateRequestUriParameterSupported_whenRequestSupportIsSwitchedOff_shouldThrowException() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setState("state");
+        authzRequest.setRequestUri("https://rp.example.com");
+
+        when(appConfiguration.getRequestUriParameterSupported()).thenReturn(false);
+
+        authorizeRestWebServiceValidator.validateRequestUriParameterSupported(authzRequest);
+    }
+
+    @Test
     public void isAuthnMaxAgeValid_whenMaxAgeIsZero_shouldReturnTrue() {
         assertTrue(authorizeRestWebServiceValidator.isAuthnMaxAgeValid(0, new SessionId(), new Client()));
     }

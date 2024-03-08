@@ -1,3 +1,10 @@
+---
+tags:
+ - administration
+ - lock
+ - opa
+---
+
 # Developer Guide: Lock PDP Client 
 
 ## Janc core messages API
