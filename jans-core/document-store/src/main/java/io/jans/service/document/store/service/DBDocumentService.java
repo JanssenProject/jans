@@ -15,7 +15,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 
 /**
  * Provides operations with Document
@@ -23,7 +22,6 @@ import jakarta.inject.Named;
  * @author Shekhar L. Date : 29 Sep 2022
  */
 @ApplicationScoped
-@Named("DBDocumentService")
 public class DBDocumentService implements Serializable {
 
 	private static final long serialVersionUID = 65734145678106186L;
