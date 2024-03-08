@@ -135,7 +135,7 @@ public class TrustRelationshipResource extends BaseResource {
             logger.debug(" Create metaDataFile.available():{}", metaDataFile.available());
         }
 
-        validateSpMetaDataSourceType(trustRelationship, metaDataFile);
+        validateSpMetaDataSourceType(trustRelationship, metaDataFile, false);
         String inum = samlService.generateInumForNewRelationship();
         trustRelationship.setInum(inum);
         trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
@@ -206,7 +206,7 @@ public class TrustRelationshipResource extends BaseResource {
             logger.debug("For update metaDataFile.available():{}", metaDataFile.available());
         }
         
-        validateSpMetaDataSourceType(trustRelationship, metaDataFile);
+        validateSpMetaDataSourceType(trustRelationship, metaDataFile, true);
         // Update
         trustRelationship = samlService.updateTrustRelationship(trustRelationship, metaDataFile);
 
@@ -288,10 +288,10 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.ok().build();
     }
     
-    private void validateSpMetaDataSourceType(TrustRelationship trustRelationship, InputStream metaDataFile)
+    private void validateSpMetaDataSourceType(TrustRelationship trustRelationship, InputStream metaDataFile, boolean isUpdate)
             throws IOException {
-        logger.info("Validate SP MetaDataSourceType trustRelationship:{}, metaDataFile:{}", trustRelationship,
-                metaDataFile);
+        logger.info("Validate SP MetaDataSourceType trustRelationship:{}, metaDataFile:{}, isUpdate:{}", trustRelationship,
+                metaDataFile, isUpdate);
 
         checkResourceNotNull(trustRelationship.getSpMetaDataSourceType(), "SP MetaData Source Type");
 
@@ -300,7 +300,8 @@ public class TrustRelationshipResource extends BaseResource {
         
         if (trustRelationship.getSpMetaDataSourceType().equals(MetadataSourceType.FILE)) {
 
-            if (metaDataFile == null || metaDataFile.available() <= 0) {
+            //If MetaDataSourceType==FILE and it is not Update flow
+            if ( (metaDataFile == null || metaDataFile.available() <= 0) && !isUpdate ) {
                 throwBadRequestException(DATA_NULL_CHK, String.format(DATA_NULL_MSG, "SP MetaData File"));
             }
 
