@@ -85,7 +85,7 @@ public class SsaRestWebServiceValidator {
      *
      * @param client    Client to check scope
      * @param scopeList List of scope to validated
-     * @throws WebApplicationException with status {@code 401} and key <b>UNAUTHORIZED_CLIENT</b> if you don't have the scope.
+     * @throws WebApplicationException with status {@code 401 (Unauthorized)} with <b>unauthorized_client</b> key, when it does not have the scope.
      */
     public void checkScopesPolicy(Client client, List<String> scopeList) throws WebApplicationException {
         if (client == null || scopeList == null || scopeList.isEmpty()) {
@@ -99,14 +99,10 @@ public class SsaRestWebServiceValidator {
 
     /**
      * Find SSA based on "jti" and validated
-     * <p>
-     * This method returns {@link WebApplicationException} with status 422 if the SSA does not exist or if it is in
-     * state (expired, used or revoked).
-     * Otherwise it will return the valid SSA
-     * </p>
      *
      * @param jti Unique identifier
-     * @return Ssa valid
+     * @return A Ssa validated
+     * @throws WebApplicationException with status {@code 400 (Bad Request) with <b>invalid_jti<b/> key}, when jti does not exist, is invalid or state is in (expired, used or revoked)
      */
     public Ssa getValidSsaByJti(String jti) {
         Ssa ssa = ssaService.findSsaByJti(jti);
@@ -114,7 +110,7 @@ public class SsaRestWebServiceValidator {
                 Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime().after(ssa.getExpirationDate()) ||
                 !ssa.getState().equals(SsaState.ACTIVE)) {
             log.warn("Ssa jti: '{}' is null or status (expired, used or revoked)", jti);
-            throw new WebApplicationException(Response.status(422).build());
+            throw errorResponseFactory.createBadRequestException(SsaErrorResponseType.INVALID_JTI, "Invalid JTI or not exists");
         }
         return ssa;
     }
@@ -127,11 +123,12 @@ public class SsaRestWebServiceValidator {
      * </p>
      *
      * @param createRequest SSA Metadata
+     * @throws WebApplicationException with status {@code 400 (Bad Request)} with <b>invalid_ssa_metadata<b/> key, when lifetime is invalid
      */
     public void validateSsaCreateRequest(SsaCreateRequest createRequest) {
         if (createRequest.getLifetime() != null && createRequest.getLifetime() < 1) {
             log.warn("SSA Metadata validation: 'lifetime' cannot be 0 or negative");
-            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, SsaErrorResponseType.INVALID_SSA_METADATA, "Invalid SSA Metadata");
+            throw errorResponseFactory.createBadRequestException(SsaErrorResponseType.INVALID_SSA_METADATA, "Invalid SSA Metadata");
         }
     }
 }

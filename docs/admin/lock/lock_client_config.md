@@ -1,3 +1,10 @@
+---
+tags:
+ - administration
+ - lock
+ - opa
+---
+
 ## Lock Client
 
 Lock client is Jans Message API consumer. This is middle point of join all Lock parts together. This part can be deployed as server or service. It subscribes to specified channels, process messages, send data to OPA or other PDP, send policies to OPA or other PDP and allows to customize data which server send to PDP with custom scripts.
@@ -11,7 +18,7 @@ The main part of it is generic for all Jans projects. These parts have Lock spec
 
 ```
    "tokenChannels":[
-         "id_token"
+         "jans_token"
       ],
    "opaConfiguration": {
         "baseUrl" : "http://localhost:8181/v1/",
@@ -30,7 +37,7 @@ The main part of it is generic for all Jans projects. These parts have Lock spec
    "policyConsumerType": "OPA"
 ```
 
-"tokenChannels" – list of token channel names. It’s array to allows add more token types in future without changing property type. Now it has only one value “id_token”.
+"tokenChannels" – list of token channel names. It’s array to allows add more token types in future without changing property type. Now it has only one value “jans_token”.
 
 "opaConfiguration" section has 2 properties to define OPA API base URL and specify OPA Bearer access token if OPA server started with it.
 

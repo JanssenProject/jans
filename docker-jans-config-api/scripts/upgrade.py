@@ -25,22 +25,17 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 def _transform_api_dynamic_config(conf):
     should_update = False
 
-    if "userExclusionAttributes" not in conf:
-        conf["userExclusionAttributes"] = ["userPassword"]
-        should_update = True
-
-    if "userMandatoryAttributes" not in conf:
-        conf["userMandatoryAttributes"] = [
+    # top-level config that need to be added (if missing)
+    for missing_key, value in [
+        ("userExclusionAttributes", ["userPassword"]),
+        ("userMandatoryAttributes", [
             "mail",
             "displayName",
             "jansStatus",
             "userPassword",
             "givenName",
-        ]
-        should_update = True
-
-    if "agamaConfiguration" not in conf:
-        conf["agamaConfiguration"] = {
+        ]),
+        ("agamaConfiguration", {
             "mandatoryAttributes": [
                 "qname",
                 "source",
@@ -49,68 +44,78 @@ def _transform_api_dynamic_config(conf):
                 "serialVersionUID",
                 "enabled",
             ],
-        }
-        should_update = True
-
-    if "auditLogConf" not in conf:
-        conf["auditLogConf"] = {
+        }),
+        ("auditLogConf", {
             "enabled": True,
             "headerAttributes": ["User-inum"],
-        }
-        should_update = True
-
-    if "dataFormatConversionConf" not in conf:
-        conf["dataFormatConversionConf"] = {
+        }),
+        ("dataFormatConversionConf", {
             "enabled": True,
             "ignoreHttpMethod": [
                 "@jakarta.ws.rs.GET()",
             ],
-        }
-        should_update = True
+        }),
+        ("customAttributeValidationEnabled", True),
+    ]:
+        if missing_key not in conf:
+            conf[missing_key] = value
+            should_update = True
 
     if "plugins" not in conf:
-        conf["plugins"] = [
-            {
-                "name": "admin",
-                "description": "admin-ui plugin",
-                "className": "io.jans.ca.plugin.adminui.rest.ApiApplication",
-            },
-            {
-                "name": "fido2",
-                "description": "fido2 plugin",
-                "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication",
-            },
-            {
-                "name": "scim",
-                "description": "scim plugin",
-                "className": "io.jans.configapi.plugin.scim.rest.ApiApplication",
-            },
-            {
-                "name": "user-management",
-                "description": "user-management plugin",
-                "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication",
-            },
-        ]
-        should_update = True
+        conf["plugins"] = []
 
     # current plugin names to lookup to
     plugins_names = tuple(plugin["name"] for plugin in conf["plugins"])
 
-    if "jans-link" not in plugins_names:
-        conf["plugins"].append({
+    supported_plugins = [
+        {
+            "name": "admin",
+            "description": "admin-ui plugin",
+            "className": "io.jans.ca.plugin.adminui.rest.ApiApplication"
+        },
+        {
+            "name": "fido2",
+            "description": "fido2 plugin",
+            "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication"
+        },
+        {
+            "name": "scim",
+            "description": "scim plugin",
+            "className": "io.jans.configapi.plugin.scim.rest.ApiApplication"
+        },
+        {
+            "name": "user-management",
+            "description": "user-management plugin",
+            "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication"
+        },
+        {
             "name": "jans-link",
             "description": "jans-link plugin",
-            "className": "io.jans.configapi.plugin.link.rest.ApiApplication",
-        })
-        should_update = True
-
-    if "saml" not in plugins_names:
-        conf["plugins"].append({
+            "className": "io.jans.configapi.plugin.link.rest.ApiApplication"
+        },
+        {
             "name": "saml",
             "description": "saml plugin",
             "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
-        })
-        should_update = True
+        },
+        {
+            "name": "kc-link",
+            "description": "kc-link plugin",
+            "className": "io.jans.configapi.plugin.kc.link.rest.ApiApplication"
+        },
+        {
+            "name": "lock",
+            "description": "lock plugin",
+            "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
+        }
+    ]
+
+    for supported_plugin in supported_plugins:
+        if supported_plugin["name"] not in plugins_names:
+            conf["plugins"].append(supported_plugin)
+            should_update = True
+
+    # finalized conf and flag to determine update process
     return conf, should_update
 
 

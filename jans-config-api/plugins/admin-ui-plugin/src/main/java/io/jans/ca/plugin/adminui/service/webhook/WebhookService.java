@@ -6,6 +6,7 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.webhook.AuiFeature;
+import io.jans.ca.plugin.adminui.model.webhook.ShortCodeRequest;
 import io.jans.ca.plugin.adminui.model.webhook.WebhookEntry;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
@@ -22,7 +23,8 @@ import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
-
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import javax.validation.Valid;
 import java.util.*;
 import java.util.concurrent.*;
@@ -41,6 +43,8 @@ public class WebhookService {
     @Inject
     ConfigurationFactory configurationFactory;
 
+    public static final String AUI_FEATURE_ID = "auiFeatureId";
+
     /**
      * The function retrieves all AuiFeature objects from the entryManager and returns them as a List.
      *
@@ -48,7 +52,8 @@ public class WebhookService {
      */
     public List<AuiFeature> getAllAuiFeatures() throws ApplicationException {
         try {
-            return entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, null);
+            final Filter filter = Filter.createPresenceFilter(AUI_FEATURE_ID);
+            return entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, filter);
         } catch (Exception e) {
             log.error(ErrorResponse.FETCH_DATA_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.FETCH_DATA_ERROR.getDescription());
@@ -59,6 +64,7 @@ public class WebhookService {
      * The function retrieves a list of AuiFeatures that are associated with a specific webhookId.
      *
      * @param webhookId The parameter "webhookId" is a String that represents the ID of a webhook.
+     * @throws ApplicationException
      * @return The method is returning a list of AuiFeature objects that have a webhookId matching the provided webhookId
      * parameter.
      */
@@ -80,6 +86,7 @@ public class WebhookService {
      *
      * @param searchRequest The `searchRequest` parameter is an object of type `SearchRequest`. It contains information
      *                      about the search criteria and pagination for the webhooks search.
+     * @throws ApplicationException
      * @return The method is returning a PagedResult object containing a list of WebhookEntry objects.
      */
     public PagedResult<WebhookEntry> searchWebhooks(SearchRequest searchRequest) throws ApplicationException {
@@ -134,15 +141,15 @@ public class WebhookService {
 
     public List<WebhookEntry> getWebhooksByFeatureId(String featureId) {
         try {
-            Filter filter = Filter.createSubstringFilter("auiFeatureId", null, new String[]{featureId}, null);
+            Filter filter = Filter.createSubstringFilter(AUI_FEATURE_ID, null, new String[]{featureId}, null);
             List<AuiFeature> features = entryManager.findEntries(AppConstants.ADMIN_UI_FEATURES_DN, AuiFeature.class, filter);
-            if (CommonUtils.isEmptyOrNullCollection(features)) {
+            if (CollectionUtils.isEmpty(features)) {
                 log.error(ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
             }
             AuiFeature feature = features.get(0);
             List<String> webhooksIds = feature.getWebhookIdsMapped();
-            if (CommonUtils.isEmptyOrNullCollection(webhooksIds)) {
+            if (CollectionUtils.isEmpty(webhooksIds)) {
                 log.error(ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.NO_WEBHOOK_FOUND.getDescription());
             }
@@ -165,7 +172,7 @@ public class WebhookService {
             Filter searchFilter = null;
             List<Filter> filters = new ArrayList<>();
             for (String id : ids) {
-                Filter filter = Filter.createSubstringFilter("auiFeatureId", null, new String[]{id}, null);
+                Filter filter = Filter.createSubstringFilter(AUI_FEATURE_ID, null, new String[]{id}, null);
                 filters.add(filter);
             }
             searchFilter = Filter.createORFilter(filters);
@@ -183,6 +190,7 @@ public class WebhookService {
      *
      * @param webhook The parameter "webhook" is an object of type WebhookEntry. It represents the webhook entry that needs
      *                to be added.
+     * @throws ApplicationException
      * @return The method is returning a WebhookEntry object.
      */
     public WebhookEntry addWebhook(@Valid WebhookEntry webhook) throws ApplicationException {
@@ -225,6 +233,7 @@ public class WebhookService {
      *
      * @param webhook The parameter "webhook" is of type WebhookEntry. It represents the webhook entry that needs to be
      *                removed.
+     * @throws ApplicationException
      */
     public void removeWebhook(WebhookEntry webhook) throws ApplicationException {
         try {
@@ -257,6 +266,7 @@ public class WebhookService {
      *
      * @param webhook The parameter "webhook" is an object of type WebhookEntry. It represents the webhook entry that needs
      *                to be updated.
+     * @throws ApplicationException
      * @return The method is returning a WebhookEntry object.
      */
     public WebhookEntry updateWebhook(WebhookEntry webhook) throws ApplicationException {
@@ -307,7 +317,7 @@ public class WebhookService {
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_HTTP_METHOD_EMPTY.getDescription());
         }
         if (Lists.newArrayList("POST", "PUT", "PATCH").contains(webhookEntry.getHttpMethod())) {
-            if (CommonUtils.isEmptyOrNullCollection(webhookEntry.getHttpRequestBody())) {
+            if (MapUtils.isEmpty(webhookEntry.getHttpRequestBody())) {
                 log.error(ErrorResponse.WEBHOOK_REQUEST_BODY_EMPTY.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_REQUEST_BODY_EMPTY.getDescription());
             }
@@ -323,15 +333,18 @@ public class WebhookService {
      * concurrently.
      *
      * @param webhookIds A set of webhook IDs.
+     * @throws ApplicationException
      * @return The method is returning a List of Strings.
      */
-    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds) throws ApplicationException {
+    public List<GenericResponse> triggerEnabledWebhooks(Set<String> webhookIds, List<ShortCodeRequest> shortCodes) throws ApplicationException {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         List<GenericResponse> responseList = new ArrayList<>();
         List<Callable<GenericResponse>> callables = new ArrayList<>();
         List<WebhookEntry> webhooks = getWebhookByIds(webhookIds);
         for (WebhookEntry webhook : webhooks) {
             validateWebhookEntry(webhook);
+            ShortCodeRequest shortCodeObj = shortCodes.stream().filter(shortCode -> shortCode.getWebhookId().equals(webhook.getWebhookId())).findAny().orElse(null);
+            replaceShortCodeWithValues(webhook, shortCodeObj);
             if (webhook.isJansEnabled()) {
                 Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
                 callables.add(callable);
@@ -352,6 +365,19 @@ public class WebhookService {
         return responseList;
     }
 
+    private void replaceShortCodeWithValues(WebhookEntry webhook, ShortCodeRequest shortCodeObj) {
+        if (shortCodeObj == null) {
+            return;
+        }
+
+        if (CommonUtils.hasShortCode(webhook.getUrl())) {
+            webhook.setUrl(CommonUtils.replacePlaceholders(webhook.getUrl(), shortCodeObj.getShortcodeValueMap()));
+        }
+
+        if (CommonUtils.hasShortCode(webhook.getHttpRequestBody()) && Lists.newArrayList("POST", "PUT", "PATCH").contains(webhook.getHttpMethod())) {
+            webhook.setHttpRequestBody(CommonUtils.replacePlaceholders(webhook.getHttpRequestBody(), shortCodeObj.getShortcodeValueMap()));
+        }
+    }
 
     private static String idFromName(String name) {
         return UUID.nameUUIDFromBytes(name.getBytes(UTF_8)).toString();
@@ -360,7 +386,6 @@ public class WebhookService {
     private static String dnOfWebhook(String id, String baseDn) {
         return String.format("webhookId=%s,%s", id, baseDn);
     }
-
 
     public int getRecordMaxCount() {
         log.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",

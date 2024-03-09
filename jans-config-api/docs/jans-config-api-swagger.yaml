@@ -7896,17 +7896,17 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
         userCanEdit:
-          type: boolean
-        userCanView:
           type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8232,6 +8232,12 @@ components:
           type: string
         opTosUri:
           type: string
+        cleanUpInactiveClientAfterHoursOfInactivity:
+          type: integer
+          format: int32
+        clientPeriodicUpdateTimerInterval:
+          type: integer
+          format: int32
         authorizationCodeLifetime:
           type: integer
           format: int32
@@ -8876,9 +8882,9 @@ components:
     LockMessageConfig:
       type: object
       properties:
-        enableIdTokenMessages:
+        enableTokenMessages:
           type: boolean
-        idTokenMessagesChannel:
+        tokenMessagesChannel:
           type: string
     SsaConfiguration:
       type: object

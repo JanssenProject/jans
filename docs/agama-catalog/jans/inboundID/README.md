@@ -7,7 +7,7 @@ This process is usually referred to as "inbound identity". In this document the 
 ## Requisites
 
 - A Janssen server with config-api installed
-- Starter knowledge of [OAuth2](https://www.ietf.org/rfc/rfc6749) and the Java programming language
+- Starter knowledge of [OAuth2](https://www.ietf.org/rfc/rfc6749)/[OpenId Connect](https://openid.net/developers/how-connect-works/) and the Java programming language
 
 ## Terminology
 
@@ -17,7 +17,7 @@ This process is usually referred to as "inbound identity". In this document the 
 
 ## Scope
 
-There is a great amount of different mechanisms providers may employ to materialize the authentication process. The current offering in Agama is focused on OAuth2-compliant providers, more specifically those supporting the `code` authorization grant. This does not mean other grants or even different protocols such as SAML cannot be supported, however organizations would have to engage in extra development efforts in this case.
+There is a great amount of different mechanisms providers may employ to materialize the authentication process. The current offering in Agama is focused on OAuth2-compliant providers (includes OpendId Connect), more specifically those supporting the `code` authorization grant. This does not mean other grants or even different protocols such as SAML cannot be supported, however organizations would have to engage in extra development efforts in this case.
 
 If the providers of interest already support the `code` authorization grant, the amount of work is significantly reduced.
 
@@ -30,7 +30,7 @@ For every provider to support there has to be an Agama flow that must:
 - Redirect the browser to the provider's site for the user to enter his login credentials
 - Return profile data of the given user
 
-To facilitate administrators' work, the following flows are already implemented:
+To facilitate administrators' work, the following providers are already implemented:
 
 - Apple
 - Facebook, Github, Google (through the "Generic provider" flow)
@@ -72,7 +72,7 @@ Let's add the required libraries to the authentication server:
 
 [gama files](https://docs.jans.io/head/agama/gama-format/) are deployable units in the Agama engine. To create one, simply zip the contents of [project](./project) subdirectory. The resulting archive must have three folders at top-level: `web`, `lib`, and `code`. The file extension does not matter in the end.
 
-To quickly collect the contents of _project_, you can do the following (requires `git` 2.25 or higher):
+To quickly collect the contents of `project`, you can do the following (requires `git` 2.25 or higher):
 
 ```
 git clone --depth 1 --branch main --no-checkout https://github.com/JanssenProject/jans.git
@@ -93,7 +93,7 @@ Wait 30 seconds and press the `d` key. This will show the result of the deployme
 
 ### Collect providers configurations
 
-For every provider flow (see `code/provider` directory of the `project` folder) collect OAuth 2.0 configurations. Instructions to do this vary across different social sites. For the case of Facebook, for instance, this is approximately what needs to be done:
+For every provider collect OAuth 2.0 configurations - or OpenId Connect if supported. Instructions to do this vary across different social sites. For the case of Facebook, for instance, this is approximately what needs to be done:
 
 - Login to Facebook and [register](https://developers.facebook.com/docs/development/register) as developer
 - Create an application with Facebook login capabilities
@@ -139,6 +139,7 @@ The table below explains the meaning of properties:
 |`flowQname`|The qualified name of the Agama flow associated to this provider (must exist in `code` directory)|Yes|
 |`displayName`|Short name of the provider (will be shown in the selector page)|Yes|
 |`oauthParams`|The actual OAuth configuration for the given provider. See below|Yes|
+|`openIdParams`|OpenId connect configuration. See notes below|No|
 |`mappingClassField`|The qualified name of the [attribute mapping](#attribute-mappings) for this provider|Yes|
 |`logoImg`|Relative path to the logo image (will be shown in the selector page)|No|
 |`enabled`|A boolean value indicating whether this provider can be shown (and triggered) from the main flow or not. Default value is `true`|No|
@@ -168,6 +169,16 @@ Property `oauthParams` adheres to the following structure:
 |`custParamsTokenReq`|A JSON object (keys and values expected to be strings) with extra parameters to pass to the token endpoint if desired|
 
 Edit the properties you consider relevant for every provider. Generally, from the above table, the first six are the only needed.
+
+Section `openIdParams` can be used when the provider supports OpenId Connect too. This will reduce considerably the amount of properties you will need to supply in section  `oauthParams`. Here's the structure:
+
+|Name|Description|
+|-|-|
+|`host`|The URL of the provider, e.g. `https://may.hem`|
+|`useDCR`|If the provider supports _dynamic client registration_ set this to true. It will be a time saver|
+|`useCachedClient`|Once client registration occurs for the first time, no more registration attempts will be made until the client is about to expire. Set this to `false` to force registration every time authentication is about to take place|
+
+When providing `openIdParams`, the `host` will be used to grab the endpoints mentioned in the `oauthParams` section automatically, namely, authorization, token, and userInfo endpoints.  When `useDCR` is set to `true`, a client will be registered so no need to supply `clientId` and `clientSecret`. Under these circumstances, most of times only `scopes` will be needed under the `oauthParams` section.
 
 #### Attribute mappings
 
@@ -229,7 +240,7 @@ Ensure you went through [this](#attribute-mappings) already. Some important cons
 - A mapping has to be declared as a public field in a public class
 - Several providers can use the same mapping
 
-While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can place the source (java) file in the _lib_ directory of your project and leverage hot reloading. Ensure to create the usual directory hierarchy in _lib_ corresponding to your class package. 
+While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can place the source (java) file in the `lib` directory of your project and leverage hot reloading. Ensure to create the usual directory hierarchy in `lib` corresponding to your class package. 
 
 A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension and edit the body of the lambda expression. 
 

@@ -24,6 +24,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javax.xml.validation.Schema;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.*;
@@ -60,13 +61,13 @@ public class SamlIdpService {
         return documentStoreService.getProviderType() == DocumentStoreType.LOCAL;
     }
 
-    public String saveMetadataFile(String metadataTempDir, String metadataFileName, String documentStoreModuleName,
+    public String saveMetadataFile(String metadataDir, String metadataFileName, String documentStoreModuleName,
             InputStream stream) {
-        logger.info("metadataTempDir:{}, metadataFileName:{}, documentStoreModuleName:{}, stream:{}", metadataTempDir,
+        logger.info("metadataDir:{}, metadataFileName:{}, documentStoreModuleName:{}, stream:{}", metadataDir,
                 metadataFileName, documentStoreModuleName, stream);
 
-        if (StringUtils.isBlank(metadataTempDir)) {
-            throw new InvalidConfigurationException("Failed to save file as metadataTempDir is null!");
+        if (StringUtils.isBlank(metadataDir)) {
+            throw new InvalidConfigurationException("Failed to save file as metadata directory provided is null!");
         }
 
         if (StringUtils.isBlank(metadataFileName)) {
@@ -81,22 +82,19 @@ public class SamlIdpService {
             documentStoreModuleName = "SAML";
         }
 
-        String tempFileName = getTempMetadataFilename(metadataTempDir, metadataFileName);
-        logger.debug("metadataTempDir:{}, metadataFileName:{}", metadataTempDir, metadataFileName);
-
-        String metadataFile = metadataTempDir + tempFileName;
-        logger.debug("documentStoreService:{}, metadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
+        String metadataFile = metadataDir + File.separator + metadataFileName;
+        logger.info("documentStoreService:{}, metadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
                 metadataFile, localDocumentStoreService);
         try {
-            boolean result = documentStoreService.saveDocumentStream(metadataFile, stream,
-                    List.of("jans-server", documentStoreModuleName));
-            logger.debug("SAML file saving result:{}", result);
+            String result = documentStoreService.saveDocumentStream(metadataFile, null,
+                    stream, List.of("jans-server", documentStoreModuleName));
+            logger.info("SAML file saving result:{}", result);
 
             InputStream newFile = documentStoreService.readDocumentAsStream(metadataFile);
-            logger.debug("SAML file read newFile:{}", newFile);
+            logger.info("SAML file read newFile:{}", newFile);
 
-            if (result) {
-                return tempFileName;
+            if (result != null) {
+                return metadataFile;
             }
         } catch (Exception ex) {
             logger.error("Failed to write SAML metadata file '{}'", metadataFile, ex);
@@ -125,12 +123,23 @@ public class SamlIdpService {
         logger.debug("Rename metadata file documentStoreService:{},metadataPath:{}, destinationMetadataPath:{}",
                 documentStoreService, metadataPath, destinationMetadataPath);
         try {
-            return documentStoreService.renameDocument(metadataPath, destinationMetadataPath);
+            return documentStoreService.renameDocument(metadataPath, destinationMetadataPath) != null;
         } catch (Exception ex) {
             logger.error("Failed to rename metadata '{}' to '{}'", metadataPath, destinationMetadataPath, ex);
         }
 
         return false;
+    }
+
+    public InputStream getFileFromDocumentStore(String path) {
+
+        logger.debug("Get file from DocumentStore. Path: {}",path);
+        try {
+            return documentStoreService.readDocumentAsStream(path);
+        }catch(Exception e) {
+            logger.error("Failed to get file '{}' from DocumentStore",path);
+            return null;
+        }
     }
 
     private String getTempMetadataFilename(String metadataFolder, String fileName) {

@@ -93,6 +93,28 @@ configmap:
   cnAwsSecretsReplicaRegions: []
   # [aws_secret_manager_envs] END
   # [aws_envs] END
+  # [vault_envs] Envs related to Hashicorp vault
+  # -- Vault AppRole RoleID.
+  cnVaultRoleId: ""
+  # -- Vault AppRole SecretID.
+  cnVaultSecretId: ""
+  # -- Base URL of Vault.
+  cnVaultAddr: http://localhost:8200
+  # -- Verify connection to Vault.
+  cnVaultVerify: false
+  # -- Path to file contains Vault AppRole role ID.
+  cnVaultRoleIdFile: /etc/certs/vault_role_id
+  # -- Path to file contains Vault AppRole secret ID.
+  cnVaultSecretIdFile: /etc/certs/vault_secret_id
+  # -- Vault namespace used to access the secrets.
+  cnVaultNamespace: ""
+  # -- Path to Vault KV secrets engine.
+  cnVaultKvPath: secret
+  # -- Base prefix name used to access secrets.
+  cnVaultPrefix: jans
+  # -- Path to Vault AppRole.
+  cnVaultAppRolePath: approle
+  # [vault_envs] END
   # -- Value passed to Java option -XX:MaxRAMPercentage
   cnMaxRamPercent: "75.0"
   # -- SCIM protection mode OAUTH|TEST|UMA
@@ -279,6 +301,8 @@ auth-server-key-rotation:
   additionalAnnotations: {}
   # -- Boolean flag to enable/disable the auth-server-key rotation cronjob.
   enabled: true
+  # -- The initial auth server key rotation keys life in hours
+  initKeysLife: 48
   # -- Add custom scripts that have been mounted to run before the entrypoint.
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
@@ -368,6 +392,8 @@ fido2:
   ingress:
     # -- Enable endpoint /.well-known/fido2-configuration
     fido2ConfigEnabled: false
+    # -- Enable endpoint /jans-fido2
+    fido2Enabled: false
 scim:
   # -- Name of the scim service. Please keep it as default.
   scimServiceName: scim
@@ -456,7 +482,7 @@ lbIp: 22.22.22.22
 testEnviroment: false
 # -- The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes
 configAdapterName: kubernetes
-# -- The config backend adapter that will hold Janssen secret layer. aws|google|kubernetes
+# -- The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes
 configSecretAdapter: kubernetes
 # -- Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner. Leave as this is a sensible default.
 cnGoogleApplicationCredentials: /etc/jans/conf/google-credentials.json
@@ -553,6 +579,10 @@ nginx-ingress:
     fido2ConfigLabels: { }
     # -- fido2 config ingress resource additional annotations.
     fido2ConfigAdditionalAnnotations: { }
+    # -- fido2 ingress resource labels. key app is taken
+    fido2Labels: { }
+    # -- fido2 ingress resource additional annotations.
+    fido2AdditionalAnnotations: { }
     # -- Auth server ingress resource labels. key app is taken
     authServerLabels: { }
     # -- Auth server ingress resource additional annotations.

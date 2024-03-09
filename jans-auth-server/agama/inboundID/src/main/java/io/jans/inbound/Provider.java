@@ -15,6 +15,7 @@ public class Provider {
     private boolean requestForEmail;
     private boolean emailLinkingSafe;
 
+    private OpenIdParams openIdParams;
     private OAuthParams oauthParams;
 
     public String getFlowQname() {
@@ -95,6 +96,14 @@ public class Provider {
     
     public void setOAuthParams(OAuthParams o) {
         oauthParams = o;
+    }
+    
+    public OpenIdParams getOpenIdParams() {
+        return openIdParams;
+    }
+    
+    public void setOpenIdParams(OpenIdParams o) {
+        openIdParams = o;
     }
 
 }

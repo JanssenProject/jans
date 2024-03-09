@@ -337,6 +337,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         authorizeRestWebServiceValidator.validateAcrs(authzRequest, client);
         authorizeRestWebServiceValidator.validateAuthorizationDetails(authzRequest, client);
+        authorizeRestWebServiceValidator.validateRequestParameterSupported(authzRequest);
+        authorizeRestWebServiceValidator.validateRequestUriParameterSupported(authzRequest);
 
         Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
 

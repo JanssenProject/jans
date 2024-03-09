@@ -83,11 +83,20 @@ class DialogUtils:
 
         containers = [container] if container else [self.tabs[tab] for tab in self.tabs]
 
-        for container in containers:
-            for item in container.children:
+        def check_subitmes(items):
+            for item in items:
                 if hasattr(item, 'children') and len(item.children)>1 and hasattr(item.children[1], 'jans_name'):
                     if 'required' in item.children[0].style and not data.get(item.children[1].jans_name, None):
                         missing_fields.append(item.children[1].jans_name)
+
+                if isinstance(item, prompt_toolkit.layout.containers.DynamicContainer):
+                    sub_children = item.get_children()
+                    if sub_children:
+                        for sc in sub_children:
+                            check_subitmes(sc.children)
+
+        for container in containers:
+            check_subitmes(container.children)
 
         if missing_fields:
             common_data.app.show_message(_("Please fill required fields"), _("The following fields are required:\n") + ', '.join(missing_fields), tobefocused=tobefocused)

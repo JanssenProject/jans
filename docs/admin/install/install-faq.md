@@ -152,11 +152,27 @@ Individual modules of the Janssen Server will continue to write their operationa
 /opt/jans/bin/show_version.py
 ```
 
+Alternatively, [TUI](../config-guide/config-tools/jans-tui/README.md) can be used to get this information:
+
+1. Open TUI
+2. Navigate to `Jans TUI` menu item on top menu bar
+3. Navigate to `Application Versions`
+4. Hit `enter`
+
+This will show version of each Janssen Server modules:
+
+![](../../assets/tui-version-screen.png)
+
 -----------------------------
 
 ## After installation, what's next?
 
-After successful installation of the Janssen Server, move on to the [configuration steps](../config-guide/config-tools/jans-cli/README.md) in the Command Line Interface documentation to align Janssen with your organizational requirements.
+After successful installation of the Janssen Server, start configuring Janssen
+Server to fulfil your organizational requirements and authentication flows you
+intend to implement. Use the 
+[Text-based UI](../config-guide/config-tools/jans-tui/README.md) or  
+[command-line interface](../config-guide/config-tools/jans-cli/README.md) to 
+configure the Janssen Server.
 
 ## Does the Janssen Server uninstall process remove the data store as well?
 

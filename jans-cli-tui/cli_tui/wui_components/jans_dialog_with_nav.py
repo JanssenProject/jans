@@ -5,6 +5,7 @@ from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
     Window,
+    AnyContainer
 )
 from prompt_toolkit.widgets import (
     Button,
@@ -15,9 +16,6 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.application.current import get_app
 from typing import Optional, Sequence, Union
-from prompt_toolkit.layout.containers import (
-    AnyContainer,
-)
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText

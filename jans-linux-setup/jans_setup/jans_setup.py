@@ -112,7 +112,6 @@ sys.path.insert(0, base.pylib_dir)
 from setup_app.utils.package_utils import packageUtils
 
 packageUtils.check_and_install_packages()
-sys.path.insert(0, os.path.join(base.pylib_dir, 'gcs'))
 
 if argsp.download_exit:
     downloads.download_all()
