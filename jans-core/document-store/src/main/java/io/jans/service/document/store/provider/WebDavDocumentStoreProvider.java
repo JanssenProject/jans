@@ -71,19 +71,32 @@ public class WebDavDocumentStoreProvider extends DocumentStoreProvider<WebDavDoc
 	}
 
 	@Override
-	public boolean saveDocument(String path, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
 		// TODO Auto-generated method stub
-		return false;
+		return null;
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
 		// TODO Auto-generated method stub
-		return false;
+		return null;
+	}
+
+	@Override
+	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
+			List<String> moduleList) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public String readDocument(String path, Charset charset) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InputStream readBinaryDocumentAsStream(String path) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -95,9 +108,9 @@ public class WebDavDocumentStoreProvider extends DocumentStoreProvider<WebDavDoc
 	}
 
 	@Override
-	public boolean renameDocument(String currentPath, String destinationPath) {
+	public String renameDocument(String currentPath, String destinationPath) {
 		// TODO Auto-generated method stub
-		return false;
+		return null;
 	}
 
 	@Override

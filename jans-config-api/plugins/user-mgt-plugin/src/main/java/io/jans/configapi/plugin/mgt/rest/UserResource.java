@@ -163,8 +163,9 @@ public class UserResource extends BaseResource {
         ignoreCustomAttributes(user, removeNonLDAPAttributes);
         validateAttributes(user);
 
+        logger.info("Service call to create user:{}", user);
         user = userMgmtSrv.addUser(user, true);
-        logger.debug("User created {}", user);
+        logger.info("User created {}", user);
 
         // excludedAttributes
         user = excludeUserAttributes(user);
@@ -172,9 +173,12 @@ public class UserResource extends BaseResource {
         // get custom user
         customUser = getCustomUser(user, removeNonLDAPAttributes);
         logger.info("newly created customUser:{}", customUser);
-        }catch(WebApplicationException waex) {
-            logger.error("ApplicationException while creating user is:", waex);
-            throwInternalServerException("USER_CREATION", waex.getMessage());
+        }catch(WebApplicationException wex) {
+            logger.error("ApplicationException while creating user is:{}, cause:{}", wex, wex.getCause());
+            throwInternalServerException("USER_CREATION_ERROR", wex.getMessage());
+        }catch(Exception ex) {
+            logger.error("Exception while creating user is:{}, cause:{}", ex, ex.getCause());
+            throwInternalServerException(ex);
         }
 
         return Response.status(Response.Status.CREATED).entity(customUser).build();
@@ -201,34 +205,38 @@ public class UserResource extends BaseResource {
                     removeNonLDAPAttributes);
         }
 
-        // get User object
-        User user = setUserAttributes(customUser);
-
-        // parse birthdate if present
-        userMgmtSrv.parseBirthDateAttribute(user);
-        logger.debug("Create  user:{}", user);
-
-        // checking mandatory attributes
-        List<String> excludeAttributes = List.of(USER_PWD);
-        checkMissingAttributes(user, excludeAttributes);
-        ignoreCustomAttributes(user, removeNonLDAPAttributes);
-        validateAttributes(user);
-
         try {
+            // get User object
+            User user = setUserAttributes(customUser);
+
+            // parse birthdate if present
+            userMgmtSrv.parseBirthDateAttribute(user);
+            logger.debug("Create  user:{}", user);
+
+            // checking mandatory attributes
+            List<String> excludeAttributes = List.of(USER_PWD);
+            checkMissingAttributes(user, excludeAttributes);
+            ignoreCustomAttributes(user, removeNonLDAPAttributes);
+            validateAttributes(user);
+
+            logger.info("Call update user:{}", user);
             user = userMgmtSrv.updateUser(user);
             logger.info("Updated user:{}", user);
-        } catch (Exception ex) {
-            logger.error("Error while updating user", ex);
+
+            // excludedAttributes
+            user = excludeUserAttributes(user);
+
+            // get custom user
+            customUser = getCustomUser(user, removeNonLDAPAttributes);
+            logger.info("updated customUser:{}", customUser);
+        } catch (WebApplicationException wex) {
+            logger.error("ApplicationException while updating user is:{}, cause:{}", wex, wex.getCause());
+            throwInternalServerException("USER_UPDATE_ERROR", wex.getMessage());
+        }
+        catch (Exception ex) {
+            logger.error("Exception while updating user is:{}, cause:{}", ex, ex.getCause());
             throwInternalServerException(ex);
         }
-
-        // excludedAttributes
-        user = excludeUserAttributes(user);
-
-        // get custom user
-        customUser = getCustomUser(user, removeNonLDAPAttributes);
-        logger.info("updated customUser:{}", customUser);
-
         return Response.ok(customUser).build();
 
     }
@@ -352,11 +360,7 @@ public class UserResource extends BaseResource {
     }
     
     private void validateAttributes(User user) {
-        try {
-            userMgmtSrv.validateAttributes(user.getCustomAttributes());
-        } catch (WebApplicationException wexp) {
-            throwBadRequestException("VALIDATE_ATTRIBUTE", wexp.getMessage());
-        }
+        userMgmtSrv.validateAttributes(user.getCustomAttributes());
     }
 
     private List<CustomUser> getCustomUserList(List<User> users, boolean removeNonLDAPAttributes) {

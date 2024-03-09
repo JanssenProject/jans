@@ -7896,19 +7896,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
-          type: boolean
-        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8232,6 +8232,12 @@ components:
           type: string
         opTosUri:
           type: string
+        cleanUpInactiveClientAfterHoursOfInactivity:
+          type: integer
+          format: int32
+        clientPeriodicUpdateTimerInterval:
+          type: integer
+          format: int32
         authorizationCodeLifetime:
           type: integer
           format: int32
@@ -10180,10 +10186,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
