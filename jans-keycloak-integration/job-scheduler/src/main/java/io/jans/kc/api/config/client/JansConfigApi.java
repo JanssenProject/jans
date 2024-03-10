@@ -30,7 +30,7 @@ public class JansConfigApi {
     public List<JansTrustRelationship> findAllTrustRelationships() {
 
         try {
-            List<TrustRelationship> trlist = trApi.getTrustRelationship();
+            List<TrustRelationship> trlist = trApi.getTrustRelationships();
             return trlist.stream()
                 .map(JansConfigApi::toJansTrustRelationship)
                 .collect(Collectors.toList());
@@ -38,6 +38,7 @@ public class JansConfigApi {
             throw new JansConfigApiError("getAllTrustRelationships() failed",e);
         }
     }
+
 
     public static JansConfigApi createInstance(ApiCredentials credentials) {
 

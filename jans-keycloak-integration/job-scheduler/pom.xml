@@ -81,6 +81,11 @@
       <scope>compile</scope>
     </dependency>
     <!-- end jboss logging dependencies-->
+
+    <dependency>
+      <groupId>io.jans</groupId>
+      <artifactId>jans-core-saml</artifactId>
+    </dependency>
     
   </dependencies>
 

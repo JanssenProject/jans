@@ -263,8 +263,15 @@
           <version>${quartz-scheduler.version}</version>
         </dependency>
         <!-- end quartz scheduler dependencies -->
-      </dependencies>
 
+        <!-- jans dependencies -->
+        <dependency>
+          <groupId>io.jans</groupId>
+          <artifactId>jans-core-saml</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <!-- end jans dependencies -->
+      </dependencies>
     </dependencyManagement>
 
     <build>
