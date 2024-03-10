@@ -7,6 +7,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import io.jans.service.document.store.exception.DocumentException;
+import io.jans.service.document.store.exception.WriteDocumentException;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -82,6 +84,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			}
 		} catch (Exception e) {
 			log.error("Failed to check if path '" + path + "' exists in repository", e);
+			throw new DocumentException(e);
 		}
 
 		return false;
@@ -94,7 +97,6 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		oxDocument.setDocument(documentContent);
 		oxDocument.setDisplayName(path);
 		try {
-			try {
 				oxDocument.setInum(documentService.generateInumForNewDocument());
 				String dn = "inum=" + oxDocument.getInum() + ",ou=document,o=jans";
 				oxDocument.setDn(dn);
@@ -103,13 +105,10 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 				oxDocument.setJansModuleProperty(moduleList);
 				documentService.addDocument(oxDocument);
 				return path;
-			} finally {
-			}
 		} catch (Exception ex) {
 			log.error("Failed to write document to file '{}'", path, ex);
+			throw new WriteDocumentException(ex);
 		}
-
-		return null;
 	}
 
 	@Override
@@ -132,9 +131,8 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			return path;
 		} catch (Exception e) {
 			log.error("Failed to write document from stream to file '{}'", path, e);
+			throw new WriteDocumentException(e);
 		}
-
-		return null;
 	}
 
 	@Override
@@ -154,6 +152,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			}
 		} catch (Exception e) {
 			log.error("Failed to read document as stream from file '{}'", name, e);
+			throw new DocumentException(e);
 		}
 		return null;
 	}
@@ -195,6 +194,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			}
 		} catch (Exception e) {
 			log.error("Failed to rename to destination file '{}'", destinationPath);
+			throw new WriteDocumentException(e);
 		}
 
 		return destinationPath;
@@ -210,14 +210,12 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 				log.error(" document not exist file '{}'", path);
 				return false;
 			}
-
 			documentService.removeDocument(oxDocument);
-
 			return true;
 		} catch (Exception e) {
 			log.error("Failed to remove document file '{}'", path, e);
+			throw new DocumentException(e);
 		}
-		return false;
 	}
 
 }
