@@ -278,7 +278,9 @@ class EditUserDialog(JansGDialog, DialogUtils):
             common_data.app.show_message(fix_title, _("Please enter Password"))
             return
 
-        user_info = {'customObjectClasses':['top', 'jansPerson'], 'customAttributes':[]}
+        #object_classes = self.data.get('customObjectClasses', ["top","jansCustomPerson"])
+        user_info = {'customAttributes':[]}
+
         for key_ in ('mail', 'userId', 'displayName', 'givenName'):
             user_info[key_] = raw_data.pop(key_)
 
@@ -335,7 +337,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             common_data.app.start_progressing(_("Saving user ..."))
             response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
             common_data.app.stop_progressing()
-            if response.status_code != 201:
+            if response.status_code not in (200, 201):
                 common_data.app.show_message(_('Error'), response.text + '\n' + response.reason)
             else:
                 self.future.set_result(DialogResult.OK)
