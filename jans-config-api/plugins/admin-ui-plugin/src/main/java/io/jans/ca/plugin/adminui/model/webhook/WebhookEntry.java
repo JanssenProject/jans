@@ -64,6 +64,11 @@ public class WebhookEntry extends Entry implements Serializable {
         this.description = webhookEntry.getDescription();
         this.url = webhookEntry.getUrl();
         this.httpRequestBody = webhookEntry.getHttpRequestBody();
+        // This block of code is checking if the HTTP method of the `webhookEntry` object is one of "POST", "PUT", or
+        // "PATCH". If it is, it then tries to convert the `httpRequestBody` of the `webhookEntry` object to a JSON string
+        // and store it in `httpRequestBodyString`. Additionally, it attempts to convert the `httpRequestBodyString` back
+        // to a map if it is a valid JSON string and store it in `httpRequestBody`. Any `JsonProcessingException` that
+        // occurs during these operations is caught and ignored.
         if (Lists.newArrayList("POST", "PUT", "PATCH").contains(webhookEntry.getHttpMethod())) {
             try {
                 if(!MapUtils.isEmpty(webhookEntry.getHttpRequestBody())) {
@@ -86,6 +91,13 @@ public class WebhookEntry extends Entry implements Serializable {
         return httpRequestBodyString;
     }
 
+    /**
+     * The function sets the HTTP request body string and converts it to a map if it is a valid JSON string.
+     *
+     * @param httpRequestBodyString The `setHttpRequestBodyString` method takes a string `httpRequestBodyString` as a
+     * parameter. This method sets the `httpRequestBodyString` field of the class to the provided string. It also attempts
+     * to convert the string to a map if it is a valid JSON string using the `CommonUtils
+     */
     public void setHttpRequestBodyString(String httpRequestBodyString) {
         this.httpRequestBodyString = httpRequestBodyString;
         try {
@@ -165,6 +177,12 @@ public class WebhookEntry extends Entry implements Serializable {
         return httpRequestBody;
     }
 
+    /**
+     * The function `setHttpRequestBody` sets the HTTP request body as a map and converts it to a JSON string using a
+     * utility method.
+     *
+     * @param httpRequestBody A map containing key-value pairs representing the HTTP request body.
+     */
     public void setHttpRequestBody(Map<String, Object> httpRequestBody) {
         this.httpRequestBody = httpRequestBody;
         try {

@@ -203,10 +203,8 @@ public class WebhookService {
 
             if (webhook.getAuiFeatureIds() != null) {
                 List<AuiFeature> features = getAuiFeaturesByIds(webhook.getAuiFeatureIds());
-                log.error("webhook.getAuiFeatureIds()~~~~~~~~~~~~~~~~~~~~", webhook.getAuiFeatureIds());
                 features.stream().forEach(feature -> {
                     feature.setWebhookIdsMapped(addNonExistingElements(id, feature.getWebhookIdsMapped()));
-                    log.error("feature~~~~~~~~~~~~~~~~~~~~", feature.toString());
                     entryManager.merge(feature);
                 });
             }
