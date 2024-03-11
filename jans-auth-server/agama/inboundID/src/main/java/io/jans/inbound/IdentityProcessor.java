@@ -30,11 +30,13 @@ public class IdentityProcessor {
         this.provider = provider;
     }
     
-    public Map<String, List<Object>> applyMapping(Map<String, Object> profile, ClassLoader classLoader)
-            throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    public Map<String, List<Object>> applyMapping(Map<String, Object> profile, Field f)
+            throws IllegalAccessException {
+
+        logger.debug("Retrieving value of field {}", f.getName());
+        UnaryOperator<Map<String, Object>> op = (UnaryOperator<Map<String, Object>>) f.get(f.getDeclaringClass());
         
-        UnaryOperator<Map<String, Object>> op = getMapping(provider.getMappingClassField(), 
-                classLoader == null ? getClass().getClassLoader() : classLoader);
+        logger.debug("Applying mapping to incoming profile");
         Map<String, Object> pr = op.apply(profile);
         Map<String, List<Object>> res = new HashMap<>();
         
@@ -154,25 +156,6 @@ public class IdentityProcessor {
         });
         
         return attrs;
-
-    }
-    
-    private UnaryOperator<Map<String, Object>> getMapping(String field, ClassLoader clsLoader) 
-            throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        
-        int i = 0;
-        boolean valid = field != null;
-        
-        if (valid) {
-            i = field.lastIndexOf(".");
-            valid = i > 0 && i < field.length() - 1;
-        }
-        if (!valid) throw new IllegalAccessException("Unexpected value passed for mapping field: " + field);
-        
-        String clsName = field.substring(0, i);
-        Class<?> cls = clsLoader.loadClass(clsName);
-        Field f = cls.getDeclaredField(field.substring(i + 1));
-        return (UnaryOperator<Map<String, Object>>) f.get(cls);
 
     }
 

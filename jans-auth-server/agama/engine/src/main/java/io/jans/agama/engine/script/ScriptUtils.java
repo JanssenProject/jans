@@ -116,7 +116,7 @@ public class ScriptUtils {
     }
     
     public static Pair<Object, Exception> callAction(Object instance, String actionClassName, String methodName,
-            Object[] params) throws Exception {
+            Object[] params) {
         
         Object result = null;
         Exception ex = null;
