@@ -38,7 +38,7 @@ public class WebhookCallable implements Callable<GenericResponse> {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.createObjectNode();
         try {
-            log.debug("Webhook processing started. Id: {}. Name: {}, URL : {}, HttpMethod: {}", webhook.getWebhookId(), webhook.getDisplayName(), webhook.getUrl(), webhook.getHttpMethod());
+            log.debug("Webhook processing started. Id: {}. Name: {}, URL : {}, HttpMethod: {}", webhook.getInum(), webhook.getDisplayName(), webhook.getUrl(), webhook.getHttpMethod());
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(webhook.getUrl());
             //getting all headers
             webhook.getHttpHeaders().stream()
@@ -47,15 +47,15 @@ public class WebhookCallable implements Callable<GenericResponse> {
             //Call rest endpoint
             Invocation invocation = checkHttpMethod(request);
             if (invocation == null) {
-                log.error("Error in creating invocation object for rest call (Name: {}, Id: {})", webhook.getDisplayName(), webhook.getWebhookId());
+                log.error("Error in creating invocation object for rest call (Name: {}, Id: {})", webhook.getDisplayName(), webhook.getInum());
                 return CommonUtils.createGenericResponse(false,
                         Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                        "Error in creating invocation object for rest call (Name: " + webhook.getDisplayName() + ", Id: " + webhook.getWebhookId() + ")");
+                        "Error in creating invocation object for rest call (Name: " + webhook.getDisplayName() + ", Id: " + webhook.getInum() + ")");
             }
             Response response = invocation.invoke();
-            log.debug("Webhook (Name: {}, Id: {}) response status code: {}", webhook.getDisplayName(), webhook.getWebhookId(), response.getStatus());
+            log.debug("Webhook (Name: {}, Id: {}) response status code: {}", webhook.getDisplayName(), webhook.getInum(), response.getStatus());
 
-            ((ObjectNode) jsonNode).put("webhookId", webhook.getWebhookId());
+            ((ObjectNode) jsonNode).put("webhookId", webhook.getInum());
             ((ObjectNode) jsonNode).put("webhookName", webhook.getDisplayName());
             ((ObjectNode) jsonNode).put("webhookMethod", webhook.getHttpMethod());
             if (Lists.newArrayList("POST", "PUT", "PATCH").contains(webhook.getHttpMethod())) {
@@ -65,16 +65,16 @@ public class WebhookCallable implements Callable<GenericResponse> {
                     response.getStatus() == Response.Status.CREATED.getStatusCode() ||
                     response.getStatus() == Response.Status.ACCEPTED.getStatusCode()) {
                 String responseData = response.readEntity(String.class);
-                log.debug("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getWebhookId(), responseData);
+                log.debug("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getInum(), responseData);
                 return CommonUtils.createGenericResponse(true, response.getStatus(), responseData, jsonNode);
             } else {
                 String responseData = response.readEntity(String.class);
-                log.error("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getWebhookId(), responseData);
+                log.error("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getInum(), responseData);
                 return CommonUtils.createGenericResponse(false, response.getStatus(), responseData, jsonNode);
             }
         } catch (Exception e) {
             log.error(ErrorResponse.WEBHOOK_TRIGGER_ERROR.getDescription(), e);
-            ((ObjectNode) jsonNode).put("webhookId", webhook.getWebhookId());
+            ((ObjectNode) jsonNode).put("webhookId", webhook.getInum());
             ((ObjectNode) jsonNode).put("webhookName", webhook.getDisplayName());
             ((ObjectNode) jsonNode).put("webhookMethod", webhook.getHttpMethod());
             if (Lists.newArrayList("POST", "PUT", "PATCH").contains(webhook.getHttpMethod())) {
@@ -101,7 +101,7 @@ public class WebhookCallable implements Callable<GenericResponse> {
                 }
                 Map<String, Object> requestBody = setRequestBody(webhook);
                 if (requestBody.isEmpty()) {
-                    log.error("Webhook (Name: {}, Id: {}) . Error in parsing request-body or the request-body is empty.", webhook.getDisplayName(), webhook.getWebhookId());
+                    log.error("Webhook (Name: {}, Id: {}) . Error in parsing request-body or the request-body is empty.", webhook.getDisplayName(), webhook.getInum());
                 }
                 invocation = request.buildPost(Entity.entity(setRequestBody(webhook), MediaType.APPLICATION_JSON));
                 break;
