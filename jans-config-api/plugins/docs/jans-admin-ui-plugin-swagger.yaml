@@ -1633,13 +1633,12 @@ components:
     WebhookEntry:
       required:
       - displayName
-      - httpMethod
       - url
       type: object
       properties:
         dn:
           type: string
-        webhookId:
+        inum:
           type: string
         displayName:
           maxLength: 60
@@ -1649,6 +1648,8 @@ components:
         description:
           type: string
         url:
+          type: string
+        httpRequestBodyString:
           type: string
         httpMethod:
           type: string
