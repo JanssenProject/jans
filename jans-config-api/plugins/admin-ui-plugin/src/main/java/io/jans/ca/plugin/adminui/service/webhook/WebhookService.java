@@ -99,7 +99,7 @@ public class WebhookService {
                     String[] targetArray = new String[]{assertionValue};
                     Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
                             targetArray, null);
-                    Filter webhookIdFilter = Filter.createSubstringFilter(AppConstants.WEBHOOK_ID, null, targetArray, null);
+                    Filter webhookIdFilter = Filter.createSubstringFilter(AppConstants.INUM, null, targetArray, null);
                     Filter urlFilter = Filter.createSubstringFilter("url", null, targetArray, null);
                     filters.add(Filter.createORFilter(displayNameFilter, webhookIdFilter, urlFilter));
                 }
@@ -127,7 +127,7 @@ public class WebhookService {
             Filter searchFilter = null;
             List<Filter> filters = new ArrayList<>();
             for (String id : ids) {
-                Filter filter = Filter.createSubstringFilter(AppConstants.WEBHOOK_ID, null, new String[]{id}, null);
+                Filter filter = Filter.createSubstringFilter(AppConstants.INUM, null, new String[]{id}, null);
                 filters.add(filter);
             }
             searchFilter = Filter.createORFilter(filters);
@@ -197,14 +197,16 @@ public class WebhookService {
         try {
             validateWebhookEntry(webhook);
             String id = idFromName(webhook.getDisplayName() + webhook.getUrl() + webhook.getHttpMethod());
-            webhook.setWebhookId(id);
+            webhook.setInum(id);
             webhook.setDn(dnOfWebhook(id, AppConstants.WEBHOOK_DN));
             entryManager.persist(webhook);
 
             if (webhook.getAuiFeatureIds() != null) {
                 List<AuiFeature> features = getAuiFeaturesByIds(webhook.getAuiFeatureIds());
+                log.error("webhook.getAuiFeatureIds()~~~~~~~~~~~~~~~~~~~~", webhook.getAuiFeatureIds());
                 features.stream().forEach(feature -> {
                     feature.setWebhookIdsMapped(addNonExistingElements(id, feature.getWebhookIdsMapped()));
+                    log.error("feature~~~~~~~~~~~~~~~~~~~~", feature.toString());
                     entryManager.merge(feature);
                 });
             }
@@ -237,7 +239,7 @@ public class WebhookService {
      */
     public void removeWebhook(WebhookEntry webhook) throws ApplicationException {
         try {
-            if (Strings.isNullOrEmpty(webhook.getWebhookId())) {
+            if (Strings.isNullOrEmpty(webhook.getInum())) {
                 log.error(ErrorResponse.WEBHOOK_ID_MISSING.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_ID_MISSING.getDescription());
             }
@@ -246,9 +248,9 @@ public class WebhookService {
             //removing webhookId from auiFeatures tables..
             features.stream()
                     .filter(feature -> feature.getWebhookIdsMapped() != null)
-                    .filter(feature -> feature.getWebhookIdsMapped().contains(webhook.getWebhookId()))
+                    .filter(feature -> feature.getWebhookIdsMapped().contains(webhook.getInum()))
                     .forEach(feature -> {
-                        feature.getWebhookIdsMapped().remove(webhook.getWebhookId());
+                        feature.getWebhookIdsMapped().remove(webhook.getInum());
                         entryManager.merge(feature);
                     });
             //removing webhook
@@ -272,20 +274,20 @@ public class WebhookService {
     public WebhookEntry updateWebhook(WebhookEntry webhook) throws ApplicationException {
         try {
             validateWebhookEntry(webhook);
-            if (Strings.isNullOrEmpty(webhook.getWebhookId())) {
+            if (Strings.isNullOrEmpty(webhook.getInum())) {
                 log.error(ErrorResponse.WEBHOOK_ID_MISSING.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_ID_MISSING.getDescription());
             }
 
             if (Strings.isNullOrEmpty(webhook.getDn())) {
-                webhook.setDn(dnOfWebhook(webhook.getWebhookId(), AppConstants.WEBHOOK_DN));
+                webhook.setDn(dnOfWebhook(webhook.getInum(), AppConstants.WEBHOOK_DN));
             }
             entryManager.merge(webhook);
 
             if (webhook.getAuiFeatureIds() != null) {
                 List<AuiFeature> features = getAuiFeaturesByIds(webhook.getAuiFeatureIds());
                 features.stream().forEach(feature -> {
-                    feature.setWebhookIdsMapped(addNonExistingElements(webhook.getWebhookId(), feature.getWebhookIdsMapped()));
+                    feature.setWebhookIdsMapped(addNonExistingElements(webhook.getInum(), feature.getWebhookIdsMapped()));
                     entryManager.merge(feature);
                 });
             }
@@ -343,7 +345,7 @@ public class WebhookService {
         List<WebhookEntry> webhooks = getWebhookByIds(webhookIds);
         for (WebhookEntry webhook : webhooks) {
             validateWebhookEntry(webhook);
-            ShortCodeRequest shortCodeObj = shortCodes.stream().filter(shortCode -> shortCode.getWebhookId().equals(webhook.getWebhookId())).findAny().orElse(null);
+            ShortCodeRequest shortCodeObj = shortCodes.stream().filter(shortCode -> shortCode.getWebhookId().equals(webhook.getInum())).findAny().orElse(null);
             replaceShortCodeWithValues(webhook, shortCodeObj);
             if (webhook.isJansEnabled()) {
                 Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
@@ -384,7 +386,7 @@ public class WebhookService {
     }
 
     private static String dnOfWebhook(String id, String baseDn) {
-        return String.format("webhookId=%s,%s", id, baseDn);
+        return String.format("inum=%s,%s", id, baseDn);
     }
 
     public int getRecordMaxCount() {
