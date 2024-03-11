@@ -56,7 +56,7 @@ public class TrustRelationshipResource extends BaseResource {
     @Inject
     SamlService samlService;
 
-    @Operation(summary = "Get all Trust Relationship", description = "Get all TrustRelationship.", operationId = "get-trust-relationship", tags = {
+    @Operation(summary = "Get all Trust Relationship", description = "Get all TrustRelationship.", operationId = "get-trust-relationships", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_READ_ACCESS }))
     @ApiResponses(value = {
@@ -135,7 +135,7 @@ public class TrustRelationshipResource extends BaseResource {
             logger.debug(" Create metaDataFile.available():{}", metaDataFile.available());
         }
 
-        validateSpMetaDataSourceType(trustRelationship, metaDataFile);
+        validateSpMetaDataSourceType(trustRelationship, metaDataFile, false);
         String inum = samlService.generateInumForNewRelationship();
         trustRelationship.setInum(inum);
         trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
@@ -201,14 +201,14 @@ public class TrustRelationshipResource extends BaseResource {
         }
         
         InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
-        logger.debug(" Create metaDataFile:{} ", metaDataFile);
-        if (metaDataFile != null) {
-            logger.debug(" Create metaDataFile.available():{}", metaDataFile.available());
+        logger.debug("metaDataFile for update is:{} ", metaDataFile);
+        if (metaDataFile != null && metaDataFile.available() > 0) {
+            logger.debug("For update metaDataFile.available():{}", metaDataFile.available());
         }
         
-        validateSpMetaDataSourceType(trustRelationship, metaDataFile);
+        validateSpMetaDataSourceType(trustRelationship, metaDataFile, true);
         // Update
-        trustRelationship = samlService.updateTrustRelationship(trustRelationship);
+        trustRelationship = samlService.updateTrustRelationship(trustRelationship, metaDataFile);
 
         logger.info("Post update trustRelationship:{}", trustRelationship);
 
@@ -240,6 +240,36 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.noContent().build();
     }
 
+    @Operation(summary="Get TrustRelationship file metadata", description="Get TrustRelationship file metadata",
+        operationId = "get-trust-relationship-file-metadata", tags = {"SAML - Trust Relationship"},
+        security = @SecurityRequirement(name = "oauth2", scopes= {Constants.SAML_READ_ACCESS}),
+        responses = {
+          @ApiResponse(responseCode="200",description="OK",content= @Content(mediaType = MediaType.APPLICATION_XML,schema = @Schema(type="string",format="binary"))),
+          @ApiResponse(responseCode="400",description="Bad Request",content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+          @ApiResponse(responseCode="401",description="Unauthorized"),
+          @ApiResponse(responseCode="404",description="Not Found",content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+          @ApiResponse(responseCode="500",description="Internal Server Error")
+        }
+    )
+    @Path(Constants.SP_METADATA_FILE_PATH+Constants.ID_PATH_PARAM)
+    @GET
+    @ProtectedApi(scopes = {Constants.SAML_READ_ACCESS})
+    public Response gettrustRelationshipFileMetadata(
+        @Parameter(description="TrustRelationship inum") @PathParam(Constants.ID) @NotNull String id) {
+        
+        logger.info("getTrustRelationshipFileMeta()");
+        TrustRelationship trustrelationship = samlService.getTrustRelationshipByInum(id);
+        checkResourceNotNull(trustrelationship,SAML_TRUST_RELATIONSHIP);
+        if(trustrelationship.getSpMetaDataSourceType() != MetadataSourceType.FILE) {
+           throwBadRequestException("TrustRelationship metadatasource type isn't a FILE");
+        }
+        InputStream fs = samlService.getTrustRelationshipMetadataFile(trustrelationship);
+        if(fs == null) {
+            return getNotFoundError(String.format("metadata file for tr '%s' ",id));
+        }
+        return Response.ok(fs,MediaType.APPLICATION_XML).build();
+    }
+
     @Operation(summary = "Process unprocessed metadata files", description = "Process unprocessed metadata files", operationId = "post-metadata-files", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
@@ -258,10 +288,10 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.ok().build();
     }
     
-    private void validateSpMetaDataSourceType(TrustRelationship trustRelationship, InputStream metaDataFile)
+    private void validateSpMetaDataSourceType(TrustRelationship trustRelationship, InputStream metaDataFile, boolean isUpdate)
             throws IOException {
-        logger.info("Validate SP MetaDataSourceType trustRelationship:{}, metaDataFile:{}", trustRelationship,
-                metaDataFile);
+        logger.info("Validate SP MetaDataSourceType trustRelationship:{}, metaDataFile:{}, isUpdate:{}", trustRelationship,
+                metaDataFile, isUpdate);
 
         checkResourceNotNull(trustRelationship.getSpMetaDataSourceType(), "SP MetaData Source Type");
 
@@ -270,7 +300,8 @@ public class TrustRelationshipResource extends BaseResource {
         
         if (trustRelationship.getSpMetaDataSourceType().equals(MetadataSourceType.FILE)) {
 
-            if (metaDataFile == null || metaDataFile.available() <= 0) {
+            //If MetaDataSourceType==FILE and it is not Update flow
+            if ( (metaDataFile == null || metaDataFile.available() <= 0) && !isUpdate ) {
                 throwBadRequestException(DATA_NULL_CHK, String.format(DATA_NULL_MSG, "SP MetaData File"));
             }
 
