@@ -39,6 +39,7 @@ configmap:
   cnSqldbUserPassword: Test1234#
   # -- Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` .
   cnCacheType: NATIVE_PERSISTENCE
+  containerMetadataName: kubernetes
   # -- The name of the Kubernetes ConfigMap that will hold the configuration layer
   cnConfigKubernetesConfigMap: cn
   # -- The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.
