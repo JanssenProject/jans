@@ -175,10 +175,10 @@ Section `openIdParams` can be used when the provider supports OpenId Connect too
 |Name|Description|
 |-|-|
 |`host`|The URL of the provider, e.g. `https://may.hem`|
-|`useDCR`|If the provider supports _dynamic client registration_ set this to true. It will be a time saver|
+|`useDCR`|If the provider supports _dynamic client registration_ set this to `true`. It will be a time saver|
 |`useCachedClient`|Once client registration occurs for the first time, no more registration attempts will be made until the client is about to expire. Set this to `false` to force registration every time authentication is about to take place|
 
-When providing `openIdParams`, the `host` will be used to grab the endpoints mentioned in the `oauthParams` section automatically, namely, authorization, token, and userInfo endpoints.  When `useDCR` is set to `true`, a client will be registered so no need to supply `clientId` and `clientSecret`. Under these circumstances, most of times only `scopes` will be needed under the `oauthParams` section.
+When providing `openIdParams`, the `host` will be used to grab the endpoints mentioned in the `oauthParams` section automatically, namely, authorization, token, and userInfo endpoints.  When `useDCR` is set to `true`, a client will be registered so there is no need to supply `clientId` and `clientSecret`. Under these circumstances, most of times only `scopes` will be needed under the `oauthParams` section.
 
 #### Attribute mappings
 
