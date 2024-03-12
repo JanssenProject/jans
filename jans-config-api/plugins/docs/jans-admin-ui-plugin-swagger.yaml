@@ -916,7 +916,7 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
-          default: webhookId
+          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
@@ -950,8 +950,8 @@ paths:
                       "totalEntriesCount": 2,
                       "entriesCount": 2,
                       "entries": [{
-                        "dn": "webhookId=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans",
-                        "webhookId": "aad9e1dd-87f3-357f-a2fa-93ae8eb94998",
+                        "dn": "inum=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans",
+                        "inum": "aad9e1dd-87f3-357f-a2fa-93ae8eb94998",
                         "displayName": "test-5",
                         "description": "test1",
                         "url": "https://jsonplaceholder.typicode.com/posts",
@@ -962,10 +962,10 @@ paths:
                           "key": "Content-Type",
                           "value": "application/json"
                         }],
-                        "baseDn": "webhookId=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans"
+                        "baseDn": "inum=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans"
                       }, {
-                        "dn": "webhookId=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans",
-                        "webhookId": "d23d60e8-0187-3878-94d9-30d594c4c986",
+                        "dn": "inum=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans",
+                        "inum": "d23d60e8-0187-3878-94d9-30d594c4c986",
                         "displayName": "test-6",
                         "description": "test1",
                         "url": "https://jsonplaceholder.typicode.com/posts",
@@ -976,7 +976,7 @@ paths:
                           "key": "Content-Type",
                           "value": "application/json"
                         }],
-                        "baseDn": "webhookId=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans"
+                        "baseDn": "inum=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans"
                       }]
                     }
         "400":
@@ -1013,8 +1013,8 @@ paths:
                 description: Request json example
                 value: |
                   {
-                    "dn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
-                    "webhookId": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
+                    "dn": "inum=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
+                    "inum": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
                     "displayName": "posts-webhook-1",
                     "description": "posts-webhook description",
                     "url": "https://jsonplaceholder.typicode.com/posts",
@@ -1026,7 +1026,7 @@ paths:
                       "value": "application/json"
                     }],
                     "auiFeatureIds": ["jans_link_write"],
-                    "baseDn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
+                    "baseDn": "inum=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
                   }
       responses:
         "200":
@@ -1040,8 +1040,8 @@ paths:
                   description: Response json example
                   value: |
                     {
-                      "dn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
-                      "webhookId": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
+                      "dn": "inum=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
+                      "inum": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
                       "displayName": "posts-webhook-1",
                       "description": "posts-webhook description",
                       "url": "https://jsonplaceholder.typicode.com/posts",
@@ -1053,7 +1053,7 @@ paths:
                         "value": "application/json"
                       }],
                       "auiFeatureIds": ["jans_link_write"],
-                      "baseDn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
+                      "baseDn": "inum=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
                     }
         "400":
           description: Bad Request
@@ -1113,8 +1113,8 @@ paths:
                   description: Response json example
                   value: |
                     {
-                      "dn": "webhookId=f704922d-e97f-3097-a06a-4a90ddedb87a,ou=auiWebhooks,ou=admin-ui,o=jans",
-                      "webhookId": "f704922d-e97f-3097-a06a-4a90ddedb87a",
+                      "dn": "inum=f704922d-e97f-3097-a06a-4a90ddedb87a,ou=auiWebhooks,ou=admin-ui,o=jans",
+                      "inum": "f704922d-e97f-3097-a06a-4a90ddedb87a",
                       "displayName": "posts-webhook-1",
                       "description": "posts-webhook description",
                       "url": "https://reqres.in/api/users",
@@ -1129,7 +1129,7 @@ paths:
                         "value": "application/json"
                       }],
                       "auiFeatureIds": ["jans_link_write"],
-                      "baseDn": "webhookId=f704922d-e97f-3097-a06a-4a90ddedb87a,ou=auiWebhooks,ou=admin-ui,o=jans"
+                      "baseDn": "inum=f704922d-e97f-3097-a06a-4a90ddedb87a,ou=auiWebhooks,ou=admin-ui,o=jans"
                     }
         "400":
           description: Bad Request
@@ -1366,8 +1366,8 @@ paths:
                   description: Response json example
                   value: |
                     [{
-                      "dn": "webhookId=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans",
-                      "webhookId": "aad9e1dd-87f3-357f-a2fa-93ae8eb94998",
+                      "dn": "inum=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans",
+                      "inum": "aad9e1dd-87f3-357f-a2fa-93ae8eb94998",
                       "displayName": "test-5",
                       "description": "test1",
                       "url": "https://jsonplaceholder.typicode.com/posts",
@@ -1378,10 +1378,10 @@ paths:
                         "key": "Content-Type",
                         "value": "application/json"
                       }],
-                      "baseDn": "webhookId=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans"
+                      "baseDn": "inum=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans"
                     }, {
-                      "dn": "webhookId=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans",
-                      "webhookId": "d23d60e8-0187-3878-94d9-30d594c4c986",
+                      "dn": "inum=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans",
+                      "inum": "d23d60e8-0187-3878-94d9-30d594c4c986",
                       "displayName": "test-6",
                       "description": "test1",
                       "url": "https://jsonplaceholder.typicode.com/posts",
@@ -1392,7 +1392,7 @@ paths:
                         "key": "Content-Type",
                         "value": "application/json"
                       }],
-                      "baseDn": "webhookId=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans"
+                      "baseDn": "inum=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans"
                     }]
         "400":
           description: Bad Request
@@ -1779,6 +1779,8 @@ components:
           items:
             type: object
     ShortCodeRequest:
+      required:
+      - webhookId
       type: object
       properties:
         webhookId:
