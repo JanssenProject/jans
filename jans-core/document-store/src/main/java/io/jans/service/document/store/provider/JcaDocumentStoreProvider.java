@@ -32,6 +32,8 @@ import javax.jcr.nodetype.ConstraintViolationException;
 import javax.jcr.nodetype.NodeType;
 import javax.jcr.version.VersionException;
 
+import io.jans.service.document.store.exception.DocumentException;
+import io.jans.service.document.store.exception.WriteDocumentException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -139,8 +141,9 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 			} finally {
 				closeSession(session);
 			}
-		} catch (RepositoryException ex) {
+		} catch (Exception ex) {
 			log.error("Failed to check if path '" + path + "' exists in repository", ex);
+			throw new DocumentException(ex);
 		}
 
 		return fileNode != null;
@@ -151,24 +154,22 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 		log.debug("Save document: '{}'", path);
 		
 		String normalizedPath = getNormalizedPath(path);
+		Session session = null;
 		try {
-			Session session = getSessionWithTimeout();
-			try {
-				Node contentNode = getOrCreateContentNode(normalizedPath, session);
-				Value value = session.getValueFactory().createValue(documentContent);
-				contentNode.setProperty("jcr:data", value);
-				contentNode.setProperty(JcrConstants.JCR_DATA, description);
+			session = getSessionWithTimeout();
+			Node contentNode = getOrCreateContentNode(normalizedPath, session);
+			Value value = session.getValueFactory().createValue(documentContent);
+			contentNode.setProperty("jcr:data", value);
+			contentNode.setProperty(JcrConstants.JCR_DATA, description);
 
-				session.save();
-				return path;
-			} finally {
-				closeSession(session);
-			}
-		} catch (RepositoryException ex) {
+			session.save();
+			return path;
+		} catch (Exception ex) {
 			log.error("Failed to write document to file '{}'", path, ex);
+			throw new WriteDocumentException(ex);
+		} finally {
+			closeSession(session);
 		}
-
-		return null;
 	}
 
 	@Override
@@ -176,24 +177,22 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 		log.debug("Save document from stream: '{}'", path);
 
 		String normalizedPath = getNormalizedPath(path);
+		Session session = null;
 		try {
-			Session session = getSessionWithTimeout();
-			try {
-				Node contentNode = getOrCreateContentNode(normalizedPath, session);
-				Binary value = session.getValueFactory().createBinary(documentStream);
-				contentNode.setProperty("jcr:data", value);
-				contentNode.setProperty(JcrConstants.JCR_DATA, description);
+			session = getSessionWithTimeout();
+			Node contentNode = getOrCreateContentNode(normalizedPath, session);
+			Binary value = session.getValueFactory().createBinary(documentStream);
+			contentNode.setProperty("jcr:data", value);
+			contentNode.setProperty(JcrConstants.JCR_DATA, description);
 
-				session.save();
-				return path;
-			} finally {
-				closeSession(session);
-			}
-		} catch (RepositoryException ex) {
+			session.save();
+			return path;
+		} catch (Exception ex) {
 			log.error("Failed to write document from stream to file '{}'", path, ex);
+			throw new WriteDocumentException(ex);
+		} finally {
+			closeSession(session);
 		}
-
-		return null;
 	}
 
 	@Override
@@ -207,29 +206,27 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 		log.debug("Read document: '{}'", path);
 
 		String normalizedPath = getNormalizedPath(path);
+		Session session = null;
 		try {
-			Session session = getSessionWithTimeout();
-			try {
-				Node fileNode = JcrUtils.getNodeIfExists(normalizedPath, session);
-				if (fileNode == null) {
-					log.error("Document file '{}' isn't exist", path);
-					return null;
-				}
-
-				Node contentNode = fileNode.getNode(JcrConstants.JCR_CONTENT);
-				Property property = contentNode.getProperty("jcr:data");
-				try (InputStream in = property.getBinary().getStream()) {
-					return IOUtils.toString(in, charset);
-		        }
-			} finally {
-				closeSession(session);
+			session = getSessionWithTimeout();
+			Node fileNode = JcrUtils.getNodeIfExists(normalizedPath, session);
+			if (fileNode == null) {
+				log.error("Document file '{}' isn't exist", path);
+				return null;
 			}
-		} catch (IOException ex) {
-		} catch (RepositoryException ex) {
+
+			Node contentNode = fileNode.getNode(JcrConstants.JCR_CONTENT);
+			Property property = contentNode.getProperty("jcr:data");
+			try (InputStream in = property.getBinary().getStream()) {
+				return IOUtils.toString(in, charset);
+			}
+
+		} catch (Exception ex) {
 			log.error("Failed to read document from file '{}'", path, ex);
+			throw new DocumentException();
+		} finally {
+			closeSession(session);
 		}
-		
-		return null;
 	}
 
 	@Override
@@ -237,33 +234,30 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 		log.debug("Read document as stream: '{}'", path);
 
 		String normalizedPath = getNormalizedPath(path);
+		Session session = null;
 		try {
-			Session session = getSessionWithTimeout();
-			try {
-				Node fileNode = JcrUtils.getNodeIfExists(normalizedPath, session);
-				if (fileNode == null) {
-					log.error("Document file '{}' isn't exist", path);
-					return null;
-				}
-
-				Node contentNode = fileNode.getNode(JcrConstants.JCR_CONTENT);
-				Property property = contentNode.getProperty("jcr:data");
-				try (InputStream in = property.getBinary().getStream()) {
-					// Note: We can't return real input stream because we need to make sure that we close session
-					ByteArrayOutputStream bos = new ByteArrayOutputStream();
-					IOUtils.copy(in, bos);
-					
-					return new ByteArrayInputStream(bos.toByteArray());
-		        }
-			} finally {
-				closeSession(session);
+			session = getSessionWithTimeout();
+			Node fileNode = JcrUtils.getNodeIfExists(normalizedPath, session);
+			if (fileNode == null) {
+				log.error("Document file '{}' isn't exist", path);
+				return null;
 			}
-		} catch (IOException ex) {
-		} catch (RepositoryException ex) {
+
+			Node contentNode = fileNode.getNode(JcrConstants.JCR_CONTENT);
+			Property property = contentNode.getProperty("jcr:data");
+			try (InputStream in = property.getBinary().getStream()) {
+				// Note: We can't return real input stream because we need to make sure that we close session
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				IOUtils.copy(in, bos);
+
+				return new ByteArrayInputStream(bos.toByteArray());
+			}
+		} catch (Exception ex) {
 			log.error("Failed to read document as stream from file '{}'", path, ex);
+			throw new DocumentException();
+		} finally {
+			closeSession(session);
 		}
-		
-		return null;
 	}
 
 	@Override
@@ -277,46 +271,42 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 
 		String normalizedCurrentPath = getNormalizedPath(currentPath);
 		String normalizedDestinationPath = getNormalizedPath(destinationPath);
-
+		Session session = null;
 		try {
-			Session session = getSessionWithTimeout();
-			try {
-				removeDocument(normalizedDestinationPath, session);
+			session = getSessionWithTimeout();
+			removeDocument(normalizedDestinationPath, session);
 
-				createPath(normalizedDestinationPath, session);
-				session.move(normalizedCurrentPath, normalizedDestinationPath);
+			createPath(normalizedDestinationPath, session);
+			session.move(normalizedCurrentPath, normalizedDestinationPath);
 
-				session.save();
-				return destinationPath;
-			} finally {
-				closeSession(session);
-			}
-		} catch (RepositoryException ex) {
+			session.save();
+			return destinationPath;
+
+		} catch (Exception ex) {
 			log.error("Failed to rename to destination file '{}'", destinationPath, ex);
+			throw new DocumentException();
+		} finally {
+			closeSession(session);
 		}
-		
-		return null;
 	}
 
 	@Override
 	public boolean removeDocument(String path) {
 		log.debug("Remove document: '{}'", path);
-
+		Session session = null;
 		try {
-			Session session = getSessionWithTimeout();
-			try {
-				removeDocument(path, session);
+			session = getSessionWithTimeout();
+			removeDocument(path, session);
 
-				session.save();
-				return true;
-			} finally {
-				closeSession(session);
-			}
-		} catch (RepositoryException ex) {
+			session.save();
+			return true;
+
+		} catch (Exception ex) {
 			log.error("Failed to remove document file '{}'", path, ex);
+			throw new DocumentException();
+		} finally {
+			closeSession(session);
 		}
-
-		return false;
 	}
 
 	private void removeDocument(String path, Session session)

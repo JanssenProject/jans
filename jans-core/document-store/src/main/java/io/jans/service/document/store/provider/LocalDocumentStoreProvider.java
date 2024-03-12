@@ -14,6 +14,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import io.jans.service.document.store.exception.DocumentException;
+import io.jans.service.document.store.exception.WriteDocumentException;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -113,11 +115,10 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 			os.flush();
 			
 			return path;
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			log.error("Failed to write document to file '{}'", file.getAbsolutePath(), ex);
+			throw new WriteDocumentException(ex);
 		}
-
-		return null;
 	}
 
 	@Override
@@ -134,11 +135,10 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 			os.flush();
 			
 			return path;
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			log.error("Failed to write document from stream to file '{}'", file.getAbsolutePath(), ex);
+			throw new WriteDocumentException(ex);
 		}
-
-		return null;
 	}
 
 	@Override
@@ -158,11 +158,10 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 
 		try {
 			return FileUtils.readFileToString(file, charset);
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			log.error("Failed to read document from file '{}'", file.getAbsolutePath(), ex);
+			throw new DocumentException(ex);
 		}
-		
-		return null;
 	}
 
 	@Override
@@ -173,11 +172,10 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 
 		try {
 			return new BufferedInputStream(FileUtils.openInputStream(file));
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			log.error("Failed to read document as stream from file '{}'", file.getAbsolutePath(), ex);
+			throw new DocumentException(ex);
 		}
-		
-		return null;
 	}
 
 	@Override
@@ -202,9 +200,8 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 			return destinationPath;
 		} catch (Exception ex) {
 			log.error("Failed to rename to destination file '{}'", destinationFile.getAbsolutePath(), ex);
+			throw new DocumentException(ex);
 		}
-		
-		return null;
 	}
 
 	@Override
