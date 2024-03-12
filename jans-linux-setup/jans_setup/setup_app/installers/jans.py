@@ -372,8 +372,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
             self.run(['/bin/hostname', Config.hostname])
 
+        etc_hosts_entry = '{}\t{}\t{}\n'.format(Config.ip, Config.hostname, Config.hostname.split('.')[0])
+
         if not os.path.exists(Config.etc_hosts):
-            self.writeFile(Config.etc_hosts, '{}\t{}\n'.format(Config.ip, Config.hostname))
+            self.writeFile(Config.etc_hosts, etc_hosts_entry)
         else:
             hostname_file_content = self.readFile(Config.etc_hosts)
             with open(Config.etc_hosts,'w') as w:
@@ -381,7 +383,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     if not Config.hostname in l.split():
                         w.write(l+'\n')
 
-                w.write('{}\t{}\n'.format(Config.ip, Config.hostname))
+                w.write(etc_hosts_entry)
 
         self.run([paths.cmd_chmod, '-R', '644', Config.etc_hosts])
 
