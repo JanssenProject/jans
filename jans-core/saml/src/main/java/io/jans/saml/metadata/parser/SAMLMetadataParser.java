@@ -126,7 +126,7 @@ public class SAMLMetadataParser  {
 
         NodeList assertionconsumerservicelist = XPathUtils.assertionConsumerServiceListFromParentNode(xpath, node);
         for(int i=0; i < assertionconsumerservicelist.getLength(); i++) {
-            parseIndexedEndpoint(xpath,assertionconsumerservicelist.item(i),builder.assersionConsumerService());
+            parseIndexedEndpoint(xpath,assertionconsumerservicelist.item(i),builder.assertionConsumerService());
         }
     }
 
