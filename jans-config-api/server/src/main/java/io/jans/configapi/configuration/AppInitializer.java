@@ -112,7 +112,7 @@ public class AppInitializer {
         configurationFactory.initTimer();        
 
         // Schedule timer tasks
-        loggerService.initTimer(true);
+        //loggerService.initTimer(true);
         
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
     }
