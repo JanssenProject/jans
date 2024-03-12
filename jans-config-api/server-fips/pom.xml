@@ -52,7 +52,7 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>build-oxauth-fips-war</id>
+						<id>build-configapi-fips-war</id>
 						<phase>process-sources</phase>
 						<configuration>
 							<target>
