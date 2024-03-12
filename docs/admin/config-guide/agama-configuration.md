@@ -192,7 +192,7 @@ Also, You can deploy agama project in Janssen through commandline.
 
 **Example:**
 
-Let's upload [a test project](../../../../agama/test-project.zip)
+Let's upload [a test project](https://github.com/JanssenProject/jans/blob/main/docs/assets/agama/test-project.zip)
 
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id=post-agama-prj --url-suffix="name:a test project" --data /mnt/data/agama/test-project.zip
