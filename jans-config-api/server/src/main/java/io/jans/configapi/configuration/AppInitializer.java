@@ -10,7 +10,6 @@ import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
-import io.jans.configapi.service.status.StatusCheckerTimer;
 import io.jans.configapi.service.logger.LoggerService;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
@@ -72,9 +71,6 @@ public class AppInitializer {
     private Instance<AuthorizationService> authorizationServiceInstance;
 
     @Inject
-    StatusCheckerTimer statusCheckerTimer;
-
-    @Inject
     private LoggerService loggerService;
 
     @Inject
@@ -111,9 +107,6 @@ public class AppInitializer {
 
         // Initialize custom Script
         initCustomScripts();
-
-        // Stats timer
-        statusCheckerTimer.initTimer();
 
         // Schedule timer tasks
         configurationFactory.initTimer();        
