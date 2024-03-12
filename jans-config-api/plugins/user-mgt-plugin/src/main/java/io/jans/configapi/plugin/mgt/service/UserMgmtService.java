@@ -413,9 +413,9 @@ public class UserMgmtService {
     }
 
     public User addUser(User user, boolean active) {
-        logger.info("Creating user:{}, active:{}", user, active);
+        logger.info("\n Creating user:{}, user.getCustomAttributes():{}, active:{}", user, user.getCustomAttributes(), active);
         user = userService.addUser(user, active);
-        logger.info("New user:{}", user);
+        logger.info("New user:{}, user.getCustomAttributes():{} \n", user, user.getCustomAttributes());
         // remove inactive claims
         if (user != null) {
             List<User> users = new ArrayList<>();
@@ -429,9 +429,9 @@ public class UserMgmtService {
     }
 
     public User updateUser(User user) {
-        logger.info("Updating user:{}", user);
+        logger.info("\n Updating user:{}, user.getCustomAttributes():{}", user, user.getCustomAttributes());
         user = userService.updateUser(user);
-        logger.info("Updated user:{}", user);
+        logger.info("Updated user:{}, user.getCustomAttributes():{} \n", user, user.getCustomAttributes());
         // remove inactive claims
         if (user != null) {
             List<User> users = new ArrayList<>();
@@ -473,7 +473,7 @@ public class UserMgmtService {
 
             if (CollectionUtils.isNotEmpty(attList)
                     && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {
-                logger.info("Removing attribute as it is not active attributeName: {} , status:{}", attributeName,
+                logger.info("\n\n*** Removing attribute as it is not active attributeName: {} , status:{} ***\n", attributeName,
                         attList.get(0).getStatus().getValue());
                 it.remove();
             }
