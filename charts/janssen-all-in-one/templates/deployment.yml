@@ -4,6 +4,7 @@ metadata:
   name: {{ include "janssen-all-in-one.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
+    APP_NAME: auth-server
     app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
 {{ include "janssen-all-in-one.labels" . | indent 4 }}
 {{- if .Values.additionalLabels }}
@@ -21,6 +22,7 @@ spec:
   template:
     metadata:
       labels:
+        APP_NAME: auth-server
         app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
       {{- if .Values.istio.ingress }}
       annotations:

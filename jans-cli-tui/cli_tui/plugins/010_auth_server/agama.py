@@ -35,12 +35,6 @@ class Agama(DialogUtils):
         self.app = app
         self.data = []
         self.first_enter = False
-        self.jans_help = get_help_with(
-                f'<d>              {_("Display agama project config")}\n'
-                f'<c>              {_("Manage agama project Configuration")}\n'
-                f'<Delete>         {_("Delete current agama project")}',
-                without=['d', 'delete']
-                )
 
         self.working_container = JansVerticalNav(
                 myparent=app,
@@ -52,8 +46,7 @@ class Agama(DialogUtils):
                 headerColor=cli_style.navbar_headcolor,
                 entriesColor=cli_style.navbar_entriescolor,
                 hide_headers = True,
-                custom_key_bindings=([('c', self.display_config)]),
-                jans_help=HTML(_("Press <b>d</b> to see deployment details. Press <b>c</b> to view/set projects configurations."))
+                #custom_key_bindings=([('c', self.display_config)])
             )
 
         self.main_container =  HSplit([
@@ -68,6 +61,11 @@ class Agama(DialogUtils):
                     ], style=cli_style.container)
 
         self.main_container.on_page_enter = self.on_page_enter
+        self.main_container.jans_help = get_help_with(
+                f'<v>              {_("Display agama project details")}\n',
+                without=['v', 'enter']
+                )
+
 
     def on_page_enter(self) -> None:
         self.first_enter = True
