@@ -190,6 +190,56 @@ Also, You can deploy agama project in Janssen through commandline.
 /opt/jans/jans-cli/config-cli.py --operation-id post-agama-prj --endpoint-args name:agama-project-name
 ```
 
+**Example:**
+
+Let's upload [a test project](../../../../agama/test-project.zip)
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id=post-agama-prj --url-suffix="name:a test project" --data /mnt/data/agama/test-project.zip
+Server Response:
+{
+  "message": "A deployment task for project a test project has been queued. Use the GET endpoint to poll status"
+}
+```
+
+To get uploaded projects:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id=get-agama-prj
+Please wait while retrieving data ...
+{
+  "start": 0,
+  "totalEntriesCount": 1,
+  "entriesCount": 1,
+  "entries": [
+    {
+      "dn": "jansId=08b87b15-61da-3b45-8c40-8b4217b7656a,ou=deployments,ou=agama,o=jans",
+      "id": "08b87b15-61da-3b45-8c40-8b4217b7656a",
+      "createdAt": "2024-03-12T11:54:17",
+      "taskActive": false,
+      "finishedAt": "2024-03-12T11:54:40",
+      "details": {
+        "libs": [
+          "io/jans/agama/samples/EmailOTPUtil.java"
+        ],
+        "autoconfigure": false,
+        "flowsError": {
+          "io.jans.flow.sample.basic": null,
+          "io.jans.flow.sample.otp.email": null
+        },
+        "projectMetadata": {
+          "projectName": "a test project",
+          "author": "jgomer2001",
+          "description": "Contains a simple flow that calls Groovy and Java code bundled in the project itself",
+          "configs": null
+        }
+      },
+      "baseDn": "jansId=08b87b15-61da-3b45-8c40-8b4217b7656a,ou=deployments,ou=agama,o=jans"
+    }
+  ]
+}
+```
+
 ## Retrieve Agama Project Configuration
 
 To retrieve agama project configuration:
