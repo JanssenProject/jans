@@ -7,7 +7,6 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import com.google.common.collect.Maps;
-import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
@@ -16,6 +15,7 @@ import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.*;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
@@ -41,10 +41,7 @@ import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
-import io.jans.as.server.service.external.ExternalPostAuthnService;
-import io.jans.as.server.service.external.ExternalResourceOwnerPasswordCredentialsService;
-import io.jans.as.server.service.external.ExternalSelectAccountService;
-import io.jans.as.server.service.external.ExternalUpdateTokenService;
+import io.jans.as.server.service.external.*;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
 import io.jans.as.server.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
@@ -166,6 +163,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private ExternalSelectAccountService externalSelectAccountService;
+
+    @Inject
+    private ExternalCreateUserService externalCreateUserService;
 
     @Inject
     private ExternalResourceOwnerPasswordCredentialsService externalResourceOwnerPasswordCredentialsService;
@@ -393,6 +393,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         checkPromptConsent(authzRequest, sessionUser, user, clientAuthorization, clientAuthorizationFetched);
 
         checkPromptSelectAccount(authzRequest);
+        checkPromptCreate(authzRequest);
 
         AuthorizationCode authorizationCode = null;
         if (responseTypes.contains(ResponseType.CODE)) {
@@ -575,6 +576,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (authzRequest.getPromptList().contains(Prompt.SELECT_ACCOUNT)) {
             log.debug("Redirecting to Select Account");
             throw new NoLogWebApplicationException(redirectToSelectAccountPage(authzRequest));
+        }
+    }
+
+    private void checkPromptCreate(AuthzRequest authzRequest) {
+        if (authzRequest.getPromptList().contains(Prompt.CREATE)) {
+            log.debug("Redirecting to Create User");
+            throw new NoLogWebApplicationException(redirectToCreateUserPage(authzRequest));
         }
     }
 
@@ -925,6 +933,24 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 selectAccountPageFromScript = StringUtils.removeEnd(selectAccountPageFromScript, ".xhtml");
             }
             page = selectAccountPageFromScript;
+        }
+
+        return redirectTo(page, authzRequest);
+    }
+
+    private Response redirectToCreateUserPage(AuthzRequest authzRequest) {
+        ExecutionContext executionContext = ExecutionContext.of(authzRequest);
+        executionContext.setAppConfiguration(appConfiguration);
+        executionContext.setAttributeService(attributeService);
+
+        String page = "/createUser";
+
+        String pageFromScript = externalCreateUserService.externalGetCreateUserPage(executionContext);
+        if (StringUtils.isNotBlank(pageFromScript)) {
+            if (pageFromScript.endsWith(".xhtml")) {
+                pageFromScript = StringUtils.removeEnd(pageFromScript, ".xhtml");
+            }
+            page = pageFromScript;
         }
 
         return redirectTo(page, authzRequest);

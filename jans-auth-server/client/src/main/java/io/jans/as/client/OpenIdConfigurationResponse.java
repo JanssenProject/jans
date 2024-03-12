@@ -45,6 +45,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private List<String> scopesSupported;
     private List<String> responseTypesSupported;
     private List<String> responseModesSupported;
+    private List<String> promptValuesSupported;
     private List<String> grantTypesSupported;
     private List<String> acrValuesSupported;
     private List<String> authorizationDetailsTypesSupported;
@@ -109,6 +110,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         scopesSupported = new ArrayList<>();
         responseTypesSupported = new ArrayList<>();
         responseModesSupported = new ArrayList<>();
+        promptValuesSupported = new ArrayList<>();
         grantTypesSupported = new ArrayList<>();
         acrValuesSupported = new ArrayList<>();
         authorizationDetailsTypesSupported = new ArrayList<>();
@@ -474,6 +476,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setResponseTypesSupported(List<String> responseTypesSupported) {
         this.responseTypesSupported = responseTypesSupported;
+    }
+
+    /**
+     * Gets prompt values supported
+     *
+     * @return prompt values supported
+     */
+    public List<String> getPromptValuesSupported() {
+        return promptValuesSupported;
+    }
+
+    /**
+     * Sets prompt values supported
+     *
+     * @param promptValuesSupported prompt values supported
+     */
+    public void setPromptValuesSupported(List<String> promptValuesSupported) {
+        this.promptValuesSupported = promptValuesSupported;
     }
 
     public List<String> getResponseModesSupported() {
@@ -1275,6 +1295,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", scopesSupported=" + scopesSupported +
                 ", responseTypesSupported=" + responseTypesSupported +
                 ", responseModesSupported=" + responseModesSupported +
+                ", promptValuesSupported=" + promptValuesSupported +
                 ", grantTypesSupported=" + grantTypesSupported +
                 ", acrValuesSupported=" + acrValuesSupported +
                 ", authorizationDetailsTypesSupported=" + authorizationDetailsTypesSupported +
