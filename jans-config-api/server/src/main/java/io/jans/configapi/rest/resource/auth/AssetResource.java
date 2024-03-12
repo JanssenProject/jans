@@ -167,14 +167,11 @@ public class AssetResource extends ConfigBaseResource {
 
         InputStream assetStream = assetForm.getAssetFile();
         log.info(" Upload assetStream:{} ", assetStream);
-        
-        if(assetStream==null || assetStream.available()<=0) {
-            throwBadRequestException(RESOURCE_NULL,
-                    String.format(RESOURCE_NULL_MSG, "Asset File"));
+
+        if (assetStream == null || assetStream.available() <= 0) {
+            throwBadRequestException(RESOURCE_NULL, String.format(RESOURCE_NULL_MSG, "Asset File"));
         }
-        log.info(" Save asset on Jetty Server");
-        this.saveAssetOnServer(document, assetStream);
-        log.info("After  Saving asset on Jetty Server");
+
         // upload document
         try {
             document = assetService.saveAsset(document, assetStream);
@@ -236,8 +233,7 @@ public class AssetResource extends ConfigBaseResource {
             document = assetService.updateAsset(document, assetFile);
             log.debug(" Upload asset document:{} ", document);
         } catch (Exception ex) {
-            log.error("Application Error while creating document is:{}",
-                    ex.getMessage());
+            log.error("Application Error while creating document is:{}", ex.getMessage());
             throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
         }
 
@@ -285,22 +281,47 @@ public class AssetResource extends ConfigBaseResource {
         logger.debug("Asset pagedResult:{} ", pagedResult);
         return pagedResult;
     }
-    
+/*
     private void saveAssetOnServer(Document document, InputStream assetFile) {
         logger.info("Save asset on server document:{} , assetFile:{} ", document, assetFile);
-        if(document==null || assetFile==null) {
-           return;
+        if (document == null || assetFile == null) {
+            return;
         }
-        try  {
-            File destFile = new File(document.getDescription());
-       
-            boolean movedSuccessfully = Files.copy(assetFile, destFile.toPath(), StandardCopyOption.REPLACE_EXISTING) > -1;
-            if (movedSuccessfully) {
-                logger.info("\n\n Asset successfully saved on server document.getDisplayName():{} , destFile.getPath():{} \n\n", document.getDisplayName(), destFile.getPath()); ;
-            } else {
-                logger.info("\n\n Could not save asset server - document.getDisplayName():{} , destFile.getPath():{} \n\n", document.getDisplayName(), destFile.getPath()); ;
+        try {
+            String displayName = assetService.copyAsset(document, assetFile);
+            logger.info("\n\n Asset successfully saved on server document.displayName():{} \n\n", displayName);
+            if (StringUtils.isBlank(displayName)) {
+                logger.info(
+                        "\n\n Could not save asset server - document.getDisplayName():{} , destFile.getPath():{} \n\n",
+                        document.getDisplayName());
             }
-        }catch(Exception ex) {
+        } catch (Exception ex) {
+            throwInternalServerException(ex);
+        }
+    }
+*/
+    private void saveAssetOnServer(Document document, InputStream assetFile) {
+        logger.info("Save asset on server document:{} , assetFile:{} ", document, assetFile);
+        if (document == null || assetFile == null) {
+            return;
+        }
+        try {
+            File destFile = new File(document.getDescription());
+
+            boolean movedSuccessfully = Files.copy(assetFile, destFile.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING) > -1;
+            if (movedSuccessfully) {
+                logger.info(
+                        "\n\n Asset successfully saved on server document.getDisplayName():{} , destFile.getPath():{} \n\n",
+                        document.getDisplayName(), destFile.getPath());
+                ;
+            } else {
+                logger.info(
+                        "\n\n Could not save asset server - document.getDisplayName():{} , destFile.getPath():{} \n\n",
+                        document.getDisplayName(), destFile.getPath());
+                ;
+            }
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }

@@ -13,6 +13,7 @@ import java.util.Map;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.util.AuthUtil;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -22,7 +23,14 @@ import io.jans.service.document.store.provider.DBDocumentStoreProvider;
 import io.jans.service.document.store.service.DBDocumentService;
 import io.jans.service.document.store.service.Document;
 import io.jans.util.exception.InvalidAttributeException;
+import io.jans.util.exception.InvalidConfigurationException;
+import io.jans.service.document.store.service.DocumentStoreService;
+import io.jans.service.document.store.conf.DocumentStoreType;
+import io.jans.service.document.store.service.LocalDocumentStoreService;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
@@ -31,6 +39,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.WebApplicationException;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -44,10 +54,19 @@ public class AssetService {
     PersistenceEntryManager persistenceEntryManager;
 
     @Inject
+    AuthUtil authUtil;
+
+    @Inject
+    DocumentStoreService documentStoreService;
+
+    @Inject
     DBDocumentStoreProvider dBDocumentStoreProvider;
 
     @Inject
     DBDocumentService dbDocumentService;
+
+    @Inject
+    private LocalDocumentStoreService localDocumentStoreService;
 
     public String getDnForDocument(String inum) throws Exception {
         return dbDocumentService.getDnForDocument(inum);
@@ -123,29 +142,36 @@ public class AssetService {
         return documents;
     }
 
-    public Document saveAsset(Document document, InputStream documentStream) throws Exception{
+    public Document saveAsset(Document document, InputStream documentStream) throws Exception {
         log.info("Save new asset - document:{}, documentStream:{}", document, documentStream);
-        
-        if(document==null) {
+
+        if (document == null) {
             throw new InvalidAttributeException(" Document object is null!!!");
         }
-        
-        if(documentStream==null) {
+
+        if (documentStream == null) {
             throw new InvalidAttributeException(" Document data stream object is null!!!");
         }
-        
-        boolean status = dBDocumentStoreProvider.saveDocumentStream(document.getDisplayName(), documentStream,
+
+        // common code
+        ByteArrayOutputStream bos = getByteArrayOutputStream(documentStream);
+        log.info("Asset ByteArrayOutputStream :{}", bos);
+
+        String path = dBDocumentStoreProvider.saveDocumentStream(document.getDisplayName(), null, getInputStream(bos),
                 document.getJansModuleProperty());
-        log.info("status on saving new document is :{}", status);
-        
-        if(status) {
-            document = dbDocumentService.getDocumentByDisplayName(document.getDisplayName());
-        }
+        log.info("Path of saved new document is :{}", path);
+
+        // copyAsset on jans-server
+        String result = copyAsset(document, getInputStream(bos));
+        log.info("Result of asset saved on server :{}", result);
+
+        // Get final document
+        document = dbDocumentService.getDocumentByDisplayName(document.getDisplayName());
+
         log.info("New document saved :{}", document);
         return document;
     }
 
-    
     public Document updateAsset(Document document, InputStream documentStream) throws Exception {
         log.info("Update new asset - document:{}, documentStream:{}", document, documentStream);
         if (document == null) {
@@ -163,7 +189,6 @@ public class AssetService {
         log.info("Updated document:{}", document);
         return document;
     }
-     
 
     public InputStream readAssetStream(String name) {
         log.info("Read asset as stream identified by name:{}", name);
@@ -177,6 +202,52 @@ public class AssetService {
         boolean status = dBDocumentStoreProvider.removeDocument(inum);
         log.info("Status on removing a document identified by inum is:{}", status);
         return status;
+    }
+
+    private String copyAsset(Document document, InputStream stream) {
+        log.info("document:{}, stream:{}", document, stream);
+
+        if (document == null) {
+            throw new InvalidConfigurationException("Document is null!");
+        }
+
+        if (stream == null) {
+            throw new InvalidConfigurationException("Asset stream is null!");
+        }
+
+        String path = document.getDescription();
+        String fileName = document.getDisplayName();
+        String documentStoreModuleName = fileName;
+        log.info("path:{}, fileName:{}, documentStoreModuleName:{}", path, fileName, documentStoreModuleName);
+
+        if (StringUtils.isBlank(path)) {
+            throw new InvalidConfigurationException("Path to copy the asset is null!");
+        }
+
+        if (StringUtils.isBlank(fileName)) {
+            throw new InvalidConfigurationException("Asset name is null!");
+        }
+
+        String filePath = fileName + File.separator + path;
+        log.info("documentStoreService:{}, filePath:{}, localDocumentStoreService:{} ", documentStoreService, filePath,
+                localDocumentStoreService);
+        String result = documentStoreService.saveDocumentStream(filePath, null, stream,
+                List.of(documentStoreModuleName));
+        log.info("Asset saving result:{}", result);
+
+        InputStream newFile = documentStoreService.readDocumentAsStream(filePath);
+        log.info("Reading asset file newFile:{}", newFile);
+
+        return result;
+
+    }
+
+    private ByteArrayOutputStream getByteArrayOutputStream(InputStream input) throws IOException {
+        return authUtil.getByteArrayOutputStream(input);
+    }
+
+    private InputStream getInputStream(ByteArrayOutputStream bos) throws IOException {
+        return authUtil.getInputStream(bos);
     }
 
 }
