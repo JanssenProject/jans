@@ -117,6 +117,22 @@ public class StatusCheckerTimer {
         log.debug("Configuration status update finished");
     }
 
+    public StatsData getServerStatsData() {
+        log.debug("Starting update of sever status");
+
+        StatsData statsData = new StatsData();
+        Date currentDateTime = new Date();
+        statsData.setLastUpdate(currentDateTime);
+        statsData.setFacterData(getFacterData());
+        statsData.setDbType(configurationService.getPersistenceType());
+        
+        configurationService.setStatsData(statsData);        
+
+        log.debug("statsData:{}",statsData);
+        return statsData;
+    }
+
+
     private FacterData getFacterData() {
         log.debug("Getting Server status");
         FacterData facterData = new FacterData();
@@ -124,7 +140,7 @@ public class StatusCheckerTimer {
         if (!isLinux()) {
             return facterData;
         }
-        printDirectory();
+        
         CommandLine commandLine = new CommandLine(PROGRAM_FACTER);
         commandLine.addArgument("-j");
         log.debug("Getting server status for commandLine:{}", commandLine);
@@ -154,8 +170,7 @@ public class StatusCheckerTimer {
         if (!isLinux()) {
             return appVersion;
         }
-        
-        printDirectory();
+
         CommandLine commandLine = new CommandLine(PROGRAM_SHOW_VERSION);
         if(StringUtils.isNotBlank(artifact) && !artifact.equalsIgnoreCase(ApiConstants.ALL)) {
             commandLine.addArgument("-artifact="+artifact);

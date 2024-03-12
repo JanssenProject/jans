@@ -2562,6 +2562,24 @@
               "name": "https://jans.io/oauth/config/write-all"
             }
           ]
+        },
+        {
+          "httpMethods": [
+            "DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.067",
+              "name": "https://jans.io/idp/saml.delete"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
         }
       ]
     },
