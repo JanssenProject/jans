@@ -184,6 +184,7 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnVaultSecretId | string | `""` | Vault AppRole SecretID. |
 | configmap.cnVaultSecretIdFile | string | `"/etc/certs/vault_secret_id"` | Path to file contains Vault AppRole secret ID. |
 | configmap.cnVaultVerify | bool | `false` | Verify connection to Vault. |
+| configmap.containerMetadataName | string | `"kubernetes"` |  |
 | configmap.kcDbPassword | string | `"Test1234#"` | Password for Keycloak database access |
 | configmap.kcDbSchema | string | `"keycloak"` | Keycloak database schema name (note that PostgreSQL may using "public" schema). |
 | configmap.kcDbUrlDatabase | string | `"keycloak"` | Keycloak database name |
