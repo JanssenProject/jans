@@ -100,45 +100,51 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 	}
 
 	@Override
-	public boolean saveDocument(String path, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
 		log.debug("Save document: '{}'", path);
 
 		File file = buildFilePath(path);
 		if (!createParentPath(file)) {
-			return false;
+			return null;
 		}
 
 		try (FileOutputStream os = FileUtils.openOutputStream(file)) {
 			IOUtils.write(documentContent, os, charset);
 			os.flush();
 			
-			return true;
+			return path;
 		} catch (IOException ex) {
 			log.error("Failed to write document to file '{}'", file.getAbsolutePath(), ex);
 		}
 
-		return false;
+		return null;
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
 		log.debug("Save document from stream: '{}'", path);
 
 		File file = buildFilePath(path);
 		if (!createParentPath(file)) {
-			return false;
+			return null;
 		}
 
 		try (FileOutputStream os = FileUtils.openOutputStream(file)) {
 			IOUtils.copy(documentStream, os);
 			os.flush();
 			
-			return true;
+			return path;
 		} catch (IOException ex) {
 			log.error("Failed to write document from stream to file '{}'", file.getAbsolutePath(), ex);
 		}
 
-		return false;
+		return null;
+	}
+
+	@Override
+	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
+			List<String> moduleList) {
+		return saveDocumentStream(path, description, documentStream, moduleList);
 	}
 
 	@Override
@@ -175,7 +181,12 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 	}
 
 	@Override
-	public boolean renameDocument(String currentPath, String destinationPath) {
+	public InputStream readBinaryDocumentAsStream(String path) {
+		return readDocumentAsStream(path);
+	}
+
+	@Override
+	public String renameDocument(String currentPath, String destinationPath) {
 		log.debug("Rename document: '{}' -> '{}'", currentPath, destinationPath);
 
 		File currentFile = buildFilePath(currentPath);
@@ -183,16 +194,17 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 		
 		if (!removeDocument(destinationPath)) {
 			log.error("Failed to remove destination file '{}'", destinationFile.getAbsolutePath());
+			return null;
 		}
 
 		try {
 			currentFile.renameTo(destinationFile);
-			return true;
+			return destinationPath;
 		} catch (Exception ex) {
 			log.error("Failed to rename to destination file '{}'", destinationFile.getAbsolutePath(), ex);
 		}
 		
-		return false;
+		return null;
 	}
 
 	@Override
@@ -226,5 +238,6 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 		String filePath = baseLocation + File.separator + path;
 		return new File(filePath);
 	}
+
 
 }
