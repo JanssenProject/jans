@@ -195,17 +195,16 @@ Also, You can deploy agama project in Janssen through commandline.
 Let's upload [a test project](https://github.com/JanssenProject/jans/blob/main/docs/assets/agama/test-project.zip)
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id=post-agama-prj --url-suffix="name:a test project" --data /mnt/data/agama/test-project.zip
+/opt/jans/jans-cli/config-cli.py --operation-id=post-agama-prj --url-suffix="name:Agama Lab Journey" --data /tmp/journey.zip
 Server Response:
 {
-  "message": "A deployment task for project a test project has been queued. Use the GET endpoint to poll status"
+  "message": "A deployment task for project Agama Lab Journey has been queued. Use the GET endpoint to poll status"
 }
 ```
 
 To get uploaded projects:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id=get-agama-prj
 Please wait while retrieving data ...
 {
   "start": 0,
@@ -213,32 +212,98 @@ Please wait while retrieving data ...
   "entriesCount": 1,
   "entries": [
     {
-      "dn": "jansId=08b87b15-61da-3b45-8c40-8b4217b7656a,ou=deployments,ou=agama,o=jans",
-      "id": "08b87b15-61da-3b45-8c40-8b4217b7656a",
-      "createdAt": "2024-03-12T11:54:17",
+      "dn": "jansId=a17e9a67-d44f-3b83-9e4d-4bebab375913,ou=deployments,ou=agama,o=jans",
+      "id": "a17e9a67-d44f-3b83-9e4d-4bebab375913",
+      "createdAt": "2024-03-12T18:15:29",
       "taskActive": false,
-      "finishedAt": "2024-03-12T11:54:40",
+      "finishedAt": "2024-03-12T18:15:33",
       "details": {
-        "libs": [
-          "io/jans/agama/samples/EmailOTPUtil.java"
-        ],
+        "error": "There were problems processing one or more flows",
         "autoconfigure": false,
         "flowsError": {
-          "io.jans.flow.sample.basic": null,
-          "io.jans.flow.sample.otp.email": null
+          "io.jans.agamalab.credsEnrollment.fido2": "Qualified name mismatch: io.jans.agamalab.credsEnrollment.fido2 vs. io.jans.agamaLab.credsEnrollment.fido2",
+          "io.jans.agamaLab.registration": null,
+          "io.jans.agamaLab.credsEnrollment.otp": null,
+          "io.jans.agamaLab.authenticator.otp": null,
+          "io.jans.agamaLab.authenticator.super_gluu": null,
+          "io.jans.agamaLab.credsEnrollment.super_gluu": null,
+          "io.jans.inbound.oauth2.AuthzCode": null,
+          "io.jans.agamaLab.emailVerification": null,
+          "io.jans.agamaLab.authenticator": null,
+          "io.jans.agamaLab.authenticator.fido2": null,
+          "io.jans.inbound.oauth2.AuthzCodeWithUserInfo": null,
+          "io.jans.agamaLab.main": null,
+          "io.jans.agamaLab.githubAuthn": null,
+          "io.jans.agamaLab.credsEnrollment": null
         },
         "projectMetadata": {
-          "projectName": "a test project",
+          "projectName": "Agama Lab Journey",
           "author": "jgomer2001",
-          "description": "Contains a simple flow that calls Groovy and Java code bundled in the project itself",
-          "configs": null
+          "type": "Community",
+          "configs": {
+            "io.jans.agamaLab.credsEnrollment.super_gluu": {
+              "timeout": 80
+            },
+            "io.jans.agamaLab.authenticator.super_gluu": {
+              "timeout": 80
+            },
+            "io.jans.agamaLab.credsEnrollment.otp": {
+              "timeout": 80,
+              "maxAttempts": 4
+            },
+            "io.jans.agamaLab.githubAuthn": {
+              "authzEndpoint": "https://github.com/login/oauth/authorize",
+              "tokenEndpoint": "https://github.com/login/oauth/access_token",
+              "userInfoEndpoint": "https://api.github.com/user",
+              "clientId": "YOUR CLIENT ID HERE",
+              "clientSecret": "YOUR CLIENT SECRET",
+              "scopes": [
+                "user"
+              ]
+            },
+            "io.jans.agamaLab.main": {
+              "minCredsRequired": 2,
+              "supportedMethods": [
+                "otp",
+                "fido2"
+              ]
+            },
+            "io.jans.agamaLab.registration": {
+              "recaptcha": {
+                "enabled": false,
+                "site_key": "SITE KEY (if enabled was set to true), see deployment instructions"
+              },
+              "zohoCRM": {
+                "clientId": "see deployment instructions",
+                "clientSecret": "",
+                "refreshToken": "",
+                "accountsUrl": "https://accounts.zoho.com (domain-specific Zoho Accounts URL - the domain hosting the token endpoint)"
+              }
+            }
+          }
         }
       },
-      "baseDn": "jansId=08b87b15-61da-3b45-8c40-8b4217b7656a,ou=deployments,ou=agama,o=jans"
+      "baseDn": "jansId=a17e9a67-d44f-3b83-9e4d-4bebab375913,ou=deployments,ou=agama,o=jans"
     }
   ]
 }
 ```
+
+Let's update configuration for this project with [sample project configuration](https://github.com/JanssenProject/jans/blob/main/docs/assets/agama/journey-configs.json):
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id=put-agama-prj --url-suffix "name:Agama Lab Journey" --data /tmp/journey-configs.json 
+Server Response:
+{
+  "io.jans.agamaLab.registration": true,
+  "io.jans.agamaLab.main": true,
+  "io.jans.agamaLab.credsEnrollment.otp": true,
+  "io.jans.agamaLab.authenticator.super_gluu": true,
+  "io.jans.agamaLab.credsEnrollment.super_gluu": true,
+  "io.jans.agamaLab.githubAuthn": true
+}
+```
+
 
 ## Retrieve Agama Project Configuration
 
