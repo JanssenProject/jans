@@ -1,11 +1,13 @@
 package io.jans.ca.plugin.adminui.model.webhook;
 
 import io.jans.orm.annotation.JsonObject;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.util.Map;
 
 public class ShortCodeRequest implements Serializable {
+    @NotNull
     private String webhookId;
     @JsonObject
     transient  Map<String, Object> shortcodeValueMap;
