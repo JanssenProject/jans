@@ -54,6 +54,7 @@ public class AuditLogInterceptor {
             LOG.debug("Audit Log Interceptor - context:{}, AUDIT_LOG:{}, apiAppConfiguration.isDisableAuditLogger():{}", context, AUDIT_LOG, apiAppConfiguration.isDisableAuditLogger());
 
             if(apiAppConfiguration.isDisableAuditLogger()) {
+                LOG.debug("Audit is disabled by disableAuditLogger config.");
                 return context.proceed();
             }
             
