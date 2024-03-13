@@ -192,7 +192,7 @@ Also, You can deploy agama project in Janssen through commandline.
 
 **Example:**
 
-Let's upload [a test project](https://github.com/JanssenProject/jans/blob/main/docs/assets/agama/test-project.zip)
+Let's upload [a test project](../../../assets/agama/journey.zip)
 
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id=post-agama-prj --url-suffix="name:Agama Lab Journey" --data /tmp/journey.zip
@@ -289,7 +289,7 @@ Please wait while retrieving data ...
 }
 ```
 
-Let's update configuration for this project with [sample project configuration](https://github.com/JanssenProject/jans/blob/main/docs/assets/agama/journey-configs.json):
+Let's update configuration for this project with [sample project configuration](../../../assets/agama/journey-configs.json):
 
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id=put-agama-prj --url-suffix "name:Agama Lab Journey" --data /tmp/journey-configs.json 
