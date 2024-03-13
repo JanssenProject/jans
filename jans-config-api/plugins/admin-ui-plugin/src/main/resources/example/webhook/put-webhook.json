@@ -1,6 +1,6 @@
 {
-  "dn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
-  "webhookId": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
+  "dn": "inum=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
+  "inum": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
   "displayName": "posts-webhook-1",
   "description": "posts-webhook description",
   "url": "https://jsonplaceholder.typicode.com/posts",
@@ -12,5 +12,5 @@
     "value": "application/json"
   }],
   "auiFeatureIds": ["jans_link_write"],
-  "baseDn": "webhookId=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
+  "baseDn": "inum=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
 }
