@@ -35,6 +35,12 @@ class Agama(DialogUtils):
         self.app = app
         self.data = []
         self.first_enter = False
+        self.jans_help = get_help_with(
+                f'<d>              {_("Display agama project config")}\n'
+                f'<c>              {_("Manage agama project Configuration")}\n'
+                f'<Delete>         {_("Delete current agama project")}',
+                without=['d', 'delete']
+                )
 
         self.working_container = JansVerticalNav(
                 myparent=app,
@@ -61,12 +67,12 @@ class Agama(DialogUtils):
                     ], style=cli_style.container)
 
         self.main_container.on_page_enter = self.on_page_enter
+
         self.main_container.jans_help = get_help_with(
                 f'<v>              {_("Display agama project details")}\n'
                 f'<c>              {_("Managey agama project configuration")}\n',
                 without=['v', 'enter']
                 )
-
 
     def on_page_enter(self) -> None:
         self.first_enter = True
