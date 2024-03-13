@@ -11,6 +11,8 @@ public class ApiAppConfiguration implements Configuration {
 
     private boolean configOauthEnabled;
     private boolean customAttributeValidationEnabled;
+    private boolean disableLoggerTimer;
+    private boolean disableAuditLogger;
     private List<String> apiApprovedIssuer;
     private String apiProtectionType;
     private String apiClientId;
@@ -51,6 +53,22 @@ public class ApiAppConfiguration implements Configuration {
 
     public boolean isCustomAttributeValidationEnabled() {
         return customAttributeValidationEnabled;
+    }
+    
+    public boolean isDisableLoggerTimer() {
+        return disableLoggerTimer;
+    }
+
+    public void setDisableLoggerTimer(boolean disableLoggerTimer) {
+        this.disableLoggerTimer = disableLoggerTimer;
+    }
+
+    public boolean isDisableAuditLogger() {
+        return disableAuditLogger;
+    }
+
+    public void setDisableAuditLogger(boolean disableAuditLogger) {
+        this.disableAuditLogger = disableAuditLogger;
     }
 
     public void setCustomAttributeValidationEnabled(boolean customAttributeValidationEnabled) {
@@ -270,19 +288,20 @@ public class ApiAppConfiguration implements Configuration {
     @Override
     public String toString() {
         return "ApiAppConfiguration [configOauthEnabled=" + configOauthEnabled + ", customAttributeValidationEnabled="
-                + customAttributeValidationEnabled + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
-                + apiProtectionType + ", apiClientId=" + apiClientId + ", apiClientPassword=" + apiClientPassword
-                + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl
-                + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="
-                + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="
-                + authOpenidRevokeUrl + ", smallryeHealthRootPath=" + smallryeHealthRootPath + ", exclusiveAuthScopes="
-                + exclusiveAuthScopes + ", corsConfigurationFilters=" + corsConfigurationFilters + ", loggingLevel="
-                + loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
-                + externalLoggerConfiguration + ", disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount
-                + ", userExclusionAttributes=" + userExclusionAttributes + ", userMandatoryAttributes="
-                + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf="
-                + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf + ", plugins=" + plugins
-                + "]";
+                + customAttributeValidationEnabled + ", disableLoggerTimer=" + disableLoggerTimer
+                + ", disableAuditLogger=" + disableAuditLogger + ", apiApprovedIssuer=" + apiApprovedIssuer
+                + ", apiProtectionType=" + apiProtectionType + ", apiClientId=" + apiClientId + ", apiClientPassword="
+                + apiClientPassword + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl="
+                + authIssuerUrl + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl
+                + ", authOpenidIntrospectionUrl=" + authOpenidIntrospectionUrl + ", authOpenidTokenUrl="
+                + authOpenidTokenUrl + ", authOpenidRevokeUrl=" + authOpenidRevokeUrl + ", smallryeHealthRootPath="
+                + smallryeHealthRootPath + ", exclusiveAuthScopes=" + exclusiveAuthScopes
+                + ", corsConfigurationFilters=" + corsConfigurationFilters + ", loggingLevel=" + loggingLevel
+                + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration
+                + ", disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount + ", userExclusionAttributes="
+                + userExclusionAttributes + ", userMandatoryAttributes=" + userMandatoryAttributes
+                + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf=" + auditLogConf
+                + ", dataFormatConversionConf=" + dataFormatConversionConf + ", plugins=" + plugins + "]";
     }
 }
 
