@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.0.21
-ENV CN_BUILD_DATE='2023-12-14 08:59'
+ENV CN_BUILD_DATE='2024-03-13 14:09'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -94,7 +94,7 @@ RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O ${JETTY_BASE}/jans-config-api/_plugins/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=a2c5d4bd3d09c9f34e79b0d24bc63ece4ca7da43
+ENV JANS_SOURCE_VERSION=5ac9c13fdd11b210e66d824c7592f635f7381dc2
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 

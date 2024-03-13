@@ -111,6 +111,14 @@ def _transform_api_dynamic_config(conf):
             "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
         })
         should_update = True
+
+    if "disableLoggerTimer" not in conf:
+        conf["disableLoggerTimer"] = True
+        should_update = True
+
+    if "disableAuditLogger" not in conf:
+        conf["disableAuditLogger"] = True
+        should_update = True
     return conf, should_update
 
 
