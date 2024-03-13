@@ -125,6 +125,22 @@ public class StatusCheckerTimer {
         configurationService.setStatsData(statsData);
         log.debug("Configuration status update finished");
     }
+    
+    public StatsData getServerStatsData() {
+        log.debug("Starting update of sever status");
+
+        StatsData statsData = new StatsData();
+        Date currentDateTime = new Date();
+        statsData.setLastUpdate(currentDateTime);
+        statsData.setFacterData(getFacterData());
+        statsData.setDbType(configurationService.getPersistenceType());
+        
+        configurationService.setStatsData(statsData);        
+
+        log.debug("statsData:{}",statsData);
+        return statsData;
+    }
+
 
     private FacterData getFacterData() {
         log.debug("Getting Server status");

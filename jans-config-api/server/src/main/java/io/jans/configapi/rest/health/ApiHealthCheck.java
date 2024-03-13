@@ -9,8 +9,8 @@ package io.jans.configapi.rest.health;
 import io.jans.configapi.core.model.HealthStatus;
 import io.jans.configapi.core.model.Status;
 import io.jans.configapi.model.status.StatsData;
-import io.jans.configapi.rest.resource.auth.ConfigBaseResource;
 import io.jans.configapi.service.auth.ConfigurationService;
+import io.jans.configapi.service.status.StatusCheckerTimer;
 import io.jans.configapi.util.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 @Path(ApiConstants.HEALTH)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ApiHealthCheck extends ConfigBaseResource {
+public class ApiHealthCheck  {
     
     @Inject
     Logger logger;
@@ -38,6 +38,9 @@ public class ApiHealthCheck extends ConfigBaseResource {
         
     @Inject
     ConfigurationService configurationService;
+    
+    @Inject
+    StatusCheckerTimer statusCheckerTimer;
 
     @Operation(summary = "Returns application health status", description = "Returns application health status", operationId = "get-config-health", tags = {
     "Health - Check" })
@@ -46,7 +49,7 @@ public class ApiHealthCheck extends ConfigBaseResource {
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     public Response getHealthResponse() {
-        logger.debug("Api Health Check - Entry");
+        logger.debug("Api Health Check - /health/");
         
         HealthStatus healthStatus = new HealthStatus();
         healthStatus.setStatus("UP");
@@ -87,7 +90,7 @@ public class ApiHealthCheck extends ConfigBaseResource {
     @GET
     @Path(ApiConstants.LIVE)
     public Response getLivenessResponse() {
-        logger.debug("ApiHealthCheck::getLivenessResponse() - Entry");
+        logger.info("ApiHealthCheck::/health/live");
         Status liveness = new Status();
         liveness.setName("jans-config-api liveness");
         liveness.setStatus("UP");
@@ -104,7 +107,7 @@ public class ApiHealthCheck extends ConfigBaseResource {
     @GET
     @Path(ApiConstants.READY)
     public Response getReadinessResponse() {
-        logger.debug("ApiHealthCheck::getReadinessResponse() - Entry");
+        logger.info("ApiHealthCheck::/health/ready");
      // readiness
         Status readiness = new Status();
         readiness.setName("jans-config-api readiness");
@@ -130,7 +133,7 @@ public class ApiHealthCheck extends ConfigBaseResource {
     @Path(ApiConstants.SERVER_STAT)
     public Response getServerStat() {
         logger.debug("Server Stat - Entry");
-        StatsData statsData = configurationService.getStatsData();
+        StatsData statsData = statusCheckerTimer.getServerStatsData();
         logger.debug("Server Stat - statsData:{}",statsData);
         return Response.ok(statsData).build();
 

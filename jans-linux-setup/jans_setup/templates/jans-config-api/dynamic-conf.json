@@ -1,5 +1,7 @@
 {
   "configOauthEnabled": ${configOauthEnabled},
+  "disableLoggerTimer": true,
+  "disableAuditLogger": true,
   "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",
   "apiClientId": "${jca_client_id}",
