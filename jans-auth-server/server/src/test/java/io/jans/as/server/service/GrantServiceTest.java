@@ -51,6 +51,37 @@ public class GrantServiceTest {
     private CacheConfiguration cacheConfiguration;
 
     @Test
+    public void shouldPersist_byDefault_shouldReturnTrue() {
+        assertTrue(grantService.shouldPersist());
+    }
+
+    @Test
+    public void shouldPersist_whenDontPersistConfIsTrue_shouldReturnFalse() {
+        Mockito.doReturn(true).when(appConfiguration).getSaveTokensInCacheAndDontSaveInPersistence();
+
+        assertFalse(grantService.shouldPersist());
+    }
+
+    @Test
+    public void shouldSaveInCache_byDefault_shoultReturnFalse() {
+        assertFalse(grantService.shouldSaveInCache());
+    }
+
+    @Test
+    public void shouldSaveInCache_whenAllowedByConfig_shoultReturnTrue() {
+        Mockito.doReturn(true).when(appConfiguration).getSaveTokensInCacheAndDontSaveInPersistence();
+
+        assertTrue(grantService.shouldSaveInCache());
+    }
+
+    @Test
+    public void shouldSaveInCache_whenAllowedByMainConfig_shoultReturnTrue() {
+        Mockito.doReturn(true).when(appConfiguration).getSaveTokensInCache();
+
+        assertTrue(grantService.shouldSaveInCache());
+    }
+
+    @Test
     public void filterOutRefreshTokenFromDeletion_forTokenWithoutOnlineAccess_shouldFilterOut() {
         Mockito.doReturn(false).when(appConfiguration).getRemoveRefreshTokensForClientOnLogout();
 

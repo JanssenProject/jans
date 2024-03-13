@@ -3,7 +3,7 @@ import sys
 import datetime
 
 from types import SimpleNamespace
-from typing import Optional
+from typing import Optional, List
 
 import prompt_toolkit
 
@@ -11,7 +11,7 @@ from cli_style import style
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_spinner import Spinner
 from wui_components.jans_vetrical_nav import JansVerticalNav
-from utils.static import cli_style
+from utils.static import cli_style, common_strings
 from wui_components.jans_date_picker import DateSelectWidget
 from utils.multi_lang import _
 
@@ -83,11 +83,20 @@ class DialogUtils:
 
         containers = [container] if container else [self.tabs[tab] for tab in self.tabs]
 
-        for container in containers:
-            for item in container.children:
+        def check_subitmes(items):
+            for item in items:
                 if hasattr(item, 'children') and len(item.children)>1 and hasattr(item.children[1], 'jans_name'):
                     if 'required' in item.children[0].style and not data.get(item.children[1].jans_name, None):
                         missing_fields.append(item.children[1].jans_name)
+
+                if isinstance(item, prompt_toolkit.layout.containers.DynamicContainer):
+                    sub_children = item.get_children()
+                    if sub_children:
+                        for sc in sub_children:
+                            check_subitmes(sc.children)
+
+        for container in containers:
+            check_subitmes(container.children)
 
         if missing_fields:
             common_data.app.show_message(_("Please fill required fields"), _("The following fields are required:\n") + ', '.join(missing_fields), tobefocused=tobefocused)
@@ -190,3 +199,14 @@ def fromisoformat(dt_str):
 
 def check_email(email):
     return re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$', email, re.IGNORECASE)
+
+def get_help_with(helps: str='', without: List[str]=None):
+    if not without:
+        without = []
+    help_list = []
+    for key_ in common_strings.__dict__:
+        if key_.startswith('help_') and key_[5:] not in without:
+            help_list.append(common_strings.__dict__[key_])
+    if helps:
+        help_list.insert(-1, helps)
+    return '\n'.join(help_list)

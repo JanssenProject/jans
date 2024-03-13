@@ -686,6 +686,8 @@ paths:
                     }
         "401":
           description: Unauthorized
+        "406":
+          description: NotAcceptable
         "500":
           description: InternalServerError
       security:
@@ -772,8 +774,12 @@ paths:
                         ],
                         "whitePagesCanView": false
                     }
+        "400":
+          description: BadRequest
         "401":
           description: Unauthorized
+        "406":
+          description: NotAcceptable
         "500":
           description: InternalServerError
       security:
@@ -7892,11 +7898,11 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanView:
-          type: boolean
         userCanEdit:
           type: boolean
         adminCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
@@ -8226,6 +8232,12 @@ components:
           type: string
         opTosUri:
           type: string
+        cleanUpInactiveClientAfterHoursOfInactivity:
+          type: integer
+          format: int32
+        clientPeriodicUpdateTimerInterval:
+          type: integer
+          format: int32
         authorizationCodeLifetime:
           type: integer
           format: int32
@@ -8239,6 +8251,10 @@ components:
           type: integer
           format: int32
         idTokenFilterClaimsBasedOnAccessToken:
+          type: boolean
+        saveTokensInCache:
+          type: boolean
+        saveTokensInCacheAndDontSaveInPersistence:
           type: boolean
         accessTokenLifetime:
           type: integer
@@ -8351,10 +8367,10 @@ components:
           type: boolean
         disablePromptConsent:
           type: boolean
-        sessionIdLifetime:
+        sessionIdCookieLifetime:
           type: integer
           format: int32
-        sessionIdCookieLifetime:
+        sessionIdLifetime:
           type: integer
           format: int32
         activeSessionAuthorizationScope:
@@ -8712,8 +8728,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8723,6 +8737,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8866,9 +8882,9 @@ components:
     LockMessageConfig:
       type: object
       properties:
-        enableIdTokenMessages:
+        enableTokenMessages:
           type: boolean
-        idTokenMessagesChannel:
+        tokenMessagesChannel:
           type: string
     SsaConfiguration:
       type: object
@@ -9515,6 +9531,8 @@ components:
       type: object
       properties:
         configOauthEnabled:
+          type: boolean
+        customAttributeValidationEnabled:
           type: boolean
         apiApprovedIssuer:
           type: array

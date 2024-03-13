@@ -18,7 +18,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("auth")
+logger = logging.getLogger("jans-auth")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
@@ -49,6 +49,15 @@ def _transform_lock_dynamic_config(conf):
         if missing_key not in conf["opaConfiguration"]:
             conf["opaConfiguration"][missing_key] = value
             should_update = True
+
+    # channel rename
+    if "jans_token" not in conf["tokenChannels"]:
+        conf["tokenChannels"].append("jans_token")
+
+        # remove old channel
+        with contextlib.suppress(ValueError):
+            conf["tokenChannels"].remove("id_token")
+        should_update = True
 
     # return modified config (if any) and update flag
     return conf, should_update

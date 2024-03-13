@@ -139,7 +139,7 @@ One way to structure the solution is the following:
 
 - Template `commons.ftlh` is imported and its macro `main` called passing `true` for `useSidebar`
 
-- The markup between `<@com.main...` and `</@com.main>` is the content of the homepage, which is "inserted" by the `main` macro when the `<#nested>` directive is reached  
+- The markup inside `<@com.main...` tag is the content to be "inserted" when the `<#nested>` directive is reached  
 
 ```
 <#-- about.ftlh -->
@@ -229,7 +229,7 @@ Note however URLs are not manipulable: an attempt to set the browser location to
 
 Additionally, the engine by default sends responses with proper HTTP headers so page contents are not cached. This is key to prevent manipulation and allows a safe usage of the browser's back button, where it will not be possible to visit past stages. 
 
-## Code transpilation
+### Code transpilation
 
 The engine has some timers running in the background. One of them [transpiles code](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/timer/Transpilation.java) when a change is detected in a given flow's source (written in Agama language). The transpilation process generates vanilla Javascript code runnable through [Mozilla Rhino](https://github.com/mozilla/rhino) by using a transformation chain like  (DSL) flow code -> (ANTLR4) parse tree -> (XML) abstract syntax tree -> JS. 
 
@@ -244,7 +244,7 @@ The transformation chain guarantees that a flow written in Agama DSL cannot:
 - You can find the (ANTLR4) DSL grammar [here](https://github.com/JanssenProject/jans/blob/main/agama/transpiler/src/main/antlr4/io/jans/agama/antlr/AuthnFlow.g4).
 - The last step of the transformation chain is carried out by means of [this](https://github.com/JanssenProject/jans/blob/main/agama/transpiler/src/main/resources/JSGenerator.ftl) Freemarker transformer
 
-## Other engine characteristics
+### Other engine characteristics
 
 Some interesting facts for the curious:
 

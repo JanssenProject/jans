@@ -5,18 +5,15 @@ from prompt_toolkit.formatted_text import HTML, AnyFormattedText, merge_formatte
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import FormattedTextControl, Window
 from prompt_toolkit.widgets import Label, Frame, Box, Button
-from prompt_toolkit.layout.containers import HSplit
-from prompt_toolkit.layout.containers import (
-    HSplit,
-    VSplit,
-    DynamicContainer,
-)
+from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer
+
 
 class JansLabelContainer:
     def __init__(
         self,
         title: Optional[str]='',
         width: Optional[int]=50,
+        label_width: Optional[int]=None,
         on_enter: Optional[Callable]=None,
         on_delete: Optional[Callable]=None,
         on_display: Optional[Callable]=None,
@@ -35,6 +32,8 @@ class JansLabelContainer:
             on_display (Callable, optional): this function is called when user press d on keyboard
             buttonbox (Button, optional): buntton box to be appended at the end
         """
+        if not label_width:
+            label_width = width
         self.width = width
         self.on_enter = on_enter
         self.on_delete = on_delete
@@ -58,7 +57,7 @@ class JansLabelContainer:
             widgets.append(Window(height=1))
             widgets.append(buttonbox)
 
-        self.container = Box(Frame(HSplit(widgets), title=title, width=self.width))
+        self.container = Box(Frame(HSplit(widgets, width=label_width-3), title=title), width=label_width)
 
     def _get_formatted_text(self) -> AnyFormattedText:
         """Internal function for formatting entries

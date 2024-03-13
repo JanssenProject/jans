@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.0.22-1
+    tag: 1.1.0_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -124,7 +124,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.22-1
+    tag: 1.1.0_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -258,6 +258,28 @@ config:
     cnAwsSecretsReplicaRegions: []
     # [aws_secret_manager_envs] END
     # [aws_envs] END
+    # [vault_envs] Envs related to Hashicorp vault
+    # -- Vault AppRole RoleID.
+    cnVaultRoleId: ""
+    # -- Vault AppRole SecretID.
+    cnVaultSecretId: ""
+    # -- Base URL of Vault.
+    cnVaultAddr: http://localhost:8200
+    # -- Verify connection to Vault.
+    cnVaultVerify: false
+    # -- Path to file contains Vault AppRole role ID.
+    cnVaultRoleIdFile: /etc/certs/vault_role_id
+    # -- Path to file contains Vault AppRole secret ID.
+    cnVaultSecretIdFile: /etc/certs/vault_secret_id
+    # -- Vault namespace used to access the secrets.
+    cnVaultNamespace: ""
+    # -- Path to Vault KV secrets engine.
+    cnVaultKvPath: secret
+    # -- Base prefix name used to access secrets.
+    cnVaultPrefix: jans
+    # -- Path to Vault AppRole.
+    cnVaultAppRolePath: approle
+    # [vault_envs] END
     # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
     cnLdapUrl: "opendj:1636"
     # -- Value passed to Java option -XX:MaxRAMPercentage
@@ -326,7 +348,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.0.22-1
+    tag: 1.1.0_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- LDAP admin password if OpenDJ is used for persistence.
@@ -422,7 +444,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.0.22-1
+    tag: 1.1.0_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -525,7 +547,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.0.22-1
+    tag: 1.1.0_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -633,7 +655,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 1.0.22-1
+    tag: 1.1.0_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -768,6 +790,8 @@ global:
   auth-server-key-rotation:
     # -- Boolean flag to enable/disable the auth-server-key rotation cronjob chart.
     enabled: true
+    # -- The initial auth server key rotation keys life in hours
+    initKeysLife: 48
   # -- Volume storage type if using AWS volumes.
   awsStorageType: io1
   # -- Volume storage type if using Azure disks.
@@ -811,7 +835,7 @@ global:
   jobTtlSecondsAfterFinished: 300
   # -- The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes
   configAdapterName: kubernetes
-  # -- The config backend adapter that will hold Janssen secret layer. aws|google|kubernetes
+  # -- The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes
   configSecretAdapter: kubernetes
   # -- Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner. Leave as this is a sensible default.
   cnGoogleApplicationCredentials: /etc/jans/conf/google-credentials.json
@@ -887,6 +911,8 @@ global:
     ingress:
       # -- Enable endpoint /.well-known/fido2-configuration
       fido2ConfigEnabled: false
+      # -- Enable endpoint /jans-fido2
+      fido2Enabled: false
   # -- GCE storage kind if using Google disks
   gcePdStorageType: pd-standard
   # -- Boolean flag to enable mapping global.lbIp  to global.fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.
@@ -1081,6 +1107,10 @@ nginx-ingress:
     fido2ConfigLabels: { }
     # -- fido2 config ingress resource additional annotations.
     fido2ConfigAdditionalAnnotations: { }
+    # -- fido2 ingress resource labels. key app is taken
+    fido2Labels: { }
+    # -- fido2 ingress resource additional annotations.
+    fido2AdditionalAnnotations: { }
     # -- Auth server ingress resource labels. key app is taken
     authServerLabels: { }
     # -- Auth server ingress resource additional annotations.
@@ -1279,7 +1309,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.0.22-1
+    tag: 1.1.0_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1363,7 +1393,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 1.0.22-1
+    tag: 1.1.0_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1471,7 +1501,7 @@ link:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/link
     # -- Image  tag to use for deploying.
-    tag: 1.0.22-1
+    tag: 1.1.0_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1578,7 +1608,7 @@ saml:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/saml
     # -- Image  tag to use for deploying.
-    tag: 1.0.22-1
+    tag: 1.1.0_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.

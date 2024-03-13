@@ -1,5 +1,7 @@
 package io.jans.inbound;
 
+import io.jans.inbound.oauth2.OAuthParams;
+
 public class Provider {
     
     private String flowQname;
@@ -12,6 +14,9 @@ public class Provider {
     private boolean cumulativeUpdate;
     private boolean requestForEmail;
     private boolean emailLinkingSafe;
+
+    private OpenIdParams openIdParams;
+    private OAuthParams oauthParams;
 
     public String getFlowQname() {
         return flowQname;
@@ -83,6 +88,22 @@ public class Provider {
 
     public void setEmailLinkingSafe(boolean emailLinkingSafe) {
         this.emailLinkingSafe = emailLinkingSafe;
+    }
+    
+    public OAuthParams getOAuthParams() {
+        return oauthParams;
+    }
+    
+    public void setOAuthParams(OAuthParams o) {
+        oauthParams = o;
+    }
+    
+    public OpenIdParams getOpenIdParams() {
+        return openIdParams;
+    }
+    
+    public void setOpenIdParams(OpenIdParams o) {
+        openIdParams = o;
     }
 
 }

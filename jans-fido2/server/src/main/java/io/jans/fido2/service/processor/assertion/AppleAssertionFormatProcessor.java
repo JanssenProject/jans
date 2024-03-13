@@ -15,13 +15,12 @@ package io.jans.fido2.service.processor.assertion;
 
 import java.security.PublicKey;
 
+import io.jans.fido2.service.util.DigestUtilService;
+import io.jans.fido2.service.util.HexUtilService;
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
 
 import org.slf4j.Logger;
 
@@ -75,6 +74,12 @@ public class AppleAssertionFormatProcessor implements AssertionFormatProcessor {
 	@Inject
 	private Base64Service base64Service;
 
+	@Inject
+	private DigestUtilService digestUtilService;
+
+	@Inject
+	private HexUtilService hexUtilService;
+
 	@Override
 	public AttestationFormat getAttestationFormat() {
 		return AttestationFormat.apple;
@@ -90,19 +95,18 @@ public class AppleAssertionFormatProcessor implements AssertionFormatProcessor {
 		userVerificationVerifier.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(),
 				authData);
 
-		byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
+		byte[] clientDataHash = digestUtilService.sha256Digest(base64Service.urlDecode(clientDataJson));
 
 		try {
 			int counter = authenticatorDataParser.parseCounter(authData.getCounters());
 			commonVerifiers.verifyCounter(registration.getCounter(), counter);
 			registration.setCounter(counter);
 
-			JsonNode uncompressedECPointNode = dataMapperService
-					.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
+			JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
 			PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
 
-			log.info("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
-			log.info("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
+			log.info("Uncompressed ECpoint node {}", uncompressedECPointNode);
+			log.info("EC Public key hex {}", hexUtilService.encodeHexString(publicKey.getEncoded()));
 
 			log.info("Signature algorithm: " + registration.getSignatureAlgorithm());
 
@@ -114,7 +118,7 @@ public class AppleAssertionFormatProcessor implements AssertionFormatProcessor {
 		} catch (Fido2CompromisedDevice ex) {
 			throw ex;
 		} catch (Exception ex) {
-			throw new Fido2RuntimeException("Failed to check packet assertion", ex);
+			throw new Fido2RuntimeException("Failed to check apple assertion", ex);
 		}
 	}
 

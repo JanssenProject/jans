@@ -260,7 +260,7 @@ As seen in the examples Agama engine can deal with Java exceptions, however, thi
 
 [Agama types](../../../agama/language-reference.md#data-types) do not match Java types. This means passing a "native" Agama value as parameter in a method `Call` requires some form of compatibility with the target (Java) type in the method signature.
 
-An argument (Agama value) is compatible with a method parameter if it can be "converted" successfully. As we'll see, conversion feels pretty natural in practice. If this process fails a `java.lang.IllegalArgumentException` is thrown and the flow will crash unless the exception is caught. Note however the recommended practice is to let flows [crash](./recommended-practices.md#about-crashes).
+An argument (Agama value) is compatible with a method parameter if it can be "converted" successfully. As we'll see, conversion feels pretty natural in practice. If this process fails a `java.lang.IllegalArgumentException` is thrown and the flow will crash unless the exception is caught. Note however the recommended practice is to let flows [crash](./agama-best-practices#about-crashes).
 
 The following lists some of the most common successful conversions:
 
@@ -353,4 +353,4 @@ We consider the following to be remarkable:
 
 ### OOP prose warning
 
-See the recommended [practices](./recommended-practices.md#oop-prose-warning) to learn more about this topic.
+See the recommended [practices](./agama-best-practices#oop-prose-warning) to learn more about this topic.

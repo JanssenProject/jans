@@ -44,6 +44,7 @@ public class ExecutionContext {
 
     private SessionId sessionId;
     private List<SessionId> currentSessions;
+    private SessionId authorizationChallengeSessionId;
 
     private AuthzRequest authzRequest;
     private AuthzDetails authzDetails;
@@ -127,6 +128,7 @@ public class ExecutionContext {
         executionContext.user = context.user;
         executionContext.sessionId = context.sessionId;
         executionContext.currentSessions = context.currentSessions;
+        executionContext.authorizationChallengeSessionId = context.authorizationChallengeSessionId;
         executionContext.authzRequest = context.authzRequest;
         executionContext.authzDetails = context.authzDetails;
         executionContext.authzDetail = context.authzDetail;
@@ -190,6 +192,14 @@ public class ExecutionContext {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public SessionId getAuthorizationChallengeSessionId() {
+        return authorizationChallengeSessionId;
+    }
+
+    public void setAuthorizationChallengeSessionId(SessionId authorizationChallengeSessionId) {
+        this.authorizationChallengeSessionId = authorizationChallengeSessionId;
     }
 
     public List<SessionId> getCurrentSessions() {

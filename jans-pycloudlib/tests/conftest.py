@@ -25,11 +25,19 @@ def gk8s_config():
 
 
 @pytest.fixture()
-def gvault_secret():
+def gvault_secret(tmpdir):
     from jans.pycloudlib.secret import VaultSecret
 
+    role_id_file = tmpdir.join("vault_role_id")
+    role_id_file.write("")
+    secret_id_file = tmpdir.join("vault_secret_id")
+    secret_id_file.write("")
+
     secret = VaultSecret()
-    secret.prefix = "secret/testing"
+    secret.settings["CN_SECRET_VAULT_NAMESPACE"] = "testing"
+    secret.settings["CN_SECRET_VAULT_KV_PATH"] = "secret"
+    secret.settings["CN_SECRET_VAULT_ROLE_ID_FILE"] = str(role_id_file)
+    secret.settings["CN_SECRET_VAULT_SECRET_ID_FILE"] = str(secret_id_file)
     yield secret
 
 

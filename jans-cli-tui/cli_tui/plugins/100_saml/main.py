@@ -175,7 +175,7 @@ class Plugin(DialogUtils):
         'Coroutine for getting SAML trust relationships.'
         try:
             response = self.app.cli_object.process_command_by_id(
-                        operation_id='get-trust-relationship',
+                        operation_id='get-trust-relationships',
                         url_suffix='',
                         endpoint_args='',
                         data_fn=None,
@@ -353,6 +353,27 @@ class Plugin(DialogUtils):
 
 
     def delete_identity_provider(self, **kwargs: Any) -> None:
-        """This is method for the deleting trust relationship 
+        """This is method for the deleting identity provider 
         """
-        pass
+
+        def do_delete_provider():
+            async def coroutine():
+                cli_args = {'operation_id': 'delete-saml-identity-provider', 'url_suffix':'inum:{}'.format(kwargs['selected'][0])}
+                
+                self.app.start_progressing(_("Deleting identity provider {}").format(kwargs['selected'][1]))
+                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
+                if response:
+                    self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)), tobefocused=self.provider_container)
+                await self.get_identity_providers()
+
+            asyncio.ensure_future(coroutine())
+
+        buttons = [Button(_("No")), Button(_("Yes"), handler=do_delete_provider)]
+
+        self.app.show_message(
+                title=_("Confirm"),
+                message=HTML(_("Are you sure you want to delete identity provider <b>{}</b>?").format(kwargs['selected'][1])),
+                buttons=buttons,
+                tobefocused=self.provider_container
+                )

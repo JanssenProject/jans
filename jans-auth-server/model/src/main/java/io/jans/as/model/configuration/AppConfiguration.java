@@ -15,9 +15,10 @@ import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
-import io.jans.doc.annotation.DocProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.jans.doc.annotation.DocProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
+
 import java.util.*;
 
 /**
@@ -339,6 +340,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service")
     private String opTosUri;
 
+    @DocProperty(description = "Defines client inactivity period in hours which means that client will be removed once it is passed.")
+    public int cleanUpInactiveClientAfterHoursOfInactivity = -1;
+
+    @DocProperty(description = "Interval for client periodic update timer. Update timer is used to debounce frequent updates of the client to avoid performance degradation.")
+    public int clientPeriodicUpdateTimerInterval = 3;
+
     @DocProperty(description = "The lifetime of the Authorization Code")
     private int authorizationCodeLifetime;
 
@@ -353,6 +360,12 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value specifying whether idToken filters claims based on accessToken")
     private Boolean idTokenFilterClaimsBasedOnAccessToken;
+
+    @DocProperty(description = "Boolean value specifying whether to save access_token, id_token and refresh_token in cache (with cacheKey=sha256Hex(token_code))")
+    private Boolean saveTokensInCache;
+
+    @DocProperty(description = "Boolean value specifying whether to save access_token, id_token and refresh_token in cache and skip persistence in DB at the same time (with cacheKey=sha256Hex(token_code))")
+    private Boolean saveTokensInCacheAndDontSaveInPersistence;
 
     @DocProperty(description = "The lifetime of the short lived Access Token")
     private int accessTokenLifetime;
@@ -2254,6 +2267,22 @@ public class AppConfiguration implements Configuration {
         this.opTosUri = opTosUri;
     }
 
+    public int getCleanUpInactiveClientAfterHoursOfInactivity() {
+        return cleanUpInactiveClientAfterHoursOfInactivity;
+    }
+
+    public void setCleanUpInactiveClientAfterHoursOfInactivity(int cleanUpInactiveClientAfterHoursOfInactivity) {
+        this.cleanUpInactiveClientAfterHoursOfInactivity = cleanUpInactiveClientAfterHoursOfInactivity;
+    }
+
+    public int getClientPeriodicUpdateTimerInterval() {
+        return clientPeriodicUpdateTimerInterval;
+    }
+
+    public void setClientPeriodicUpdateTimerInterval(int clientPeriodicUpdateTimerInterval) {
+        this.clientPeriodicUpdateTimerInterval = clientPeriodicUpdateTimerInterval;
+    }
+
     public int getAuthorizationCodeLifetime() {
         return authorizationCodeLifetime;
     }
@@ -2292,6 +2321,22 @@ public class AppConfiguration implements Configuration {
 
     public void setAccessTokenLifetime(int accessTokenLifetime) {
         this.accessTokenLifetime = accessTokenLifetime;
+    }
+
+    public Boolean getSaveTokensInCache() {
+        return saveTokensInCache;
+    }
+
+    public void setSaveTokensInCache(Boolean saveTokensInCache) {
+        this.saveTokensInCache = saveTokensInCache;
+    }
+
+    public Boolean getSaveTokensInCacheAndDontSaveInPersistence() {
+        return saveTokensInCacheAndDontSaveInPersistence;
+    }
+
+    public void setSaveTokensInCacheAndDontSaveInPersistence(Boolean saveTokensInCacheAndDontSaveInPersistence) {
+        this.saveTokensInCacheAndDontSaveInPersistence = saveTokensInCacheAndDontSaveInPersistence;
     }
 
     public int getUmaRptLifetime() {

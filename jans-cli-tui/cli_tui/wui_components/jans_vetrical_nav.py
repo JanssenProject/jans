@@ -96,11 +96,17 @@ class JansVerticalNav():
         self.headerColor = headerColor
         self.entriesColor = entriesColor
         self.max_height = max_height
+
         if not is_formatted_text(jans_help):
             jans_help = HTML(jans_help)
         self.jans_help = merge_formatted_text([HTML(_("Press <b>F1</b> for Help.") + " "), jans_help])
+
         self.on_enter = on_enter
         self.on_delete = on_delete
+
+        if not on_display:
+            on_display = self.myparent.data_display_dialog
+
         self.on_display = on_display
         self.change_password = change_password
         self.hide_headers = hide_headers
@@ -373,7 +379,7 @@ class JansVerticalNav():
             if self.change_password:
                 self.change_password(data=self.all_data[self.selectes])
 
-        @kb.add('d')
+        @kb.add('v')
         def _(event):
             if not self.data:
                 return
@@ -386,6 +392,7 @@ class JansVerticalNav():
                 size=size,
                 data=self.all_data[self.selectes])
 
+        @kb.add('d')
         @kb.add('delete')
         def _(event):
             if self.data and self.on_delete:

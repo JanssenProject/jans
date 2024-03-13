@@ -15,7 +15,7 @@ from jans.pycloudlib.persistence import id_from_dn
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("keycloak-link")
+logger = logging.getLogger("jans-keycloak-link")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
