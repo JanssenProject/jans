@@ -8163,17 +8163,17 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
-        userCanAccess:
+        adminCanView:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -10453,10 +10453,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

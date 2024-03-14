@@ -155,11 +155,10 @@ public class AssetService {
 
         // common code
         ByteArrayOutputStream bos = getByteArrayOutputStream(documentStream);
-        log.info("Asset ByteArrayOutputStream :{}", bos);
+        log.trace("Asset ByteArrayOutputStream :{}", bos);
 
-        String path = dBDocumentStoreProvider.saveDocumentStream(document.getDisplayName(), null, getInputStream(bos),
-                document.getJansModuleProperty());
-        log.info("Path of saved new document is :{}", path);
+        document = saveDocument(document, getInputStream(bos));
+        log.info("Saved  document is :{}", document);
 
         // copyAsset on jans-server
         String result = copyAsset(document, getInputStream(bos));
@@ -204,40 +203,59 @@ public class AssetService {
         return status;
     }
 
+    private Document saveDocument(Document document, InputStream stream) {
+        log.info("Saving document in DB DocumentStore - document:{}, stream:{}", document, stream);
+        try {
+            String path = dBDocumentStoreProvider.saveDocumentStream(document.getDisplayName(), document.getDescription(), stream,
+                    document.getJansModuleProperty());
+            log.info("Successfully stored document - Path of saved new document is :{}", path);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("Error while saving document in DB DocumentStore is:{}", ex);
+            // throw new WebApplicationException(ex);
+        }
+        return document;
+    }
+
     private String copyAsset(Document document, InputStream stream) {
-        log.info("document:{}, stream:{}", document, stream);
+        log.info("Copy document on server - document:{}, stream:{}", document, stream);
+        String result = null;
+        try {
+            if (document == null) {
+                throw new InvalidConfigurationException("Document is null!");
+            }
 
-        if (document == null) {
-            throw new InvalidConfigurationException("Document is null!");
+            if (stream == null) {
+                throw new InvalidConfigurationException("Asset stream is null!");
+            }
+
+            String path = document.getDescription();
+            String fileName = document.getDisplayName();
+            String documentStoreModuleName = fileName;
+            log.info("path:{}, fileName:{}, documentStoreModuleName:{}", path, fileName, documentStoreModuleName);
+
+            if (StringUtils.isBlank(path)) {
+                throw new InvalidConfigurationException("Path to copy the asset is null!");
+            }
+
+            if (StringUtils.isBlank(fileName)) {
+                throw new InvalidConfigurationException("Asset name is null!");
+            }
+
+            String filePath = path + File.separator + fileName;
+            log.info("documentStoreService:{}, filePath:{}, localDocumentStoreService:{} ", documentStoreService,
+                    filePath, localDocumentStoreService);
+            result = documentStoreService.saveDocumentStream(filePath, null, stream, List.of(documentStoreModuleName));
+            log.info("Asset saving result:{}", result);
+
+            InputStream newFile = documentStoreService.readDocumentAsStream(filePath);
+            log.info("Reading asset file newFile:{}", newFile);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("Error while copying document on server is:{}", ex);
+            // throw new WebApplicationException(ex);
         }
-
-        if (stream == null) {
-            throw new InvalidConfigurationException("Asset stream is null!");
-        }
-
-        String path = document.getDescription();
-        String fileName = document.getDisplayName();
-        String documentStoreModuleName = fileName;
-        log.info("path:{}, fileName:{}, documentStoreModuleName:{}", path, fileName, documentStoreModuleName);
-
-        if (StringUtils.isBlank(path)) {
-            throw new InvalidConfigurationException("Path to copy the asset is null!");
-        }
-
-        if (StringUtils.isBlank(fileName)) {
-            throw new InvalidConfigurationException("Asset name is null!");
-        }
-
-        String filePath = fileName + File.separator + path;
-        log.info("documentStoreService:{}, filePath:{}, localDocumentStoreService:{} ", documentStoreService, filePath,
-                localDocumentStoreService);
-        String result = documentStoreService.saveDocumentStream(filePath, null, stream,
-                List.of(documentStoreModuleName));
-        log.info("Asset saving result:{}", result);
-
-        InputStream newFile = documentStoreService.readDocumentAsStream(filePath);
-        log.info("Reading asset file newFile:{}", newFile);
-
         return result;
 
     }
