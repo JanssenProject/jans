@@ -102,5 +102,3 @@ Read-Only:
 
 - `raised_at` (String)
 - `stack_trace` (String)
-
-

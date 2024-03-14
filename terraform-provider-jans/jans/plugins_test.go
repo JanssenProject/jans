@@ -19,7 +19,7 @@ func TestPlugins(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(plugins) != 4 {
-		t.Fatal("expected 4 plugins, got ", len(plugins))
+	if len(plugins) != 5 {
+		t.Fatal("expected 5 plugins, got ", len(plugins))
 	}
 }
