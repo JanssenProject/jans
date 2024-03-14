@@ -77,7 +77,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=39743bdeacde69c32b8d3b20a7b47c7d8f72e13b
+ENV JANS_SOURCE_VERSION=a8e6bbfc92cbb5f65984c75f3b2c2f3576e81e56
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
