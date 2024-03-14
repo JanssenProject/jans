@@ -69,7 +69,9 @@ func (c *Client) GetAttributes(ctx context.Context) ([]Attribute, error) {
 
 	resp := response{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/attributes", token, &resp); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/attributes", token, &resp, map[string]string{
+		"limit": "5",
+	}); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 

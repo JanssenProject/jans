@@ -88,10 +88,12 @@ func resourceScript() *schema.Resource {
 						"persistence_extension",
 						"idp",
 						"discovery",
+						"authz_detail",
 						"update_token",
 						"config_api_auth",
 						"modify_ssa_response",
 						"fido2_extension",
+						"lock_extension",
 					}
 					return validateEnum(v, enums)
 				},

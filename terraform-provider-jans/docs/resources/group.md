@@ -79,5 +79,3 @@ Read-Only:
 - `last_modified` (String)
 - `location` (String)
 - `resource_type` (String)
-
-
