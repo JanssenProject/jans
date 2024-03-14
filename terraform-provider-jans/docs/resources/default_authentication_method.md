@@ -28,5 +28,3 @@ resource "jans_default_authentication_method" "global" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

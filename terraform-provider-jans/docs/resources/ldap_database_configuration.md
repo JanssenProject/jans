@@ -57,5 +57,3 @@ resource "jans_ldap_database_configuration" "test" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-
