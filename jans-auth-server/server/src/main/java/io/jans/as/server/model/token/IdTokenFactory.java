@@ -62,7 +62,6 @@ import static io.jans.as.server.token.ws.rs.TokenExchangeService.DEVICE_SECRET;
  * @author Yuriy Zabrovarnyy
  * @version 12 Feb, 2020
  */
-@ApplicationScoped
 @Stateless
 @Named
 public class IdTokenFactory {
