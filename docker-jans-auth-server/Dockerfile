@@ -50,7 +50,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.1.0-SNAPSHOT
+ENV CN_VERSION=1.1.0
 ENV CN_BUILD_DATE='2024-03-11 19:00'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -102,7 +102,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=39743bdeacde69c32b8d3b20a7b47c7d8f72e13b
+ENV JANS_SOURCE_VERSION=a8e6bbfc92cbb5f65984c75f3b2c2f3576e81e56
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
