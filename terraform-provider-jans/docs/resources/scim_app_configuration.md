@@ -60,5 +60,3 @@ resource "jans_scim_app_configuration" "global" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-
