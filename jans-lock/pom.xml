@@ -195,6 +195,13 @@
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>3.1.0</version>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<configuration>
+						<additionalJOption>-Xdoclint:none</additionalJOption>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
