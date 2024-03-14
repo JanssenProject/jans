@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # =======
 
 ENV CN_VERSION=1.1.0
-ENV CN_BUILD_DATE='2024-03-11 08:03'
+ENV CN_BUILD_DATE='2024-03-14 12:04'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-keycloak-link-server/${CN_VERSION}/jans-keycloak-link-server-${CN_VERSION}.war
 
 # Install Link
