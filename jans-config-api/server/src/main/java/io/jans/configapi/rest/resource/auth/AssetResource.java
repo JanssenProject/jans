@@ -135,7 +135,7 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @POST
-    @Path(ApiConstants.UPLOAD_ASSET)
+    @Path(ApiConstants.UPLOAD)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
     public Response uploadAsset(@MultipartForm AssetForm assetForm) throws Exception {
         if (log.isInfoEnabled()) {
@@ -195,7 +195,7 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @PUT
-    @Path(ApiConstants.UPLOAD_ASSET)
+    @Path(ApiConstants.UPLOAD)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
     public Response updateAsset(@MultipartForm AssetForm assetForm) throws Exception {
         if (log.isInfoEnabled()) {
@@ -280,25 +280,20 @@ public class AssetResource extends ConfigBaseResource {
         logger.debug("Asset pagedResult:{} ", pagedResult);
         return pagedResult;
     }
-/*
-    private void saveAssetOnServer(Document document, InputStream assetFile) {
-        logger.info("Save asset on server document:{} , assetFile:{} ", document, assetFile);
-        if (document == null || assetFile == null) {
-            return;
-        }
-        try {
-            String displayName = assetService.copyAsset(document, assetFile);
-            logger.info("\n\n Asset successfully saved on server document.displayName():{} \n\n", displayName);
-            if (StringUtils.isBlank(displayName)) {
-                logger.info(
-                        "\n\n Could not save asset server - document.getDisplayName():{} , destFile.getPath():{} \n\n",
-                        document.getDisplayName());
-            }
-        } catch (Exception ex) {
-            throwInternalServerException(ex);
-        }
+
+    @POST
+    @Path("/test")
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
+    public Response testAsset(String name, String path) throws Exception {
+
+        log.info("Test Asset name:{}, path:{} ", name, path);
+
+        String testResult = assetService.readAsset(name, path);
+        log.debug(" Upload asset testResult:{} ", testResult);
+
+        return Response.status(Response.Status.OK).entity(testResult).build();
     }
-*/
+
     private void saveAssetOnServer(Document document, InputStream assetFile) {
         logger.info("Save asset on server document:{} , assetFile:{} ", document, assetFile);
         if (document == null || assetFile == null) {

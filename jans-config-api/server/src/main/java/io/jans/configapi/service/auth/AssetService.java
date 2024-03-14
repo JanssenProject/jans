@@ -206,8 +206,8 @@ public class AssetService {
     private Document saveDocument(Document document, InputStream stream) {
         log.info("Saving document in DB DocumentStore - document:{}, stream:{}", document, stream);
         try {
-            String path = dBDocumentStoreProvider.saveDocumentStream(document.getDisplayName(), document.getDescription(), stream,
-                    document.getJansModuleProperty());
+            String path = dBDocumentStoreProvider.saveDocumentStream(document.getDisplayName(),
+                    document.getDescription(), stream, document.getJansModuleProperty());
             log.info("Successfully stored document - Path of saved new document is :{}", path);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -268,4 +268,36 @@ public class AssetService {
         return authUtil.getInputStream(bos);
     }
 
+    public String readAsset(String assetName, String assetPath) {
+        log.info("Copy document on server - assetName:{}, assetPath:{}", assetName, assetPath);
+        String filePath = null;
+        try {
+
+            if (StringUtils.isBlank(assetName)) {
+                throw new InvalidConfigurationException("Asset name is null!");
+            }
+
+            if (StringUtils.isBlank(assetPath)) {
+                throw new InvalidConfigurationException("Path to read the asset from is null");
+            }
+
+            filePath = assetPath + File.separator + assetName;
+            log.info("documentStoreService:{}, filePath:{}, localDocumentStoreService:{} ", documentStoreService,
+                    filePath, localDocumentStoreService);
+
+            InputStream newFile = documentStoreService.readDocumentAsStream(filePath);
+            log.info("Reading asset file newFile:{}", newFile);
+
+            filePath = assetPath + File.separator + assetName + "_puja.new";
+            String result = documentStoreService.saveDocumentStream(filePath, null, newFile, List.of("test"));
+            log.info("Asset saving result:{}", result);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("Error while copying document on server is:{}", ex);
+            // throw new WebApplicationException(ex);
+        }
+        return filePath;
+
+    }
 }
