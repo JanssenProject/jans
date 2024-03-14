@@ -39,7 +39,9 @@ func (c *Client) GetCustomUsers(ctx context.Context) ([]CustomUser, error) {
 
 	ret := response{}
 
-	if err := c.get(ctx, "/jans-config-api/mgt/configuser", token, &ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/mgt/configuser", token, &ret, map[string]string{
+		"limit": "5",
+	}); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 

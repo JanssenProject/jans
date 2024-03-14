@@ -112,5 +112,3 @@ Read-Only:
 Read-Only:
 
 - `supported` (Boolean)
-
-

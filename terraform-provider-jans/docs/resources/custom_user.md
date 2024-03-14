@@ -78,5 +78,3 @@ Optional:
 
 - `display_value` (String) Display value for the attribute.
 - `value` (String) Value for the attribute.
-
-
