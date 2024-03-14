@@ -66,7 +66,9 @@ func (c *Client) GetScripts(ctx context.Context) ([]Script, error) {
 
 	ret := response{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/config/scripts", token, &ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/config/scripts", token, &ret, map[string]string{
+		"limit": "5",
+	}); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 

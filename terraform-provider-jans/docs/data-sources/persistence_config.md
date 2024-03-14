@@ -28,5 +28,3 @@ output "persistence_config" {
 
 - `id` (String) The ID of this resource.
 - `persistence_type` (String)
-
-
