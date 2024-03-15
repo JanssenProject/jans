@@ -60,5 +60,3 @@ resource "jans_json_web_key" "test" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-
