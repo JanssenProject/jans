@@ -384,7 +384,7 @@ nav:
   - Link Guide:
     - admin/link/README.md
     - Jans LDAP Link: admin/link/jans-link.md
-    - Jans Keycloak Link: admin/link/keycloak-synch.md
+    - Jans Keycloak Link: admin/link/keycloak-link.md
   - Lock Guide:
       - admin/lock/README.md
       - Lock Installation: admin/lock/lock_installation.md
