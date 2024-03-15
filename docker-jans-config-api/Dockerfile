@@ -40,8 +40,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Config API
 # ==========
 
-ENV CN_VERSION=1.1.0
-ENV CN_BUILD_DATE='2024-03-14 12:08'
+ENV CN_VERSION=1.1.1-SNAPSHOT
+ENV CN_BUILD_DATE='2024-03-11 19:17'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -232,7 +232,7 @@ EXPOSE $CN_CONFIG_API_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.0" \
+    org.opencontainers.image.version="1.1.1" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 
