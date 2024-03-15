@@ -157,11 +157,12 @@ public class AssetService {
         ByteArrayOutputStream bos = getByteArrayOutputStream(documentStream);
         log.trace("Asset ByteArrayOutputStream :{}", bos);
 
+        updateRevision(document);
         document = saveDocument(document, getInputStream(bos));
         log.info("Saved  document is :{}", document);
 
         // copyAsset on jans-server
-        String result = copyAsset(document, getInputStream(bos));
+        String result = copyAssetOnServer(document, getInputStream(bos));
         log.info("Result of asset saved on server :{}", result);
 
         // Get final document
@@ -183,6 +184,7 @@ public class AssetService {
 
         String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
         document.setDocument(documentContent);
+        updateRevision(document);
         dbDocumentService.updateDocument(document);
         document = dbDocumentService.getDocumentByDisplayName(document.getDisplayName());
         log.info("Updated document:{}", document);
@@ -202,6 +204,32 @@ public class AssetService {
         log.info("Status on removing a document identified by inum is:{}", status);
         return status;
     }
+    
+    private Document updateRevision (Document document) {
+        log.info("Update document revision - document:{}", document);
+        try{
+            if(document==null) {        
+            return document;
+        }
+        
+        String revision = document.getJansRevision();
+        log.info("Current document revision:{}", revision);
+        int intRevision = 1;
+        if(revision!=null && StringUtils.isNotBlank(revision)) {
+            intRevision = Integer.getInteger(revision).intValue();
+            intRevision = intRevision + 1;
+        }
+        revision = String.valueOf(intRevision);
+        log.info("Current document intRevision:{}", intRevision);
+        document.setJansRevision(revision);
+                
+        log.info("Updated document revision - document:{}", document);
+        }catch(Exception ex) {
+            log.error("Exception while updating document revision is:{}", ex);
+            return document;
+        }
+        return document;
+    }
 
     private Document saveDocument(Document document, InputStream stream) {
         log.info("Saving document in DB DocumentStore - document:{}, stream:{}", document, stream);
@@ -217,7 +245,7 @@ public class AssetService {
         return document;
     }
 
-    private String copyAsset(Document document, InputStream stream) {
+    private String copyAssetOnServer(Document document, InputStream stream) {
         log.info("Copy document on server - document:{}, stream:{}", document, stream);
         String result = null;
         try {
