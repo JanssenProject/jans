@@ -31,7 +31,7 @@
 			<div class="container">
 				<h:panelGroup rendered="#{deviceAuthorizationAction.newRequest}">
 					<div class="jans-form-container">
-						<div class="row no-margin">
+						<div class="no-margin">
 							<div class="device-authz-title">
 								<h:outputText value="#{msgs['device.authorization.title']}" />
 							</div>
@@ -47,7 +47,7 @@
 								<h:outputText value="#{msgs['device.authorization.code.inputbox.label']}" />
 							</div>
 							<h:panelGroup layout="block" rendered="#{!deviceAuthorizationAction.completeVerificationMode}">
-								<div class="row no-margin flex-nowrap device-authz-input-container justify-content-center align-items-center">
+								<div class="no-margin d-flex flex-nowrap device-authz-input-container justify-content-center align-items-center">
 									<h:inputText placeholder="#{msgs['device.authorization.code.inputbox.label']}"
 										id="userCodePart1" name="userCodePart1" colMd="10"
 										labelColMd="2" autocomplete="off"
@@ -76,7 +76,7 @@
 						<div class="device-authz-button">
 							<div style="width: 100%">
 								<h:commandButton id="continueButton"
-									styleClass="btn device-authz-continue-btn col-sm-12" value="#{msgs['device.authorization.confirm.button']}"
+									styleClass="device-authz-continue-btn col-sm-12" value="#{msgs['device.authorization.confirm.button']}"
 									iconAwesome="fa-sign-in">
 									<f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.processUserCodeVerification}" />
 								</h:commandButton>
@@ -85,13 +85,13 @@
 					</div>
 				</h:panelGroup>
 
-				<h:panelGroup layout="block" styleClass="row col-12 justify-content-center"
+				<h:panelGroup layout="block" styleClass="d-flex flex-column justify-content-center"
 							  rendered="#{deviceAuthorizationAction.errorResponse || deviceAuthorizationAction.deviceAuthnCompleted}">
-					<h:outputLabel styleClass="col-12 device-authz-title text-center text-white" value="#{deviceAuthorizationAction.titleMsg}" />
-					<h:outputLabel styleClass="col-12 reg_link text-white" value="#{deviceAuthorizationAction.descriptionMsg}" />
+					<h:outputLabel styleClass="device-authz-title text-center text-white mb-2" value="#{deviceAuthorizationAction.titleMsg}" />
+					<h:outputLabel styleClass="reg_link text-white" value="#{deviceAuthorizationAction.descriptionMsg}" />
 					<h:commandButton id="newAuthn1"
 									 style="background-color: #00BE79; color:white;"
-									 styleClass="btn device-authz-init-btn" value="#{msgs['device.authorization.init.new.request.msg']}"
+									 styleClass="device-authz-init-btn py-2 mt-4" value="#{msgs['device.authorization.init.new.request.msg']}"
 									 iconAwesome="fa-sign-in" onclick="initNewRequest()">
 						<f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.initializeSession()}" />
 					</h:commandButton>

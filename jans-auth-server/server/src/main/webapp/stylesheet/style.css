@@ -690,6 +690,7 @@ input.btn.btn-done {
 
 .device-authz-init-btn {
     margin-top: 40px;
+    border: none !important;
 }
 
 .no-margin {
@@ -729,6 +730,7 @@ input.btn.btn-done {
     font-weight: bold !important;
     padding: 8px 0 !important;
     border-radius: 7px !important;
+    border: none !important;
 }
 
 .device-authz-input-code, .app-input-styles {
