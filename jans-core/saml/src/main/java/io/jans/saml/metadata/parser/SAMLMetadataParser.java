@@ -242,8 +242,8 @@ public class SAMLMetadataParser  {
     }
 
     private final void parseEndpoint(final XPath xpath, final Node node, final EndpointBuilder builder) throws XPathExpressionException {
-
-        builder.binding(XPathUtils.bindingAttributeValue(xpath, node))
+        
+        builder.binding(SAMLBinding.fromString(XPathUtils.bindingAttributeValue(xpath, node)))
                .location(XPathUtils.locationAttributeValue(xpath, node))
                .responseLocation(XPathUtils.responseLocationAttributeValue(xpath, node));
     }

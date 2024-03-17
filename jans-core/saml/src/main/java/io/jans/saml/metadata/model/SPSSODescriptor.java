@@ -41,6 +41,13 @@ public class SPSSODescriptor extends SSODescriptor {
         return this.assertionConsumerServices;
     }
 
+    public List<IndexedEndpoint> getAssertionConsumerServices(SAMLBinding binding) {
+
+        return assertionConsumerServices.stream()
+            .filter((e) -> { return e.getBinding() == binding; })
+            .toList();
+    }
+
     public void addAssertionConsumerService(final IndexedEndpoint service) {
 
         this.assertionConsumerServices.add(service);
