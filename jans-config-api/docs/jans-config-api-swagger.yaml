@@ -460,8 +460,8 @@ paths:
     get:
       tags:
       - Jans Assets
-      summary: Gets Jans asset by inum - unique identifier
-      description: Gets Jans asset by inum - unique identifier
+      summary: Gets an asset by inum - unique identifier
+      description: Gets an asset by inum - unique identifier
       operationId: get-asset-by-inum
       parameters:
       - name: inum
@@ -485,6 +485,10 @@ paths:
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/jans_asset-read
@@ -501,33 +505,29 @@ paths:
         required: true
         schema:
           type: string
-      requestBody:
-        description: String multipart form.
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AssetForm'
-            examples:
-              Response json example:
-                description: Response json example
-                value: ""
       responses:
-        "201":
-          description: Newly created Trust IDP
-          content:
-            application/json-patch+json:
-              schema:
-                $ref: '#/components/schemas/Document'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: ""
+        "204":
+          description: No Content
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans_asset-delete
@@ -603,6 +603,10 @@ paths:
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/jans_asset-read
@@ -624,7 +628,7 @@ paths:
       tags:
       - Jans Assets
       summary: Update existing asset
-      description: Upload new asset
+      description: Update existing asset
       operationId: put-asset
       requestBody:
         description: String multipart form.
@@ -637,8 +641,8 @@ paths:
                 description: Response json example
                 value: ""
       responses:
-        "201":
-          description: Newly created Trust IDP
+        "200":
+          description: Modified Asset
           content:
             application/json-patch+json:
               schema:
@@ -649,10 +653,24 @@ paths:
                   value: ""
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans_asset-write
@@ -671,10 +689,14 @@ paths:
             examples:
               Response json example:
                 description: Response json example
-                value: ""
+                value: "{\n    \"displayName\": \"kc-saml-plugin.jar\",\n    \"description\"\
+                  : \"Config api pligin\",\n    \"document\":\"\",\n    \"jansModuleProperty\"\
+                  : [\n\t\t\"config-api\",\n\t\t\"jar\",\n\t\t\"/opt/jans/jetty/jans-config-api/custom/lib\"\
+                  \n\t],\t\n    \"jansLevel\": \"1\",\n    \"jansRevision\": \"1\"\
+                  ,\n    \"jansEnabled\": true,\n    \"jansAlias\": \"\"\n}\n"
       responses:
         "201":
-          description: Newly created Trust IDP
+          description: Newly created Asset
           content:
             application/json-patch+json:
               schema:
@@ -682,13 +704,32 @@ paths:
               examples:
                 Response json example:
                   description: Response json example
-                  value: ""
+                  value: "{\n    \"displayName\": \"kc-saml-plugin.jar\",\n    \"\
+                    description\": \"Config api pligin\",\n    \"document\":\"\",\n\
+                    \    \"jansModuleProperty\": [\n\t\t\"config-api\",\n\t\t\"jar\"\
+                    ,\n\t\t\"/opt/jans/jetty/jans-config-api/custom/lib\"\n\t],\t\n\
+                    \    \"jansLevel\": \"1\",\n    \"jansRevision\": \"1\",\n   \
+                    \ \"jansEnabled\": true,\n    \"jansAlias\": \"\"\n}\n"
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans_asset-write
@@ -8020,6 +8061,15 @@ components:
           type: array
           items:
             type: object
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
+          type: string
     AssetForm:
       required:
       - assetFile
@@ -8176,19 +8226,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9008,8 +9058,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9019,6 +9067,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10466,10 +10516,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

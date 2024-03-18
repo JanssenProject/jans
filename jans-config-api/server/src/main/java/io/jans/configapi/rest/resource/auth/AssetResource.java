@@ -7,6 +7,7 @@
 package io.jans.configapi.rest.resource.auth;
 
 import io.jans.configapi.service.auth.AssetService;
+import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.form.AssetForm;
 
@@ -56,12 +57,12 @@ import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 public class AssetResource extends ConfigBaseResource {
 
     private static final String APPLICATION_ERROR = "Application Error";
-    private static final String DOCUMENT_DATA = "Document Data";
-    private static final String DOCUMENT_DATA_FORM = "Document Data From";
-    private static final String DOCUMENT_CHECK_STR = "Document identified by '";
-    private static final String DOCUMENT_NAME_CONFLICT = "NAME_CONFLICT";
-    private static final String DOCUMENT_NAME_CONFLICT_MSG = "Document with same name %s already exists!";
-    private static final String DOCUMENT_INUM = "Document Identifier Inum";
+    private static final String ASSET_DATA = "Asset Data";
+    private static final String ASSET_DATA_FORM = "Asset Data From";
+    private static final String ASSET_CHECK_STR = "Asset identified by '";
+    private static final String ASSET_NAME_CONFLICT = "NAME_CONFLICT";
+    private static final String ASSET_NAME_CONFLICT_MSG = "Asset with same name %s already exists!";
+    private static final String ASSET_INUM = "Asset Identifier Inum";
     private static final String RESOURCE_NULL = "RESOURCE_NULL";
     private static final String RESOURCE_NULL_MSG = "%s is null";
 
@@ -77,7 +78,7 @@ public class AssetResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-all-asset.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError")))})
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
@@ -96,18 +97,18 @@ public class AssetResource extends ConfigBaseResource {
                     escapeLog(limit), escapeLog(pattern), escapeLog(status), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
-        SearchRequest searchReq = createSearchRequest(assetService.getDnForDocument(null), pattern, sortBy, sortOrder,
+        SearchRequest searchReq = createSearchRequest(assetService.getDnForAsset(null), pattern, sortBy, sortOrder,
                 startIndex, limit, null, null, this.getMaxCount(), fieldValuePair, JansAttribute.class);
         return Response.ok(doSearch(searchReq, status)).build();
     }
 
-    @Operation(summary = "Gets Jans asset by inum - unique identifier", description = "Gets Jans asset by inum - unique identifier", operationId = "get-asset-by-inum", tags = {
+    @Operation(summary = "Gets an asset by inum - unique identifier", description = "Gets an asset by inum - unique identifier", operationId = "get-asset-by-inum", tags = {
             "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-all-asset.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
@@ -118,9 +119,9 @@ public class AssetResource extends ConfigBaseResource {
             logger.info("Search Asset with inum:{}", escapeLog(inum));
         }
 
-        Document document = assetService.getDocumentByInum(inum);
-        logger.info(" Docucment fetched based on inme:{} is:{}", inum, document);
-        return Response.ok(document).build();
+        Document asset = assetService.getAssetByInum(inum);
+        logger.info("Asset fetched based on inme:{} is:{}", inum, asset);
+        return Response.ok(asset).build();
 
     }
 
@@ -129,10 +130,12 @@ public class AssetResource extends ConfigBaseResource {
                     ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }))
     @RequestBody(description = "String multipart form.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = AssetForm.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/post-asset.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Newly created Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/post-asset.json"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "201", description = "Newly created Asset", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/post-asset.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError")))
+    })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @POST
     @Path(ApiConstants.UPLOAD)
@@ -143,112 +146,106 @@ public class AssetResource extends ConfigBaseResource {
         }
 
         // validation
-        checkResourceNotNull(assetForm, DOCUMENT_DATA_FORM);
-        Document document = assetForm.getDocument();
-        log.info(" Create document:{} ", document);
-        checkResourceNotNull(document, DOCUMENT_DATA);
-        checkNotNull(document.getDisplayName(), AttributeNames.DISPLAY_NAME);
+        checkResourceNotNull(assetForm, ASSET_DATA_FORM);
+        Document asset = assetForm.getDocument();
+        log.info(" Create asset:{} ", asset);
+        checkResourceNotNull(asset, ASSET_DATA);
+        checkNotNull(asset.getDisplayName(), AttributeNames.DISPLAY_NAME);
 
         // check if asset with same name already exists
-        List<Document> documents = assetService.getDocumentByName(document.getDisplayName());
-        if (documents != null && !documents.isEmpty()) {
-            throwBadRequestException(DOCUMENT_NAME_CONFLICT,
-                    String.format(DOCUMENT_NAME_CONFLICT_MSG, document.getDisplayName()));
-        }
-
-        // check if IDP with same name already exists
-        InputStream existingAssetStream = assetService.readAssetStream(document.getDisplayName());
-        log.info("Check if asset with same name exists - existingAssetStream?:{} ", existingAssetStream);
-        if (existingAssetStream != null && existingAssetStream.available() > 0) {
-            throwBadRequestException(DOCUMENT_NAME_CONFLICT,
-                    String.format(DOCUMENT_NAME_CONFLICT_MSG, document.getDisplayName()));
+        List<Document> assets = assetService.getAssetByName(asset.getDisplayName());
+        if (assets != null && !assets.isEmpty()) {
+            asset.setInum(assets.get(0).getInum());
         }
 
         InputStream assetStream = assetForm.getAssetFile();
-        log.info(" Upload assetStream:{} ", assetStream);
+        log.info("New assetStream:{} ", assetStream);
 
         if (assetStream == null || assetStream.available() <= 0) {
             throwBadRequestException(RESOURCE_NULL, String.format(RESOURCE_NULL_MSG, "Asset File"));
         }
 
-        // upload document
+        // save asset
         try {
-            document = assetService.saveAsset(document, assetStream);
-            log.debug(" Upload asset document:{} ", document);
+            asset = assetService.saveAsset(asset, assetStream);
+            log.debug("Saved asset:{} ", asset);
         } catch (Exception ex) {
-            log.error("Application Error while creating document is - status:{}", ex.getMessage());
+            log.error("Application Error while creating asset is - status:{}", ex.getMessage());
             throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
         }
 
-        log.info("Create IdentityProvider - document:{}", document);
-        return Response.status(Response.Status.CREATED).entity(document).build();
+        log.info("Create IdentityProvider - asset:{}", asset);
+        return Response.status(Response.Status.CREATED).entity(asset).build();
     }
 
-    @Operation(summary = "Update existing asset", description = "Upload new asset", operationId = "put-asset", tags = {
+    @Operation(summary = "Update existing asset", description = "Update existing asset", operationId = "put-asset", tags = {
             "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }))
     @RequestBody(description = "String multipart form.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = AssetForm.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/put-asset.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Newly created Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/post-asset.json"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "200", description = "Modified Asset", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/put-asset.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError")))
+    })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @PUT
     @Path(ApiConstants.UPLOAD)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
     public Response updateAsset(@MultipartForm AssetForm assetForm) throws Exception {
         if (log.isInfoEnabled()) {
-            log.info("Create Asset details assetForm:{}", assetForm);
+            log.info("Update Asset details assetForm:{}", assetForm);
         }
 
         // validation
-        checkResourceNotNull(assetForm, DOCUMENT_DATA_FORM);
-        Document document = assetForm.getDocument();
-        final String inum = document.getInum();
-        log.debug(" Create document:{} ", document);
-        checkResourceNotNull(document, DOCUMENT_DATA);
-        checkResourceNotNull(inum, DOCUMENT_INUM);
-        checkNotNull(document.getDisplayName(), AttributeNames.DISPLAY_NAME);
+        checkResourceNotNull(assetForm, ASSET_DATA_FORM);
+        Document asset = assetForm.getDocument();
+        final String inum = asset.getInum();
+        log.debug(" Create asset:{} ", asset);
+        checkResourceNotNull(asset, ASSET_DATA);
+        checkResourceNotNull(inum, ASSET_INUM);
+        checkNotNull(asset.getDisplayName(), AttributeNames.DISPLAY_NAME);
 
         // check if asset with same name already exists
-        List<Document> documents = assetService.getDocumentByName(document.getDisplayName());
+        List<Document> assets = assetService.getAssetByName(asset.getDisplayName());
         log.info(
-                "Check if document with inum different then:{} but with same name exists - document.getDisplayName():{}, documents:{}",
-                inum, document.getDisplayName(), documents);
-        if (documents != null && !documents.isEmpty()) {
-            List<Document> list = documents.stream().filter(e -> !e.getInum().equalsIgnoreCase(inum))
+                "Check if asset with inum different then:{} but with same name exists - asset.getDisplayName():{}, assets:{}",
+                inum, asset.getDisplayName(), assets);
+        if (assets != null && !assets.isEmpty()) {
+            List<Document> list = assets.stream().filter(e -> !e.getInum().equalsIgnoreCase(inum))
                     .collect(Collectors.toList());
-            logger.info("Other document with same name:{} are list:{}", document.getDisplayName(), list);
-            throwBadRequestException(DOCUMENT_NAME_CONFLICT,
-                    String.format(DOCUMENT_NAME_CONFLICT_MSG, document.getDisplayName()));
+            logger.info("Other asset with same name:{} are list:{}", asset.getDisplayName(), list);
+            throwBadRequestException(ASSET_NAME_CONFLICT,
+                    String.format(ASSET_NAME_CONFLICT_MSG, asset.getDisplayName()));
         }
 
         InputStream assetFile = assetForm.getAssetFile();
-        log.debug(" Upload assetFile:{} ", assetFile);
+        log.debug(" Update asset assetFile:{} ", assetFile);
 
-        // upload document
+        // update asset
         try {
-            document = assetService.updateAsset(document, assetFile);
-            log.debug(" Upload asset document:{} ", document);
+            asset = assetService.updateAsset(asset, assetFile);
+            log.debug(" Updated asset:{} ", asset);
         } catch (Exception ex) {
-            log.error("Application Error while creating document is:{}", ex.getMessage());
+            log.error("Application Error while updated asset is:{}", ex.getMessage());
             throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
         }
 
-        log.info("Create IdentityProvider - document:{}", document);
-        return Response.status(Response.Status.CREATED).entity(document).build();
+        log.info("Updated asset:{}", asset);
+        return Response.status(Response.Status.OK).entity(asset).build();
     }
 
     @Operation(summary = "Delete an asset", description = "Delete an asset", operationId = "delete-asset", tags = {
             "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_ASSET_DELETE_ACCESS }))
-    @RequestBody(description = "String multipart form.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = AssetForm.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/put-asset.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Newly created Trust IDP", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/post-asset.json"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "204", description = "No Content"),
+            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError")))
+    })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_DELETE_ACCESS })
@@ -294,25 +291,24 @@ public class AssetResource extends ConfigBaseResource {
         return Response.status(Response.Status.OK).entity(testResult).build();
     }
 
-    private void saveAssetOnServer(Document document, InputStream assetFile) {
-        logger.info("Save asset on server document:{} , assetFile:{} ", document, assetFile);
-        if (document == null || assetFile == null) {
+    private void saveAssetOnServer(Document asset, InputStream assetFile) {
+        logger.info("Save asset on server asset:{} , assetFile:{} ", asset, assetFile);
+        if (asset == null || assetFile == null) {
             return;
         }
         try {
-            File destFile = new File(document.getDescription());
+            File destFile = new File(asset.getDescription());
 
             boolean movedSuccessfully = Files.copy(assetFile, destFile.toPath(),
                     StandardCopyOption.REPLACE_EXISTING) > -1;
             if (movedSuccessfully) {
                 logger.info(
-                        "\n\n Asset successfully saved on server document.getDisplayName():{} , destFile.getPath():{} \n\n",
-                        document.getDisplayName(), destFile.getPath());
+                        "\n\n Asset successfully saved on server asset.getDisplayName():{} , destFile.getPath():{} \n\n",
+                        asset.getDisplayName(), destFile.getPath());
                 ;
             } else {
-                logger.info(
-                        "\n\n Could not save asset server - document.getDisplayName():{} , destFile.getPath():{} \n\n",
-                        document.getDisplayName(), destFile.getPath());
+                logger.info("\n\n Could not save asset server - asset.getDisplayName():{} , destFile.getPath():{} \n\n",
+                        asset.getDisplayName(), destFile.getPath());
                 ;
             }
         } catch (Exception ex) {
