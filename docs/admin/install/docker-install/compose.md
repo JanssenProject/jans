@@ -7,8 +7,8 @@ tags:
 - docker image
 ---
 
-!!! Warning 
-    **This image is for testing and development purposes only. Use Janssen [helm charts](https://github.com/JanssenProject/jans/tree/main/charts/janssen) for production setups.**
+> **Warning**
+> This image is for testing and development purposes only. Use Janssen [helm charts](https://github.com/JanssenProject/jans/tree/main/charts/janssen) for production setups.
 
 ## Overview
 
@@ -51,7 +51,7 @@ Installation depends on the set of environment variables shown below. These envi
 
 ## How to run
 
-Download the compose file:
+Download the compose file 
 
 ```bash
 
@@ -64,7 +64,7 @@ This docker compose file runs two containers, the janssen monolith container and
 docker compose -f jans-mysql-compose.yml up -d
 ```
 
-To view the containers running:
+To view the containers running
 
 ```bash
 
@@ -73,19 +73,14 @@ docker compose -f jans-mysql-compose.yml ps
 
 ## Configure Janssen Server
 
-1. Access the Docker container shell using:
+```bash
 
-    ```bash
-    docker compose -f jans-mysql-compose.yml exec jans sh
-    ```
+docker compose -f jans-mysql-compose.yml exec jans sh #This opens a bash terminal in the running container
 
-2. Grab a pair of client_id and client_pw(secret) from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
+/opt/jans/jans-cli/config-cli.py #configure using the config-cli
 
-3. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen Server as needed. For example you can run the [TUI](../../config-guide/config-tools/jans-tui/README.md):
-    ```bash
-    python3 /opt/jans/jans-cli/config-cli-tui.py
-    ```
-
+/opt/jans/jans-cli/scim-cli.py #configure using the scim-cli
+```
 
 ## Access endpoints externally
 
@@ -105,4 +100,3 @@ Remove setup and volumes
 ```
 docker compose -f jans-mysql-compose.yml down
 ```
-
