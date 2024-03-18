@@ -8,6 +8,8 @@ package io.jans.as.server.ws.rs.controller;
 
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.server.service.external.ExternalAuthenticationService;
+import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.orm.PersistenceEntryManager;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -32,6 +34,12 @@ public class HealthCheckController {
     private PersistenceEntryManager persistenceEntryManager;
 
     @Inject
+    private ExternalAuthenticationService externalAuthenticationService;
+
+    @Inject
+    private ExternalDynamicScopeService externalDynamicScopeService;
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     @GET
@@ -42,7 +50,15 @@ public class HealthCheckController {
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.HEALTH_CHECK);
         boolean isConnected = persistenceEntryManager.getOperationService().isConnected();
         String dbStatus = isConnected ? "online" : "offline";
-        return "{\"status\": \"running\", \"db_status\":\"" + dbStatus + "\"}";
+    	String appStatus = getAppStatus();
+        return "{\"status\": \"" + appStatus + "\", \"db_status\":\"" + dbStatus + "\"}";
     }
 
+    public String getAppStatus() {
+        if (externalAuthenticationService.isLoaded() && externalDynamicScopeService.isLoaded()) {
+        	return "running";
+        } else {
+        	return "starting";
+        }
+    }
 }
