@@ -383,8 +383,8 @@ nav:
     - Adding Custom Attributes: admin/scim/custom-attributes.md
   - Link Guide:
     - admin/link/README.md
-    - Jans Link: admin/link/jans-link.md
-    - Keycloak Synch: admin/link/keycloak-synch.md
+    - Jans LDAP Link: admin/link/jans-link.md
+    - Jans Keycloak Link: admin/link/keycloak-link.md
   - Lock Guide:
       - admin/lock/README.md
       - Lock Installation: admin/lock/lock_installation.md
