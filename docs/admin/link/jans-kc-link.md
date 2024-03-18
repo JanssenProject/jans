@@ -27,6 +27,9 @@ authentication mechanisms:
   authentication`
 - Enable `Service Accounts Enabled` flag, which enables client credentials grant
   ![](../../assets/jans-kc-link-client-2.png)
+- Go to tab `Service accounts roles`, assign role `admin` to the client using 
+  `Assign role` button
+  ![](../../assets/jans-kc-link-client-4.png)
 - Keep a note of the client ID and client secret. This detail will be required to be added
   to the Janssen server
 
