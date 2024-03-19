@@ -4,7 +4,7 @@
 
 This plugin allows users to "link" their local Jans account with existing accounts at third-party identity providers like OIDC OPs and social sites, e.g. Apple, Facebook, Google, etc.
 
-Besides the usual onboarding of a plugin jar file in Casa, administrators must deploy a number of additional components. This will be regarded later. By now let's summary key points of the accounts linking experience:
+Besides the usual onboarding of a plugin jar file in Casa, administrators must deploy a number of additional components. This will be regarded later. However let's summary the key points of the accounts linking experience:
 
 - When a user tries to login to Casa, the usual username/password form is presented but also a list of links that can take him to external sites (third-party identity providers) where authentication takes place
 - Once authenticated, user profile data is grabbed from the external site - this is all backchannel
