@@ -65,6 +65,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -580,9 +581,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private void checkPromptCreate(AuthzRequest authzRequest) {
+    public void checkPromptCreate(AuthzRequest authzRequest) {
         if (authzRequest.getPromptList().contains(Prompt.CREATE)) {
-            log.debug("Redirecting to Create User");
+            if (BooleanUtils.isTrue(appConfiguration.getDisablePromptCreate())) {
+                log.debug("Skipped prompt=create handling. config disablePromptConsent=true.");
+                return;
+            }
+
+            log.debug("Redirecting to Create User, prompt=create");
             throw new NoLogWebApplicationException(redirectToCreateUserPage(authzRequest));
         }
     }
@@ -954,6 +960,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             page = pageFromScript;
         }
 
+        authzRequest.setPrompt(""); // drop prompt=create to not get into registration form again
         return redirectTo(page, authzRequest);
     }
 
