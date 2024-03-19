@@ -48,7 +48,7 @@ import jakarta.ws.rs.ApplicationPath;
                 @Tag(name = "Auth - Session Management"), @Tag(name = "Organization Configuration"),
                 @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins"),
                 @Tag(name = "Configuration – Config API"), @Tag(name = "Client Authorization"),
-                @Tag(name = "Configuration – Jans Assets")},
+                @Tag(name = "Jans Assets")},
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })
 

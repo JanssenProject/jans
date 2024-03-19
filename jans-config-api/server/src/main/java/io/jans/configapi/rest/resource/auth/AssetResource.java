@@ -34,22 +34,20 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.*;
 
 import org.slf4j.Logger;
-import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+
+import io.swagger.v3.oas.annotations.Hidden;
 
 @Path(ApiConstants.JANS_ASSETS)
 @Produces(MediaType.APPLICATION_JSON)
@@ -297,6 +295,7 @@ public class AssetResource extends ConfigBaseResource {
         return pagedResult;
     }
 
+    @Hidden
     @POST
     @Path("/test")
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
