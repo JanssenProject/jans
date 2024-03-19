@@ -134,7 +134,8 @@ public class AssetResource extends ConfigBaseResource {
             ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.NAME + ApiConstants.NAME_PARAM_PATH)
     public Response getAssetByName(
-            @Parameter(description = "Asset Name") @PathParam(ApiConstants.NAME) @NotNull String name) throws Exception {
+            @Parameter(description = "Asset Name") @PathParam(ApiConstants.NAME) @NotNull String name)
+            throws Exception {
         if (logger.isInfoEnabled()) {
             logger.info("Search Asset with name:{}", escapeLog(name));
         }
@@ -271,9 +272,16 @@ public class AssetResource extends ConfigBaseResource {
         if (log.isInfoEnabled()) {
             log.info("Delete an Asset identified inum:{}", inum);
         }
-
-        boolean status = assetService.removeAsset(inum);
-        log.debug(" Delete asset status:{} ", status);
+        try {
+            boolean status = assetService.removeAsset(inum);
+            log.debug(" Delete asset status:{} ", status);
+        } catch (Exception ex) {
+            log.error("Error while asset deletion is:{}", ex.getMessage());
+            if(ex instanceof  NotFoundException ) {
+                throwNotFoundException(APPLICATION_ERROR, ex.getMessage());   
+            }
+            throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
+        }
         return Response.noContent().build();
 
     }

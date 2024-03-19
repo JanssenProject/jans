@@ -146,6 +146,15 @@ public class BaseResource {
             throw new InternalServerErrorException(getInternalServerException(throwable.getMessage()));
         }
     }
+    
+    public static void throwNotFoundException(String msg) {
+        throw new NotFoundException(getNotFoundError(msg));
+    }
+    
+    public static void throwNotFoundException(String msg, String description) {
+        throw new InternalServerErrorException(getNotFoundError(msg, description));
+    }
+    
 
     /**
      * @param attributeName
@@ -164,6 +173,13 @@ public class BaseResource {
         return Response.status(Response.Status.NOT_FOUND).entity(error).build();
     }
 
+    protected static Response getNotFoundError(String msg, String description) {
+        ApiError error = new ApiError.ErrorBuilder()
+                .withCode(String.valueOf(Response.Status.NOT_FOUND.getStatusCode())).withMessage(msg).andDescription(description)
+                .build();
+        return Response.status(Response.Status.NOT_FOUND).entity(error).build();
+    }
+    
     protected static Response getNotAcceptableException(String msg) {
         ApiError error = new ApiError.ErrorBuilder()
                 .withCode(String.valueOf(Response.Status.NOT_ACCEPTABLE.getStatusCode())).withMessage(msg).build();

@@ -36,8 +36,8 @@ import java.nio.charset.StandardCharsets;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -200,11 +200,56 @@ public class AssetService {
         return inputStream;
     }
 
-    public boolean removeAsset(String inum) {
-        log.info("Remove new asset - inum:{}", inum);
+    public boolean removeAsset(String inum) throws Exception {
+        log.info("Remove asset - inum:{}", inum);
+        
+        Document asset = this.getAssetByInum(inum);
+        log.info("asset{} identified by inum:{}", asset, inum);
+        
+        if(asset==null) {
+            throw new NotFoundException("Cannot find asset identified by - "+inum);
+        }
+        //remove from store
         boolean status = dBDocumentStoreProvider.removeDocument(inum);
         log.info("Status on removing a asset identified by inum is:{}", status);
+        
+        //remove from server
+        status =  deleteAssetFromServer(asset);
+        log.info("Status on deleting asset from server is:{}", status);
+        
         return status;
+    }
+    
+    
+    private boolean deleteAssetFromServer(Document asset) {
+        log.info("Delete asset - asset:{}", asset);
+        boolean deleteStatus = false;
+        if(asset==null) {
+            return deleteStatus;
+        }
+        
+        String path = asset.getDescription();
+        String fileName = asset.getDisplayName();
+        String documentStoreModuleName = fileName;
+        log.info("path:{}, fileName:{}, documentStoreModuleName:{}", path, fileName, documentStoreModuleName);
+
+        if (StringUtils.isBlank(path)) {
+            throw new InvalidConfigurationException("Path to delete the asset is null!");
+        }
+
+        if (StringUtils.isBlank(fileName)) {
+            throw new InvalidConfigurationException("Name of asset to be deleted is null!");
+        }
+        
+        if(documentStoreService==null) {
+            throw new InvalidConfigurationException("document Store Service is null!");
+        }
+
+        String filePath = path + File.separator + fileName;
+        log.info("documentStoreService:{}, filePath:{} ", documentStoreService, filePath, localDocumentStoreService);
+        deleteStatus = documentStoreService.removeDocument(filePath);
+        log.info("Asset deletion deleteStatus:{}", deleteStatus); 
+        return deleteStatus;
     }
 
     private Document updateRevision(Document asset) {

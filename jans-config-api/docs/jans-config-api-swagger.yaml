@@ -8207,9 +8207,9 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
@@ -9841,6 +9841,12 @@ components:
       properties:
         configOauthEnabled:
           type: boolean
+        disableLoggerTimer:
+          type: boolean
+        disableAuditLogger:
+          type: boolean
+        assetMgtEnabled:
+          type: boolean
         customAttributeValidationEnabled:
           type: boolean
         apiApprovedIssuer:
@@ -10495,10 +10501,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

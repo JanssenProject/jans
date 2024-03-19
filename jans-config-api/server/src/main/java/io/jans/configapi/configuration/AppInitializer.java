@@ -7,6 +7,7 @@
 package io.jans.configapi.configuration;
 
 import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
@@ -96,7 +97,8 @@ public class AppInitializer {
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
         this.createAuthorizationService();
-        log.info("Initialized ApiAppConfiguration:{}", this.configurationFactory.getApiAppConfiguration());
+        ApiAppConfiguration apiAppConfiguration = this.configurationFactory.getApiAppConfiguration();
+        log.info("Initialized ApiAppConfiguration:{}", apiAppConfiguration);
 
         // Initialize python interpreter
         pythonService
@@ -112,7 +114,10 @@ public class AppInitializer {
         configurationFactory.initTimer();        
 
         // Schedule timer tasks
-        loggerService.initTimer(true);
+        if(!apiAppConfiguration.isDisableLoggerTimer()) {
+            log.debug("LoggerService timer enabled!");
+            loggerService.initTimer(true);
+        }
         
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
     }
