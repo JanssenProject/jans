@@ -189,8 +189,15 @@ class SqlSchemaMixin:
     @cached_property
     def sql_data_types(self) -> dict[str, dict[str, _t.Any]]:
         """Get list of data types from pre-defined file."""
+        data_types = {}
         with open("/app/static/rdbm/sql_data_types.json") as f:
-            return json.loads(f.read())  # type: ignore
+            data_types.update(json.loads(f.read()))
+
+        custom_types_fn = os.environ.get("CN_SQL_CUSTOM_TYPES_FILE", "/etc/jans/conf/sql_data_types.custom.json")
+        if os.path.isfile(custom_types_fn):
+            with open(custom_types_fn) as f:
+                data_types.update(json.loads(f.read()))
+        return data_types  # type: ignore
 
     @cached_property
     def sql_data_types_mapping(self) -> dict[str, dict[str, _t.Any]]:

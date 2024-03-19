@@ -103,5 +103,3 @@ Optional:
 
 - `domains` (List of String) Requested Party domains.
 - `name` (String) Name of the requested party.
-
-
