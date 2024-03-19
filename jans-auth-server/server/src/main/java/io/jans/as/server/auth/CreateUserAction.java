@@ -2,11 +2,10 @@ package io.jans.as.server.auth;
 
 import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.service.ErrorHandlerService;
-import io.jans.as.server.service.RequestParameterService;
-import io.jans.as.server.service.UserService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalCreateUserService;
 import io.jans.jsf2.service.FacesService;
 import jakarta.annotation.PostConstruct;
@@ -85,6 +84,12 @@ public class CreateUserAction {
     @Inject
     private RequestParameterService requestParameterService;
 
+    @Inject
+    private CookieService cookieService;
+
+    @Inject
+    private SessionIdService sessionIdService;
+
     @PostConstruct
     public void prepare() {
         log.trace("Preparing CreateUserAction");
@@ -142,7 +147,54 @@ public class CreateUserAction {
 
     private String buildAuthorizationUrl() throws UnsupportedEncodingException {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
-        return httpRequest.getContextPath() + "/restv1/authorize?" + requestParameterService.parametersAsString(getFilteredParameters());
+        final Map<String, String> filteredParameters = getFilteredParameters();
+        filteredParameters.remove("password");
+        filteredParameters.remove("email");
+
+        log.debug("client_id {}, response_type {}, scope {}, acr_values {}", clientId, responseType, scope, acrValues);
+
+        filteredParameters.putIfAbsent("client_id", clientId);
+        filteredParameters.putIfAbsent("response_type", responseType);
+        filteredParameters.putIfAbsent("response_mode", responseMode);
+        filteredParameters.putIfAbsent("scope", scope);
+        filteredParameters.putIfAbsent("redirect_uri", redirectUri);
+        filteredParameters.putIfAbsent("nonce", nonce);
+        filteredParameters.putIfAbsent("acr_values", acrValues);
+        filteredParameters.putIfAbsent("state", state);
+        filteredParameters.putIfAbsent("request", request);
+        filteredParameters.putIfAbsent("request_uri", requestUri);
+        filteredParameters.putIfAbsent("display", display);
+        filteredParameters.putIfAbsent("max_age", maxAge != null ? maxAge.toString() : null);
+        filteredParameters.putIfAbsent("ui_locales", uiLocales);
+        filteredParameters.putIfAbsent("id_token_hint", idTokenHint);
+        filteredParameters.putIfAbsent("login_hint", loginHint);
+        filteredParameters.putIfAbsent("amr_values", amrValues);
+        filteredParameters.putIfAbsent("code_challenge", codeChallenge);
+        filteredParameters.putIfAbsent("code_challenge_method", codeChallengeMethod);
+        filteredParameters.putIfAbsent("claims", claims);
+        filteredParameters.putIfAbsent("auth_req_id", authReqId);
+        filteredParameters.putIfAbsent("binding_message", bindingMessage);
+        filteredParameters.putIfAbsent("session_id", sessionId);
+        filteredParameters.putIfAbsent("allowed_scope", allowedScope);
+
+        return httpRequest.getContextPath() + "/restv1/authorize?" + requestParameterService.parametersAsString(filteredParameters);
+    }
+
+    public SessionId getSession() {
+        return getSession(null);
+    }
+
+    public SessionId getSession(String sessionId) {
+        if (StringUtils.isBlank(sessionId)) {
+            sessionId = cookieService.getSessionIdFromCookie();
+            if (StringUtils.isBlank(sessionId)) {
+                return null;
+            }
+        }
+
+        SessionId dbSessionId = sessionIdService.getSessionId(sessionId);
+        log.debug("Found session {}, dbSession: {}", sessionId, dbSessionId);
+        return dbSessionId;
     }
 
     private Map<String, String> getFilteredParameters() {
