@@ -78,7 +78,7 @@ public class AssetResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-all-asset.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError")))})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
@@ -106,7 +106,7 @@ public class AssetResource extends ConfigBaseResource {
             "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-all-asset.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-asset-by-inum.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
@@ -120,9 +120,29 @@ public class AssetResource extends ConfigBaseResource {
         }
 
         Document asset = assetService.getAssetByInum(inum);
-        logger.info("Asset fetched based on inme:{} is:{}", inum, asset);
+        logger.info("Asset fetched based on inum:{} is:{}", inum, asset);
         return Response.ok(asset).build();
+    }
 
+    @Operation(summary = "Fetch asset by name", description = "Fetch asset by name.", operationId = "get-asset-by-name", tags = {
+            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-asset-by-name.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.NAME + ApiConstants.NAME_PARAM_PATH)
+    public Response getAssetByName(
+            @Parameter(description = "Asset Name") @PathParam(ApiConstants.NAME) @NotNull String name) throws Exception {
+        if (logger.isInfoEnabled()) {
+            logger.info("Search Asset with name:{}", escapeLog(name));
+        }
+        List<Document> assets = assetService.getAssetByName(name);
+        logger.info("Asset fetched based on name:{} are:{}", name, assets);
+        return Response.ok(assets).build();
     }
 
     @Operation(summary = "Upload new asset", description = "Upload new asset", operationId = "post-new-asset", tags = {
@@ -131,11 +151,10 @@ public class AssetResource extends ConfigBaseResource {
     @RequestBody(description = "String multipart form.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = AssetForm.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/post-asset.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Newly created Asset", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/post-asset.json"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError")))
-    })
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @POST
     @Path(ApiConstants.UPLOAD)
@@ -156,6 +175,7 @@ public class AssetResource extends ConfigBaseResource {
         List<Document> assets = assetService.getAssetByName(asset.getDisplayName());
         if (assets != null && !assets.isEmpty()) {
             asset.setInum(assets.get(0).getInum());
+            asset.setBaseDn(assets.get(0).getBaseDn());
         }
 
         InputStream assetStream = assetForm.getAssetFile();
@@ -184,11 +204,10 @@ public class AssetResource extends ConfigBaseResource {
     @RequestBody(description = "String multipart form.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = AssetForm.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/put-asset.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Modified Asset", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/put-asset.json"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError")))
-    })
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @PUT
     @Path(ApiConstants.UPLOAD)
@@ -216,8 +235,10 @@ public class AssetResource extends ConfigBaseResource {
             List<Document> list = assets.stream().filter(e -> !e.getInum().equalsIgnoreCase(inum))
                     .collect(Collectors.toList());
             logger.info("Other asset with same name:{} are list:{}", asset.getDisplayName(), list);
-            throwBadRequestException(ASSET_NAME_CONFLICT,
-                    String.format(ASSET_NAME_CONFLICT_MSG, asset.getDisplayName()));
+            if (list != null && !list.isEmpty()) {
+                throwBadRequestException(ASSET_NAME_CONFLICT,
+                        String.format(ASSET_NAME_CONFLICT_MSG, asset.getDisplayName()));
+            }
         }
 
         InputStream assetFile = assetForm.getAssetFile();
@@ -239,13 +260,11 @@ public class AssetResource extends ConfigBaseResource {
     @Operation(summary = "Delete an asset", description = "Delete an asset", operationId = "delete-asset", tags = {
             "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_ASSET_DELETE_ACCESS }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "No Content"),
-            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError")))
-    })
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_DELETE_ACCESS })

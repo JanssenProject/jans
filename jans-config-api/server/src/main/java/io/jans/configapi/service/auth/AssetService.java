@@ -134,8 +134,7 @@ public class AssetService {
     public List<Document> getAssetByName(String name) throws Exception {
         log.info("Get asset by name:{}", name);
         Filter nameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, name);
-        List<Document> documents = persistenceEntryManager.findEntries(getDnForAsset(null), Document.class,
-                nameFilter);
+        List<Document> documents = persistenceEntryManager.findEntries(getDnForAsset(null), Document.class, nameFilter);
         log.info("Asset by name:{} are documents:{}", name, documents);
         return documents;
     }
@@ -153,24 +152,25 @@ public class AssetService {
 
         ByteArrayOutputStream bos = getByteArrayOutputStream(documentStream);
         log.trace("Asset ByteArrayOutputStream :{}", bos);
-        updateRevision(asset);
+
         if (StringUtils.isBlank(asset.getInum())) {
-            log.debug("As inum is blank create new asset :{}", asset);
+            log.info("As inum is blank create new asset :{}", asset);
+            updateRevision(asset);
             asset = saveNewAsset(asset, getInputStream(bos));
         } else {
-            log.debug("Inum is not blank hence update existing asset :{}", asset);
+            log.info("Inum is not blank hence update existing asset :{}", asset);
             asset = updateAsset(asset, getInputStream(bos));
         }
-        log.info("Saved  asset is :{}", asset);
+        log.debug("Saved  asset is :{}", asset);
 
         // copyAsset on jans-server
         String result = copyAssetOnServer(asset, getInputStream(bos));
         log.info("Result of asset saved on server :{}", result);
 
         // Get final asset
-        asset = dbDocumentService.getDocumentByDisplayName(asset.getDisplayName());
+        asset = dbDocumentService.getDocumentByInum(asset.getInum());
 
-        log.info("New asset saved :{}", asset);
+        log.info("Asset saved :{}", asset);
         return asset;
     }
 
@@ -188,8 +188,8 @@ public class AssetService {
         asset.setDocument(documentContent);
         updateRevision(asset);
         dbDocumentService.updateDocument(asset);
-        asset = dbDocumentService.getDocumentByDisplayName(asset.getDisplayName());
-        log.info("Updated asset:{}", asset);
+
+        log.info("Successfully updated asset:{}", asset);
         return asset;
     }
 
@@ -208,27 +208,25 @@ public class AssetService {
     }
 
     private Document updateRevision(Document asset) {
-        log.info("\n\n **** Update asset revision - asset:{}", asset);
+        log.info("Update asset revision - asset:{}", asset);
         try {
             if (asset == null) {
                 return asset;
             }
 
             String revision = asset.getJansRevision();
-            log.info(" Current asset revision is:{}", revision);
+            log.debug(" Current asset revision is:{}", revision);
             int intRevision = 1;
-            if (revision != null && StringUtils.isNotBlank(revision)) {
-                log.info(" Convert revision to int :{}", revision);
-                intRevision = Integer.getInteger(revision).intValue();
+            if (revision != null && revision.trim().length() > 0) {
+                intRevision = Integer.parseInt(revision);
                 intRevision = intRevision + 1;
             }
             revision = String.valueOf(intRevision);
-            log.info("Current asset intRevision:{}", intRevision);
+            log.debug("Current asset intRevision:{}", intRevision);
             asset.setJansRevision(revision);
 
-            log.info("\n Updated asset revision - asset:{} \n\n\n", asset);
+            log.info("Updated asset revision - asset:{}", asset);
         } catch (Exception ex) {
-            ex.printStackTrace();
             log.error("Exception while updating asset revision is:{}", ex);
             return asset;
         }
@@ -237,57 +235,46 @@ public class AssetService {
 
     private Document saveNewAsset(Document asset, InputStream stream) {
         log.info("Saving new asset in DB DocumentStore - asset:{}, stream:{}", asset, stream);
-        try {
-            String path = dBDocumentStoreProvider.saveDocumentStream(asset.getDisplayName(),
-                    asset.getDescription(), stream, asset.getJansModuleProperty());
-            log.info("Successfully stored asset - Path of saved new asset is :{}", path);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error("Error while saving asset in DB DocumentStore is:{}", ex);
-            // throw new WebApplicationException(ex);
-        }
+        String path = dBDocumentStoreProvider.saveDocumentStream(asset.getDisplayName(), asset.getDescription(), stream,
+                asset.getJansModuleProperty());
+        log.info("Successfully stored asset - Path of saved new asset is :{}", path);
         return asset;
     }
 
     private String copyAssetOnServer(Document asset, InputStream stream) {
         log.info("Copy asset on server - asset:{}, stream:{}", asset, stream);
         String result = null;
-        try {
-            if (asset == null) {
-                throw new InvalidConfigurationException("Asset is null!");
-            }
 
-            if (stream == null) {
-                throw new InvalidConfigurationException("Asset stream is null!");
-            }
-
-            String path = asset.getDescription();
-            String fileName = asset.getDisplayName();
-            String documentStoreModuleName = fileName;
-            log.info("path:{}, fileName:{}, documentStoreModuleName:{}", path, fileName, documentStoreModuleName);
-
-            if (StringUtils.isBlank(path)) {
-                throw new InvalidConfigurationException("Path to copy the asset is null!");
-            }
-
-            if (StringUtils.isBlank(fileName)) {
-                throw new InvalidConfigurationException("Asset name is null!");
-            }
-
-            String filePath = path + File.separator + fileName;
-            log.info("documentStoreService:{}, filePath:{}, localDocumentStoreService:{} ", documentStoreService,
-                    filePath, localDocumentStoreService);
-            result = documentStoreService.saveDocumentStream(filePath, null, stream, List.of(documentStoreModuleName));
-            log.info("Asset saving result:{}", result);
-
-            InputStream newFile = documentStoreService.readDocumentAsStream(filePath);
-            log.info("Reading asset file newFile:{}", newFile);
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error("Error while copying asset on server is:{}", ex);
-            // throw new WebApplicationException(ex);
+        if (asset == null) {
+            throw new InvalidConfigurationException("Asset is null!");
         }
+
+        if (stream == null) {
+            throw new InvalidConfigurationException("Asset stream is null!");
+        }
+
+        String path = asset.getDescription();
+        String fileName = asset.getDisplayName();
+        String documentStoreModuleName = fileName;
+        log.info("path:{}, fileName:{}, documentStoreModuleName:{}", path, fileName, documentStoreModuleName);
+
+        if (StringUtils.isBlank(path)) {
+            throw new InvalidConfigurationException("Path to copy the asset is null!");
+        }
+
+        if (StringUtils.isBlank(fileName)) {
+            throw new InvalidConfigurationException("Asset name is null!");
+        }
+
+        String filePath = path + File.separator + fileName;
+        log.info("documentStoreService:{}, filePath:{}, localDocumentStoreService:{} ", documentStoreService, filePath,
+                localDocumentStoreService);
+        result = documentStoreService.saveDocumentStream(filePath, null, stream, List.of(documentStoreModuleName));
+        log.info("Asset saving result:{}", result);
+
+        InputStream newFile = documentStoreService.readDocumentAsStream(filePath);
+        log.info("Reading asset file newFile:{}", newFile);
+
         return result;
 
     }
@@ -303,32 +290,26 @@ public class AssetService {
     public String readAsset(String assetName, String assetPath) {
         log.info("Read asset from server - assetName:{}, assetPath:{}", assetName, assetPath);
         String filePath = null;
-        try {
 
-            if (StringUtils.isBlank(assetName)) {
-                throw new InvalidConfigurationException("Asset name is null!");
-            }
-
-            if (StringUtils.isBlank(assetPath)) {
-                throw new InvalidConfigurationException("Path to read the asset from is null");
-            }
-
-            filePath = assetPath + File.separator + assetName;
-            log.info("documentStoreService:{}, filePath:{}, localDocumentStoreService:{} ", documentStoreService,
-                    filePath, localDocumentStoreService);
-
-            InputStream newFile = documentStoreService.readDocumentAsStream(filePath);
-            log.info("Reading asset file newFile:{}", newFile);
-
-            filePath = assetPath + File.separator + assetName + "_puja.new";
-            String result = documentStoreService.saveDocumentStream(filePath, null, newFile, List.of("test"));
-            log.info("Asset saving result:{}", result);
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error("Error while reading document from server is:{}", ex);
-            // throw new WebApplicationException(ex);
+        if (StringUtils.isBlank(assetName)) {
+            throw new InvalidConfigurationException("Asset name is null!");
         }
+
+        if (StringUtils.isBlank(assetPath)) {
+            throw new InvalidConfigurationException("Path to read the asset from is null");
+        }
+
+        filePath = assetPath + File.separator + assetName;
+        log.info("documentStoreService:{}, filePath:{}, localDocumentStoreService:{} ", documentStoreService, filePath,
+                localDocumentStoreService);
+
+        InputStream newFile = documentStoreService.readDocumentAsStream(filePath);
+        log.info("Reading asset file newFile:{}", newFile);
+
+        filePath = assetPath + File.separator + assetName + "_puja.new";
+        String result = documentStoreService.saveDocumentStream(filePath, null, newFile, List.of("test"));
+        log.info("Asset saving result:{}", result);
+
         return filePath;
 
     }

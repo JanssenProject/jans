@@ -480,7 +480,24 @@ paths:
               examples:
                 Response example:
                   description: Response example
-                  value: ""
+                  value: |
+                    {
+                        "dn": "inum=0b436302-b729-4eb2-b211-335980dcab43,ou=document,o=jans",
+                        "selected": false,
+                        "inum": "0b436302-b729-4eb2-b211-335980dcab43",
+                        "displayName": "mermaid-extra.css",
+                        "description": "/opt/jans/jetty/jans-config-api/",
+                        "document": ".mermaid {\r\n\toverflow: auto;\r\n}\r\n\r\n.mermaid svg {\r\n\twidth: 1315px;\r\n\theight: 600px;\r\n}\r\n",
+                        "jansModuleProperty": [
+                            "config-api",
+                            "jar",
+                            "/opt/jans/jetty/jans-config-api/custom/lib"
+                        ],
+                        "jansLevel": "1",
+                        "jansRevision": "2",
+                        "jansEnabled": true,
+                        "baseDn": "inum=0b436302-b729-4eb2-b211-335980dcab43,ou=document,o=jans"
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -531,6 +548,42 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans_asset-delete
+  /api/v1/jans-assets/name/{name}:
+    get:
+      tags:
+      - Jans Assets
+      summary: Fetch asset by name
+      description: Fetch asset by name.
+      operationId: get-asset-by-name
+      parameters:
+      - name: name
+        in: path
+        description: Asset Name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResult'
+              examples:
+                Response example:
+                  description: Response example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans_asset-read
   /api/v1/jans-assets:
     get:
       tags:
@@ -598,7 +651,46 @@ paths:
               examples:
                 Response example:
                   description: Response example
-                  value: ""
+                  value: |
+                    {
+                        "start": 0,
+                        "totalEntriesCount": 2,
+                        "entriesCount": 2,
+                        "entries": [
+                            {
+                                "dn": "inum=0b436302-b729-4eb2-b211-335980dcab43,ou=document,o=jans",
+                                "selected": false,
+                                "inum": "0b436302-b729-4eb2-b211-335980dcab43",
+                                "displayName": "mermaid-extra.css",
+                                "description": "/opt/jans/jetty/jans-config-api/",
+                                "document": ".mermaid {\r\n\toverflow: auto;\r\n}\r\n\r\n.mermaid svg {\r\n\twidth: 1315px;\r\n\theight: 600px;\r\n}\r\n",
+                                "jansModuleProperty": [
+                                    "config-api",
+                                    "jar",
+                                    "/opt/jans/jetty/jans-config-api/custom/lib"
+                                ],
+                                "jansLevel": "1",
+                                "jansRevision": "2",
+                                "jansEnabled": true,
+                                "baseDn": "inum=0b436302-b729-4eb2-b211-335980dcab43,ou=document,o=jans"
+                            },
+                            {
+                                "dn": "inum=9d2f39f5-a910-4a03-a888-6f0f1ee03445,ou=document,o=jans",
+                                "selected": false,
+                                "inum": "9d2f39f5-a910-4a03-a888-6f0f1ee03445",
+                                "displayName": "kc-saml-plugin.jar",
+                                "description": "/opt/jans/jetty/jans-config-api/",
+                                "creationDate": "2024-03-14T12:53:00",
+                                "jansModuleProperty": [
+                                    "config-api",
+                                    "jar",
+                                    "/opt/jans/jetty/jans-config-api/custom/lib"
+                                ],
+                                "jansEnabled": true,
+                                "baseDn": "inum=9d2f39f5-a910-4a03-a888-6f0f1ee03445,ou=document,o=jans"
+                            }
+                        ]
+                    }
         "401":
           description: Unauthorized
         "500":
@@ -639,7 +731,14 @@ paths:
             examples:
               Response json example:
                 description: Response json example
-                value: ""
+                value: "{\n    \"dn\": \"inum=ed901270-c0cd-43cf-a683-10795ff66349,ou=document,o=jans\"\
+                  ,\n    \"selected\": false,\n    \"inum\": \"ed901270-c0cd-43cf-a683-10795ff66349\"\
+                  ,\n    \"displayName\": \"janssen_dove_icon.png\",\n    \"description\"\
+                  : \"/opt/jans/jetty/jans-auth/custom/static\",\n\t\"jansModuleProperty\"\
+                  : [\n        \"agama\",\n        \"img\",\n        \"/opt/jans/jetty/jans-auth\"\
+                  \n    ],\n    \"jansLevel\": \"1\",\n    \"jansRevision\": \"2\"\
+                  ,\n    \"jansEnabled\": true,\n    \"baseDn\": \"inum=ed901270-c0cd-43cf-a683-10795ff66349,ou=document,o=jans\"\
+                  \n}\n"
       responses:
         "200":
           description: Modified Asset
@@ -650,7 +749,14 @@ paths:
               examples:
                 Response json example:
                   description: Response json example
-                  value: ""
+                  value: "{\n    \"dn\": \"inum=ed901270-c0cd-43cf-a683-10795ff66349,ou=document,o=jans\"\
+                    ,\n    \"selected\": false,\n    \"inum\": \"ed901270-c0cd-43cf-a683-10795ff66349\"\
+                    ,\n    \"displayName\": \"janssen_dove_icon.png\",\n    \"description\"\
+                    : \"/opt/jans/jetty/jans-auth/custom/static\",\n\t\"jansModuleProperty\"\
+                    : [\n        \"agama\",\n        \"img\",\n        \"/opt/jans/jetty/jans-auth\"\
+                    \n    ],\n    \"jansLevel\": \"1\",\n    \"jansRevision\": \"\
+                    2\",\n    \"jansEnabled\": true,\n    \"baseDn\": \"inum=ed901270-c0cd-43cf-a683-10795ff66349,ou=document,o=jans\"\
+                    \n}\n"
         "400":
           description: Bad Request
           content:
@@ -8112,19 +8218,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
+        userCanView:
+          type: boolean
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9966,14 +10072,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
