@@ -208,16 +208,17 @@ public class AssetService {
     }
 
     private Document updateRevision(Document asset) {
-        log.info("Update asset revision - asset:{}", asset);
+        log.info("\n\n **** Update asset revision - asset:{}", asset);
         try {
             if (asset == null) {
                 return asset;
             }
 
             String revision = asset.getJansRevision();
-            log.info("Current asset revision:{}", revision);
+            log.info(" Current asset revision is:{}", revision);
             int intRevision = 1;
             if (revision != null && StringUtils.isNotBlank(revision)) {
+                log.info(" Convert revision to int :{}", revision);
                 intRevision = Integer.getInteger(revision).intValue();
                 intRevision = intRevision + 1;
             }
@@ -225,8 +226,9 @@ public class AssetService {
             log.info("Current asset intRevision:{}", intRevision);
             asset.setJansRevision(revision);
 
-            log.info("Updated asset revision - asset:{}", asset);
+            log.info("\n Updated asset revision - asset:{} \n\n\n", asset);
         } catch (Exception ex) {
+            ex.printStackTrace();
             log.error("Exception while updating asset revision is:{}", ex);
             return asset;
         }
