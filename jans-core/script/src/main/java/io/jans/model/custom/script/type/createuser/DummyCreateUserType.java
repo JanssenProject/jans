@@ -26,6 +26,11 @@ public class DummyCreateUserType implements CreateUserType {
     }
 
     @Override
+    public String buildPostAuthorizeUrl(Object context) {
+        return null;
+    }
+
+    @Override
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }

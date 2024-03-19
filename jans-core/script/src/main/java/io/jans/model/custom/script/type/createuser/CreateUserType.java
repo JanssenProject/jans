@@ -12,4 +12,6 @@ public interface CreateUserType extends BaseExternalType {
     boolean prepare(Object context);
 
     boolean createUser(Object context);
+
+    String buildPostAuthorizeUrl(Object context);
 }

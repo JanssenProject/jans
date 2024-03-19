@@ -146,7 +146,15 @@ public class CreateUserAction {
     }
 
     private String buildAuthorizationUrl() throws UnsupportedEncodingException {
+        final ExecutionContext executionContext = ExecutionContext.of(externalContext);
+        final String url = externalCreateUserService.externalBuildPostAuthorizeUrl(executionContext);
+        if (StringUtils.isNotBlank(url)) {
+            log.debug("Authorization Url is returned from external script, url: {}", url);
+            return url;
+        }
+
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
+
         final Map<String, String> filteredParameters = getFilteredParameters();
         filteredParameters.remove("password");
         filteredParameters.remove("email");

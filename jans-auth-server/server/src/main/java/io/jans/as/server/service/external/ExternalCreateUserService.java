@@ -133,6 +133,42 @@ public class ExternalCreateUserService extends ExternalScriptService {
         }
     }
 
+    public String externalBuildPostAuthorizeUrl(ExecutionContext context) {
+        final Set<CustomScriptConfiguration> scripts = getScriptsToExecute();
+        if (scripts.isEmpty()) {
+            return "";
+        }
+
+        log.trace("Found {} 'createuser' scripts.", scripts.size());
+
+        for (CustomScriptConfiguration script : scripts) {
+            final String result = externalBuildPostAuthorizeUrl(script, context);
+            if (StringUtils.isNotBlank(result)) {
+                log.debug("'buildPostAuthorizeUrl' return {}, script: {}", result, script.getName());
+                return result;
+            }
+        }
+
+        return "";
+    }
+
+    public String externalBuildPostAuthorizeUrl(CustomScriptConfiguration scriptConfiguration, ExecutionContext context) {
+        try {
+            log.trace("Executing external 'buildPostAuthorizeUrl' method, script name: {}, context: {}", scriptConfiguration.getName(), context);
+
+            CreateUserType script = (CreateUserType) scriptConfiguration.getExternalType();
+            context.setScript(scriptConfiguration);
+            final String result = script.buildPostAuthorizeUrl(context);
+
+            log.trace("Finished external 'buildPostAuthorizeUrl' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(scriptConfiguration.getCustomScript(), ex);
+            return "";
+        }
+    }
+
     private Set<CustomScriptConfiguration> getScriptsToExecute() {
         Set<CustomScriptConfiguration> result = Sets.newHashSet();
         if (this.customScriptConfigurations == null) {
