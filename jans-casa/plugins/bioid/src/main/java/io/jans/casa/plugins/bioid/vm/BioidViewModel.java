@@ -8,7 +8,6 @@ import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.bioid.BioIDService;
 import io.jans.casa.plugins.bioid.BioidPlugin;
 import io.jans.casa.plugins.bioid.model.BioIDCredential;
-import io.jans.casa.plugins.cert.CertAuthenticationExtension;
 import io.jans.casa.plugins.credentials.extensions.BioidExtension;
 import io.jans.casa.service.ISessionContext;
 import io.jans.casa.service.SndFactorAuthenticationUtils;
@@ -165,7 +164,7 @@ public class BioidViewModel {
 		logger.debug("delete invoked");
 		String resetMessages = sndFactorUtils.removalConflict(BioIDService.ACR, 1, user).getY();
 		boolean reset = resetMessages != null;
-		Pair<String, String> delMessages = getDeleteMessages(resetMessages);
+		Pair<String, String> delMessages = getDeleteMessages(resetMessages, null);
 		Messagebox.show(delMessages.getY(), delMessages.getX(), Messagebox.YES | Messagebox.NO,
 				true ? Messagebox.EXCLAMATION : Messagebox.QUESTION, event -> {
 					if (Messagebox.ON_YES.equals(event.getName())) {

@@ -1,19 +1,19 @@
 package io.jans.casa.plugins.bioid.model;
 
 import io.jans.casa.core.model.BasePerson;
-import io.jans.persist.annotation.AttributeName;
-import io.jans.persist.annotation.DataEntry;
-import io.jans.persist.annotation.ObjectClass;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.ObjectClass;
 
 @DataEntry
 @ObjectClass("gluuPerson")
 public class PersonBiometric extends BasePerson {
 
-    @AttributeName(name = "oxBiometricDevices")
-    private String bioMetricDevices;
+	@AttributeName(name = "oxBiometricDevices")
+	private String bioMetricDevices;
 
-    @AttributeName
-    private String bioid;
+	@AttributeName
+	private String bioid;
 
 	public String getBioMetricDevices() {
 		return bioMetricDevices;
@@ -30,11 +30,5 @@ public class PersonBiometric extends BasePerson {
 	public void setBioid(String bioid) {
 		this.bioid = bioid;
 	}
-
-	
-
-	
-
-    
 
 }
