@@ -7,6 +7,7 @@
 package io.jans.configapi.rest;
 
 import io.jans.configapi.core.rest.BaseApiApplication;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.rest.resource.auth.*;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.rest.health.ApiHealthCheck;
@@ -20,8 +21,10 @@ import io.swagger.v3.oas.annotations.servers.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.ApplicationPath;
 
+import org.slf4j.Logger;
 /**
  * @author Mougang T.Gasmyr
  *
@@ -115,6 +118,12 @@ import jakarta.ws.rs.ApplicationPath;
 )))
 public class ApiApplication extends BaseApiApplication {
 
+    @Inject
+    Logger log;
+    
+    @Inject
+    private ApiAppConfiguration appConfiguration;
+    
     @Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
@@ -147,7 +156,11 @@ public class ApiApplication extends BaseApiApplication {
         classes.add(PluginResource.class);
         classes.add(ConfigApiResource.class);
         classes.add(ClientAuthResource.class);
-        classes.add(AssetResource.class);
+        
+        log.info("appConfiguration:{}",appConfiguration );
+        if(appConfiguration!=null && appConfiguration.isAssetMgtEnabled()) {
+            classes.add(AssetResource.class);
+        }
 
         return classes;
     }

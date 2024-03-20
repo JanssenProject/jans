@@ -24,10 +24,8 @@ import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
-import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
-import org.slf4j.Logger;
-import java.util.ArrayList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -44,6 +42,9 @@ import jakarta.servlet.ServletContext;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
+import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
+
+import org.slf4j.Logger;
 
 @ApplicationScoped
 @Named("appInitializer")
