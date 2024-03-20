@@ -111,13 +111,15 @@ public class AssetResource extends ConfigBaseResource {
             ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getAssetByInum(
-            @Parameter(description = "Asset Inum") @PathParam(ApiConstants.INUM) @NotNull String inum) throws Exception {
+            @Parameter(description = "Asset Inum") @PathParam(ApiConstants.INUM) @NotNull String inum)
+            throws Exception {
         if (logger.isInfoEnabled()) {
             logger.info("Search Asset with inum:{}", escapeLog(inum));
         }
 
         Document asset = assetService.getAssetByInum(inum);
-        if(asset==null) {
+        if (asset == null) {
+            log.error("No asset found with the inum:{}", inum);
             throwNotFoundException(NOT_FOUND_ERROR, String.format(ASSET_NOT_FOUND, inum));
         }
         logger.info("Asset fetched based on inum:{} is:{}", inum, asset);
@@ -142,8 +144,10 @@ public class AssetResource extends ConfigBaseResource {
         if (logger.isInfoEnabled()) {
             logger.info("Search Asset with name:{}", escapeLog(name));
         }
+
         List<Document> assets = assetService.getAssetByName(name);
-        if(assets==null) {
+        if (assets == null) {
+            log.error("No asset found with the name:{}", name);
             throwNotFoundException(NOT_FOUND_ERROR, String.format(ASSET_NOT_FOUND, name));
         }
         logger.info("Asset fetched based on name:{} are:{}", name, assets);
@@ -164,13 +168,17 @@ public class AssetResource extends ConfigBaseResource {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
     public Response getAssetStreamByName(
-            @Parameter(description = "Asset Name") @PathParam(ApiConstants.NAME) @NotNull String name) throws Exception {
+            @Parameter(description = "Asset Name") @PathParam(ApiConstants.NAME) @NotNull String name) {
 
         log.info("Fetch asset stream identified by name:{} ", name);
-
-        InputStream assetStream = assetService.readAsset(name);
-        log.debug(" Fetched  assetStream:{} ", assetStream);
-
+        InputStream assetStream = null;
+        try {
+            assetStream = assetService.readAssetStream(name);
+            log.debug(" Fetched  assetStream:{} ", assetStream);
+        } catch (Exception ex) {
+            log.error("Application Error while reading asset stream is - status:{}", ex.getMessage());
+            throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
+        }
         return Response.status(Response.Status.OK).entity(assetStream).build();
     }
 
@@ -211,6 +219,7 @@ public class AssetResource extends ConfigBaseResource {
         log.info("New assetStream:{} ", assetStream);
 
         if (assetStream == null || assetStream.available() <= 0) {
+            log.error("No asset file provided");
             throwBadRequestException(RESOURCE_NULL, String.format(RESOURCE_NULL_MSG, "Asset File"));
         }
 
@@ -265,6 +274,7 @@ public class AssetResource extends ConfigBaseResource {
                     .collect(Collectors.toList());
             logger.info("Other asset with same name:{} are list:{}", asset.getDisplayName(), list);
             if (list != null && !list.isEmpty()) {
+                log.error("Another asset with same name:{}", asset.getDisplayName());
                 throwBadRequestException(ASSET_NAME_CONFLICT,
                         String.format(ASSET_NAME_CONFLICT_MSG, asset.getDisplayName()));
             }

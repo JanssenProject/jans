@@ -71,7 +71,7 @@ public class AssetService {
     }
 
     public PagedResult<Document> searchAsset(SearchRequest searchRequest, String status) throws Exception {
-        log.info("Search Documents with searchRequest:{}, status:{}", searchRequest, status);
+        log.info("Search asset with searchRequest:{}, status:{}", searchRequest, status);
 
         Filter activeFilter = null;
         if (ApiConstants.ACTIVE.equalsIgnoreCase(status)) {
@@ -126,9 +126,9 @@ public class AssetService {
 
     public Document getAssetByInum(String inum) throws Exception {
         log.info("Get asset by inum:{}", inum);
-        Document document = dbDocumentService.getDocumentByInum(inum);
-        log.info("Asset by inum:{} is document:{}", inum, document);
-        return document;
+        Document asset = dbDocumentService.getDocumentByInum(inum);
+        log.info("Asset by inum:{} is asset:{}", inum, asset);
+        return asset;
     }
 
     public List<Document> getAssetByName(String name) throws Exception {
@@ -153,9 +153,12 @@ public class AssetService {
         ByteArrayOutputStream bos = getByteArrayOutputStream(documentStream);
         log.trace("Asset ByteArrayOutputStream :{}", bos);
 
+        // update asset revision
+        updateRevision(asset);
+
+        // save asset in DB store
         if (StringUtils.isBlank(asset.getInum())) {
             log.info("As inum is blank create new asset :{}", asset);
-            updateRevision(asset);
             saveNewAsset(asset, getInputStream(bos));
         } else {
             log.info("Inum is not blank hence update existing asset :{}", asset);
@@ -163,15 +166,67 @@ public class AssetService {
         }
         log.debug("Saved  asset is :{}", asset);
 
-        // copyAsset on jans-server
+        // copy asset on jans-server
         String result = copyAssetOnServer(asset, getInputStream(bos));
         log.info("Result of asset saved on server :{}", result);
 
         // Get final asset
-        asset = dbDocumentService.getDocumentByInum(asset.getInum());
-
-        log.error("\n * Asset saved :{}", asset);
+        List<Document >assets = this.getAssetByName(asset.getDisplayName());
+        if(assets==null) {
+            throw new WebApplicationException(" Error while saving asset");
+        }
+        asset = assets.get(0);
+        log.info("\n * Asset saved :{}", asset);
         return asset;
+    }
+
+    public boolean removeAsset(String inum) throws Exception {
+        log.info("Remove asset - inum:{}", inum);
+
+        Document asset = this.getAssetByInum(inum);
+        log.info("asset{} identified by inum:{}", asset, inum);
+
+        if (asset == null) {
+            throw new NotFoundException("Cannot find asset identified by - " + inum);
+        }
+
+        // remove asset from DB store
+        boolean status = dBDocumentStoreProvider.removeDocument(inum);
+        log.info("Status on removing a asset identified by inum is:{}", status);
+
+        // remove asset from server
+        status = deleteAssetFromServer(asset);
+        log.info("Status on deleting asset from server is:{}", status);
+
+        return status;
+    }
+
+    public InputStream readAssetStream(String assetName) throws Exception {
+        log.info("Read asset stream from server - assetName:{}", assetName);
+        String filePath = null;
+
+        if (StringUtils.isBlank(assetName)) {
+            throw new InvalidConfigurationException("Asset name is null!");
+        }
+
+        List<Document> assets = this.getAssetByName(assetName);
+        log.info("assets{} identified by assetName:{}", assets, assetName);
+
+        if (assets == null || assets.isEmpty()) {
+            throw new NotFoundException("Cannot find asset identified by - " + assetName);
+        }
+
+        Document asset = assets.get(0);
+        String assetPath = asset.getDescription();
+        filePath = assetPath + File.separator + assetName;
+        log.info("documentStoreService:{}, filePath:{}, localDocumentStoreService:{} ", documentStoreService, filePath,
+                localDocumentStoreService);
+
+        InputStream stream = dBDocumentStoreProvider.readDocumentAsStream(filePath);
+        log.info("Read asset stream:{}", stream);
+
+        return stream;
+
     }
 
     private Document updateAsset(Document asset, InputStream documentStream) throws Exception {
@@ -186,42 +241,13 @@ public class AssetService {
 
         String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
         asset.setDocument(documentContent);
-        updateRevision(asset);
         dbDocumentService.updateDocument(asset);
 
         // Get final asset
         asset = dbDocumentService.getDocumentByInum(asset.getInum());
-        
-        log.error("\n * Successfully updated asset:{}", asset);
+
+        log.info("\n * Successfully updated asset:{}", asset);
         return asset;
-    }
-
-    public InputStream readAssetStream(String name) {
-        log.info("Read asset as stream identified by name:{}", name);
-        InputStream inputStream = dBDocumentStoreProvider.readDocumentAsStream(name);
-        log.info("Asset as stream identified by name:{}, inputStream:{}", name, inputStream);
-        return inputStream;
-    }
-
-    public boolean removeAsset(String inum) throws Exception {
-        log.info("Remove asset - inum:{}", inum);
-
-        Document asset = this.getAssetByInum(inum);
-        log.info("asset{} identified by inum:{}", asset, inum);
-
-        if (asset == null) {
-            throw new NotFoundException("Cannot find asset identified by - " + inum);
-        }
-
-        // remove from store
-        boolean status = dBDocumentStoreProvider.removeDocument(inum);
-        log.info("Status on removing a asset identified by inum is:{}", status);
-
-        // remove from server
-        status = deleteAssetFromServer(asset);
-        log.info("Status on deleting asset from server is:{}", status);
-
-        return status;
     }
 
     private boolean deleteAssetFromServer(Document asset) {
@@ -249,9 +275,10 @@ public class AssetService {
         }
 
         String filePath = path + File.separator + fileName;
-        log.info("documentStoreService:{}, localDocumentStoreService:{}, filePath:{} ", documentStoreService, localDocumentStoreService, filePath);
+        log.info("documentStoreService:{}, localDocumentStoreService:{}, filePath:{} ", documentStoreService,
+                localDocumentStoreService, filePath);
         deleteStatus = documentStoreService.removeDocument(filePath);
-        log.info("Asset deletion deleteStatus:{}", deleteStatus);
+        log.info("Asset deletion status:{}", deleteStatus);
         return deleteStatus;
     }
 
@@ -270,9 +297,7 @@ public class AssetService {
                 intRevision = intRevision + 1;
             }
             revision = String.valueOf(intRevision);
-            log.debug("Current asset intRevision:{}", intRevision);
             asset.setJansRevision(revision);
-
             log.info("Updated asset revision - asset:{}", asset);
         } catch (Exception ex) {
             log.error("Exception while updating asset revision is - ", ex);
@@ -335,31 +360,4 @@ public class AssetService {
         return authUtil.getInputStream(bos);
     }
 
-    public InputStream readAsset(String assetName) throws Exception{
-        log.info("Read asset from server - assetName:{}", assetName);
-        String filePath = null;
-
-        if (StringUtils.isBlank(assetName)) {
-            throw new InvalidConfigurationException("Asset name is null!");
-        }
-
-        List<Document> assets = this.getAssetByName(assetName);
-        log.info("assets{} identified by assetName:{}", assets, assetName);
-
-        if (assets == null || assets.isEmpty()) {
-            throw new NotFoundException("Cannot find asset identified by - " + assetName);
-        }
-
-        Document asset = assets.get(0);
-        String assetPath = asset.getDescription();
-        filePath = assetPath + File.separator + assetName;
-        log.info("documentStoreService:{}, filePath:{}, localDocumentStoreService:{} ", documentStoreService, filePath,
-                localDocumentStoreService);
-
-        InputStream stream = documentStoreService.readDocumentAsStream(filePath);
-        log.info("Reading asset file Reading:{}", stream);
-
-        return stream;
-
-    }
 }
