@@ -191,19 +191,15 @@ public class AssetService {
         }
 
         // remove asset from DB store
-        boolean status = dBDocumentStoreProvider.removeDocument(asset.getDisplayName());
-        log.info("Status on removing a asset identified by inum is:{}", status);
-        if(status==false) {
-            log.error("Could not delete asset identified by inum:{}",inum);
-            throw new WebApplicationException("Could not delete asset identified by inum"+inum);
-        }
-
+        dbDocumentService.removeDocument(asset);
+        log.info("Deleted asset identified by inum {}", inum);
+        
         // remove asset from server
-        status = deleteAssetFromServer(asset);
+        boolean status = deleteAssetFromServer(asset);
         log.info("Status on deleting asset from server is:{}", status);
-        if(status==false) {
+        if(!status) {
             log.error("Could not remove asset from server identified by inum:{}",inum);
-            throw new WebApplicationException("Could not delete asset identified by inum"+inum);
+            throw new WebApplicationException("Could not delete asset identified by inum - "+inum);
         }
         
         return status;
