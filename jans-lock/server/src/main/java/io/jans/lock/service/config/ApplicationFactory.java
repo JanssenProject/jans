@@ -9,7 +9,7 @@ package io.jans.lock.service.config;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.config.GluuConfiguration;
 import io.jans.lock.model.config.StaticConfiguration;
 import io.jans.lock.server.service.ConfigurationService;
 import io.jans.model.SmtpConfiguration;

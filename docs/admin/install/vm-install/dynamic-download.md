@@ -66,6 +66,9 @@ curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-vers
 
 Use the command below to uninstall the Janssen Server
 
+!!! Note
+For removal of the attached persistence store, please refer to [this note](../install-faq.md#does-the-janssen-server-uninstall-process-remove-the-data-store-as-well).
+
 ```
 python3 install.py -uninstall
 ```

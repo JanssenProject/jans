@@ -8,9 +8,15 @@ from setup_app.utils import base
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
+from setup_app.utils.ldif_utils import myLdifParser
 
 Config.jans_lock_port = '8076'
+Config.jans_opa_host = 'localhost'
+Config.jans_opa_port = '8181'
 Config.lock_message_provider_type = 'DISABLED'
+Config.lock_redis_host = 'localhost'
+Config.lock_redis_port = '6379'
+
 
 class JansLockInstaller(JettyInstaller):
 
@@ -18,6 +24,8 @@ class JansLockInstaller(JettyInstaller):
                 (os.path.join(Config.dist_jans_dir, 'jans-lock.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-server/{0}/jans-lock-server-{0}.war').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_jans_dir, 'jans-lock-service.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-service/{0}/jans-lock-service-{0}.jar').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_app_dir, 'opa'), 'https://openpolicyagent.org/downloads/{}/opa_linux_amd64_static'.format(base.current_app.app_info['OPA_VERSION'])),
+                (os.path.join(Config.dist_jans_dir, 'lock-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/lock-plugin/{0}/lock-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+                (os.path.join(Config.dist_jans_dir, 'jans-lock-model.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-model/{0}/jans-lock-model-{0}.jar'.format(base.current_app.app_info['jans_version']))),
                 ]
 
     def __init__(self):
@@ -30,7 +38,7 @@ class JansLockInstaller(JettyInstaller):
         self.register_progess()
 
         self.systemd_units = []
-
+        self.set_provider_type = True
         self.output_dir = os.path.join(Config.output_dir, self.service_name)
         self.template_dir = os.path.join(Config.templateFolder, self.service_name)
         self.dynamic_conf_json = os.path.join(self.output_dir, 'dynamic-conf.json')
@@ -38,12 +46,12 @@ class JansLockInstaller(JettyInstaller):
         self.static_conf_json = os.path.join(self.output_dir, 'static-conf.json')
         self.message_conf_json = os.path.join(self.output_dir, 'jans_message_conf.json')
         self.config_ldif = os.path.join(self.output_dir, 'config.ldif')
-        self.opa_addr = 'localhost:8181'
         self.opa_dir = os.path.join(Config.opt_dir, 'opa')
         self.opa_bin_dir = os.path.join(self.opa_dir, 'bin')
+        self.opa_log_dir = os.path.join(self.opa_dir, 'logs')
+
 
     def install(self):
-
         if Config.get('install_jans_lock_as_server'):
             self.install_as_server()
             self.systemd_units.append('jans-lock')
@@ -53,9 +61,14 @@ class JansLockInstaller(JettyInstaller):
         if Config.get('install_opa'):
             self.install_opa()
 
-        if Config.rdbm_type == 'pgsql':
-            self.dbUtils.set_oxAuthConfDynamic({'lockMessageConfig': {'enableIdTokenMessages': True, 'idTokenMessagesChannel': 'id_token'}})
+        if Config.persistence_type == 'sql' and Config.rdbm_type == 'pgsql':
+            self.dbUtils.set_oxAuthConfDynamic({'lockMessageConfig': {'enableTokenMessages': True, 'tokenMessagesChannel': 'jans_token'}})
             Config.lock_message_provider_type = 'POSTGRES'
+
+        # deploy config-api plugin
+        base.current_app.ConfigApiInstaller.source_files.append(self.source_files[3])
+        base.current_app.ConfigApiInstaller.install_plugin('lock-plugin')
+
 
     def install_as_server(self):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
@@ -64,16 +77,15 @@ class JansLockInstaller(JettyInstaller):
         self.enable()
 
     def install_as_service(self):
-        plugin_name = os.path.basename(self.source_files[1][0])
-        self.logIt(f"Adding plugin {plugin_name} to jans-auth")
-        self.copyFile(self.source_files[1][0], base.current_app.JansAuthInstaller.custom_lib_dir)
-        plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
-        base.current_app.JansAuthInstaller.add_extra_class(plugin_class_path)
-        self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
-
+        for plugin in (self.source_files[1][0], self.source_files[4][0]):
+            plugin_name = os.path.basename(plugin)
+            self.logIt(f"Adding plugin {plugin_name} to jans-auth")
+            self.copyFile(plugin, base.current_app.JansAuthInstaller.custom_lib_dir)
+            plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
+            base.current_app.JansAuthInstaller.add_extra_class(plugin_class_path)
+            self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
 
     def render_import_templates(self):
-
         for tmp in (self.dynamic_conf_json, self.error_json, self.static_conf_json):
             self.renderTemplateInOut(tmp, self.template_dir, self.output_dir)
 
@@ -83,9 +95,13 @@ class JansLockInstaller(JettyInstaller):
 
         self.renderTemplateInOut(self.config_ldif, self.template_dir, self.output_dir)
 
-        ldif_files = [self.config_ldif]
-        self.dbUtils.import_ldif(ldif_files)
+        config_parser = myLdifParser(self.config_ldif)
+        config_parser.parse()
+        dn = config_parser.entries[0][0]
 
+        if not self.dbUtils.dn_exists(dn):
+            ldif_files = [self.config_ldif]
+            self.dbUtils.import_ldif(ldif_files)
 
     def configure_message_conf(self):
         # this function is called in JansInstaller.post_install_tasks
@@ -98,6 +114,7 @@ class JansLockInstaller(JettyInstaller):
         opa_fn = 'opa'
         self.systemd_units.append(opa_fn)
         self.createDirs(self.opa_bin_dir)
+        self.createDirs(self.opa_log_dir)
         self.copyFile(self.source_files[2][0], self.opa_bin_dir)
         self.run([paths.cmd_chmod, '755', os.path.join(self.opa_bin_dir, opa_fn)])
         self.chown(self.opa_dir, Config.jetty_user, Config.jetty_group, recursive=True)

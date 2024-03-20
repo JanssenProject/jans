@@ -161,7 +161,7 @@ Connection: close
   "scope": "email openid profile",
   "client_secret": "a656a654-c930-4b52-9edb-68ead50d046e",
   "client_id_issued_at": 1700261473,
-  "backchannel_logout_uri": [],
+  "backchannel_logout_uri": "",
   "backchannel_logout_session_required": false,
   "client_name": "PKCE Test Client",
   "par_lifetime": 600,

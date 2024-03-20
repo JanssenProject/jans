@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-@DataEntry(sortBy = { "auiFeatureId" })
+@DataEntry(sortBy = {"auiFeatureId"})
 @ObjectClass(value = "auiFeatures")
 public class AuiFeature extends Entry implements Serializable {
 
@@ -53,7 +53,7 @@ public class AuiFeature extends Entry implements Serializable {
     }
 
     public void setWebhookIdsMapped(List<String> webhookIdsMapped) {
-        if(webhookIdsMapped != null) {
+        if (webhookIdsMapped != null) {
             this.webhookIdsMapped = Lists.newArrayList(Sets.newHashSet(webhookIdsMapped));
         }
     }
@@ -64,7 +64,7 @@ public class AuiFeature extends Entry implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         AuiFeature that = (AuiFeature) o;
-        return auiFeatureId.equals(that.auiFeatureId) && displayName.equals(that.displayName) && jansScope.equals(that.jansScope) && Objects.equals(webhookIdsMapped, that.webhookIdsMapped);
+        return auiFeatureId.equals(that.auiFeatureId) && displayName.equals(that.displayName) && jansScope.equals(that.jansScope);
     }
 
     @Override

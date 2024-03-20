@@ -39,6 +39,7 @@ configmap:
   cnSqldbUserPassword: Test1234#
   # -- Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` .
   cnCacheType: NATIVE_PERSISTENCE
+  containerMetadataName: kubernetes
   # -- The name of the Kubernetes ConfigMap that will hold the configuration layer
   cnConfigKubernetesConfigMap: cn
   # -- The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.
@@ -93,6 +94,28 @@ configmap:
   cnAwsSecretsReplicaRegions: []
   # [aws_secret_manager_envs] END
   # [aws_envs] END
+  # [vault_envs] Envs related to Hashicorp vault
+  # -- Vault AppRole RoleID.
+  cnVaultRoleId: ""
+  # -- Vault AppRole SecretID.
+  cnVaultSecretId: ""
+  # -- Base URL of Vault.
+  cnVaultAddr: http://localhost:8200
+  # -- Verify connection to Vault.
+  cnVaultVerify: false
+  # -- Path to file contains Vault AppRole role ID.
+  cnVaultRoleIdFile: /etc/certs/vault_role_id
+  # -- Path to file contains Vault AppRole secret ID.
+  cnVaultSecretIdFile: /etc/certs/vault_secret_id
+  # -- Vault namespace used to access the secrets.
+  cnVaultNamespace: ""
+  # -- Path to Vault KV secrets engine.
+  cnVaultKvPath: secret
+  # -- Base prefix name used to access secrets.
+  cnVaultPrefix: jans
+  # -- Path to Vault AppRole.
+  cnVaultAppRolePath: approle
+  # [vault_envs] END
   # -- Value passed to Java option -XX:MaxRAMPercentage
   cnMaxRamPercent: "75.0"
   # -- SCIM protection mode OAUTH|TEST|UMA
@@ -137,6 +160,10 @@ configmap:
   kcDbUrlDatabase: keycloak
   # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
   kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
+  # -- URL of OPA server
+  cnOpaUrl: http://opa.opa.svc.cluster.cluster.local:8181/v1
+  # -- Message type (one of POSTGRES, REDIS, or DISABLED)
+  cnMessageType: DISABLED
 nameOverride: ""
 fullNameOverride: ""
 # -- Redis admin password if `configmap.cnCacheType` is set to `REDIS`.
@@ -212,6 +239,8 @@ auth-server:
     webdiscoveryEnabled: true
     # -- Enable endpoint /.well-known/fido-configuration
     u2fConfigEnabled: true
+  # -- Enable jans-lock as service running inside auth-server
+  lockEnabled: false
 # -- Responsible for regenerating auth-keys per x hours
 auth-server-key-rotation:
   # -- Add custom normal and secret envs to the service
@@ -232,7 +261,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.22-1
+    tag: 1.1.1_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -273,6 +302,8 @@ auth-server-key-rotation:
   additionalAnnotations: {}
   # -- Boolean flag to enable/disable the auth-server-key rotation cronjob.
   enabled: true
+  # -- The initial auth server key rotation keys life in hours
+  initKeysLife: 48
   # -- Add custom scripts that have been mounted to run before the entrypoint.
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
@@ -331,6 +362,8 @@ config-api:
   ingress:
     # Enable config API endpoints /jans-config-api
     configApiEnabled: true
+  # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml")
+  plugins: "admin-ui,fido2,scim,user-mgt"
 fido2:
   # -- Name of the fido2 service. Please keep it as default.
   fido2ServiceName: fido2
@@ -360,6 +393,8 @@ fido2:
   ingress:
     # -- Enable endpoint /.well-known/fido2-configuration
     fido2ConfigEnabled: false
+    # -- Enable endpoint /jans-fido2
+    fido2Enabled: false
 scim:
   # -- Name of the scim service. Please keep it as default.
   scimServiceName: scim
@@ -448,7 +483,7 @@ lbIp: 22.22.22.22
 testEnviroment: false
 # -- The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes
 configAdapterName: kubernetes
-# -- The config backend adapter that will hold Janssen secret layer. aws|google|kubernetes
+# -- The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes
 configSecretAdapter: kubernetes
 # -- Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner. Leave as this is a sensible default.
 cnGoogleApplicationCredentials: /etc/jans/conf/google-credentials.json
@@ -460,8 +495,8 @@ cnAwsConfigFile: /etc/jans/conf/aws_config_file
 cnAwsSecretsReplicaRegionsFile: /etc/jans/conf/aws_secrets_replica_regions
 # -- Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number.
 cnPrometheusPort: ""
-# -- Document store type to use for shibboleth files LOCAL.
-cnDocumentStoreType: LOCAL
+# -- Document store type to use for shibboleth files DB.
+cnDocumentStoreType: DB
 # -- Path to SQL password file
 cnSqlPasswordFile: /etc/jans/conf/sql_password
 # -- Path to Couchbase password file
@@ -545,6 +580,10 @@ nginx-ingress:
     fido2ConfigLabels: { }
     # -- fido2 config ingress resource additional annotations.
     fido2ConfigAdditionalAnnotations: { }
+    # -- fido2 ingress resource labels. key app is taken
+    fido2Labels: { }
+    # -- fido2 ingress resource additional annotations.
+    fido2AdditionalAnnotations: { }
     # -- Auth server ingress resource labels. key app is taken
     authServerLabels: { }
     # -- Auth server ingress resource additional annotations.
@@ -636,7 +675,7 @@ image:
   # -- Image  to use for deploying.
   repository: ghcr.io/janssenproject/jans/all-in-one
   # -- Image  tag to use for deploying.
-  tag: 1.0.22-1
+  tag: 1.1.1_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
@@ -645,9 +684,9 @@ replicas: 1
 resources:
   limits:
     # -- CPU limit.
-    cpu: 2500m
+    cpu: 16000m
     # -- Memory limit.
-    memory: 2500Mi
+    memory: 16000Mi
   requests:
     # -- CPU request.
     cpu: 2500m

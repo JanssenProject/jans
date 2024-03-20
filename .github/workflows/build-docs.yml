@@ -22,8 +22,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g."v1.0.22")'
-        default: "v1.0.22"
+        description: 'Version tag (e.g."v1.1.1")'
+        default: "v1.1.1"
         required: false
 concurrency:
   group: run-once
@@ -133,20 +133,6 @@ jobs:
          git commit -a -S -m "docs: auto-generated Swagger SPEC docs" || echo "Nothing to commit"
          cd ../..
           
-         echo "Generating javadocs"
-         sudo bash ./automation/docs/generate-javadocs.sh . || echo "something went wrong with generating the java docs"
-         cp -r docs/admin/reference/javadocs/* ../../docs/admin/reference/javadocs/
-         #cd docs
-         #git add . || echo "Nothing to add"
-         #git commit -a -S -m "docs: generate and add javadocs" || echo "Nothing to commit"
-         #cd ..
-         
-         # update mkdocs.yml
-         sudo python3 -m pip install --upgrade pip
-         sudo pip3 install pyyaml
-         sudo python3 automation/docs/add-javadocs-to-mkdocs.py || echo "something went wrong with adding javadocs to mkdocs.yml"
-         rm -rf docs/admin/reference/javadocs
-
          git push --set-upstream origin cn-jans-update-auto-generated-docs
          MESSAGE="fix(docs): autogenerate docs"
          PR=$(gh pr create --body "Auto generated docs" --title "${MESSAGE}")
@@ -227,7 +213,11 @@ jobs:
             if [[ $folder != "${STABLE}/" ]]; then
               git rm -r $folder/admin/reference/javadocs || echo "Nothing to remove"
             fi
-          done          
+          done
+          # Replace scarf url
+          sed -i -e "s/placeholder-scarf-pixel-url/https:\/\/static.scarf.sh\/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9/g" ${STABLE}/overrides/main.html
+          git add ${STABLE}/overrides/main.html && git update-index --refresh
+          git diff-index --quiet HEAD -- || git commit -S -m "docs: update scarf pixel url"
           echo "${STABLE}" > stable.txt
           git add stable.txt && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"

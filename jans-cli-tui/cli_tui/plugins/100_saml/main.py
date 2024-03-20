@@ -40,7 +40,7 @@ class Plugin(DialogUtils):
         """
         self.app = app
         self.pid = 'saml'
-        self.name = 'Jans SA[M]L'
+        self.name = 'Ja[n]s SAML'
         self.server_side_plugin = True
         self.page_entered = False
 
@@ -82,16 +82,6 @@ class Plugin(DialogUtils):
                 hide_headers=False
             )
 
-
-        add_tr_button_label = _("Add Trust Relationship")
-        self.tabs['trust_relationships'] = HSplit([
-                                self.tr_container,
-                                Window(height=1),
-                                VSplit([Button(add_tr_button_label, handler=self.edit_tr, width=len(add_tr_button_label)+4)], align=HorizontalAlign.CENTER),
-                                ],
-                                width=D()
-                                )
-
         self.tabs['configuration'] = HSplit([
                         self.app.getTitledCheckBox(
                             _("Enable SAML"),
@@ -114,21 +104,21 @@ class Plugin(DialogUtils):
                             style=cli_style.titled_text
                         ),
 
-                    self.app.getTitledText(
-                        title=_("IDP Metadata File Pattern"),
-                        name='idpMetadataFilePattern',
-                        value=self.config.get('idpMetadataFilePattern', ''),
-                        style=cli_style.edit_text,
-                        jans_help=_("Pattern for saving metadata file"),
-                        widget_style=cli_style.black_bg_widget
-                    ),
-
                         self.app.getTitledCheckBox(_("Ignore Validation"), name='ignoreValidation', checked=self.config.get('ignoreValidation'), jans_help=self.app.get_help_from_schema(self.schema, 'ignoreValidation'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
                         Window(height=1),
                         VSplit([Button(_("Save"), handler=self.save_config)], align=HorizontalAlign.CENTER),
                         ],
                         width=D()
                     )
+
+        add_tr_button_label = _("Add Service Provider")
+        self.tabs['trust_relationships'] = HSplit([
+                                self.tr_container,
+                                Window(height=1),
+                                VSplit([Button(add_tr_button_label, handler=self.edit_tr, width=len(add_tr_button_label)+4)], align=HorizontalAlign.CENTER),
+                                ],
+                                width=D()
+                                )
 
         self.provider_container = JansVerticalNav(
                 myparent=self.app,
@@ -185,7 +175,7 @@ class Plugin(DialogUtils):
         'Coroutine for getting SAML trust relationships.'
         try:
             response = self.app.cli_object.process_command_by_id(
-                        operation_id='get-trust-relationship',
+                        operation_id='get-trust-relationships',
                         url_suffix='',
                         endpoint_args='',
                         data_fn=None,
@@ -252,9 +242,9 @@ class Plugin(DialogUtils):
         self.nav_bar = JansNavBar(
                     self.app,
                     entries=[
-                            ('trust_relationships', '[T]rust Relationships'),
                             ('configuration', 'C[o]nfiguration'),
-                            ('identity_providers', '[I]dentity Providers'),
+                            ('trust_relationships', 'S[e]rvice Providers'),
+                            ('identity_providers', 'I[d]entity Providers'),
                             ],
                     selection_changed=self.nav_selection_changed,
                     select=0,
@@ -363,6 +353,27 @@ class Plugin(DialogUtils):
 
 
     def delete_identity_provider(self, **kwargs: Any) -> None:
-        """This is method for the deleting trust relationship 
+        """This is method for the deleting identity provider 
         """
-        pass
+
+        def do_delete_provider():
+            async def coroutine():
+                cli_args = {'operation_id': 'delete-saml-identity-provider', 'url_suffix':'inum:{}'.format(kwargs['selected'][0])}
+                
+                self.app.start_progressing(_("Deleting identity provider {}").format(kwargs['selected'][1]))
+                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
+                if response:
+                    self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)), tobefocused=self.provider_container)
+                await self.get_identity_providers()
+
+            asyncio.ensure_future(coroutine())
+
+        buttons = [Button(_("No")), Button(_("Yes"), handler=do_delete_provider)]
+
+        self.app.show_message(
+                title=_("Confirm"),
+                message=HTML(_("Are you sure you want to delete identity provider <b>{}</b>?").format(kwargs['selected'][1])),
+                buttons=buttons,
+                tobefocused=self.provider_container
+                )

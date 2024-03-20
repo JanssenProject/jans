@@ -41,10 +41,6 @@
     "deviceAuthorizationEndpoint":"${config.oxauth.contextPath}/restv1/device_authorization",
     "umaConfigurationEndpoint":"${config.oxauth.contextPath}/restv1/uma2-configuration",
     "sectorIdentifierEndpoint":"${config.oxauth.contextPath}/sectoridentifier",
-    "jansElevenGenerateKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/generateKey",
-    "jansElevenSignEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/sign",
-    "jansElevenVerifySignatureEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/verifySignature",
-    "jansElevenDeleteKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/deleteKey",
     "backchannelAuthenticationEndpoint":"${config.oxauth.contextPath}/restv1/bc-authorize",
     "parEndpoint":"${config.oxauth.contextPath}/restv1/par",
     "backchannelDeviceRegistrationEndpoint":"${config.oxauth.contextPath}/restv1/bc-deviceRegistration",
@@ -81,7 +77,8 @@
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:openid:params:grant-type:ciba",
         "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange"
+        "urn:ietf:params:oauth:grant-type:token-exchange",
+        "tx_token"
     ],
     "subjectTypesSupported":[
         "public",
@@ -157,6 +154,60 @@
         "A256KW"
     ],
     "userInfoEncryptionEncValuesSupported":[
+        "A128CBC+HS256",
+        "A256CBC+HS512",
+        "A128GCM",
+        "A256GCM"
+    ],
+    "txTokenSigningAlgValuesSupported":[
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "txTokenEncryptionAlgValuesSupported":[
+        "RSA1_5",
+        "RSA-OAEP",
+        "A128KW",
+        "A256KW"
+    ],
+    "txTokenEncryptionEncValuesSupported":[
+        "A128CBC+HS256",
+        "A256CBC+HS512",
+        "A128GCM",
+        "A256GCM"
+    ],
+    "introspectionSigningAlgValuesSupported":[
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "introspectionEncryptionAlgValuesSupported":[
+        "RSA1_5",
+        "RSA-OAEP",
+        "A128KW",
+        "A256KW"
+    ],
+    "introspectionEncryptionEncValuesSupported":[
         "A128CBC+HS256",
         "A256CBC+HS512",
         "A128GCM",
@@ -272,7 +323,8 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:openid:params:grant-type:ciba",
-        "urn:ietf:params:oauth:grant-type:device_code"
+        "urn:ietf:params:oauth:grant-type:device_code",
+        "tx_token"
     ],
     "claimTypesSupported":[
         "normal"
@@ -295,6 +347,7 @@
     "authorizationCodeLifetime":${config.client.authorization-code-lifetime},
     "refreshTokenLifetime":14400,
     "idTokenLifetime":3600,
+    "txTokenLifetime":180,
     "accessTokenLifetime":300,
     "grantTypesAndResponseTypesAutofixEnabled":true,
     "umaRptLifetime":${config.uma.requester-permission-token-lifetime},
@@ -348,6 +401,7 @@
     "sessionIdEnabled":true,
     "sessionIdPersistOnPromptNone":true,
     "sessionIdLifetime":86400,
+    "sessionIdCookieLifetime":86400,
     "forceOfflineAccessScopeToEnableRefreshToken":false,
     "configurationUpdateInterval":3600,
     "cssLocation":"${config.oxauth.contextPath}/stylesheet",
@@ -360,7 +414,6 @@
     "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}",
     "shareSubjectIdBetweenClientsWithSameSectorId": true,
     "webKeysStorage": "keystore",
-    "jansElevenTestModeToken": "${config.oxeleven.testModeToken}",
     "dnName": "CN=Jans Auth CA Certificates",
     "keyStoreFile": "./conf/keystore.p12",
     "keyStoreSecret": "secret",

@@ -516,4 +516,43 @@ public class AuthorizeRestWebServiceValidator {
         // 4. external script validation
         externalAuthzDetailTypeService.externalValidateAuthzDetails(authzRequest);
     }
+
+    public void validateRequestParameterSupported(AuthzRequest authzRequest) {
+        String request = authzRequest.getRequest();
+        String state = authzRequest.getState();
+
+        if (StringUtils.isBlank(request)) {
+            return;
+        }
+
+        if (org.apache.commons.lang3.BooleanUtils.isTrue(appConfiguration.getRequestParameterSupported())) {
+            return;
+        }
+
+        log.debug("'request' support is switched off by requestParameterSupported=false configuration property.");
+        throw new WebApplicationException(Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.REQUEST_NOT_SUPPORTED, state, "request processing is denied by AS."))
+                .build());
+
+    }
+
+    public void validateRequestUriParameterSupported(AuthzRequest authzRequest) {
+        String requestUri = authzRequest.getRequestUri();
+        String state = authzRequest.getState();
+
+        if (StringUtils.isBlank(requestUri)) {
+            return;
+        }
+
+        if (org.apache.commons.lang3.BooleanUtils.isTrue(appConfiguration.getRequestUriParameterSupported())) {
+            return;
+        }
+
+        log.debug("'request_uri' support is switched off by requestUriParameterSupported=false configuration property.");
+        throw new WebApplicationException(Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.REQUEST_URI_NOT_SUPPORTED, state, "request_uri processing is denied by AS"))
+                .build());
+    }
 }

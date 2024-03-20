@@ -18,6 +18,8 @@ public class Constants {
     public static final String IDP_MODULE = "idp-module";
     public static final String SP_MODULE = "sp-module";
     public static final String REALM_MASTER = "master";
+    public static final String SP_METADATA_FILE_PATTERN = "%s_sp-metadata.xml";
+    public static final String IDP_METADATA_FILE_PATTERN = "%s_idp-metadata.xml";
 
     public static final String SAML_CONFIG = "/samlConfig";
     public static final String TRUST_RELATIONSHIP = "/trust-relationship";
@@ -68,6 +70,7 @@ public class Constants {
     // Scopes
     public static final String SAML_READ_ACCESS = "https://jans.io/oauth/config/saml.readonly";
     public static final String SAML_WRITE_ACCESS = "https://jans.io/oauth/config/saml.write";
+    public static final String SAML_DELETE_ACCESS = "https://jans.io/oauth/config/saml.delete";
 
     public static final String SAML_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/saml-config.readonly";
     public static final String SAML_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/saml-config.write";

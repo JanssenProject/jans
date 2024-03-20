@@ -4,7 +4,7 @@ import io.jans.casa.core.SessionContext;
 import io.jans.casa.core.pojo.BrowserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.zkoss.bind.annotation.AfterCompose;;
+import org.zkoss.bind.annotation.AfterCompose;
 import org.zkoss.bind.annotation.ContextParam;
 import org.zkoss.bind.annotation.ContextType;
 import org.zkoss.bind.annotation.Init;

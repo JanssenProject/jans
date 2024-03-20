@@ -302,6 +302,8 @@ paths:
                       - session_selection_required
                       - consent_required
                       - user_mismatched
+                      - request_not_supported
+                      - request_uri_not_supported
                       - invalid_request_uri
                       - invalid_request_object
                       - authentication_session_invalid
@@ -451,6 +453,8 @@ paths:
                       - session_selection_required
                       - consent_required
                       - user_mismatched
+                      - request_not_supported
+                      - request_uri_not_supported
                       - invalid_request_uri
                       - invalid_request_object
                       - authentication_session_invalid
@@ -1413,6 +1417,15 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                tx_token_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
+                tx_token_encrypted_response_alg:
+                  type: string
+                  description: JWE alg algorithm (JWA) required for encrypting Transaction Token Responses.
+                tx_token_encrypted_response_enc:
+                  type: string
+                  description: JWE enc algorithm (JWA) required for encrypting Transaction Token Responses.
                 request_object_signing_alg:
                   type: string
                   description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
@@ -1544,8 +1557,16 @@ paths:
                     type: string
                 access_token_lifetime:
                   type: integer
-                  description: Specifies the Client-specific access token expiration.
-                  example: 100000000
+                  description: Specifies the Client-specific access token expiration in seconds.
+                  example: 600
+                id_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific id_token expiration in seconds.
+                  example: 600
+                tx_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific tx_token expiration in seconds.
+                  example: 600
                 par_lifetime:
                   type: integer
                   description: Specifies the Client-specific PAR expiration in seconds.
@@ -1841,6 +1862,15 @@ paths:
                 introspection_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                tx_token_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
+                tx_token_encrypted_response_alg:
+                  type: string
+                  description: JWE alg algorithm (JWA) required for encrypting Transaction Token Responses.
+                tx_token_encrypted_response_enc:
+                  type: string
+                  description: JWE enc algorithm (JWA) required for encrypting Transaction Token Responses.
                 request_object_signing_alg:
                   type: string
                   description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
@@ -1972,8 +2002,16 @@ paths:
                     type: string
                 access_token_lifetime:
                   type: integer
-                  description: Specifies the Client-specific access token expiration.
-                  example: 100000000
+                  description: Specifies the Client-specific access token expiration in seconds.
+                  example: 600
+                id_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific id_token expiration in seconds.
+                  example: 600
+                tx_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific tx_token expiration in seconds.
+                  example: 600
                 par_lifetime:
                   type: integer
                   description: Specifies the Client-specific PAR expiration in seconds.
@@ -2249,6 +2287,15 @@ paths:
                   introspection_encrypted_response_enc:
                     type: string
                     description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                  tx_token_signed_response_alg:
+                    type: string
+                    description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
+                  tx_token_encrypted_response_alg:
+                    type: string
+                    description: JWE alg algorithm (JWA) required for encrypting Transaction Token Responses.
+                  tx_token_encrypted_response_enc:
+                    type: string
+                    description: JWE enc algorithm (JWA) required for encrypting Transaction Token Responses.
                   request_object_signing_alg:
                     type: string
                     description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
@@ -2381,7 +2428,15 @@ paths:
                   access_token_lifetime:
                     type: integer
                     description: Specifies the Client-specific access token expiration.
-                    example: 100000000
+                    example: 100
+                  id_token_lifetime:
+                    type: integer
+                    description: Specifies the Client-specific id_token expiration in seconds.
+                    example: 600
+                  tx_token_lifetime:
+                    type: integer
+                    description: Specifies the Client-specific tx_token expiration in seconds.
+                    example: 600
                   par_lifetime:
                     type: integer
                     description: Specifies the Client-specific PAR expiration in seconds.
@@ -4370,29 +4425,6 @@ paths:
           $ref: '#/components/responses/UnauthorizedSSA'
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
-    head:
-      tags:
-        - SSA
-      summary: Validate SSA
-      description: |-
-        # Validates that a given SSA `jti` exists and is valid
-        ----
-        
-        This endpoint does not have any security, it is an open endpoint.
-      parameters:
-        - schema:
-            type: string
-          in: header
-          name: jti
-          description: Unique Identifier
-          required: true
-      responses:
-        200:
-          description: The API returns `200` status code, when token is valid.
-        422:
-          description: Not found.
-        500:
-          $ref: '#/components/responses/InternalServerErrorSSA'
     delete:
       tags:
         - SSA
@@ -4437,6 +4469,40 @@ paths:
           description: Not Acceptable. Check the query params. (When `jti` or `org_id` is not sent in the query param)
         422:
           description: Not found.
+        500:
+          $ref: '#/components/responses/InternalServerErrorSSA'
+
+  /ssa/validation:
+    post:
+      tags:
+        - SSA
+      summary: Validate SSA
+      description: |-
+        # Validates that a given SSA `jti` exists and is valid
+        ----
+
+        This endpoint does not have any security, it is an open endpoint.
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: jti
+          description: Unique Identifier
+          required: true
+      responses:
+        200:
+          description: The API returns `200` status code, when token is valid.
+        400:
+          description: When jti does not exist, is invalid or state is in (expired, used or revoked),
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalida_jti:
+                  value:
+                    error: invalid_jti
+                    error_description: Invalid JTI or not exists.
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
 

@@ -207,11 +207,6 @@ updates:
       interval: daily
 
   - package-ecosystem: maven
-    directory: /jans-eleven
-    schedule:
-      interval: daily
-
-  - package-ecosystem: maven
     directory: /jans-fido2
     schedule:
       interval: daily

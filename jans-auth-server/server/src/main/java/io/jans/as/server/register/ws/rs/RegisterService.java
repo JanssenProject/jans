@@ -313,6 +313,15 @@ public class RegisterService {
         if (requestObject.getIntrospectionEncryptedResponseEnc() != null) {
             client.getAttributes().setIntrospectionEncryptedResponseEnc(requestObject.getIntrospectionEncryptedResponseEnc().toString());
         }
+        if (requestObject.getTxTokenSignedResponseAlg() != null) {
+            client.getAttributes().setTxTokenSignedResponseAlg(requestObject.getTxTokenSignedResponseAlg().toString());
+        }
+        if (requestObject.getTxTokenEncryptedResponseAlg() != null) {
+            client.getAttributes().setTxTokenEncryptedResponseAlg(requestObject.getTxTokenEncryptedResponseAlg().toString());
+        }
+        if (requestObject.getTxTokenEncryptedResponseEnc() != null) {
+            client.getAttributes().setTxTokenEncryptedResponseEnc(requestObject.getTxTokenEncryptedResponseEnc().toString());
+        }
         if (requestObject.getRequestObjectSigningAlg() != null) {
             client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());
         }
@@ -379,8 +388,8 @@ public class RegisterService {
         }
         client.setFrontChannelLogoutSessionRequired(requestObject.getFrontChannelLogoutSessionRequired());
 
-        if (requestObject.getBackchannelLogoutUris() != null && !requestObject.getBackchannelLogoutUris().isEmpty()) {
-            client.getAttributes().setBackchannelLogoutUri(requestObject.getBackchannelLogoutUris());
+        if (requestObject.getBackchannelLogoutUri() != null && !requestObject.getBackchannelLogoutUri().isEmpty()) {
+            client.getAttributes().setBackchannelLogoutUri(Lists.newArrayList(requestObject.getBackchannelLogoutUri()));
         }
         client.getAttributes().setBackchannelLogoutSessionRequired(requestObject.getBackchannelLogoutSessionRequired());
 

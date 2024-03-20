@@ -1,0 +1,8 @@
+<EntityDescriptor entityID="google.com/a/company.org" xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
+	<SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+		<NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>
+		<AssertionConsumerService index="1" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+		Location="https://www.google.com/a/company.org/acs" >
+		</AssertionConsumerService>
+	</SPSSODescriptor>
+</EntityDescriptor>

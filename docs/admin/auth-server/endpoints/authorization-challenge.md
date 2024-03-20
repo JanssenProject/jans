@@ -141,7 +141,39 @@ Full sample script can be found [here](../../../script-catalog/authorization_cha
 
 Device session is optional. AS does not return it by default. 
 It's possible to pass in request `use_device_session=true` which makes AS return it in error response.
+If it is desired to use `device_session` and don't pass `client_id` (or other parameters) in next request, 
+it should be put in attributes of `device_session` object.
 
+Example
+```java
+String clientId = context.getHttpRequest().getParameter("client_id");
+deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
+``` 
+
+Full sample script can be found [here](../../../script-catalog/authorization_challenge/AuthorizationChallenge.java)
+
+## Web session
+
+Authorization challenge script is first-party flow and thus web session is not created by default. 
+However there can be cases when such session has to be created. Please set **authorizationChallengeShouldGenerateSession** configuration property to **true**
+to force session creation. 
+
+In case it is needed to prepare session with specific data, it is possible to create session
+in script and set it into context. Example:
+
+```java
+SessionIdService sessionIdService = CdiUtil.bean(SessionIdService.class);
+Identity identityService = CdiUtil.bean(Identity.class);
+
+Map<String, String> sessionStore = new HashMap<String, String>();
+sessionStore.put("login_id_token",login_id_token);
+sessionStore.put("login_access_token",login_access_token);
+sessionStore.put("transaction_status","PENDING");
+SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(context.getHttpRequest(), user.getDn(), sessionStore);
+
+context.getExecutionContext().setAuthorizationChallengeSessionId(sessionId);
+scriptLogger.trace("Created Authorization challenge session successfully");
+``` 
 
 ## Multi-step example
 
@@ -223,6 +255,16 @@ In custom script it's easy to code what data has to be kept in `device_session`.
         String otp = context.getHttpRequest().getParameter(OTP_PARAMETER);
         if (StringUtils.isNotBlank(otp)) {
             deviceSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
+        }
+        
+        String clientId = context.getHttpRequest().getParameter("client_id");
+        if (StringUtils.isNotBlank(clientId)) {
+            deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
+        }
+        
+        String acrValues = context.getHttpRequest().getParameter("acr_values");
+        if (StringUtils.isNotBlank(acrValues)) {
+            deviceSessionObject.getAttributes().getAttributes().put("acr_values", acrValues);
         }
 
         if (newSave) {
@@ -386,7 +428,7 @@ X-Xss-Protection: 1; mode=block
     "scope": "openid",
     "client_secret": "f6364c5c-295d-4e6e-bb40-6ad3a47b2119",
     "client_id_issued_at": 1691668385,
-    "backchannel_logout_uri": [],
+    "backchannel_logout_uri": "",
     "backchannel_logout_session_required": false,
     "client_name": "jans test app",
     "par_lifetime": 600,
@@ -679,7 +721,7 @@ X-Xss-Protection: 1; mode=block
     "scope": "openid",
     "client_secret": "f921c89c-57f0-4a91-baaa-036a4a22737b",
     "client_id_issued_at": 1691668622,
-    "backchannel_logout_uri": [],
+    "backchannel_logout_uri": "",
     "backchannel_logout_session_required": false,
     "client_name": "jans test app",
     "par_lifetime": 600,

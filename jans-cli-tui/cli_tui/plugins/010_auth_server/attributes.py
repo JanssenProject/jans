@@ -43,7 +43,7 @@ class Attributes(DialogUtils):
         self.main_container =  HSplit([
                     VSplit([
                         self.app.getTitledText(_("Search"), name='oauth:attributes:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_attributes, style=cli_style.edit_text),
-                        self.app.getButton(text=_("Add Attribute"), name='oauth:attributes:add', jans_help=_("To add a new Agama project press this button"), handler=self.add_attributes),
+                        self.app.getButton(text=_("Add Attribute"), name='oauth:attributes:add', jans_help=_("To add a new attribute press this button"), handler=self.add_attributes),
                         ],
                         padding=3,
                         width=D(),
@@ -60,6 +60,37 @@ class Attributes(DialogUtils):
             params (dict): arguments passed by Nav Bar or add button
         """
         data = params['data']
+
+        def get_custom_validation_container(cb=None):
+            if getattr(cb, 'checked', False) or data.get('attributeValidation'):
+                self.custom_validation_container = HSplit([
+                                self.app.getTitledText(
+                                    title=_("    Regular Exprrssion"),
+                                    name='regexp',
+                                    value=data.get('attributeValidation',{}).get('regexp', ''),
+                                    style=cli_style.edit_text
+                                ),
+                                self.app.getTitledText(
+                                    title=_("    Minumum Lenght"),
+                                    name='minLength',
+                                    value=data.get('attributeValidation',{}).get('minLength', 8),
+                                    text_type='integer',
+                                    style=cli_style.edit_text
+                                ),
+                                self.app.getTitledText(
+                                    title=_("    Maximum Lenght"),
+                                    name='maxLength',
+                                    value=data.get('attributeValidation',{}).get('maxLength', 10),
+                                    text_type='integer',
+                                    style=cli_style.edit_text
+                                ),
+                                ],
+                                width=D()
+                            )
+            else:
+                self.custom_validation_container = HSplit([], width=D())
+
+        get_custom_validation_container()
 
         body = HSplit([
 
@@ -163,6 +194,17 @@ class Attributes(DialogUtils):
                     style=cli_style.edit_text
                 ),
 
+                self.app.getTitledCheckBox(
+                    _("Enable Custom Validation"),
+                    name='enableCustomValidation',
+                    checked=bool(data.get('attributeValidation')),
+                    on_selection_changed=get_custom_validation_container,
+                    jans_help=_("Check this to enable custom validation"),
+                    style=cli_style.check_box
+                ),
+
+                DynamicContainer(lambda: self.custom_validation_container)
+
             ])
 
         save_button = Button(_("Save"), handler=self.save_attribute)
@@ -193,6 +235,12 @@ class Attributes(DialogUtils):
 
         if 'origin' not in new_data:
             new_data['origin'] = 'jansCustomPerson'
+
+        enable_custom_validation = new_data.pop('enableCustomValidation')
+        if enable_custom_validation:
+            new_data['attributeValidation'] = self.make_data_from_dialog({'attributeValidation': self.custom_validation_container})
+        else:
+            new_data.pop('attributeValidation', None)
 
         if self.check_required_fields(dialog.body, data=new_data):
             dialog.future.set_result(True)

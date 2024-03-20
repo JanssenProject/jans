@@ -89,9 +89,65 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "ssa"
         ]),
         ("lockMessageConfig", {
-            "enableIdTokenMessages": False,
-            "idTokenMessagesChannel": "id_token"
+            "enableTokenMessages": False,
+            "tokenMessagesChannel": "jans_token"
         }),
+        ("txTokenSigningAlgValuesSupported", [
+            "HS256",
+            "HS384",
+            "HS512",
+            "RS256",
+            "RS384",
+            "RS512",
+            "ES256",
+            "ES384",
+            "ES512",
+            "ES512",
+            "PS256",
+            "PS384",
+            "PS512"
+        ]),
+        ("txTokenEncryptionAlgValuesSupported", [
+            "RSA1_5",
+            "RSA-OAEP",
+            "A128KW",
+            "A256KW"
+        ]),
+        ("txTokenEncryptionEncValuesSupported", [
+            "A128CBC+HS256",
+            "A256CBC+HS512",
+            "A128GCM",
+            "A256GCM"
+        ]),
+        ("introspectionSigningAlgValuesSupported", [
+            "HS256",
+            "HS384",
+            "HS512",
+            "RS256",
+            "RS384",
+            "RS512",
+            "ES256",
+            "ES384",
+            "ES512",
+            "ES512",
+            "PS256",
+            "PS384",
+            "PS512"
+        ]),
+        ("introspectionEncryptionAlgValuesSupported", [
+            "RSA1_5",
+            "RSA-OAEP",
+            "A128KW",
+            "A256KW"
+        ]),
+        ("introspectionEncryptionEncValuesSupported", [
+            "A128CBC+HS256",
+            "A256CBC+HS512",
+            "A128GCM",
+            "A256GCM"
+        ]),
+        ("txTokenLifetime", 180),
+        ("sessionIdCookieLifetime", 86400),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -129,6 +185,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
     for grant_type in [
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
+        "tx_token",
     ]:
         if grant_type not in conf["grantTypesSupported"]:
             conf["grantTypesSupported"].append(grant_type)
@@ -136,11 +193,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
 
     # change ox to jans
     for old_attr, new_attr in [
-        ("oxElevenGenerateKeyEndpoint", "jansElevenGenerateKeyEndpoint"),
-        ("oxElevenSignEndpoint", "jansElevenSignEndpoint"),
-        ("oxElevenVerifySignatureEndpoint", "jansElevenVerifySignatureEndpoint"),
-        ("oxElevenDeleteKeyEndpoint", "jansElevenDeleteKeyEndpoint"),
-        ("oxElevenJwksEndpoint", "jansElevenJwksEndpoint"),
         ("oxOpenIdConnectVersion", "jansOpenIdConnectVersion"),
         ("oxId", "jansId"),
     ]:
@@ -185,6 +237,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
     for grant_type in [
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
+        "tx_token",
     ]:
         if grant_type not in conf["dynamicGrantTypeDefault"]:
             conf["dynamicGrantTypeDefault"].append(grant_type)
@@ -211,6 +264,16 @@ def transform_auth_dynamic_config_hook(conf, manager):
     ]:
         if new_key not in conf["agamaConfiguration"]:
             conf["agamaConfiguration"][new_key] = value
+            should_update = True
+
+    # lockMessageConfig attribute rename
+    for new_attr, old_attr, default_val in [
+        ("enableTokenMessages", "enableIdTokenMessages", False),
+        ("tokenMessagesChannel", "idTokenMessagesChannel", "jans_token"),
+    ]:
+        if new_attr not in conf["lockMessageConfig"]:
+            conf["lockMessageConfig"][new_attr] = default_val
+            conf["lockMessageConfig"].pop(old_attr, None)
             should_update = True
 
     # return the conf and flag to determine whether it needs update or not

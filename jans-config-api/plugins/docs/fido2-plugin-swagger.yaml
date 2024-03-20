@@ -176,6 +176,8 @@ components:
           type: boolean
         skipValidateMdsInAttestationEnabled:
           type: boolean
+        assertionOptionsGenerateEndpointEnabled:
+          type: boolean
     RequestedParty:
       type: object
       properties:
@@ -267,7 +269,8 @@ components:
         challange:
           type: string
         challengeHash:
-          type: string
+          type: integer
+          format: int32
         creationDate:
           type: string
           format: date-time

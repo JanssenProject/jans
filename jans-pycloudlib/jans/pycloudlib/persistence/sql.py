@@ -19,6 +19,7 @@ from sqlalchemy import MetaData
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import delete
+from sqlalchemy import event
 from ldif import LDIFParser
 from ldap3.utils import dn as dnutils
 
@@ -188,8 +189,15 @@ class SqlSchemaMixin:
     @cached_property
     def sql_data_types(self) -> dict[str, dict[str, _t.Any]]:
         """Get list of data types from pre-defined file."""
+        data_types = {}
         with open("/app/static/rdbm/sql_data_types.json") as f:
-            return json.loads(f.read())  # type: ignore
+            data_types.update(json.loads(f.read()))
+
+        custom_types_fn = os.environ.get("CN_SQL_CUSTOM_TYPES_FILE", "/etc/jans/conf/sql_data_types.custom.json")
+        if os.path.isfile(custom_types_fn):
+            with open(custom_types_fn) as f:
+                data_types.update(json.loads(f.read()))
+        return data_types  # type: ignore
 
     @cached_property
     def sql_data_types_mapping(self) -> dict[str, dict[str, _t.Any]]:
@@ -256,11 +264,19 @@ class SqlClient(SqlSchemaMixin):
 
         self.dialect = self.adapter.dialect
         self._metadata: _t.Optional[MetaData] = None
+        self._engine = None
 
-    @cached_property
+    @property
     def engine(self) -> Engine:
         """Lazy init of engine instance object."""
-        return create_engine(self.engine_url, pool_pre_ping=True, hide_parameters=True)
+        if not self._engine:
+            self._engine = create_engine(self.engine_url, pool_pre_ping=True, hide_parameters=True)
+
+            if self.dialect == "mysql":
+                event.listen(self._engine, "first_connect", set_mysql_strict_mode)
+
+        # initialized engine
+        return self._engine
 
     @property
     def engine_url(self) -> str:
@@ -592,3 +608,9 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
             "server_time_zone": os.environ.get("CN_SQL_DB_TIMEZONE", "UTC"),
         }
         f.write(rendered_txt)
+
+
+def set_mysql_strict_mode(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("SET SESSION sql_mode = 'TRADITIONAL'")
+    cursor.close()
