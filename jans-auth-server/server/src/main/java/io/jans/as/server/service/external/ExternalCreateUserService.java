@@ -2,6 +2,7 @@ package io.jans.as.server.service.external;
 
 import com.google.common.collect.Sets;
 import io.jans.as.server.model.common.ExecutionContext;
+import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.createuser.CreateUserType;
@@ -50,7 +51,9 @@ public class ExternalCreateUserService extends ExternalScriptService {
 
             CreateUserType script = (CreateUserType) scriptConfiguration.getExternalType();
             context.setScript(scriptConfiguration);
-            final boolean result = script.createUser(context);
+
+            final ExternalScriptContext scriptContext = new ExternalScriptContext(context);
+            final boolean result = script.createUser(scriptContext);
 
             log.trace("Finished external 'externalCreateUser' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
             return result;
@@ -86,7 +89,9 @@ public class ExternalCreateUserService extends ExternalScriptService {
 
             CreateUserType script = (CreateUserType) scriptConfiguration.getExternalType();
             context.setScript(scriptConfiguration);
-            final String result = script.getCreateUserPage(context);
+
+            final ExternalScriptContext scriptContext = new ExternalScriptContext(context);
+            final String result = script.getCreateUserPage(scriptContext);
 
             log.trace("Finished external 'externalGetCreateUserPage' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
             return result;
@@ -122,7 +127,9 @@ public class ExternalCreateUserService extends ExternalScriptService {
 
             CreateUserType script = (CreateUserType) scriptConfiguration.getExternalType();
             context.setScript(scriptConfiguration);
-            final boolean result = script.prepare(context);
+
+            final ExternalScriptContext scriptContext = new ExternalScriptContext(context);
+            final boolean result = script.prepare(scriptContext);
 
             log.trace("Finished external 'externalPrepare' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
             return result;
@@ -158,7 +165,9 @@ public class ExternalCreateUserService extends ExternalScriptService {
 
             CreateUserType script = (CreateUserType) scriptConfiguration.getExternalType();
             context.setScript(scriptConfiguration);
-            final String result = script.buildPostAuthorizeUrl(context);
+
+            final ExternalScriptContext scriptContext = new ExternalScriptContext(context);
+            final String result = script.buildPostAuthorizeUrl(scriptContext);
 
             log.trace("Finished external 'buildPostAuthorizeUrl' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
             return result;
