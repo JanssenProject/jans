@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalCreateUserService;
@@ -14,6 +15,7 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -90,6 +92,9 @@ public class CreateUserAction {
     @Inject
     private SessionIdService sessionIdService;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
     @PostConstruct
     public void prepare() {
         log.trace("Preparing CreateUserAction");
@@ -104,6 +109,11 @@ public class CreateUserAction {
 
     public void createUser() {
         try {
+            if (BooleanUtils.isTrue(appConfiguration.getDisablePromptCreate())) {
+                log.debug("Skipped user creation. config disablePromptCreate=true");
+                return;
+            }
+
             log.debug("Creating user ...");
 
             ExecutionContext executionContext = ExecutionContext.of(externalContext);
