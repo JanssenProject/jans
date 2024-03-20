@@ -111,7 +111,7 @@ public class AssetResource extends ConfigBaseResource {
             ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getAssetByInum(
-            @Parameter(description = "Asset Id") @PathParam(ApiConstants.INUM) @NotNull String inum) throws Exception {
+            @Parameter(description = "Asset Inum") @PathParam(ApiConstants.INUM) @NotNull String inum) throws Exception {
         if (logger.isInfoEnabled()) {
             logger.info("Search Asset with inum:{}", escapeLog(inum));
         }
@@ -275,7 +275,7 @@ public class AssetResource extends ConfigBaseResource {
 
         // update asset
         try {
-            asset = assetService.updateAsset(asset, assetFile);
+            asset = assetService.saveAsset(asset, assetFile);
             log.debug(" Updated asset:{} ", asset);
         } catch (Exception ex) {
             log.error("Application Error while updated asset is:{}", ex.getMessage());

@@ -174,7 +174,7 @@ public class AssetService {
         return asset;
     }
 
-    public Document updateAsset(Document asset, InputStream documentStream) throws Exception {
+    private Document updateAsset(Document asset, InputStream documentStream) throws Exception {
         log.info("Update new asset - asset:{}, documentStream:{}", asset, documentStream);
         if (asset == null) {
             throw new InvalidAttributeException(" Asset object is null!!!");
@@ -358,12 +358,6 @@ public class AssetService {
 
         InputStream stream = documentStoreService.readDocumentAsStream(filePath);
         log.info("Reading asset file Reading:{}", stream);
-
-        //To test - remove later - start
-        filePath = assetPath + File.separator + "puja-"+assetName;
-        String result = documentStoreService.saveDocumentStream(filePath, null, stream, List.of("test"));
-        log.info("Asset saving result:{}", result);
-        //To test - remove later - end
 
         return stream;
 
