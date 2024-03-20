@@ -38,9 +38,6 @@ import jakarta.ws.rs.core.Response;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.InputStream;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.*;
 
@@ -54,12 +51,13 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AssetResource extends ConfigBaseResource {
 
-    private static final String APPLICATION_ERROR = "Application Error";
+    private static final String APPLICATION_ERROR = "APPLICATION_ERROR";
+    private static final String NOT_FOUND_ERROR = "NOT_FOUND_ERROR";
     private static final String ASSET_DATA = "Asset Data";
     private static final String ASSET_DATA_FORM = "Asset Data From";
-    private static final String ASSET_CHECK_STR = "Asset identified by '";
     private static final String ASSET_NAME_CONFLICT = "NAME_CONFLICT";
     private static final String ASSET_NAME_CONFLICT_MSG = "Asset with same name %s already exists!";
+    private static final String ASSET_NOT_FOUND = "Asset identified by %s not found!";
     private static final String ASSET_INUM = "Asset Identifier Inum";
     private static final String RESOURCE_NULL = "RESOURCE_NULL";
     private static final String RESOURCE_NULL_MSG = "%s is null";
@@ -106,6 +104,7 @@ public class AssetResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-asset-by-inum.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
@@ -118,6 +117,9 @@ public class AssetResource extends ConfigBaseResource {
         }
 
         Document asset = assetService.getAssetByInum(inum);
+        if(asset==null) {
+            throwNotFoundException(NOT_FOUND_ERROR, String.format(ASSET_NOT_FOUND, inum));
+        }
         logger.info("Asset fetched based on inum:{} is:{}", inum, asset);
         return Response.ok(asset).build();
     }
@@ -128,6 +130,7 @@ public class AssetResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-asset-by-name.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
@@ -140,8 +143,35 @@ public class AssetResource extends ConfigBaseResource {
             logger.info("Search Asset with name:{}", escapeLog(name));
         }
         List<Document> assets = assetService.getAssetByName(name);
+        if(assets==null) {
+            throwNotFoundException(NOT_FOUND_ERROR, String.format(ASSET_NOT_FOUND, name));
+        }
         logger.info("Asset fetched based on name:{} are:{}", name, assets);
         return Response.ok(assets).build();
+    }
+
+    @Hidden
+    @Operation(summary = "Fetch asset stream by name.", description = "Fetch asset stream by name.", operationId = "get-asset-stream-by-name", tags = {
+            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-asset-by-name.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
+    @GET
+    @Path(ApiConstants.STREAM + ApiConstants.NAME_PARAM_PATH)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
+    public Response getAssetStreamByName(
+            @Parameter(description = "Asset Name") @PathParam(ApiConstants.NAME) @NotNull String name) throws Exception {
+
+        log.info("Fetch asset stream identified by name:{} ", name);
+
+        InputStream assetStream = assetService.readAsset(name);
+        log.debug(" Fetched  assetStream:{} ", assetStream);
+
+        return Response.status(Response.Status.OK).entity(assetStream).build();
     }
 
     @Operation(summary = "Upload new asset", description = "Upload new asset", operationId = "post-new-asset", tags = {
@@ -277,8 +307,8 @@ public class AssetResource extends ConfigBaseResource {
             log.debug(" Delete asset status:{} ", status);
         } catch (Exception ex) {
             log.error("Error while asset deletion is:{}", ex.getMessage());
-            if(ex instanceof  NotFoundException ) {
-                throwNotFoundException(APPLICATION_ERROR, ex.getMessage());   
+            if (ex instanceof NotFoundException) {
+                throwNotFoundException(NOT_FOUND_ERROR, ex.getMessage());
             }
             throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
         }
@@ -301,45 +331,6 @@ public class AssetResource extends ConfigBaseResource {
 
         logger.debug("Asset pagedResult:{} ", pagedResult);
         return pagedResult;
-    }
-
-    @Hidden
-    @POST
-    @Path("/test")
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
-    public Response testAsset(String name, String path) throws Exception {
-
-        log.info("Test Asset name:{}, path:{} ", name, path);
-
-        String testResult = assetService.readAsset(name, path);
-        log.debug(" Upload asset testResult:{} ", testResult);
-
-        return Response.status(Response.Status.OK).entity(testResult).build();
-    }
-
-    private void saveAssetOnServer(Document asset, InputStream assetFile) {
-        logger.info("Save asset on server asset:{} , assetFile:{} ", asset, assetFile);
-        if (asset == null || assetFile == null) {
-            return;
-        }
-        try {
-            File destFile = new File(asset.getDescription());
-
-            boolean movedSuccessfully = Files.copy(assetFile, destFile.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING) > -1;
-            if (movedSuccessfully) {
-                logger.info(
-                        "\n\n Asset successfully saved on server asset.getDisplayName():{} , destFile.getPath():{} \n\n",
-                        asset.getDisplayName(), destFile.getPath());
-                ;
-            } else {
-                logger.info("\n\n Could not save asset server - asset.getDisplayName():{} , destFile.getPath():{} \n\n",
-                        asset.getDisplayName(), destFile.getPath());
-                ;
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
 }

@@ -152,7 +152,7 @@ public class BaseResource {
     }
     
     public static void throwNotFoundException(String msg, String description) {
-        throw new InternalServerErrorException(getNotFoundError(msg, description));
+        throw new NotFoundException(getNotFoundError(msg, description));
     }
     
 

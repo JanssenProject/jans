@@ -500,6 +500,12 @@ paths:
                     }
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
           content:
@@ -575,6 +581,12 @@ paths:
                   value: ""
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
           content:
@@ -8205,19 +8217,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanView:
+        userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9037,8 +9049,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9048,6 +9058,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10501,10 +10513,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

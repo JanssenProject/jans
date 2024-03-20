@@ -156,7 +156,7 @@ public class AssetService {
         if (StringUtils.isBlank(asset.getInum())) {
             log.info("As inum is blank create new asset :{}", asset);
             updateRevision(asset);
-            asset = saveNewAsset(asset, getInputStream(bos));
+            saveNewAsset(asset, getInputStream(bos));
         } else {
             log.info("Inum is not blank hence update existing asset :{}", asset);
             asset = updateAsset(asset, getInputStream(bos));
@@ -170,7 +170,7 @@ public class AssetService {
         // Get final asset
         asset = dbDocumentService.getDocumentByInum(asset.getInum());
 
-        log.info("Asset saved :{}", asset);
+        log.error("\n * Asset saved :{}", asset);
         return asset;
     }
 
@@ -189,7 +189,10 @@ public class AssetService {
         updateRevision(asset);
         dbDocumentService.updateDocument(asset);
 
-        log.info("Successfully updated asset:{}", asset);
+        // Get final asset
+        asset = dbDocumentService.getDocumentByInum(asset.getInum());
+        
+        log.error("\n * Successfully updated asset:{}", asset);
         return asset;
     }
 
@@ -202,32 +205,32 @@ public class AssetService {
 
     public boolean removeAsset(String inum) throws Exception {
         log.info("Remove asset - inum:{}", inum);
-        
+
         Document asset = this.getAssetByInum(inum);
         log.info("asset{} identified by inum:{}", asset, inum);
-        
-        if(asset==null) {
-            throw new NotFoundException("Cannot find asset identified by - "+inum);
+
+        if (asset == null) {
+            throw new NotFoundException("Cannot find asset identified by - " + inum);
         }
-        //remove from store
+
+        // remove from store
         boolean status = dBDocumentStoreProvider.removeDocument(inum);
         log.info("Status on removing a asset identified by inum is:{}", status);
-        
-        //remove from server
-        status =  deleteAssetFromServer(asset);
+
+        // remove from server
+        status = deleteAssetFromServer(asset);
         log.info("Status on deleting asset from server is:{}", status);
-        
+
         return status;
     }
-    
-    
+
     private boolean deleteAssetFromServer(Document asset) {
         log.info("Delete asset - asset:{}", asset);
         boolean deleteStatus = false;
-        if(asset==null) {
+        if (asset == null) {
             return deleteStatus;
         }
-        
+
         String path = asset.getDescription();
         String fileName = asset.getDisplayName();
         String documentStoreModuleName = fileName;
@@ -240,15 +243,15 @@ public class AssetService {
         if (StringUtils.isBlank(fileName)) {
             throw new InvalidConfigurationException("Name of asset to be deleted is null!");
         }
-        
-        if(documentStoreService==null) {
+
+        if (documentStoreService == null) {
             throw new InvalidConfigurationException("document Store Service is null!");
         }
 
         String filePath = path + File.separator + fileName;
-        log.info("documentStoreService:{}, filePath:{} ", documentStoreService, filePath, localDocumentStoreService);
+        log.info("documentStoreService:{}, localDocumentStoreService:{}, filePath:{} ", documentStoreService, localDocumentStoreService, filePath);
         deleteStatus = documentStoreService.removeDocument(filePath);
-        log.info("Asset deletion deleteStatus:{}", deleteStatus); 
+        log.info("Asset deletion deleteStatus:{}", deleteStatus);
         return deleteStatus;
     }
 
@@ -272,7 +275,7 @@ public class AssetService {
 
             log.info("Updated asset revision - asset:{}", asset);
         } catch (Exception ex) {
-            log.error("Exception while updating asset revision is:{}", ex);
+            log.error("Exception while updating asset revision is - ", ex);
             return asset;
         }
         return asset;
@@ -328,34 +331,41 @@ public class AssetService {
         return authUtil.getByteArrayOutputStream(input);
     }
 
-    private InputStream getInputStream(ByteArrayOutputStream bos) throws IOException {
+    private InputStream getInputStream(ByteArrayOutputStream bos) {
         return authUtil.getInputStream(bos);
     }
 
-    public String readAsset(String assetName, String assetPath) {
-        log.info("Read asset from server - assetName:{}, assetPath:{}", assetName, assetPath);
+    public InputStream readAsset(String assetName) throws Exception{
+        log.info("Read asset from server - assetName:{}", assetName);
         String filePath = null;
 
         if (StringUtils.isBlank(assetName)) {
             throw new InvalidConfigurationException("Asset name is null!");
         }
 
-        if (StringUtils.isBlank(assetPath)) {
-            throw new InvalidConfigurationException("Path to read the asset from is null");
+        List<Document> assets = this.getAssetByName(assetName);
+        log.info("assets{} identified by assetName:{}", assets, assetName);
+
+        if (assets == null || assets.isEmpty()) {
+            throw new NotFoundException("Cannot find asset identified by - " + assetName);
         }
 
+        Document asset = assets.get(0);
+        String assetPath = asset.getDescription();
         filePath = assetPath + File.separator + assetName;
         log.info("documentStoreService:{}, filePath:{}, localDocumentStoreService:{} ", documentStoreService, filePath,
                 localDocumentStoreService);
 
-        InputStream newFile = documentStoreService.readDocumentAsStream(filePath);
-        log.info("Reading asset file newFile:{}", newFile);
+        InputStream stream = documentStoreService.readDocumentAsStream(filePath);
+        log.info("Reading asset file Reading:{}", stream);
 
-        filePath = assetPath + File.separator + assetName + "_puja.new";
-        String result = documentStoreService.saveDocumentStream(filePath, null, newFile, List.of("test"));
+        //To test - remove later - start
+        filePath = assetPath + File.separator + "puja-"+assetName;
+        String result = documentStoreService.saveDocumentStream(filePath, null, stream, List.of("test"));
         log.info("Asset saving result:{}", result);
+        //To test - remove later - end
 
-        return filePath;
+        return stream;
 
     }
 }
