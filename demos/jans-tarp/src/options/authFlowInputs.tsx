@@ -281,7 +281,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
         {loading ? <LinearProgress color="success" /> : ''}
         <DialogContent>
           <DialogContentText>
-            Submit below details to create a new OIDC client.
+            Enter inputs (optional) before initiating authentication flow.
           </DialogContentText>
           <Stack
             component="form"
@@ -299,7 +299,6 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
               error={additionalParamError.length !== 0}
               placeholder='e.g. {"paramOne": "valueOne", "paramTwo": "valueTwo"}'
               autoFocus
-              required
               margin="dense"
               id="additionalParams"
               name="additionalParams"
@@ -311,7 +310,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
               onBlur={(e) => {
                 validateJson(e);
               }}
-              value={client.additionalParams}
+              defaultValue={client.additionalParams}
             />
 
             <InputLabel id="acr-value-label">Acr Value</InputLabel>
@@ -329,7 +328,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" onClick={triggerCodeFlow}>Trigger</Button>
+          <Button type="submit" onClick={triggerCodeFlow}>Trigger Auth Flow</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>

@@ -52,8 +52,7 @@ class Agama(DialogUtils):
                 headerColor=cli_style.navbar_headcolor,
                 entriesColor=cli_style.navbar_entriescolor,
                 hide_headers = True,
-                custom_key_bindings=([('c', self.display_config)]),
-                jans_help=HTML(_("Press <b>d</b> to see deployment details. Press <b>c</b> to view/set projects configurations."))
+                custom_key_bindings=([('c', self.display_config)])
             )
 
         self.main_container =  HSplit([
@@ -68,6 +67,12 @@ class Agama(DialogUtils):
                     ], style=cli_style.container)
 
         self.main_container.on_page_enter = self.on_page_enter
+
+        self.main_container.jans_help = get_help_with(
+                f'<v>              {_("Display agama project details")}\n'
+                f'<c>              {_("Managey agama project configuration")}\n',
+                without=['v', 'enter']
+                )
 
     def on_page_enter(self) -> None:
         self.first_enter = True
@@ -185,14 +190,19 @@ class Agama(DialogUtils):
                 self.app.show_jans_dialog(file_browser_dialog)
 
             export_sample_config_button = Box(Button(export_sample_config_button_title, width=len(export_sample_config_button_title)+4, handler=export_sample_config))
-            export_current_config_button = Box(Button(export_current_config_button_title, width=len(export_current_config_button_title)+4, handler=export_current_config))
+            #export_current_config_button = Box(Button(export_current_config_button_title, width=len(export_current_config_button_title)+4, handler=export_current_config))
             import_configuration_button = Box(Button(import_configuration_button_title, width=len(import_configuration_button_title)+4, handler=import_config))
 
             dialog_title = _("Manage Configuration for Project {}").format(project_name)
             dialog = JansGDialog(
                         self.app,
                         title=dialog_title,
-                        body=HSplit([export_sample_config_button, export_current_config_button, import_configuration_button], width=D(), padding=1),
+                        body=HSplit([
+                            export_sample_config_button,
+                            #export_current_config_button,
+                            import_configuration_button
+                            ],
+                        width=D(), padding=1),
                         buttons=[Button('Close')],
                         width=len(dialog_title)+8
                         )

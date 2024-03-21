@@ -418,8 +418,8 @@ class Plugin():
                     response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                     self.app.stop_progressing()
 
-                    if response:
-                        self.app.show_message(_("Error!"), _("An error ocurred while Addin role adminui permission:\n") + str(response.text))
+                    if response.status_code != 200:
+                        self.app.show_message(_("Error!"), _("An error ocurred while Addin role adminui permission:\n") + str(response.text), tobefocused=self.app.center_container)
                     else:
                         self.adminui_update_permissions()
 
