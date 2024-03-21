@@ -10,7 +10,9 @@ import typing as _t
 from functools import cached_property
 
 from google.cloud import secretmanager
-from google.api_core.exceptions import AlreadyExists, NotFound
+from google.api_core.exceptions import AlreadyExists
+from google.api_core.exceptions import NotFound
+from google.api_core.exceptions import FailedPrecondition
 
 from jans.pycloudlib.config.base_config import BaseConfig
 from jans.pycloudlib.utils import safe_value
@@ -220,10 +222,10 @@ class GoogleConfig(BaseConfig):
         )
 
         logger.info("Added secret version: {}".format(response.name))
-        self._disable_old_versions(parent)
+        self._destroy_old_versions(parent)
         return bool(response)
 
-    def _disable_old_versions(self, parent):
+    def _destroy_old_versions(self, parent):
         # list of version.state enum
         #
         # - STATE_UNSPECIFIED = 0
@@ -251,7 +253,13 @@ class GoogleConfig(BaseConfig):
             # hence we only disable 1 version after allowed enabled versions are reaching threshold
             logger.info(
                 f"The soft-limit for max. versions (currently set to {self.max_versions}) has been reached; "
-                f"disabling previous version {version.name} (state={version.state.name})"
+                f"destroying previous version {version.name} (state={version.state.name})"
             )
-            self.client.disable_secret_version(request={"name": version.name})
+
+            try:
+                self.client.destroy_secret_version(request={"name": version.name})
+            except FailedPrecondition as exc:
+                # re-raise error if the state is not DESTROYED (400 status code)
+                if exc.code != 400:
+                    raise exc
             break
