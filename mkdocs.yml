@@ -384,7 +384,7 @@ nav:
   - Link Guide:
     - admin/link/README.md
     - Jans LDAP Link: admin/link/jans-link.md
-    - Jans Keycloak Link: admin/link/keycloak-link.md
+    - Jans Keycloak Link: admin/link/jans-keycloak-link.md
   - Lock Guide:
       - admin/lock/README.md
       - Lock Installation: admin/lock/lock_installation.md
@@ -448,6 +448,7 @@ nav:
         - 'Localization': 'casa/administration/localization.md'
         - 'Plugins':
             - '2FA Settings': 'casa/plugins/2fa-settings.md'
+            - 'Accounts Linking': 'casa/plugins/accts-linking/index.md'
             - 'Consent Management': 'casa/plugins/consent-management.md'
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'

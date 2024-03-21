@@ -61,6 +61,7 @@
         <module>shared</module>
         <module>app</module>
         <module>app-fips</module>
+        <module>plugins/acct-linking</module>
         <module>plugins/client-authorizations</module>
         <module>plugins/custom-branding</module>
         <module>plugins/strong-authn-settings</module>
