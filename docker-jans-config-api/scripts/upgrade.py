@@ -56,6 +56,9 @@ def _transform_api_dynamic_config(conf):
             ],
         }),
         ("customAttributeValidationEnabled", True),
+        ("disableLoggerTimer", False),
+        ("disableAuditLogger", False),
+        ("assetMgtEnabled", True),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
