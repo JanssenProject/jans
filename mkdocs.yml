@@ -448,6 +448,7 @@ nav:
         - 'Localization': 'casa/administration/localization.md'
         - 'Plugins':
             - '2FA Settings': 'casa/plugins/2fa-settings.md'
+            - 'Accounts Linking': 'casa/plugins/accts-linking/index.md'
             - 'Consent Management': 'casa/plugins/consent-management.md'
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'
