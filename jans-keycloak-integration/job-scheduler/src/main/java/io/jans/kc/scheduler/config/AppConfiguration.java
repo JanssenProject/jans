@@ -37,6 +37,7 @@ public class AppConfiguration {
     private static final String CFG_PROP_JOB_TRSYNC_SCHEDULE_INTERVAL = "app.job.trustrelationship-sync.schedule-interval";
 
     private static final String CFG_PROP_KEYCLOAK_RESOURCES_REALM = "app.keycloak.resources.realm";
+    private static final String CFG_PROP_KEYCLOAK_RESOURCES_AUTHN_BROWSER_FLOW_ALIAS = "app.keycloak.resources.authn.browser.flow-alias";
 
     private final Properties configProperties;
 
@@ -118,6 +119,11 @@ public class AppConfiguration {
     public String keycloakResourcesRealm() {
 
         return getStringEntry(CFG_PROP_KEYCLOAK_RESOURCES_REALM);
+    }
+
+    public String keycloakResourcesBrowserFlowAlias() {
+
+        return getStringEntry(CFG_PROP_KEYCLOAK_RESOURCES_AUTHN_BROWSER_FLOW_ALIAS);
     }
 
     public Duration trustRelationshipSyncScheduleInterval() {
