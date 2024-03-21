@@ -42,6 +42,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -359,6 +360,23 @@ public class AssertionService {
         	authenticationData.setStatus(Fido2AuthenticationStatus.canceled);
         } else {
         	authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
+
+        	JsonNode responseDeviceData = responseNode.get("deviceData");
+    		if (responseDeviceData != null && responseDeviceData.isTextual()) {
+                try {
+    				Fido2DeviceData deviceData = dataMapperService.readValue(
+    						new String(base64Service.urlDecode(responseDeviceData.asText()), StandardCharsets.UTF_8),
+    						Fido2DeviceData.class);
+    	            
+    	            boolean pushTokenUpdated = !StringHelper.equals(registrationEntry.getDeviceData().getPushToken(), deviceData.getPushToken());
+    	            if (pushTokenUpdated) {
+    	            	prepareForPushTokenChange(registrationEntry);
+    	            }
+                    registrationEntry.setDeviceData(deviceData);
+                } catch (Exception ex) {
+                    throw errorResponseFactory.invalidRequest(String.format("Device data is invalid: %s", responseDeviceData), ex);
+                }
+            }
         }
 
 		// Set expiration
@@ -395,6 +413,28 @@ public class AssertionService {
 		externalFido2InterceptionService.verifyAssertionFinish(finishResponseNode, externalFido2InterceptionContext);
 
 		return finishResponseNode;
+	}
+
+	private void prepareForPushTokenChange(Fido2RegistrationEntry registrationEntry) {
+		Fido2DeviceNotificationConf deviceNotificationConf = registrationEntry.getDeviceNotificationConf();
+		if (deviceNotificationConf == null) {
+			return;
+		}
+
+		String snsEndpointArn = deviceNotificationConf.getSnsEndpointArn();
+		if (StringHelper.isEmpty(snsEndpointArn)) {
+			return;
+		}
+		
+		deviceNotificationConf.setSnsEndpointArn(null);
+		deviceNotificationConf.setSnsEndpointArnRemove(snsEndpointArn);
+		List<String> snsEndpointArnHistory = deviceNotificationConf.getSnsEndpointArnHistory();
+		if (snsEndpointArnHistory == null) {
+			snsEndpointArnHistory = new ArrayList<>();
+			deviceNotificationConf.setSnsEndpointArnHistory(snsEndpointArnHistory);
+		}
+		
+		snsEndpointArnHistory.add(snsEndpointArn);
 	}
 
 	private Pair<ArrayNode, String> prepareAllowedCredentials(String documentDomain, String username, String requestedKeyHandle, boolean superGluu) {
