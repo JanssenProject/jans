@@ -2,8 +2,11 @@ package io.jans.kc.scheduler;
 
 import io.jans.kc.scheduler.job.ExecutionContext;
 import io.jans.kc.scheduler.job.RecurringJob;
+import io.jans.saml.metadata.model.EntityDescriptor;
+import io.jans.saml.metadata.model.SAMLMetadata;
 import io.jans.kc.api.admin.client.KeycloakApi;
 import io.jans.kc.api.admin.client.model.ManagedSamlClient;
+import io.jans.kc.api.admin.client.model.AuthenticationFlow;
 import io.jans.kc.api.config.client.JansConfigApi;
 import io.jans.kc.api.config.client.model.JansTrustRelationship;
 import io.jans.kc.scheduler.App;
@@ -24,115 +27,81 @@ public class TrustRelationshipSyncJob extends RecurringJob {
     private JansConfigApi jansConfigApi;
     private KeycloakApi keycloakApi;
     private String realm;
+    private AuthenticationFlow authnBrowserFlow;
 
     public TrustRelationshipSyncJob() {
 
         this.jansConfigApi = App.jansConfigApi();
         this.keycloakApi = App.keycloakApi();
-        this.realm = App.configuration().keycloakAdminRealm();
+        this.realm = App.configuration().keycloakResourcesRealm();
     }
     
     @Override
     public void run(ExecutionContext context) {
         
         try {
+
+            log.debug("Initializing job objects");
+            initJob();
             log.debug("Performing Saml client housekeeping");
             performSamlClientsHousekeeping();
             log.debug("Saml client housekeeping complete");
 
-            log.debug("Synchronizing new trustrelationships");
-            syncNewTrustRelationships();
-            log.debug("New trustrelationships sync complete");
+            log.debug("Creating new managed saml clients");
+            createNewManagedSamlClients();
+            log.debug("Creating new managed saml clients complete");
         }catch(Exception e) {
             log.error("Error running tr sync job",e);
         }
     }
 
+    private void initJob() {
+        
+        authnBrowserFlow = keycloakApi.getAuthenticationFlowFromAlias(realm,App.configuration().keycloakResourcesBrowserFlowAlias());
+    }
+
     private void performSamlClientsHousekeeping() {
 
-        log.debug("Saml housekeeping start for realm -- {}",realm);
-        List<ManagedSamlClient> samlclients = keycloakApi.findAllManagedSamlClients(realm);
-        for(ManagedSamlClient samlclient : samlclients) {
-            String jans_tr_inum = samlclient.trustRelationshipInum();
-            log.debug("Housekeeping attempt for SAML client -- {}",samlclient.keycloakId());
-            if(!jansConfigApi.trustRelationshipExists(jans_tr_inum)) {
-                log.debug("Deleting SAML client -- {}",samlclient.keycloakId());
-                keycloakApi.deleteManagedSamlClient(realm,samlclient);
+        deleteUnmanagedSamlClients();
+    }
+
+    private void deleteUnmanagedSamlClients() {
+
+        log.debug("Deleting unmanaged SAML clients");
+        List<ManagedSamlClient> managedsamlclients = keycloakApi.findAllManagedSamlClients(realm);
+        managedsamlclients.forEach((c) -> {
+           if(!jansConfigApi.trustRelationshipExists(c.externalRef())) {
+               log.debug("Deleting previously managed Saml client with id: {}",c.keycloakId());
+               keycloakApi.deleteManagedSamlClient(realm,c);
+           }
+        });
+    }
+
+    private void createNewManagedSamlClients() {
+        log.debug("Creating new managed Saml clients");
+        unassociatedJansTrustRelationships().stream().forEach(this::createNewManagedSamlClient);
+    }
+
+    private void createNewManagedSamlClient(final JansTrustRelationship trustrelationship) {
+        try {
+            SAMLMetadata metadata = jansConfigApi.getTrustRelationshipSamlMetadata(trustrelationship);
+            List<EntityDescriptor> entitydescriptors = metadata.getEntityDescriptors();
+            if(!entitydescriptors.isEmpty()) {
+                //use first entity descriptor 
+                keycloakApi.createManagedSamlClient(realm,trustrelationship.getInum(),authnBrowserFlow,entitydescriptors.get(0));
             }
+        }catch(Exception e) {
+            log.warn("Could not create managed saml client using Trustrelationship with inum " + trustrelationship.getInum(),e);
         }
-        log.debug("Saml housekeeping exit for realm -- {}",realm);
     }
 
-    private void syncNewTrustRelationships() {
-
-        List<JansTrustRelationship> unmanagedtrs = unmanagedTrustRelationships();
-        unmanagedtrs.forEach(new CreateSamlClientFromTrustRelationship());
-        
-    }
-
-    private void syncExistingTrustRelationships() {
-
-    }
-
-    private List<JansTrustRelationship> unmanagedTrustRelationships() {
-
-        List<ManagedSamlClient> samlclients = keycloakApi.findAllManagedSamlClients(realm);
-        return filteredTrustRelationships(new HasAnAssociatedSamlClient(samlclients).negate());
-    }
-
-    private List<JansTrustRelationship> managedTrustRelationships() {
-
-        List<ManagedSamlClient> samlclients = keycloakApi.findAllManagedSamlClients(realm);
-        return filteredTrustRelationships(new HasAnAssociatedSamlClient(samlclients));
-    }
-
-    private List<JansTrustRelationship> filteredTrustRelationships(final Predicate<JansTrustRelationship> filter) {
+    private List<JansTrustRelationship> unassociatedJansTrustRelationships() {
 
         List<JansTrustRelationship> alltr = jansConfigApi.findAllTrustRelationships();
-        return alltr
-            .stream()
-            .filter(filter)
-            .collect(Collectors.toList());
+        List<ManagedSamlClient> clients = keycloakApi.findAllManagedSamlClients(realm);
+        return alltr.stream().filter((t)-> {
+            return clients.stream().noneMatch((c) -> {return c.externalRef().equals(t.getInum());});
+        }).toList();
     }
 
-    private class HasAnAssociatedSamlClient implements Predicate<JansTrustRelationship> {
-
-        private List<ManagedSamlClient> samlclients;
-
-        public HasAnAssociatedSamlClient(List<ManagedSamlClient>  samlclients) {
-
-            this.samlclients = samlclients;
-        }
-
-
-        @Override
-        public boolean test(JansTrustRelationship t) {
-
-            for(ManagedSamlClient c : samlclients) {
-                if(c.trustRelationshipInum().equalsIgnoreCase(t.getInum())) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-    }
-
-    private class CreateSamlClientFromTrustRelationship implements Consumer<JansTrustRelationship> {
-
-        @Override
-        public void accept(JansTrustRelationship tr) {
-
-        }
-
-        
-    }
-
-    private class UpdateSamlClientUsingTrustRelationship implements Consumer<JansTrustRelationship> {
-
-        @Override
-        public void accept(JansTrustRelationship tr) {
-
-        }
-    }
 }

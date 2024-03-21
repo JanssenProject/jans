@@ -26,6 +26,7 @@ import io.jans.kc.api.config.client.*;
 import io.jans.kc.api.config.client.impl.*;
 
 import io.jans.kc.api.admin.client.*;
+import io.jans.kc.api.admin.client.model.AuthenticationFlow;
 import io.jans.kc.api.admin.client.model.ManagedSamlClient;
 
 import java.util.List;
@@ -58,6 +59,9 @@ public class App {
             log.debug("Setting up access to external apis");
             jansConfigApiFactory = JansConfigApiFactory.createFactory(config);
             keycloakApiFactory = KeycloakApiFactory.createFactory(config);
+
+            //initialize application objects
+            log.debug("Initialization additional application objects");
 
             log.debug("Initializing scheduler ");
             jobScheduler = createJobScheduler(config);
@@ -202,16 +206,18 @@ public class App {
 
     private static class JansConfigApiFactory {
 
+        private String endpoint;
         private ApiCredentialsProvider credsprovider;
 
-        private JansConfigApiFactory(ApiCredentialsProvider credsprovider) {
+        private JansConfigApiFactory(String endpoint, ApiCredentialsProvider credsprovider) {
 
+            this.endpoint = endpoint;
             this.credsprovider = credsprovider;
         }
 
         public JansConfigApi newApiClient() {
 
-            return JansConfigApi.createInstance(credsprovider.getApiCredentials());
+            return JansConfigApi.createInstance(endpoint,credsprovider.getApiCredentials());
         }
 
         public static JansConfigApiFactory createFactory(AppConfiguration config) {
@@ -232,7 +238,7 @@ public class App {
                     throw new StartupError("Could not initialize jans-config API. Unsupported authn method");
                 }
                 ApiCredentialsProvider provider = OAuthApiCredentialsProvider.create(config.configApiAuthUrl(),authparams);
-                return new JansConfigApiFactory(provider);
+                return new JansConfigApiFactory(config.configApiUrl(),provider);
 
             }catch(CredentialsProviderError e) {
                 throw new StartupError("Could not initialize jans-config API",e);
