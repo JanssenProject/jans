@@ -62,7 +62,7 @@ public class SAMLMetadataParser  {
             validator.validate(new StreamSource(metadatafile));
 
             final DocumentBuilderFactory docbuilderfactory = DocumentBuilderFactory.newInstance();
-            docbuilderfactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
+            docbuilderfactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",false);
             docbuilderfactory.setSchema(schema);
             docbuilderfactory.setNamespaceAware(true);
             final DocumentBuilder docbuilder = docbuilderfactory.newDocumentBuilder();

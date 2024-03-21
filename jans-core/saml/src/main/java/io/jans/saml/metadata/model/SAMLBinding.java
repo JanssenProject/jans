@@ -15,7 +15,7 @@ public enum SAMLBinding {
         this.value = value;
     }
 
-    public String getValue() {
+    public String value() {
 
         return this.value;
     }

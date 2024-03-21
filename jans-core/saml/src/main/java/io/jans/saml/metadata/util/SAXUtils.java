@@ -17,13 +17,13 @@ import org.xml.sax.SAXException;
 public class SAXUtils  {
 
     private static final Source [] schemasources = new Source [] {
-        new StreamSource(SAXUtils.class.getResourceAsStream("/schema/saml/saml-schema-metadata-2.0.xsd"))
+        new StreamSource(SAXUtils.class.getResourceAsStream("/META-INF/saml.schemas/saml-schema-metadata-2.0.xsd"))
     };
 
 
     public static final SAXParser createParser() throws ParserConfigurationException, SAXException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",false);
         factory.setSchema(newSchemaFactory().newSchema(schemasources));
         factory.setNamespaceAware(true);
         return factory.newSAXParser();
@@ -32,7 +32,7 @@ public class SAXUtils  {
     private static final SchemaFactory newSchemaFactory() throws SAXException {
         
         final SchemaFactory schemafactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        schemafactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
+        schemafactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",false);
         schemafactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA,"");
         schemafactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         schemafactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
