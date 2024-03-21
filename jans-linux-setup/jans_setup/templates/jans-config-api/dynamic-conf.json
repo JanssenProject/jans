@@ -1,6 +1,9 @@
 {
   "configOauthEnabled": ${configOauthEnabled},
+  "disableLoggerTimer": false,
+  "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
+  "assetMgtEnabled": true,
   "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",
   "apiClientId": "${jca_client_id}",
