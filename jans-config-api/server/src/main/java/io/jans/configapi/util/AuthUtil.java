@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.lang.reflect.Field;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -465,6 +466,18 @@ public class AuthUtil {
         }
         baos.flush();
         return baos;
+    }
+    
+    public InputStream getInputStream(ByteArrayOutputStream output) {
+        log.debug("Get InputStream for output:{}", output);
+        InputStream input = null;
+        if (output == null) {
+            return input;
+        }
+
+        input = new ByteArrayInputStream(output.toByteArray());
+        log.debug("From ByteArrayOutputStream InputStream is:{}", input);
+        return input;
     }
     
     
