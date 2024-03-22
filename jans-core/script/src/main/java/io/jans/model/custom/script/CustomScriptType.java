@@ -23,6 +23,8 @@ import io.jans.model.custom.script.type.client.ClientRegistrationType;
 import io.jans.model.custom.script.type.client.DummyClientRegistrationType;
 import io.jans.model.custom.script.type.configapi.ConfigApiType;
 import io.jans.model.custom.script.type.configapi.DummyConfigApiType;
+import io.jans.model.custom.script.type.createuser.CreateUserType;
+import io.jans.model.custom.script.type.createuser.DummyCreateUserType;
 import io.jans.model.custom.script.type.discovery.DiscoveryType;
 import io.jans.model.custom.script.type.discovery.DummyDiscoveryType;
 import io.jans.model.custom.script.type.fido2.DummyFido2ExtensionType;
@@ -100,6 +102,7 @@ public enum CustomScriptType implements AttributeEnum {
     END_SESSION("end_session", "End Session", EndSessionType.class, CustomScript.class, "EndSession", new DummyEndSessionType()),
     POST_AUTHN("post_authn", "Post Authentication", PostAuthnType.class, CustomScript.class, "PostAuthn", new DummyPostAuthnType()),
     SELECT_ACCOUNT("select_account", "Select Account", SelectAccountType.class, CustomScript.class, "SelectAccount", new DummySelectAccountType()),
+    CREATE_USER("create_user", "Create User", CreateUserType.class, CustomScript.class, "CreateUser", new DummyCreateUserType()),
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType()),
     CIBA_END_USER_NOTIFICATION("ciba_end_user_notification", "CIBA End User Notification", EndUserNotificationType.class,
             CustomScript.class, "EndUserNotification", new DummyEndUserNotificationType()),
