@@ -7,6 +7,36 @@ tags:
   - prompt
 ---
 
+# Prompt CREATE
+
+`prompt=create` value indicates to the AS that the client desires that the user be shown
+ the account creation page rather than the login flow.
+
+It is enabled by default. However `prompt=create` can be entirely disabled if set
+AS configuration property `disablePromptCreate` to `true`.
+
+By default for `prompt=create` `createUser` page is shown which allows to enter basic information:
+- display name
+- email
+- login
+- password
+
+On "Create User" button click user is created and redirected Authorization Endpoint of AS.
+
+![Create User](../../../assets/create-user.png)
+
+If more or custom fields has to be shown then custom page should be added and ["CreateUser" custom script](../../developer/scripts/create-user.md) 
+should redirect to that custom page.
+
+```java
+public String getCreateUserPage(Object context) {
+    return "/customCreateUser";
+}
+```
+
+- ["CreateUser" custom script](../../developer/scripts/create-user.md)
+
+
 # Prompt NONE
 
 The OpenID Connect protocol supports a prompt=none parameter on the authentication request that allows applications to indicate that the authorization server must not display any user interaction (such as authentication, consent, or MFA). Janssen will either return the requested response back to the application, or return an error if the user is not already authenticated or if some type of consent or prompt is required before proceeding.
