@@ -730,7 +730,7 @@ global:
     authServerServiceName: auth-server
     # -- Boolean flag to enable/disable auth-server chart. You should never set this to false.
     enabled: true
-    # -- passing custom java options to auth-server. Notice you do not need to pass in any loggers optoins as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    # -- passing custom java options to auth-server. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
@@ -801,7 +801,7 @@ global:
   # -- Azure storage kind if using Azure disks
   azureStorageKind: Managed
   casa:
-    # -- passing custom java options to casa. Notice you do not need to pass in any loggers optoins as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    # -- passing custom java options to casa. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
@@ -854,7 +854,7 @@ global:
     configApiServerServiceName: config-api
     # -- Boolean flag to enable/disable the config-api chart.
     enabled: true
-    # -- passing custom java options to config-api. Notice you do not need to pass in any loggers optoins as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    # -- passing custom java options to config-api. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
@@ -893,7 +893,7 @@ global:
     fido2ServiceName: fido2
     # -- Boolean flag to enable/disable the fido2 chart.
     enabled: true
-    # -- passing custom java options to fido2. Notice you do not need to pass in any loggers optoins as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    # -- passing custom java options to fido2. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
@@ -956,7 +956,7 @@ global:
     scimServiceName: scim
     # -- Boolean flag to enable/disable the SCIM chart.
     enabled: true
-    # -- passing custom java options to scim. Notice you do not need to pass in any loggers optoins as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    # -- passing custom java options to scim. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
@@ -1009,7 +1009,7 @@ global:
     linkServiceName: link
     # -- Boolean flag to enable/disable the link chart.
     enabled: false
-    # -- passing custom java options to link. Notice you do not need to pass in any loggers optoins as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    # -- passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
