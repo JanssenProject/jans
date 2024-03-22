@@ -48,6 +48,7 @@ public enum ErrorResponse {
     WEBHOOK_URL_EMPTY("Webhook URL is required."),
     WEBHOOK_HTTP_METHOD_EMPTY("HTTP method for webhook is required."),
     WEBHOOK_REQUEST_BODY_EMPTY("HTTP request-body for webhook is required for POST/PUT/PATCH request."),
+    WEBHOOK_REQUEST_BODY_PARSING_ERROR("Error in parsing request body."),
     WEBHOOK_SAVE_ERROR("Error in saving webhook."),
     WEBHOOK_SEARCH_ERROR("Error in fetching webhook."),
     WEBHOOK_TRIGGER_ERROR("Error in triggering webhook."),

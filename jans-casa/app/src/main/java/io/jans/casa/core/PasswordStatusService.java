@@ -39,8 +39,8 @@ public class PasswordStatusService implements Serializable {
 
     public void reloadStatus() {
 
-        passSetAvailable = false;   //Setting user's password is a disabled feature in Jans Casa
         IdentityPerson p = persistenceService.get(IdentityPerson.class, persistenceService.getPersonDn(asco.getUser().getId()));
+        passSetAvailable = !p.hasPassword();
         passResetAvailable = p.hasPassword() && confSettings.isEnablePassReset();        
 
     }

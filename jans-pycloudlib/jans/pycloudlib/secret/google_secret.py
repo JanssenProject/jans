@@ -18,7 +18,9 @@ from math import ceil
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.exceptions import InvalidTag
 from google.cloud import secretmanager
-from google.api_core.exceptions import AlreadyExists, NotFound
+from google.api_core.exceptions import AlreadyExists
+from google.api_core.exceptions import NotFound
+from google.api_core.exceptions import FailedPrecondition
 
 from jans.pycloudlib.secret.base_secret import BaseSecret
 from jans.pycloudlib.utils import safe_value
@@ -93,6 +95,14 @@ class GoogleSecret(BaseSecret):
         # iterable contains multipart secret names
         self.multiparts: list[str] = []
 
+        # allowed number of ENABLED versions
+        try:
+            max_versions = int(os.environ.get("CN_GOOGLE_SECRET_MAX_VERSIONS", "5"))
+        except ValueError:
+            max_versions = 5
+            logger.warning("Unsupported value set to CN_GOOGLE_SECRET_MAX_VERSIONS environment variable. Falling back to default value.")
+        self.max_versions = max(1, max_versions)
+
     @cached_property
     def client(self) -> secretmanager.SecretManagerServiceClient:
         """Create the Secret Manager client."""
@@ -164,7 +174,7 @@ class GoogleSecret(BaseSecret):
 
         data = self._maybe_legacy_payload(payload)
         if not data:
-            logger.warning("Unable to load payload with zlib/lzma format; trying to load using new format.")
+            # logger.warning("Unable to load payload with zlib/lzma format; trying to load using new format.")
             data = json.loads(payload)
 
         # decoded payload
@@ -194,8 +204,14 @@ class GoogleSecret(BaseSecret):
             A boolean to mark whether secret is set or not.
         """
         all_ = self.get_all()
-        all_[key] = safe_value(value)
-        logger.info(f"Adding key {key}.")
+        new_value = safe_value(value)
+
+        # no changes, skip updating secret
+        if new_value == all_.get(key):
+            return False
+
+        all_[key] = new_value
+        logger.info(f"Adding/updating key {key} to google secret manager")
 
         payload = safe_value(all_)
         return self._add_secret_version_multipart(payload)
@@ -213,8 +229,13 @@ class GoogleSecret(BaseSecret):
         # note that existing value will be overwritten
         all_ = self.get_all()
 
-        for k, v in data.items():
-            all_[k] = safe_value(v)
+        safe_data = {k: safe_value(v) for k, v in data.items()}
+
+        # no changes, skip updating secrets
+        if safe_data == all_:
+            return False
+
+        all_.update(safe_data)
 
         payload = safe_value(all_)
         return self._add_secret_version_multipart(payload)
@@ -267,6 +288,7 @@ class GoogleSecret(BaseSecret):
                 request={"parent": parent, "payload": {"data": fragment}}
             )
             logger.info(f"Added secret version: {response.name}")
+            self._destroy_old_versions(parent)
         return True
 
     def _prepare_secret_multipart(self, part: int) -> str:
@@ -330,3 +352,42 @@ class GoogleSecret(BaseSecret):
         except binascii.Error:
             data = json.loads(payload_str)
         return data
+
+    def _destroy_old_versions(self, parent):
+        # list of version.state enum
+        #
+        # - STATE_UNSPECIFIED = 0
+        # - ENABLED = 1
+        # - DISABLED = 2
+        # - DESTROYED = 3
+        response = self.client.list_secret_versions(
+            request={
+                "parent": parent,
+                "filter": "state:ENABLED",
+                "page_size": 1,
+            },
+        )
+
+        # versions that need to be kept as enabled
+        enabled_versions = []
+
+        for version in response:
+            # keep version as enabled (default max. is set by `max_versions` attribute)
+            if len(enabled_versions) < self.max_versions and version.name not in enabled_versions:
+                enabled_versions.append(version.name)
+                continue
+
+            # secrets may have lots of versions; disabling them all could produce bottleneck
+            # hence we only disable 1 version after allowed enabled versions are reaching threshold
+            logger.info(
+                f"The soft-limit for max. versions (currently set to {self.max_versions}) has been reached; "
+                f"destroying previous version {version.name} (state={version.state.name})"
+            )
+
+            try:
+                self.client.destroy_secret_version(request={"name": version.name})
+            except FailedPrecondition as exc:
+                # re-raise error if the state is not DESTROYED (400 status code)
+                if exc.code != 400:
+                    raise exc
+            break
