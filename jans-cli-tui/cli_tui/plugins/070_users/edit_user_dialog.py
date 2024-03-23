@@ -278,7 +278,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             common_data.app.show_message(fix_title, _("Please enter Password"))
             return
 
-        user_info = {'customObjectClasses':['top', 'jansPerson'], 'customAttributes':[]}
+        user_info = {'customObjectClasses':['top', 'jansPerson', 'jansCustomPerson'], 'customAttributes':[]}
         for key_ in ('mail', 'userId', 'displayName', 'givenName'):
             user_info[key_] = raw_data.pop(key_)
 
