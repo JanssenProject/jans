@@ -1,6 +1,8 @@
 from typing import Optional, Sequence, Callable
 import asyncio
 from functools import partial
+
+from prompt_toolkit import HTML
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit,\
     DynamicContainer, Window
@@ -235,7 +237,8 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 continue
             if claim['name'] in ('memberOf', 'userPassword', 'uid', 'jansStatus', 'jansActive', 'updatedAt'):
                 continue
-            claims_list.append((claim['name'], claim['displayName']))
+            if claim.get('status') == 'active':
+                claims_list.append((claim['name'], claim['displayName']))
 
         claims_checkbox = CheckboxList(values=claims_list)
 
@@ -253,7 +256,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),show_scrollbar=False)
 
 
-        body = HSplit([Label(_("Select claim to be added to current user.")), claims_checkbox])
+        body = HSplit([Label(HTML(_("Select claim to be added to current user.\n<i>Note</i>: Only <b>active</b> claims are displayed."))), claims_checkbox])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_claim)]
         dialog = JansGDialog(common_data.app, title=_("Claims"), body=body, buttons=buttons, width=common_data.app.dialog_width-20)
         common_data.app.show_jans_dialog(dialog)
