@@ -88,7 +88,7 @@ Create JAVA_OPTIONS ENV for passing custom work and detailed logs
 {{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" $memory -}}
 {{- $xmx := printf "-Xmx%dm" (sub $memory 300) -}}
 {{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
-{{ $customJavaOptions | trimS " " | quote }}
+{{ $customJavaOptions | trim | quote }}
 {{- end }}
 
 {{/*
