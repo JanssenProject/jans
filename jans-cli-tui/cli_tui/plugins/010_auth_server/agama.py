@@ -36,9 +36,9 @@ class Agama(DialogUtils):
         self.data = []
         self.first_enter = False
         self.jans_help = get_help_with(
-                f'<d>              {_("Display agama project config")}\n'
-                f'<c>              {_("Manage agama project Configuration")}\n'
-                f'<Delete>         {_("Delete current agama project")}',
+                f'<d>              {_("Display Agama project config")}\n'
+                f'<c>              {_("Manage Agama project Configuration")}\n'
+                f'<Delete>         {_("Delete current Agama project")}',
                 without=['d', 'delete']
                 )
 
@@ -69,8 +69,8 @@ class Agama(DialogUtils):
         self.main_container.on_page_enter = self.on_page_enter
 
         self.main_container.jans_help = get_help_with(
-                f'<v>              {_("Display agama project details")}\n'
-                f'<c>              {_("Managey agama project configuration")}\n',
+                f'<v>              {_("Display Agama project details")}\n'
+                f'<c>              {_("Manage Agama project configuration")}\n',
                 without=['v', 'enter']
                 )
 
