@@ -58,7 +58,7 @@ public class KeycloakApi {
     private static final String  SAML_PROTOCOL = "saml";
     private static final Pattern MANAGED_SAML_CLIENT_NAME_REGEX = Pattern.compile("^managed_saml_client_([a-zA-Z0-9\\-]+)$");
     private static final String  MANAGED_SAML_CLIENT_NAME_FORMAT = "managed_saml_client_%s";
-    private static final String  MANAGED_SAML_CLIENT_DESC_FORMAT = "managed saml client. External #ref %s.";
+    private static final String  MANAGED_SAML_CLIENT_DESC_FORMAT = "#REF %s.\r\n!!! DO NOT ALTER THIS CLIENT MANUALLY!!!";
     private static final String  BROWSER_AUTHN_FLOW_KEY = "browser";
 
     private static final Logger log = LoggerFactory.getLogger(KeycloakApi.class);
@@ -127,26 +127,60 @@ public class KeycloakApi {
             ClientsResource clientsresource = realmresource.clients();
             ClientRepresentation clientrep = new ClientRepresentation();
             ManagedSamlClient client = new ManagedSamlClient(clientrep,externalref);
-            client.setName(managedSamlClientName(externalref));
-            client.setDescription(managedSamlClientDescription(externalref));
-            client.setClientId(entitydesc.getEntityId());
-
+            
+            //configure basic properties
+            configureBasicManagedClientProperties(managedSamlClientName(externalref),managedSamlClientDescription(externalref),
+                    entitydesc.getEntityId(), client);
             //configure saml redirect uris
             configureSamlRedirectUris(entitydesc, client);
-
             //configure signing and encryption
             configureSamlEncryptionAndSigning(entitydesc,client);
-
             //configure keycloak authentication 
             configureKeycloakAuthentication(browserflow,client);
 
             Response response = clientsresource.create(clientrep);
             int code = response.getStatus();
-            String body = response.readEntity(String.class);
-            log.info("Create managed saml client: {} - {}",code,body);
+            if(code != Response.Status.CREATED.getStatusCode()) {
+                String body = response.readEntity(String.class);
+                throw new KeycloakAdminClientApiError(String.format("Could not create managed saml client(http code %d). %s.",code,body));
+            }
             return client;
         }catch(Exception e) {
             throw new KeycloakAdminClientApiError("Could not create managed saml client",e);
+        }
+    }
+
+    public void updateManagedSamlClient(String realmname,ManagedSamlClient client, EntityDescriptor entitydesc) {
+
+        try {
+            log.info("Update managed saml client. keycloak id - {}. External #ref - {}",client.keycloakId(),client.externalRef());
+            RealmResource realmresource = realmByName(realmname);
+            ClientsResource clientsresource = realmresource.clients();
+            ClientResource clientresource = clientsresource.get(client.keycloakId());
+            String externalref = client.externalRef();
+            String description = managedSamlClientDescription(client.externalRef());
+            configureBasicManagedClientProperties(null,description,entitydesc.getEntityId(),client);
+            configureSamlRedirectUris(entitydesc, client);
+            //configure signing and encryption
+            configureSamlEncryptionAndSigning(entitydesc, client);
+            clientresource.update(client.clientRepresentation());
+        }catch(Exception e) {
+            throw new KeycloakAdminClientApiError("Could not create update managed saml client",e);
+        }
+    }
+
+    private void configureBasicManagedClientProperties(String name, String description, String clientid, ManagedSamlClient client) {
+
+        if(name != null) {
+            client.setName(name);
+        }
+
+        if(description != null) {
+            client.setDescription(description);
+        }
+
+        if(clientid != null) {
+            client.setClientId(clientid);
         }
     }
 

@@ -10,6 +10,7 @@ package io.jans.kc.scheduler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import io.jans.kc.scheduler.config.ConfigApiAuthnMethod;
 import io.jans.kc.scheduler.config.AppConfiguration;
@@ -28,8 +29,12 @@ import io.jans.kc.api.config.client.impl.*;
 import io.jans.kc.api.admin.client.*;
 import io.jans.kc.api.admin.client.model.AuthenticationFlow;
 import io.jans.kc.api.admin.client.model.ManagedSamlClient;
+import io.jans.saml.metadata.parser.ParserCreateError;
+import io.jans.saml.metadata.util.SAXUtils;
 
 import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public class App {
     
@@ -47,7 +52,7 @@ public class App {
     /*
      * Entry point 
      */
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ParserCreateError, ParserConfigurationException, SAXException {
 
         log.info("Application starting ...");
         try {
@@ -62,6 +67,7 @@ public class App {
 
             //initialize application objects
             log.debug("Initialization additional application objects");
+            SAXUtils.init();
 
             log.debug("Initializing scheduler ");
             jobScheduler = createJobScheduler(config);

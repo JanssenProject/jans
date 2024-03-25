@@ -173,6 +173,16 @@ public class ManagedSamlClient {
         return this.externalRef;
     }
 
+    public ClientRepresentation clientRepresentation() {
+
+        return this.clientRepresentation;
+    }
+
+    public boolean correspondsToExternalRef(String externalRef) {
+
+        return this.externalRef.equals(externalRef);
+    }
+
     public String keycloakId() {
 
         return this.clientRepresentation.getId();
