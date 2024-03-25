@@ -138,34 +138,36 @@ export default function OIDCClients(data) {
         <Container maxWidth="lg">
             <RegisterClient isOpen={modelOpen} handleDialog={handleDialog} />
             <HelpDrawer isOpen={drawerOpen} handleDrawer={handleDrawer} />
-            <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
-                <Button color="success" variant="outlined" startIcon={<LiveHelpIcon />} onClick={() => handleDrawer(true)} >
-                    How it works?
-                </Button>
-                <Button color="success" variant="outlined" startIcon={<AddIcon />} onClick={() => setModelOpen(true)} >
-                    Add Client
+            <Stack direction="column" spacing={2} sx={{ mb: 1 }}>
+                <Stack direction="row" spacing={2} sx={{ mb: 1 }} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button color="success" variant="outlined" startIcon={<AddIcon />} onClick={() => setModelOpen(true)} style={{ maxWidth: '200px' }}>
+                        Add Client
+                    </Button>
+                </Stack>
+                <TableContainer component={Paper}>
+                    <Table aria-label="collapsible table">
+                        <TableHead>
+                            <TableRow>
+                                <StyledTableCell />
+                                <StyledTableCell>Issuer</StyledTableCell>
+                                <StyledTableCell>Client Id</StyledTableCell>
+                                <StyledTableCell>Client Secret</StyledTableCell>
+                                <StyledTableCell>Is Active</StyledTableCell>
+                                <StyledTableCell align="right">Action</StyledTableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {(data.data === undefined || data.data.length == 0) ?
+                                <TableCell colSpan={6}><Alert severity="warning">No Records to show.</Alert></TableCell> :
+                                data.data.map((row) => (<Row key={row.clientId} row={row} />))
+                            }
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <Button color="success" variant="contained" startIcon={<LiveHelpIcon />} onClick={() => handleDrawer(true)} style={{ maxWidth: '150px', float: 'left' }}>
+                    Help?
                 </Button>
             </Stack>
-            <TableContainer component={Paper}>
-                <Table aria-label="collapsible table">
-                    <TableHead>
-                        <TableRow>
-                            <StyledTableCell />
-                            <StyledTableCell>Issuer</StyledTableCell>
-                            <StyledTableCell>Client Id</StyledTableCell>
-                            <StyledTableCell>Client Secret</StyledTableCell>
-                            <StyledTableCell>Is Active</StyledTableCell>
-                            <StyledTableCell align="right">Action</StyledTableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {(data.data === undefined || data.data.length == 0) ?
-                            <TableCell colSpan={6}><Alert severity="warning">No Records to show.</Alert></TableCell> :
-                            data.data.map((row) => (<Row key={row.clientId} row={row} />))
-                        }
-                    </TableBody>
-                </Table>
-            </TableContainer>
         </Container>
     );
 }
