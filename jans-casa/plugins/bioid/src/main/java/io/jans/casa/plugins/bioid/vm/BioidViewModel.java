@@ -2,16 +2,6 @@ package io.jans.casa.plugins.bioid.vm;
 
 import java.util.List;
 
-import io.jans.casa.core.pojo.User;
-import io.jans.casa.credential.BasicCredential;
-import io.jans.casa.misc.Utils;
-import io.jans.casa.plugins.bioid.BioIDService;
-import io.jans.casa.plugins.bioid.BioidPlugin;
-import io.jans.casa.plugins.bioid.model.BioIDCredential;
-import io.jans.casa.plugins.credentials.extensions.BioidExtension;
-import io.jans.casa.service.ISessionContext;
-import io.jans.casa.service.SndFactorAuthenticationUtils;
-import io.jans.casa.ui.UIUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.bind.BindUtils;
@@ -31,6 +21,14 @@ import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Messagebox;
+
+import io.jans.casa.core.pojo.User;
+import io.jans.casa.misc.Utils;
+import io.jans.casa.plugins.bioid.BioIDService;
+import io.jans.casa.plugins.bioid.model.BioIDCredential;
+import io.jans.casa.service.ISessionContext;
+import io.jans.casa.service.SndFactorAuthenticationUtils;
+import io.jans.casa.ui.UIUtils;
 
 public class BioidViewModel {
 	private Logger logger = LoggerFactory.getLogger(getClass());
