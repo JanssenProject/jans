@@ -43,8 +43,6 @@
       
     
     
-      <link rel="stylesheet" href="../../../../css/timeago.css">
-    
       <link rel="stylesheet" href="../../../../css/tabs.css">
     
       <link rel="stylesheet" href="../../../../stylesheets/mermaid-extra.css">
@@ -8114,8 +8112,6 @@
           
         
           
-            
-          
         
           
         
@@ -8123,16 +8119,10 @@
         
       
       
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../../casa/plugins/accts-linking/">Plugins</a>
-          
-            <label for="__nav_5_2_8">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
+        <label class="md-nav__link" for="__nav_5_2_8">
+          Plugins
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <nav class="md-nav" aria-label="Plugins" data-md-level="3">
         <label class="md-nav__title" for="__nav_5_2_8">
@@ -8155,6 +8145,18 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../casa/plugins/accts-linking/account-linking-index/" class="md-nav__link">
+        Accounts Linking
+      </a>
+    </li>
+  
+
             
           
             
@@ -8382,7 +8384,7 @@
 
 
 <h1 id="persistence-script">Persistence Script<a class="headerlink" href="#persistence-script" title="Permanent link">#</a></h1>
-<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/v1.1.1.nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
+<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
 <ol>
 <li>Load initialization data from DB or initialize services after the creation of Entry Manager. </li>
 <li>Release resources, terminate services etc. after the destruction of Entry Manager.</li>
@@ -8396,7 +8398,7 @@ Information about an entity (person, session, client, scripts etc) constitutes a
 The Entry Manager (CRUD operations) implementation for each type of Persistence is available in the Janssen server and the relevant Entry Manager ( LDAPEntryManager, SQLEntryManager, etc.) is created when the server starts up. </p>
 </div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<p>The Jans-Auth server contains a <a href="https://github.com/JanssenProject/jans/blob/v1.1.1.nightly/docs/script-catalog/persistence_extension/PersistenceExtension.py"><code>PeristenceType</code></a> script.</p>
+<p>The Jans-Auth server contains a <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/persistence_extension/PersistenceExtension.py"><code>PeristenceType</code></a> script.</p>
 <h2 id="hashed-passwords">Hashed Passwords<a class="headerlink" href="#hashed-passwords" title="Permanent link">#</a></h2>
 <p>Hashed passwords can be created using any method from this <a href="https://github.com/JanssenProject/jans/blob/main/jans-orm/core/src/main/java/io/jans/orm/operation/auth/PasswordEncryptionMethod.java">enum</a>, instead of the native/default SSHA256.
 The ORM module of the Janssen server does the following: </p>
@@ -8426,21 +8428,6 @@ The ORM module of the Janssen server does the following: </p>
 </ul>
 </li>
 </ol>
-
-  <hr>
-<div class="md-source-file">
-  <small>
-    
-      Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-10-26T11:06:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-10-26</span>
-      
-        <br>
-        Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-05-18T19:22:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-05-18</span>
-      
-    
-  </small>
-</div>
 
 
 
@@ -8534,10 +8521,6 @@ The ORM module of the Janssen server does the following: </p>
     
 
       <script src="../../../../assets/javascripts/bundle.8492ddcf.min.js"></script>
-      
-        <script src="../../../../js/timeago.min.js"></script>
-      
-        <script src="../../../../js/timeago_mkdocs_material.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->

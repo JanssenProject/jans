@@ -43,8 +43,6 @@
       
     
     
-      <link rel="stylesheet" href="../css/timeago.css">
-    
       <link rel="stylesheet" href="../css/tabs.css">
     
       <link rel="stylesheet" href="../stylesheets/mermaid-extra.css">
@@ -8072,8 +8070,6 @@
           
         
           
-            
-          
         
           
         
@@ -8081,16 +8077,10 @@
         
       
       
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../casa/plugins/accts-linking/">Plugins</a>
-          
-            <label for="__nav_5_2_8">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
+        <label class="md-nav__link" for="__nav_5_2_8">
+          Plugins
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <nav class="md-nav" aria-label="Plugins" data-md-level="3">
         <label class="md-nav__title" for="__nav_5_2_8">
@@ -8113,6 +8103,18 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../casa/plugins/accts-linking/account-linking-index/" class="md-nav__link">
+        Accounts Linking
+      </a>
+    </li>
+  
+
             
           
             
@@ -8475,11 +8477,11 @@ In this guide, the following command is documented:</p>
 <p>Above command contains references to the release number at two places. <code>v1.0.5</code> in the URL and <code>1.0.5</code> as part of the file
 name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
 make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.</p>
-<p>To avoid this manual, error-prone approach the Janssen Project uses a release marker, <code>1.1.1.nightly</code> instead
+<p>To avoid this manual, error-prone approach the Janssen Project uses a release marker, <code>replace-janssen-version</code> instead
 of writing actual release numbers in the <code>head</code>(latest) documentation branch. So, when there is a need to mention the release number, instead of
 writing the actual release number, use the release marker. Let's see how to document the above command (at the <code>head</code> version)
 so that it stays up-to-date release after release.</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.1.nightly/jans_1.1.1.nightly.ubuntu20.04_amd64.deb -P /tmp
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -8724,21 +8726,6 @@ docs: no docs modification
 <p>Follow activities on your PR closely till the time PR is merged. PR reviewer may want to suggest a change or may need to ask a question to get more clarity. Make sure you are actively collaborating. Once Reviewer has completed the review and approved the changes, the PR will be merged.</p>
 <p>Thats it!! Congratulations on successful contribution. 🥳 🤟</p>
 
-  <hr>
-<div class="md-source-file">
-  <small>
-    
-      Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-05-17T14:12:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-05-17</span>
-      
-        <br>
-        Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-01-27T07:35:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-01-27</span>
-      
-    
-  </small>
-</div>
-
 
 
 
@@ -8831,10 +8818,6 @@ docs: no docs modification
     
 
       <script src="../assets/javascripts/bundle.8492ddcf.min.js"></script>
-      
-        <script src="../js/timeago.min.js"></script>
-      
-        <script src="../js/timeago_mkdocs_material.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->

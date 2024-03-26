@@ -43,8 +43,6 @@
       
     
     
-      <link rel="stylesheet" href="../../../css/timeago.css">
-    
       <link rel="stylesheet" href="../../../css/tabs.css">
     
       <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
@@ -8142,8 +8140,6 @@
           
         
           
-            
-          
         
           
         
@@ -8151,16 +8147,10 @@
         
       
       
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../casa/plugins/accts-linking/">Plugins</a>
-          
-            <label for="__nav_5_2_8">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
+        <label class="md-nav__link" for="__nav_5_2_8">
+          Plugins
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <nav class="md-nav" aria-label="Plugins" data-md-level="3">
         <label class="md-nav__title" for="__nav_5_2_8">
@@ -8183,6 +8173,18 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../casa/plugins/accts-linking/account-linking-index/" class="md-nav__link">
+        Accounts Linking
+      </a>
+    </li>
+  
+
             
           
             
@@ -8483,7 +8485,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-key-rotation</span><span class="w"></span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:1.1.1.nightly-1</span><span class="w"></span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1</span><span class="w"></span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span><span class="w"></span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w"></span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w"> </span><span class="c1"># This may be differnet in Helm</span><span class="w"></span>
@@ -8535,7 +8537,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">              </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web_https.key</span><span class="w">                              </span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">load-web-key-rotation</span><span class="w"></span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:1.1.1.nightly-1</span><span class="w"></span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1</span><span class="w"></span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span><span class="w"></span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w"></span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w">  </span><span class="c1">#This may be differnet in Helm</span><span class="w"></span>
@@ -8595,7 +8597,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">        </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
 <span class="w">          </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-key-rotation</span><span class="w"></span>
-<span class="w">              </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:1.1.1.nightly-1</span><span class="w"></span>
+<span class="w">              </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1</span><span class="w"></span>
 <span class="w">              </span><span class="nt">resources</span><span class="p">:</span><span class="w"></span>
 <span class="w">                </span><span class="nt">requests</span><span class="p">:</span><span class="w"></span>
 <span class="w">                  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;300Mi&quot;</span><span class="w"></span>
@@ -8672,21 +8674,6 @@ OPENDJ_KEY_B64=$(base64 opendj.key -w0)
 Afterwards, do rollout restart for other deployments/statefulsets to ensure latest OpenDJ certificate and key are pulled into pods.</p>
 </li>
 </ol>
-
-  <hr>
-<div class="md-source-file">
-  <small>
-    
-      Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-11-29T09:45:02+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-11-29</span>
-      
-        <br>
-        Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-07-21</span>
-      
-    
-  </small>
-</div>
 
 
 
@@ -8780,10 +8767,6 @@ Afterwards, do rollout restart for other deployments/statefulsets to ensure late
     
 
       <script src="../../../assets/javascripts/bundle.8492ddcf.min.js"></script>
-      
-        <script src="../../../js/timeago.min.js"></script>
-      
-        <script src="../../../js/timeago_mkdocs_material.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->

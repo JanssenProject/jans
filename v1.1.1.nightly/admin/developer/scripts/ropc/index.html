@@ -43,8 +43,6 @@
       
     
     
-      <link rel="stylesheet" href="../../../../css/timeago.css">
-    
       <link rel="stylesheet" href="../../../../css/tabs.css">
     
       <link rel="stylesheet" href="../../../../stylesheets/mermaid-extra.css">
@@ -8171,8 +8169,6 @@
           
         
           
-            
-          
         
           
         
@@ -8180,16 +8176,10 @@
         
       
       
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../../casa/plugins/accts-linking/">Plugins</a>
-          
-            <label for="__nav_5_2_8">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
+        <label class="md-nav__link" for="__nav_5_2_8">
+          Plugins
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <nav class="md-nav" aria-label="Plugins" data-md-level="3">
         <label class="md-nav__title" for="__nav_5_2_8">
@@ -8212,6 +8202,18 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../casa/plugins/accts-linking/account-linking-index/" class="md-nav__link">
+        Accounts Linking
+      </a>
+    </li>
+  
+
             
           
             
@@ -8493,7 +8495,7 @@
 <p>Resource Owner Password Credentials script allows modifying the behavior of Resource Owner Password Credentials Grant (<a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.3">RFC 6749</a>).</p>
 <p>The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via <code>context.setUser(user)</code>).</p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
-<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/v1.1.1.nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
+<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
 <h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -8543,7 +8545,7 @@
 <tbody>
 <tr>
 <td align="left"><code>customScript</code></td>
-<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/v1.1.1.nightly/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
 </tr>
 <tr>
 <td align="left"><code>configurationAttributes</code></td>
@@ -8551,11 +8553,11 @@
 </tr>
 <tr>
 <td align="left"><code>SimpleCustomProperty</code></td>
-<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/v1.1.1.nightly/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
 </tr>
 <tr>
 <td align="left"><code>context</code></td>
-<td align="left"><a href="https://github.com/JanssenProject/jans/blob/v1.1.1.nightly/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
+<td align="left"><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
 </tr>
 </tbody>
 </table>
@@ -8704,21 +8706,6 @@ By default it is not enabled but it can be enabled if set <code>forceRopcInAutho
 <li><a href="../../../script-catalog/resource_owner_password_credentials/resource-owner-password-credentials-2fa/">3 Step ROPW Script</a></li>
 </ul>
 
-  <hr>
-<div class="md-source-file">
-  <small>
-    
-      Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-09-27T13:08:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-09-27</span>
-      
-        <br>
-        Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-23T16:23:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-23</span>
-      
-    
-  </small>
-</div>
-
 
 
 
@@ -8811,10 +8798,6 @@ By default it is not enabled but it can be enabled if set <code>forceRopcInAutho
     
 
       <script src="../../../../assets/javascripts/bundle.8492ddcf.min.js"></script>
-      
-        <script src="../../../../js/timeago.min.js"></script>
-      
-        <script src="../../../../js/timeago_mkdocs_material.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->

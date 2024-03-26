@@ -43,8 +43,6 @@
       
     
     
-      <link rel="stylesheet" href="../../../../css/timeago.css">
-    
       <link rel="stylesheet" href="../../../../css/tabs.css">
     
       <link rel="stylesheet" href="../../../../stylesheets/mermaid-extra.css">
@@ -8121,8 +8119,6 @@
           
         
           
-            
-          
         
           
         
@@ -8130,16 +8126,10 @@
         
       
       
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../../casa/plugins/accts-linking/">Plugins</a>
-          
-            <label for="__nav_5_2_8">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
+        <label class="md-nav__link" for="__nav_5_2_8">
+          Plugins
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <nav class="md-nav" aria-label="Plugins" data-md-level="3">
         <label class="md-nav__title" for="__nav_5_2_8">
@@ -8162,6 +8152,18 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../casa/plugins/accts-linking/account-linking-index/" class="md-nav__link">
+        Accounts Linking
+      </a>
+    </li>
+  
+
             
           
             
@@ -8480,7 +8482,7 @@
 <p>Start a fresh Ubuntu <code>18.04</code>/<code>20.04</code>/<code>22.04</code> 4 CPU, 8 GB RAM, and 50GB SSD VM with ports <code>443</code> and <code>80</code> open. Then execute the following</p>
 <p><div class="highlight"><pre><span></span><code>sudo su -
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/v1.1.1.nightly/automation/startjanssendemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssendemo.sh <span class="o">&amp;&amp;</span> ./startjanssendemo.sh
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssendemo.sh <span class="o">&amp;&amp;</span> ./startjanssendemo.sh
 </code></pre></div></p>
 <p>This will install Docker, Microk8s, Helm and Janssen with the default settings that can be found inside <a href="https://github.com/JanssenProject/jans/blob/main/charts/janssen/values.yaml">values.yaml</a>.  </p>
 <p>The installer will automatically add a record to your hosts record in the VM but if you want access the endpoints outside the VM you must  map the <code>ip</code> of the instance running ubuntu to the FQDN you provided and then access the endpoints at your browser such in the example in the table below.</p>
@@ -8508,21 +8510,6 @@
 </table>
 <h2 id="configure-janssen">Configure Janssen<a class="headerlink" href="#configure-janssen" title="Permanent link">#</a></h2>
 <p>You can use the <a href="../../../kubernetes-ops/tui-k8s/">TUI</a> to configure Janssen components. The TUI calls the Config API to perform ad hoc configuration.</p>
-
-  <hr>
-<div class="md-source-file">
-  <small>
-    
-      Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-11-01T12:42:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-11-01</span>
-      
-        <br>
-        Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-05-18T19:22:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-05-18</span>
-      
-    
-  </small>
-</div>
 
 
 
@@ -8616,10 +8603,6 @@
     
 
       <script src="../../../../assets/javascripts/bundle.8492ddcf.min.js"></script>
-      
-        <script src="../../../../js/timeago.min.js"></script>
-      
-        <script src="../../../../js/timeago_mkdocs_material.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->

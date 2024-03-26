@@ -43,8 +43,6 @@
       
     
     
-      <link rel="stylesheet" href="../../../css/timeago.css">
-    
       <link rel="stylesheet" href="../../../css/tabs.css">
     
       <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
@@ -8058,8 +8056,6 @@
           
         
           
-            
-          
         
           
         
@@ -8067,16 +8063,10 @@
         
       
       
-        
-        
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../casa/plugins/accts-linking/">Plugins</a>
-          
-            <label for="__nav_5_2_8">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
+        <label class="md-nav__link" for="__nav_5_2_8">
+          Plugins
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <nav class="md-nav" aria-label="Plugins" data-md-level="3">
         <label class="md-nav__title" for="__nav_5_2_8">
@@ -8099,6 +8089,18 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../casa/plugins/accts-linking/account-linking-index/" class="md-nav__link">
+        Accounts Linking
+      </a>
+    </li>
+  
+
             
           
             
@@ -8393,7 +8395,7 @@
 </tr>
 </tbody>
 </table>
-<p>To update this setting in Jans persistence, follow this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/v1.1.1.nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">link</a></p>
+<p>To update this setting in Jans persistence, follow this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">link</a></p>
 <h3 id="enable-sign-in-with-apple-authentication-script">Enable Sign-in with Apple Authentication script<a class="headerlink" href="#enable-sign-in-with-apple-authentication-script" title="Permanent link">#</a></h3>
 <p>By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.</p>
 <p>Obtain the json contents of <code>apple</code> custom script by using a jans-cli command like get-config-scripts-by-type, get-config-scripts-by-inum etc.
@@ -8403,7 +8405,7 @@ Update the custom script and change the enabled attribute to <code>true</code>
 Now Sign-in with Apple is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect acr_values, applications can now request Apple authentication for users.</p>
 <p>!!! Note To make sure <code>apple</code> has been enabled successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: https://<hostname>/.well-known/openid-configuration. Find "acr_values_supported": and you should see "apple".</p>
 <h3 id="make-sign-in-with-apple-script-as-default-authentication-script">Make Sign-in with Apple Script as default authentication script:<a class="headerlink" href="#make-sign-in-with-apple-script-as-default-authentication-script" title="Permanent link">#</a></h3>
-<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/v1.1.1.nightly/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
+<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
 <p>Steps:
 1. Create a file say <code>apple-auth-default.json</code> with the following contents
 <div class="highlight"><pre><span></span><code>{
@@ -8420,21 +8422,6 @@ Now Sign-in with Apple is an available authentication mechanism for your Janssen
 <p>An example of a complete URL looks like this -
 <div class="highlight"><pre><span></span><code>https://&lt;your.jans.server&gt;/jans-auth/authorize.htm?response_type=code&amp;redirect_uri=https://&lt;your.jans.server&gt;/admin&amp;client_id=&lt;replace_with_inum_client_id&gt;&amp;scope=openid+profile+email+user_name&amp;state=faad2cdjfdddjfkdf&amp;nonce=dajdffdfsdcfff
 </code></pre></div></p>
-
-  <hr>
-<div class="md-source-file">
-  <small>
-    
-      Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
-      
-        <br>
-        Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-16T15:25:39+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-16</span>
-      
-    
-  </small>
-</div>
 
 
 
@@ -8492,10 +8479,6 @@ Now Sign-in with Apple is an available authentication mechanism for your Janssen
     
 
       <script src="../../../assets/javascripts/bundle.8492ddcf.min.js"></script>
-      
-        <script src="../../../js/timeago.min.js"></script>
-      
-        <script src="../../../js/timeago_mkdocs_material.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->
