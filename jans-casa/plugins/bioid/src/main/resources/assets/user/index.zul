@@ -4,25 +4,22 @@
 
     <h:title self="@define(title)">${zkService.appName} - ${labels.bioid_title}</h:title>
 
-    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.helloworld.HelloWorldVM')"
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.bioid.vm.BioidViewModel')"
            self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
 
         <div class="${css['sectionsWrapper']} pt3">
             <section class="${css.section}">
                 <div class="${css.panel}">
-                    <h2 class="f4 dark-blue2">${labels.hello.title}</h2>
-                    <div class="mb2">
-                        <label>
-                            ${labels.hello.user_message} ${sessionContext.user.userName}
-                            <z:textbox class="${css.textInput} ml2" value="@bind(vm.message)" onOK="@('loadOrgName')" />
-                        </label>
-                    </div>
-                    <z:button label="${labels.hello.button_label}" class="${css.primaryButton}" onClick="@('loadOrgName')" />
-                </div>
+                    <h2 class="f4 dark-blue2">${labels.bioid_title}</h2>
 
-                <z:div class="${css.panel} w-100 tc" visible="@load(not empty vm.organizationName)">
-                    <z:label class="i f4" value="@load(c:cat3(c:l('hello.org_name'), ' ', c:toUpperCase(vm.organizationName)))" />
-                </z:div>
+		            <div class="ph4 mb2">
+			            <div class="alert alert-success dn" id="feedback-bioid" role="alert" />
+		            </div>
+
+                    <z:button label="${labels.bioid_enroll_ready}" class="${css.primaryButton}" onClick="@('buttonPressed')" />
+                </div>
             </section>
         </div>
     </z:div>
