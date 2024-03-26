@@ -89,9 +89,11 @@ Janssen Server supports all response modes as defined in [JARM specification](ht
 ## Using Prompt Parameter
 
 `prompt` request parameter is an ASCII string value that specifies whether the Authorization Server prompts the End-User
-for re-authentication and consent. Janssen Server supports `none`, `login`, `consent` and `select_account` values for
+for re-authentication and consent. Janssen Server supports `none`, `login`, `consent`, `create` and `select_account` values for
 `prompt` parameter. Multiple values can be specified by separating them with single space. Based on value/s of this 
-request parameter Authorization Server prompts the End-User for re-authentication and consent. 
+request parameter Authorization Server prompts the End-User for re-authentication (`login`), consent or user registration details (`create`).
+
+Check [Prompt](../openid-features/prompt-parameter.md) page for more details.
 
 ### none
 
