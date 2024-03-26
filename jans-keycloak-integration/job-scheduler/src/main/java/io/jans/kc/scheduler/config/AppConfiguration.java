@@ -38,6 +38,7 @@ public class AppConfiguration {
 
     private static final String CFG_PROP_KEYCLOAK_RESOURCES_REALM = "app.keycloak.resources.realm";
     private static final String CFG_PROP_KEYCLOAK_RESOURCES_AUTHN_BROWSER_FLOW_ALIAS = "app.keycloak.resources.authn.browser.flow-alias";
+    private static final String CFG_PROP_KEYCLOAK_RESOURCES_SAML_USER_ATTRIBUTE_MAPPER = "app.keycloak.resources.saml.user-attribute-mapper";
 
     private final Properties configProperties;
 
@@ -124,6 +125,11 @@ public class AppConfiguration {
     public String keycloakResourcesBrowserFlowAlias() {
 
         return getStringEntry(CFG_PROP_KEYCLOAK_RESOURCES_AUTHN_BROWSER_FLOW_ALIAS);
+    }
+
+    public String keycloakResourcesSamlUserAttributeMapper() {
+
+        return getStringEntry(CFG_PROP_KEYCLOAK_RESOURCES_SAML_USER_ATTRIBUTE_MAPPER);
     }
 
     public Duration trustRelationshipSyncScheduleInterval() {
