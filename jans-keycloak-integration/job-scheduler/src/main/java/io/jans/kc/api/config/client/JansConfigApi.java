@@ -1,10 +1,12 @@
 package io.jans.kc.api.config.client;
 
 import io.jans.config.api.client.ApiClient;
-import io.jans.config.api.clinet.AttributeApi;
+import io.jans.config.api.client.AttributeApi;
 import io.jans.config.api.client.SamlTrustRelationshipApi;
 import io.jans.config.api.client.ApiException;
+import io.jans.config.api.client.model.JansAttribute;
 import io.jans.config.api.client.model.TrustRelationship;
+import io.jans.kc.api.config.client.model.JansAttributeRepresentation;
 import io.jans.kc.api.config.client.model.JansTrustRelationship;
 
 import io.jans.saml.metadata.builder.SAMLMetadataBuilder;
@@ -16,6 +18,7 @@ import io.jans.saml.metadata.parser.SAMLMetadataParser;
 
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,7 +69,22 @@ public class JansConfigApi {
         throw new JansConfigApiError("Unsupported Saml metadata type specified");
     }
 
-    
+    public List<JansAttributeRepresentation> getTrustRelationshipReleasedAttributes(JansTrustRelationship trustrelationship) {
+
+        List<String> inums = trustrelationship.getReleasedAttributesInums();
+        List<JansAttributeRepresentation> ret = new ArrayList<JansAttributeRepresentation>();
+        try {
+            for(String inum : inums) {
+                JansAttribute attr = attributeApi.getAttributesByInum(inum);
+                if(attr != null) {
+                    ret.add(new JansAttributeRepresentation(attr));
+                }
+            }
+        }catch(ApiException e) {
+            throw new JansConfigApiError("Unable to get trust relationship attributes",e);
+        }
+        return ret;
+    }
 
     private SAMLMetadata getTrustRelationshipFileMetadata(JansTrustRelationship trustrelationship) {
 
@@ -142,7 +160,7 @@ public class JansConfigApi {
         return ret;
     }
 
-    private static newAttributeApi(String endpoint, ApiCredentials credentials) {
+    private static AttributeApi newAttributeApi(String endpoint, ApiCredentials credentials) {
 
         AttributeApi ret = new AttributeApi();
         ret.setApiClient(createApiClient(endpoint,credentials));
