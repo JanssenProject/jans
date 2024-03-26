@@ -75,11 +75,10 @@ def get_registered_common_libs(app_name, persistence_type):
     archived_libs = get_archived_libs(app_name)
     archived_lib_names = [al.meta["name"] for al in archived_libs]
 
-    reg_libs = [
+    return [
         lib.path for lib in libs
         if lib.meta["name"] not in archived_lib_names
     ]
-    return reg_libs
 
 
 def modify_app_xml(app_name):
