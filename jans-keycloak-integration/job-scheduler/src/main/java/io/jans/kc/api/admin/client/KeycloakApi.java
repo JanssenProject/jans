@@ -3,6 +3,7 @@ package io.jans.kc.api.admin.client;
 import io.jans.kc.api.admin.client.KeycloakConfiguration;
 import io.jans.kc.api.admin.client.model.AuthenticationFlow;
 import io.jans.kc.api.admin.client.model.ManagedSamlClient;
+import io.jans.kc.api.admin.client.model.ProtocolMapper;
 import io.jans.saml.metadata.model.EntityDescriptor;
 import io.jans.saml.metadata.model.IndexedEndpoint;
 import io.jans.saml.metadata.model.KeyDescriptor;
@@ -33,10 +34,12 @@ import org.keycloak.admin.client.resource.AuthenticationManagementResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.ClientsResource;
 import org.keycloak.admin.client.resource.ClientResource;
+import org.keycloak.admin.client.resource.ProtocolMappersResource;
 import org.keycloak.OAuth2Constants;
 
 import org.keycloak.representations.idm.AuthenticationFlowRepresentation;
 import org.keycloak.representations.idm.ClientRepresentation;
+import org.keycloak.representations.idm.ProtocolMapperRepresentation;
 
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.client.HttpClients;
@@ -92,8 +95,7 @@ public class KeycloakApi {
 
         try {
             RealmResource realmresource = realmByName(realmname);
-            ClientsResource clientsresource = realmresource.clients();
-            List<ClientRepresentation> clientsrep = clientsresource.findAll();
+            List<ClientRepresentation> clientsrep = realmresource.clients().findAll();
             log.debug("Clients from realm count : {}",clientsrep.size());
             return clientsrep.stream()
                 .filter(KeycloakApi::isManagedSamlClientRepresentation)
@@ -108,8 +110,7 @@ public class KeycloakApi {
 
         try {
             RealmResource realmresource = realmByName(realmname);
-            ClientsResource clientsresource = realmresource.clients();
-            ClientResource clientresource = clientsresource.get(client.keycloakId());
+            ClientResource clientresource = realmresource.clients().get(client.keycloakId());
             if(clientresource != null) {
                 clientresource.remove();
             }
@@ -153,10 +154,8 @@ public class KeycloakApi {
     public void updateManagedSamlClient(String realmname,ManagedSamlClient client, EntityDescriptor entitydesc) {
 
         try {
-            log.info("Update managed saml client. keycloak id - {}. External #ref - {}",client.keycloakId(),client.externalRef());
             RealmResource realmresource = realmByName(realmname);
-            ClientsResource clientsresource = realmresource.clients();
-            ClientResource clientresource = clientsresource.get(client.keycloakId());
+            ClientResource clientresource = realmresource.clients().get(client.keycloakId());
             String externalref = client.externalRef();
             String description = managedSamlClientDescription(client.externalRef());
             configureBasicManagedClientProperties(null,description,entitydesc.getEntityId(),client);
@@ -166,6 +165,55 @@ public class KeycloakApi {
             clientresource.update(client.clientRepresentation());
         }catch(Exception e) {
             throw new KeycloakAdminClientApiError("Could not create update managed saml client",e);
+        }
+    }
+
+    public void addProtocolMappersToManagedSamlClient(String realmname, ManagedSamlClient client,List<ProtocolMapper> mappers) {
+
+        try {
+            RealmResource realmresource = realmByName(realmname);
+            ClientResource clientresource = realmresource.clients().get(client.keycloakId());
+            clientresource.getProtocolMappers().createMapper(mappers.stream().map((m)-> {
+                return m.representation();
+            }).toList());
+        }catch(Exception e) {
+            throw new KeycloakAdminClientApiError("Could not add protocol mapper to managed saml client",e);
+        }
+    }
+
+    public void updateManagedSamlClientProtocolMapper(String realmname, ManagedSamlClient client, ProtocolMapper mapper) {
+
+        try {
+            RealmResource realmresource =realmByName(realmname);
+            ClientResource clientresource = realmresource.clients().get(client.keycloakId());
+            clientresource.getProtocolMappers().update(mapper.getId(),mapper.representation());
+        }catch(Exception e) {
+            throw new KeycloakAdminClientApiError("Could not update protocol mapper for managed saml client",e);
+        }
+    }
+
+    public List<ProtocolMapper> getManagedSamlClientProtocolMappers(String realmname, ManagedSamlClient client)  {
+
+        try {
+            log.debug("Get managed saml client protocol mappers. Keycloak id: {}",client.keycloakId());
+            RealmResource realmresource = realmByName(realmname);
+            ClientResource clientresource = realmresource.clients().get(client.keycloakId());
+            ProtocolMappersResource protocolmappers = clientresource.getProtocolMappers();
+            List<ProtocolMapperRepresentation> mappers = protocolmappers.getMappersPerProtocol(ProtocolMapper.Protocol.SAML.value());
+            return mappers.stream().map((m)-> { return new ProtocolMapper(m);}).toList();
+        }catch(Exception e) {
+            throw new KeycloakAdminClientApiError("Could not get managed saml client protocol mappers",e);
+        }
+    }
+
+    public void deleteManagedSamlClientProtocolMapper(String realmname,ManagedSamlClient client, ProtocolMapper mapper) {
+
+        try {
+            RealmResource realmresource = realmByName(realmname);
+            ClientResource clientresource = realmresource.clients().get(client.keycloakId());
+            clientresource.getProtocolMappers().delete(mapper.getId());
+        }catch(Exception e) {
+            throw new KeycloakAdminClientApiError("Could not delete managed saml client protocol mapper",e);
         }
     }
 
