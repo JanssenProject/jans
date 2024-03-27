@@ -8,7 +8,7 @@ tags:
 # Create User Custom Script
 
 ## Overview
-"CreateUser" custom script is use when Authorization Endpoint is called with `prompt=create` parameter.
+"CreateUser" custom script is used when Authorization Endpoint is called with `prompt=create` parameter.
 In this case AS shows user registration form instead of authn/authz UI.
 "CreateUser" custom script allows inject/modify user registration process.
 
