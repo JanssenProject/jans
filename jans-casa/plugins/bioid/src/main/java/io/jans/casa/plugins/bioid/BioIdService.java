@@ -67,7 +67,7 @@ public class BioIdService {
 		return result.toString();
 	}
 
-	public Map<String, Object> getJansCredential(String userId) {
+	public Map<String, Map<String, Object>> getJansCredential(String userId) {
 		try {
 			BioIdPersonModel user = persistenceService.get(BioIdPersonModel.class,
 					persistenceService.getPersonDn(userId));
@@ -78,7 +78,7 @@ public class BioIdService {
 		return null;
 	}
 
-	public void setJansCredential(String userId, Map<String, Object> jansCredential) {
+	public void setJansCredential(String userId, Map<String, Map<String, Object>> jansCredential) {
 		try {
 			BioIdPersonModel user = persistenceService.get(BioIdPersonModel.class,
 					persistenceService.getPersonDn(userId));

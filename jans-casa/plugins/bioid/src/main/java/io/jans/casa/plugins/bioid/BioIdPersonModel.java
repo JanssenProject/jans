@@ -2,8 +2,6 @@ package io.jans.casa.plugins.bioid;
 
 import java.util.Map;
 
-import org.json.JSONObject;
-
 import io.jans.casa.core.model.BasePerson;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -16,13 +14,13 @@ public class BioIdPersonModel extends BasePerson {
 
     @JsonObject
     @AttributeName(name = "jansCredential")
-    private Map<String, Object> jansCredential;
+    private Map<String, Map<String, Object>> jansCredential;
 
-    public Map<String, Object> getJansCredential() {
+    public Map<String, Map<String, Object>> getJansCredential() {
         return jansCredential;
     }
 
-    public void setJansCredential(Map<String, Object> jansCredential) {
+    public void setJansCredential(Map<String, Map<String, Object>> jansCredential) {
         this.jansCredential = jansCredential;
     }
 }

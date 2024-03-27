@@ -22,9 +22,6 @@
                 </div>
             </section>
         </div>
-        <z:div class="${css.panel}">
-            <z:button label="Click here to enroll" class="${css.primaryButton}" onClick="@('storeBioIdCode')" />
-        </z:div>
     </z:div>
 
 </zk:zk>

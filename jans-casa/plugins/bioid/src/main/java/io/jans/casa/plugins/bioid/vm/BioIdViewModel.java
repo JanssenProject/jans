@@ -1,19 +1,11 @@
 package io.jans.casa.plugins.bioid.vm;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.zkoss.bind.annotation.AfterCompose;
-import org.zkoss.bind.annotation.ContextParam;
-import org.zkoss.bind.annotation.ContextType;
 import org.zkoss.bind.annotation.Init;
-import org.zkoss.zk.ui.Component;
-import org.zkoss.zk.ui.select.Selectors;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 
 import io.jans.casa.core.pojo.User;
@@ -44,17 +36,18 @@ public class BioIdViewModel {
 	}
 
 	private void initializeBioIdDict() {
-		Map<String, Object> jansCredential = bis.getJansCredential(user.getId());
+		Map<String, Map<String, Object>> jansCredential = bis.getJansCredential(user.getId());
 		if (jansCredential == null) {
-			logger.info("jansCredential Dict missing, creating");
-			jansCredential = new HashMap<String, Object>();
+			logger.debug("jansCredential Dict missing, creating");
+			jansCredential = new HashMap<String, Map<String, Object>>();
 		}
-
+		Map<String, Object> bioIdDict = jansCredential.get("bioid");
+		if (bioIdDict == null) {
+			bioIdDict = new HashMap<String, Object>();
+			jansCredential.put("bioid", bioIdDict);
+			bis.setJansCredential(user.getId(), jansCredential);
+			logger.debug("Initialized bioId dict");
+		}
 	}
 
-	public void storeBioIdCode() {
-		byte size = 25;
-		String code = bis.generateBioIdCode(size);
-		logger.info("BioID code stored successfully");
-	}
 }
