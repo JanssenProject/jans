@@ -61,6 +61,7 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
     git checkout main
     cd docs/agama-catalog/jans/inboundID/project
     zip -r inbound.zip *
+    cd ../../../../..
     cd jans-casa/plugins/acct-linking/extras/agama
     zip -r acctlinking.zip *
     ```
