@@ -4,24 +4,27 @@
 
     <h:title self="@define(title)">${zkService.appName} - ${labels.bioid_title}</h:title>
 
-    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.bioid.vm.BioidViewModel')"
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.bioid.vm.BioIdViewModel')"
            self="@define(maincontent)">
 
         <z:include src="/back-home.zul" />
+		<div class="ph4 mb2">
+		    <div class="alert alert-success dn" id="feedback-bioid" role="alert" />
+		</div>
 
         <div class="${css['sectionsWrapper']} pt3">
             <section class="${css.section}">
                 <div class="${css.panel}">
                     <h2 class="f4 dark-blue2">${labels.bioid_title}</h2>
-
-		            <div class="ph4 mb2">
-			            <div class="alert alert-success dn" id="feedback-bioid" role="alert" />
-		            </div>
-
-                    <z:button label="${labels.bioid_enroll_ready}" class="${css.primaryButton}" onClick="@('buttonPressed')" />
+                        <z:button href="interlude.zul?start=true"
+                            class="${css.primaryButton} lh-tight mr2" target="_blank"
+                            label="Start Enrollment Flow" />
                 </div>
             </section>
         </div>
+        <z:div class="${css.panel}">
+            <z:button label="Click here to enroll" class="${css.primaryButton}" onClick="@('storeBioIdCode')" />
+        </z:div>
     </z:div>
 
 </zk:zk>
