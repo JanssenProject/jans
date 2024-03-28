@@ -12,6 +12,11 @@ public class JansAttributeRepresentation {
         this.jansAttribute = jansAttribute;
     }
 
+    public String getInum() {
+
+        return jansAttribute.getInum();
+    }
+
     public String getSourceAttribute() {
 
         return jansAttribute.getSourceAttribute();
@@ -36,4 +41,10 @@ public class JansAttributeRepresentation {
 
         return jansAttribute.getDescription();
     }
+
+    public String getSaml2Uri() {
+
+        return jansAttribute.getSaml2Uri();
+    }
+
 }

@@ -188,6 +188,12 @@ public class ManagedSamlClient {
         return this.clientRepresentation.getId();
     }
 
+    public ManagedSamlClient setKeycloakId(String keycloakid) {
+
+        this.clientRepresentation.setId(keycloakid);
+        return this;
+    }
+
     public ManagedSamlClient setName(final String name) {
 
         this.clientRepresentation.setName(name);
@@ -204,6 +210,11 @@ public class ManagedSamlClient {
 
         this.clientRepresentation.setClientId(clientid);
         return this;
+    }
+
+    public String clientId() {
+
+        return this.clientRepresentation.getClientId();
     }
 
     public ManagedSamlClient setEnabled(final Boolean enabled) {

@@ -76,6 +76,7 @@ public class KeycloakApi {
     public AuthenticationFlow getAuthenticationFlowFromAlias(String realmname, String alias) {
 
         try {
+            
             RealmResource realmresource = realmByName(realmname);
             AuthenticationManagementResource authnmanagementresource = realmresource.flows();
             List<AuthenticationFlowRepresentation> flows = authnmanagementresource.getFlows();
@@ -94,6 +95,7 @@ public class KeycloakApi {
     public List<ManagedSamlClient> findAllManagedSamlClients(String realmname) {
 
         try {
+            
             RealmResource realmresource = realmByName(realmname);
             List<ClientRepresentation> clientsrep = realmresource.clients().findAll();
             log.debug("Clients from realm count : {}",clientsrep.size());
@@ -145,6 +147,9 @@ public class KeycloakApi {
                 String body = response.readEntity(String.class);
                 throw new KeycloakAdminClientApiError(String.format("Could not create managed saml client(http code %d). %s.",code,body));
             }
+
+            String id = clientsresource.findByClientId(client.clientId()).get(0).getId();
+            client.setKeycloakId(id);
             return client;
         }catch(Exception e) {
             throw new KeycloakAdminClientApiError("Could not create managed saml client",e);
@@ -177,6 +182,7 @@ public class KeycloakApi {
                 return m.representation();
             }).toList());
         }catch(Exception e) {
+            e.printStackTrace();
             throw new KeycloakAdminClientApiError("Could not add protocol mapper to managed saml client",e);
         }
     }
@@ -195,7 +201,6 @@ public class KeycloakApi {
     public List<ProtocolMapper> getManagedSamlClientProtocolMappers(String realmname, ManagedSamlClient client)  {
 
         try {
-            log.debug("Get managed saml client protocol mappers. Keycloak id: {}",client.keycloakId());
             RealmResource realmresource = realmByName(realmname);
             ClientResource clientresource = realmresource.clients().get(client.keycloakId());
             ProtocolMappersResource protocolmappers = clientresource.getProtocolMappers();
