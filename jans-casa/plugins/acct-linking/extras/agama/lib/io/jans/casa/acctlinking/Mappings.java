@@ -3,6 +3,7 @@ package io.jans.casa.acctlinking;
 import java.util.function.UnaryOperator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Fields of this class can be referenced in the config properties of flow 
@@ -15,8 +16,11 @@ public final class Mappings {
         profile -> {
             Map<String, Object> map = new HashMap<>();
             
-            map.put("ID", profile.get("sub"));
-            map.put("mail", profile.get("email"));
+            String sub = profile.get("sub");
+            String mail = profile.get("email");
+
+            map.put("ID", Optional.ofNullable(mail).orElse(sub));
+            map.put("mail", mail);
             map.put("cn", profile.get("name"));
             map.put("sn", profile.get("family_name"));
             map.put("displayName", profile.get("given_name"));
@@ -31,8 +35,11 @@ public final class Mappings {
         profile -> {
             Map<String, Object> map = new HashMap<>();
             
-            map.put("ID", profile.get("id"));
-            map.put("mail", profile.get("email"));
+            String id = profile.get("id");
+            String mail = profile.get("email");
+
+            map.put("ID", Optional.ofNullable(mail).orElse(id));
+            map.put("mail", mail);
             map.put("cn", profile.get("name"));
             map.put("sn", profile.get("last_name"));
             map.put("displayName", profile.get("first_name"));
@@ -46,8 +53,11 @@ public final class Mappings {
         profile -> {
             Map<String, Object> map = new HashMap<>();
             
-            map.put("ID", profile.get("sub"));
-            map.put("mail", profile.get("email"));
+            String sub = profile.get("sub");
+            String mail = profile.get("email");
+
+            map.put("ID", Optional.ofNullable(mail).orElse(sub));
+            map.put("mail", mail);
             
             return map;
         };
@@ -57,8 +67,10 @@ public final class Mappings {
 
         profile -> {
             Map<String, Object> map = new HashMap<>();
+            
+            String handle = profile.get("login");
 
-            map.put("ID", profile.getOrDefault("login", profile.get("id")));
+            map.put("ID", Optional.ofNullable(handle).orElse(profile.get("id")));
             map.put("mail", profile.get("email"));
             map.put("displayName", profile.get("name"));
             map.put("givenName", profile.get("name"));
