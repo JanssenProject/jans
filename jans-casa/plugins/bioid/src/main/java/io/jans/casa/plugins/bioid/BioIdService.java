@@ -49,11 +49,8 @@ public class BioIdService {
 		return SINGLE_INSTANCE;
 	}
 
-	public Map<String, String> getCasaClient() {
-		HashMap<String, String> map = new HashMap<>();
-		map.put("client_id", cls.getClientId());
-		map.put("client_secret", cls.getClientSecret());
-		return map;
+	public OIDCClientSettings getCasaClient() {
+		return cls;
 	}
 
 	public String generateBioIdCode(byte seedLength) {
