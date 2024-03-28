@@ -29,6 +29,8 @@ import io.jans.model.custom.script.type.discovery.DiscoveryType;
 import io.jans.model.custom.script.type.discovery.DummyDiscoveryType;
 import io.jans.model.custom.script.type.fido2.DummyFido2ExtensionType;
 import io.jans.model.custom.script.type.fido2.Fido2ExtensionType;
+import io.jans.model.custom.script.type.health.DummyHealthCheck;
+import io.jans.model.custom.script.type.health.HealthCheckType;
 import io.jans.model.custom.script.type.id.DummyIdGeneratorType;
 import io.jans.model.custom.script.type.id.IdGeneratorType;
 import io.jans.model.custom.script.type.idp.DummyIdpType;
@@ -110,6 +112,7 @@ public enum CustomScriptType implements AttributeEnum {
     PERSISTENCE_EXTENSION("persistence_extension", "Persistence Extension", PersistenceType.class, CustomScript.class, "PersistenceExtension", new DummyPeristenceType()),
     IDP("idp", "Idp Extension", IdpType.class, CustomScript.class, "IdpExtension", new DummyIdpType()),
     DISCOVERY("discovery", "Discovery", DiscoveryType.class, CustomScript.class, "Discovery", new DummyDiscoveryType()),
+    HEALTH_CHECK("health_check", "Health Check", HealthCheckType.class, CustomScript.class, "HealthCheck", new DummyHealthCheck()),
     AUTHZ_DETAIL("authz_detail", "Authorization Detail", AuthzDetailType.class, CustomScript.class, "AuthzDetail", new DummyAuthzDetail()),
     UPDATE_TOKEN("update_token", "Update Token", UpdateTokenType.class, CustomScript.class, "UpdateToken", new DummyUpdateTokenType()),
     CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType()),

@@ -47,7 +47,7 @@ public class ExternalCreateUserService extends ExternalScriptService {
 
     public boolean externalCreate(CustomScriptConfiguration scriptConfiguration, ExecutionContext context) {
         try {
-            log.trace("Executing external 'externalCreateUser' method, script name: {}, context: {}", scriptConfiguration.getName(), context);
+            log.trace("Executing external 'createUser' method, script name: {}, context: {}", scriptConfiguration.getName(), context);
 
             CreateUserType script = (CreateUserType) scriptConfiguration.getExternalType();
             context.setScript(scriptConfiguration);
@@ -55,7 +55,7 @@ public class ExternalCreateUserService extends ExternalScriptService {
             final ExternalScriptContext scriptContext = new ExternalScriptContext(context);
             final boolean result = script.createUser(scriptContext);
 
-            log.trace("Finished external 'externalCreateUser' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
+            log.trace("Finished external 'createUser' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
             return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
