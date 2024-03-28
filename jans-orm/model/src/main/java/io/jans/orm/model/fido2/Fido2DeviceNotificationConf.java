@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Yuriy Movchan Date: 03/21/2024
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Fido2DeviceNotificationConf implements Serializable {
 
 	private static final long serialVersionUID = -8173244116167488365L;
