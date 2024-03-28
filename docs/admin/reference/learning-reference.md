@@ -14,3 +14,8 @@ created by the community, help us keep it updated by raising a PR.
 
 ## Videos
 
+- [Password Authentication Using Agama](https://gluu.co/apow-1)
+- [Email Code verification flow Using Agama](https://gluu.co/apow-2)
+- [Time Based OTP authentication Using Agama](https://gluu.co/apow-3)
+- [Connecting To External OpenId Providers Using Agama](https://gluu.co/apow-4)
+
