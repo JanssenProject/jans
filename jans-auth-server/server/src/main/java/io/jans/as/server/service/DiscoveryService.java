@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
 import static io.jans.as.model.util.StringUtils.implode;
@@ -106,6 +107,11 @@ public class DiscoveryService {
         if (responseTypesSupported.length() > 0) {
             jsonObj.put(RESPONSE_TYPES_SUPPORTED, responseTypesSupported);
         }
+
+        final JSONArray promptValuesSupported = new JSONArray();
+        promptValuesSupported.putAll(Arrays.stream(Prompt.values()).map(Prompt::getParamName).collect(Collectors.toList()));
+
+        jsonObj.put(PROMPT_VALUES_SUPPORTED, promptValuesSupported);
 
         List<String> listResponseModesSupported = new ArrayList<>();
         if (appConfiguration.getResponseModesSupported() != null) {

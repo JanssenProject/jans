@@ -930,7 +930,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         # Return endpoint ARN if it created already
         notificationConf = u2fDevice.getDeviceNotificationConf()
-        if StringHelper.isNotEmpty(notificationConf):
+        if notificationConf != None:
             targetEndpointArn = notificationConf.getSnsEndpointArn()
             if StringHelper.isNotEmpty(targetEndpointArn):
                 print "Super-Gluu. Get target endpoint ARN. There is already created target endpoint ARN"

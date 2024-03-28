@@ -133,6 +133,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         Util.addToListIfHas(response.getScopesSupported(), jsonObj, SCOPES_SUPPORTED);
         Util.addToListIfHas(response.getResponseTypesSupported(), jsonObj, RESPONSE_TYPES_SUPPORTED);
         Util.addToListIfHas(response.getResponseModesSupported(), jsonObj, RESPONSE_MODES_SUPPORTED);
+        Util.addToListIfHas(response.getPromptValuesSupported(), jsonObj, PROMPT_VALUES_SUPPORTED);
         Util.addToListIfHas(response.getGrantTypesSupported(), jsonObj, GRANT_TYPES_SUPPORTED);
         Util.addToListIfHas(response.getAcrValuesSupported(), jsonObj, ACR_VALUES_SUPPORTED);
         Util.addToListIfHas(response.getAuthorizationDetailsTypesSupported(), jsonObj, AUTHORIZATION_DETAILS_TYPES_SUPPORTED);
