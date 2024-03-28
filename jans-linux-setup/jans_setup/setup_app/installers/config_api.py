@@ -80,6 +80,7 @@ class ConfigApiInstaller(JettyInstaller):
                 self.copyFile(source_file[0], self.libDir)
                 plugin_path = os.path.join(self.libDir, os.path.basename(source_file[0]))
                 self.add_extra_class(plugin_path)
+                self.chown(plugin_path, Config.jetty_user, Config.jetty_group)
                 break
 
     def extract_files(self):

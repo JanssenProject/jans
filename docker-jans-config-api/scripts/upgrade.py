@@ -17,7 +17,7 @@ from settings import LOGGING_CONFIG
 from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("config-api")
+logger = logging.getLogger("jans-config-api")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
@@ -25,22 +25,17 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 def _transform_api_dynamic_config(conf):
     should_update = False
 
-    if "userExclusionAttributes" not in conf:
-        conf["userExclusionAttributes"] = ["userPassword"]
-        should_update = True
-
-    if "userMandatoryAttributes" not in conf:
-        conf["userMandatoryAttributes"] = [
+    # top-level config that need to be added (if missing)
+    for missing_key, value in [
+        ("userExclusionAttributes", ["userPassword"]),
+        ("userMandatoryAttributes", [
             "mail",
             "displayName",
             "jansStatus",
             "userPassword",
             "givenName",
-        ]
-        should_update = True
-
-    if "agamaConfiguration" not in conf:
-        conf["agamaConfiguration"] = {
+        ]),
+        ("agamaConfiguration", {
             "mandatoryAttributes": [
                 "qname",
                 "source",
@@ -49,68 +44,81 @@ def _transform_api_dynamic_config(conf):
                 "serialVersionUID",
                 "enabled",
             ],
-        }
-        should_update = True
-
-    if "auditLogConf" not in conf:
-        conf["auditLogConf"] = {
+        }),
+        ("auditLogConf", {
             "enabled": True,
             "headerAttributes": ["User-inum"],
-        }
-        should_update = True
-
-    if "dataFormatConversionConf" not in conf:
-        conf["dataFormatConversionConf"] = {
+        }),
+        ("dataFormatConversionConf", {
             "enabled": True,
             "ignoreHttpMethod": [
                 "@jakarta.ws.rs.GET()",
             ],
-        }
-        should_update = True
+        }),
+        ("customAttributeValidationEnabled", True),
+        ("disableLoggerTimer", False),
+        ("disableAuditLogger", False),
+        ("assetMgtEnabled", True),
+    ]:
+        if missing_key not in conf:
+            conf[missing_key] = value
+            should_update = True
 
     if "plugins" not in conf:
-        conf["plugins"] = [
-            {
-                "name": "admin",
-                "description": "admin-ui plugin",
-                "className": "io.jans.ca.plugin.adminui.rest.ApiApplication",
-            },
-            {
-                "name": "fido2",
-                "description": "fido2 plugin",
-                "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication",
-            },
-            {
-                "name": "scim",
-                "description": "scim plugin",
-                "className": "io.jans.configapi.plugin.scim.rest.ApiApplication",
-            },
-            {
-                "name": "user-management",
-                "description": "user-management plugin",
-                "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication",
-            },
-        ]
-        should_update = True
+        conf["plugins"] = []
 
     # current plugin names to lookup to
     plugins_names = tuple(plugin["name"] for plugin in conf["plugins"])
 
-    if "jans-link" not in plugins_names:
-        conf["plugins"].append({
+    supported_plugins = [
+        {
+            "name": "admin",
+            "description": "admin-ui plugin",
+            "className": "io.jans.ca.plugin.adminui.rest.ApiApplication"
+        },
+        {
+            "name": "fido2",
+            "description": "fido2 plugin",
+            "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication"
+        },
+        {
+            "name": "scim",
+            "description": "scim plugin",
+            "className": "io.jans.configapi.plugin.scim.rest.ApiApplication"
+        },
+        {
+            "name": "user-management",
+            "description": "user-management plugin",
+            "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication"
+        },
+        {
             "name": "jans-link",
             "description": "jans-link plugin",
-            "className": "io.jans.configapi.plugin.link.rest.ApiApplication",
-        })
-        should_update = True
-
-    if "saml" not in plugins_names:
-        conf["plugins"].append({
+            "className": "io.jans.configapi.plugin.link.rest.ApiApplication"
+        },
+        {
             "name": "saml",
             "description": "saml plugin",
             "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
-        })
-        should_update = True
+        },
+        {
+            "name": "kc-link",
+            "description": "kc-link plugin",
+            "className": "io.jans.configapi.plugin.kc.link.rest.ApiApplication"
+        },
+        {
+            "name": "lock",
+            "description": "lock plugin",
+            "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
+        }
+    ]
+
+    for supported_plugin in supported_plugins:
+        if supported_plugin["name"] not in plugins_names:
+            conf["plugins"].append(supported_plugin)
+            should_update = True
+
+    # finalized conf and flag to determine update process
     return conf, should_update
 
 
@@ -307,6 +315,9 @@ class Upgrade:
         self.update_client_scopes()
         self.update_test_client_scopes()
 
+        # creatorAttrs data type has been changed
+        self.update_scope_creator_attrs()
+
     def update_client_redirect_uri(self):
         kwargs = {}
         jca_client_id = self.manager.config.get("jca_client_id")
@@ -458,6 +469,44 @@ class Upgrade:
             else:
                 entry.attrs["jansScope"] = client_scopes + diff
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_scope_creator_attrs(self):
+        kwargs = {}
+
+        if self.backend.type != "sql":
+            return
+
+        kwargs.update({"table_name": "jansScope"})
+        entries = self.backend.search_entries("", **kwargs)
+
+        for entry in entries:
+            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                creator_attrs = entry.attrs["creatorAttrs"]["v"]
+            else:
+                creator_attrs = entry.attrs.get("creatorAttrs") or []
+
+            if not isinstance(creator_attrs, list):
+                creator_attrs = [creator_attrs]
+
+            new_creator_attrs = []
+
+            # check the type of attr
+            for _, attr in enumerate(creator_attrs):
+                with contextlib.suppress(TypeError, json.decoder.JSONDecodeError):
+                    # migrating from old data, i.e. `{"v": ["{}"]}`
+                    attr = json.loads(attr)
+
+                if isinstance(attr, str):
+                    # migrating from old data, i.e. `{"v": ["\"{}\""]}`
+                    attr = json.loads(attr.strip('"'))
+                new_creator_attrs.append(attr)
+
+            if new_creator_attrs != creator_attrs:
+                if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                    entry.attrs["creatorAttrs"]["v"] = new_creator_attrs
+                else:
+                    entry.attrs["creatorAttrs"] = new_creator_attrs
+                self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
 def main():

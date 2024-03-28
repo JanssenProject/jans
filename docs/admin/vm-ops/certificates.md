@@ -32,12 +32,24 @@ Additionally the following json files are available which are used in different 
 On a fresh VM installation, Janssen generates self signed certificates. You will want to change these to real certificates. For this documentation we will use [certbot](https://certbot.eff.org) using [Let's Encrypt](https://letsencrypt.org/) certificates. Certbot recommends using `snap` to install certbot and obtain certificates. The following instructions are for Ubuntu 20; however, any platform supporting `snap` should work.
 
  - Backup the `/etc/certs` folder on your server
- - Install snap: `sudo snap install core; sudo snap refresh core` 
- - Remove any certbot OS packages. This varies across distributions. For Ubuntu: `sudo apt remove certbot`
- - Install certbot: `sudo snap install --classic certbot` 
- - Issue certificate: `certbot --apache -d fqdn_of_Gluu_server`
+ - Install snap
+   ```shell
+   sudo snap install core; sudo snap refresh core
+   ``` 
+ - Remove any certbot OS packages. This varies across distributions. 
+   For Ubuntu: 
+   ```shell
+   sudo apt remove certbot
+   ```
+ - Install certbot: 
+   ```shell
+   sudo snap install --classic certbot
+   ``` 
+ - Issue certificate: 
+   ```shell
+   certbot --apache -d fqdn_of_Gluu_server
+   ```
  - Full certificate chain and key are available in: `/etc/letsencrypt/live/` location.
- - Move the cert and key to `/etc/certs` and name them `httpd.crt` and `httpd.key` respectively.
  - Reboot your server
 
 # Installing intermediate certificates

@@ -7,7 +7,6 @@
 package io.jans.as.client.util;
 
 import io.jans.as.model.crypto.AuthCryptoProvider;
-import io.jans.as.model.crypto.ElevenCryptoProvider;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
@@ -15,14 +14,7 @@ import io.jans.as.model.jwk.*;
 import io.jans.as.model.util.StringUtils;
 import io.jans.util.StringHelper;
 import io.jans.util.security.SecurityProviderUtility;
-
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
@@ -43,7 +35,6 @@ import static io.jans.as.model.jwk.JWKParameter.*;
  * <p/>
  * KeyGenerator -sig_keys RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA -enc_keys RSA1_5 RSA-OAEP RSA-OAEP-256 ECDH-ES ECDH-ES+A128KW ECDH-ES+A192KW ECDH-ES+A256KW -keystore /Users/JAVIER/tmp/mykeystore.jks -keypasswd secret -dnname "CN=Jans Auth CA Certificates" -expiration 365
  * <p/>
- * KeyGenerator -sig_keys RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA -ox11 https://ce.gluu.info:8443/oxeleven/rest/generateKey -expiration 365 -at xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
  * Note that EdDSA is not allowed in FIPS mode
  *
  * @author Javier Rojas Blum
@@ -59,8 +50,6 @@ public class KeyGenerator {
     private static final String KEY_STORE_FILE = "keystore";
     private static final String KEY_STORE_PASSWORD = "keypasswd";
     private static final String DN_NAME = "dnname";
-    private static final String OXELEVEN_ACCESS_TOKEN = "at";
-    private static final String OXELEVEN_GENERATE_KEY_ENDPOINT = "ox11";
     private static final String EXPIRATION = "expiration";
     private static final String EXPIRATION_HOURS = "expiration_hours";
     private static final String KEY_LENGTH = "key_length";
@@ -105,8 +94,6 @@ public class KeyGenerator {
             options.addOption(KEY_STORE_FILE, true, "Key Store file.");
             options.addOption(KEY_STORE_PASSWORD, true, "Key Store password.");
             options.addOption(DN_NAME, true, "DN of certificate issuer.");
-            options.addOption(OXELEVEN_ACCESS_TOKEN, true, "oxEleven Access Token.");
-            options.addOption(OXELEVEN_GENERATE_KEY_ENDPOINT, true, "oxEleven Generate Key Endpoint.");
             options.addOption(EXPIRATION, true, "Expiration in days.");
             options.addOption(EXPIRATION_HOURS, true, "Expiration in hours.");
             options.addOption(KEY_LENGTH, true, "Key length.");
@@ -149,9 +136,7 @@ public class KeyGenerator {
                 context.setTestPropFile(TestPropFile.create(cmd));
                 context.setKeyOpsType(keyOpsType);
 
-                if (cmd.hasOption(OXELEVEN_ACCESS_TOKEN) && cmd.hasOption(OXELEVEN_GENERATE_KEY_ENDPOINT)) {
-                    generateKeysWithEleven(cmd, signatureAlgorithms, encryptionAlgorithms, context);
-                } else if (cmd.hasOption(KEY_STORE_FILE)
+                if (cmd.hasOption(KEY_STORE_FILE)
                         && cmd.hasOption(KEY_STORE_PASSWORD)
                         && cmd.hasOption(DN_NAME)) {
                     generateKeysWithJansAuth(cmd, signatureAlgorithms, encryptionAlgorithms, context);
@@ -190,21 +175,6 @@ public class KeyGenerator {
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error("Failed to generate keys with `jans-auth` crypto", e);
-                help();
-            }
-        }
-
-        private void generateKeysWithEleven(CommandLine cmd, List<Algorithm> signatureAlgorithms, List<Algorithm> encryptionAlgorithms, KeyGeneratorContext context) {
-            String accessToken = cmd.getOptionValue(OXELEVEN_ACCESS_TOKEN);
-            String generateKeyEndpoint = cmd.getOptionValue(OXELEVEN_GENERATE_KEY_ENDPOINT);
-
-            try {
-                context.setCryptoProvider(new ElevenCryptoProvider(generateKeyEndpoint,
-                        null, null, null, accessToken));
-
-                generateKeys(context, signatureAlgorithms, encryptionAlgorithms);
-            } catch (Exception e) {
-                log.error("Failed to generate keys with 'eleven' crypto", e);
                 help();
             }
         }

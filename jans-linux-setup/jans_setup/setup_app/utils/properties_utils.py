@@ -502,6 +502,8 @@ class PropertiesUtils(SetupUtils):
             Config.mapping_locations[m] = 'couchbase'
 
     def set_persistence_type(self):
+        if Config.installed_instance:
+            return
         if Config.opendj_install and (not Config.cb_install) and (not Config.rdbm_install):
             Config.persistence_type = 'ldap'
         elif (not Config.opendj_install) and (not Config.rdbm_install) and Config.cb_install:
@@ -573,21 +575,6 @@ class PropertiesUtils(SetupUtils):
 
         if Config.installed_instance and Config.installOxd:
             Config.addPostSetupService.append('installOxd')
-
-
-    def promptForEleven(self):
-        if Config.installed_instance and Config.installEleven:
-            return
-
-        promp_for_eleven = self.getPrompt("Install Eleven Server?",
-                                            self.getDefaultOption(Config.installEleven)
-                                            )[0].lower()
-
-        Config.installEleven = promp_for_eleven == 'y'
-
-        if Config.installed_instance and Config.installEleven:
-            Config.addPostSetupService.append('installEleven')
-
 
     def prompt_for_jans_link(self):
         if Config.installed_instance and Config.install_jans_link:
@@ -954,6 +941,56 @@ class PropertiesUtils(SetupUtils):
             Config.ob_alias = self.getPrompt('  Openbanking Key Alias', Config.ob_alias)
 
 
+    def prompt_for_http_cert_info(self):
+        # IP address needed only for Apache2 and hosts file update
+        if Config.installHttpd:
+            Config.ip = self.get_ip()
+
+        if base.argsp.host_name:
+            detectedHostname = base.argsp.host_name
+        else:
+            detectedHostname = self.detect_hostname()
+
+            if detectedHostname == 'localhost':
+                detectedHostname = None
+
+        while True:
+            if detectedHostname:
+                Config.hostname = self.getPrompt("Enter hostname", detectedHostname)
+            else:
+                Config.hostname = self.getPrompt("Enter hostname")
+
+            if Config.hostname != 'localhost':
+                break
+            else:
+                print("Hostname can't be \033[;1mlocalhost\033[0;0m")
+
+        Config.oxd_server_https = 'https://{}:8443'.format(Config.hostname)
+
+        # Get city and state|province code
+        Config.city = self.getPrompt("Enter your city or locality", Config.city)
+        Config.state = self.getPrompt("Enter your state or province two letter code", Config.state)
+
+        # Get the Country Code
+        long_enough = False
+        while not long_enough:
+            countryCode = self.getPrompt("Enter two letter Country Code", Config.countryCode)
+            if len(countryCode) != 2:
+                print("Country code must be two characters")
+            else:
+                Config.countryCode = countryCode
+                long_enough = True
+
+        Config.orgName = self.getPrompt("Enter Organization Name", Config.orgName)
+
+        while True:
+            Config.admin_email = self.getPrompt('Enter email address for support at your organization', Config.admin_email)
+            if self.check_email(Config.admin_email):
+                break
+            else:
+                print("Please enter valid email address")
+
+
     def promptForProperties(self):
 
         if Config.noPrompt or '-x' in sys.argv:
@@ -968,54 +1005,7 @@ class PropertiesUtils(SetupUtils):
             if promptForMITLicense != 'y':
                 sys.exit(0)
 
-            # IP address needed only for Apache2 and hosts file update
-            if Config.installHttpd:
-                Config.ip = self.get_ip()
-
-            if base.argsp.host_name:
-                detectedHostname = base.argsp.host_name
-            else:
-                detectedHostname = self.detect_hostname()
-
-                if detectedHostname == 'localhost':
-                    detectedHostname = None
-
-            while True:
-                if detectedHostname:
-                    Config.hostname = self.getPrompt("Enter hostname", detectedHostname)
-                else:
-                    Config.hostname = self.getPrompt("Enter hostname")
-
-                if Config.hostname != 'localhost':
-                    break
-                else:
-                    print("Hostname can't be \033[;1mlocalhost\033[0;0m")
-
-            Config.oxd_server_https = 'https://{}:8443'.format(Config.hostname)
-
-            # Get city and state|province code
-            Config.city = self.getPrompt("Enter your city or locality", Config.city)
-            Config.state = self.getPrompt("Enter your state or province two letter code", Config.state)
-
-            # Get the Country Code
-            long_enough = False
-            while not long_enough:
-                countryCode = self.getPrompt("Enter two letter Country Code", Config.countryCode)
-                if len(countryCode) != 2:
-                    print("Country code must be two characters")
-                else:
-                    Config.countryCode = countryCode
-                    long_enough = True
-
-            Config.orgName = self.getPrompt("Enter Organization Name", Config.orgName)
-
-            while True:
-                Config.admin_email = self.getPrompt('Enter email address for support at your organization', Config.admin_email)
-                if self.check_email(Config.admin_email):
-                    break
-                else:
-                    print("Please enter valid email address")
-            
+            self.prompt_for_http_cert_info()
             Config.jans_max_mem = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.jans_max_mem))
 
 
@@ -1042,9 +1032,6 @@ class PropertiesUtils(SetupUtils):
             self.prompt_for_casa()
             self.pompt_for_jans_lock()
             self.prompt_for_jans_saml()
-            #self.promptForEleven()
-            #if (not Config.installOxd) and Config.oxd_package:
-            #    self.promptForOxd()
 
 
 

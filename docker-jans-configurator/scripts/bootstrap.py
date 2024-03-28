@@ -296,7 +296,7 @@ class CtxGenerator:
         self.set_config("auth_enc_keys", enc_keys)
 
         # default exp = 48 hours + token lifetime (in hour)
-        exp = int(48 + (3600 / 3600))
+        exp = int(self.params["init_keys_exp"] + (3600 / 3600))
 
         _, err, retcode = generate_openid_keys_hourly(
             self.get_secret("auth_openid_jks_pass"),

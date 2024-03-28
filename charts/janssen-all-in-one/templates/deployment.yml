@@ -4,6 +4,7 @@ metadata:
   name: {{ include "janssen-all-in-one.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
+    APP_NAME: auth-server
     app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
 {{ include "janssen-all-in-one.labels" . | indent 4 }}
 {{- if .Values.additionalLabels }}
@@ -21,6 +22,7 @@ spec:
   template:
     metadata:
       labels:
+        APP_NAME: auth-server
         app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
       {{- if .Values.istio.ingress }}
       annotations:
@@ -58,6 +60,7 @@ spec:
               {{- with .Values.customScripts }}
               {{- toYaml . | replace "- " "" | nindent 14}}
               {{- end }}
+              python3 /scripts/tls_generator.py &
               /app/bin/entrypoint.sh
         {{- end}}
         ports:
@@ -99,6 +102,14 @@ spec:
           - mountPath: {{ .Values.cnGoogleApplicationCredentials }}
             name: google-sa
             subPath: google-credentials.json
+        {{- end }}
+        {{ if eq .Values.configSecretAdapter "vault" }}
+          - name: vault
+            mountPath: /etc/certs/vault_role_id
+            subPath: vault_role_id
+          - name: vault
+            mountPath: /etc/certs/vault_secret_id
+            subPath: vault_secret_id
         {{- end }}
           - mountPath: /opt/jans/configurator/db/generate.json
             name: {{ include "janssen-all-in-one.name" . }}-mount-gen-file
@@ -175,6 +186,16 @@ spec:
         - name: google-sa
           secret:
             secretName: {{ .Release.Name }}-google-sa
+      {{- end }}
+      {{ if eq .Values.configSecretAdapter "vault" }}
+        - name: vault
+          secret:
+            secretName: {{ .Release.Name }}-vault
+            items:
+            - key: vault_role_id
+              path: vault_role_id
+            - key: vault_secret_id
+              path: vault_secret_id
       {{- end }}
         - name: {{ include "janssen-all-in-one.name" . }}-mount-gen-file
           secret:

@@ -18,7 +18,7 @@ from jans.pycloudlib.persistence import id_from_dn
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("casa")
+logger = logging.getLogger("jans-casa")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 

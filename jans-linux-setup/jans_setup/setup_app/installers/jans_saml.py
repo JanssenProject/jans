@@ -17,14 +17,13 @@ from setup_app.utils.ldif_utils import create_client_ldif
 # Config
 Config.idp_config_http_port = '8083'
 Config.jans_idp_enabled = 'true'
-Config.jans_idp_realm = 'jans-api'
-Config.jans_idp_client_id = f'jans-api-{uuid.uuid4()}'
+Config.jans_idp_realm = 'jans'
+Config.jans_idp_client_id = f'jans-{uuid.uuid4()}'
 Config.jans_idp_client_secret = os.urandom(10).hex()
 Config.jans_idp_grant_type = 'PASSWORD'
-Config.jans_idp_user_name = 'jans-api'
+Config.jans_idp_user_name = 'jans'
 Config.jans_idp_user_password = os.urandom(10).hex()
 Config.jans_idp_idp_root_dir = os.path.join(Config.jansOptFolder, 'idp')
-Config.jans_idp_idp_metadata_file_pattern = '%s-idp-metadata.xml'
 Config.jans_idp_ignore_validation = 'true'
 Config.jans_idp_idp_metadata_file = 'idp-metadata.xml'
 
@@ -60,8 +59,6 @@ class JansSamlInstaller(JettyInstaller):
         self.idp_config_id = 'keycloak'
         self.idp_config_root_dir = os.path.join(self.idp_root_dir, self.idp_config_id)
         self.idp_config_enabled = 'true'
-        self.idp_config_temp_meta_dir = os.path.join(self.idp_root_dir, self.idp_config_id, 'temp_metadata')
-        self.idp_config_meta_dir = os.path.join(self.idp_root_dir, self.idp_config_id, 'metadata')
 
         self.idp_config_data_dir = os.path.join(Config.opt_dir, self.idp_config_id)
         self.idp_config_log_dir = os.path.join(self.idp_config_data_dir, 'logs')
@@ -101,9 +98,10 @@ class JansSamlInstaller(JettyInstaller):
 
 
     def create_folders(self):
-        for saml_dir in (self.idp_root_dir, self.idp_config_root_dir, self.idp_config_temp_meta_dir, self.idp_config_meta_dir,
-                        self.idp_config_data_dir, self.idp_config_log_dir, self.idp_config_providers_dir,
-                        Config.jans_idp_idp_metadata_root_dir, Config.jans_idp_sp_metadata_root_dir, Config.jans_idp_sp_metadata_temp_dir,
+        for saml_dir in (self.idp_root_dir, self.idp_config_root_dir, self.idp_config_data_dir,
+                        self.idp_config_log_dir, self.idp_config_providers_dir,
+                        Config.jans_idp_idp_metadata_temp_dir, Config.jans_idp_idp_metadata_root_dir,
+                        Config.jans_idp_sp_metadata_root_dir, Config.jans_idp_sp_metadata_temp_dir,
                 ):
             self.createDirs(saml_dir)
 

@@ -71,10 +71,6 @@ components.
 1. **Jans ORM**: This is the library for persistence and caching implementations
 in Janssen. Currently, LDAP and Couchbase are supported. RDBMS is coming soon.
 
-1. **Jans Eleven**: Auth Server can use the Jans Eleven REST API for key
-operations, which in turns uses PKCS11 interface of an HSM. Basically, it's a
-strategy to share an HSM over a network.
-
 1. **Agama**: The Agama module offers an alternative way to build authentication
 flows in Janssen Server. With Agama, flows are coded in a DSL (domain specific
 language) designed for the sole purpose of writing web flows.

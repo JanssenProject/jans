@@ -15,14 +15,6 @@ get_debug_opt() {
     echo "${debug_opt}"
 }
 
-move_builtin_jars() {
-    # twilio, jsmpp, casa-config, jans-fido2-client
-    for src in /opt/jans/jetty/jans-auth/_libs/*.jar; do
-        fname=$(basename "$src")
-        cp "$src" "/opt/jans/jetty/jans-auth/custom/libs/$fname"
-    done
-}
-
 get_prometheus_opt() {
     prom_opt=""
 
@@ -76,7 +68,6 @@ get_logging_files() {
     echo $logs
 }
 
-move_builtin_jars
 get_prometheus_lib
 python3 "$basedir/wait.py"
 python3 "$basedir/bootstrap.py"

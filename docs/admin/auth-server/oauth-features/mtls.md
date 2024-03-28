@@ -551,7 +551,7 @@ Response:
   "scope": "email openid profile",
   "client_secret": "e1c9e9df-e542-4225-adb4-d0590f85d97d",
   "client_id_issued_at": 1698114939,
-  "backchannel_logout_uri": [],
+  "backchannel_logout_uri": "",
   "backchannel_logout_session_required": false,
   "client_name": "Test Client mTLS",
   "par_lifetime": 600,

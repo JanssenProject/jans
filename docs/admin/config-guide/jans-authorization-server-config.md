@@ -137,7 +137,8 @@ It returns all the information of the Jans Authorization server.
     "client_credentials",
     "refresh_token",
     "authorization_code",
-    "password"
+    "password",
+    "tx_token"
   ],
   "subjectTypesSupported": [
     "public",
@@ -344,6 +345,7 @@ It returns all the information of the Jans Authorization server.
   "opTosUri": "https://example.jans.io/tos",
   "authorizationCodeLifetime": 60,
   "refreshTokenLifetime": 14400,
+  "txTokenLifetime": 180,
   "idTokenLifetime": 3600,
   "idTokenFilterClaimsBasedOnAccessToken": false,
   "accessTokenLifetime": 300,
@@ -423,7 +425,7 @@ It returns all the information of the Jans Authorization server.
   "disablePromptLogin": false,
   "disablePromptConsent": false,
   "sessionIdLifetime": 86400,
-  "serverSessionIdLifetime": 86400,
+  "sessionIdCookieLifetime": 86400,
   "configurationUpdateInterval": 3600,
   "enableClientGrantTypeUpdate": true,
   "dynamicGrantTypeDefault": [
@@ -433,7 +435,8 @@ It returns all the information of the Jans Authorization server.
     "urn:ietf:params:oauth:grant-type:device_code",
     "client_credentials",
     "refresh_token",
-    "authorization_code"
+    "authorization_code",
+    "tx_token"
   ],
   "metricReporterInterval": 300,
   "metricReporterKeepDataDays": 15,
@@ -447,10 +450,6 @@ It returns all the information of the Jans Authorization server.
   "keyStoreSecret": "S63ogThoRsEf",
   "keySelectionStrategy": "OLDER",
   "keySignWithSameKeyButDiffAlg": false,
-  "jansElevenGenerateKeyEndpoint": "https://example.jans.io/oxeleven/rest/oxeleven/generateKey",
-  "jansElevenSignEndpoint": "https://example.jans.io/oxeleven/rest/oxeleven/sign",
-  "jansElevenVerifySignatureEndpoint": "https://example.jans.io/oxeleven/rest/oxeleven/verifySignature",
-  "jansElevenDeleteKeyEndpoint": "https://example.jans.io/oxeleven/rest/oxeleven/deleteKey",
   "introspectionAccessTokenMustHaveUmaProtectionScope": false,
   "introspectionAccessTokenMustHaveIntrospectionScope": false,
   "introspectionSkipAuthorization": false,

@@ -225,6 +225,12 @@ func resourceAppConfiguration() *schema.Resource {
 				Description:      "URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP. Example: https://server.example.com/restv1/jwks",
 				ValidateDiagFunc: validateURL,
 			},
+			"archived_jwks_uri": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Archved URLs of the OP's JSON Web Key Set (JWK) document.",
+				ValidateDiagFunc: validateURL,
+			},
 			"openid_discovery_endpoint": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -366,10 +372,20 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Boolean value true allow all value for revoke endpoint.",
 			},
+			"allow_revoke_for_other_clients": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value ture allow revoke for other clients.",
+			},
 			"sector_identifier_cache_lifetime_in_minutes": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "The cache lifetime in minutes of the sector identifier.",
+			},
+			"archived_jwk_lifetime_in_seconds": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The archived jwk lifetime in seconds.",
 			},
 			"uma_configuration_endpoint": {
 				Type:             schema.TypeString,
@@ -524,6 +540,7 @@ func resourceAppConfiguration() *schema.Resource {
 							"implicit",
 							"password",
 							"refresh_token",
+							"tx_token",
 							"urn:ietf:params:oauth:grant-type:device_code",
 							"urn:ietf:params:oauth:grant-type:token-exchange",
 							"urn:ietf:params:oauth:grant-type:uma-ticket",
@@ -616,6 +633,72 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional: true,
 				Description: `A list of the JWE encryption algorithms (enc values) JWA supported by the UserInfo Endpoint 
 							to encode the Claims in a JWT. One of "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM".`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+						return validateEnum(v, encryptionEnc)
+					},
+				},
+			},
+			"introspection_signing_alg_values_supported": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `A list of the JWS signing algorithms (alg values) JWA supported by the introspection endpoint`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+						return validateEnum(v, signingAlgs)
+					},
+				},
+			},
+			"introspection_encryption_alg_values_supported": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `A list of the JWE encryption algorithms (alg values) JWA supported by the introspection endpoint`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+						return validateEnum(v, encryptionAlgs)
+					},
+				},
+			},
+			"introspection_encryption_enc_values_supported": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `A list of the JWE encryption algorithms (alg values) JWA supported by the introspection endpoint`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+						return validateEnum(v, encryptionEnc)
+					},
+				},
+			},
+			"tx_token_signing_alg_values_supported": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `A list of the JWS signing algorithms (alg values) supported by the Token Exchange endpoint.`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+						return validateEnum(v, signingAlgs)
+					},
+				},
+			},
+			"tx_token_encryption_alg_values_supported": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `A list of the JWE encryption algorithms (alg values) supported by the Token Exchange endpoint.`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+						return validateEnum(v, encryptionAlgs)
+					},
+				},
+			},
+			"tx_token_encryption_enc_values_supported": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `A list of the JWE encryption algorithms (enc values) supported by the Token Exchange endpoint.`,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
@@ -897,6 +980,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "The lifetime of the Refresh Token.",
 			},
+			"tx_token_lifetime": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The lifetime of the Token Exchange Token.",
+			},
 			"id_token_lifetime": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -906,6 +994,16 @@ func resourceAppConfiguration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Boolean value specifying whether idToken filters claims based on accessToken.",
+			},
+			"save_tokens_in_cache": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to save token in cache.",
+			},
+			"save_tokens_in_cache_and_dont_save_in_persistence": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to save token in cache and don't save in persistence.",
 			},
 			"access_token_lifetime": {
 				Type:        schema.TypeInt,
@@ -1216,6 +1314,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "The lifetime of session id in seconds. If 0 or -1 then expiration is not set. 'session_id' cookie expires when browser session ends.",
 			},
+			"session_id_cookie_lifetime": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The lifetime of session id cookie in seconds. If 0 or -1 then expiration is not set. 'session_id' cookie expires when browser session ends.",
+			},
 			"server_session_id_lifetime": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -1246,7 +1349,7 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional: true,
 				Description: `List of the OAuth 2.0 Grant Type values that it's possible to set via client 
 							registration API. One of 'none', 'authorization_code', 'implicit', 'password', 'client_credentials', 'refresh_token', 
-							'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:openid:params:grant-type:ciba', 'urn:ietf:params:oauth:grant-type:device_code'.`,
+							'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:openid:params:grant-type:ciba', 'urn:ietf:params:oauth:grant-type:device_code', 'tx_token'.`,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -1361,34 +1464,6 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Specifies static decryption Kid",
 			},
-			"jans_eleven_test_mode_token": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "jansEleven Test Mode Token.",
-			},
-			"jans_eleven_generate_key_endpoint": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "URL for the jansEleven Generate Key Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/generateKey",
-				ValidateDiagFunc: validateURL,
-			},
-			"jans_eleven_sign_endpoint": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "URL for the jansEleven Sign Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/sign",
-				ValidateDiagFunc: validateURL,
-			},
-			"jans_eleven_verify_signature_endpoint": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "URL for the jansEleven Verify Signature Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/verifySignature",
-				ValidateDiagFunc: validateURL,
-			},
-			"jans_eleven_delete_key_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "URL for the jansEleven Delete Key Endpoint. Example: https://server.example.com/janseleven/rest/oxeleven/deleteKey",
-			},
 			"introspection_access_token_must_have_uma_protection_scope": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -1403,6 +1478,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Specifies if authorization to be skipped for introspection.",
+			},
+			"introspection_restrict_basic_authn_to_own_tokens": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Specifies if basic authentication to be restricted to own tokens.",
 			},
 			"end_session_with_access_token": {
 				Type:        schema.TypeBool,
@@ -1983,6 +2063,33 @@ func resourceAppConfiguration() *schema.Resource {
 				Description: "List of feature flags.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
+					ValidateDiagFunc: func(i interface{}, p cty.Path) diag.Diagnostics {
+
+						enums := []string{
+							"UNKNOWN",
+							"HEALTH_CHECK",
+							"USERINFO",
+							"CLIENTINFO",
+							"ID_GENERATION",
+							"REGISTRATION",
+							"INTROSPECTION",
+							"REVOKE_TOKEN",
+							"REVOKE_SESSION",
+							"ACTIVE_SESSION",
+							"END_SESSION",
+							"STATUS_SESSION",
+							"JANS_CONFIGURATION",
+							"CIBA",
+							"UMA",
+							"U2F",
+							"DEVICE_AUTHZ",
+							"METRIC",
+							"STAT",
+							"PAR",
+							"SSA",
+						}
+						return validateEnum(i, enums)
+					},
 				},
 			},
 			"http_logging_enabled": {
@@ -2026,10 +2133,6 @@ func resourceAppConfiguration() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"serializer_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
 						"max_items_logged_in_collections": {
 							Type:     schema.TypeInt,
 							Optional: true,
@@ -2053,6 +2156,16 @@ func resourceAppConfiguration() *schema.Resource {
 						"bridge_script_page": {
 							Type:     schema.TypeString,
 							Optional: true,
+						},
+						"serialize_rules": {
+							Type:     schema.TypeMap,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeList,
+								Elem: &schema.Schema{
+									Type: schema.TypeString,
+								},
+							},
 						},
 						"default_response_headers": {
 							Type:     schema.TypeMap,
@@ -2106,6 +2219,26 @@ func resourceAppConfiguration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Boolean value specifying whether to skip authentication filter for options method calls.",
+			},
+			"lock_message_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Lock message configuration.",
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable_id_token_messages": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Boolean value specifying whether to enable ID Token messages.",
+						},
+						"id_token_messages_channel": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "ID Token messages channel.",
+						},
+					},
+				},
 			},
 			"fapi": {
 				Type:        schema.TypeBool,

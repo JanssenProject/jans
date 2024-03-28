@@ -17,7 +17,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("auth")
+logger = logging.getLogger("jans-auth")
 
 manager = get_manager()
 
@@ -114,7 +114,9 @@ class LockPersistenceSetup:
     @cached_property
     def ctx(self) -> dict[str, _t.Any]:
         ctx = {
-            # "hostname": self.manager.config.get("hostname"),
+            "hostname": self.manager.config.get("hostname"),
+            "jans_opa_host": "localhost",
+            "jans_opa_port": 8181,
         }
 
         # pre-populate lock_dynamic_conf_base64

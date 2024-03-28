@@ -42,14 +42,17 @@ complicated and costly to operate, as you have to break up the data and
 configure multiple replicated topologies. As a rule of thumb, if concurrency of
 more then 120 OpenID code flow authentications per second are needed, you should
 consider another database. But for concurrency less then this, OpenDJ is an
-excellent choice.
+excellent choice. Owing to these limitations, **LDAP is not 
+supported in production deployments using Kubernetes, 1.0.23 and forward**.
 
 1. **MySQL** You know it... you love it. That's the biggest advantage.
 Performance is great out of the box. But if you have high concurrency,
-you'll have to figure out a plan for replication, and horizontal scaling.
+you'll have to figure out a plan for replication, and horizontal scaling. 
+**MySQL is our default persistence for Production deployments using Kubernetes**.
 
 1. **Postgres** Same as MySQL above, but there are some great commercial
-distributions of Postgres like [EnterpriseDB](https://www.enterprisedb.com/).
+distributions of Postgres like [EnterpriseDB](https://www.enterprisedb.com/). **Postgres is our default 
+persistence for VM based non-production deployments**.
 
 1. **Couchbase** A JSON NoSQL database that supports automatic distribution
 of data for auto-scaling multi-region sharded cloud native deployments. Janssen

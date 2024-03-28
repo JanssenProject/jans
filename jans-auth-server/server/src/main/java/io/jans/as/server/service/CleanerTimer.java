@@ -40,10 +40,7 @@ import jakarta.inject.Named;
 import org.apache.tika.utils.StringUtils;
 import org.slf4j.Logger;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -123,15 +120,15 @@ public class CleanerTimer {
         int interval = appConfiguration.getCleanServiceInterval();
         if (interval < 0) {
             log.info("Cleaner Timer is disabled.");
-            log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
+            log.warn("Cleaner Timer Interval (cleanServiceInterval in AS configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
             return false;
         }
 
         long cleaningInterval = interval * 1000L;
 
-        long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
+        long timeDifference = System.currentTimeMillis() - this.lastFinishedTime;
 
-        return timeDiffrence >= cleaningInterval;
+        return timeDifference >= cleaningInterval;
     }
 
     public void processImpl() {
@@ -174,10 +171,34 @@ public class CleanerTimer {
             }
 
             processCache(now);
+            processInactiveClients(chunkSize);
 
             this.lastFinishedTime = System.currentTimeMillis();
         } catch (Exception e) {
             log.error("Failed to process clean up.", e);
+        }
+    }
+
+    private void processInactiveClients(int chunkSize) {
+        try {
+            final int inactiveIntervalInHours = appConfiguration.getCleanUpInactiveClientAfterHoursOfInactivity();
+            if (inactiveIntervalInHours <= 0) {
+                return;
+            }
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.HOUR, -inactiveIntervalInHours);
+            Date dateMinusInactiveHours = calendar.getTime();
+
+            String clientsBaseDn = staticConfiguration.getBaseDn().getClients();
+            Filter filter = Filter.createANDFilter(
+                    Filter.createEqualityFilter("del", true),
+                    Filter.createLessOrEqualFilter("jansLastAccessTime", entryManager.encodeTime(clientsBaseDn, dateMinusInactiveHours)));
+
+            int removedCount = entryManager.remove(clientsBaseDn, Client.class, filter, chunkSize);
+            log.trace("Removed {} inactive clients from {}", removedCount, clientsBaseDn);
+        } catch (Exception e) {
+            log.error("Failed to perform clean up of inactive clients.", e);
         }
     }
 

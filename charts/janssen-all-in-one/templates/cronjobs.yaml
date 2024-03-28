@@ -7,12 +7,12 @@ metadata:
   labels:
     app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-as-key-rotation
 {{ include "janssen-all-in-one.labels" . | indent 4 }}
-{{- if .Values.additionalLabels }}
-{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- if (index .Values "auth-server-key-rotation" "additionalLabels") }}
+{{ toYaml (index .Values "auth-server-key-rotation" "additionalLabels") | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if (index .Values "auth-server-key-rotation" "additionalAnnotations") }}
   annotations:
-{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{ toYaml (index .Values "auth-server-key-rotation" "additionalAnnotations") | indent 4 }}
 {{- end }}
 spec:
   schedule: "@every {{ index .Values "auth-server-key-rotation" "keysLife" }}h"
@@ -24,34 +24,34 @@ spec:
           annotations:
             sidecar.istio.io/inject: "false"
         spec:
-        {{- with .Values.image.pullSecrets }}
+        {{- with (index .Values "auth-server-key-rotation" "image" "pullSecrets") }}
           imagePullSecrets:
             {{- toYaml . | nindent 8 }}
         {{- end }}
-          dnsPolicy: {{ .Values.dnsPolicy | quote }}
-        {{- with .Values.dnsConfig }}
+          dnsPolicy: {{ index .Values "auth-server-key-rotation" "dnsPolicy" | quote }}
+        {{- with (index .Values "auth-server-key-rotation" "dnsConfig") }}
           dnsConfig:
 {{ toYaml . | indent 12 }}
         {{- end }}
           containers:
             - name: {{ include "janssen-all-in-one.name" . }}-as-key-rotation
-              {{- if .Values.customScripts }}
+              {{- if (index .Values "auth-server-key-rotation" "customScripts") }}
               command:
                 - /bin/sh
                 - -c
                 - |
-                    {{- with .Values.customScripts }}
+                    {{- with (index .Values "auth-server-key-rotation" "customScripts") }}
                     {{- toYaml . | replace "- " "" | nindent 20}}
                     {{- end }}
                     /app/bin/entrypoint.sh
               {{- end}}
-              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              image: "{{ index .Values "auth-server-key-rotation" "image" "repository" }}:{{ index .Values "auth-server-key-rotation" "image" "tag" }}"
               env:
                 {{- include "janssen-all-in-one.usr-envs" . | indent 16 }}
                 {{- include "janssen-all-in-one.usr-secret-envs" . | indent 16 }}
-              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              imagePullPolicy: {{ index .Values "auth-server-key-rotation" "image" "pullPolicy" }}
               lifecycle:
-{{- toYaml .Values.lifecycle | nindent 16 }}
+{{- toYaml (index .Values "auth-server-key-rotation" "lifecycle") | nindent 16 }}
               volumeMounts:
               {{ if or (eq .Values.configSecretAdapter "aws") (eq .Values.configAdapterName "aws") }}
                 - mountPath: {{ .Values.cnAwsSharedCredentialsFile }}
@@ -69,7 +69,15 @@ spec:
                   name: google-sa
                   subPath: google-credentials.json
                 {{- end }}
-              {{- with .Values.volumeMounts }}
+                {{ if eq .Values.configSecretAdapter "vault" }}
+                - name: vault
+                  mountPath: /etc/certs/vault_role_id
+                  subPath: vault_role_id
+                - name: vault
+                  mountPath: /etc/certs/vault_secret_id
+                  subPath: vault_secret_id
+                {{- end }}
+              {{- with (index .Values "auth-server-key-rotation" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
               {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
@@ -102,11 +110,11 @@ spec:
               resources: {}
               {{- else }}
               resources:
-{{- toYaml .Values.resources | nindent 16 }}
+{{- toYaml (index .Values "auth-server-key-rotation" "resources") | nindent 16 }}
               {{- end }}
               args: ["patch", "auth", "--opts", "interval:{{ index .Values "auth-server-key-rotation" "keysLife" }}", "--opts", "key-strategy:{{ index .Values "auth-server-key-rotation" "keysStrategy" }}", "--opts", "privkey-push-delay:{{ index .Values "auth-server-key-rotation" "keysPushDelay" }}", "--opts", "privkey-push-strategy:{{ index .Values "auth-server-key-rotation" "keysPushStrategy" }}"]
           volumes:
-          {{- with .Values.volumes }}
+          {{- with (index .Values "auth-server-key-rotation" "volumes") }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
           {{ if or (eq .Values.configSecretAdapter "aws") (eq .Values.configAdapterName "aws") }}
@@ -133,6 +141,16 @@ spec:
             - name: google-sa
               secret:
                 secretName: {{ .Release.Name }}-google-sa
+          {{- end }}
+          {{ if eq .Values.configSecretAdapter "vault" }}
+            - name: vault
+              secret:
+                secretName: {{ .Release.Name }}-vault
+                items:
+                - key: vault_role_id
+                  path: vault_role_id
+                - key: vault_secret_id
+                  path: vault_secret_id
           {{- end }}
           {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
             {{- if not .Values.istio.enabled }}

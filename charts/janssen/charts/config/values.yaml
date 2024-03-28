@@ -88,6 +88,28 @@ configmap:
   cnAwsSecretsReplicaRegions: []
   # [aws_secret_manager_envs] END
   # [aws_envs] END
+  # [vault_envs] Envs related to Hashicorp vault
+  # -- Vault AppRole RoleID.
+  cnVaultRoleId: ""
+  # -- Vault AppRole SecretID.
+  cnVaultSecretId: ""
+  # -- Base URL of Vault.
+  cnVaultAddr: http://localhost:8200
+  # -- Verify connection to Vault.
+  cnVaultVerify: false
+  # -- Path to file contains Vault AppRole role ID.
+  cnVaultRoleIdFile: /etc/certs/vault_role_id
+  # -- Path to file contains Vault AppRole secret ID.
+  cnVaultSecretIdFile: /etc/certs/vault_secret_id
+  # -- Vault namespace used to access the secrets.
+  cnVaultNamespace: ""
+  # -- Path to Vault KV secrets engine.
+  cnVaultKvPath: secret
+  # -- Base prefix name used to access secrets.
+  cnVaultPrefix: jans
+  # -- Path to Vault AppRole.
+  cnVaultAppRolePath: approle
+  # [vault_envs] END
   # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
   cnLdapUrl: "opendj:1636"
   # -- Value passed to Java option -XX:MaxRAMPercentage
@@ -142,6 +164,10 @@ configmap:
   kcDbUrlDatabase: keycloak
   # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
   kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
+  # -- URL of OPA API
+  cnOpaUrl: http://opa.opa.svc.cluster.cluster.local:8181/v1
+  # -- Message type (one of POSTGRES, REDIS, or DISABLED)
+  cnMessageType: DISABLED
 # -- Country code. Used for certificate creation.
 countryCode: US
 # -- Email address of the administrator usually. Used for certificate creation.
@@ -150,7 +176,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/configurator
   # -- Image  tag to use for deploying.
-  tag: 1.0.22-1
+  tag: 1.1.1_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- LDAP admin password if OpennDJ is used for persistence.

@@ -686,10 +686,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TrustRelationship'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.write
@@ -716,10 +732,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TrustRelationship'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.write
@@ -753,7 +785,7 @@ paths:
       - SAML - Trust Relationship
       summary: Get all Trust Relationship
       description: Get all TrustRelationship.
-      operationId: get-trust-relationship
+      operationId: get-trust-relationships
       responses:
         "200":
           description: Ok
@@ -795,6 +827,47 @@ paths:
           description: Unauthorized
         "500":
           description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.readonly
+  /kc/saml/trust-relationship/sp-metadata-file/{id}:
+    get:
+      tags:
+      - SAML - Trust Relationship
+      summary: Get TrustRelationship file metadata
+      description: Get TrustRelationship file metadata
+      operationId: get-trust-relationship-file-metadata
+      parameters:
+      - name: id
+        in: path
+        description: TrustRelationship inum
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/xml:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: Internal Server Error
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.readonly
@@ -976,15 +1049,11 @@ components:
           type: string
         idpMetadataTempDir:
           type: string
-        idpMetadataFilePattern:
-          type: string
         idpMetadataFile:
           type: string
         spMetadataDir:
           type: string
         spMetadataTempDir:
-          type: string
-        spMetadataFilePattern:
           type: string
         spMetadataFile:
           type: string
@@ -1011,10 +1080,24 @@ components:
           type: string
         signResponses:
           type: string
+    SAMLMetadata:
+      type: object
+      properties:
+        nameIDPolicyFormat:
+          type: string
+        entityId:
+          type: string
+        singleLogoutServiceUrl:
+          type: string
+        jansAssertionConsumerServiceGetURL:
+          type: string
+        jansAssertionConsumerServicePostURL:
+          type: string
     TrustRelationship:
       required:
       - description
       - displayName
+      - name
       - spMetaDataSourceType
       type: object
       properties:
@@ -1024,7 +1107,9 @@ components:
           type: string
         owner:
           type: string
-        clientId:
+        name:
+          maxLength: 60
+          minLength: 0
           type: string
         displayName:
           maxLength: 60
@@ -1058,18 +1143,17 @@ components:
           type: string
           enum:
           - file
-          - uri
-          - federation
           - manual
-          - mdq
+        samlMetadata:
+          $ref: '#/components/schemas/SAMLMetadata'
+        redirectUris:
+          type: array
+          items:
+            type: string
         spMetaDataURL:
           type: string
         metaLocation:
           type: string
-        jansEntityId:
-          type: array
-          items:
-            type: string
         releasedAttributes:
           type: array
           items:
@@ -1115,6 +1199,15 @@ components:
         metaDataFile:
           type: string
           format: binary
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
+          type: string
   securitySchemes:
     oauth2:
       type: oauth2

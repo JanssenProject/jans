@@ -2,6 +2,7 @@ package io.jans.configapi.plugin.mgt.rest;
 
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
+import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.mgt.model.user.CustomUser;
@@ -134,9 +135,11 @@ public class UserResource extends BaseResource {
     @RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-post.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Created Object"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))),
+            })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     public Response createUser(@Valid CustomUser customUser,
@@ -147,6 +150,7 @@ public class UserResource extends BaseResource {
                     removeNonLDAPAttributes);
         }
 
+        try {
         // get User object
         User user = setUserAttributes(customUser);
 
@@ -157,9 +161,11 @@ public class UserResource extends BaseResource {
         // checking mandatory attributes
         checkMissingAttributes(user, null);
         ignoreCustomAttributes(user, removeNonLDAPAttributes);
+        validateAttributes(user);
 
+        logger.info("Service call to create user:{}", user);
         user = userMgmtSrv.addUser(user, true);
-        logger.debug("User created {}", user);
+        logger.info("User created {}", user);
 
         // excludedAttributes
         user = excludeUserAttributes(user);
@@ -167,6 +173,13 @@ public class UserResource extends BaseResource {
         // get custom user
         customUser = getCustomUser(user, removeNonLDAPAttributes);
         logger.info("newly created customUser:{}", customUser);
+        }catch(WebApplicationException wex) {
+            logger.error("ApplicationException while creating user is:{}, cause:{}", wex, wex.getCause());
+            throwInternalServerException("USER_CREATION_ERROR", wex.getMessage());
+        }catch(Exception ex) {
+            logger.error("Exception while creating user is:{}, cause:{}", ex, ex.getCause());
+            throwInternalServerException(ex);
+        }
 
         return Response.status(Response.Status.CREATED).entity(customUser).build();
     }
@@ -177,10 +190,11 @@ public class UserResource extends BaseResource {
     @RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Not Found"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))),
+            })
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     public Response updateUser(@Valid CustomUser customUser,
@@ -191,33 +205,38 @@ public class UserResource extends BaseResource {
                     removeNonLDAPAttributes);
         }
 
-        // get User object
-        User user = setUserAttributes(customUser);
-
-        // parse birthdate if present
-        userMgmtSrv.parseBirthDateAttribute(user);
-        logger.debug("Create  user:{}", user);
-
-        // checking mandatory attributes
-        List<String> excludeAttributes = List.of(USER_PWD);
-        checkMissingAttributes(user, excludeAttributes);
-        ignoreCustomAttributes(user, removeNonLDAPAttributes);
-
         try {
+            // get User object
+            User user = setUserAttributes(customUser);
+
+            // parse birthdate if present
+            userMgmtSrv.parseBirthDateAttribute(user);
+            logger.debug("Create  user:{}", user);
+
+            // checking mandatory attributes
+            List<String> excludeAttributes = List.of(USER_PWD);
+            checkMissingAttributes(user, excludeAttributes);
+            ignoreCustomAttributes(user, removeNonLDAPAttributes);
+            validateAttributes(user);
+
+            logger.info("Call update user:{}", user);
             user = userMgmtSrv.updateUser(user);
             logger.info("Updated user:{}", user);
-        } catch (Exception ex) {
-            logger.error("Error while updating user", ex);
+
+            // excludedAttributes
+            user = excludeUserAttributes(user);
+
+            // get custom user
+            customUser = getCustomUser(user, removeNonLDAPAttributes);
+            logger.info("updated customUser:{}", customUser);
+        } catch (WebApplicationException wex) {
+            logger.error("ApplicationException while updating user is:{}, cause:{}", wex, wex.getCause());
+            throwInternalServerException("USER_UPDATE_ERROR", wex.getMessage());
+        }
+        catch (Exception ex) {
+            logger.error("Exception while updating user is:{}, cause:{}", ex, ex.getCause());
             throwInternalServerException(ex);
         }
-
-        // excludedAttributes
-        user = excludeUserAttributes(user);
-
-        // get custom user
-        customUser = getCustomUser(user, removeNonLDAPAttributes);
-        logger.info("updated customUser:{}", customUser);
-
         return Response.ok(customUser).build();
 
     }
@@ -338,6 +357,10 @@ public class UserResource extends BaseResource {
         }
 
         throwMissingAttributeError(missingAttributes);
+    }
+    
+    private void validateAttributes(User user) {
+        userMgmtSrv.validateAttributes(user.getCustomAttributes());
     }
 
     private List<CustomUser> getCustomUserList(List<User> users, boolean removeNonLDAPAttributes) {

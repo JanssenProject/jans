@@ -5,23 +5,23 @@ on:
       simple_release_as:
         description: 'Release version for docs'
         required: true
-        default: '1.0.22'
+        default: '1.1.1'
       java_release_as:
         description: 'Release version for the java projects jans-*'
         required: true
-        default: '1.0.22'
+        default: '1.1.1'
       docker_release_as:
         description: 'Release version for the docker images docker-*'
         required: true
-        default: '1.0.22-1'
+        default: '1.1.1-1'
       python_release_as:
         description: 'Release version for the python projects'
         required: true
-        default: '1.0.22'
+        default: '1.1.1'
       mega_release_as:
         description: 'Mega release version'
         required: true
-        default: '1.0.22'
+        default: '1.1.1'
 permissions:
   contents: read
 
@@ -75,7 +75,7 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        maven: [ "jans-scim", "jans-orm", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama", "jans-link", "jans-keycloak-link", "jans-keycloak-integration", "jans-casa", "jans-lock" ]
+        maven: [ "jans-scim", "jans-orm", "jans-fido2", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama", "jans-link", "jans-keycloak-link", "jans-keycloak-integration", "jans-casa", "jans-lock" ]
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1

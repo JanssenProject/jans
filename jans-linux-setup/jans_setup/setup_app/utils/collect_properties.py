@@ -230,7 +230,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         Config.install_scim_server = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.d'))
         Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.d'))
-        Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.d'))
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
         Config.install_jans_link = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-link'))
         Config.install_casa = os.path.exists(os.path.join(Config.jetty_base, 'casa/start.d'))
@@ -251,7 +250,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('jans_idp_idp_root_dir', 'idpRootDir'),
                     ('jans_idp_idp_metadata_root_dir', 'idpMetadataRootDir'),
                     ('jans_idp_idp_metadata_temp_dir', 'idpMetadataTempDir'),
-                    ('jans_idp_idp_metadata_file_pattern', 'idpMetadataFilePattern'),
                     ('jans_idp_idp_metadata_file', 'idpMetadataFile'),
                     ('jans_idp_sp_metadata_root_dir', 'spMetadataRootDir'),
                     ('jans_idp_sp_metadata_temp_dir', 'spMetadataTempDir'),

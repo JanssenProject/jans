@@ -1,6 +1,8 @@
 import json
 import logging.config
 import os
+import shutil
+from pathlib import Path
 from string import Template
 
 from jans.pycloudlib import get_manager
@@ -23,7 +25,7 @@ from lock import configure_lock_logging
 from lock import LockPersistenceSetup
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("auth")
+logger = logging.getLogger("jans-auth")
 
 manager = get_manager()
 
@@ -98,6 +100,8 @@ def main():
     except ValueError:
         # likely secret is not created yet
         logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
+
+    copy_builtin_libs()
 
     if as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
         configure_lock_logging()
@@ -187,6 +191,18 @@ def configure_logging():
     tmpl = Template(txt)
     with open(logfile, "w") as f:
         f.write(tmpl.safe_substitute(config))
+
+
+def copy_builtin_libs():
+    lock_enabled = as_boolean(os.environ.get("CN_LOCK_ENABLED", "false"))
+
+    for src in Path("/opt/jans/jetty/jans-auth/_libs").glob("*.jar"):
+        # skip jans-lock-service and jans-lock-model
+        if lock_enabled is False and src.name.startswith("jans-lock"):
+            continue
+
+        dst = f"/opt/jans/jetty/jans-auth/custom/libs/{src.name}"
+        shutil.copyfile(src, dst)
 
 
 if __name__ == "__main__":
