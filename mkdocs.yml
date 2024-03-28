@@ -448,7 +448,7 @@ nav:
         - 'Localization': 'casa/administration/localization.md'
         - 'Plugins':
             - '2FA Settings': 'casa/plugins/2fa-settings.md'
-            - 'Accounts Linking': 'casa/plugins/accts-linking/index.md'
+            - 'Accounts Linking': 'casa/plugins/accts-linking/account-linking-index.md'
             - 'Consent Management': 'casa/plugins/consent-management.md'
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'
@@ -456,13 +456,14 @@ nav:
         - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
     - User Guide: 'casa/user-guide.md'
 plugins:
+- include-markdown
 - tags
 - search
 - exclude-search:
     exclude_unreferenced: true
-- git-revision-date-localized:
-    enable_creation_date: true
-    type: timeago
+#- git-revision-date-localized:
+#    enable_creation_date: true
+#    type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.

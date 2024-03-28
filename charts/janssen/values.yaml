@@ -730,6 +730,8 @@ global:
     authServerServiceName: auth-server
     # -- Boolean flag to enable/disable auth-server chart. You should never set this to false.
     enabled: true
+    # -- passing custom java options to auth-server. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e auth-server-script ===> 2022-12-20 17:49:55,744 INFO
@@ -799,6 +801,8 @@ global:
   # -- Azure storage kind if using Azure disks
   azureStorageKind: Managed
   casa:
+    # -- passing custom java options to casa. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e casa ===> 2022-12-20 17:49:55,744 INFO
@@ -850,6 +854,8 @@ global:
     configApiServerServiceName: config-api
     # -- Boolean flag to enable/disable the config-api chart.
     enabled: true
+    # -- passing custom java options to config-api. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e config-api_persistence ===> 2022-12-20 17:49:55,744 INFO
@@ -887,6 +893,8 @@ global:
     fido2ServiceName: fido2
     # -- Boolean flag to enable/disable the fido2 chart.
     enabled: true
+    # -- passing custom java options to fido2. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e fido2 ===> 2022-12-20 17:49:55,744 INFO
@@ -948,6 +956,8 @@ global:
     scimServiceName: scim
     # -- Boolean flag to enable/disable the SCIM chart.
     enabled: true
+    # -- passing custom java options to scim. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e jans-scim ===> 2022-12-20 17:49:55,744 INFO
@@ -999,6 +1009,8 @@ global:
     linkServiceName: link
     # -- Boolean flag to enable/disable the link chart.
     enabled: false
+    # -- passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e link-persistence ===> 2022-12-20 17:49:55,744 INFO
@@ -1036,7 +1048,8 @@ global:
     ingress:
       # Enable saml endpoints /kc
       samlEnabled: false
-
+    # -- passing custom java options to saml. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: "" 
   # -- Path to SQL password file
   cnSqlPasswordFile: /etc/jans/conf/sql_password
   # -- Path to Couchbase password file
