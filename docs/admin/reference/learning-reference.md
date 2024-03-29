@@ -1,8 +1,20 @@
-# Learning References 
+---
+tags:
+  - administration
+  - external content
+  - blogs
+  - videos
+  - tutorials
+---
 
-This is a list of helpful learning resources out there on the internet about 
-Janssen Project. Though this list is not a complete list of all the content
-created by the community, help us keep it updated by raising a PR.
+# Community Content References
+
+This is a list of helpful learning resources outside the official documentation 
+about the Janssen Project. Most of the content is created by the community 
+at large,
+along with the core team. Though this list is not a complete list of all the 
+content created by the community on various platforms, please 
+help us keep it updated by raising a PR.
 
 ## Articles and Blogs
 
