@@ -86,8 +86,8 @@ public class RedirectViewModel {
                 if (!incomingState.equals(state)) {
                     throw new GeneralException("State mismatch");
                 }
-                title = "Success";
-                text = "You may close this now";
+                title = Labels.getLabel("bioid_success");
+                text = Labels.getLabel("bioid_close");
             }
 
         } catch (Exception e) {
