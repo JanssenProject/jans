@@ -96,6 +96,22 @@ public class SimpleUser extends BaseEntry implements Serializable {
 		this.status = status;
 	}
 
+	public String[] getExternalUid() {
+		return externalUid;
+	}
+
+	public void setExternalUid(String[] externalUid) {
+		this.externalUid = externalUid;
+	}
+
+	public String[] getJansAuthenticator() {
+		return jansAuthenticator;
+	}
+
+	public void setJansAuthenticator(String[] jansAuthenticator) {
+		this.jansAuthenticator = jansAuthenticator;
+	}
+
 	public List<CustomObjectAttribute> getCustomAttributes() {
         return customAttributes;
     }
