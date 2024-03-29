@@ -151,7 +151,7 @@ public abstract class UserService {
         user.setAttribute("inum", inum, false);
 
         GluuStatus status = active ? GluuStatus.ACTIVE : GluuStatus.REGISTER;
-        user.setAttribute("jansStatus", status.getValue(), false);
+        user.setStatus(status);
 
         if (dataSourceTypeService.isLDAP(user.getDn())) {
 	        List<String> personCustomObjectClassList = getPersonCustomObjectClassList();
