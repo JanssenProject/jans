@@ -8,13 +8,14 @@ package io.jans.orm.model.base;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.annotation.CustomObjectClass;
-import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.util.StringHelper;
@@ -39,6 +40,15 @@ public class SimpleUser extends BaseEntry implements Serializable {
 
     @AttributeName(name = "jansPersistentJWT")
     private String[] oxAuthPersistentJwt;
+
+    @AttributeName(name = "jansExtUid")
+    private String[] externalUid;
+
+    @AttributeName(name = "jansAuthenticator")
+    private String[] jansAuthenticator;
+
+    @AttributeName(name = "jansStatus")
+    private String status;
 
     @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
     protected List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
@@ -78,12 +88,28 @@ public class SimpleUser extends BaseEntry implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public List<CustomObjectAttribute> getCustomAttributes() {
+    public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public List<CustomObjectAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
     public void setCustomAttributes(List<CustomObjectAttribute> customAttributes) {
         this.customAttributes = customAttributes;
+    }
+
+    public String[] getCustomObjectClasses() {
+        return customObjectClasses;
+    }
+
+    public void setCustomObjectClasses(String[] customObjectClasses) {
+        this.customObjectClasses = customObjectClasses;
     }
 
     public String getAttribute(String attributeName) {
@@ -134,12 +160,55 @@ public class SimpleUser extends BaseEntry implements Serializable {
         return values;
     }
 
-    public String[] getCustomObjectClasses() {
-        return customObjectClasses;
+    public void setAttribute(String name, Object value) {
+        setAttribute(name, value, null);
     }
 
-    public void setCustomObjectClasses(String[] customObjectClasses) {
-        this.customObjectClasses = customObjectClasses;
+    public void setAttribute(String name, Object value, Boolean multiValued) {
+        CustomObjectAttribute attribute = new CustomObjectAttribute(name, value);
+        if (multiValued != null) {
+            attribute.setMultiValued(multiValued);
+        }
+
+        removeAttribute(name);
+        getCustomAttributes().add(attribute);
+    }
+
+    public void setAttribute(String name, Object[] values) {
+        setAttribute(name, values, null);
+    }
+
+    public void setAttribute(String name, Object[] values, Boolean multiValued) {
+        CustomObjectAttribute attribute = new CustomObjectAttribute(name, Arrays.asList(values));
+        if (multiValued != null) {
+            attribute.setMultiValued(multiValued);
+        }
+
+        removeAttribute(name);
+        getCustomAttributes().add(attribute);
+    }
+
+    public void setAttribute(String name, List<String> values) {
+        setAttribute(name, values, null);
+    }
+
+    public void setAttribute(String name, List<String> values, Boolean multiValued) {
+        CustomObjectAttribute attribute = new CustomObjectAttribute(name, values);
+        if (multiValued != null) {
+            attribute.setMultiValued(multiValued);
+        }
+
+        removeAttribute(name);
+        getCustomAttributes().add(attribute);
+    }
+
+    public void removeAttribute(String name) {
+        for (Iterator<CustomObjectAttribute> it = getCustomAttributes().iterator(); it.hasNext(); ) {
+            if (StringHelper.equalsIgnoreCase(name, it.next().getName())) {
+                it.remove();
+                break;
+            }
+        }
     }
 
 }
