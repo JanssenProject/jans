@@ -588,9 +588,7 @@ public class AuthenticationService {
     }
 
     private boolean checkUserStatus(User user) {
-        CustomObjectAttribute userStatus = userService.getCustomAttribute(user, "jansStatus");
-
-        if ((userStatus != null) && GluuStatus.ACTIVE.getValue().equalsIgnoreCase(StringHelper.toString(userStatus.getValue()))) {
+        if (GluuStatus.ACTIVE == user.getStatus()) {
             return true;
         }
 
@@ -894,5 +892,4 @@ public class AuthenticationService {
             setExternalScriptExtraParameters(newSessionIdAttributes, authExternalAttributes);
         }
     }
-
 }

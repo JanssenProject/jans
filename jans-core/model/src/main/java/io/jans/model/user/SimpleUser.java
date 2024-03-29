@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.orm.model.base;
+package io.jans.model.user;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,11 +13,14 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import io.jans.model.GluuStatus;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.annotation.CustomObjectClass;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.BaseEntry;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.util.StringHelper;
 
 /**
@@ -48,7 +51,7 @@ public class SimpleUser extends BaseEntry implements Serializable {
     private String[] jansAuthenticator;
 
     @AttributeName(name = "jansStatus")
-    private String status;
+    private GluuStatus status;
 
     @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
     protected List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
@@ -88,11 +91,11 @@ public class SimpleUser extends BaseEntry implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public String getStatus() {
+    public GluuStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(GluuStatus status) {
 		this.status = status;
 	}
 

@@ -11,9 +11,9 @@ import java.util.List;
 import org.json.JSONArray;
 
 import io.jans.as.model.exception.InvalidClaimException;
+import io.jans.model.user.SimpleUser;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
-import io.jans.orm.model.base.SimpleUser;
 
 /**
  * @author Yuriy Movchan Date: 06/11/2013
