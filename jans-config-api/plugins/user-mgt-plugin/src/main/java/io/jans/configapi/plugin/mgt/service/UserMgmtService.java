@@ -88,7 +88,7 @@ public class UserMgmtService {
         boolean useLowercaseFilter = configurationService.isLowercaseFilter(userService.getPeopleBaseDn());
         logger.info("For searching user user useLowercaseFilter?:{}", useLowercaseFilter);
 
-        Filter displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter, searchFilter = null;
+        Filter displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter, givenNameFilter, middleNameFilter, nicknameFilter, snFilter, searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
@@ -105,6 +105,10 @@ public class UserMgmtService {
                             Filter.createLowercaseFilter(AttributeConstants.DESCRIPTION), null, targetArray, null);
                     mailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.MAIL),
                             null, targetArray, null);
+                    givenNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("givenName"), null, targetArray, null);
+                    middleNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("middleName"), null, targetArray, null);
+                    nicknameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("nickname"), null, targetArray, null);
+                    snFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("sn"), null, targetArray, null);
                     uidFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray,
                             null);
                 } else {
@@ -113,12 +117,16 @@ public class UserMgmtService {
                     descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
                             null);
                     mailFilter = Filter.createSubstringFilter(AttributeConstants.MAIL, null, targetArray, null);
+                    givenNameFilter = Filter.createSubstringFilter("givenName", null, targetArray, null);
+                    middleNameFilter = Filter.createSubstringFilter("middleName", null, targetArray, null);
+                    nicknameFilter = Filter.createSubstringFilter("nickname", null, targetArray, null);
+                    snFilter = Filter.createSubstringFilter("sn", null, targetArray, null);
                     uidFilter = Filter.createSubstringFilter("uid", null, targetArray, null);
                 }
 
                 inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
                 filters.add(
-                        Filter.createORFilter(displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter));
+                        Filter.createORFilter(displayNameFilter, descriptionFilter, mailFilter, uidFilter, givenNameFilter, middleNameFilter, nicknameFilter, snFilter, inumFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
@@ -405,25 +413,33 @@ public class UserMgmtService {
     }
 
     public User addUser(User user, boolean active) {
+        logger.info("\n Creating user:{}, user.getCustomAttributes():{}, active:{}", user, user.getCustomAttributes(), active);
         user = userService.addUser(user, active);
+        logger.info("New user:{}, user.getCustomAttributes():{} \n", user, user.getCustomAttributes());
         // remove inactive claims
         if (user != null) {
             List<User> users = new ArrayList<>();
             users.add(user);
             users = this.verifyCustomAttributes(users);
-            user = users.get(0);
+            if (users != null && !users.isEmpty()) {
+                user = users.get(0);
+            }           
         }
         return user;
     }
 
     public User updateUser(User user) {
+        logger.info("\n Updating user:{}, user.getCustomAttributes():{}", user, user.getCustomAttributes());
         user = userService.updateUser(user);
+        logger.info("Updated user:{}, user.getCustomAttributes():{} \n", user, user.getCustomAttributes());
         // remove inactive claims
         if (user != null) {
             List<User> users = new ArrayList<>();
             users.add(user);
             users = this.verifyCustomAttributes(users);
-            user = users.get(0);
+            if (users != null && !users.isEmpty()) {
+                user = users.get(0);
+            }  
         }
         return user;
     }
@@ -457,7 +473,7 @@ public class UserMgmtService {
 
             if (CollectionUtils.isNotEmpty(attList)
                     && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {
-                logger.info("Removing attribute as it is not active attributeName: {} , status:{}", attributeName,
+                logger.info("\n\n*** Removing attribute as it is not active attributeName: {} , status:{} ***\n", attributeName,
                         attList.get(0).getStatus().getValue());
                 it.remove();
             }
@@ -479,7 +495,7 @@ public class UserMgmtService {
     }
 
     public void validateAttributes(List<CustomObjectAttribute> customAttributes) {
-        logger.info("**** Validate customAttributes: {}", customAttributes);
+        logger.info("\n **** Validate customAttributes: {}", customAttributes);
         if (customAttributes == null || customAttributes.isEmpty()) {
             return;
         }
@@ -491,16 +507,17 @@ public class UserMgmtService {
             if(attribute!=null) {
                 validation = attribute.getAttributeValidation();
             }
-            logger.info("validation:{}", validation);
+            logger.info("customObjectAttribute.getName():{}, validation:{}", customObjectAttribute.getName(), validation);
 
             String errorMsg = validateCustomAttributes(customObjectAttribute, validation);
-
+            logger.info("customObjectAttribute.getName():{}, errorMsg:{}", customObjectAttribute.getName(), errorMsg);
             if (StringUtils.isNotBlank(errorMsg)) {
                 sb.append(errorMsg);
             }
         }
 
         if (StringUtils.isNotBlank(sb.toString())) {
+            logger.error("Attribute validation failed with error msg:{} \n",sb);
             throw new WebApplicationException(sb.toString());
         }
 
@@ -534,12 +551,12 @@ public class UserMgmtService {
 
             // minvalue Validation
             if (minvalue != null && attributeValue.length() < minvalue) {
-                sb.append(",must be at least " + minvalue + " characters.");
+                sb.append(",must be at least " + minvalue + " characters");
             }
 
             // maxValue Validation
             if (maxValue != null && attributeValue.length() > maxValue) {
-                sb.append(",must be less than " + maxValue + " characters.");
+                sb.append(",must be less than " + maxValue + " characters");
             }
 
             // regexpValue
@@ -547,16 +564,17 @@ public class UserMgmtService {
                 Pattern pattern = Pattern.compile(regexpValue);
                 Matcher matcher = pattern.matcher(attributeValue);
                 if (!matcher.matches()) {
-                    sb.append(",must match (" + regexpValue + ") pattern.");
+                    sb.append(",must match (" + regexpValue + ") pattern");
                 }
             }
         } catch (Exception ex) {
             logger.error("Error while validating attributeName:{}", attributeName);
         }
-        logger.info("Validate reuslt - sb :{} ", sb);
+        logger.info("Validate reuslt for attributeName:{} is sb :{} ", attributeName, sb);
 
         if (StringUtils.isNotBlank(sb.toString())) {
-            sb.insert(0, attributeName+" ");
+            sb.insert(0, "'"+attributeName+"' -> ");
+            sb.append("  ");        
         }
         return sb.toString();
     }

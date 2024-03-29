@@ -122,6 +122,18 @@ kubectl get configmap -n <namespace> cn -o json
 
 From the console, Go to `Secret Manager`> Click on `Create Secret` > Add a `name` > Upload a `json` file or add the json to the `Secret value` field > Create
 
+#### Managing Versions
+
+While there's no limitation on how many versions a secret can have, the recommendation is to keep the number as low as possible, e.g. 5 active versions.
+If there are too many secret versions, it's best to destroy older versions manually, for example:
+
+```bash
+gcloud secrets versions list jans-secret --filter="state = enabled" --filter="createTime < '2024-03-02'" | grep "NAME:" | tr -d "NAME: " > versions_to_destroy.txt
+while read -r line; do
+  gcloud secrets versions destroy "$line" --secret=jans-secret
+done < "versions_to_destroy.txt"
+```
+
 ### Vault
 
 !!! Note

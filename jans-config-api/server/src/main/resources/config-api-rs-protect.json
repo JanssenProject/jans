@@ -2562,6 +2562,24 @@
               "name": "https://jans.io/oauth/config/write-all"
             }
           ]
+        },
+        {
+          "httpMethods": [
+            "DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.067",
+              "name": "https://jans.io/idp/saml.delete"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
         }
       ]
     },
@@ -2844,6 +2862,70 @@
             {
               "inum": "1800.01.74",
               "name": "https://jans.io/oauth/lock-config.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/jans-assets",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.75",
+              "name": "https://jans.io/oauth/jans_asset-read"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.76",
+              "name": "https://jans.io/oauth/config/jans_asset-write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "PUT"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.76",
+              "name": "https://jans.io/oauth/config/jans_asset-write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.77",
+              "name": "https://jans.io/oauth/config/jans_asset-delete"
             }
           ],
           "groupScopes": [],

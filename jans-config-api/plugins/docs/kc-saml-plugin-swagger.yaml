@@ -785,7 +785,7 @@ paths:
       - SAML - Trust Relationship
       summary: Get all Trust Relationship
       description: Get all TrustRelationship.
-      operationId: get-trust-relationship
+      operationId: get-trust-relationships
       responses:
         "200":
           description: Ok
@@ -827,6 +827,47 @@ paths:
           description: Unauthorized
         "500":
           description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.readonly
+  /kc/saml/trust-relationship/sp-metadata-file/{id}:
+    get:
+      tags:
+      - SAML - Trust Relationship
+      summary: Get TrustRelationship file metadata
+      description: Get TrustRelationship file metadata
+      operationId: get-trust-relationship-file-metadata
+      parameters:
+      - name: id
+        in: path
+        description: TrustRelationship inum
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/xml:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: Internal Server Error
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.readonly

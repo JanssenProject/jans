@@ -10,7 +10,9 @@ import typing as _t
 from functools import cached_property
 
 from google.cloud import secretmanager
-from google.api_core.exceptions import AlreadyExists, NotFound
+from google.api_core.exceptions import AlreadyExists
+from google.api_core.exceptions import NotFound
+from google.api_core.exceptions import FailedPrecondition
 
 from jans.pycloudlib.config.base_config import BaseConfig
 from jans.pycloudlib.utils import safe_value
@@ -59,6 +61,14 @@ class GoogleConfig(BaseConfig):
 
         # secrets key value by default
         self.google_secret_name = f"{prefix}-configuration"
+
+        # allowed number of ENABLED versions
+        try:
+            max_versions = int(os.environ.get("CN_GOOGLE_SECRET_MAX_VERSIONS", "5"))
+        except ValueError:
+            max_versions = 5
+            logger.warning("Unsupported value set to CN_GOOGLE_SECRET_MAX_VERSIONS environment variable. Falling back to default value.")
+        self.max_versions = max(1, max_versions)
 
     @cached_property
     def client(self) -> secretmanager.SecretManagerServiceClient:
@@ -128,14 +138,19 @@ class GoogleConfig(BaseConfig):
             A boolean to mark whether config is set or not.
         """
         all_ = self.get_all()
-        all_[key] = safe_value(value)
+        new_value = safe_value(value)
+
+        # no changes, skip updating secret
+        if new_value == all_.get(key):
+            return False
+
+        all_[key] = new_value
 
         self.create_secret()
 
-        logger.info(f'Adding key {key} to google secret manager')
+        logger.info(f'Adding/updating key {key} to google secret manager')
         logger.info(f'Size of secret payload : {sys.getsizeof(safe_value(all_))} bytes')
-        secret_version_bool = self.add_secret_version(safe_value(all_))
-        return secret_version_bool
+        return self.add_secret_version(safe_value(all_))
 
     def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Push a full dictionary to secrets.
@@ -150,14 +165,18 @@ class GoogleConfig(BaseConfig):
         # note that existing value will be overwritten
         all_ = self.get_all()
 
-        for k, v in data.items():
-            all_[k] = safe_value(v)
+        safe_data = {k: safe_value(v) for k, v in data.items()}
+
+        # no changes, skip updating secret
+        if safe_data == all_:
+            return False
+
+        all_.update(safe_data)
 
         self.create_secret()
 
         logger.info(f'Size of secret payload : {sys.getsizeof(safe_value(all_))} bytes')
-        secret_version_bool = self.add_secret_version(safe_value(all_))
-        return secret_version_bool
+        return self.add_secret_version(safe_value(all_))
 
     def create_secret(self) -> None:
         """Create a new secret with the given name.
@@ -203,4 +222,44 @@ class GoogleConfig(BaseConfig):
         )
 
         logger.info("Added secret version: {}".format(response.name))
+        self._destroy_old_versions(parent)
         return bool(response)
+
+    def _destroy_old_versions(self, parent):
+        # list of version.state enum
+        #
+        # - STATE_UNSPECIFIED = 0
+        # - ENABLED = 1
+        # - DISABLED = 2
+        # - DESTROYED = 3
+        response = self.client.list_secret_versions(
+            request={
+                "parent": parent,
+                "filter": "state:ENABLED",
+                "page_size": 1,
+            },
+        )
+
+        # versions that need to be kept as enabled
+        enabled_versions = []
+
+        for version in response:
+            # keep version as enabled (default max. is set by `max_versions` attribute)
+            if len(enabled_versions) < self.max_versions and version.name not in enabled_versions:
+                enabled_versions.append(version.name)
+                continue
+
+            # secrets may have lots of versions; disabling them all could produce bottleneck
+            # hence we only disable 1 version after allowed enabled versions are reaching threshold
+            logger.info(
+                f"The soft-limit for max. versions (currently set to {self.max_versions}) has been reached; "
+                f"destroying previous version {version.name} (state={version.state.name})"
+            )
+
+            try:
+                self.client.destroy_secret_version(request={"name": version.name})
+            except FailedPrecondition as exc:
+                # re-raise error if the state is not DESTROYED (400 status code)
+                if exc.code != 400:
+                    raise exc
+            break
