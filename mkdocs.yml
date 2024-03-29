@@ -361,6 +361,7 @@ nav:
         - Persistence: admin/reference/kubernetes/docker-jans-persistence-loader.md
         - SCIM: admin/reference/kubernetes/docker-jans-scim.md
         - Gluu OpenDJ: admin/reference/kubernetes/docker-opendj.md
+    - Learning Reference: admin/reference/learning-reference.md
   - FIDO Admin Guide:
     - admin/fido/README.md
     - Configuration: admin/fido/config.md
