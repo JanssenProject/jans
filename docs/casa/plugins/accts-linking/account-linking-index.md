@@ -19,6 +19,9 @@ From the perspective of a user already logged into Casa, the experience is as fo
 
 ## Components deployment
 
+!!! Note
+    Ensure you are running at least version 1.1.0 of Jans Authentication Server and Casa
+
 The pieces that allow materialization of the experience summarized above are the following:
 
 a) The Casa plugin jar file
