@@ -274,6 +274,7 @@ public class KeycloakApi {
 
     private void configureSamlSigningKey(KeyDescriptor keydescriptor, ManagedSamlClient client) {
 
+
         KeyInfo keyinfo = keydescriptor.getKeyInfo();
         List<X509Data> certdata = keyinfo.getDatalist();
         if(!certdata.isEmpty()) {
@@ -287,7 +288,7 @@ public class KeycloakApi {
         KeyInfo keyinfo = keydescriptor.getKeyInfo();
         List<X509Data> certdata = keyinfo.getDatalist();
         if(!certdata.isEmpty()) {
-            
+            client.samlEncryptAssertions(true);
             client.samlClientEncryptionCertificate(certdata.get(0).getFirstX509Certificate());
         }
     }

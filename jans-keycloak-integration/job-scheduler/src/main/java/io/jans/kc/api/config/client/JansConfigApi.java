@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class JansConfigApi {
 
+    private static final int HTTP_CODE_404 = 404;
     private static final Logger log = LoggerFactory.getLogger(JansConfigApi.class);
     private SamlTrustRelationshipApi trApi;
     private AttributeApi attributeApi;
@@ -43,6 +44,9 @@ public class JansConfigApi {
             TrustRelationship tr = trApi.getTrustRelationshipById(inum);
             return (tr != null);
         }catch(ApiException e) {
+            if(e.getCode() == HTTP_CODE_404) {
+                return false;
+            }
             throw new JansConfigApiError("trustRelationshipExists() failed",e);
         }
     }
