@@ -5743,6 +5743,8 @@
         
           
         
+          
+        
       
       
         
@@ -6504,6 +6506,20 @@
           
         </ul>
       </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/learning-reference/" class="md-nav__link">
+        Learning Reference
+      </a>
     </li>
   
 
@@ -8386,11 +8402,11 @@
 <h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
 <p>For local deployments like <code>minikube</code> and <code>MicroK8s</code> or cloud installations in demo mode, resources may be set to the minimum as below:</p>
 <ul>
-<li>8GB RAM</li>
+<li>8 GB RAM</li>
 <li>4 CPU cores</li>
-<li>50GB hard-disk</li>
+<li>50 GB hard-disk</li>
 </ul>
-<p>Use the listing below for detailed estimation of minimum required resources. Table contains the default resources recommendations per service. Depending on the use of each service the resources needs may be increase or decrease.</p>
+<p>Use the listing below for detailed estimation of minimum required resources. Table contains the default resources recommendations per service. Depending on the use of each service the resources needs may increase or decrease.</p>
 <table>
 <thead>
 <tr>
@@ -8417,7 +8433,7 @@
 <td>2GB</td>
 <td>10GB</td>
 <td>64 Bit</td>
-<td>Only if couchbase is not installed</td>
+<td>Only if Couchbase/SQL not installed</td>
 </tr>
 <tr>
 <td>fido2</td>
@@ -8429,24 +8445,24 @@
 </tr>
 <tr>
 <td>scim</td>
-<td>1.0</td>
-<td>1.0GB</td>
+<td>1</td>
+<td>1GB</td>
 <td>N/A</td>
 <td>64 Bit</td>
 <td>No</td>
 </tr>
 <tr>
 <td>config - job</td>
-<td>0.5</td>
-<td>0.5GB</td>
+<td>0.3</td>
+<td>0.3GB</td>
 <td>N/A</td>
 <td>64 Bit</td>
 <td>Yes on fresh installs</td>
 </tr>
 <tr>
 <td>persistence - job</td>
-<td>0.5</td>
-<td>0.5GB</td>
+<td>0.3</td>
+<td>0.3GB</td>
 <td>N/A</td>
 <td>64 Bit</td>
 <td>Yes on fresh installs</td>
@@ -8457,7 +8473,7 @@
 <td>1GB</td>
 <td>N/A</td>
 <td>64 Bit</td>
-<td>Yes if not ALB</td>
+<td>Yes ALB/Istio not used</td>
 </tr>
 <tr>
 <td>auth-key-rotation</td>
@@ -8475,17 +8491,41 @@
 <td>64 Bit</td>
 <td>No</td>
 </tr>
+<tr>
+<td>casa</td>
+<td>0.5</td>
+<td>0.5GB</td>
+<td>N/A</td>
+<td>64 Bit</td>
+<td>No</td>
+</tr>
+<tr>
+<td>link</td>
+<td>0.5</td>
+<td>1GB</td>
+<td>N/A</td>
+<td>64 Bit</td>
+<td>No</td>
+</tr>
+<tr>
+<td>saml</td>
+<td>0.5</td>
+<td>1GB</td>
+<td>N/A</td>
+<td>64 Bit</td>
+<td>No</td>
+</tr>
 </tbody>
 </table>
 <p>Releases of images are in style 1.0.0-beta.0, 1.0.0-0</p>
 <h2 id="installation-steps">Installation Steps<a class="headerlink" href="#installation-steps" title="Permanent link">#</a></h2>
-<p>Start a fresh Ubuntu <code>18.04</code>/<code>20.04</code>/<code>22.04</code> 4 CPU, 8 GB RAM, and 50GB SSD VM with ports <code>443</code> and <code>80</code> open. Then execute the following</p>
+<p>Start a fresh Ubuntu <code>18.04</code>/<code>20.04</code>/<code>22.04</code> VM with ports <code>443</code> and <code>80</code> open. Then execute the following:</p>
 <p><div class="highlight"><pre><span></span><code>sudo su -
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/v1.1.1.nightly/automation/startjanssendemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssendemo.sh <span class="o">&amp;&amp;</span> ./startjanssendemo.sh
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssendemo.sh <span class="o">&amp;&amp;</span> ./startjanssendemo.sh
 </code></pre></div></p>
 <p>This will install Docker, Microk8s, Helm and Janssen with the default settings that can be found inside <a href="https://github.com/JanssenProject/jans/blob/main/charts/janssen/values.yaml">values.yaml</a>.  </p>
-<p>The installer will automatically add a record to your hosts record in the VM but if you want access the endpoints outside the VM you must  map the <code>ip</code> of the instance running ubuntu to the FQDN you provided and then access the endpoints at your browser such in the example in the table below.</p>
+<p>The installer will automatically add a record to your hosts record in the VM but if you want to access the endpoints outside the VM you must map the <code>ip</code> of the instance running Ubuntu to the FQDN you provided and then access the endpoints at your browser such in the example in the table below.</p>
 <table>
 <thead>
 <tr>
@@ -8567,7 +8607,7 @@
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2023, The Janssen Project
+      Copyright &copy; 2024, The Janssen Project
     </div>
   
   

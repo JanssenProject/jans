@@ -5750,6 +5750,8 @@
         
           
         
+          
+        
       
       
         
@@ -6511,6 +6513,20 @@
           
         </ul>
       </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/learning-reference/" class="md-nav__link">
+        Learning Reference
+      </a>
     </li>
   
 
@@ -8413,100 +8429,7 @@
 
 <h1 id="install-janssen-on-aks">Install Janssen on AKS<a class="headerlink" href="#install-janssen-on-aks" title="Permanent link">#</a></h1>
 <h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
-<p>The resources may be set to the minimum as below:</p>
-<ul>
-<li>8 GiB RAM</li>
-<li>8 CPU cores</li>
-<li>50GB hard-disk</li>
-</ul>
-<p>Use the listing below for detailed estimation of minimum required resources. Table contains the default resources recommendations per service. Depending on the use of each service the resources needs may be increase or decrease.</p>
-<table>
-<thead>
-<tr>
-<th>Service</th>
-<th>CPU Unit</th>
-<th>RAM</th>
-<th>Disk Space</th>
-<th>Processor Type</th>
-<th>Required</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Auth server</td>
-<td>2.5</td>
-<td>2.5GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>Yes</td>
-</tr>
-<tr>
-<td>LDAP (OpenDJ)</td>
-<td>1.5</td>
-<td>2GB</td>
-<td>10GB</td>
-<td>64 Bit</td>
-<td>Only if couchbase is not installed</td>
-</tr>
-<tr>
-<td>fido2</td>
-<td>0.5</td>
-<td>0.5GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>No</td>
-</tr>
-<tr>
-<td>scim</td>
-<td>1.0</td>
-<td>1.0GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>No</td>
-</tr>
-<tr>
-<td>config - job</td>
-<td>0.5</td>
-<td>0.5GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>Yes on fresh installs</td>
-</tr>
-<tr>
-<td>persistence - job</td>
-<td>0.5</td>
-<td>0.5GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>Yes on fresh installs</td>
-</tr>
-<tr>
-<td>nginx</td>
-<td>1</td>
-<td>1GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>Yes if not ALB</td>
-</tr>
-<tr>
-<td>auth-key-rotation</td>
-<td>0.3</td>
-<td>0.3GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>No [Strongly recommended]</td>
-</tr>
-<tr>
-<td>config-api</td>
-<td>1</td>
-<td>1GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>No</td>
-</tr>
-</tbody>
-</table>
-<p>Releases of images are in style 1.0.0-beta.0, 1.0.0-0</p>
+<p>{% include "includes/cn-system-requirements.md" %}</p>
 <h2 id="initial-setup">Initial Setup<a class="headerlink" href="#initial-setup" title="Permanent link">#</a></h2>
 <ol>
 <li>
@@ -8790,7 +8713,7 @@ helm install janssen janssen/janssen -n jans -f override.yaml
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2023, The Janssen Project
+      Copyright &copy; 2024, The Janssen Project
     </div>
   
   
