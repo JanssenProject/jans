@@ -14,10 +14,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.jans.model.GluuStatus;
+import io.jans.model.user.authenticator.UserAuthenticatorList;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.annotation.CustomObjectClass;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 import io.jans.orm.model.base.CustomObjectAttribute;
@@ -47,8 +49,9 @@ public class SimpleUser extends BaseEntry implements Serializable {
     @AttributeName(name = "jansExtUid")
     private String[] externalUid;
 
+    @JsonObject
     @AttributeName(name = "jansAuthenticator")
-    private String[] jansAuthenticator;
+    private UserAuthenticatorList authenticator;
 
     @AttributeName(name = "jansStatus")
     private GluuStatus status;
@@ -107,12 +110,12 @@ public class SimpleUser extends BaseEntry implements Serializable {
 		this.externalUid = externalUid;
 	}
 
-	public String[] getJansAuthenticator() {
-		return jansAuthenticator;
+	public UserAuthenticatorList getAuthenticator() {
+		return authenticator;
 	}
 
-	public void setJansAuthenticator(String[] jansAuthenticator) {
-		this.jansAuthenticator = jansAuthenticator;
+	public void setAuthenticator(UserAuthenticatorList authenticator) {
+		this.authenticator = authenticator;
 	}
 
 	public List<CustomObjectAttribute> getCustomAttributes() {

@@ -21,8 +21,8 @@ the requirements can vary based on the size of the data and the required
 concurrency, the following guidelines can help you plan:
 
 ### Development and Test Environments
-- 4 GB RAM
-- 2 CPU
+- 8 GB RAM
+- 4 CPU
 - 20 GB Disk
 
 ### Production Environment Recommendation:

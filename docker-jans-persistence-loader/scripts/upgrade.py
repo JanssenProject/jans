@@ -800,13 +800,12 @@ class Upgrade:
             should_update = True
 
         # message configuration
-        if "jansMessageConf" not in entry.attrs:
-            entry.attrs["jansMessageConf"] = {}
+        message_conf = entry.attrs.get("jansMessageConf") or {}
 
         with contextlib.suppress(TypeError):
-            entry.attrs["jansMessageConf"] = json.loads(entry.attrs["jansMessageConf"])
+            message_conf = json.loads(message_conf)
 
-        entry.attrs["jansMessageConf"], should_update = _transform_message_config(entry.attrs["jansMessageConf"])
+        entry.attrs["jansMessageConf"], should_update = _transform_message_config(message_conf)
 
         # set document store
         doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
