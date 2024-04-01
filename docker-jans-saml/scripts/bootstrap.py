@@ -9,6 +9,7 @@ from string import Template
 from uuid import uuid4
 
 from jans.pycloudlib import get_manager
+from jans.pycloudlib.persistence import sync_ldap_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
@@ -51,6 +52,11 @@ def render_keycloak_conf():
 
 
 def main():
+    persistence_groups = PersistenceMapper().groups().keys()
+
+    if "ldap" in persistence_groups:
+        sync_ldap_password(manager)
+
     with manager.lock.create_lock("saml-setup"):
         persistence_setup = PersistenceSetup(manager)
         persistence_setup.import_ldif_files()
