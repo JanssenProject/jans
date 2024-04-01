@@ -20,7 +20,6 @@ import java.util.Map;
  * @author gasmyr on 9/17/20.
  */
 @ApplicationScoped
-@Named("externalIdGeneratorService")
 public class ExternalIdGeneratorService extends ExternalScriptService {
 
     private static final long serialVersionUID = 1727751544454591273L;

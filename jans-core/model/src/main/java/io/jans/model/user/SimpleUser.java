@@ -4,19 +4,25 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.orm.model.base;
+package io.jans.model.user;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
+import io.jans.model.GluuStatus;
+import io.jans.model.user.authenticator.UserAuthenticatorList;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.annotation.CustomObjectClass;
-import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.BaseEntry;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.util.StringHelper;
 
 /**
@@ -39,6 +45,16 @@ public class SimpleUser extends BaseEntry implements Serializable {
 
     @AttributeName(name = "jansPersistentJWT")
     private String[] oxAuthPersistentJwt;
+
+    @AttributeName(name = "jansExtUid")
+    private String[] externalUid;
+
+    @JsonObject
+    @AttributeName(name = "jansAuthenticator")
+    private UserAuthenticatorList authenticator;
+
+    @AttributeName(name = "jansStatus")
+    private GluuStatus status;
 
     @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
     protected List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
@@ -78,12 +94,44 @@ public class SimpleUser extends BaseEntry implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public List<CustomObjectAttribute> getCustomAttributes() {
+    public GluuStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(GluuStatus status) {
+		this.status = status;
+	}
+
+	public String[] getExternalUid() {
+		return externalUid;
+	}
+
+	public void setExternalUid(String[] externalUid) {
+		this.externalUid = externalUid;
+	}
+
+	public UserAuthenticatorList getAuthenticator() {
+		return authenticator;
+	}
+
+	public void setAuthenticator(UserAuthenticatorList authenticator) {
+		this.authenticator = authenticator;
+	}
+
+	public List<CustomObjectAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
     public void setCustomAttributes(List<CustomObjectAttribute> customAttributes) {
         this.customAttributes = customAttributes;
+    }
+
+    public String[] getCustomObjectClasses() {
+        return customObjectClasses;
+    }
+
+    public void setCustomObjectClasses(String[] customObjectClasses) {
+        this.customObjectClasses = customObjectClasses;
     }
 
     public String getAttribute(String attributeName) {
@@ -134,12 +182,55 @@ public class SimpleUser extends BaseEntry implements Serializable {
         return values;
     }
 
-    public String[] getCustomObjectClasses() {
-        return customObjectClasses;
+    public void setAttribute(String name, Object value) {
+        setAttribute(name, value, null);
     }
 
-    public void setCustomObjectClasses(String[] customObjectClasses) {
-        this.customObjectClasses = customObjectClasses;
+    public void setAttribute(String name, Object value, Boolean multiValued) {
+        CustomObjectAttribute attribute = new CustomObjectAttribute(name, value);
+        if (multiValued != null) {
+            attribute.setMultiValued(multiValued);
+        }
+
+        removeAttribute(name);
+        getCustomAttributes().add(attribute);
+    }
+
+    public void setAttribute(String name, Object[] values) {
+        setAttribute(name, values, null);
+    }
+
+    public void setAttribute(String name, Object[] values, Boolean multiValued) {
+        CustomObjectAttribute attribute = new CustomObjectAttribute(name, Arrays.asList(values));
+        if (multiValued != null) {
+            attribute.setMultiValued(multiValued);
+        }
+
+        removeAttribute(name);
+        getCustomAttributes().add(attribute);
+    }
+
+    public void setAttribute(String name, List<String> values) {
+        setAttribute(name, values, null);
+    }
+
+    public void setAttribute(String name, List<String> values, Boolean multiValued) {
+        CustomObjectAttribute attribute = new CustomObjectAttribute(name, values);
+        if (multiValued != null) {
+            attribute.setMultiValued(multiValued);
+        }
+
+        removeAttribute(name);
+        getCustomAttributes().add(attribute);
+    }
+
+    public void removeAttribute(String name) {
+        for (Iterator<CustomObjectAttribute> it = getCustomAttributes().iterator(); it.hasNext(); ) {
+            if (StringHelper.equalsIgnoreCase(name, it.next().getName())) {
+                it.remove();
+                break;
+            }
+        }
     }
 
 }

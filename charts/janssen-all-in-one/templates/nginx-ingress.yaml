@@ -419,7 +419,7 @@ spec:
               service:
                 name: {{ .Values.service.name }}
                 port:
-                  number: 8074
+                  number: 8080
 {{- end }}
 
 ---
