@@ -77,6 +77,7 @@ public class TrustRelationshipResource extends BaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Trust relationship not found",content=@Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class))),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
@@ -87,11 +88,19 @@ public class TrustRelationshipResource extends BaseResource {
             logger.info("Searching TrustRelationship by id: {}", escapeLog(id));
         }
 
-        TrustRelationship trustRelationship = samlService.getTrustRelationshipByInum(id);
-
-        logger.info("TrustRelationship found by id:{}, trustRelationship:{}", id, trustRelationship);
-
-        return Response.ok(trustRelationship).build();
+        TrustRelationship trustrelationship = samlService.getTrustRelationshipByInum(id);
+        if(trustrelationship != null) {
+            logger.info("TrustRelationship found by id:{}, trustRelationship:{}", id, trustrelationship);
+            return Response.ok(trustrelationship).build();
+        }else {
+            logger.info("TrustRelationship with id {} not found",id);
+            ApiError error = new ApiError.ErrorBuilder()
+                .withCode(String.valueOf(Response.Status.NOT_FOUND.getStatusCode()))
+                .withMessage("Trust relationship not found")
+                .andDescription(String.format("The TrustRelationship with id '%s' was not found",id))
+                .build();
+            return Response.status(Response.Status.NOT_FOUND).entity(error).build();
+        }
     }
 
     @Operation(summary = "Create Trust Relationship with Metadata File", description = "Create Trust Relationship with Metadata File", operationId = "post-trust-relationship-metadata-file", tags = {
