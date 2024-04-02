@@ -462,7 +462,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "OTP. Process HOTP authentication during authentication. otpCode is valid"
                         
                         # Update current moving factor in user entry
-                        enrolledAuthenticator.addCustom("movingFactor", otp_secret_key)
+                        enrolledAuthenticator.addCustom("movingFactor", moving_factor)
 
                         # Update moving factor in user entry
                         updatedUser = userService.updateUser(user)
