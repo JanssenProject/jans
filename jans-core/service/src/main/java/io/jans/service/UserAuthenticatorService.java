@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import io.jans.model.user.SimpleUser;
 import io.jans.model.user.authenticator.UserAuthenticator;
 import io.jans.model.user.authenticator.UserAuthenticatorList;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.mail.Authenticator;
 
 /**
  * Provides operations with user authenticators
@@ -20,6 +22,7 @@ import jakarta.inject.Inject;
  * @author Yuriy Movchan
  * @version 03/29/2024
  */
+@ApplicationScoped
 public class UserAuthenticatorService {
 
 	@Inject
@@ -27,13 +30,40 @@ public class UserAuthenticatorService {
 
 	public static String EXTERNAL_UID_FORMAT = "%s: %s";
 	private static String[] EMPTY_STRING_ARRAY = new String[0];
+	
+	private static final UserAuthenticatorList EMPTY_USER_AUTHENTICATOR_LIST = new UserAuthenticatorList(Collections.emptyList());
 
 	public UserAuthenticatorList getUserAuthenticatorList(SimpleUser user) {
-		if (user == null) {
-			return (UserAuthenticatorList) Collections.EMPTY_LIST;
+		if ((user == null) || (user.getAuthenticator() == null)) {
+			return EMPTY_USER_AUTHENTICATOR_LIST;
 		}
 
 		return user.getAuthenticator();
+	}
+
+	public List<UserAuthenticator> getUserAuthenticatorsByType(SimpleUser user, String type) {
+		UserAuthenticatorList userAuthenticatorList = getUserAuthenticatorList(user);
+		
+		List<UserAuthenticator> result = new ArrayList<>();
+		for (UserAuthenticator authenticator :  userAuthenticatorList.getAuthenticators()) {
+			if (authenticator.getType().equals(type)) {
+				result.add(authenticator);
+			}
+		}
+
+		return result;
+	}
+
+	public UserAuthenticator getUserAuthenticatorById(SimpleUser user, String id) {
+		UserAuthenticatorList userAuthenticatorList = getUserAuthenticatorList(user);
+		
+		for (UserAuthenticator authenticator :  userAuthenticatorList.getAuthenticators()) {
+			if (authenticator.getId().equals(id)) {
+				return authenticator;
+			}
+		}
+
+		return null;
 	}
 
 	public void addUserAuthenticator(SimpleUser user, UserAuthenticator userAuthenticator) {
@@ -75,11 +105,41 @@ public class UserAuthenticatorService {
 				String externalUid = (String) it.next();
 				int idx = externalUid.indexOf(':');
 				if (idx != -1) {
-					String type = externalUid.substring(0, idx).trim();
+					String foundType = externalUid.substring(0, idx).trim();
 					String id = externalUid.substring(idx + 1).trim();
-					if (userAuthenticator.getId().equals(id) && userAuthenticator.getType().equals(type)) {
+					if (userAuthenticator.getId().equals(id) && userAuthenticator.getType().equals(foundType)) {
 						it.remove();
 						break;
+					}
+				}
+			}
+			
+			user.setExternalUid(externalUidList.toArray(EMPTY_STRING_ARRAY));
+		}
+	}
+
+	public void removeUserAuthenticator(SimpleUser user, String type) {
+		UserAuthenticatorList userAuthenticatorList = user.getAuthenticator();
+		if (userAuthenticatorList != null) {
+			for (Iterator<UserAuthenticator> it = userAuthenticatorList.getAuthenticators().iterator(); it.hasNext();) {
+				UserAuthenticator authenticator = (UserAuthenticator) it.next();
+				if (type.equals(authenticator.getType())) {
+					it.remove();
+				}
+			}
+		}
+
+		List<String> externalUidList = new ArrayList<>();
+		if (user.getExternalUid() != null) {
+			externalUidList.addAll(Arrays.asList(user.getExternalUid()));
+			
+			for (Iterator<String> it = externalUidList.iterator(); it.hasNext();) {
+				String externalUid = (String) it.next();
+				int idx = externalUid.indexOf(':');
+				if (idx != -1) {
+					String foundType = externalUid.substring(0, idx).trim();
+					if (type.equals(foundType)) {
+						it.remove();
 					}
 				}
 			}

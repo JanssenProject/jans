@@ -34,6 +34,12 @@ public class UserAuthenticatorList implements Serializable {
 
 	private List<UserAuthenticator> authenticators;
 
+	public UserAuthenticatorList() {}
+
+	public UserAuthenticatorList(List<UserAuthenticator> authenticators) {
+		this.authenticators = authenticators;
+	}
+
 	public List<UserAuthenticator> getAuthenticators() {
 		return authenticators;
 	}
