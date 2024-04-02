@@ -100,7 +100,7 @@ public class ConfigProcessor {
         s = oap.getUserInfoEndpoint();
         if (s == null) {
             logger.info("Grabbing userInfo endpoint from OP configuration document");
-            oap.setUserInfoEndpoint(opMetadata.getAuthorizationEndpointURI().toString());
+            oap.setUserInfoEndpoint(opMetadata.getUserInfoEndpointURI().toString());
         }
         
         s = oap.getRedirectUri();
