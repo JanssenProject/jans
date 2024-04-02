@@ -91,9 +91,8 @@ public class AssetService {
                         targetArray, null);
                 Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
                         targetArray, null);
-                Filter aliasFilter = Filter.createSubstringFilter("jansAlias", null, targetArray, null);
                 Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, aliasFilter, inumFilter));
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
