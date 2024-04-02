@@ -1,3 +1,9 @@
+---
+tags:
+- Casa
+- Accounts Linking
+---
+
 # Accounts Linking Plugin
 
 ## Overview
