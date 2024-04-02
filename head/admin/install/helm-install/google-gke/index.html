@@ -5750,6 +5750,8 @@
         
           
         
+          
+        
       
       
         
@@ -6511,6 +6513,20 @@
           
         </ul>
       </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/learning-reference/" class="md-nav__link">
+        Learning Reference
+      </a>
     </li>
   
 
@@ -8164,10 +8180,63 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8_2" type="checkbox" id="__nav_5_2_8_2" >
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_5_2_8_2">
+          Accounts Linking
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Accounts Linking" data-md-level="4">
+        <label class="md-nav__title" for="__nav_5_2_8_2">
+          <span class="md-nav__icon md-icon"></span>
+          Accounts Linking
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../../../casa/plugins/accts-linking/account-linking-index/" class="md-nav__link">
-        Accounts Linking
+        Accounts Linking Plugin
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../casa/plugins/accts-linking/accts-linking-agama/" class="md-nav__link">
+        Configuring Agama Project
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -8413,100 +8482,7 @@
 
 <h1 id="install-janssen-on-gke">Install Janssen on GKE<a class="headerlink" href="#install-janssen-on-gke" title="Permanent link">#</a></h1>
 <h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h2>
-<p>The resources may be set to the minimum as below:</p>
-<ul>
-<li>8 GiB RAM</li>
-<li>8 CPU cores</li>
-<li>50GB hard-disk</li>
-</ul>
-<p>Use the listing below for detailed estimation of minimum required resources. Table contains the default resources recommendations per service. Depending on the use of each service the resources needs may be increase or decrease.</p>
-<table>
-<thead>
-<tr>
-<th>Service</th>
-<th>CPU Unit</th>
-<th>RAM</th>
-<th>Disk Space</th>
-<th>Processor Type</th>
-<th>Required</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Auth server</td>
-<td>2.5</td>
-<td>2.5GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>Yes</td>
-</tr>
-<tr>
-<td>LDAP (OpenDJ)</td>
-<td>1.5</td>
-<td>2GB</td>
-<td>10GB</td>
-<td>64 Bit</td>
-<td>Only if couchbase is not installed</td>
-</tr>
-<tr>
-<td>fido2</td>
-<td>0.5</td>
-<td>0.5GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>No</td>
-</tr>
-<tr>
-<td>scim</td>
-<td>1.0</td>
-<td>1.0GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>No</td>
-</tr>
-<tr>
-<td>config - job</td>
-<td>0.5</td>
-<td>0.5GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>Yes on fresh installs</td>
-</tr>
-<tr>
-<td>persistence - job</td>
-<td>0.5</td>
-<td>0.5GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>Yes on fresh installs</td>
-</tr>
-<tr>
-<td>nginx</td>
-<td>1</td>
-<td>1GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>Yes if not ALB</td>
-</tr>
-<tr>
-<td>auth-key-rotation</td>
-<td>0.3</td>
-<td>0.3GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>No [Strongly recommended]</td>
-</tr>
-<tr>
-<td>config-api</td>
-<td>1</td>
-<td>1GB</td>
-<td>N/A</td>
-<td>64 Bit</td>
-<td>No</td>
-</tr>
-</tbody>
-</table>
-<p>Releases of images are in style 1.0.0-beta.0, 1.0.0-0</p>
+<p>{% include "includes/cn-system-requirements.md" %}</p>
 <h2 id="initial-setup">Initial Setup<a class="headerlink" href="#initial-setup" title="Permanent link">#</a></h2>
 <ol>
 <li>
@@ -8526,7 +8502,7 @@
 </li>
 <li>
 <p>Create cluster using a command such as the following example:</p>
-<p><div class="highlight"><pre><span></span><code>gcloud container clusters create janssen-cluster --num-nodes 2 --machine-type e2-highcpu-8 --zone us-west1-a
+<p><div class="highlight"><pre><span></span><code>gcloud container clusters create janssen-cluster --num-nodes 2 --machine-type e2-standard-4 --zone us-west1-a
 </code></pre></div>
 You can adjust <code>num-nodes</code> and <code>machine-type</code> as per your desired cluster size</p>
 </li>
@@ -8788,7 +8764,7 @@ helm install janssen janssen/janssen -n jans -f override.yaml
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2023, The Janssen Project
+      Copyright &copy; 2024, The Janssen Project
     </div>
   
   
