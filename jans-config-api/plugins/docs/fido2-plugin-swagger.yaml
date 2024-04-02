@@ -211,6 +211,17 @@ components:
             type: string
         push_token:
           type: string
+    Fido2DeviceNotificationConf:
+      type: object
+      properties:
+        sns_endpoint_arn:
+          type: string
+        sns_endpoint_arn_remove:
+          type: string
+        sns_endpoint_arn_history:
+          type: array
+          items:
+            type: string
     Fido2RegistrationData:
       type: object
       properties:
@@ -308,7 +319,7 @@ components:
           - compromised
           - canceled
         deviceNotificationConf:
-          type: string
+          $ref: '#/components/schemas/Fido2DeviceNotificationConf'
         deviceData:
           $ref: '#/components/schemas/Fido2DeviceData'
         expiration:
