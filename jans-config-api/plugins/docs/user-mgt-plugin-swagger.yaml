@@ -884,6 +884,19 @@ components:
           type: array
           items:
             type: string
+        externalUid:
+          type: array
+          items:
+            type: string
+        authenticator:
+          $ref: '#/components/schemas/UserAuthenticatorList'
+        status:
+          type: string
+          enum:
+          - active
+          - inactive
+          - expired
+          - register
         customAttributes:
           type: array
           items:
@@ -904,10 +917,26 @@ components:
           type: string
         userPassword:
           type: string
-        status:
-          type: string
         baseDn:
           type: string
+    UserAuthenticator:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        custom:
+          type: object
+          additionalProperties:
+            type: object
+    UserAuthenticatorList:
+      type: object
+      properties:
+        authenticators:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAuthenticator'
     ApiError:
       type: object
       properties:
