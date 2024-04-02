@@ -8180,10 +8180,63 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8_2" type="checkbox" id="__nav_5_2_8_2" >
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_5_2_8_2">
+          Accounts Linking
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Accounts Linking" data-md-level="4">
+        <label class="md-nav__title" for="__nav_5_2_8_2">
+          <span class="md-nav__icon md-icon"></span>
+          Accounts Linking
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../../casa/plugins/accts-linking/account-linking-index/" class="md-nav__link">
-        Accounts Linking
+        Accounts Linking Plugin
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../casa/plugins/accts-linking/accts-linking-agama/" class="md-nav__link">
+        Configuring Agama Project
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -8456,7 +8509,7 @@
 </code></pre></div></p>
 </li>
 </ol>
-<p>Keep note of the chart version. For example: <code>1.1.1.nightly</code></p>
+<p>Keep note of the chart version. For example: <code>replace-janssen-version</code></p>
 <h3 id="manual-restore">Manual Restore<a class="headerlink" href="#manual-restore" title="Permanent link">#</a></h3>
 <ol>
 <li>
@@ -8478,7 +8531,7 @@
 <p>Insall jans using the override or user supplied values with the same chart version:</p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code>helm install &lt;release-name&gt; janssen/janssen -f values.yaml --version<span class="o">=</span>&lt;1.1.1.nightly&gt; -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>helm install &lt;release-name&gt; janssen/janssen -f values.yaml --version<span class="o">=</span>&lt;replace-janssen-version&gt; -n &lt;namespace&gt;
 </code></pre></div>
 <h2 id="automatic-backup-and-restore">Automatic Backup and Restore<a class="headerlink" href="#automatic-backup-and-restore" title="Permanent link">#</a></h2>
 <p>There are several tools that helps in automatic backups and restore, like <a href="https://www.kasten.io/kubernetes/use-cases/backup-restore">Kasten K10</a>.</p>
