@@ -3888,6 +3888,26 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#errors" class="md-nav__link">
+    Errors
+  </a>
+  
+    <nav class="md-nav" aria-label="Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unmet_authentication_requirements" class="md-nav__link">
+    unmet_authentication_requirements
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#want-to-contribute" class="md-nav__link">
     Want to contribute?
   </a>
@@ -8539,6 +8559,26 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#errors" class="md-nav__link">
+    Errors
+  </a>
+  
+    <nav class="md-nav" aria-label="Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unmet_authentication_requirements" class="md-nav__link">
+    unmet_authentication_requirements
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#want-to-contribute" class="md-nav__link">
     Want to contribute?
   </a>
@@ -8681,6 +8721,11 @@ must re-authenticate to continue. If the user succeeds, a new session with a new
   to any reason, then the Janssen Server uses the <a href="#1-internal-janssen-server-acr">internal server ACR</a> to authenticate
   the end-user.</li>
 </ul>
+<h2 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">#</a></h2>
+<h3 id="unmet_authentication_requirements">unmet_authentication_requirements<a class="headerlink" href="#unmet_authentication_requirements" title="Permanent link">#</a></h3>
+<p>If authorization request is sent to Authorization Endpoint with <code>acr_values</code> for which 
+AS it not able to find "Person Authentication" custom script, it returns "unmet_authentication_requirements"
+with detail log in <code>jans-auth.log</code>.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
 <p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
