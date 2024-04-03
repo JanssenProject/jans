@@ -514,7 +514,7 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
-        - https://jans.io/oauth/jans_asset-read
+        - https://jans.io/oauth/config/jans_asset-read
     delete:
       tags:
       - Jans Assets
@@ -595,7 +595,7 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
-        - https://jans.io/oauth/jans_asset-read
+        - https://jans.io/oauth/config/jans_asset-read
   /api/v1/jans-assets:
     get:
       tags:
@@ -713,7 +713,7 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
-        - https://jans.io/oauth/jans_asset-read
+        - https://jans.io/oauth/config/jans_asset-read
   /api/v1/jans-assets/upload:
     put:
       tags:
@@ -4396,12 +4396,14 @@ paths:
                   - end_session
                   - post_authn
                   - select_account
+                  - create_user
                   - scim
                   - ciba_end_user_notification
                   - revoke_token
                   - persistence_extension
                   - idp
                   - discovery
+                  - health_check
                   - authz_detail
                   - update_token
                   - config_api_auth
@@ -8217,13 +8219,13 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanView:
+        userCanEdit:
           type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
@@ -8776,6 +8778,8 @@ components:
         introspectionRestrictBasicAuthnToOwnTokens:
           type: boolean
         endSessionWithAccessToken:
+          type: boolean
+        disablePromptCreate:
           type: boolean
         cookieDomain:
           type: string
@@ -10038,12 +10042,14 @@ components:
           - end_session
           - post_authn
           - select_account
+          - create_user
           - scim
           - ciba_end_user_notification
           - revoke_token
           - persistence_extension
           - idp
           - discovery
+          - health_check
           - authz_detail
           - update_token
           - config_api_auth
@@ -10543,6 +10549,19 @@ components:
           type: array
           items:
             type: string
+        externalUid:
+          type: array
+          items:
+            type: string
+        authenticator:
+          $ref: '#/components/schemas/UserAuthenticatorList'
+        status:
+          type: string
+          enum:
+          - active
+          - inactive
+          - expired
+          - register
         customAttributes:
           type: array
           items:
@@ -10551,10 +10570,26 @@ components:
           type: array
           items:
             type: string
-        status:
-          type: string
         baseDn:
           type: string
+    UserAuthenticator:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        custom:
+          type: object
+          additionalProperties:
+            type: object
+    UserAuthenticatorList:
+      type: object
+      properties:
+        authenticators:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAuthenticator'
     UmaResource:
       required:
       - name
@@ -10682,6 +10717,6 @@ components:
               configuration properties
             https://jans.io/oauth/client/authorizations.readonly: View ClientAuthorizations
             https://jans.io/oauth/client/authorizations.delete: Revoke ClientAuthorizations
-            https://jans.io/oauth/jans_asset-read: View Jans Assets
+            https://jans.io/oauth/config/jans_asset-read: View Jans Assets
             https://jans.io/oauth/config/jans_asset-write: Manage Jans Assets
             https://jans.io/oauth/config/jans_asset-delete: Delete Jans Assets

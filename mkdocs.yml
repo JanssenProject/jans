@@ -1,4 +1,4 @@
-copyright: Copyright &copy; 2023, The Janssen Project
+copyright: Copyright &copy; 2024, The Janssen Project
 docs_dir: ./docs
 edit_uri: edit/main/docs/
 extra:
@@ -449,7 +449,9 @@ nav:
         - 'Localization': 'casa/administration/localization.md'
         - 'Plugins':
             - '2FA Settings': 'casa/plugins/2fa-settings.md'
-            - 'Accounts Linking': 'casa/plugins/accts-linking/account-linking-index.md'
+            - 'Accounts Linking':
+              - 'casa/plugins/accts-linking/account-linking-index.md'
+              - 'Configuring Agama Project': 'casa/plugins/accts-linking/accts-linking-agama.md'
             - 'Consent Management': 'casa/plugins/consent-management.md'
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'
@@ -457,7 +459,6 @@ nav:
         - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
     - User Guide: 'casa/user-guide.md'
 plugins:
-- include-markdown
 - tags
 - search
 - exclude-search:
