@@ -1150,7 +1150,7 @@
       "type": "STRING(MAX)"
     }
   },
-  "jansValidation": {
+  "document": {
     "mysql": {
       "type": "MEDIUMTEXT"
     },
