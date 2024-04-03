@@ -1149,5 +1149,16 @@
     "spanner": {
       "type": "STRING(MAX)"
     }
+  },
+  "jansValidation": {
+    "mysql": {
+      "type": "MEDIUMTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
   }
 }
