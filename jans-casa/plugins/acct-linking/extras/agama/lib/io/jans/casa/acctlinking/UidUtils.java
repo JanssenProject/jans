@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 public class UidUtils {
     
-    private static final Logger logger = LoggerFactory.getLogger(Utils.class);
+    private static final Logger logger = LoggerFactory.getLogger(UidUtils.class);
     
     public static String lookupUid(String uidRef, String uid, String extUid, String jansExtAttrName,
             String jansExtUid) throws IOException {

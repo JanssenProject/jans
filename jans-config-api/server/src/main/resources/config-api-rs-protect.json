@@ -2884,7 +2884,7 @@
           "scopes": [
             {
               "inum": "1800.01.75",
-              "name": "https://jans.io/oauth/jans_asset-read"
+              "name": "https://jans.io/oauth/config/jans_asset-read"
             }
           ],
           "groupScopes": [
