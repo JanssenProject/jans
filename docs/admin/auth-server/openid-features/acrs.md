@@ -125,6 +125,14 @@ flowchart TD
   to any reason, then the Janssen Server uses the [internal server ACR](#1-internal-janssen-server-acr) to authenticate
   the end-user.
 
+## Errors 
+
+### unmet_authentication_requirements
+
+If authorization request is sent to Authorization Endpoint with `acr_values` for which 
+AS it not able to find "Person Authentication" custom script, it returns "unmet_authentication_requirements"
+with detail log in `jans-auth.log`.
+
 ## Want to contribute?
 
 If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
