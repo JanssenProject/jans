@@ -69,6 +69,13 @@ public class AuthorizeRestWebServiceValidatorTest {
     private ExternalAuthenticationService externalAuthenticationService;
 
     @Test
+    public void checkAcrScriptIsAvailable_forBlankAcr_shouldPass() {
+        AuthzRequest authzRequest = new AuthzRequest();
+
+        authorizeRestWebServiceValidator.checkAcrScriptIsAvailable(authzRequest);
+    }
+
+    @Test
     public void checkAcrScriptIsAvailable_forBuildInAcr_shouldPass() {
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setAcrValues("simple_password_auth");
