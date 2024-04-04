@@ -42,6 +42,8 @@ import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
+import org.apache.commons.lang.StringUtils;
+
 @Path(Constants.CONFIG_USER)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -435,11 +437,17 @@ public class UserResource extends BaseResource {
     }
 
     private User setUserCustomAttributes(CustomUser customUser, User user) {
-        user.setAttribute(MAIL, customUser.getMail(), false);
+        if(StringUtils.isNotBlank(customUser.getMail())) {        
+            user.setAttribute(MAIL, customUser.getMail(), false);
+        }
+        
         user.setAttribute(DISPLAY_NAME, customUser.getDisplayName(), false);
         user.setAttribute(JANS_STATUS, customUser.getJansStatus(), false);
         user.setAttribute(GIVEN_NAME, customUser.getGivenName(), false);
-        user.setAttribute(USER_PWD, customUser.getUserPassword(), false);
+        
+        if(StringUtils.isNotBlank(customUser.getUserPassword())) {  
+            user.setAttribute(USER_PWD, customUser.getUserPassword(), false);
+        }
         user.setAttribute(INUM, customUser.getInum(), false);
 
         logger.debug("Custom User - user:{}", user);
