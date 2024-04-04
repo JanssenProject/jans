@@ -159,6 +159,7 @@ data-sources.json
 .settings
 .classpath
 .project
+.factorypath
 
 # scanner reports
 trivy.json
