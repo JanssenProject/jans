@@ -190,7 +190,7 @@ class CtxGenerator:
         # self.set_secret("encoded_ldap_pw", ldap_encode(self.params["admin_pw"]))
         self.set_secret(
             "encoded_ox_ldap_pw",
-            partial(encode_text, self.params["ldap_pw"], encoded_salt),
+            partial(encode_text, self.params["ldap_password"], encoded_salt),
         )
         self.set_config("ldap_init_host", "localhost")
         self.set_config("ldap_init_port", 1636)
@@ -435,7 +435,7 @@ class CtxGenerator:
         self.set_secret("couchbase_superuser_password", self.params["couchbase_superuser_pw"])
 
     def sql_ctx(self):
-        self.set_secret("sql_password", self.params["sql_pw"])
+        self.set_secret("sql_password", self.params["sql_password"])
 
     def generate(self):
         opt_scopes = self.params["optional_scopes"]
@@ -450,11 +450,11 @@ class CtxGenerator:
         if "redis" in opt_scopes:
             self.redis_ctx()
 
-        # if "couchbase" in opt_scopes:
-        #     self.couchbase_ctx()
+        if "couchbase" in opt_scopes:
+            self.couchbase_ctx()
 
-        # if "sql" in opt_scopes:
-        #     self.sql_ctx()
+        if "sql" in opt_scopes:
+            self.sql_ctx()
 
         # populated config
         return self.ctx

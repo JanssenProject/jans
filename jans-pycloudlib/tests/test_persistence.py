@@ -547,11 +547,6 @@ def test_get_sql_password_from_file(monkeypatch, tmpdir, gmanager):
     assert get_sql_password(gmanager) == "secret"
 
 
-def test_get_sql_password_from_secrets(gmanager):
-    from jans.pycloudlib.persistence.sql import get_sql_password
-    assert get_sql_password(gmanager) == "secret"
-
-
 @pytest.mark.parametrize("dialect, port, schema, jdbc_driver", [
     ("mysql", 3306, "jans", "mysql"),
     ("pgsql", 5432, "public", "postgresql"),

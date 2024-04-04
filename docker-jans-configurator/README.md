@@ -81,7 +81,7 @@ For fresh installation, generate the initial configuration and secret by creatin
     "state": "TX",
     "city": "Austin",
     "admin_pw": "S3cr3t+pass",
-    "ldap_pw": "S3cr3t+pass",
+    "sql_password": "S3cr3t+pass",
     "email": "s@jans.io",
     "org_name": "Gluu Inc."
 }
@@ -92,10 +92,10 @@ For fresh installation, generate the initial configuration and secret by creatin
 - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
 - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
 - `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
-- `ldap_pw`: user's password to access LDAP database (only used if `optional_scopes` list contains `ldap` scope)
-- `sql_pw`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
-- `couchbase_pw`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
-- `couchbase_superuser_pw`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
+- `ldap_password` (previously `ldap_pw`): user's password to access LDAP database (only used if `optional_scopes` list contains `ldap` scope)
+- `sql_password` (previously `sql_pw`): user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
+- `couchbase_password` (previously `couchbase_pw`): user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
+- `couchbase_superuser_password` (previously `couchbase_superuser_pw`): superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
 - `salt`: user-defined salt (24 characters length); if omitted, salt will be generated automatically
 - `init_keys_exp`: the initial keys expiration time in hours (default to `48`; extra 1 hour will be added for hard limit)
 

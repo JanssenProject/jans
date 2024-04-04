@@ -6,6 +6,7 @@ from pathlib import Path
 from string import Template
 
 from jans.pycloudlib import get_manager
+from jans.pycloudlib import wait_for_persistence
 from jans.pycloudlib.persistence import render_couchbase_properties
 from jans.pycloudlib.persistence import render_base_properties
 from jans.pycloudlib.persistence import render_hybrid_properties
@@ -17,6 +18,7 @@ from jans.pycloudlib.persistence import sync_ldap_password
 from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.persistence import render_spanner_properties
 from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
 
@@ -64,6 +66,8 @@ def main():
         sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
+        sync_sql_password(manager)
+
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
 
         render_sql_properties(
@@ -78,6 +82,8 @@ def main():
             "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
+
+    wait_for_persistence(manager)
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
         manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")

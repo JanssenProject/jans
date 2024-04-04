@@ -3,6 +3,8 @@ import os
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import sync_ldap_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.persistence.sql import sync_sql_password
+from jans.pycloudlib import wait_for_persistence_conn
 
 from hybrid_setup import HybridBackend
 from ldap_setup import LDAPBackend
@@ -33,6 +35,11 @@ def main():
 
     if "ldap" in persistence_groups:
         sync_ldap_password(manager)
+
+    if "sql" in persistence_groups:
+        sync_sql_password(manager)
+
+    wait_for_persistence_conn(manager)
 
     with manager.lock.create_lock("persistence-loader-init"):
         backend = backend_cls(manager)

@@ -8,6 +8,7 @@ from functools import cached_property
 from ldif import LDIFWriter
 
 from jans.pycloudlib import get_manager
+from jans.pycloudlib import wait_for_persistence
 from jans.pycloudlib.persistence import render_couchbase_properties
 from jans.pycloudlib.persistence import render_base_properties
 from jans.pycloudlib.persistence import render_hybrid_properties
@@ -24,6 +25,7 @@ from jans.pycloudlib.persistence import SpannerClient
 from jans.pycloudlib.persistence import SqlClient
 from jans.pycloudlib.persistence import doc_id_from_dn
 from jans.pycloudlib.persistence import id_from_dn
+from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import get_random_chars
@@ -141,6 +143,8 @@ def main():
         sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
+        sync_sql_password(manager)
+
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
 
         render_sql_properties(
@@ -155,6 +159,8 @@ def main():
             "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
+
+    wait_for_persistence(manager)
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
         manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
