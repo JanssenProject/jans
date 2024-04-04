@@ -418,14 +418,19 @@ public class AuthorizeRestWebServiceValidator {
     }
 
     public void checkAcrScriptIsAvailable(AuthzRequest authzRequest) {
-        if (Util.isBuiltInPasswordAuthn(authzRequest.getAcrValues())) {
+        final String acrValues = authzRequest.getAcrValues();
+        if (StringUtils.isBlank(acrValues)) {
+            return; // nothing to validate
+        }
+
+        if (Util.isBuiltInPasswordAuthn(acrValues)) {
             return; // no need for script for built-in "simple_password_auth"
         }
 
         CustomScriptConfiguration script = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, authzRequest.getAcrValuesList());
         if (script == null) {
             String msg = String.format("Unable to find script for acr: %s. Send error: %s",
-                    authzRequest.getAcrValues(), AuthorizeErrorResponseType.UNMET_AUTHENTICATION_REQUIREMENTS.getParameter());
+                    acrValues, AuthorizeErrorResponseType.UNMET_AUTHENTICATION_REQUIREMENTS.getParameter());
             log.debug(msg);
             throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.UNMET_AUTHENTICATION_REQUIREMENTS, msg);
         }
