@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * @author Yuriy Zabrovarnyy
  */
@@ -26,13 +28,13 @@ import java.util.Map;
 public class AttributeService extends io.jans.as.common.service.AttributeService {
 
     private static final long serialVersionUID = -820393743995746612L;
-    
+
     @Inject
     private ApiAppConfiguration appConfiguration;
-    
+
     @Inject
     transient ConfigurationService configurationService;
-    
+
     @Override
     protected boolean isUseLocalCache() {
         return false;
@@ -40,48 +42,65 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
 
     public PagedResult<JansAttribute> searchJansAttributes(SearchRequest searchRequest, String status) {
         if (log.isInfoEnabled()) {
-            log.info("Search JansAttributes with searchRequest:{}, status:{}", escapeLog(searchRequest), escapeLog(status));
+            log.info("Search JansAttributes with searchRequest:{}, status:{}", escapeLog(searchRequest),
+                    escapeLog(status));
         }
+        boolean useLowercaseFilter = configurationService.isLowercaseFilter(getDnForAttribute(null));
+        log.info("For searching attribute useLowercaseFilter?:{}", useLowercaseFilter);
 
-        Filter activeFilter = null;
-        if (ApiConstants.ACTIVE.equalsIgnoreCase(status)) {
-            activeFilter = Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "active");
-        } else if (ApiConstants.INACTIVE.equalsIgnoreCase(status)) {
-            activeFilter = Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "inactive");
-        }
-
+        Filter activeFilter = createActiveFilter(status,useLowercaseFilter);
+       
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                if(useLowercaseFilter && StringUtils.isNotBlank(assertionValue)) {
+                    assertionValue = assertionValue.toLowerCase();
+                }
+                log.info("For searching attribute useLowercaseFilter:{}, assertionValue?:{}", useLowercaseFilter, assertionValue);
+                
                 String[] targetArray = new String[] { assertionValue };
-                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
-                        targetArray, null);
-                Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
-                        targetArray, null);
-                Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.JANS_ATTR_NAME, null, targetArray,
-                        null);
-                Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter, inumFilter));
+
+                if (useLowercaseFilter) {
+                    Filter displayNameFilter = Filter.createSubstringFilter(
+                            Filter.createLowercaseFilter(AttributeConstants.DISPLAY_NAME), null, targetArray, null);
+                    Filter descriptionFilter = Filter.createSubstringFilter(
+                            Filter.createLowercaseFilter(AttributeConstants.DESCRIPTION), null, targetArray, null);
+                    Filter nameFilter = Filter.createSubstringFilter(
+                            Filter.createLowercaseFilter(AttributeConstants.JANS_ATTR_NAME), null, targetArray, null);
+                    Filter inumFilter = Filter.createSubstringFilter(
+                            Filter.createLowercaseFilter(AttributeConstants.INUM), null, targetArray, null);
+                    filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter, inumFilter));
+
+                } else {
+                    Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
+                            targetArray, null);
+                    Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
+                            targetArray, null);
+                    Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.JANS_ATTR_NAME, null,
+                            targetArray, null);
+                    Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+                    filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter, inumFilter));
+                }
             }
             searchFilter = Filter.createORFilter(filters);
         }
-        
+
         log.trace("Attributes pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
-        if(searchRequest.getFieldValueMap()!=null && !searchRequest.getFieldValueMap().isEmpty())
-        {
+        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
                 Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
                 log.trace("dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
-            }  
-            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters), Filter.createANDFilter(fieldValueFilters));
-        }        
+            }
+            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                    Filter.createANDFilter(fieldValueFilters));
+        }
 
         log.trace("Attributes pattern and field searchFilter:{}", searchFilter);
-       
+
         if (activeFilter != null) {
             searchFilter = Filter.createANDFilter(searchFilter, activeFilter);
         }
@@ -113,13 +132,13 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
         }
         return jansAttribute;
     }
-	
+
     public List<JansAttribute> getAttributeWithName(String name) {
         log.info("Get attribute by name:{}", name);
         List<JansAttribute> jansAttributes = null;
         try {
             Filter nameFilter = Filter.createEqualityFilter("jansAttrName", name);
-			log.info("JansAttribute nameFilter:{}", nameFilter);
+            log.info("JansAttribute nameFilter:{}", nameFilter);
             jansAttributes = persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                     nameFilter);
             log.info("JansAttribute by name:{} are jansAttributes:{}", name, jansAttributes);
@@ -131,17 +150,20 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
     }
 
     public boolean validateAttributeDefinition(String attributeName) {
-        log.info(" Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName, getPersistenceType(), appConfiguration);
+        log.info(" Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName,
+                getPersistenceType(), appConfiguration);
         boolean isValidAttribute = false;
         try {
-            
-            //return if isCustomAttributeValidationEnabled not enabled
-            if(appConfiguration!=null && !appConfiguration.isCustomAttributeValidationEnabled()) {
-                return true;                
+
+            // return if isCustomAttributeValidationEnabled not enabled
+            if (appConfiguration != null && !appConfiguration.isCustomAttributeValidationEnabled()) {
+                return true;
             }
 
-            log.info("attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, User.class,attributeName)():{}", attributeName, persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
-                    attributeName));
+            log.info(
+                    "attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, User.class,attributeName)():{}",
+                    attributeName,
+                    persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class, attributeName));
             AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
                     attributeName);
             log.error("\n attributeName:{}, attributeType():{}", attributeName, attributeType);
@@ -157,6 +179,27 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
 
     private String getPersistenceType() {
         return configurationService.getPersistenceType();
+    }
+    
+    private Filter createActiveFilter(String status, boolean useLowercaseFilter) {
+        Filter activeFilter = null;
+        if (ApiConstants.ACTIVE.equalsIgnoreCase(status)) {
+            if (useLowercaseFilter) {
+                activeFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(AttributeConstants.JANS_STATUS),
+                        "active");
+            } else {
+                activeFilter = Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "active");
+            }
+        } else if (ApiConstants.INACTIVE.equalsIgnoreCase(status)) {
+            if (useLowercaseFilter) {
+                activeFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(AttributeConstants.JANS_STATUS),
+                        "inactive");
+            } else {
+                activeFilter = Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "inactive");
+            }
+        }
+        return activeFilter;
+
     }
 
 }
