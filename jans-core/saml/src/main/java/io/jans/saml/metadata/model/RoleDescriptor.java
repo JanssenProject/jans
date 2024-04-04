@@ -90,6 +90,22 @@ public class RoleDescriptor {
         return this.keyDescriptors;
     }
 
+    public List<KeyDescriptor> getEncryptionKeys() {
+
+        return keyDescriptors 
+            .stream()
+            .filter((k) -> { return k.isEncryptionKey();})
+            .toList();
+    }
+
+    public List<KeyDescriptor> getSigningKeys() {
+
+        return keyDescriptors
+            .stream()
+            .filter((k)-> { return k.isSigningKey();})
+            .toList();
+    }
+
     public void addKeyDescriptor(final KeyDescriptor keyDescriptor) {
 
         this.keyDescriptors.add(keyDescriptor);
