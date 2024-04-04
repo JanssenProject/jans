@@ -1,4 +1,4 @@
-copyright: Copyright &copy; 2023, The Janssen Project
+copyright: Copyright &copy; 2024, The Janssen Project
 docs_dir: ./docs
 edit_uri: edit/main/docs/
 extra:
@@ -361,6 +361,7 @@ nav:
         - Persistence: admin/reference/kubernetes/docker-jans-persistence-loader.md
         - SCIM: admin/reference/kubernetes/docker-jans-scim.md
         - Gluu OpenDJ: admin/reference/kubernetes/docker-opendj.md
+    - Learning Reference: admin/reference/learning-reference.md
   - FIDO Admin Guide:
     - admin/fido/README.md
     - Configuration: admin/fido/config.md
@@ -384,7 +385,7 @@ nav:
   - Link Guide:
     - admin/link/README.md
     - Jans LDAP Link: admin/link/jans-link.md
-    - Jans Keycloak Link: admin/link/keycloak-link.md
+    - Jans Keycloak Link: admin/link/jans-keycloak-link.md
   - Lock Guide:
       - admin/lock/README.md
       - Lock Installation: admin/lock/lock_installation.md
@@ -448,6 +449,9 @@ nav:
         - 'Localization': 'casa/administration/localization.md'
         - 'Plugins':
             - '2FA Settings': 'casa/plugins/2fa-settings.md'
+            - 'Accounts Linking':
+              - 'casa/plugins/accts-linking/account-linking-index.md'
+              - 'Configuring Agama Project': 'casa/plugins/accts-linking/accts-linking-agama.md'
             - 'Consent Management': 'casa/plugins/consent-management.md'
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'
@@ -459,9 +463,9 @@ plugins:
 - search
 - exclude-search:
     exclude_unreferenced: true
-- git-revision-date-localized:
-    enable_creation_date: true
-    type: timeago
+#- git-revision-date-localized:
+#    enable_creation_date: true
+#    type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.

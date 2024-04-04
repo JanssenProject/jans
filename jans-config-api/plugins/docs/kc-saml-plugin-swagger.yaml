@@ -825,6 +825,12 @@ paths:
                 $ref: '#/components/schemas/TrustRelationship'
         "401":
           description: Unauthorized
+        "404":
+          description: Trust relationship not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
       security:

@@ -6,16 +6,32 @@
 
 package io.jans.as.server.service;
 
-import io.jans.as.common.model.common.SimpleUser;
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.slf4j.Logger;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
-import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
@@ -35,28 +51,12 @@ import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.util.ArrayHelper;
 import io.jans.util.Pair;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.ExternalContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
 
 /**
  * Authentication service methods
@@ -566,20 +566,20 @@ public class AuthenticationService {
             return null;
         }
 
-        SimpleUser sampleUser = new SimpleUser();
-        sampleUser.setDn(baseDn);
+        User user = new User();
+        user.setDn(baseDn);
 
         List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
         customAttributes.add(new CustomObjectAttribute(attributeName, attributeValue));
 
-        sampleUser.setCustomAttributes(customAttributes);
+        user.setCustomAttributes(customAttributes);
 
         log.debug("Searching user by attributes: '{}', baseDn: '{}'", customAttributes, baseDn);
-        List<User> entries = ldapAuthEntryManager.findEntries(sampleUser, 1);
+        List<User> entries = ldapAuthEntryManager.findEntries(user, 1);
         log.debug("Found '{}' entries", entries.size());
 
         if (entries.size() > 0) {
-            SimpleUser foundUser = entries.get(0);
+            User foundUser = entries.get(0);
 
             return ldapAuthEntryManager.find(User.class, foundUser.getDn());
         } else {
@@ -588,9 +588,7 @@ public class AuthenticationService {
     }
 
     private boolean checkUserStatus(User user) {
-        CustomObjectAttribute userStatus = userService.getCustomAttribute(user, "jansStatus");
-
-        if ((userStatus != null) && GluuStatus.ACTIVE.getValue().equalsIgnoreCase(StringHelper.toString(userStatus.getValue()))) {
+        if (GluuStatus.ACTIVE == user.getStatus()) {
             return true;
         }
 
@@ -894,5 +892,4 @@ public class AuthenticationService {
             setExternalScriptExtraParameters(newSessionIdAttributes, authExternalAttributes);
         }
     }
-
 }

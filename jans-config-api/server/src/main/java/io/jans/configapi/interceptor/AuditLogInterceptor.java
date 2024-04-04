@@ -8,6 +8,7 @@ package io.jans.configapi.interceptor;
 
 import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
 import io.jans.configapi.core.rest.BaseResource;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.model.configuration.AuditLogConf;
 import io.jans.configapi.util.AuthUtil;
 
@@ -41,14 +42,22 @@ public class AuditLogInterceptor {
 
     @Inject
     AuthUtil authUtil;
+    
+    @Inject
+    ApiAppConfiguration apiAppConfiguration;
 
     @SuppressWarnings({ "all" })
     @AroundInvoke
     public Object aroundReadFrom(InvocationContext context) throws Exception {
 
         try {
-            LOG.debug("Audit Log Interceptor - context:{}, AUDIT_LOG:{}", context, AUDIT_LOG);
+            LOG.debug("Audit Log Interceptor - context:{}, AUDIT_LOG:{}, apiAppConfiguration.isDisableAuditLogger():{}", context, AUDIT_LOG, apiAppConfiguration.isDisableAuditLogger());
 
+            if(apiAppConfiguration.isDisableAuditLogger()) {
+                LOG.debug("Audit is disabled by disableAuditLogger config.");
+                return context.proceed();
+            }
+            
             HttpServletRequest request = ((BaseResource) context.getTarget()).getHttpRequest();
             HttpHeaders httpHeaders = ((BaseResource) context.getTarget()).getHttpHeaders();
             UriInfo uriInfo = ((BaseResource) context.getTarget()).getUriInfo();
