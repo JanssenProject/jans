@@ -452,6 +452,7 @@ nav:
             - 'Accounts Linking':
               - 'casa/plugins/accts-linking/account-linking-index.md'
               - 'Configuring Agama Project': 'casa/plugins/accts-linking/accts-linking-agama.md'
+            - 'BioID': 'casa/plugins/bioid.md'
             - 'Consent Management': 'casa/plugins/consent-management.md'
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'
