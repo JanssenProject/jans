@@ -62,7 +62,7 @@ public class SAMLMetadataParser  {
             validator.validate(new StreamSource(metadatafile));
 
             final DocumentBuilderFactory docbuilderfactory = DocumentBuilderFactory.newInstance();
-            docbuilderfactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
+            docbuilderfactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",false);
             docbuilderfactory.setSchema(schema);
             docbuilderfactory.setNamespaceAware(true);
             final DocumentBuilder docbuilder = docbuilderfactory.newDocumentBuilder();
@@ -126,7 +126,7 @@ public class SAMLMetadataParser  {
 
         NodeList assertionconsumerservicelist = XPathUtils.assertionConsumerServiceListFromParentNode(xpath, node);
         for(int i=0; i < assertionconsumerservicelist.getLength(); i++) {
-            parseIndexedEndpoint(xpath,assertionconsumerservicelist.item(i),builder.assersionConsumerService());
+            parseIndexedEndpoint(xpath,assertionconsumerservicelist.item(i),builder.assertionConsumerService());
         }
     }
 
@@ -242,8 +242,8 @@ public class SAMLMetadataParser  {
     }
 
     private final void parseEndpoint(final XPath xpath, final Node node, final EndpointBuilder builder) throws XPathExpressionException {
-
-        builder.binding(XPathUtils.bindingAttributeValue(xpath, node))
+        
+        builder.binding(SAMLBinding.fromString(XPathUtils.bindingAttributeValue(xpath, node)))
                .location(XPathUtils.locationAttributeValue(xpath, node))
                .responseLocation(XPathUtils.responseLocationAttributeValue(xpath, node));
     }
