@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.jans.orm.couchbase.impl.CouchbaseEntryManager;
+import io.jans.orm.couchbase.model.SimpleUser;
 import io.jans.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
-import io.jans.orm.model.base.SimpleUser;
 import io.jans.orm.search.filter.Filter;
 
 /**

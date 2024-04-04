@@ -599,6 +599,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose whether to accept access tokens to call end_session endpoint")
     private Boolean endSessionWithAccessToken;
 
+    @DocProperty(description = "Disables prompt=create user registration functionality")
+    private Boolean disablePromptCreate;
+
     @DocProperty(description = "Sets cookie domain for all cookies created by OP")
     private String cookieDomain;
 
@@ -2741,6 +2744,14 @@ public class AppConfiguration implements Configuration {
 
     public void setEndSessionWithAccessToken(Boolean endSessionWithAccessToken) {
         this.endSessionWithAccessToken = endSessionWithAccessToken;
+    }
+
+    public Boolean getDisablePromptCreate() {
+        return disablePromptCreate;
+    }
+
+    public void setDisablePromptCreate(Boolean disablePromptCreate) {
+        this.disablePromptCreate = disablePromptCreate;
     }
 
     public String getCookieDomain() {

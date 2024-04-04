@@ -55,7 +55,7 @@ public class ApiHealthCheck  {
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     public Response getHealthResponse() {
-        logger.debug("Api Health Check - Entry");
+        logger.debug("Api Health Check - /health/");
         
         HealthStatus healthStatus = new HealthStatus();
         healthStatus.setStatus("UP");
@@ -96,7 +96,7 @@ public class ApiHealthCheck  {
     @GET
     @Path(ApiConstants.LIVE)
     public Response getLivenessResponse() {
-        logger.debug("ApiHealthCheck::getLivenessResponse() - Entry");
+        logger.info("ApiHealthCheck::/health/live");
         Status liveness = new Status();
         liveness.setName("jans-config-api liveness");
         liveness.setStatus("UP");
@@ -113,7 +113,7 @@ public class ApiHealthCheck  {
     @GET
     @Path(ApiConstants.READY)
     public Response getReadinessResponse() {
-        logger.debug("ApiHealthCheck::getReadinessResponse() - Entry");
+        logger.info("ApiHealthCheck::/health/ready");
      // readiness
         Status readiness = new Status();
         readiness.setName("jans-config-api readiness");
