@@ -13,6 +13,7 @@ import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.external.ExternalHealthCheckService;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.service.custom.script.CustomScriptManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,6 +51,9 @@ public class HealthCheckController {
     @Inject
     private ExternalHealthCheckService externalHealthCheckService;
 
+    @Inject
+    private CustomScriptManager сustomScriptManager;
+
     @GET
     @POST
     @Path("/health-check")
@@ -74,7 +78,7 @@ public class HealthCheckController {
     }
 
     public String getAppStatus() {
-        if (externalAuthenticationService.isLoaded() && externalDynamicScopeService.isLoaded()) {
+        if (externalAuthenticationService.isLoaded() && externalDynamicScopeService.isLoaded() && сustomScriptManager.isInitialized()) {
         	return "running";
         } else {
         	return "starting";
