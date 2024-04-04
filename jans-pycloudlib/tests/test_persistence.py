@@ -139,42 +139,37 @@ def test_ldap_client_init(gmanager):
 # =========
 
 
-def test_get_couchbase_user(monkeypatch, gmanager):
+def test_get_couchbase_user(monkeypatch):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 
     monkeypatch.setenv("CN_COUCHBASE_USER", "root")
-    assert get_couchbase_user(gmanager) == "root"
+    assert get_couchbase_user() == "root"
 
 
-def test_get_couchbase_password_from_file(monkeypatch, tmpdir, gmanager):
+def test_get_couchbase_password_from_file(monkeypatch, tmpdir):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 
     passwd_file = tmpdir.join("couchbase_password")
     passwd_file.write("secret")
     monkeypatch.setenv("CN_COUCHBASE_PASSWORD_FILE", str(passwd_file))
-    assert get_couchbase_password(gmanager) == "secret"
+    assert get_couchbase_password() == "secret"
 
 
-def test_get_couchbase_password_from_secrets(gmanager):
-    from jans.pycloudlib.persistence.couchbase import get_couchbase_password
-    assert get_couchbase_password(gmanager) == "secret"
-
-
-def test_get_couchbase_superuser(monkeypatch, gmanager):
+def test_get_couchbase_superuser(monkeypatch):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
 
-    monkeypatch.setenv("CN_COUCHBASE_SUPERUSER", "")
-    assert get_couchbase_superuser(gmanager) == ""
+    monkeypatch.setenv("CN_COUCHBASE_SUPERUSER", "admin")
+    assert get_couchbase_superuser() == "admin"
 
 
-def test_get_couchbase_superuser_password(monkeypatch, tmpdir, gmanager):
+def test_get_couchbase_superuser_password(monkeypatch, tmpdir):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser_password
 
     passwd_file = tmpdir.join("couchbase_superuser_password")
     passwd_file.write("secret")
 
     monkeypatch.setenv("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", str(passwd_file))
-    assert get_couchbase_superuser_password(gmanager) == "secret"
+    assert get_couchbase_superuser_password() == "secret"
 
 
 @pytest.mark.skipif(

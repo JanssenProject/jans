@@ -10,9 +10,10 @@ from uuid import uuid4
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for_persistence
-from jans.pycloudlib.persistence import sync_ldap_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.ldap import sync_ldap_password
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import sync_sql_password
@@ -55,6 +56,9 @@ def render_keycloak_conf():
 
 def main():
     persistence_groups = PersistenceMapper().groups().keys()
+
+    if "couchbase" in persistence_groups:
+        sync_couchbase_password(manager)
 
     if "ldap" in persistence_groups:
         sync_ldap_password(manager)

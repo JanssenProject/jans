@@ -61,8 +61,8 @@ The following environment variables are supported by the container:
 - `CN_LDAP_URL`: Address and port of LDAP server (default to `localhost:1636`).
 - `CN_LDAP_USE_SSL`: Whether to use SSL connection to LDAP server (default to `true`).
 - `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
-- `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`).
-- `CN_COUCHBASE_SUPERUSER`: Superuser of Couchbase server (default to empty-string).
+- `CN_COUCHBASE_USER`: Username of Couchbase server (default to `jans`).
+- `CN_COUCHBASE_SUPERUSER`: Superuser of Couchbase server (default to `admin`).
 - `CN_COUCHBASE_CERT_FILE`: Couchbase root certificate location (default to `/etc/certs/couchbase.crt`).
 - `CN_COUCHBASE_PASSWORD_FILE`: Path to file contains Couchbase password (default to `/etc/jans/conf/couchbase_password`).
 - `CN_COUCHBASE_SUPERUSER_PASSWORD_FILE`: Path to file contains Couchbase superuser password (default to `/etc/jans/conf/couchbase_superuser_password`).

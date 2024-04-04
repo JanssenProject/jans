@@ -5,6 +5,7 @@ from contextlib import suppress
 import click
 
 from jans.pycloudlib import get_manager
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.ldap import sync_ldap_password
 from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -80,6 +81,8 @@ def patch(service, dry_run, opts):
             sync_ldap_password(manager)
         case "sql":
             sync_sql_password(manager)
+        case "couchbase":
+            sync_couchbase_password(manager)
 
     logger.info(f"Processing updates for service {service}")
     parsed_opts = _parse_opts(opts)
@@ -114,6 +117,8 @@ def prune(service, dry_run, opts):
             sync_ldap_password(manager)
         case "sql":
             sync_sql_password(manager)
+        case "couchbase":
+            sync_couchbase_password(manager)
 
     logger.info(f"Processing updates for service {service}")
     parsed_opts = _parse_opts(opts)

@@ -122,11 +122,15 @@ class ParamSchema(Schema):
     @validates_schema
     def validate_persistence_password(self, data, **kwargs):
         err = {}
+
         # map between scope, old attribute, and new attribute
         scope_attr_map = [
             ("ldap", [("ldap_pw", "ldap_password")]),
             ("sql", [("sql_pw", "sql_password")]),
-            ("couchbase", [("couchbase_pw", "couchbase_password")]),
+            ("couchbase", [
+                ("couchbase_pw", "couchbase_password"),
+                ("couchbase_superuser_pw", "couchbase_superuser_password"),
+            ]),
         ]
 
         for scope, attrs in scope_attr_map:

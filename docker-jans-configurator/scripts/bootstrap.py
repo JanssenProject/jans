@@ -431,8 +431,8 @@ class CtxGenerator:
         # TODO: move this to persistence-loader?
         self.set_config("couchbaseTrustStoreFn", "/etc/certs/couchbase.pkcs12")
         self.set_secret("couchbase_shib_user_password", get_random_chars)
-        self.set_secret("couchbase_password", self.params["couchbase_pw"])
-        self.set_secret("couchbase_superuser_password", self.params["couchbase_superuser_pw"])
+        self.set_secret("couchbase_password", self.params["couchbase_password"])
+        self.set_secret("couchbase_superuser_password", self.params["couchbase_superuser_password"])
 
     def sql_ctx(self):
         self.set_secret("sql_password", self.params["sql_password"])

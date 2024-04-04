@@ -14,11 +14,12 @@ from jans.pycloudlib.persistence import render_ldap_properties
 from jans.pycloudlib.persistence import render_salt
 from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
-from jans.pycloudlib.persistence import sync_ldap_password
 from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.persistence import render_spanner_properties
-from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
+from jans.pycloudlib.persistence.ldap import sync_ldap_password
 from jans.pycloudlib.persistence.sql import sync_sql_password
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
 
@@ -57,6 +58,7 @@ def main():
         sync_ldap_password(manager)
 
     if "couchbase" in persistence_groups:
+        sync_couchbase_password(manager)
         render_couchbase_properties(
             manager,
             "/app/templates/jans-couchbase.properties",
