@@ -21,7 +21,7 @@ public class SPSSODescriptorBuilder extends SSODescriptorBuilder {
         return this;
     }
 
-    public IndexedEndpointBuilder assersionConsumerService() {
+    public IndexedEndpointBuilder assertionConsumerService() {
 
         IndexedEndpoint endpoint = new IndexedEndpoint();
         spssoDescriptor().addAssertionConsumerService(endpoint);

@@ -17,6 +17,14 @@ public class X509Data {
         return this.x509certificates;
     }
 
+    public String getFirstX509Certificate() {
+
+        if(!x509certificates.isEmpty()) {
+            return x509certificates.get(0);
+        }
+        return null;
+    }
+
     public void addX509Certificate(final String x509certificate) {
 
         this.x509certificates.add(x509certificate);
