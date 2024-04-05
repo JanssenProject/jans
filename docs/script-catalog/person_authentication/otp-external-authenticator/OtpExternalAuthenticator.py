@@ -460,7 +460,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     validation_result = self.validateHotpKey(otp_secret_key, moving_factor, otpCode)
                     if (validation_result != None) and validation_result["result"]:
                         print "OTP. Process HOTP authentication during authentication. otpCode is valid"
-                        
+
                         # Update current moving factor in user entry
                         enrolledAuthenticator.addCustom("movingFactor", moving_factor)
 
