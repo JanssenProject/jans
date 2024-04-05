@@ -8219,13 +8219,13 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
-        adminCanView:
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
+        adminCanView:
           type: boolean
         userCanAccess:
           type: boolean
@@ -9830,10 +9830,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:

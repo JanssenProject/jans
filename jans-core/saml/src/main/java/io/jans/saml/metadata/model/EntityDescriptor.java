@@ -70,6 +70,14 @@ public class EntityDescriptor {
         return this.spssoDescriptors;
     }
 
+    public SPSSODescriptor getFirstSpssoDescriptor() {
+
+        if(!this.spssoDescriptors.isEmpty()) {
+            return this.spssoDescriptors.get(0);
+        }
+        return null;
+    }
+
     public void addSpssoDescriptor(final SPSSODescriptor descriptor) {
 
         this.spssoDescriptors.add(descriptor);

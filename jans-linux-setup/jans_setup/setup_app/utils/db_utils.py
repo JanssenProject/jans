@@ -437,7 +437,7 @@ class DBUtils:
                 for col, val in search_list:
                     if val == '*':
                         continue
-                    
+
                     if col.lower() == 'objectclass':
                         s_table = val
                     else:
