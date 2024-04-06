@@ -39,7 +39,7 @@
 		<jakarta.mail.version>1.6.7</jakarta.mail.version>
 
 		<jakarta.websocket.api.version>2.1.0</jakarta.websocket.api.version>
-		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version>
+		<jakarta.xml.bind.api.version>4.0.2</jakarta.xml.bind.api.version>
 		<org.glassfish.jakarta.el.api.version>5.0.0-M1</org.glassfish.jakarta.el.api.version>
 		<jakarta.el.api.version>5.0.0-RC1</jakarta.el.api.version>
 
