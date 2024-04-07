@@ -225,14 +225,15 @@ def test_get_couchbase_scan_consistency(monkeypatch, scan, expected):
     assert get_couchbase_scan_consistency() == expected
 
 
-def test_sync_couchbase_cert(monkeypatch, tmpdir):
+def test_sync_couchbase_cert(monkeypatch, tmpdir, gmanager):
     from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
 
     cert_file = tmpdir.join("couchbase.crt")
     cert_file.write(DUMMY_COUCHBASE_CERT)
 
     monkeypatch.setenv("CN_COUCHBASE_CERT_FILE", str(cert_file))
-    assert sync_couchbase_cert() == DUMMY_COUCHBASE_CERT
+    sync_couchbase_cert(gmanager)
+    assert os.path.exists(str(cert_file))
 
 
 def test_exec_api_unsupported_method():

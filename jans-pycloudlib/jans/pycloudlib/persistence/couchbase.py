@@ -204,15 +204,14 @@ def render_couchbase_properties(manager: Manager, src: str, dest: str) -> None:
         fw.write(rendered_txt)
 
 
-# DEPRECATED
-def sync_couchbase_cert(manager: _t.Union[Manager, None] = None) -> str:
-    """Synchronize Couchbase certificate.
+def sync_couchbase_cert(manager: Manager) -> str:
+    """Synchronize Couchbase certificate."""
+    cert_file = get_couchbase_cert_file()
 
-    This function is deprecated and will be removed in future versions.
-    """
-    cert_file = os.environ.get("CN_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
-    with open(cert_file) as f:
-        return f.read()
+    if os.path.isfile(cert_file):
+        manager.secret.from_file("couchbase_cert", cert_file)
+    else:
+        manager.secret.to_file("couchbase_cert", cert_file)
 
 
 def sync_couchbase_truststore(manager: Manager, dest: str = "/etc/certs/couchbase.pkcs12") -> None:
@@ -222,7 +221,7 @@ def sync_couchbase_truststore(manager: Manager, dest: str = "/etc/certs/couchbas
         manager: An instance of manager class.
         dest: Absolute path where generated file is located.
     """
-    cert_file = os.environ.get("CN_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
+    cert_file = get_couchbase_cert_file()
     dest = dest or manager.config.get("couchbaseTrustStoreFn")
     cert_to_truststore(
         "couchbase", cert_file, dest, resolve_couchbase_truststore_pw(manager),
@@ -922,3 +921,7 @@ def sync_couchbase_superuser_password(manager):
         manager: An instance of manager class.
     """
     _sync_cb_password(manager, get_couchbase_superuser_password_file(), "couchbase_superuser_password")
+
+
+def get_couchbase_cert_file():
+    return os.environ.get("CN_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")

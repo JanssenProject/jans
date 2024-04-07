@@ -1,13 +1,16 @@
 import json
 import logging.config
 import re
+from base64 import b64decode
 
+import pem
 from fqdn import FQDN
 from marshmallow import INCLUDE
 from marshmallow import Schema
 from marshmallow import validates
 from marshmallow import validates_schema
 from marshmallow import ValidationError
+from marshmallow import post_load
 from marshmallow.fields import Email
 from marshmallow.fields import List
 from marshmallow.fields import Str
@@ -89,6 +92,8 @@ class ParamSchema(Schema):
     # previously couchbase_superuser_pw
     couchbase_superuser_password = Str(load_default="", dump_default="")
 
+    couchbase_cert = Str(load_default="", dump_default="")
+
     auth_sig_keys = Str(load_default="")
 
     auth_enc_keys = Str(load_default="")
@@ -161,6 +166,28 @@ class ParamSchema(Schema):
 
         if value and not value.isalnum():
             raise ValidationError("Only alphanumeric characters are allowed")
+
+    @post_load
+    def transform_certs(self, in_data, **kwargs):
+        in_data["couchbase_cert"] = maybe_cert(in_data["couchbase_cert"])
+        return in_data
+
+
+def maybe_cert(value):
+    try:
+        certs = pem.parse(value)
+    except AttributeError:
+        certs = []
+
+    if not certs:
+        # try parsing base64-decoded
+        certs = pem.parse(b64decode(value).decode())
+
+    try:
+        cert = str(certs[0])
+    except IndexError:
+        cert = ""
+    return cert
 
 
 def params_from_file(path):

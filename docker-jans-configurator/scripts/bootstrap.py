@@ -433,6 +433,7 @@ class CtxGenerator:
         self.set_secret("couchbase_shib_user_password", get_random_chars)
         self.set_secret("couchbase_password", self.params["couchbase_password"])
         self.set_secret("couchbase_superuser_password", self.params["couchbase_superuser_password"])
+        self.set_secret("couchbase_cert", self.params["couchbase_cert"])
 
     def sql_ctx(self):
         self.set_secret("sql_password", self.params["sql_password"])
