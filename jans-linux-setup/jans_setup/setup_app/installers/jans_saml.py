@@ -178,10 +178,10 @@ class JansSamlInstaller(JettyInstaller):
         jans_api_user_fn = 'jans.api-user.json'
         jans_browser_auth_flow_fn = 'jans.browser-auth-flow.json'
         jans_execution_config_jans_fn = 'jans.execution-config-jans.json'
-
+        jans_userstorage_provider_component_fn = 'jans.userstorage-provider-component.json'
         self.idp_config_fn = os.path.join(self.templates_folder, 'keycloak.conf')
 
-        for tmp_fn in (jans_api_openid_client_fn, jans_api_realm_fn, jans_api_user_fn, jans_browser_auth_flow_fn):
+        for tmp_fn in (jans_api_openid_client_fn, jans_api_realm_fn, jans_api_user_fn, jans_browser_auth_flow_fn, jans_userstorage_provider_component_fn):
             self.renderTemplateInOut(os.path.join(jans_api_tmp_dir, tmp_fn), jans_api_tmp_dir, jans_api_output_dir, pystring=True)
 
         self.logIt("Starting KC for config api idp plugin configurations")
@@ -246,4 +246,6 @@ class JansSamlInstaller(JettyInstaller):
             # Configure the jans auth execution step in realm jans-api
             self.run([kcadm_cmd, 'create', f'authentication/executions/{jans_execution_auth_jans_id}/config', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_execution_config_jans_fn), '--config', kc_tmp_config], env=env)
 
+            # create userstorage provider component
+            self.run([kcadm_cmd, 'create', 'components', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_userstorage_provider_component_fn), '--config', kc_tmp_config], env=env)
 
