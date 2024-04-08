@@ -13,7 +13,7 @@ from prompt_toolkit.buffer import Buffer
 
 from cli import config_cli
 from utils.multi_lang import _
-from utils.utils import DialogUtils
+from utils.utils import DialogUtils, fromisoformat
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
@@ -121,7 +121,7 @@ class SSA(DialogUtils):
             new_data['expiration'] = int(datetime.now().timestamp()) + 1576800000
         else:
             if self.expire_widget.value:
-                new_data['expiration'] = int(datetime.fromisoformat(self.expire_widget.value).timestamp())
+                new_data['expiration'] = int(fromisoformat(self.expire_widget.value).timestamp())
 
         new_data['software_roles'] = new_data['software_roles'].splitlines()
 
