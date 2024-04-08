@@ -109,14 +109,14 @@ class JansSamlInstaller(JettyInstaller):
         self.run([paths.cmd_chmod, '0760', saml_dir])
 
     def create_clients(self):
-        clients_data =  base.readJsonFile(self.clients_json_fn)
+        clients_data = base.readJsonFile(self.clients_json_fn)
         client_ldif_fns = []
         for client_info in clients_data:
                 check_client = self.check_clients([(client_info['client_var'], client_info['client_prefix'])])
                 if check_client.get(client_info['client_prefix']) == -1:
                     scopes = client_info['scopes_dns']
                     for scope_id in client_info['scopes_ids']:
-                        scope_info = self.dbUtils.search('ou=scopes,o=jans', search_filter=f'(jansId=scope_id)')
+                        scope_info = self.dbUtils.search('ou=scopes,o=jans', search_filter=f'(&(objectClass=jansScope)(jansId={scope_id}))')
                         if scope_info:
                             scopes.append(scope_info['dn'])
                     client_id = getattr(Config, client_info['client_var'])

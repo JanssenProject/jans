@@ -1,4 +1,4 @@
-/* Extra small devices (portrait phones, less than 740px) */
+﻿/* Extra small devices (portrait phones, less than 740px) */
 @media (max-width: 575.98px ) and (max-height: 739.98px ) {
     html {
         font-size: 11px;
@@ -69,7 +69,7 @@
 
     .instruction {
         margin-top: 30px;
-        font-size: 1.4rem;
+        font-size: 1.6rem;
         height: 50px; 
     }
 
@@ -156,7 +156,7 @@
     }
 
     .instruction {
-        font-size: 1.4rem;
+        font-size: 1.6rem;
         margin-top: 30px;
         height: 80px; 
     }
@@ -273,7 +273,7 @@ body {
 }
 
 .red {
-    color: red;
+    color: #dc3545;
     font-weight: 600;
 }
 
@@ -291,7 +291,7 @@ body {
     border-radius: 12px;
     padding: 10px 32px;
     color: white;
-    background-color: #93D50B;
+    background-color: #58b999;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -302,16 +302,12 @@ body {
 }
 
 .button:hover {
-    background-color: #82BA0B;
+    background-color: #46967d;
 }
 
 .button:focus {
     outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(127, 186, 6, 0.5);
-}
-
-.button:hover {
-    background-color: #82BA0B;
+    box-shadow: 0 0 0 0.2rem rgba(165, 206, 192, 1);
 }
 
 .button:disabled {
@@ -354,11 +350,11 @@ body {
 
 .button-info:focus {
     outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(60, 176, 253, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(165, 206, 192, 0.5);
 }
 
 a .button-back {
-    width: 25px;
+    width: 18px;
     height: auto;
     vertical-align: middle;
 }
@@ -423,20 +419,20 @@ a .button-back {
     -webkit-transform: scaleX(-1);
 }
 
-.modalB {
+.modal {
     display: none;
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-20%, -200%);
+    transform: translate(-50%, -50%);
     font-size: 1.3rem;
     background-color: #FFFFFF;
-    color: #BE0000;
+    color: #dc3545;
     padding: 50px;
     opacity: 0.8;
 }
 
-.modalB-footer {
+.modal-footer {
     margin-top: 2rem;
 }
 
@@ -525,7 +521,7 @@ a .button-back {
 }
 
 .intro-title {
-    font-size: 1.5rem;
+    font-size: 2.4rem;
     font-weight: 700;
     color: #3A61A0;
     text-transform: uppercase;
@@ -533,7 +529,7 @@ a .button-back {
 }
 
 .intro-subtitle {
-    font-size: 1.5rem;
+    font-size: 2.4rem;
     font-weight: 700;
     color: #3A61A0;
     text-transform: uppercase;
@@ -541,7 +537,7 @@ a .button-back {
 }
 
 .intro-description {
-    font-size: 1.0rem;
+    font-size: 1.6rem;
     font-weight: 500;
     color: #3A61A0;
     text-align: center;
@@ -570,7 +566,7 @@ a .button-back {
 }
 
 .intro-skip {
-    font-size: 1.0rem;
+    font-size: 1.6rem;
     text-align: center;
     line-height: 1.6rem;
 }

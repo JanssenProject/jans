@@ -28,7 +28,7 @@ public class UserAuthenticatorService {
 	@Inject
 	private Logger log;
 
-	public static String EXTERNAL_UID_FORMAT = "%s: %s";
+	public static String EXTERNAL_UID_FORMAT = "%s:%s";
 	private static String[] EMPTY_STRING_ARRAY = new String[0];
 	
 	private static final UserAuthenticatorList EMPTY_USER_AUTHENTICATOR_LIST = new UserAuthenticatorList(Collections.emptyList());

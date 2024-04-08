@@ -311,7 +311,7 @@ public class AssetService {
 
     private Document saveNewAsset(Document asset, InputStream stream) {
         log.info("Saving new asset in DB DocumentStore - asset:{}, stream:{}", asset, stream);
-        String path = dBDocumentStoreProvider.saveDocumentStream(asset.getDisplayName(), asset.getDescription(), stream,
+        String path = dBDocumentStoreProvider.saveBinaryDocumentStream(asset.getDisplayName(), asset.getDescription(), stream,
                 asset.getJansModuleProperty());
         log.info("Successfully stored asset - Path of saved new asset is :{}", path);
         return asset;
