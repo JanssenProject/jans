@@ -1,5 +1,7 @@
-from typing import Optional, Sequence, Callable
 import asyncio
+import json
+
+from typing import Optional, Sequence, Callable
 from functools import partial
 
 from prompt_toolkit import HTML
@@ -301,7 +303,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             multi_valued = False
             key_prop = self.get_claim_properties(key_)
 
-            if key_prop.get('dataType') == 'json':
+            if key_prop.get('dataType') == 'json' and raw_data[key_]:
                 try:
                     json.loads(raw_data[key_])
                 except Exception as e:
