@@ -13,7 +13,7 @@ By default the attribute validation is not enabled.
 To enable custom validation for password attribute use admin-ui Schema screen.
 1. Search for password attribute.
 
-2. Check "Enable custom validation for this attribute?" 
+2. Check **Enable custom validation for this attribute?** 
 ![update default authentication method](../../assets/image-pwd-enable-custom-validation.png)
 
 3. Enter valid regex expression to check the strength of the password.
@@ -22,18 +22,20 @@ To enable custom validation for password attribute use admin-ui Schema screen.
 
 5. Enter **Maximum length**, the maximum length of a value associated with this attribute.
 
-6. Click on save
+6. Click on save.
 
 ![update default authentication method](../../assets/image-pwd-regex.png)
 
 # Create User 
-1. Create a new user
+1. Create a new user using **User Management** screen.
 
-2. Enter user details including password
+2. Enter user details.
 
-3. Save user details.
+3. Enter password.
 
-4. Error notification will be displayed if the password does not match the validation.
+4. Save user details.
+
+5. Error notification will be displayed if the password does not match the validation.
 
 ![update default authentication method](../../assets/image-pwd-validation-notification.png)
 
