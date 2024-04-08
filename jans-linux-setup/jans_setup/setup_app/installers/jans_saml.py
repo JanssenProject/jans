@@ -225,7 +225,7 @@ class JansSamlInstaller(JettyInstaller):
             self.run([kcadm_cmd, 'set-password', '-r', Config.jans_idp_realm, '--username', Config.jans_idp_user_name, '--new-password', Config.jans_idp_user_password, '--config', kc_tmp_config], env=env)
 
             # assign roles to jans-api-user
-            self.run([kcadm_cmd, 'add-roles', '-r', Config.jans_idp_realm, '--uusername', Config.jans_idp_user_name, '--cclientid', 'realm-management', '--rolename', 'manage-identity-providers', '--rolename', 'view-identity-providers', '--rolename', 'view-identity-providers', '--config', kc_tmp_config], env=env)
+            self.run([kcadm_cmd, 'add-roles', '-r', Config.jans_idp_realm, '--uusername', Config.jans_idp_user_name, '--cclientid', 'realm-management', '--rolename', 'manage-identity-providers', '--rolename', 'view-identity-providers', '--rolename', 'query-realms', '--rolename', 'view-realm', '--rolename', 'view-clients', '--rolename', 'manage-clients', '--rolename', 'query-clients', '--rolename', 'query-users', '--rolename', 'view-users', '--config', kc_tmp_config], env=env)
 
             # Create authentication flow in the jans-api realm used for saml clients
             _, result = self.run([kcadm_cmd, 'create', 'authentication/flows', '-r',  Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_browser_auth_flow_fn), '--config', kc_tmp_config], env=env, get_stderr=True)
