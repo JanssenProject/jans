@@ -84,12 +84,14 @@ class KC:
 
     def maybe_realm_exists(self):
         # check if realm exists
-        out, err, code = exec_cmd(f"{self.kcadm_script} get realms/{self.ctx['jans_idp_realm']} --config {self.config_file}")
+        out, err, code = exec_cmd(f"{self.kcadm_script} get realms/{self.ctx['jans_idp_realm']} --fields 'id' --config {self.config_file}")
 
         if code != 0:
             logger.warning(f"Unable to get realm {self.ctx['jans_idp_realm']}; reason={err.decode()}")
-            return False
-        return True
+            return ""
+
+        # realm exists
+        return json.loads(out)["id"]
 
     def create_realm(self):
         if self.maybe_realm_exists():
@@ -155,9 +157,23 @@ class KC:
             logger.warning(f"Unable to re-set password for  user {username}; reason={err.decode()}")
 
     def _assign_user_roles(self, username):
-        out, err, code = exec_cmd(
-            f"{self.kcadm_script} add-roles -r {self.ctx['jans_idp_realm']} --uusername {username} --cclientid realm-management --rolename manage-identity-providers --rolename view-identity-providers --config {self.config_file}"
-        )
+        cmd = " ".join([
+            f"{self.kcadm_script}",
+            f"add-roles -r {self.ctx['jans_idp_realm']}",
+            f"--uusername {username}",
+            "--cclientid realm-management",
+            "--rolename manage-identity-providers",
+            "--rolename view-identity-providers",
+            "--rolename query-realms",
+            "--rolename view-realm",
+            "--rolename view-clients",
+            "--rolename manage-clients",
+            "--rolename query-clients",
+            "--rolename query-users",
+            "--rolename view-users",
+            f"--config {self.config_file}",
+        ])
+        out, err, code = exec_cmd(cmd)
 
         if code != 0:
             logger.warning(f"Unable to assign roles for  user {username}; reason={err.decode()}")
@@ -252,6 +268,35 @@ class KC:
             if not mysql_kc.check_xa_recover_admin():
                 mysql_kc.grant_xa_recover_admin()
 
+    def maybe_userstorage_exists(self):
+        comp_exists = False
+
+        # check if component exists
+        out, err, code = exec_cmd(f"{self.kcadm_script} get components --fields 'name' -r {self.ctx['jans_idp_realm']} --config {self.config_file}")
+
+        if code != 0:
+            logger.warning(f"Unable to list userstorage components; reason={err.decode()}")
+        else:
+            for datum in json.loads(out.decode()):
+                if datum["name"] == "jans-user-federation":
+                    comp_exists = True
+                    break
+        return comp_exists
+
+    def create_userstorage(self):
+        if self.maybe_userstorage_exists():
+            return
+
+        logger.info(f"Creating userstorage component 'jans-user-federation' in realm {self.ctx['jans_idp_realm']}")
+
+        storage_config = f"{self.base_dir}/jans.userstorage-provider-component.json"
+        parent_id = self.maybe_realm_exists()
+
+        out, err, code = exec_cmd(f"{self.kcadm_script} create components -r {self.ctx['jans_idp_realm']} -s parentId='{parent_id}' -f {storage_config} --config {self.config_file}")
+
+        if code != 0:
+            logger.warning(f"Unable to create userstorage component specified in {storage_config}; reason={err.decode()}")
+
 
 class MysqlKeycloak:
     def __init__(self):
@@ -343,10 +388,12 @@ def main():
             "jans.api-realm.json",
             "jans.api-user.json",
             "jans.browser-auth-flow.json",
+            "jans.userstorage-provider-component.json",
         ])
         kc.create_realm()
         kc.create_client()
         kc.create_user()
+        kc.create_userstorage()
 
         if flow := kc.get_or_create_flow():
             kc.ctx["jans_browser_auth_flow_id"] = flow["id"]
