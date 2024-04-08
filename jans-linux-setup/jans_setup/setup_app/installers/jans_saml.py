@@ -144,7 +144,13 @@ class JansSamlInstaller(JettyInstaller):
     def install_keycloack(self):
         self.logIt("Installing KC", pbar=self.service_name)
         base.unpack_zip(self.source_files[3][0], self.idp_config_data_dir, with_par_dir=False)
+
+        # retreive auth config
+        _, jans_auth_config = self.dbUtils.get_oxAuthConfDynamic()
+        Config.templateRenderingDict['jans_auth_token_endpoint'] = jans_auth_config['tokenEndpoint']
+
         self.update_rendering_dict()
+        
         self.renderTemplateInOut(self.idp_config_fn, self.templates_folder, os.path.join(self.idp_config_data_dir, 'conf'))
         self.chown(self.idp_config_data_dir, Config.jetty_user, Config.jetty_group, recursive=True)
 
@@ -179,7 +185,6 @@ class JansSamlInstaller(JettyInstaller):
         jans_browser_auth_flow_fn = 'jans.browser-auth-flow.json'
         jans_execution_config_jans_fn = 'jans.execution-config-jans.json'
         jans_userstorage_provider_component_fn = 'jans.userstorage-provider-component.json'
-        self.idp_config_fn = os.path.join(self.templates_folder, 'keycloak.conf')
 
         for tmp_fn in (jans_api_openid_client_fn, jans_api_realm_fn, jans_api_user_fn, jans_browser_auth_flow_fn, jans_userstorage_provider_component_fn):
             self.renderTemplateInOut(os.path.join(jans_api_tmp_dir, tmp_fn), jans_api_tmp_dir, jans_api_output_dir, pystring=True)
@@ -248,4 +253,3 @@ class JansSamlInstaller(JettyInstaller):
 
             # create userstorage provider component
             self.run([kcadm_cmd, 'create', 'components', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_userstorage_provider_component_fn), '--config', kc_tmp_config], env=env)
-
