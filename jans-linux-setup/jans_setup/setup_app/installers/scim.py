@@ -143,7 +143,7 @@ class ScimInstaller(JettyInstaller):
                 'jansAccessTknSigAlg': ['RS256'],
                 'jansAppTyp': ['native'],
                 'jansAttrs': ['{}'],
-                'jansGrantTyp':	['client_credentials'],
+                'jansGrantTyp': ['client_credentials'],
                 'jansScope': scopes_dn,
                 'jansSubjectTyp': ['pairwise'],
                 'jansTknEndpointAuthMethod': ['client_secret_basic'],
