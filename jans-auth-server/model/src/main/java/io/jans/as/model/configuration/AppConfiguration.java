@@ -526,8 +526,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose if client can update Grant Type values")
     private Boolean enableClientGrantTypeUpdate;
 
-    @DocProperty(description = "This list details which OAuth 2.0 grant types can be set up with the client registration API")
-    private Set<GrantType> dynamicGrantTypeDefault;
+    @DocProperty(description = "This list details which OAuth 2.0 grant types can be set up with the dynamic client registration API")
+    private Set<GrantType> grantTypesSupportedByDynamicRegistration;
 
     @DocProperty(description = "The location for CSS files")
     private String cssLocation;
@@ -2895,12 +2895,12 @@ public class AppConfiguration implements Configuration {
         this.enableClientGrantTypeUpdate = enableClientGrantTypeUpdate;
     }
 
-    public Set<GrantType> getDynamicGrantTypeDefault() {
-        return dynamicGrantTypeDefault;
+    public Set<GrantType> getGrantTypesSupportedByDynamicRegistration() {
+        return grantTypesSupportedByDynamicRegistration;
     }
 
-    public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
-        this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
+    public void setGrantTypesSupportedByDynamicRegistration(Set<GrantType> grantTypesSupportedByDynamicRegistration) {
+        this.grantTypesSupportedByDynamicRegistration = grantTypesSupportedByDynamicRegistration;
     }
 
     /**

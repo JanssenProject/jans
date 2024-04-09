@@ -19,7 +19,7 @@ III. These changes should be applied to oxAuth config.
 
 3. "dynamicRegistrationExpirationTime":86400,
 
-4. "dynamicGrantTypeDefault":[
+4. "grantTypesSupportedByDynamicRegistration":[
       "authorization_code",
       "implicit",
       "password",
