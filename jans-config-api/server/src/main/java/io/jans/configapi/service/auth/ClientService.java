@@ -275,8 +275,8 @@ public class ClientService implements Serializable {
         logger.trace("After setting - client.getResponseTypes():{}, client.getGrantTypes():{}",
                 client.getResponseTypes(), client.getGrantTypes());
 
-        Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
-        grantTypeSet.retainAll(dynamicGrantTypeDefault);
+        Set<GrantType> grantTypesSupportedByDynamicRegistration = appConfiguration.getGrantTypesSupportedByDynamicRegistration();
+        grantTypeSet.retainAll(grantTypesSupportedByDynamicRegistration);
 
         if (!update || (responseTypeSet != null && !responseTypeSet.isEmpty())) {
             client.setResponseTypes(responseTypeSet.toArray(new ResponseType[0]));
