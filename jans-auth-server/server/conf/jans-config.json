@@ -315,7 +315,7 @@
         "page",
         "popup"
     ],
-    "dynamicGrantTypeDefault":[
+    "grantTypesSupportedByDynamicRegistration":[
         "authorization_code",
         "implicit",
         "password",

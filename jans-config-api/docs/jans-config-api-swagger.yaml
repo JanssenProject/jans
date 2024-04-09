@@ -8705,7 +8705,7 @@ components:
           type: boolean
         enableClientGrantTypeUpdate:
           type: boolean
-        dynamicGrantTypeDefault:
+        grantTypesSupportedByDynamicRegistration:
           uniqueItems: true
           type: array
           items:
