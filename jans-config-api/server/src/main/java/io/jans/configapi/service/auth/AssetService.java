@@ -91,9 +91,8 @@ public class AssetService {
                         targetArray, null);
                 Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
                         targetArray, null);
-                Filter aliasFilter = Filter.createSubstringFilter("jansAlias", null, targetArray, null);
                 Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, aliasFilter, inumFilter));
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
@@ -312,7 +311,7 @@ public class AssetService {
 
     private Document saveNewAsset(Document asset, InputStream stream) {
         log.info("Saving new asset in DB DocumentStore - asset:{}, stream:{}", asset, stream);
-        String path = dBDocumentStoreProvider.saveDocumentStream(asset.getDisplayName(), asset.getDescription(), stream,
+        String path = dBDocumentStoreProvider.saveBinaryDocumentStream(asset.getDisplayName(), asset.getDescription(), stream,
                 asset.getJansModuleProperty());
         log.info("Successfully stored asset - Path of saved new asset is :{}", path);
         return asset;

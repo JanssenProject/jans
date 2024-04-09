@@ -34,6 +34,12 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-common</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>bcprov-jdk15on</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>

@@ -7,7 +7,12 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
+import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalAuthzDetailTypeService;
+import io.jans.model.AuthenticationScriptUsageType;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.model.CustomScript;
+import io.jans.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import org.mockito.InjectMocks;
@@ -18,6 +23,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import static org.mockito.Mockito.*;
@@ -58,6 +64,53 @@ public class AuthorizeRestWebServiceValidatorTest {
 
     @Mock
     private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
+
+    @Mock
+    private ExternalAuthenticationService externalAuthenticationService;
+
+    @Test
+    public void checkAcrScriptIsAvailable_forBlankAcr_shouldPass() {
+        AuthzRequest authzRequest = new AuthzRequest();
+
+        authorizeRestWebServiceValidator.checkAcrScriptIsAvailable(authzRequest);
+    }
+
+    @Test
+    public void checkAcrScriptIsAvailable_forBuildInAcr_shouldPass() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("simple_password_auth");
+
+        authorizeRestWebServiceValidator.checkAcrScriptIsAvailable(authzRequest);
+    }
+
+    @Test
+    public void checkAcrScriptIsAvailable_whenScriptIsAvailable_shouldPass() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("my_acr");
+
+        final CustomScriptConfiguration script = new CustomScriptConfiguration(new CustomScript(), new DummyPersonAuthenticationType(), new HashMap<>());
+        when(externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, authzRequest.getAcrValuesList())).thenReturn(script);
+
+        authorizeRestWebServiceValidator.checkAcrScriptIsAvailable(authzRequest);
+    }
+
+    @Test
+    public void checkAcrScriptIsAvailable_whenScriptIsNotAvailable_shouldFail() {
+        RedirectUri redirectUri = mock(RedirectUri.class);
+        when(redirectUri.toString()).thenReturn("http://rp.com");
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("my_acr");
+        authzRequest.setRedirectUriResponse(new RedirectUriResponse(redirectUri, "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
+
+        try {
+            authorizeRestWebServiceValidator.checkAcrScriptIsAvailable(authzRequest);
+        } catch (WebApplicationException e) {
+            return;
+        }
+
+        fail("Script is not available but exception is not thrown.");
+    }
 
     @Test
     public void validateRequestParameterSupported_whenRequestIsEmpty_shouldPass() {

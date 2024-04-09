@@ -1,3 +1,9 @@
+---
+tags:
+- Casa
+- Accounts Linking
+---
+
 # Accounts Linking Plugin
 
 ## Overview
@@ -18,6 +24,9 @@ From the perspective of a user already logged into Casa, the experience is as fo
 - If an account has no password assigned, removal of linked accounts is not allowed. However, a functionality for the user to assign himself a password is provided
 
 ## Components deployment
+
+!!! Note
+    Ensure you are running at least version 1.1.1 of Jans Authentication Server and Casa
 
 The pieces that allow materialization of the experience summarized above are the following:
 

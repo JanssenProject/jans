@@ -100,7 +100,7 @@ tags:
 | dpopSigningAlgValuesSupported | Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported | [Details](#dpopsigningalgvaluessupported) |
 | dpopTimeframe | Demonstration of Proof-of-Possession (DPoP) timeout | [Details](#dpoptimeframe) |
 | dpopUseNonce | Demonstration of Proof-of-Possession (DPoP) use nonce | [Details](#dpopusenonce) |
-| dynamicGrantTypeDefault | This list details which OAuth 2.0 grant types can be set up with the client registration API | [Details](#dynamicgranttypedefault) |
+| grantTypesSupportedByDynamicRegistration | This list details which OAuth 2.0 grant types can be set up with the client registration API | [Details](#granttypessupportedbydynamicregistration) |
 | dynamicRegistrationAllowedPasswordGrantScopes | List of grant scopes for dynamic registration | [Details](#dynamicregistrationallowedpasswordgrantscopes) |
 | dynamicRegistrationCustomAttributes | This list details the custom attributes allowed for dynamic registration | [Details](#dynamicregistrationcustomattributes) |
 | dynamicRegistrationCustomObjectClass | LDAP custom object class for dynamic registration | [Details](#dynamicregistrationcustomobjectclass) |
@@ -1085,7 +1085,7 @@ tags:
 - Default value: false
 
 
-### dynamicGrantTypeDefault
+### grantTypesSupportedByDynamicRegistration
 
 - Description: This list details which OAuth 2.0 grant types can be set up with the client registration API
 

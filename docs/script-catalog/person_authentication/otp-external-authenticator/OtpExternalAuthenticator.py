@@ -26,7 +26,7 @@ from com.lochbridge.oath.otp.keyprovisioning import OTPAuthURIBuilder
 from com.lochbridge.oath.otp.keyprovisioning import OTPKey
 from com.lochbridge.oath.otp.keyprovisioning.OTPKey import OTPType
 from java.security import SecureRandom
-from java.util import Arrays
+from java.util import Arrays, HashMap
 from java.util.concurrent import TimeUnit
 from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
@@ -35,6 +35,7 @@ from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import SessionIdService
 from io.jans.as.server.service import UserService
+from io.jans.service import UserAuthenticatorService
 from io.jans.as.server.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
@@ -111,6 +112,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         authenticationService = CdiUtil.bean(AuthenticationService)
+        userAuthenticatorService = CdiUtil.bean(UserAuthenticatorService)
 
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
@@ -130,7 +132,7 @@ class PersonAuthentication(PersonAuthenticationType):
             #    otp_auth_method = "enroll"
 
             if otp_auth_method == "authenticate":
-                user_enrollments = self.findEnrollments(authenticated_user.getUserId())
+                user_enrollments = userAuthenticatorService.getUserAuthenticatorsByType(authenticated_user, self.otpType)
                 if len(user_enrollments) == 0:
                     otp_auth_method = "enroll"
                     print "OTP. Authenticate for step 1. There is no OTP enrollment for user '%s'. Changing otp_auth_method to '%s'" % (authenticated_user.getUserId(), otp_auth_method)
@@ -174,11 +176,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "OTP. Authenticate for step 2. Skipping this step during enrollment"
                 return True
 
-            otp_auth_result = self.processOtpAuthentication(requestParameters, user.getUserId(), identity, otp_auth_method)
+            otp_auth_result = self.processOtpAuthentication(requestParameters, user, identity, otp_auth_method)
             print "OTP. Authenticate for step 2. OTP authentication result: '%s'" % otp_auth_result
 
             return otp_auth_result
         elif step == 3:
+            print 3
             print "OTP. Authenticate for step 3"
 
             authenticationService = CdiUtil.bean(AuthenticationService)
@@ -196,7 +199,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if otp_auth_method != 'enroll':
                 return False
 
-            otp_auth_result = self.processOtpAuthentication(requestParameters, user.getUserId(), identity, otp_auth_method)
+            otp_auth_result = self.processOtpAuthentication(requestParameters, user, identity, otp_auth_method)
             print "OTP. Authenticate for step 3. OTP authentication result: '%s'" % otp_auth_result
 
             return otp_auth_result
@@ -367,34 +370,6 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return find_user_by_uid
 
-    def findEnrollments(self, user_name, skipPrefix = True):
-        result = []
-
-        userService = CdiUtil.bean(UserService)
-        user = userService.getUser(user_name, "jansExtUid")
-        if user == None:
-            print "OTP. Find enrollments. Failed to find user"
-            return result
-        
-        user_custom_ext_attribute = userService.getCustomAttribute(user, "jansExtUid")
-        if user_custom_ext_attribute == None:
-            return result
-
-        otp_prefix = "%s:" % self.otpType
-        
-        otp_prefix_length = len(otp_prefix) 
-        for user_external_uid in user_custom_ext_attribute.getValues():
-            index = user_external_uid.find(otp_prefix)
-            if index != -1:
-                if skipPrefix:
-                    enrollment_uid = user_external_uid[otp_prefix_length:]
-                else:
-                    enrollment_uid = user_external_uid
-
-                result.append(enrollment_uid)
-        
-        return result
-
     def validateSessionId(self, identity):
         session = CdiUtil.bean(SessionIdService).getSessionId()
         if session == None:
@@ -408,17 +383,17 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return True
 
-    def processOtpAuthentication(self, requestParameters, user_name, identity, otp_auth_method):
+    def processOtpAuthentication(self, requestParameters, user, identity, otp_auth_method):
         facesMessages = CdiUtil.bean(FacesMessages)
         facesMessages.setKeepMessages()
 
         userService = CdiUtil.bean(UserService)
+        userAuthenticatorService = CdiUtil.bean(UserAuthenticatorService)
 
         otpCode = ServerUtil.getFirstValue(requestParameters, "loginForm:otpCode")
         if StringHelper.isEmpty(otpCode):
             facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to authenticate. OTP code is empty")
             print "OTP. Process OTP authentication. otpCode is empty"
-
             return False
         
         if otp_auth_method == "enroll":
@@ -435,64 +410,73 @@ class PersonAuthentication(PersonAuthenticationType):
                 
                 if (validation_result != None) and validation_result["result"]:
                     print "OTP. Process HOTP authentication during enrollment. otpCode is valid"
+
                     # Store HOTP Secret Key and moving factor in user entry
-                    otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
+                    map = HashMap()
+                    map.put("movingFactor", validation_result["movingFactor"])
 
                     # Add otp_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "jansExtUid", otp_user_external_uid, True)
-                    if find_user_by_external_uid != None:
+                    authenticator = userAuthenticatorService.createUserAuthenticator("%s" % otp_secret_key_encoded, "hotp", map)
+                    userAuthenticatorService.addUserAuthenticator(user, authenticator)
+
+                    updatedUser = userService.updateUser(user)
+                    if updatedUser != None:
                         return True
 
                     print "OTP. Process HOTP authentication during enrollment. Failed to update user entry"
             elif self.otpType == "totp":
-                validation_result = self.validateTotpKey(otp_secret_key, otpCode,user_name)
+                validation_result = self.validateTotpKey(otp_secret_key, otpCode, user.getUserId())
                 if (validation_result != None) and validation_result["result"]:
                     print "OTP. Process TOTP authentication during enrollment. otpCode is valid"
                     # Store TOTP Secret Key and moving factor in user entry
-                    otp_user_external_uid = "totp:%s" % otp_secret_key_encoded
-
                     # Add otp_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "jansExtUid", otp_user_external_uid, True)
-                    if find_user_by_external_uid != None:
+                    authenticator = userAuthenticatorService.createUserAuthenticator("%s" % otp_secret_key_encoded, "totp")
+                    userAuthenticatorService.addUserAuthenticator(user, authenticator)
+
+                    updatedUser = userService.updateUser(user)
+                    if updatedUser != None:
                         return True
 
                     print "OTP. Process TOTP authentication during enrollment. Failed to update user entry"
         elif otp_auth_method == "authenticate":
-            user_enrollments = self.findEnrollments(user_name)
+            enrolledAuthenticators = userAuthenticatorService.getUserAuthenticatorsByType(user, self.otpType)
 
-            if len(user_enrollments) == 0:
-                print "OTP. Process OTP authentication. There is no OTP enrollment for user '%s'" % user_name
+            if len(enrolledAuthenticators) == 0:
+                print "OTP. Process OTP authentication. There is no OTP enrollment for user '%s'" % user.getUserId()
                 facesMessages.add(FacesMessage.SEVERITY_ERROR, "There is no valid OTP user enrollments")
                 return False
 
             if self.otpType == "hotp":
-                for user_enrollment in user_enrollments:
-                    user_enrollment_data = user_enrollment.split(";")
-                    otp_secret_key_encoded = user_enrollment_data[0]
+                for enrolledAuthenticator in enrolledAuthenticators:
+                    otp_secret_key_encoded = enrolledAuthenticator.getId()
+                    otp_secret_key = self.fromBase64Url(otp_secret_key_encoded)
+                    
+                    # Get current moving factor from user entry
+                    moving_factor = enrolledAuthenticator.getCustom("movingFactor")
 
                     # Get current moving factor from user entry
-                    moving_factor = StringHelper.toInteger(user_enrollment_data[1])
-                    otp_secret_key = self.fromBase64Url(otp_secret_key_encoded)
 
                     # Validate TOTP
                     validation_result = self.validateHotpKey(otp_secret_key, moving_factor, otpCode)
                     if (validation_result != None) and validation_result["result"]:
                         print "OTP. Process HOTP authentication during authentication. otpCode is valid"
-                        otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, moving_factor )
-                        new_otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
-    
+
+                        # Update current moving factor in user entry
+                        enrolledAuthenticator.addCustom("movingFactor", moving_factor)
+
                         # Update moving factor in user entry
-                        find_user_by_external_uid = userService.replaceUserAttribute(user_name, "jansExtUid", otp_user_external_uid, new_otp_user_external_uid, True)
-                        if find_user_by_external_uid != None:
+                        updatedUser = userService.updateUser(user)
+                        if updatedUser != None:
                             return True
     
                         print "OTP. Process HOTP authentication during authentication. Failed to update user entry"
             elif self.otpType == "totp":
-                for user_enrollment in user_enrollments:
-                    otp_secret_key = self.fromBase64Url(user_enrollment)
+                for enrolledAuthenticator in enrolledAuthenticators:
+                    otp_secret_key_encoded = enrolledAuthenticator.getId()
+                    otp_secret_key = self.fromBase64Url(otp_secret_key_encoded)
 
                     # Validate TOTP
-                    validation_result = self.validateTotpKey(otp_secret_key, otpCode, user_name)
+                    validation_result = self.validateTotpKey(otp_secret_key, otpCode, user.getUserId())
                     if (validation_result != None) and validation_result["result"]:
                         print "OTP. Process TOTP authentication during authentication. otpCode is valid"
                         return True
