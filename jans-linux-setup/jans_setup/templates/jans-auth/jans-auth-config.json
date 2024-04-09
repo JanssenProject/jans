@@ -345,7 +345,7 @@
         "ru",
         "tr"
     ],
-    "dynamicGrantTypeDefault":[
+    "grantTypesSupportedByDynamicRegistration":[
         "authorization_code",
         "implicit",
         "client_credentials",
