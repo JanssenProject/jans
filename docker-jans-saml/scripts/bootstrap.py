@@ -37,6 +37,9 @@ def render_keycloak_conf():
     ctx = {
         "hostname": manager.config.get("hostname"),
         "db_password": get_kc_db_password(),
+        "saml_scim_client_id": manager.config.get("saml_scim_client_id"),
+        "saml_scim_client_pw": manager.secret.get("saml_scim_client_pw"),
+        "jans_auth_token_endpoint": "jans-auth/restv1/token",
     }
 
     with open("/app/templates/jans-saml/keycloak.conf") as f:

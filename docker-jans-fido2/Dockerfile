@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # =====
 
 ENV CN_VERSION=1.1.1-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-03 08:50'
+ENV CN_BUILD_DATE='2024-04-08 17:07'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -59,7 +59,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=aeba80d5fb2860e1336a49bfc3cbfc80f79b08ba
+ENV JANS_SOURCE_VERSION=58f8fff55c6ba0a61d8053fb32a79700f44f41d0
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
