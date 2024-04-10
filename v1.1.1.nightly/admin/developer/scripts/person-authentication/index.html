@@ -5642,6 +5642,47 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#f-using-person-authenticator-jansauthenticator-attribute" class="md-nav__link">
+    F. Using person authenticator jansAuthenticator attribute :
+  </a>
+  
+    <nav class="md-nav" aria-label="F. Using person authenticator jansAuthenticator attribute :">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-format-of-attributes" class="md-nav__link">
+    1. Format of attributes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-sample-data" class="md-nav__link">
+    2. Sample data:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-access-jansauthenticator-and-jansextuid-from-generic-bean" class="md-nav__link">
+    2. Access jansAuthenticator and jansExtUid from generic bean
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-default-authentication-method_1" class="md-nav__link">
+    1. Default authentication method:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -8707,6 +8748,47 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#f-using-person-authenticator-jansauthenticator-attribute" class="md-nav__link">
+    F. Using person authenticator jansAuthenticator attribute :
+  </a>
+  
+    <nav class="md-nav" aria-label="F. Using person authenticator jansAuthenticator attribute :">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-format-of-attributes" class="md-nav__link">
+    1. Format of attributes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-sample-data" class="md-nav__link">
+    2. Sample data:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-access-jansauthenticator-and-jansextuid-from-generic-bean" class="md-nav__link">
+    2. Access jansAuthenticator and jansExtUid from generic bean
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-default-authentication-method_1" class="md-nav__link">
+    1. Default authentication method:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -8946,6 +9028,89 @@ Learn more about acr_values in the <a href="http://openid.net/specs/openid-conne
 </ol>
 <h4 id="level-rank-of-an-authentication-mechanism">Level (rank) of an Authentication mechanism :<a class="headerlink" href="#level-rank-of-an-authentication-mechanism" title="Permanent link">#</a></h4>
 <p>Each authentication mechanism (script) has a "Level" assigned to it which describes how secure and reliable it is. <strong>The higher the "Level", higher is the reliability represented by the script.</strong> Though several mechanisms can be enabled at the same Janssen server instance at the same time, for any specific user's session only one of them can be set as the current one (and will be returned as <code>acr</code> claim of id_token for them). If after initial session is created a new authorization request from a RP comes in specifying another authentication method, its "Level" will be compared to that of the method currently associated with this session. If requested method's "Level" is lower or equal to it, nothing is changed and the usual SSO behavior is observed. If it's higher (i.e. a more secure method is requested), it's not possible to serve such request using the existing session's context, and user must re-authenticate themselves to continue. If they succeed, a new session becomes associated with that requested mechanism instead.</p>
+<h3 id="f-using-person-authenticator-jansauthenticator-attribute">F. Using person authenticator <code>jansAuthenticator</code> attribute :<a class="headerlink" href="#f-using-person-authenticator-jansauthenticator-attribute" title="Permanent link">#</a></h3>
+<p>The <code>jansAuthenticator</code> attribute can be used in cases when person authenticator need to persist data between person logins. For example script can have enrollment and authentication flows. And after enrollment it needs to store data into user entry for later use in authentication flow.
+In order to search by enrolled authenticator there is another multi-valued attribute <code>jansExtUid</code>. This attribute has default DB index to quick search.
+Both attributes is recommended to use In Jans since 1.1.1 version for better compatibility in future.</p>
+<h4 id="1-format-of-attributes">1. Format of attributes<a class="headerlink" href="#1-format-of-attributes" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>jansExtUid: [otp:xyz1, cert:xyz2, duo:xyz3, ...]
+jansAuthenticator: {
+   &quot;xyz1&quot;: {&quot;id&quot;: &quot;xyz1&quot;, &quot;type&quot;: &quot;otp&quot;, &quot;custom&quot;: {...}}, 
+   &quot;xyz2&quot;: {&quot;id&quot;: &quot;xyz2&quot;, &quot;type&quot;: &quot;cert&quot;, &quot;custom&quot;: {...}},
+   &quot;xyz3&quot;: {&quot;id&quot;: &quot;xyz3&quot;, &quot;type&quot;: &quot;duo&quot;, &quot;custom&quot;: {...}},
+    ...
+}
+</code></pre></div>
+<h4 id="2-sample-data">2. Sample data:<a class="headerlink" href="#2-sample-data" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>jansExtUid: [hotp:S9dO_qKQoOcpPk9GuStlNO9seoA=, cert:totp, duo:Nv7Dg7aP0wRPJd6NHjx1ai9bN9Y=]
+jansAuthenticator:
+{
+  &quot;S9dO_qKQoOcpPk9GuStlNO9seoA=&quot;: {
+    &quot;id&quot;: &quot;S9dO_qKQoOcpPk9GuStlNO9seoA=&quot;,
+    &quot;type&quot;: &quot;hotp&quot;,
+    &quot;custom&quot;: {
+      &quot;movingFactor&quot;: 3
+    }
+  },
+  &quot;Nv7Dg7aP0wRPJd6NHjx1ai9bN9Y=&quot;: {
+    &quot;id&quot;: &quot;Nv7Dg7aP0wRPJd6NHjx1ai9bN9Y=&quot;,
+    &quot;type&quot;: &quot;totp&quot;
+  }
+}
+</code></pre></div>
+<h4 id="2-access-jansauthenticator-and-jansextuid-from-generic-bean">2. Access <code>jansAuthenticator</code> and <code>jansExtUid</code> from generic bean<a class="headerlink" href="#2-access-jansauthenticator-and-jansextuid-from-generic-bean" title="Permanent link">#</a></h4>
+<p>For both attributes there are get/set methods in <code>User</code> entry. After loading user object script can call these methods to get required data.</p>
+<div class="highlight"><pre><span></span><code>...
+    @AttributeName(name = &quot;jansExtUid&quot;)
+    private String[] externalUid;
+
+    @JsonObject
+    @AttributeName(name = &quot;jansAuthenticator&quot;)
+    private UserAuthenticatorList authenticator
+...
+    public String[] getExternalUid() {
+        return externalUid;
+    }
+
+    public void setExternalUid(String[] externalUid) {
+        this.externalUid = externalUid;
+    }
+
+    public UserAuthenticatorList getAuthenticator() {
+        return authenticator;
+    }
+
+    public void setAuthenticator(UserAuthenticatorList authenticator) {
+        this.authenticator = authenticator;
+    }
+...
+</code></pre></div>
+<p><code>UserAuthenticatorList</code> is defined <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/model/src/main/java/io/jans/model/user/authenticator/UserAuthenticatorList.java">here</a>. It contains list of <code>UserAuthenticator</code> objects. <code>UserAuthenticator</code> is defined <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/model/src/main/java/io/jans/model/user/authenticator/UserAuthenticator.java">here</a></p>
+<p>For convenience in 1.1.1 there is new service <code>UserAuthenticator</code>. See it's code <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/model/src/main/java/io/jans/model/user/authenticator/UserAuthenticator.java">here</a></p>
+<p>It provides next API methods:</p>
+<div class="highlight"><pre><span></span><code>    public UserAuthenticatorList getUserAuthenticatorList(SimpleUser user);
+
+    public List&lt;UserAuthenticator&gt; getUserAuthenticatorsByType(SimpleUser user, String type);
+
+    public UserAuthenticator getUserAuthenticatorById(SimpleUser user, String id);
+
+    public void addUserAuthenticator(SimpleUser user, UserAuthenticator userAuthenticator);
+
+    public void removeUserAuthenticator(SimpleUser user, UserAuthenticator userAuthenticator);
+
+    public void removeUserAuthenticator(SimpleUser user, String type);
+
+    public UserAuthenticator createUserAuthenticator(String id, String type);
+
+    public UserAuthenticator createUserAuthenticator(String id, String type, Map&lt;String, Object&gt; custom);
+
+    public String formatExternalUid(String id, String type);
+
+    public boolean checkAndMigrateToAuthenticatorList(SimpleUser user);
+</code></pre></div>
+<p>All these methods update both <code>jansAuthenticator</code> and <code>jansExtUid</code> attributes without persisting changes to DB. After calling these methods script should persist user entry. It's expected behaviour because script might update other fields too. Hence it's better to persist all changes in one update request to DB.</p>
+<h4 id="1-default-authentication-method_1">1. Default authentication method:<a class="headerlink" href="#1-default-authentication-method_1" title="Permanent link">#</a></h4>
+<p><code>default_acr</code>: This is the default authentication mechanism exposed to all applications that send users to the Janssen Server for sign-in. Unless an app specifically requests a different form of authentication using the OpenID Connect acr_values parameter (as specified below), users will receive the form of authentication specified in this field.</p>
 <h2 id="usage-scenarios">Usage scenarios<a class="headerlink" href="#usage-scenarios" title="Permanent link">#</a></h2>
 <h3 id="a-implementing-2fa-authentication-mechanisms">A. Implementing 2FA authentication mechanisms<a class="headerlink" href="#a-implementing-2fa-authentication-mechanisms" title="Permanent link">#</a></h3>
 <ol>
