@@ -107,6 +107,111 @@ By default, users will get the default authentication mechanism as specified abo
 #### Level (rank) of an Authentication mechanism :
 Each authentication mechanism (script) has a "Level" assigned to it which describes how secure and reliable it is. **The higher the "Level", higher is the reliability represented by the script.** Though several mechanisms can be enabled at the same Janssen server instance at the same time, for any specific user's session only one of them can be set as the current one (and will be returned as `acr` claim of id_token for them). If after initial session is created a new authorization request from a RP comes in specifying another authentication method, its "Level" will be compared to that of the method currently associated with this session. If requested method's "Level" is lower or equal to it, nothing is changed and the usual SSO behavior is observed. If it's higher (i.e. a more secure method is requested), it's not possible to serve such request using the existing session's context, and user must re-authenticate themselves to continue. If they succeed, a new session becomes associated with that requested mechanism instead.
 
+### F. Using person authenticator `jansAuthenticator` attribute :
+The `jansAuthenticator` attribute can be used in cases when person authenticator need to persist data between person logins. For example script can have enrollment and authentication flows. And after enrollment it needs to store data into user entry for later use in authentication flow.
+In order to search by enrolled authenticator there is another multi-valued attribute `jansExtUid`. This attribute has default DB index to quick search.
+Both attributes is recommended to use In Jans since 1.1.1 version for better compatibility in future.
+
+
+#### 1. Format of attributes
+
+```
+jansExtUid: [otp:xyz1, cert:xyz2, duo:xyz3, ...]
+jansAuthenticator: {
+   "xyz1": {"id": "xyz1", "type": "otp", "custom": {...}}, 
+   "xyz2": {"id": "xyz2", "type": "cert", "custom": {...}},
+   "xyz3": {"id": "xyz3", "type": "duo", "custom": {...}},
+    ...
+}
+
+```
+
+#### 2. Sample data:
+
+```
+jansExtUid: [hotp:S9dO_qKQoOcpPk9GuStlNO9seoA=, cert:totp, duo:Nv7Dg7aP0wRPJd6NHjx1ai9bN9Y=]
+jansAuthenticator:
+{
+  "S9dO_qKQoOcpPk9GuStlNO9seoA=": {
+    "id": "S9dO_qKQoOcpPk9GuStlNO9seoA=",
+    "type": "hotp",
+    "custom": {
+      "movingFactor": 3
+    }
+  },
+  "Nv7Dg7aP0wRPJd6NHjx1ai9bN9Y=": {
+    "id": "Nv7Dg7aP0wRPJd6NHjx1ai9bN9Y=",
+    "type": "totp"
+  }
+}
+```
+
+#### 2. Access `jansAuthenticator` and `jansExtUid` from generic bean
+
+For both attributes there are get/set methods in `User` entry. After loading user object script can call these methods to get required data.
+
+```
+...
+    @AttributeName(name = "jansExtUid")
+    private String[] externalUid;
+
+    @JsonObject
+    @AttributeName(name = "jansAuthenticator")
+    private UserAuthenticatorList authenticator
+...
+	public String[] getExternalUid() {
+		return externalUid;
+	}
+
+	public void setExternalUid(String[] externalUid) {
+		this.externalUid = externalUid;
+	}
+
+	public UserAuthenticatorList getAuthenticator() {
+		return authenticator;
+	}
+
+	public void setAuthenticator(UserAuthenticatorList authenticator) {
+		this.authenticator = authenticator;
+	}
+...
+```
+
+`UserAuthenticatorList` is defined [here](https://github.com/JanssenProject/jans/blob/main/jans-core/model/src/main/java/io/jans/model/user/authenticator/UserAuthenticatorList.java). It contains list of `UserAuthenticator` objects. `UserAuthenticator` is defined [here](https://github.com/JanssenProject/jans/blob/main/jans-core/model/src/main/java/io/jans/model/user/authenticator/UserAuthenticator.java)
+
+For convenience in 1.1.1 there is new service `UserAuthenticator`. See it's code [here](https://github.com/JanssenProject/jans/blob/main/jans-core/model/src/main/java/io/jans/model/user/authenticator/UserAuthenticator.java)
+
+It provides next API methods:
+
+```
+	public UserAuthenticatorList getUserAuthenticatorList(SimpleUser user);
+
+	public List<UserAuthenticator> getUserAuthenticatorsByType(SimpleUser user, String type);
+
+	public UserAuthenticator getUserAuthenticatorById(SimpleUser user, String id);
+
+	public void addUserAuthenticator(SimpleUser user, UserAuthenticator userAuthenticator);
+
+	public void removeUserAuthenticator(SimpleUser user, UserAuthenticator userAuthenticator);
+
+	public void removeUserAuthenticator(SimpleUser user, String type);
+
+	public UserAuthenticator createUserAuthenticator(String id, String type);
+
+	public UserAuthenticator createUserAuthenticator(String id, String type, Map<String, Object> custom);
+
+	public String formatExternalUid(String id, String type);
+
+	public boolean checkAndMigrateToAuthenticatorList(SimpleUser user);
+```
+
+All these methods update both `jansAuthenticator` and `jansExtUid` attributes without persisting changes to DB. After calling these methods script should persist user entry. It's expected behaviour because script might update other fields too. Hence it's better to persist all changes in one update request to DB.
+
+
+#### 1. Default authentication method:
+
+`default_acr`: This is the default authentication mechanism exposed to all applications that send users to the Janssen Server for sign-in. Unless an app specifically requests a different form of authentication using the OpenID Connect acr_values parameter (as specified below), users will receive the form of authentication specified in this field.
+
 ## Usage scenarios
 
 ### A. Implementing 2FA authentication mechanisms
