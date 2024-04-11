@@ -13,7 +13,6 @@ public class CustomUser extends User {
     private String inum;
     private String mail;
     private String displayName;
-    private GluuStatus jansStatus;
     private String givenName;
     private String userPassword;
     
@@ -41,15 +40,7 @@ public class CustomUser extends User {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
-    
-    public GluuStatus getJansStatus() {
-        return jansStatus;
-    }
-    
-    public void setJansStatus(GluuStatus jansStatus) {
-        this.jansStatus = jansStatus;
-    }
-    
+       
     public String getGivenName() {
         return givenName;
     }
@@ -68,8 +59,8 @@ public class CustomUser extends User {
     
     @Override
     public String toString() {
-        return "CustomUser [inum=" + inum + ", mail=" + mail + ", displayName=" + displayName + ", jansStatus="
-                + jansStatus + ", givenName=" + givenName + ", userPassword=" + userPassword + "]";
+        return "CustomUser [inum=" + inum + ", mail=" + mail + ", displayName=" + displayName 
+                + ", givenName=" + givenName + ", userPassword=" + userPassword + "]";
     }
     
     
