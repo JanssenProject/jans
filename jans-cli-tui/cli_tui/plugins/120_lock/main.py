@@ -50,7 +50,7 @@ class Plugin(DialogUtils):
         self.opa_config_base_url = common_data.app.getTitledText(
                     title=_("Base URL"),
                     name='baseUrl',
-                    value=self.data.get('OpaConfiguration', {}).get('baseUrl', ''),
+                    value=self.data.get('opaConfiguration', {}).get('baseUrl', ''),
                     style=cli_style.edit_text,
                     jans_help=_("Base URL for OPA"),
                     widget_style=cli_style.black_bg_widget
@@ -59,7 +59,7 @@ class Plugin(DialogUtils):
         self.opa_config_accessToken = common_data.app.getTitledText(
                     title=_("Access Token"),
                     name='accessToken',
-                    value=self.data.get('OpaConfiguration', {}).get('accessToken', ''),
+                    value=self.data.get('opaConfiguration', {}).get('accessToken', ''),
                     style=cli_style.edit_text,
                     jans_help=_("Access token for OPA"),
                     widget_style=cli_style.black_bg_widget
@@ -150,7 +150,7 @@ class Plugin(DialogUtils):
                 ),
 
                 Frame(
-                    title=_("Opa Configuration"),
+                    title=_("OPA Configuration"),
                     body=HSplit([self.opa_config_base_url, self.opa_config_accessToken]),
                 ),
 
