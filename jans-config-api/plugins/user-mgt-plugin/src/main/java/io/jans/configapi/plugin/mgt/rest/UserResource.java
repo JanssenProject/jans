@@ -177,7 +177,7 @@ public class UserResource extends BaseResource {
         logger.info("newly created customUser:{}", customUser);
         }catch(WebApplicationException wex) {
             logger.error("ApplicationException while creating user is:{}, cause:{}", wex, wex.getCause());
-            throwInternalServerException("USER_CREATION_ERROR", wex.getMessage());
+            throwInternalServerException("USER_CREATION_ERROR", wex);
         }catch(Exception ex) {
             logger.error("Exception while creating user is:{}, cause:{}", ex, ex.getCause());
             throwInternalServerException(ex);
@@ -400,7 +400,7 @@ public class UserResource extends BaseResource {
         customUser.setOxAuthPersistentJwt(user.getOxAuthPersistentJwt());
         customUser.setUpdatedAt(user.getUpdatedAt());
         customUser.setUserId(user.getUserId());
-
+        customUser.setStatus(user.getStatus());
         ignoreCustomAttributes(customUser, removeNonLDAPAttributes);
         return setCustomUserAttributes(customUser, user);
     }
@@ -408,14 +408,12 @@ public class UserResource extends BaseResource {
     public CustomUser setCustomUserAttributes(CustomUser customUser, User user) {
         customUser.setMail(user.getAttribute(MAIL));
         customUser.setDisplayName(user.getAttribute(DISPLAY_NAME));
-        customUser.setJansStatus(user.getAttribute(JANS_STATUS));
         customUser.setGivenName(user.getAttribute(GIVEN_NAME));
         customUser.setUserPassword(user.getAttribute(USER_PWD));
         customUser.setInum(user.getAttribute(INUM));
 
         customUser.removeAttribute(MAIL);
         customUser.removeAttribute(DISPLAY_NAME);
-        customUser.removeAttribute(JANS_STATUS);
         customUser.removeAttribute(GIVEN_NAME);
         customUser.removeAttribute(USER_PWD);
         customUser.removeAttribute(INUM);
@@ -433,6 +431,8 @@ public class UserResource extends BaseResource {
         user.setOxAuthPersistentJwt(customUser.getOxAuthPersistentJwt());
         user.setUpdatedAt(customUser.getUpdatedAt());
         user.setUserId(customUser.getUserId());
+        user.setStatus(customUser.getJansStatus());
+               
         return setUserCustomAttributes(customUser, user);
     }
 
@@ -442,20 +442,19 @@ public class UserResource extends BaseResource {
         }
         
         user.setAttribute(DISPLAY_NAME, customUser.getDisplayName(), false);
-        user.setAttribute(JANS_STATUS, customUser.getJansStatus(), false);
         user.setAttribute(GIVEN_NAME, customUser.getGivenName(), false);
-        
         if(StringUtils.isNotBlank(customUser.getUserPassword())) {  
             user.setAttribute(USER_PWD, customUser.getUserPassword(), false);
         }
-        user.setAttribute(INUM, customUser.getInum(), false);
-
-        logger.debug("Custom User - user:{}", user);
+        if(StringUtils.isNotBlank(customUser.getInum())) {    
+            user.setAttribute(INUM, customUser.getInum(), false);
+        }
+        
         return user;
     }
 
     private User ignoreCustomAttributes(User user, boolean removeNonLDAPAttributes) {
-        logger.debug(
+        logger.info(
                 "** validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
                 user, removeNonLDAPAttributes, user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(),
                 userMgmtSrv.isLDAP());

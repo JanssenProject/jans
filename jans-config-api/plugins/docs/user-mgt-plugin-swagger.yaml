@@ -863,10 +863,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     CustomUser:
       type: object
       properties:
@@ -913,6 +913,11 @@ components:
           type: string
         jansStatus:
           type: string
+          enum:
+          - active
+          - inactive
+          - expired
+          - register
         givenName:
           type: string
         userPassword:
