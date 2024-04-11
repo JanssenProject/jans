@@ -3,7 +3,6 @@ package io.jans.configapi.plugin.mgt.model.user;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.as.common.model.common.User;
-import io.jans.model.GluuStatus;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomUser extends User {

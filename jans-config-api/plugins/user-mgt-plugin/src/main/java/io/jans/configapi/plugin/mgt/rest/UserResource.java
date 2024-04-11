@@ -53,7 +53,6 @@ public class UserResource extends BaseResource {
     private static final String USER = "user";
     private static final String MAIL = "mail";
     private static final String DISPLAY_NAME = "displayName";
-    private static final String JANS_STATUS = "jansStatus";
     private static final String GIVEN_NAME = "givenName";
     private static final String USER_PWD = "userPassword";
     private static final String INUM = "inum";
