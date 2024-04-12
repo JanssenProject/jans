@@ -198,6 +198,12 @@
 		<dependency>
 			<groupId>com.github.microsoft</groupId>
 			<artifactId>TSS.Java</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>bcprov-jdk15on</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
