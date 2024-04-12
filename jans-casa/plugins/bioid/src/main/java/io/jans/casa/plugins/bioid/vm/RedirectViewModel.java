@@ -66,7 +66,7 @@ public class RedirectViewModel {
             String currentUrl = WebUtils.getServletRequest().getRequestURL().toString();
             title = Labels.getLabel("general.error.general");
             CodeGrantUtil cgu = new CodeGrantUtil(
-                        makeOAuthParams(bis.getCasaClient(), bioIdCode, currentUrl));
+                    makeOAuthParams(bis.getCasaClient(), bioIdCode, currentUrl));
             if (Utils.isNotEmpty(start)) {
                 String agamaUrl = getAuthzRequestRedirectUrl(cgu);
                 WebUtils.execRedirect(agamaUrl, false);
@@ -76,11 +76,11 @@ public class RedirectViewModel {
                 if (state == null) {
                     return;
                 }
-                Map<String, String[]> params= WebUtils.getServletRequest().getParameterMap();
-                for (Map.Entry<String, String[]> entry: params.entrySet()) {
-                   String key = entry.getKey();
-                   String value = Arrays.toString(entry.getValue());
-                   logger.info("Key: " + key + ", value: " + value);
+                Map<String, String[]> params = WebUtils.getServletRequest().getParameterMap();
+                for (Map.Entry<String, String[]> entry : params.entrySet()) {
+                    String key = entry.getKey();
+                    String value = Arrays.toString(entry.getValue());
+                    logger.info("Key: " + key + ", value: " + value);
                 }
                 String incomingState = params.get("state")[0];
                 if (!incomingState.equals(state)) {
@@ -99,12 +99,10 @@ public class RedirectViewModel {
     private String storeBioIdCode() {
         byte size = 25;
         String code = bis.generateBioIdCode(size);
-        Map<String, Map<String, Object>> jansCredential = bis.getJansCredential(user.getId());
-        Map<String, Object> bioIdDict = jansCredential.get("bioid");
+        Map<String, Object> bioIdDict = new HashMap<>();
         bioIdDict.put("code", code);
         bioIdDict.put("expiration", new Date().getTime() + 60000);
-        jansCredential.put("bioid", bioIdDict);
-        bis.setJansCredential(user.getId(), jansCredential);
+        bis.setBioIdCode(user.getId(), bioIdDict);
         logger.debug("BioID code stored successfully");
         return code;
     }

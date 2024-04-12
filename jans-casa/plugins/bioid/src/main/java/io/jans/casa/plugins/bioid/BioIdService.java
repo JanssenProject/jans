@@ -14,12 +14,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.casa.misc.Utils;
 import io.jans.casa.service.IPersistenceService;
+import io.jans.model.user.authenticator.UserAuthenticator;
+import io.jans.model.user.authenticator.UserAuthenticatorList;
 import io.jans.casa.conf.OIDCClientSettings;
 import io.jans.casa.model.ApplicationConfiguration;
 
 /**
  * 
- * @author madhumita
+ * @author madhumita, SafinWasi
  *
  */
 
@@ -31,6 +33,7 @@ public class BioIdService {
 	private static ObjectMapper mapper;
 	private IPersistenceService persistenceService;
 	private OIDCClientSettings cls;
+	private String BIOID_TYPE = "bioid";
 
 	private BioIdService() {
 		persistenceService = Utils.managedBean(IPersistenceService.class);
@@ -80,6 +83,41 @@ public class BioIdService {
 			BioIdPersonModel user = persistenceService.get(BioIdPersonModel.class,
 					persistenceService.getPersonDn(userId));
 			user.setJansCredential(jansCredential);
+			persistenceService.modify(user);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+	}
+
+	public Map<String, Object> getBioIdCode(String userId) {
+		try {
+			BioIdPersonModel user = persistenceService.get(BioIdPersonModel.class,
+					persistenceService.getPersonDn(userId));
+			UserAuthenticatorList authenticatorList = user.getAuthenticator();
+			for (UserAuthenticator authenticator : authenticatorList.getAuthenticators()) {
+				if(authenticator.getId().equals(BIOID_TYPE)) {
+					return authenticator.getCustom();
+				}
+			}
+			return null;
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return null;
+	}
+
+	public void setBioIdCode(String userId, Map<String, Object> bioIdCode) {
+		try {
+			BioIdPersonModel user = persistenceService.get(BioIdPersonModel.class,
+					persistenceService.getPersonDn(userId));
+			UserAuthenticator authenticator = new UserAuthenticator(BIOID_TYPE, BIOID_TYPE);
+			authenticator.setCustom(bioIdCode);
+
+			UserAuthenticatorList authenticatorList = user.getAuthenticator();
+			if (authenticatorList == null) {
+				user.setAuthenticator(new UserAuthenticatorList());
+			}
+			user.getAuthenticator().addAuthenticator(authenticator);
 			persistenceService.modify(user);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
