@@ -1108,13 +1108,13 @@
   },
   "webhookId": {
     "mysql": {
-      "type": "TEXT"
+      "type": "JSON"
     },
     "pgsql": {
-      "type": "TEXT"
+      "type": "JSONB"
     },
     "spanner": {
-      "type": "STRING(MAX)"
+      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "url": {
@@ -1142,6 +1142,28 @@
   "samlMetadata": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "document": {
+    "mysql": {
+      "type": "MEDIUMTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "jansValidation": {
+    "mysql": {
+      "type": "MEDIUMTEXT"
     },
     "pgsql": {
       "type": "TEXT"

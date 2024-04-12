@@ -153,7 +153,7 @@ public class WebhookResource extends BaseResource {
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(AppConstants.WEBHOOK_ID) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(AppConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
             @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "scopeType=spontaneous,defaultScope=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) {
         try {
@@ -200,7 +200,7 @@ public class WebhookResource extends BaseResource {
             }
 
             WebhookEntry result = webhookService.addWebhook(webhook);
-            log.debug("Id of newly added is {}", result.getWebhookId());
+            log.debug("Id of newly added is {}", result.getInum());
             return Response.status(Response.Status.CREATED).entity(result).build();
         } catch (ApplicationException e) {
             log.error(e.getMessage(), e);
@@ -231,10 +231,10 @@ public class WebhookResource extends BaseResource {
     public Response updateWebhook(@Valid WebhookEntry webhook) {
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Webhook to be updated :{}", escapeLog(webhook.getWebhookId()));
+                log.debug("Webhook to be updated :{}", escapeLog(webhook.getInum()));
             }
             HashSet<String> webhookIdSet = Sets.newHashSet();
-            webhookIdSet.add(webhook.getWebhookId());
+            webhookIdSet.add(webhook.getInum());
             List<WebhookEntry> existingWebhooks = webhookService.getWebhookByIds(webhookIdSet);
             if (existingWebhooks == null) {
                 log.error(ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
@@ -243,13 +243,13 @@ public class WebhookResource extends BaseResource {
             if (!existingWebhooks.isEmpty()) {
                 WebhookEntry existingWebhook = existingWebhooks.get(0);
                 checkResourceNotNull(existingWebhook, WEBHOOK);
-                webhook.setWebhookId(existingWebhook.getWebhookId());
+                webhook.setInum(existingWebhook.getInum());
                 webhook.setDn(existingWebhook.getDn());
             }
 
             webhook = webhookService.updateWebhook(webhook);
 
-            log.debug("Updated webhook:{}", webhook.getWebhookId());
+            log.debug("Updated webhook:{}", webhook.getInum());
             return Response.ok(webhook).build();
         } catch (ApplicationException e) {
             log.error(e.getMessage(), e);

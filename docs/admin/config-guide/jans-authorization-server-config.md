@@ -428,7 +428,7 @@ It returns all the information of the Jans Authorization server.
   "sessionIdCookieLifetime": 86400,
   "configurationUpdateInterval": 3600,
   "enableClientGrantTypeUpdate": true,
-  "dynamicGrantTypeDefault": [
+  "grantTypesSupportedByDynamicRegistration": [
     "urn:ietf:params:oauth:grant-type:uma-ticket",
     "implicit",
     "urn:ietf:params:oauth:grant-type:token-exchange",

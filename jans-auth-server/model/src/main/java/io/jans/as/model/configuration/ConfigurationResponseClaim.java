@@ -37,6 +37,7 @@ public final class ConfigurationResponseClaim {
     public static final String SCOPE_TO_CLAIMS_MAPPING = "scope_to_claims_mapping";
     public static final String RESPONSE_TYPES_SUPPORTED = "response_types_supported";
     public static final String RESPONSE_MODES_SUPPORTED = "response_modes_supported";
+    public static final String PROMPT_VALUES_SUPPORTED = "prompt_values_supported";
     public static final String GRANT_TYPES_SUPPORTED = "grant_types_supported";
     public static final String ACR_VALUES_SUPPORTED = "acr_values_supported";
     public static final String AUTHORIZATION_DETAILS_TYPES_SUPPORTED = "authorization_details_types_supported";

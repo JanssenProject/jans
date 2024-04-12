@@ -16,7 +16,7 @@ import io.jans.orm.annotation.AttributeEnum;
  */
 public enum MetadataSourceType implements AttributeEnum {
 
-	FILE("file", "File",1), URI("uri", "URI",2), FEDERATION("federation", "Federation",3), MANUAL("manual", "Manual",4), MDQ("mdq", "MDQ",5);
+	FILE("file", "File",1),  MANUAL("manual", "Manual",2);
 
 	private final String value;
 	private final String displayName;

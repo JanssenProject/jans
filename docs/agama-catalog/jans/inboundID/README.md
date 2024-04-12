@@ -144,7 +144,7 @@ The table below explains the meaning of properties:
 |`logoImg`|Relative path to the logo image (will be shown in the selector page)|No|
 |`enabled`|A boolean value indicating whether this provider can be shown (and triggered) from the main flow or not. Default value is `true`|No|
 |`skipProfileUpdate`|Determines if profile data should not be updated for a user if an entry already exists locally for him. Default value is `false`|No|
-|`cumulativeUpdate`|When `true`, existing value(s) of an attribute are preserved when the incoming profile data already contains value(s) for such attribute, otherwise its values are replaced by the incoming ones entirely. Default value is `true`|No|
+|`cumulativeUpdate`|When `true`, existing value(s) of an attribute are preserved when the incoming profile data already contains value(s) for such attribute, otherwise its values are replaced by the incoming ones entirely. Default value is `false`|No|
 |`requestForEmail`|Whether to prompt the user to enter his e-mail if the data supplied by the identity provider does not contain one. Default value is `false`|No|
 |`emailLinkingSafe`|Determines if an existing account with the same e-mail of the user about to be provisioned can be treated as the same person|No|
 
@@ -175,10 +175,10 @@ Section `openIdParams` can be used when the provider supports OpenId Connect too
 |Name|Description|
 |-|-|
 |`host`|The URL of the provider, e.g. `https://may.hem`|
-|`useDCR`|If the provider supports _dynamic client registration_ set this to true. It will be a time saver|
+|`useDCR`|If the provider supports _dynamic client registration_ set this to `true`. It will be a time saver|
 |`useCachedClient`|Once client registration occurs for the first time, no more registration attempts will be made until the client is about to expire. Set this to `false` to force registration every time authentication is about to take place|
 
-When providing `openIdParams`, the `host` will be used to grab the endpoints mentioned in the `oauthParams` section automatically, namely, authorization, token, and userInfo endpoints.  When `useDCR` is set to `true`, a client will be registered so no need to supply `clientId` and `clientSecret`. Under these circumstances, most of times only `scopes` will be needed under the `oauthParams` section.
+When providing `openIdParams`, the `host` will be used to grab the endpoints mentioned in the `oauthParams` section automatically, namely, authorization, token, and userInfo endpoints.  When `useDCR` is set to `true`, a client will be registered so there is no need to supply `clientId` and `clientSecret`. Under these circumstances, most of times only `scopes` will be needed under the `oauthParams` section.
 
 #### Attribute mappings
 

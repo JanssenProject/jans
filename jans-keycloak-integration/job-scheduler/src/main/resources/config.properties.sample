@@ -2,6 +2,9 @@
 
 # logging configuration 
 app.logging.level.root=DEBUG
+app.logging.level.apache.http.client=INFO
+app.logging.level.apache.http.wire=INFO
+app.logging.level.apache.http.header=INFO
 app.logging.loghistory=180
 
 
@@ -19,7 +22,7 @@ app.config-api.auth.client.scopes=%{scopes}
 app.config-api.auth.method=%{auth_method}
 
 
-# keycloak configuration 
+# keycloak api configuration 
 app.keycloak-admin.url=%{keycloak_admin_url}
 app.keycloak-admin.realm=%{keycloak_admin_realm}
 app.keycloak-admin.username=%{keycloak_admin_username}
@@ -30,5 +33,7 @@ app.keycloak-admin.conn.poolsize=10
 # trust relationship sync job configuration
 app.job.trustrelationship-sync.schedule-interval=PT10M
 
-# keycloak configuration 
+# keycloak resources configuration 
 app.keycloak.resources.realm=jans
+app.keycloak.resources.authn.browser.flow-alias=janssen login
+app.keycloak.resources.saml.user-attribute-mapper=saml-user-attribute-mapper

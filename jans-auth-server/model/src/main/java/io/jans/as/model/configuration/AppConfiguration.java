@@ -340,6 +340,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service")
     private String opTosUri;
 
+    @DocProperty(description = "Defines client inactivity period in hours which means that client will be removed once it is passed.")
+    public int cleanUpInactiveClientAfterHoursOfInactivity = -1;
+
+    @DocProperty(description = "Interval for client periodic update timer. Update timer is used to debounce frequent updates of the client to avoid performance degradation.")
+    public int clientPeriodicUpdateTimerInterval = 3;
+
     @DocProperty(description = "The lifetime of the Authorization Code")
     private int authorizationCodeLifetime;
 
@@ -520,8 +526,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose if client can update Grant Type values")
     private Boolean enableClientGrantTypeUpdate;
 
-    @DocProperty(description = "This list details which OAuth 2.0 grant types can be set up with the client registration API")
-    private Set<GrantType> dynamicGrantTypeDefault;
+    @DocProperty(description = "This list details which OAuth 2.0 grant types can be set up with the dynamic client registration API")
+    private Set<GrantType> grantTypesSupportedByDynamicRegistration;
 
     @DocProperty(description = "The location for CSS files")
     private String cssLocation;
@@ -592,6 +598,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Choose whether to accept access tokens to call end_session endpoint")
     private Boolean endSessionWithAccessToken;
+
+    @DocProperty(description = "Disables prompt=create user registration functionality")
+    private Boolean disablePromptCreate;
 
     @DocProperty(description = "Sets cookie domain for all cookies created by OP")
     private String cookieDomain;
@@ -2261,6 +2270,22 @@ public class AppConfiguration implements Configuration {
         this.opTosUri = opTosUri;
     }
 
+    public int getCleanUpInactiveClientAfterHoursOfInactivity() {
+        return cleanUpInactiveClientAfterHoursOfInactivity;
+    }
+
+    public void setCleanUpInactiveClientAfterHoursOfInactivity(int cleanUpInactiveClientAfterHoursOfInactivity) {
+        this.cleanUpInactiveClientAfterHoursOfInactivity = cleanUpInactiveClientAfterHoursOfInactivity;
+    }
+
+    public int getClientPeriodicUpdateTimerInterval() {
+        return clientPeriodicUpdateTimerInterval;
+    }
+
+    public void setClientPeriodicUpdateTimerInterval(int clientPeriodicUpdateTimerInterval) {
+        this.clientPeriodicUpdateTimerInterval = clientPeriodicUpdateTimerInterval;
+    }
+
     public int getAuthorizationCodeLifetime() {
         return authorizationCodeLifetime;
     }
@@ -2721,6 +2746,14 @@ public class AppConfiguration implements Configuration {
         this.endSessionWithAccessToken = endSessionWithAccessToken;
     }
 
+    public Boolean getDisablePromptCreate() {
+        return disablePromptCreate;
+    }
+
+    public void setDisablePromptCreate(Boolean disablePromptCreate) {
+        this.disablePromptCreate = disablePromptCreate;
+    }
+
     public String getCookieDomain() {
         return cookieDomain;
     }
@@ -2862,12 +2895,12 @@ public class AppConfiguration implements Configuration {
         this.enableClientGrantTypeUpdate = enableClientGrantTypeUpdate;
     }
 
-    public Set<GrantType> getDynamicGrantTypeDefault() {
-        return dynamicGrantTypeDefault;
+    public Set<GrantType> getGrantTypesSupportedByDynamicRegistration() {
+        return grantTypesSupportedByDynamicRegistration;
     }
 
-    public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
-        this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
+    public void setGrantTypesSupportedByDynamicRegistration(Set<GrantType> grantTypesSupportedByDynamicRegistration) {
+        this.grantTypesSupportedByDynamicRegistration = grantTypesSupportedByDynamicRegistration;
     }
 
     /**

@@ -49,6 +49,8 @@ spec:
           runAsUser: 1000
           runAsNonRoot: true
         env:
+        - name: CN_FIDO2_JAVA_OPTIONS
+          value: {{ include "fido2.customJavaOptions" . | trim }}
           {{- include "fido2.usr-envs" . | indent 12 }}
           {{- include "fido2.usr-secret-envs" . | indent 12 }}
         {{- if or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local") ( .Values.customScripts) }}

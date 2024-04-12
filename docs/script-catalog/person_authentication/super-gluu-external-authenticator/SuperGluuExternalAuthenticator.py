@@ -29,6 +29,7 @@ from java.time import ZonedDateTime
 from java.time.format import DateTimeFormatter
 from io.jans.as.model.configuration import AppConfiguration
 from io.jans.as.server.service.custom import CustomScriptService
+from io.jans.orm.model.fido2 import Fido2DeviceNotificationConf
 
 import sys
 import json
@@ -929,9 +930,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         # Return endpoint ARN if it created already
         notificationConf = u2fDevice.getDeviceNotificationConf()
-        if StringHelper.isNotEmpty(notificationConf):
-            notificationConfJson = json.loads(notificationConf)
-            targetEndpointArn = notificationConfJson['sns_endpoint_arn']
+        if notificationConf != None:
+            targetEndpointArn = notificationConf.getSnsEndpointArn()
             if StringHelper.isNotEmpty(targetEndpointArn):
                 print "Super-Gluu. Get target endpoint ARN. There is already created target endpoint ARN"
                 return targetEndpointArn
@@ -977,7 +977,7 @@ class PersonAuthentication(PersonAuthenticationType):
         # Store created endpoint ARN in device entry
         userInum = user.getAttribute("inum")
         u2fDeviceUpdate = registrationPersistenceService.findRegisteredUserDevice(userInum, u2fDevice.getId())
-        u2fDeviceUpdate.setDeviceNotificationConf('{"sns_endpoint_arn" : "%s"}' % targetEndpointArn)
+        u2fDeviceUpdate.setDeviceNotificationConf(Fido2DeviceNotificationConf(targetEndpointArn, None, None))
         registrationPersistenceService.update(u2fDeviceUpdate)
         print "Super-Gluu. Send push notification. Stored ARN user's '%s' enpoint " % user.getUserId()
 

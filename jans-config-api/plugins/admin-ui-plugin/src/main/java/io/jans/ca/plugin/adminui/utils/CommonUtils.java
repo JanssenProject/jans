@@ -1,10 +1,14 @@
 package io.jans.ca.plugin.adminui.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.binary.Base64;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.io.UnsupportedEncodingException;
@@ -140,5 +144,24 @@ public class CommonUtils {
 
         matcher.appendTail(sb); // Append remaining string
         return sb.toString();
+    }
+
+    public static Map<String, Object> jsonStringToMap(String jsonString) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(jsonString, Map.class);
+    }
+
+    public static String mapToJsonString(Map<String, Object> mapObj) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(mapObj);
+    }
+
+    public static boolean isValidJson(String json) {
+        try {
+            new JSONObject(json);
+        } catch (JSONException e) {
+            return false;
+        }
+        return true;
     }
 }

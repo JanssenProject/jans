@@ -49,6 +49,8 @@ ingress:
   fido2Enabled: false
   # -- fido2 ingress resource labels. key app is taken
   fido2Labels: { }
+  # -- fido2 ingress resource additional annotations.
+  fido2AdditionalAnnotations: { }
   # -- Auth server config ingress resource labels. key app is taken
   authServerLabels: { }
   # -- Auth server ingress resource additional annotations.

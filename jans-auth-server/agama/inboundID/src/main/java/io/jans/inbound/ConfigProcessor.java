@@ -29,7 +29,7 @@ public class ConfigProcessor {
     private static String KEY_PREFIX = "agama-openid-";
     private static ConfigProcessor instance;
     
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private static Logger logger = LoggerFactory.getLogger(ConfigProcessor.class);
     
     public static ConfigProcessor getInstance() {
         
@@ -100,7 +100,7 @@ public class ConfigProcessor {
         s = oap.getUserInfoEndpoint();
         if (s == null) {
             logger.info("Grabbing userInfo endpoint from OP configuration document");
-            oap.setUserInfoEndpoint(opMetadata.getAuthorizationEndpointURI().toString());
+            oap.setUserInfoEndpoint(opMetadata.getUserInfoEndpointURI().toString());
         }
         
         s = oap.getRedirectUri();
@@ -129,12 +129,12 @@ public class ConfigProcessor {
 
     }
     
-    private void storeCredentials(String key, Pair<String, String> creds, Long expMinutes) {
+    private void storeCredentials(String key, Pair<String, String> creds, Long expSeconds) {
 
         CacheService cache = CdiUtil.bean(CacheService.class);
         try {
             logger.info("Writing SimpleOAuthParams instance to cache...");
-            cache.put(expMinutes.intValue() - 1, key, creds);
+            cache.put(expSeconds.intValue() - 1, key, creds);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -173,16 +173,16 @@ public class ConfigProcessor {
         boolean notExpiring = expd == null; 
         
         logger.debug("Client ID is {}. Expiring {}", clId, notExpiring ? "NEVER" : expd);        
-        long expMinutes;
+        long expSeconds;
         
         if (notExpiring) {
-            expMinutes = Integer.MAX_VALUE;
+            expSeconds = Integer.MAX_VALUE;
         } else {
-            expMinutes = (expd.getTime() - System.currentTimeMillis()) / 1000L;
+            expSeconds = (expd.getTime() - System.currentTimeMillis()) / 1000L;
         }
         
         Pair<String, String> creds = new Pair<>(clId, secret.getValue());
-        storeCredentials(key, creds, expMinutes);
+        storeCredentials(key, creds, expSeconds);
         
         return creds;
         

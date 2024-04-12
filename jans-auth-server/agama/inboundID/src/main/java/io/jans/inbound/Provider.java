@@ -11,7 +11,7 @@ public class Provider {
 
     private boolean enabled = true;
     private boolean skipProfileUpdate;
-    private boolean cumulativeUpdate = true;
+    private boolean cumulativeUpdate;
     private boolean requestForEmail;
     private boolean emailLinkingSafe;
 

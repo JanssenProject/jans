@@ -1,6 +1,10 @@
-from typing import Optional, Sequence, Callable
 import asyncio
+import json
+
+from typing import Optional, Sequence, Callable
 from functools import partial
+
+from prompt_toolkit import HTML
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit,\
     DynamicContainer, Window
@@ -235,7 +239,8 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 continue
             if claim['name'] in ('memberOf', 'userPassword', 'uid', 'jansStatus', 'jansActive', 'updatedAt'):
                 continue
-            claims_list.append((claim['name'], claim['displayName']))
+            if claim.get('status') == 'active':
+                claims_list.append((claim['name'], claim['displayName']))
 
         claims_checkbox = CheckboxList(values=claims_list)
 
@@ -253,7 +258,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),show_scrollbar=False)
 
 
-        body = HSplit([Label(_("Select claim to be added to current user.")), claims_checkbox])
+        body = HSplit([Label(HTML(_("Select claim to be added to current user.\n<i>Note</i>: Only <b>active</b> claims are displayed."))), claims_checkbox])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_claim)]
         dialog = JansGDialog(common_data.app, title=_("Claims"), body=body, buttons=buttons, width=common_data.app.dialog_width-20)
         common_data.app.show_jans_dialog(dialog)
@@ -278,7 +283,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             common_data.app.show_message(fix_title, _("Please enter Password"))
             return
 
-        user_info = {'customObjectClasses':['top', 'jansPerson'], 'customAttributes':[]}
+        user_info = {'customObjectClasses':['top', 'jansPerson', 'jansCustomPerson'], 'customAttributes':[]}
         for key_ in ('mail', 'userId', 'displayName', 'givenName'):
             user_info[key_] = raw_data.pop(key_)
 
@@ -298,7 +303,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             multi_valued = False
             key_prop = self.get_claim_properties(key_)
 
-            if key_prop.get('dataType') == 'json':
+            if key_prop.get('dataType') == 'json' and raw_data[key_]:
                 try:
                     json.loads(raw_data[key_])
                 except Exception as e:
@@ -335,7 +340,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             common_data.app.start_progressing(_("Saving user ..."))
             response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
             common_data.app.stop_progressing()
-            if response.status_code != 201:
+            if response.status_code not in (200, 201):
                 common_data.app.show_message(_('Error'), response.text + '\n' + response.reason)
             else:
                 self.future.set_result(DialogResult.OK)

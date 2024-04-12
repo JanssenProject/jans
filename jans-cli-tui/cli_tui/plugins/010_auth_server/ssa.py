@@ -13,7 +13,7 @@ from prompt_toolkit.buffer import Buffer
 
 from cli import config_cli
 from utils.multi_lang import _
-from utils.utils import DialogUtils
+from utils.utils import DialogUtils, fromisoformat
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
@@ -121,7 +121,7 @@ class SSA(DialogUtils):
             new_data['expiration'] = int(datetime.now().timestamp()) + 1576800000
         else:
             if self.expire_widget.value:
-                new_data['expiration'] = int(datetime.fromisoformat(self.expire_widget.value).timestamp())
+                new_data['expiration'] = int(fromisoformat(self.expire_widget.value).timestamp())
 
         new_data['software_roles'] = new_data['software_roles'].splitlines()
 
@@ -200,11 +200,27 @@ class SSA(DialogUtils):
             data = {}
             title = _("Add new SSA")
 
+        
+            
+
+
         expiration_label = _("Expiration")
         never_expire_label = _("Never")
         self.never_expire_cb = Checkbox(never_expire_label)
+        never_expire_cb_handler_org = self.never_expire_cb._handle_enter
+
+        def hide_show_expire_widget():
+            never_expire_cb_handler_org()
+            if self.never_expire_cb.checked:
+                self.expire_widget = Window()
+            else:
+                self.expire_widget = DateSelectWidget(value=expiration_iso, parent=self)
+
+        self.never_expire_cb._handle_enter = hide_show_expire_widget
+
+        hide_show_expire_widget()
+
         expiration_iso = datetime.fromtimestamp(data['exp']).isoformat() if 'exp' in data else ''
-        self.expire_widget = DateSelectWidget(value=expiration_iso, parent=self)
 
         custom_claims_title = _("Custom Claims: ")
         add_custom_claim_title = _("Add Claim")
@@ -290,7 +306,7 @@ class SSA(DialogUtils):
                 VSplit([
                     Label(expiration_label + ': ', width=len(expiration_label)+2, style=cli_style.titled_text),
                     HSplit([self.never_expire_cb], width=len(never_expire_label)+7),
-                    self.expire_widget,
+                    DynamicContainer(lambda: self.expire_widget),
                     ], height=1),
 
             ])

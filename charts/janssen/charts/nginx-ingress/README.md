@@ -1,6 +1,6 @@
 # nginx-ingress
 
-![Version: 1.1.0-dev](https://img.shields.io/badge/Version-1.1.0--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.0-dev](https://img.shields.io/badge/AppVersion-1.1.0--dev-informational?style=flat-square)
+![Version: 1.1.1-dev](https://img.shields.io/badge/Version-1.1.1--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.1-dev](https://img.shields.io/badge/AppVersion-1.1.1--dev-informational?style=flat-square)
 
 Nginx ingress definitions chart
 
@@ -26,7 +26,7 @@ Kubernetes: `>=v1.22.0-0`
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | fullnameOverride | string | `""` |  |
-| ingress | object | `{"additionalAnnotations":{},"additionalLabels":{},"authServerAdditionalAnnotations":{},"authServerLabels":{},"casaAdditionalAnnotations":{},"casaLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeLabels":{},"enabled":true,"fido2ConfigAdditionalAnnotations":{},"fido2ConfigLabels":{},"fido2Enabled":false,"fido2Labels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingLabels":{},"hosts":["demoexample.jans.io"],"ingressClassName":"nginx","legacy":false,"openidAdditionalAnnotations":{},"openidConfigLabels":{},"path":"/","samlAdditionalAnnotations":{},"samlLabels":{},"scimAdditionalAnnotations":{},"scimConfigAdditionalAnnotations":{},"scimConfigLabels":{},"scimLabels":{},"tls":[{"hosts":["demoexample.jans.io"],"secretName":"tls-certificate"}],"u2fAdditionalAnnotations":{},"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerLabels":{}}` | Nginx ingress definitions chart |
+| ingress | object | `{"additionalAnnotations":{},"additionalLabels":{},"authServerAdditionalAnnotations":{},"authServerLabels":{},"casaAdditionalAnnotations":{},"casaLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeLabels":{},"enabled":true,"fido2AdditionalAnnotations":{},"fido2ConfigAdditionalAnnotations":{},"fido2ConfigLabels":{},"fido2Enabled":false,"fido2Labels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingLabels":{},"hosts":["demoexample.jans.io"],"ingressClassName":"nginx","legacy":false,"openidAdditionalAnnotations":{},"openidConfigLabels":{},"path":"/","samlAdditionalAnnotations":{},"samlLabels":{},"scimAdditionalAnnotations":{},"scimConfigAdditionalAnnotations":{},"scimConfigLabels":{},"scimLabels":{},"tls":[{"hosts":["demoexample.jans.io"],"secretName":"tls-certificate"}],"u2fAdditionalAnnotations":{},"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerLabels":{}}` | Nginx ingress definitions chart |
 | ingress.additionalAnnotations | object | `{}` | Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken Enable client certificate authentication nginx.ingress.kubernetes.io/auth-tls-verify-client: "optional" Create the secret containing the trusted ca certificates nginx.ingress.kubernetes.io/auth-tls-secret: "janssen/tls-certificate" Specify the verification depth in the client certificates chain nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1" Specify if certificates are passed to upstream server nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true" |
 | ingress.additionalLabels | object | `{}` | Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"} |
 | ingress.authServerAdditionalAnnotations | object | `{}` | Auth server ingress resource additional annotations. |
@@ -35,6 +35,7 @@ Kubernetes: `>=v1.22.0-0`
 | ingress.casaLabels | object | `{}` | Casa ingress resource labels. key app is taken |
 | ingress.deviceCodeAdditionalAnnotations | object | `{}` | device-code ingress resource additional annotations. |
 | ingress.deviceCodeLabels | object | `{}` | device-code ingress resource labels. key app is taken |
+| ingress.fido2AdditionalAnnotations | object | `{}` | fido2 ingress resource additional annotations. |
 | ingress.fido2ConfigAdditionalAnnotations | object | `{}` | fido2 config ingress resource additional annotations. |
 | ingress.fido2ConfigLabels | object | `{}` | fido2 config ingress resource labels. key app is taken |
 | ingress.fido2Enabled | bool | `false` | Enable all fido2 endpoints |
