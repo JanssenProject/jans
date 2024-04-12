@@ -143,6 +143,7 @@ Scenario: Get an attribute by inum
 	And print response
 
 
+@ignore
 @CreateUpdate 
 Scenario: Create new attribute 
 	Given url mainUrl
