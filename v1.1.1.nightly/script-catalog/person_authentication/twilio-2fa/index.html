@@ -43,6 +43,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../css/timeago.css">
+    
       <link rel="stylesheet" href="../../../css/tabs.css">
     
       <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
@@ -8550,7 +8552,7 @@
 </ol>
 <p>e.g : <code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION</code> , <code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7</code></p>
 <ol>
-<li><a href="https://github.com/JanssenProject/jans-cli/blob/v1.1.1.nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">Update the custom script</a> and change the <code>enabled</code> attribute to <code>true</code>  </li>
+<li><a href="https://github.com/JanssenProject/jans-cli/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">Update the custom script</a> and change the <code>enabled</code> attribute to <code>true</code>  </li>
 </ol>
 <p>Now <code>twilio_sms</code> is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect <code>acr_values</code>, applications can now request <code>twilio_sms</code> authentication for users.</p>
 <div class="admonition note">
@@ -8560,7 +8562,7 @@ configuration by navigating to the following URL: <code>https://&lt;hostname&gt;
 Find <code>"acr_values_supported":</code> and you should see <code>twilio_sms</code> .</p>
 </div>
 <h2 id="enable-twilio_sms-script-as-default-authentication-script">Enable <code>twilio_sms</code> Script as default authentication script:<a class="headerlink" href="#enable-twilio_sms-script-as-default-authentication-script" title="Permanent link">#</a></h2>
-<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/v1.1.1.nightly/docs/cli/cli-default-authentication-method.md">link</a> as a reference.
+<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md">link</a> as a reference.
 Follow the steps below to enable <code>twilio_sms</code> authentication:
 1. Create a file say <code>twilio_sms</code> -auth-default.json<code>with the following contents
 <div class="highlight"><pre><span></span><code>{
@@ -8597,6 +8599,21 @@ Twilio SMS. Initialized successfully
 <p>Also make sure you are using the latest version of the script that can be found <a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/twilio-2fa/twilio2FA.py">here</a>.</p>
 <h2 id="self-service-account-security">Self-service account security<a class="headerlink" href="#self-service-account-security" title="Permanent link">#</a></h2>
 <p>To offer end-users a portal where they can manage their own account security preferences, including two-factor authentication credentials like phone numbers for SMS OTP, check out our new app, <a href="https://casa.gluu.org">Gluu Casa</a>. </p>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-06-20T12:49:55+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-06-20</span>
+      
+        <br>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-07-21</span>
+      
+    
+  </small>
+</div>
 
 
 
@@ -8654,6 +8671,10 @@ Twilio SMS. Initialized successfully
     
 
       <script src="../../../assets/javascripts/bundle.8492ddcf.min.js"></script>
+      
+        <script src="../../../js/timeago.min.js"></script>
+      
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->

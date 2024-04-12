@@ -43,6 +43,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../../css/timeago.css">
+    
       <link rel="stylesheet" href="../../../../css/tabs.css">
     
       <link rel="stylesheet" href="../../../../stylesheets/mermaid-extra.css">
@@ -8522,7 +8524,7 @@
 <p>Installation depends on a <a href="https://github.com/JanssenProject/jans/tree/main/docker-jans-monolith#environment-variables">set of environment variables</a>.
 These environment variables can be set to customize installation as per the need. If not set, the installer uses default values.</p>
 <p>Run this command to start the installation:</p>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/v1.1.1.nightly/automation/startjanssenmonolithdemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssenmonolithdemo.sh <span class="o">&amp;&amp;</span> sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL <span class="s2">&quot;&quot;</span> main
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssenmonolithdemo.sh <span class="o">&amp;&amp;</span> sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL <span class="s2">&quot;&quot;</span> main
 </code></pre></div>
 <p>Console messages like below confirms the successful installation:</p>
 <div class="highlight"><pre><span></span><code>[+] Running 3/3
@@ -8568,6 +8570,21 @@ Testing openid-configuration endpoint..
  ⠿ Container docker-jans-monolith-mysql-1     Removed                    0.9s
  ⠿ Network docker-jans-monolith_cloud_bridge  Removed                    0.1s
 </code></pre></div>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-10-19T21:02:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-10-19</span>
+      
+        <br>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-04T08:56:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-04</span>
+      
+    
+  </small>
+</div>
 
 
 
@@ -8661,6 +8678,10 @@ Testing openid-configuration endpoint..
     
 
       <script src="../../../../assets/javascripts/bundle.8492ddcf.min.js"></script>
+      
+        <script src="../../../../js/timeago.min.js"></script>
+      
+        <script src="../../../../js/timeago_mkdocs_material.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->

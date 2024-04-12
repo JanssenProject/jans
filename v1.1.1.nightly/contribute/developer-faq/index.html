@@ -43,6 +43,8 @@
       
     
     
+      <link rel="stylesheet" href="../../css/timeago.css">
+    
       <link rel="stylesheet" href="../../css/tabs.css">
     
       <link rel="stylesheet" href="../../stylesheets/mermaid-extra.css">
@@ -8686,7 +8688,7 @@ you as a quick reference to generate Let's Encrypt CA certificates.</p>
 </div>
 <p>This installation uses Gluu Testing certificate.</p>
 <h3 id="download-installer">Download Installer<a class="headerlink" href="#download-installer" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/v1.1.1.nightly/jans-linux-setup/jans_setup/install.py -O install.py
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py -O install.py
 </code></pre></div>
 <h3 id="execute-installer">Execute Installer<a class="headerlink" href="#execute-installer" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>python3 install.py --profile=openbanking --args=&quot;-ob-key-fn=/opt/jans/jans-setup/openbanking/static/ob-gluu-test.key -static-kid=ob-gluu-test -jwks-uri=https://ox.gluu.org/icrby8xcvbcv/ob/ob-gluu-test.jwks --disable-ob-auth-script -ob-alias=ob-gluu-test&quot;
@@ -8716,6 +8718,21 @@ for ex:
 </code></pre></div></p>
 <p>same way we can run  other commands.
 rest is same for jans and openbanking</p>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-10-19T09:25:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-10-19</span>
+      
+        <br>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-05-18T19:22:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-05-18</span>
+      
+    
+  </small>
+</div>
 
 
 
@@ -8809,6 +8826,10 @@ rest is same for jans and openbanking</p>
     
 
       <script src="../../assets/javascripts/bundle.8492ddcf.min.js"></script>
+      
+        <script src="../../js/timeago.min.js"></script>
+      
+        <script src="../../js/timeago_mkdocs_material.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->
