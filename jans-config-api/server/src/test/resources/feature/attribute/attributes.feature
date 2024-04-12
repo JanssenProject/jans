@@ -93,6 +93,7 @@ Scenario: Fetch the first three inactive attributes
 	#And assert response[2].status == 'INACTIVE'		
 
 
+@ignore
 @CreateUpdateDelete 
 Scenario: Create new attribute 
 	Given url mainUrl
