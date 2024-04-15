@@ -12,6 +12,7 @@ import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
@@ -433,7 +434,7 @@ public class UserResource extends BaseResource {
         user.setOxAuthPersistentJwt(customUser.getOxAuthPersistentJwt());
         user.setUpdatedAt(customUser.getUpdatedAt());
         user.setUserId(customUser.getUserId());
-        user.setStatus(customUser.getStatus());     
+        user.setStatus((customUser.getStatus()!=null?customUser.getStatus() : GluuStatus.ACTIVE));     
         
         return setUserCustomAttributes(customUser, user);
     }
