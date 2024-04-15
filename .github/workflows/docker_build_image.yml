@@ -146,11 +146,8 @@ jobs:
             if [[ ${{ github.event_name != 'pull_request' }} ]]; then
               TEMP_IMG="auth-server certmanager config-api configurator fido2 persistence-loader scim monolith loadtesting-jmeter link casa saml keycloak-link"
               for i in $TEMP_IMG; do
-                TEMP_TOKEN=$(curl https://ghcr.io/token\?scope\="repository:janssenproject/jans/$i:pull" | jq -r '.token')
-                while [[ $(curl -s -H "Authorization: Bearer ${TEMP_TOKEN}" https://ghcr.io/v2/janssenproject/jans/$i/tags/list | jq -r '.tags' | grep "$VERSION" | tr -d '[:space:]"') != "$VERSION" ]]; do
-                  echo "Waiting for $i to be built"
-                  sleep 30
-                done
+                echo "Waiting for $i to be built"
+                sleep 30
               done
             fi
           fi

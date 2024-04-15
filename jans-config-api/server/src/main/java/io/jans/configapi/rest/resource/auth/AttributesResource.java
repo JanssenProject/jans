@@ -193,15 +193,16 @@ public class AttributesResource extends ConfigBaseResource {
                 throwBadRequestException(NAME_CONFLICT, String.format(NAME_CONFLICT_MSG, attribute.getName()));
             }
         }
-
-        // check if attribute exists in schema
-        boolean attributeValidation = attributeService.validateAttributeDefinition(attribute.getName());
-        log.info(" ** Validate attribute - attribute.getName():{}, attributeValidation:{}", attribute.getName(),
-                attributeValidation);
-        if (!attributeValidation) {
-            throw new WebApplicationException(getNotAcceptableException(
-                    "The attribute type '" + attribute.getName() + "' not defined in DB schema"));
-        }        
+        else {
+            // check if attribute exists in schema
+            boolean attributeValidation = attributeService.validateAttributeDefinition(attribute.getName());
+            log.info(" ** Validate attribute - attribute.getName():{}, attributeValidation:{}", attribute.getName(),
+                    attributeValidation);
+            if (!attributeValidation) {
+                throw new WebApplicationException(getNotAcceptableException(
+                        "The attribute type '" + attribute.getName() + "' not defined in DB schema"));
+            }
+        }
         
         JansAttribute existingAttribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(existingAttribute, JANS_ATTRIBUTE);
