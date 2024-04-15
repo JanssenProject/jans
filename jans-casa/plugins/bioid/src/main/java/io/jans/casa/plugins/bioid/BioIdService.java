@@ -67,35 +67,13 @@ public class BioIdService {
 		return result.toString();
 	}
 
-	public Map<String, Map<String, Object>> getJansCredential(String userId) {
-		try {
-			BioIdPersonModel user = persistenceService.get(BioIdPersonModel.class,
-					persistenceService.getPersonDn(userId));
-			return user.getJansCredential();
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-		}
-		return null;
-	}
-
-	public void setJansCredential(String userId, Map<String, Map<String, Object>> jansCredential) {
-		try {
-			BioIdPersonModel user = persistenceService.get(BioIdPersonModel.class,
-					persistenceService.getPersonDn(userId));
-			user.setJansCredential(jansCredential);
-			persistenceService.modify(user);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-		}
-	}
-
 	public Map<String, Object> getBioIdCode(String userId) {
 		try {
 			BioIdPersonModel user = persistenceService.get(BioIdPersonModel.class,
 					persistenceService.getPersonDn(userId));
 			UserAuthenticatorList authenticatorList = user.getAuthenticator();
 			for (UserAuthenticator authenticator : authenticatorList.getAuthenticators()) {
-				if(authenticator.getId().equals(BIOID_TYPE)) {
+				if (authenticator.getId().equals(BIOID_TYPE)) {
 					return authenticator.getCustom();
 				}
 			}

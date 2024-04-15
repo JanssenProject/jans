@@ -20,18 +20,6 @@ public class BioIdPersonModel extends BasePerson {
     @JsonObject
     private UserAuthenticatorList authenticatorList;
 
-    @JsonObject
-    @AttributeName(name = "jansCredential")
-    private Map<String, Map<String, Object>> jansCredential;
-
-    public Map<String, Map<String, Object>> getJansCredential() {
-        return jansCredential;
-    }
-
-    public void setJansCredential(Map<String, Map<String, Object>> jansCredential) {
-        this.jansCredential = jansCredential;
-    }
-
     public String[] getExternalUid() {
         return externalUid;
     }
