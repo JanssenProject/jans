@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   jans:
-    image: ghcr.io/janssenproject/jans/monolith:1.1.1_dev
+    image: ghcr.io/janssenproject/jans/monolith:1.1.1-1
     restart: always
     ports:
       - "443:443"
