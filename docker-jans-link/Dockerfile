@@ -40,8 +40,10 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Link
 # ====
 
-ENV CN_VERSION=1.1.1
-ENV CN_BUILD_DATE='2024-04-16 07:16'
+
+ENV CN_VERSION=1.1.2-SNAPSHOT
+ENV CN_BUILD_DATE='2024-04-14 08:33'
+
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-link-server/${CN_VERSION}/jans-link-server-${CN_VERSION}.war
 
 # Install Link
@@ -205,7 +207,7 @@ EXPOSE $CN_LINK_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/link" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.1" \
+    org.opencontainers.image.version="1.1.2" \
     org.opencontainers.image.title="Janssen Link" \
     org.opencontainers.image.description=""
 
