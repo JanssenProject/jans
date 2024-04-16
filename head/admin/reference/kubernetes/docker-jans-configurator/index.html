@@ -8641,7 +8641,7 @@ python -c &#39;import random, string; print(&quot;&quot;.join(random.choices(str
 <span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-generate-params</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configurator-load</span><span class="w"></span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/configurator:1.1.1_dev</span><span class="w"></span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/configurator:1.1.2_dev</span><span class="w"></span>
 <span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/db/generate.json</span><span class="w"></span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-generate-params</span><span class="w"></span>
@@ -8680,7 +8680,7 @@ kubectl create cm secret-params --from-file<span class="o">=</span>secret.json
 <span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret-params</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configurator-load</span><span class="w"></span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/configurator:1.1.1_dev</span><span class="w"></span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/configurator:1.1.2_dev</span><span class="w"></span>
 <span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/db/config.json</span><span class="w"></span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-params</span><span class="w"></span>
@@ -8707,7 +8707,7 @@ kubectl create cm secret-params --from-file<span class="o">=</span>secret.json
 <span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configurator-dump-job</span><span class="w"></span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/configurator:1.1.1_dev</span><span class="w"></span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/configurator:1.1.2_dev</span><span class="w"></span>
 <span class="w">          </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/bin/sh</span><span class="w"></span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-c</span><span class="w"></span>
@@ -8726,7 +8726,7 @@ kubectl create cm secret-params --from-file<span class="o">=</span>secret.json
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-03-15T08:20:09+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-03-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-04-16T15:43:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-04-16</span>
       
         <br>
         Created:
@@ -8841,7 +8841,7 @@ kubectl create cm secret-params --from-file<span class="o">=</span>secret.json
 <!--nightly docs may be used extensively by development team and contributors-->
 <!--for testing purposes-->
 <img referrerpolicy="no-referrer-when-downgrade"
-     src="placeholder-scarf-pixel-url"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
      width="0" height="0"/>
 
   </body>
