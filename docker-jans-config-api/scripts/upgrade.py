@@ -490,7 +490,7 @@ class Upgrade:
 
         for entry in entries:
             if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
-                creator_attrs = entry.attrs["creatorAttrs"]["v"]
+                creator_attrs = (entry.attrs.get("creatorAttrs") or {}).get("v") or []
             else:
                 creator_attrs = entry.attrs.get("creatorAttrs") or []
 
