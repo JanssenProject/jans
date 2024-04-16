@@ -31,7 +31,7 @@ def _transform_api_dynamic_config(conf):
         ("userMandatoryAttributes", [
             "mail",
             "displayName",
-            "jansStatus",
+            "status",
             "userPassword",
             "givenName",
         ]),
@@ -117,6 +117,15 @@ def _transform_api_dynamic_config(conf):
         if supported_plugin["name"] not in plugins_names:
             conf["plugins"].append(supported_plugin)
             should_update = True
+
+    # userMandatoryAttributes.jansStatus is changed to userMandatoryAttributes.status
+    if "jansStatus" in conf["userMandatoryAttributes"]:
+        conf["userMandatoryAttributes"].remove("jansStatus")
+        should_update = True
+
+    if "status" not in conf["userMandatoryAttributes"]:
+        conf["userMandatoryAttributes"].append("status")
+        should_update = True
 
     # finalized conf and flag to determine update process
     return conf, should_update
@@ -481,7 +490,7 @@ class Upgrade:
 
         for entry in entries:
             if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
-                creator_attrs = entry.attrs["creatorAttrs"]["v"]
+                creator_attrs = (entry.attrs.get("creatorAttrs") or {}).get("v") or []
             else:
                 creator_attrs = entry.attrs.get("creatorAttrs") or []
 

@@ -11,10 +11,7 @@ jansAppTyp: web
 jansAttrs: {"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}
 jansClntSecret: %(saml_scim_client_encoded_pw)s
 jansDisabled: false
-jansGrantTyp: authorization_code
 jansGrantTyp: client_credentials
-jansGrantTyp: password
-jansGrantTyp: refresh_token
 jansIdTknSignedRespAlg: RS256
 jansInclClaimsInIdTkn: false
 jansLogoutSessRequired: false

@@ -172,7 +172,7 @@ public class AssetService {
         // Get final asset
         List<Document >assets = this.getAssetByName(asset.getDisplayName());
         if(assets==null) {
-            throw new WebApplicationException(" Error while saving asset");
+            throw new WebApplicationException(" Could not  save asset");
         }
         asset = assets.get(0);
         log.info("\n * Asset saved :{}", asset);
@@ -233,7 +233,7 @@ public class AssetService {
     }
 
     private Document updateAsset(Document asset, InputStream documentStream) throws Exception {
-        log.info("Update new asset - asset:{}, documentStream:{}", asset, documentStream);
+        log.info("Update an asset - asset:{}, documentStream:{}", asset, documentStream);
         if (asset == null) {
             throw new InvalidAttributeException(" Asset object is null!!!");
         }

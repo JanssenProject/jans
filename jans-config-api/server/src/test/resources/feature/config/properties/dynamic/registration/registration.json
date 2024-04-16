@@ -6,7 +6,7 @@
   "dynamicRegistrationPasswordGrantTypeEnabled": false,
   "trustedClientEnabled": true,
   "dynamicRegistrationCustomObjectClass": "MyDynamicRegistrationCustomObject",
-  "dynamicGrantTypeDefault": [
+  "grantTypesSupportedByDynamicRegistration": [
     "REFRESH_TOKEN",
     "OXAUTH_UMA_TICKET",
     "IMPLICIT",

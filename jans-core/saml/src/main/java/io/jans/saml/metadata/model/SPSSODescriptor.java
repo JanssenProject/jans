@@ -2,6 +2,7 @@ package io.jans.saml.metadata.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SPSSODescriptor extends SSODescriptor {
 
@@ -45,7 +46,7 @@ public class SPSSODescriptor extends SSODescriptor {
 
         return assertionConsumerServices.stream()
             .filter((e) -> { return e.getBinding() == binding; })
-            .toList();
+            .collect(Collectors.toList());
     }
 
     public List<String> getAssertionConsumerServicesLocations(SAMLBinding binding) {
@@ -53,7 +54,7 @@ public class SPSSODescriptor extends SSODescriptor {
         return assertionConsumerServices.stream()
             .filter((e) -> { return e.getBinding() == binding;})
             .map((e) -> { return e.getLocation();})
-            .toList();
+            .collect(Collectors.toList());
     }
 
     public void addAssertionConsumerService(final IndexedEndpoint service) {
