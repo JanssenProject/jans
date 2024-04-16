@@ -1171,5 +1171,16 @@
     "spanner": {
       "type": "STRING(MAX)"
     }
+  },
+  "jansAuthenticator": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
   }
 }
