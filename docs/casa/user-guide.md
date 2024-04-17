@@ -10,7 +10,7 @@ Jans Casa ("Casa") is a self-service web portal for managing account security pr
 
 ## Sign in for the first time
 
-To log in to Casa, navigate to `https://<yourdomain>/casa`.
+To log in to Casa, navigate to `https://<yourdomain>/jans-casa`.
 
 If you have an existing account, sign in with your standard username and password.
 
