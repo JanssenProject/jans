@@ -213,7 +213,7 @@ public class UserServiceTest {
         User resultUser = userService.addUser(user, true);
         assertNotNull(resultUser);
         assertNotNull(resultUser.getUserId());
-        assertNotNull(user.getAttribute("jansStatus"));
+        assertNotNull(user.getStatus());
         assertNotNull(user.getAttribute("inum"));
         assertEquals(user.getStatus(), GluuStatus.ACTIVE);
         assertEquals(resultUser.getCustomObjectClasses().length, 2);
