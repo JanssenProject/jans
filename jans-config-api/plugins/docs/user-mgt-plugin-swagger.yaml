@@ -911,8 +911,6 @@ components:
           type: string
         displayName:
           type: string
-        jansStatus:
-          type: string
         givenName:
           type: string
         userPassword:

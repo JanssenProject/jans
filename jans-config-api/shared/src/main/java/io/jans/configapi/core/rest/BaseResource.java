@@ -139,6 +139,13 @@ public class BaseResource {
     public static void throwInternalServerException(String msg, String description) {
         throw new InternalServerErrorException(getInternalServerException(msg, description));
     }
+    
+    public static void throwInternalServerException(String msg, Throwable throwable) {
+        throwable = findRootError(throwable);
+        if (throwable != null) {
+            throw new InternalServerErrorException(getInternalServerException(msg, throwable.getMessage()));
+        }
+    }
 
     public static void throwInternalServerException(Throwable throwable) {
         throwable = findRootError(throwable);

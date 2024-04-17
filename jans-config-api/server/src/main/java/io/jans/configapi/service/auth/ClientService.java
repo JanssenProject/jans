@@ -270,13 +270,15 @@ public class ClientService implements Serializable {
             }
         }
 
+        logger.trace("After setting - responseTypeSet:{}, client.getResponseTypes():{}, appConfiguration.getAllResponseTypesSupported():{}, grantTypeSet:{}, client.getGrantTypes():{}, appConfiguration.getGrantTypesSupported():{}",
+                responseTypeSet, client.getResponseTypes(), appConfiguration.getAllResponseTypesSupported(), grantTypeSet, client.getGrantTypes(), appConfiguration.getGrantTypesSupported());
         responseTypeSet.retainAll(appConfiguration.getAllResponseTypesSupported());
         grantTypeSet.retainAll(appConfiguration.getGrantTypesSupported());
-        logger.trace("After setting - client.getResponseTypes():{}, client.getGrantTypes():{}",
-                client.getResponseTypes(), client.getGrantTypes());
+        logger.trace("After setting - responseTypeSet:{}, grantTypeSet:{}, appConfiguration.getGrantTypesSupportedByDynamicRegistration():{}",
+                responseTypeSet, grantTypeSet, appConfiguration.getGrantTypesSupportedByDynamicRegistration());
 
-        Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
-        grantTypeSet.retainAll(dynamicGrantTypeDefault);
+        Set<GrantType> grantTypesSupportedByDynamicRegistration = appConfiguration.getGrantTypesSupportedByDynamicRegistration();
+        grantTypeSet.retainAll(grantTypesSupportedByDynamicRegistration);
 
         if (!update || (responseTypeSet != null && !responseTypeSet.isEmpty())) {
             client.setResponseTypes(responseTypeSet.toArray(new ResponseType[0]));

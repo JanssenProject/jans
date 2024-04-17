@@ -8219,19 +8219,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanEdit:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8705,7 +8705,7 @@ components:
           type: boolean
         enableClientGrantTypeUpdate:
           type: boolean
-        dynamicGrantTypeDefault:
+        grantTypesSupportedByDynamicRegistration:
           uniqueItems: true
           type: array
           items:
@@ -9830,10 +9830,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.time.Duration;
+import java.util.stream.Collectors;
 
 public class RoleDescriptor {
 
@@ -88,6 +89,22 @@ public class RoleDescriptor {
 
 
         return this.keyDescriptors;
+    }
+
+    public List<KeyDescriptor> getEncryptionKeys() {
+
+        return keyDescriptors 
+            .stream()
+            .filter((k) -> { return k.isEncryptionKey();})
+            .collect(Collectors.toList());
+    }
+
+    public List<KeyDescriptor> getSigningKeys() {
+
+        return keyDescriptors
+            .stream()
+            .filter((k)-> { return k.isSigningKey();})
+            .collect(Collectors.toList());
     }
 
     public void addKeyDescriptor(final KeyDescriptor keyDescriptor) {

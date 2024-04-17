@@ -1,5 +1,7 @@
-from typing import Optional, Sequence, Callable
 import asyncio
+import json
+
+from typing import Optional, Sequence, Callable
 from functools import partial
 
 from prompt_toolkit import HTML
@@ -92,7 +94,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             return [] if multi else ''
 
         if self.data:
-            active_checked = self.data.get('jansStatus', '').lower() == 'active'
+            active_checked = self.data.get('status', '').lower() == 'active'
         else:
             active_checked = True
 
@@ -151,7 +153,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         for ca in self.data.get('customAttributes', []):
 
-            if ca['name'] in ('middleName', 'sn', 'jansStatus', 'nickname', 'jansActive', 'userPassword'):
+            if ca['name'] in ('middleName', 'sn', 'status', 'nickname', 'jansActive', 'userPassword'):
                 continue
 
             claim_prop = self.get_claim_properties(ca['name'])
@@ -235,7 +237,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
         for claim in common_data.jans_attributes:
             if not claim['oxMultiValuedAttribute'] and claim['name'] in cur_claims:
                 continue
-            if claim['name'] in ('memberOf', 'userPassword', 'uid', 'jansStatus', 'jansActive', 'updatedAt'):
+            if claim['name'] in ('memberOf', 'userPassword', 'uid', 'status', 'jansActive', 'updatedAt'):
                 continue
             if claim.get('status') == 'active':
                 claims_list.append((claim['name'], claim['displayName']))
@@ -295,13 +297,13 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 user_info[key_] = self.data[key_]
 
         status = raw_data.pop('active')
-        user_info['jansStatus'] = 'active' if status else 'inactive'
+        user_info['status'] = 'active' if status else 'inactive'
 
         for key_ in raw_data:
             multi_valued = False
             key_prop = self.get_claim_properties(key_)
 
-            if key_prop.get('dataType') == 'json':
+            if key_prop.get('dataType') == 'json' and raw_data[key_]:
                 try:
                     json.loads(raw_data[key_])
                 except Exception as e:

@@ -31,6 +31,7 @@ from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import get_server_certificate
 
 from settings import LOGGING_CONFIG
 from plugins import AdminUiPlugin
@@ -89,12 +90,13 @@ def main():
             "/etc/jans/conf/jans-spanner.properties",
         )
 
-    if not all([
-        os.path.isfile("/etc/certs/web_https.crt"),
-        os.path.isfile("/etc/certs/web_https.key"),
-    ]):
-        manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
-        manager.secret.to_file("ssl_key", "/etc/certs/web_https.key")
+    if not os.path.isfile("/etc/certs/web_https.crt"):
+        if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
+            manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
+        else:
+            hostname = manager.config.get("hostname")
+            logger.info(f"Pulling SSL certificate from {hostname}")
+            get_server_certificate(hostname, 443, "/etc/certs/web_https.crt")
 
     cert_to_truststore(
         "web_https",
