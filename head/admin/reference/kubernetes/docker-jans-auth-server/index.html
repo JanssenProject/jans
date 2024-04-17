@@ -8628,6 +8628,7 @@
 <li><code>AWS_PROFILE</code>: The default profile to use, if any.</li>
 <li><code>CN_LOCK_ENABLED</code>: Enable <code>jans-lock</code> as part of <code>jans-auth</code>.</li>
 <li><code>CN_OPA_URL</code>: URL to OPA server (default to <code>http://localhost:8181/v1</code>).</li>
+<li><code>CN_SSL_CERT_FROM_SECRETS</code>: Determine whether to get SSL cert from secrets backend (default to <code>true</code>). Note that the flag will take effect only if there's no mounted <code>/etc/certs/web_https.crt</code> file.</li>
 </ul>
 <h3 id="configure-app-loggers">Configure app loggers<a class="headerlink" href="#configure-app-loggers" title="Permanent link">#</a></h3>
 <p>App loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.</p>
@@ -8733,7 +8734,7 @@ To customize the config, mount custom config file to <code>/opt/prometheus/prome
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-03-01T16:35:58+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-03-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-04-17T02:42:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-04-17</span>
       
         <br>
         Created:

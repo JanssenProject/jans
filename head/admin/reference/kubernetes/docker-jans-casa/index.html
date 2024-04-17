@@ -8560,7 +8560,6 @@
 <li><code>CN_JACKRABBIT_SYNC_INTERVAL</code>: Interval between files sync (default to <code>300</code> seconds).</li>
 <li><code>CN_JACKRABBIT_ADMIN_ID</code>: Admin username (default to <code>admin</code>).</li>
 <li><code>CN_JACKRABBIT_ADMIN_PASSWORD_FILE</code>: Absolute path to file contains password for admin user (default to <code>/etc/jans/conf/jackrabbit_admin_password</code>).</li>
-<li><code>CN_SSL_CERT_FROM_SECRETS</code>: Determine whether to get SSL cert from secrets backend (default to <code>false</code>). Note that the flag will take effect only if there's no mounted <code>/etc/certs/web_https.crt</code> file.</li>
 <li><code>CN_SQL_DB_DIALECT</code>: Dialect name of SQL backend (one of <code>mysql</code>, <code>pgsql</code>; default to <code>mysql</code>).</li>
 <li><code>CN_SQL_DB_HOST</code>: Host of SQL backend (default to <code>localhost</code>).</li>
 <li><code>CN_SQL_DB_PORT</code>: Port of SQL backend (default to <code>3306</code>).</li>
@@ -8577,6 +8576,7 @@
 <li><code>CN_CASA_ADMIN_LOCK_FILE</code>: Path to lock file to enable/disable administration feature (default to <code>/opt/jans/jetty/jans-casa/.administrable</code>). If file is not exist, the feature is disabled.</li>
 <li><code>CN_PROMETHEUS_PORT</code>: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See <a href="#exposing-metrics">Exposing metrics</a> for details.</li>
 <li><code>CN_CASA_JWKS_SIZE_LIMIT</code>: Default HTTP size limit (in bytes) when retrieving remote JWKS (default to <code>100000</code>).</li>
+<li><code>CN_SSL_CERT_FROM_SECRETS</code>: Determine whether to get SSL cert from secrets backend (default to <code>true</code>). Note that the flag will take effect only if there's no mounted <code>/etc/certs/web_https.crt</code> file.</li>
 </ul>
 <h3 id="configure-app-loggers">Configure app loggers<a class="headerlink" href="#configure-app-loggers" title="Permanent link">#</a></h3>
 <p>App loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.</p>
@@ -8648,7 +8648,7 @@ To customize the config, mount custom config file to <code>/opt/prometheus/prome
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-03-01T16:35:58+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-03-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-04-17T02:42:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-04-17</span>
       
         <br>
         Created:
