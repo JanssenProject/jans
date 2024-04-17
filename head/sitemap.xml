@@ -1836,6 +1836,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-all-in-one/</loc>
+         <lastmod>2024-04-17</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-auth-server/</loc>
          <lastmod>2024-04-17</lastmod>
          <changefreq>daily</changefreq>
