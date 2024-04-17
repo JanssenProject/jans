@@ -1,20 +1,23 @@
 package io.jans.kc.spi.storage.config;
 
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import org.keycloak.Config;
 
 public class PluginConfiguration {
 
-    private static final String AUTH_TOKEN_ENDPOINT_KEY = "jans-storage-auth-token-endpoint";
-    private static final String SCIM_USER_ENDPOINT_KEY = "jans-storage-scim-user-endpoint";
-    private static final String SCIM_USER_SEARCH_ENDPOINT_KEY = "jans-storage-scim-user-search-endpoint";
-    private static final String SCIM_OAUTH_SCOPE_KEY = "jans-storage-scim-oauth-scope";
-    private static final String SCIM_CLIENT_ID_KEY = "jans-storage-scim-client-id";
-    private static final String SCIM_CLIENT_SECRET = "jans-storage-scim-client-secret";
-
+    private static final String AUTH_TOKEN_ENDPOINT_KEY = "auth-token-endpoint";
+    private static final String SCIM_USER_ENDPOINT_KEY = "scim-user-endpoint";
+    private static final String SCIM_USER_SEARCH_ENDPOINT_KEY = "scim-user-search-endpoint";
+    private static final String SCIM_OAUTH_SCOPES_KEY = "scim-oauth-scopes";
+    private static final String SCIM_CLIENT_ID_KEY = "scim-client-id";
+    private static final String SCIM_CLIENT_SECRET = "scim-client-secret";
+    
     private String authTokenEndpoint;
     private String scimUserEndpoint;
     private String scimUserSearchEndpoint;
-    private String scimOauthScope;
+    private List<String> scimOauthScopes;
     private String scimClientId;
     private String scimClientSecret;
 
@@ -28,7 +31,11 @@ public class PluginConfiguration {
         ret.authTokenEndpoint = config.get(AUTH_TOKEN_ENDPOINT_KEY);
         ret.scimUserEndpoint = config.get(SCIM_USER_ENDPOINT_KEY);
         ret.scimUserSearchEndpoint = config.get(SCIM_USER_SEARCH_ENDPOINT_KEY);
-        ret.scimOauthScope = config.get(SCIM_OAUTH_SCOPE_KEY);
+        ret.scimOauthScopes = new ArrayList<>();
+        String tmpscopes = config.get(SCIM_OAUTH_SCOPES_KEY);
+        if(tmpscopes != null) {
+            ret.scimOauthScopes = Arrays.asList(tmpscopes.split(","));
+        }
         ret.scimClientId = config.get(SCIM_CLIENT_ID_KEY);
         ret.scimClientSecret = config.get(SCIM_CLIENT_SECRET);
         return ret;
@@ -50,9 +57,9 @@ public class PluginConfiguration {
         return scimUserSearchEndpoint;
     }
 
-    public String getScimOauthScope() {
+    public List<String> getScimOauthScopes() {
 
-        return scimOauthScope;
+        return scimOauthScopes;
     }
 
     public String getScimClientId() {
@@ -70,7 +77,7 @@ public class PluginConfiguration {
         return authTokenEndpoint != null 
                && scimUserEndpoint != null
                && scimUserSearchEndpoint != null
-               && scimOauthScope != null 
+               && scimOauthScopes != null 
                && scimClientId != null
                && scimClientSecret != null;
     }
