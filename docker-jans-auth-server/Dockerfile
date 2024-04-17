@@ -247,7 +247,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AUTH_JETTY_HOST=0.0.0.0 \
     CN_SHARE_AUTH_CONF=true \
     CN_LOCK_ENABLED=false \
-    CN_OPA_URL=http://localhost:8181/v1
+    CN_OPA_URL=http://localhost:8181/v1 \
+    CN_SSL_CERT_FROM_SECRETS=true
 
 # @TODO: revisit the usage (if any)
 ENV ADMIN_UI_JWKS=http://${CN_AUTH_JETTY_HOST}:${CN_AUTH_JETTY_PORT}/jans-auth/restv1/jwks
