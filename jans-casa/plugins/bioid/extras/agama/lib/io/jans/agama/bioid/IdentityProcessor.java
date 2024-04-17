@@ -49,6 +49,7 @@ public class IdentityProcessor implements IdentityProcessorInterface {
             isValid = false;
         }
         userAuthenticatorService.removeUserAuthenticator(user, authenticator);
+        userService.updateUser(user);
         return isValid;
     }
 

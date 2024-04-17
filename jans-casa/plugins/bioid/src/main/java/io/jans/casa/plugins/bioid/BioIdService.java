@@ -2,6 +2,7 @@ package io.jans.casa.plugins.bioid;
 
 import java.security.SecureRandom;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +41,6 @@ public class BioIdService {
 		mapper = new ObjectMapper();
 		cls = persistenceService.get(ApplicationConfiguration.class, "ou=casa,ou=configuration,o=jans")
 				.getSettings().getOidcSettings().getClient();
-
 	}
 
 	public static BioIdService getInstance() {
@@ -71,7 +71,7 @@ public class BioIdService {
 		try {
 			BioIdPersonModel user = persistenceService.get(BioIdPersonModel.class,
 					persistenceService.getPersonDn(userId));
-			UserAuthenticatorList authenticatorList = user.getAuthenticator();
+			UserAuthenticatorList authenticatorList = user.getAuthenticatorList();
 			for (UserAuthenticator authenticator : authenticatorList.getAuthenticators()) {
 				if (authenticator.getId().equals(BIOID_TYPE)) {
 					return authenticator.getCustom();
@@ -88,17 +88,36 @@ public class BioIdService {
 		try {
 			BioIdPersonModel user = persistenceService.get(BioIdPersonModel.class,
 					persistenceService.getPersonDn(userId));
+			cleanOldAuthenticators(user);
 			UserAuthenticator authenticator = new UserAuthenticator(BIOID_TYPE, BIOID_TYPE);
 			authenticator.setCustom(bioIdCode);
 
-			UserAuthenticatorList authenticatorList = user.getAuthenticator();
+			UserAuthenticatorList authenticatorList = user.getAuthenticatorList();
 			if (authenticatorList == null) {
-				user.setAuthenticator(new UserAuthenticatorList());
+				user.setAuthenticatorList(new UserAuthenticatorList());
 			}
-			user.getAuthenticator().addAuthenticator(authenticator);
+			user.getAuthenticatorList().addAuthenticator(authenticator);
 			persistenceService.modify(user);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
 	}
+
+	private void cleanOldAuthenticators(BioIdPersonModel user) {
+		try {
+			UserAuthenticatorList authenticatorList = user.getAuthenticatorList();
+			if (authenticatorList == null) {
+				return;
+			}
+			for (Iterator<UserAuthenticator> it = authenticatorList.getAuthenticators().iterator(); it.hasNext();) {
+				UserAuthenticator authenticator = (UserAuthenticator) it.next();
+				if (BIOID_TYPE.equals(authenticator.getType())) {
+					it.remove();
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+	}
+
 }

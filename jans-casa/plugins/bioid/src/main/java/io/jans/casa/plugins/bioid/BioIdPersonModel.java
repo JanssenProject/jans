@@ -28,11 +28,11 @@ public class BioIdPersonModel extends BasePerson {
         this.externalUid = externalUid;
     }
 
-    public UserAuthenticatorList getAuthenticator() {
+    public UserAuthenticatorList getAuthenticatorList() {
         return authenticatorList;
     }
 
-    public void setAuthenticator(UserAuthenticatorList authenticator) {
-        this.authenticatorList = authenticator;
+    public void setAuthenticatorList(UserAuthenticatorList authenticatorList) {
+        this.authenticatorList = authenticatorList;
     }
 }
