@@ -65,9 +65,11 @@ class JansLockInstaller(JettyInstaller):
             self.dbUtils.set_oxAuthConfDynamic({'lockMessageConfig': {'enableTokenMessages': True, 'tokenMessagesChannel': 'jans_token'}})
             Config.lock_message_provider_type = 'POSTGRES'
 
-        # deploy config-api plugin
-        base.current_app.ConfigApiInstaller.source_files.append(self.source_files[3])
-        base.current_app.ConfigApiInstaller.install_plugin('lock-plugin')
+        # we don't need to install lock-plugin to jans-config-api for remote client
+        if hasattr(base.current_app, 'ConfigApiInstaller'):
+            # deploy config-api plugin
+            base.current_app.ConfigApiInstaller.source_files.append(self.source_files[3])
+            base.current_app.ConfigApiInstaller.install_plugin('lock-plugin')
 
 
     def install_as_server(self):
@@ -82,7 +84,6 @@ class JansLockInstaller(JettyInstaller):
             self.logIt(f"Adding plugin {plugin_name} to jans-auth")
             self.copyFile(plugin, base.current_app.JansAuthInstaller.custom_lib_dir)
             plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
-            base.current_app.JansAuthInstaller.add_extra_class(plugin_class_path)
             self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
 
     def render_import_templates(self):

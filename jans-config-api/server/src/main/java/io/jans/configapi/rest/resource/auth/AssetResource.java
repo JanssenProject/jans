@@ -177,7 +177,7 @@ public class AssetResource extends ConfigBaseResource {
             log.debug(" Fetched  assetStream:{} ", assetStream);
         } catch (Exception ex) {
             log.error("Application Error while reading asset stream is - status:{}", ex.getMessage());
-            throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
+            throwInternalServerException(APPLICATION_ERROR, ex);
         }
         return Response.status(Response.Status.OK).entity(assetStream).build();
     }
@@ -229,7 +229,7 @@ public class AssetResource extends ConfigBaseResource {
             log.debug("Saved asset:{} ", asset);
         } catch (Exception ex) {
             log.error("Application Error while creating asset is - status:{}", ex.getMessage());
-            throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
+            throwInternalServerException(APPLICATION_ERROR, ex);
         }
 
         log.info("Create IdentityProvider - asset:{}", asset);
@@ -289,7 +289,7 @@ public class AssetResource extends ConfigBaseResource {
             log.debug(" Updated asset:{} ", asset);
         } catch (Exception ex) {
             log.error("Application Error while updated asset is:{}", ex.getMessage());
-            throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
+            throwInternalServerException(APPLICATION_ERROR, ex);
         }
 
         log.info("Updated asset:{}", asset);
@@ -320,7 +320,7 @@ public class AssetResource extends ConfigBaseResource {
             if (ex instanceof NotFoundException) {
                 throwNotFoundException(NOT_FOUND_ERROR, ex.getMessage());
             }
-            throwInternalServerException(APPLICATION_ERROR, ex.getMessage());
+            throwInternalServerException(APPLICATION_ERROR, ex);
         }
         return Response.noContent().build();
 

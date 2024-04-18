@@ -80,6 +80,9 @@ class Agama(DialogUtils):
 
     def display_config(self, event):
 
+        if not self.working_container.all_data:
+            return
+
         project_data = self.working_container.all_data[self.working_container.selectes]
         project_name = project_data['details']['projectMetadata']['projectName']
         fdata = SimpleNamespace()
