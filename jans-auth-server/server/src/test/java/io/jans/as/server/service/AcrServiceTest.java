@@ -1,6 +1,8 @@
 package io.jans.as.server.service;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.authorize.ws.rs.AuthzRequest;
 import io.jans.as.server.security.Identity;
@@ -17,12 +19,14 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import org.testng.collections.Lists;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Z
@@ -44,6 +48,92 @@ public class AcrServiceTest {
 
     @Mock
     private ExternalAuthenticationService externalAuthenticationService;
+
+    @Mock
+    private AppConfiguration appConfiguration;
+
+    @Test
+    public void isAgama_whenAcrIsNullOrNonAgama_shouldReturnFalse() {
+        assertFalse(AcrService.isAgama(null));
+        assertFalse(AcrService.isAgama(""));
+        assertFalse(AcrService.isAgama("asf"));
+    }
+
+    @Test
+    public void isAgama_whenAcrStartsFromAgama_shouldReturnTrue() {
+        assertTrue(AcrService.isAgama("agama_"));
+        assertTrue(AcrService.isAgama("agama_flow"));
+        assertTrue(AcrService.isAgama("agama_com.company.flow"));
+    }
+
+    @Test
+    public void checkClientAuthorizedAcrs_whenClientAuthorizedAcrsEmpty_shouldPass() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("acr1");
+
+        acrService.checkClientAuthorizedAcrs(authzRequest, new Client());
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void checkClientAuthorizedAcrs_whenClientDoesNotAllowAcr_shouldThrowException() {
+        RedirectUri redirectUri = mock(RedirectUri.class);
+        when(redirectUri.toString()).thenReturn("http://rp.com");
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("my_acr");
+        authzRequest.setRedirectUriResponse(new RedirectUriResponse(redirectUri, "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
+
+        final Client client = new Client();
+        client.getAttributes().setAuthorizedAcrValues(Lists.newArrayList("clientAcr"));
+
+        acrService.checkClientAuthorizedAcrs(authzRequest, client);
+    }
+
+    @Test
+    public void checkClientAuthorizedAcrs_whenClientAllowAcr_shouldPass() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("my_acr");
+
+        final Client client = new Client();
+        client.getAttributes().setAuthorizedAcrValues(Lists.newArrayList("my_acr"));
+
+        acrService.checkClientAuthorizedAcrs(authzRequest, client);
+    }
+
+    @Test
+    public void checkClientAuthorizedAcrs_whenClientAllowAcrViaMappings_shouldPass() {
+        Map<String, String> mapping = new HashMap<>();
+        mapping.put("my_acr", "map2");
+
+        when(appConfiguration.getAcrMappings()).thenReturn(mapping);
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("my_acr");
+        acrService.applyAcrMappings(authzRequest);
+
+        final Client client = new Client();
+        client.getAttributes().setAuthorizedAcrValues(Lists.newArrayList("my_acr"));
+
+        acrService.checkClientAuthorizedAcrs(authzRequest, client);
+    }
+
+    @Test
+    public void applyAcrMappings_whenMappingsIsNotSet_shouldDoNothing() {
+        final String mapped = acrService.applyAcrMappings(Lists.newArrayList("acr1", "acr2"));
+
+        assertEquals(mapped, "acr1 acr2");
+    }
+
+    @Test
+    public void applyAcrMappings_whenMappingsIsSet_shouldMapCorrectly() {
+        Map<String, String> mapping = new HashMap<>();
+        mapping.put("acr2", "map2");
+
+        when(appConfiguration.getAcrMappings()).thenReturn(mapping);
+        final String mapped = acrService.applyAcrMappings(Lists.newArrayList("acr1", "acr2"));
+
+        assertEquals(mapped, "acr1 map2");
+    }
 
     @Test
     public void checkAcrScriptIsAvailable_forBlankAcr_shouldPass() {
