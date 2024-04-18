@@ -457,6 +457,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Enable/Disable usage of highest level script in case ACR script does not exist", defaultValue = "false")
     private Boolean useHighestLevelScriptIfAcrScriptNotFound;
 
+    @DocProperty(description = "The acr mappings. When AS meets key-value in map, it tries to replace 'key' with 'value' as very first thing and use that 'value' in further processing.")
+    private Map<String, String> acrMappings;
+
     @DocProperty(description = "Boolean value specifying whether to enable user authentication filters")
     private Boolean authenticationFiltersEnabled;
 
@@ -3446,6 +3449,15 @@ public class AppConfiguration implements Configuration {
 
     public void setUseHighestLevelScriptIfAcrScriptNotFound(Boolean useHighestLevelScriptIfAcrScriptNotFound) {
         this.useHighestLevelScriptIfAcrScriptNotFound = useHighestLevelScriptIfAcrScriptNotFound;
+    }
+
+    public Map<String, String> getAcrMappings() {
+        if (acrMappings == null) acrMappings = new HashMap<>();
+        return acrMappings;
+    }
+
+    public void setAcrMappings(Map<String, String> acrMappings) {
+        this.acrMappings = acrMappings;
     }
 
     public EngineConfig getAgamaConfiguration() {
