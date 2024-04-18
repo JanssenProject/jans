@@ -3843,6 +3843,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#4-agama-acrs" class="md-nav__link">
+    4. Agama ACRs
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3878,6 +3885,13 @@
         <li class="md-nav__item">
   <a href="#acr-precedence-levels" class="md-nav__link">
     ACR Precedence Levels
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acr-mappings-aliases" class="md-nav__link">
+    ACR mappings (aliases)
   </a>
   
 </li>
@@ -8530,6 +8544,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#4-agama-acrs" class="md-nav__link">
+    4. Agama ACRs
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -8565,6 +8586,13 @@
         <li class="md-nav__item">
   <a href="#acr-precedence-levels" class="md-nav__link">
     ACR Precedence Levels
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acr-mappings-aliases" class="md-nav__link">
+    ACR mappings (aliases)
   </a>
   
 </li>
@@ -8672,7 +8700,7 @@ deployment.</p>
 understanding.</p>
 <h3 id="1-internal-janssen-server-acr">1. Internal Janssen Server ACR<a class="headerlink" href="#1-internal-janssen-server-acr" title="Permanent link">#</a></h3>
 <p>Janssen server will use internal ACR only if no other authentication method is set or could be invoked.
-This internal ACR, <code>default_password_auth</code>, is set to level -1. This means that it has lower
+This internal ACR, <code>simple_password_auth</code>, is set to level -1. This means that it has lower
 priority than any other script. This ACR is always available and enabled on any Janssen Server deployment.</p>
 <p>This ACR is a simple user-id and password-based authentication mechanism. It authenticates the end-user
 against the backend datastore.</p>
@@ -8685,6 +8713,9 @@ LDAP-based IDP or a local LDAP.</p>
 <p>To offer highly flexible and pluggable authentication flows, Janssen Server uses script-based ACRs. These ACRs are
 associated with a corresponding <a href="../../../developer/scripts/person-authentication/">person authentication script</a>. To use these ACRs
 in the authentication flow, the associated <a href="../../../developer/scripts/person-authentication/#enabling-an-authentication-mechanism">script should be enabled</a>.</p>
+<h3 id="4-agama-acrs">4. Agama ACRs<a class="headerlink" href="#4-agama-acrs" title="Permanent link">#</a></h3>
+<p>Agama acrs starts from <code>agama_</code> prefix. All of them invoke underlying agama bridge script called <code>agama</code>.
+General pattern is <code>agama_&lt;flow name&gt;</code>.</p>
 <h2 id="configuring-acrs-in-the-jans-as">Configuring ACRs in the JANS AS:<a class="headerlink" href="#configuring-acrs-in-the-jans-as" title="Permanent link">#</a></h2>
 <p>ACRs can be configured on two levels:</p>
 <h3 id="1-client-level-acr">1. Client Level ACR :<a class="headerlink" href="#1-client-level-acr" title="Permanent link">#</a></h3>
@@ -8712,6 +8743,12 @@ to that of the method associated with the current session. If the requested meth
 ACR's level, nothing is changed and the usual SSO behavior is observed. If the new level is higher (i.e. a more secure
 method is requested), and it's not possible to serve such a request using the existing session's context, then the user
 must re-authenticate to continue. If the user succeeds, a new session with a new ACR gets associated.</p>
+<h2 id="acr-mappings-aliases">ACR mappings (aliases)<a class="headerlink" href="#acr-mappings-aliases" title="Permanent link">#</a></h2>
+<p>There is <code>acrMappings</code> AS configuration property which allows to specify aliases for acrs.
+<code>acrMappings</code> contains simple map in key-value form.</p>
+<p>Lets say RP sends request with <code>acr_values=loginWithOtpCheck</code>. If <code>acrMappings</code> contains mapping "loginWithOtpCheck":"otp" then
+AS will map <code>loginWithOtpCheck</code> to <code>otp</code> and will use <code>acr_values=otp</code>. 
+It means that script must be called <code>otp</code> in this case and not <code>loginWithOtpCheck</code>. </p>
 <h2 id="flowchart-how-the-jans-as-derives-an-acr-value-for-a-user-session">Flowchart - How the Jans AS derives an ACR value for a user session :<a class="headerlink" href="#flowchart-how-the-jans-as-derives-an-acr-value-for-a-user-session" title="Permanent link">#</a></h2>
 <pre class="mermaid"><code>flowchart TD
     A[RP send authentication request] --&gt; B{Request contains &lt;br /&gt;&lt;code&gt;acr_values&lt;/code&gt; parameter?}
@@ -8752,7 +8789,7 @@ with detail log in <code>jans-auth.log</code>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-04-03T09:09:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-04-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-04-18T14:00:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-04-18</span>
       
         <br>
         Created:

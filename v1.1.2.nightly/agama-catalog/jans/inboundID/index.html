@@ -8537,7 +8537,7 @@
 
 
 <h1 id="inbound-identity-with-agama">Inbound identity with Agama<a class="headerlink" href="#inbound-identity-with-agama" title="Permanent link">#</a></h1>
-<p>Using Agama administrators can delegate authorization to external services like social sites. In a typical setting users are shown a login form with a "Sign in with..." button for authentication to take place at a given 3rd party in order to get access to a target application.</p>
+<p>Using Agama administrators can delegate authorization to external services like social sites and enterprise access management solutions, e.g. Microsoft Entra ID, Oracle Access Management, etc. In a typical setting users are presented a login form with a "Sign in with..." button for authentication to take place at a given 3rd party in order to get access to a target application.</p>
 <p>This process is usually referred to as "inbound identity". In this document the steps required to setup inbound identity in your Janssen server are presented.</p>
 <h2 id="requisites">Requisites<a class="headerlink" href="#requisites" title="Permanent link">#</a></h2>
 <ul>
@@ -8599,7 +8599,6 @@
 <ul>
 <li>Visit <a href="https://maven.jans.io/maven/io/jans/agama-inbound/">this</a> page, navigate to the folder matching your Janssen server version, and download the jar file</li>
 <li>SSH to the server. Transfer the file to directory <code>/opt/jans/jetty/jans-auth/custom/libs</code></li>
-<li>Navigate to <code>/opt/jans/jetty/jans-auth/webapps</code> and edit the file <code>jans-auth.xml</code> by adding <code>&lt;Set name="extraClasspath"&gt;./custom/libs/*&lt;/Set&gt;</code> before the root tag closes</li>
 <li>Restart the server, e.g. <code>systemctl restart jans-auth</code></li>
 </ul>
 <h3 id="make-a-gama-archive">Make a <code>gama</code> archive<a class="headerlink" href="#make-a-gama-archive" title="Permanent link">#</a></h3>
@@ -8911,7 +8910,7 @@ From there onwards, you only need to re-upload the file as many times as needed.
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-03-11T14:11:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-03-11</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-04-18T14:22:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-04-18</span>
       
         <br>
         Created:
