@@ -189,6 +189,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.dbUtils.bind(force=True)
 
+
     def get_sql_col_type(self, attrname, table=None):
 
         if attrname in self.dbUtils.sql_data_types:
@@ -199,6 +200,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 data_type = '{}({})'.format(type_['type'], type_['size'])
             else:
                 data_type = type_['type']
+
+        elif self.dbUtils.is_schema_rdbm_json(attrname):
+            return self.dbUtils.rdbm_json_types[Config.rdbm_type]['type']
+
         else:
             attr_syntax = self.dbUtils.get_attr_syntax(attrname)
             type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax].get(Config.rdbm_type) or self.dbUtils.ldap_sql_data_type_mapping[attr_syntax]['mysql']
