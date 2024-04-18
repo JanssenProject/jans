@@ -47,7 +47,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-casa/webapps \
 
 # casa plugins
 RUN mkdir -p ${JETTY_BASE}/jans-casa/plugins \
-    && for casa_plugin in strong-authn-settings authorized-clients custom-branding; \
+    && for casa_plugin in acct-linking authorized-clients bioid-plugin custom-branding email_2fa_core strong-authn-settings; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/casa/plugins/${casa_plugin}/${CN_VERSION}/${casa_plugin}-${CN_VERSION}-jar-with-dependencies.jar" -O "${JETTY_BASE}/jans-casa/plugins/${casa_plugin}-${CN_VERSION}.jar"; \
     done
