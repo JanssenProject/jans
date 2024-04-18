@@ -53,8 +53,8 @@ public class AssetService {
 
     @Inject
     AuthUtil authUtil;
-    
-    @Inject 
+
+    @Inject
     DBDocumentStoreProvider dBDocumentStoreProvider;
 
     @Inject
@@ -150,8 +150,9 @@ public class AssetService {
         log.trace("Asset ByteArrayOutputStream :{}", bos);
 
         //get asset
-        asset = setAssetContent(asset, new Base64InputStream(getInputStream(bos), true));
-        
+        try(InputStream is = new Base64InputStream(getInputStream(bos), true) ){
+        asset = setAssetContent(asset, is);
+        }
         // save asset in DB store
         String inum = asset.getInum();
         log.trace("inum of asset to be saved is:{}", inum);
@@ -169,7 +170,9 @@ public class AssetService {
         log.debug("Saved  asset is :{}", asset);
 
         // copy asset on jans-server
-        String result = copyAssetOnServer(asset, getInputStream(bos));
+        try (InputStream ins = getInputStream(bos)) {
+            String result = copyAssetOnServer(asset, ins);
+        }
         log.info("Result of asset saved on server :{}", result);
 
         // Get final asset
@@ -192,15 +195,15 @@ public class AssetService {
         // remove asset from DB store
         dbDocumentService.removeDocument(asset);
         log.info("Deleted asset identified by inum {}", inum);
-        
+
         // remove asset from server
         boolean status = deleteAssetFromServer(asset);
         log.info("Status on deleting asset from server is:{}", status);
-        if(!status) {
-            log.error("Could not remove asset from server identified by inum:{}",inum);
-            throw new WebApplicationException("Could not delete asset identified by inum - "+inum);
+        if (!status) {
+            log.error("Could not remove asset from server identified by inum:{}", inum);
+            throw new WebApplicationException("Could not delete asset identified by inum - " + inum);
         }
-        
+
         return status;
     }
 
@@ -243,11 +246,10 @@ public class AssetService {
 
         String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
         asset.setDocument(documentContent);
-        
+
         // update asset revision
         updateRevision(asset);
-        
-       
+
         log.info("\n * Successfully updated asset:{}", asset);
         return asset;
     }
@@ -307,7 +309,6 @@ public class AssetService {
         return asset;
     }
 
-
     private String copyAssetOnServer(Document asset, InputStream stream) {
         log.info("Copy asset on server - asset:{}, stream:{}", asset, stream);
         String result = null;
@@ -337,9 +338,6 @@ public class AssetService {
         log.info("documentStoreService:{}, filePath:{}", documentStoreService, filePath);
         result = documentStoreService.saveDocumentStream(filePath, null, stream, List.of(documentStoreModuleName));
         log.info("Asset saving result:{}", result);
-
-        InputStream newFile = documentStoreService.readDocumentAsStream(filePath);
-        log.info("Reading asset file newFile:{}", newFile);
 
         return result;
 
