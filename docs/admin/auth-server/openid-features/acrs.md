@@ -103,7 +103,7 @@ must re-authenticate to continue. If the user succeeds, a new session with a new
 ## ACR mappings (aliases)
 
 There is `acrMappings` AS configuration property which allows to specify aliases for acrs.
-`acrMappings` contains simply map in key-value form.
+`acrMappings` contains simple map in key-value form.
 
 Lets say RP sends request with `acr_values=loginWithOtpCheck`. If `acrMappings` contains mapping "loginWithOtpCheck":"otp" then
 AS will map `loginWithOtpCheck` to `otp` and will use `acr_values=otp`. 

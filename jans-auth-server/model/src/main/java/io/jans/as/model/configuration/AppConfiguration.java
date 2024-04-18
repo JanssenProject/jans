@@ -457,7 +457,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Enable/Disable usage of highest level script in case ACR script does not exist", defaultValue = "false")
     private Boolean useHighestLevelScriptIfAcrScriptNotFound;
 
-    @DocProperty(description = "The acr mappings. When AS meets key-value in map, it tries to replace key with value.")
+    @DocProperty(description = "The acr mappings. When AS meets key-value in map, it tries to replace 'key' with 'value' as very first thing and use that 'value' in further processing.")
     private Map<String, String> acrMappings;
 
     @DocProperty(description = "Boolean value specifying whether to enable user authentication filters")
