@@ -139,6 +139,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
 
     @Inject
+    private AcrService acrService;
+
+    @Inject
     private CIBAPushTokenDeliveryService cibaPushTokenDeliveryService;
 
     @Inject
@@ -336,7 +339,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setRedirectUri(authorizeRestWebServiceValidator.validateRedirectUri(client, authzRequest.getRedirectUri(), authzRequest.getState(), deviceAuthzUserCode, authzRequest.getHttpRequest()));
         authzRequestService.createRedirectUriResponse(authzRequest);
 
-        authorizeRestWebServiceValidator.validateAcrs(authzRequest, client);
+        acrService.validateAcrs(authzRequest, client);
+
         authorizeRestWebServiceValidator.validateAuthorizationDetails(authzRequest, client);
         authorizeRestWebServiceValidator.validateRequestParameterSupported(authzRequest);
         authorizeRestWebServiceValidator.validateRequestUriParameterSupported(authzRequest);
