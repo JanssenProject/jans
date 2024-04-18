@@ -327,7 +327,8 @@ public class AuthorizeAction {
                     acrValuesList = Arrays.asList(defaultAuthenticationMode.getName());
                 }
 
-                CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
+                List<String> acrsToDetermineScript = AcrService.getAcrsToDetermineScript(acrValuesList);
+                CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrsToDetermineScript);
 
                 if (customScriptConfiguration == null) {
                     log.error("Failed to get CustomScriptConfiguration. auth_step: {}, acr_values: {}", 1, this.acrValues);
