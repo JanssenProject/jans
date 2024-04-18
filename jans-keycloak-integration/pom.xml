@@ -4,7 +4,7 @@
     <groupId>io.jans</groupId>
     <artifactId>jans-kc-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.1</version>
+    <version>1.1.2-SNAPSHOT</version>
     <name>keycloak-integration-parent</name>
 
     <distributionManagement>
@@ -19,7 +19,7 @@
       <maven.min-version>3.3.9</maven.min-version>
       <maven.compiler.source>17</maven.compiler.source>
       <maven.compiler.target>17</maven.compiler.target>
-      <keycloak-server.version>23.0.3</keycloak-server.version>
+      <keycloak-server.version>24.0.3</keycloak-server.version>
       <nimbus.oauth-sdk.version>10.11</nimbus.oauth-sdk.version>
       <nimbus.oauth2-oidc-sdk.version>10.11</nimbus.oauth2-oidc-sdk.version>
       <jackson.coreutils.version>1.8</jackson.coreutils.version>

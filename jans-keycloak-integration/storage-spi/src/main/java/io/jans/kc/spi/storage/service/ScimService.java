@@ -101,7 +101,7 @@ public class ScimService {
             HttpClient client = HttpClientBuilder.create().build();
 
             SearchRequest searchRequest = createSearchRequest(filter);
-            log.debugv("ScimService::postData() - client:{0}, searchRequest:{1}, accessToken:{2}", client, searchRequest,
+            log.debugv("ScimService::postData() - client:{0}, searchRequest:{1}, accessToken:{2}", client, searchRequest.toString(),
                     accessToken);
 
             JsonNode jsonNode = SimpleHttp.doPost(uri, client).auth(accessToken).json(searchRequest).asJson();

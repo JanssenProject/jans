@@ -57,6 +57,7 @@ class JansAuthInstaller(JettyInstaller):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.external_libs()
+        self.set_class_path([os.path.join(self.custom_lib_dir, '*')])
         self.setup_agama()
         self.enable()
 
@@ -201,8 +202,6 @@ class JansAuthInstaller(JettyInstaller):
             extra_lib_path = os.path.join(self.custom_lib_dir, os.path.basename(extra_lib))
             extra_libs.append(extra_lib_path)
             self.chown(extra_lib_path, Config.jetty_user, Config.jetty_group)
-
-        self.add_extra_class(','.join(extra_libs))
 
 
     def setup_agama(self):

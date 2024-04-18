@@ -310,7 +310,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 Config.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
                 Config.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
 
-                if maxHeapMem < 256 and applicationName in allowedApplicationsMemory:    
+                if maxHeapMem < 256 and applicationName in allowedApplicationsMemory:
                     retVal = False
 
         return retVal

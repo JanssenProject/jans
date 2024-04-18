@@ -27,11 +27,6 @@ public class NetworkUtils {
     
     private static Logger LOG = LoggerFactory.getLogger(NetworkUtils.class);
     
-    private static String urlBeforeContextPath() {
-        HttpServletRequest req = CdiUtil.bean(HttpServletRequest.class);
-        return req.getScheme() + "://" + req.getServerName();
-    }
-    
     public static String makeRedirectUri() {
         return urlBeforeContextPath() + "/jans-auth/fl/callback";
     }
@@ -86,6 +81,11 @@ public class NetworkUtils {
                 Collections.singletonMap("Authorization", "Bearer " + bearerToken));
         return mapFromGetRequest(url, headers, null, true);
 
+    }
+    
+    public static String urlBeforeContextPath() {
+        HttpServletRequest req = CdiUtil.bean(HttpServletRequest.class);
+        return req.getScheme() + "://" + req.getServerName();
     }
     
     private NetworkUtils() { }
