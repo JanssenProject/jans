@@ -32,22 +32,5 @@ public class BioIdViewModel {
 		user = sessionContext.getLoggedUser();
 		sndFactorUtils = Utils.managedBean(SndFactorAuthenticationUtils.class);
 		bis = BioIdService.getInstance();
-		initializeBioIdDict();
 	}
-
-	private void initializeBioIdDict() {
-		Map<String, Map<String, Object>> jansCredential = bis.getJansCredential(user.getId());
-		if (jansCredential == null) {
-			logger.debug("jansCredential Dict missing, creating");
-			jansCredential = new HashMap<String, Map<String, Object>>();
-		}
-		Map<String, Object> bioIdDict = jansCredential.get("bioid");
-		if (bioIdDict == null) {
-			bioIdDict = new HashMap<String, Object>();
-			jansCredential.put("bioid", bioIdDict);
-			bis.setJansCredential(user.getId(), jansCredential);
-			logger.debug("Initialized bioId dict");
-		}
-	}
-
 }
