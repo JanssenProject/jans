@@ -863,10 +863,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     CustomUser:
       type: object
       properties:
@@ -910,8 +910,6 @@ components:
         mail:
           type: string
         displayName:
-          type: string
-        jansStatus:
           type: string
         givenName:
           type: string

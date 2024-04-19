@@ -24,6 +24,7 @@
             <class name="io.jans.as.server.service.LocalResponseCacheTest" />
             <class name="io.jans.as.server.service.SessionIdServiceTest" />
             <class name="io.jans.as.server.service.DiscoveryServiceTest" />
+            <class name="io.jans.as.server.service.AcrServiceTest" />
 
             <class name="io.jans.as.server.auth.DpopServiceTest" />
             <class name="io.jans.as.server.token.ws.rs.TokenExchangeServiceTest" />

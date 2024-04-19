@@ -504,15 +504,18 @@ public class UserMgmtService {
             logger.info("customObjectAttribute:{}, customObjectAttribute.getName():{}", customObjectAttribute, customObjectAttribute.getName());
             JansAttribute attribute = attributeService.getAttributeByName(customObjectAttribute.getName());
             AttributeValidation validation = null;
-            if(attribute!=null) {
+            if (attribute != null) {
                 validation = attribute.getAttributeValidation();
             }
-            logger.info("customObjectAttribute.getName():{}, validation:{}", customObjectAttribute.getName(), validation);
-
-            String errorMsg = validateCustomAttributes(customObjectAttribute, validation);
-            logger.info("customObjectAttribute.getName():{}, errorMsg:{}", customObjectAttribute.getName(), errorMsg);
-            if (StringUtils.isNotBlank(errorMsg)) {
-                sb.append(errorMsg);
+            logger.info("customObjectAttribute.getName():{}, validation:{}", customObjectAttribute.getName(),
+                    validation);
+            if (validation != null) {
+                String errorMsg = validateCustomAttributes(customObjectAttribute, validation);
+                logger.info("customObjectAttribute.getName():{}, errorMsg:{}", customObjectAttribute.getName(),
+                        errorMsg);
+                if (StringUtils.isNotBlank(errorMsg)) {
+                    sb.append(errorMsg);
+                }
             }
         }
 

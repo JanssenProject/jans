@@ -10,6 +10,7 @@ import ldap3
 import pymysql
 import time
 
+from types import MappingProxyType
 from ldap3.utils import dn as dnutils
 from pathlib import PurePath
 
@@ -41,6 +42,8 @@ class DBUtils:
     session = None
     cbm = None
     mariadb = False
+    rdbm_json_types = MappingProxyType({ 'mysql': {'type': 'JSON'}, 'pgsql': {'type': 'JSONB'}, 'spanner': {'type': 'ARRAY<STRING(MAX)>'} })
+
 
     def bind(self, use_ssl=True, force=False):
 
@@ -169,7 +172,7 @@ class DBUtils:
 
         for attr in attribDataTypes.listAttributes:
             if not attr in self.sql_data_types:
-                self.sql_data_types[attr] = { 'mysql': {'type': 'JSON'}, 'pgsql': {'type': 'JSONB'}, 'spanner': {'type': 'ARRAY<STRING(MAX)>'} }
+                self.sql_data_types[attr] = self.rdbm_json_types
 
     def in_subtable(self, table, attr):
         if table in self.sub_tables[Config.rdbm_type]:
@@ -749,9 +752,16 @@ class DBUtils:
 
             return table in metadata
 
+    def is_schema_rdbm_json(self, attrname):
+        for attr in self.jans_attributes:
+            if attrname in attr['names']:
+                return attr.get('rdbm_json_column')
+
     def get_attr_sql_data_type(self, key):
         if key in self.sql_data_types:
             data_type = self.sql_data_types[key]
+        elif self.is_schema_rdbm_json(key):
+            return self.rdbm_json_types[Config.rdbm_type]['type']
         else:
             attr_syntax = self.get_attr_syntax(key)
             data_type = self.ldap_sql_data_type_mapping[attr_syntax]

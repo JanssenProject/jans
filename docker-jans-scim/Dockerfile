@@ -40,8 +40,10 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # SCIM
 # ====
 
-ENV CN_VERSION=1.1.1-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-03 08:54'
+
+ENV CN_VERSION=1.1.2-SNAPSHOT
+ENV CN_BUILD_DATE='2024-04-14 08:39'
+
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -59,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=aeba80d5fb2860e1336a49bfc3cbfc80f79b08ba
+ENV JANS_SOURCE_VERSION=21e4cc39e71d78d35a01aa3143bfd3a3d2657047
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
@@ -197,7 +199,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_SCIM_JETTY_PORT=8080 \
     CN_SCIM_JETTY_HOST=0.0.0.0 \
-    CN_JETTY_ARGS=""
+    CN_JETTY_ARGS="" \
+    CN_SSL_CERT_FROM_SECRETS=true
 
 # ==========
 # misc stuff
@@ -208,7 +211,7 @@ EXPOSE $CN_SCIM_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/scim" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.1" \
+    org.opencontainers.image.version="1.1.2" \
     org.opencontainers.image.title="Janssen SCIM" \
     org.opencontainers.image.description="SCIM server"
 

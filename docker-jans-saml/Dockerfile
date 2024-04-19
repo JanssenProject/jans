@@ -23,8 +23,8 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.1.1-SNAPSHOT
-ENV CN_BUILD_DATE='2024-03-11 19:25'
+ENV CN_VERSION=1.1.2-SNAPSHOT
+ENV CN_BUILD_DATE='2024-04-14 08:51'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
@@ -40,7 +40,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=aeba80d5fb2860e1336a49bfc3cbfc80f79b08ba
+ENV JANS_SOURCE_VERSION=21e4cc39e71d78d35a01aa3143bfd3a3d2657047
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -167,6 +167,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_SAML_JAVA_OPTIONS="" \
     CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
     CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
+    CN_SSL_CERT_FROM_SECRETS=true \
     KC_HEALTH_ENABLED=true \
     KC_METRICS_ENABLED=true \
     KC_LOG_LEVEL=INFO \
@@ -189,7 +190,7 @@ EXPOSE $CN_SAML_HTTP_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.1" \
+    org.opencontainers.image.version="1.1.2" \
     org.opencontainers.image.title="Janssen SAML" \
     org.opencontainers.image.description=""
 

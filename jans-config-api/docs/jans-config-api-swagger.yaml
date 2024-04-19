@@ -8219,19 +8219,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
+        adminCanEdit:
+          type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8705,7 +8705,7 @@ components:
           type: boolean
         enableClientGrantTypeUpdate:
           type: boolean
-        dynamicGrantTypeDefault:
+        grantTypesSupportedByDynamicRegistration:
           uniqueItems: true
           type: array
           items:
@@ -10519,10 +10519,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
