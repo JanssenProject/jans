@@ -69,7 +69,6 @@ class CasaInstaller(JettyInstaller):
                 if not os.path.exists(plugin_class_path):
                     self.logIt("Adding plugin {} to jans-auth".format(plugin_name))
                     self.copyFile(plugin, base.current_app.JansAuthInstaller.custom_lib_dir)
-                    base.current_app.JansAuthInstaller.add_extra_class(plugin_class_path)
                     self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
 
 

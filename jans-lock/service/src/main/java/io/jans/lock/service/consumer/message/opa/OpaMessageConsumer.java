@@ -148,7 +148,6 @@ public class OpaMessageConsumer extends MessageConsumer {
 		}
 
 		// Send rest request to OPA
-		
 		OpaConfiguration opaConfiguration = appConfiguration.getOpaConfiguration();
 		String baseUrl = opaConfiguration.getBaseUrl();
 
