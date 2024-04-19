@@ -9,6 +9,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.authorize.ws.rs.AuthzDetailsService;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.ExternalTokenExchangeService;
 import org.apache.commons.lang.StringUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -48,6 +49,9 @@ public class TokenExchangeServiceTest {
 
     @Mock
     private AuthzDetailsService authzDetailsService;
+
+    @Mock
+    private ExternalTokenExchangeService externalTokenExchangeService;
 
     @InjectMocks
     private TokenExchangeService tokenExchangeService;

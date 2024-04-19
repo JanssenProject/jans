@@ -1,9 +1,9 @@
 package io.jans.as.server.token.ws.rs;
 
-import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -13,6 +13,7 @@ import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.ExternalTokenExchangeService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import jakarta.ejb.Stateless;
@@ -69,6 +70,9 @@ public class TokenExchangeService {
 
     @Inject
     private AuthzDetailsService authzDetailsService;
+
+    @Inject
+    private ExternalTokenExchangeService externalTokenExchangeService;
 
     public void rotateDeviceSecretOnRefreshToken(HttpServletRequest httpRequest, AuthorizationGrant refreshGrant, String scope) {
         if (StringUtils.isBlank(scope) || !scope.contains(ScopeConstants.DEVICE_SSO)) {

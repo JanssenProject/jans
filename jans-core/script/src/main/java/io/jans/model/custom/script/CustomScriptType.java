@@ -63,6 +63,8 @@ import io.jans.model.custom.script.type.ssa.DummyModifySsaResponseType;
 import io.jans.model.custom.script.type.ssa.ModifySsaResponseType;
 import io.jans.model.custom.script.type.token.DummyUpdateTokenType;
 import io.jans.model.custom.script.type.token.UpdateTokenType;
+import io.jans.model.custom.script.type.tokenexchange.DummyTokenExchangeType;
+import io.jans.model.custom.script.type.tokenexchange.TokenExchangeType;
 import io.jans.model.custom.script.type.uma.*;
 import io.jans.model.custom.script.type.user.CacheRefreshType;
 import io.jans.model.custom.script.type.user.DummyCacheRefreshType;
@@ -103,6 +105,7 @@ public enum CustomScriptType implements AttributeEnum {
     SPONTANEOUS_SCOPE("spontaneous_scope", "Spontaneous Scopes", SpontaneousScopeType.class, CustomScript.class, "SpontaneousScope", new DummySpontaneousScopeType()),
     END_SESSION("end_session", "End Session", EndSessionType.class, CustomScript.class, "EndSession", new DummyEndSessionType()),
     POST_AUTHN("post_authn", "Post Authentication", PostAuthnType.class, CustomScript.class, "PostAuthn", new DummyPostAuthnType()),
+    TOKEN_EXCHANGE("token_exchange", "Token Exchange", TokenExchangeType.class, CustomScript.class, "TokenExchange", new DummyTokenExchangeType()),
     SELECT_ACCOUNT("select_account", "Select Account", SelectAccountType.class, CustomScript.class, "SelectAccount", new DummySelectAccountType()),
     CREATE_USER("create_user", "Create User", CreateUserType.class, CustomScript.class, "CreateUser", new DummyCreateUserType()),
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType()),
