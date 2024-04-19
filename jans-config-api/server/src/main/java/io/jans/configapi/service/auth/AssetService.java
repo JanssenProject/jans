@@ -131,12 +131,12 @@ public class AssetService {
         log.info("Get asset by name:{}", name);
         Filter nameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, name);
         List<Document> documents = persistenceEntryManager.findEntries(getDnForAsset(null), Document.class, nameFilter);
-        log.info("Asset by name:{} are documents:{}", name, documents);
+        log.trace("Asset by name:{} are documents:{}", name, documents);
         return documents;
     }
 
     public Document saveAsset(Document asset, InputStream documentStream) throws Exception {
-        log.info("Save new asset - asset:{}, documentStream:{}", asset, documentStream);
+        log.info("Save asset - asset:{}, documentStream:{}", asset, documentStream);
 
         if (asset == null) {
             throw new InvalidAttributeException("Asset object is null!!!");
@@ -150,8 +150,8 @@ public class AssetService {
         log.trace("Asset ByteArrayOutputStream :{}", bos);
 
         //get asset
-        try(InputStream is = new Base64InputStream(getInputStream(bos), true) ){
-        asset = setAssetContent(asset, is);
+        try (InputStream is = new Base64InputStream(getInputStream(bos), true)) {
+            asset = setAssetContent(asset, is);
         }
         // save asset in DB store
         String inum = asset.getInum();
@@ -161,19 +161,19 @@ public class AssetService {
             asset.setInum(inum);
             String dn = "inum=" + asset.getInum() + ",ou=document,o=jans";
             asset.setDn(dn);
-            log.info("As inum is blank create new asset :{}", asset);
+            log.info("As inum is blank create new asset with inum:{}", inum);
             dbDocumentService.addDocument(asset);
         } else {
-            log.info("Inum is not blank hence update existing asset :{}", asset);
+            log.info("Inum is not blank hence update existing asset with inum :{}", inum);
             dbDocumentService.updateDocument(asset);
         }
-        log.debug("Saved  asset is :{}", asset);
 
         // copy asset on jans-server
         try (InputStream ins = getInputStream(bos)) {
             String result = copyAssetOnServer(asset, ins);
+            log.info("Result of asset saved on server :{}", result);
         }
-        log.info("Result of asset saved on server :{}", result);
+
 
         // Get final asset
         asset = this.getAssetByInum(asset.getInum());
@@ -250,7 +250,7 @@ public class AssetService {
         // update asset revision
         updateRevision(asset);
 
-        log.info("\n * Successfully updated asset:{}", asset);
+        log.info("\n * Successfully updated asset");
         return asset;
     }
 
@@ -286,7 +286,7 @@ public class AssetService {
     }
 
     private Document updateRevision(Document asset) {
-        log.info("Update asset revision - asset:{}", asset);
+        log.debug("Update asset revision - asset:{}", asset);
         try {
             if (asset == null) {
                 return asset;
@@ -301,7 +301,7 @@ public class AssetService {
             }
             revision = String.valueOf(intRevision);
             asset.setJansRevision(revision);
-            log.info("Updated asset revision - asset:{}", asset);
+            log.info("Updated asset revision to asset.getJansRevision():{}", asset.getJansRevision());
         } catch (Exception ex) {
             log.error("Exception while updating asset revision is - ", ex);
             return asset;
