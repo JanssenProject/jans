@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:23.0.3@sha256:4f72a5b0c076755e806457d96404dd28dc1394013933d7170c154c26db9b6a16 as kc-src
+FROM quay.io/keycloak/keycloak:24.0.2@sha256:4f72a5b0c076755e806457d96404dd28dc1394013933d7170c154c26db9b6a16 as kc-src
 
 FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
 
@@ -24,7 +24,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # ==============
 
 ENV CN_VERSION=1.1.2-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-14 08:51'
+ENV CN_BUILD_DATE='2024-04-19 08:58'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \

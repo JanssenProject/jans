@@ -42,7 +42,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=1.1.2-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-14 08:41'
+ENV CN_BUILD_DATE='2024-04-20 08:11'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-keycloak-link-server/${CN_VERSION}/jans-keycloak-link-server-${CN_VERSION}.war
 
