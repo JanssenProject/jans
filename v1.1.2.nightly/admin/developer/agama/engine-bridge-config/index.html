@@ -8572,25 +8572,14 @@
 <li>If the object is a (Java) exception, JAVA is used unless the full class name appears listed in the KRYO rules</li>
 </ul>
 <h2 id="bridge-configuration">Bridge configuration<a class="headerlink" href="#bridge-configuration" title="Permanent link">#</a></h2>
-<p>There are a few configuration properties admins can set to modify the behavior of the bridge:</p>
-<ul>
-<li>
-<p><code>cust_param_name</code>: The name of the request parameter - in the authentication request - that will carry the name of the flow to launch. Ensure to register the given parameter name in the <a href="../../../config-guide/jans-authorization-server-config/">server configuration</a> (property <code>authorizationRequestCustomAllowedParameters</code>) beforehand</p>
-</li>
-<li>
-<p><code>default_flow_name</code>: If the relying party (RP) is not able to send custom parameters or omits the flow name in the authentication request, the value of this property will be assumed to be the flow to launch by default</p>
-</li>
-<li>
-<p><code>finish_userid_db_attribute</code>: It is used to map the identity of the user to login in the case of sucessfully finished flows. The value of this property will contain a physical database attribute that will be correlated with the <code>userId</code> passed in the <code>Finish</code> instruction of the flow</p>
-</li>
-</ul>
+<p>Administrators can modify the behavior of the bridge by setting the <code>finish_userid_db_attribute</code> configuration property of the script. This is used to map the identity of the user to login in the case of sucessfully finished flows. The value of this property will contain a physical database attribute that will be correlated with the <code>userId</code> passed in the <code>Finish</code> instruction of the flow.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-02-09T11:51:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-02-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-04-20T16:35:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-04-20</span>
       
         <br>
         Created:

@@ -8710,20 +8710,14 @@
 <p>Ensure both the Agama engine and the bridge are <a href="../engine-bridge-config/#availability">enabled</a> in the Janssen server to effectively use engine's features</p>
 </div>
 <h2 id="launching-flows">Launching flows<a class="headerlink" href="#launching-flows" title="Permanent link">#</a></h2>
-<p>Flows can be launched by sending an (OpenId Connect) authentication request to the user's browser. This usually boils down to make a redirection to a URL looking like <code>https://&lt;jans-server-name&gt;/jans-auth/restv1/authorize?acr_values=agama&amp;agama_flow=flow-qname&amp;scope=...&amp;response_type=...&amp;redirect_uri=https...&amp;client_id=...&amp;state=...</code>. Check the OpenId Connect <a href="https://openid.net/specs/openid-connect-core-1_0.html">spec</a> for more details. Note Jans Server is spec-compliant.</p>
+<p>Flows can be launched by sending an (OpenId Connect) authentication request to the user's browser. This usually boils down to making a redirection to a URL looking like <code>https://&lt;jans-server-name&gt;/jans-auth/restv1/authorize?acr_values=agama_flowQname&amp;scope=...&amp;response_type=...&amp;redirect_uri=https...&amp;client_id=...&amp;state=...</code>. Check the OpenId Connect <a href="https://openid.net/specs/openid-connect-core-1_0.html">spec</a> for more details. Note Jans Server is spec-compliant.</p>
 <p>Things to highlight:</p>
 <ul>
 <li>
-<p>The <code>acr_values</code> parameter must be equal to <code>agama</code></p>
+<p>The <code>acr_values</code> parameter carries the qualified name (identifier) of the flow to launch prefixed with the string <code>agama_</code>, for example <code>acr_values=agama_test.acme.co</code></p>
 </li>
 <li>
-<p>The qualified name (identifier) of the flow to launch is passed using the parameter referenced in property <code>cust_param_name</code> of the Agama <a href="../engine-bridge-config/#bridge-configuration">bridge</a> script. <code>agama_flow</code> will most likely work since this is the default value employed by the Jans installer, e.g. <code>agama_flow=test.acme.co</code></p>
-</li>
-<li>
-<p>If the flow to call receives input parameters, their values can be passed in the custom parameter as well. Use a hyphen to separate the flow name and the parameters expressed in JSON object format. For example, if the flow had inputs  <code>height</code> and <code>color</code>, you can use <code>test.acme.co-{"height": 190, "color": "blue"}</code> for the value of <code>agama_flow</code>. Ensure to apply proper URL-encoding beforehand. In this case, the actual value would be <code>test-%7B%22height%22%3A+190%2C+%22color%22%3A+%22blue%22%7D</code>. If certain inputs are not provided, <code>null</code> values will be assigned for them</p>
-</li>
-<li>
-<p>If for some reason you are not able to set the given custom parameter in the authorization request, you can set its value in the configuration property <code>default_flow_name</code> of the <a href="../engine-bridge-config/#bridge-configuration">bridge</a> script. Note this will launch the same fixed flow at all times</p>
+<p>If the flow to call receives input parameters, this data can be appended to the <code>acr_values</code> parameter: use a hyphen to separate the flow name and the parameters expressed in Base64 URL encoded format. For example, if the flow had inputs  <code>height</code> and <code>color</code>, you would encode the string <code>{"height": 190, "color": "blue"}</code> and the resulting value would be <code>agama_test.acme.co-eyJoZWlnaHQiOiAxOTAsICJjb2xvciI6ICJibHVlIn0</code>. When a given input variable is not provided, the engine will assign a <code>null</code> value automatically</p>
 </li>
 </ul>
 <h2 id="authentication-and-finish">Authentication and <code>Finish</code><a class="headerlink" href="#authentication-and-finish" title="Permanent link">#</a></h2>
@@ -9162,7 +9156,7 @@ words = Call java.util.Collections#unmodifiableSet jStrArr
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-02-08T19:03:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-02-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-04-20T16:35:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-04-20</span>
       
         <br>
         Created:
