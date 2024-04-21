@@ -126,7 +126,10 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && cp -R ${JANS_SETUP_DIR}/static/auth/conf /etc/certs \
     && mkdir -p /opt/jans/python/libs \
     && cp jans-casa/extras/casa-external_* /opt/jans/python/libs \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-lock /app/templates/
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-lock /app/templates/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # ======
 # Python

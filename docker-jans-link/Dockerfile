@@ -88,7 +88,10 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-link/configuration.ldif /app/templates/jans-link/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-link/jans-link-config.json /app/templates/jans-link/ \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-link/jans-link-static-config.json /app/templates/jans-link/
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-link/jans-link-static-config.json /app/templates/jans-link/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # ======
 # Python

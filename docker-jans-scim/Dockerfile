@@ -91,7 +91,10 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/jans-scim/configuration.ldif /app/templates/jans-scim/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-scim/dynamic-conf.json /app/templates/jans-scim/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-scim/static-conf.json /app/templates/jans-scim/ \
-    && cp ${JANS_SCIM_RESOURCE_DIR}/jans-scim-openapi.yaml /app/templates/jans-scim/
+    && cp ${JANS_SCIM_RESOURCE_DIR}/jans-scim-openapi.yaml /app/templates/jans-scim/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # ======
 # Python

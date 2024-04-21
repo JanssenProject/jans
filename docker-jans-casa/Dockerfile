@@ -84,7 +84,10 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-casa/* /app/templates/jans-casa/ \
-    && cp ${JANS_CASA_EXTRAS_DIR}/Casa.py /app/static/extension/person_authentication/
+    && cp ${JANS_CASA_EXTRAS_DIR}/Casa.py /app/static/extension/person_authentication/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # ======
 # Python

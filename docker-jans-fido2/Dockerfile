@@ -93,7 +93,10 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/jans-fido2/fido2.ldif /app/templates/jans-fido2/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-fido2/dynamic-conf.json /app/templates/jans-fido2/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-fido2/static-conf.json /app/templates/jans-fido2/ \
-    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/jans-fido2-errors.json /app/templates/jans-fido2/
+    && cp ${JANS_SETUP_DIR}/templates/jans-fido2/jans-fido2-errors.json /app/templates/jans-fido2/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # download external files
 ARG MDS_DOWNLOAD_DATE='2022-10-03'

@@ -111,7 +111,10 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/dynamic-conf.json /app/templates/jans-config-api/ \
     && cp ${JANS_SETUP_DIR}/setup_app/utils/printVersion.py /opt/jans/bin/printVersion.py \
     && ln -s /opt/jans/bin/printVersion.py /opt/jans/bin/show_version.py \
-    && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/templates/jans-config-api/
+    && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/templates/jans-config-api/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # ======
 # Python
