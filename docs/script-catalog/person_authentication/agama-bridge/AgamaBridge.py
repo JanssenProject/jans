@@ -7,6 +7,7 @@ from com.fasterxml.jackson.databind import ObjectMapper
 from io.jans.agama import NativeJansFlowBridge
 from io.jans.agama.engine.misc import FlowUtils
 from io.jans.service import EncryptionService
+from io.jans.as.model.util import Base64Util
 from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService, UserService
 from io.jans.jsf2.service import FacesService
@@ -29,16 +30,6 @@ class PersonAuthentication(PersonAuthenticationType):
     def init(self, customScript, configurationAttributes):
         print "Agama. Initialization"
         self.resultParam = "agamaData"
-
-        prop = "cust_param_name"
-        self.cust_param_name = self.configProperty(configurationAttributes, prop)
-        
-        if self.cust_param_name == None:
-            print "Agama. Custom parameter name not referenced via property '%s'" % prop
-            return False
-
-        prop = "default_flow_name"
-        self.default_flow_name = self.configProperty(configurationAttributes, prop)
         
         prop = "finish_userid_db_attribute"
         self.finish_userid_db_attr = self.configProperty(configurationAttributes, prop)
@@ -46,9 +37,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if self.finish_userid_db_attr == None:
             print "Agama. Property '%s' is missing value" % prop
             return False
-            
-        print "Agama. Request param '%s' will be used to pass flow name and inputs" % self.cust_param_name
-        print "Agama. When '%s' is missing, the flow to launch will be '%s'" % (self.cust_param_name, self.default_flow_name)
+
         print "Agama. DB attribute '%s' will be used to map the identity of userId passed in Finish directives (if any)" % self.finish_userid_db_attr
         print "Agama. Initialized successfully"
 
@@ -139,20 +128,19 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Agama. Failed to retrieve session_id"
                 return False
                 
-            param = session.getSessionAttributes().get(self.cust_param_name) 
-            if StringHelper.isEmpty(param):
-                print "Agama. Request param '%s' is missing or has no value" % self.cust_param_name
-                
-                param = self.default_flow_name
-                if param == None:
-                    print "Agama. Default flow name is not set either..." 
+            cesar = session.getSessionAttributes()
+            param = cesar.get("agama_flow")
 
+            if StringHelper.isEmpty(param):
+                param = self.extractAgamaFlow(cesar.get("acr_values"))
+
+                if StringHelper.isEmpty(param):
                     print "Agama. Unable to determine the Agama flow to launch. Check the docs"
                     return False
             
             (qn, ins) = self.extractParams(param)
             if qn == None:
-                print "Agama. Param '%s' is missing the name of the flow to be launched" % self.cust_param_name
+                print "Agama. Unable to determine the Agama flow to launch. Check the docs"
                 return False
                 
             try:
@@ -215,10 +203,16 @@ class PersonAuthentication(PersonAuthenticationType):
         facesMessages.clear()
         facesMessages.add(severity, msg)
         
+    def extractAgamaFlow(self, acr):
+        prefix = "agama_"
+        if StringHelper.isNotEmpty(acr) and acr.find(prefix) == 0:
+            return acr[len(prefix):]
+        return None        
+        
     def extractParams(self, param):
 
         # param must be of the form QN-INPUT where QN is the qualified name of the flow to launch
-        # INPUT is a JSON object that contains the arguments to use for the flow call.
+        # INPUT is a base64URL-encoded JSON object that contains the arguments to use for the flow call.
         # The keys of this object should match the already defined flow inputs. Ideally, and   
         # depending on the actual flow implementation, some keys may not even be required 
         # QN and INPUTS are separated by a hyphen
@@ -230,4 +224,4 @@ class PersonAuthentication(PersonAuthenticationType):
         elif i == -1:
             return (param, None)
         else:
-            return (param[:i], param[i+1:])
+            return (param[:i], Base64Util.base64urldecodeToString(param[i+1:]))
