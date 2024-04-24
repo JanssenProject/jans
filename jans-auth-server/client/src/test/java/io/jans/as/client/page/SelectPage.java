@@ -12,6 +12,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,7 +59,7 @@ public class SelectPage extends AbstractPage {
 
         navigate(driver.getCurrentUrl());
         if (BaseTest.ENABLE_REDIRECT_TO_LOGIN_PAGE) {
-            new WebDriverWait(driver, PageConfig.WAIT_OPERATION_TIMEOUT)
+            new WebDriverWait(driver, Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
                     .until((WebDriver d) -> !d.getCurrentUrl().contains("/authorize"));
         }
         return new LoginPage(config);

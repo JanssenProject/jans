@@ -442,6 +442,7 @@ public abstract class BaseTest {
         //driver = new InternetExplorerDriver();
 
         driver = new HtmlUnitDriver(true);
+        driver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
     }
 
     public void stopSelenium() {
@@ -812,7 +813,7 @@ public abstract class BaseTest {
 
         final String previousURL = driver.getCurrentUrl();
         doNotAllowButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, 1);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         wait.until((WebDriver d) -> (d.getCurrentUrl() != previousURL));
 
         String authorizationResponseStr = driver.getCurrentUrl();
@@ -871,7 +872,7 @@ public abstract class BaseTest {
 
             navigateToAuhorizationUrl(driver, driver.getCurrentUrl());
 
-            new WebDriverWait(driver, PageConfig.WAIT_OPERATION_TIMEOUT)
+            new WebDriverWait(driver, Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
                     .until(webDriver -> !webDriver.getCurrentUrl().contains("/authorize"));
         }
 
