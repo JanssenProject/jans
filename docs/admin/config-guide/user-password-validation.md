@@ -14,49 +14,44 @@ By default the attribute validation is not enabled.
 
 1. Obtain the access token
 ```shell
-curl -u "put_client_id_here:put_config_api_client_secret_here" https://<your.jans.server>/jans-auth/restv1/token \
+curl -k -u "<put_client_id_here>:<put_config_api_client_secret_here>" https://<your.jans.server>/jans-auth/restv1/token \
      -d  "grant_type=client_credentials&scope=https://jans.io/oauth/config/attributes.write"
 ```
-   
-2. Search for `userPassword` attribute details in json fileCheck
-curl https://<your.jans.server>/jans-config-api/api/v1/attributes?pattern=userPassword \ 
-    -H "Authorization: Bearer put_access_token_here"
+    
+2. Search for `userPassword` attribute to get its unique ID, that is inum.
+curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" \
+  -H "Authorization:Bearer <put_access_token_here>" 
+  -X GET https://<your.jans.server>/jans-config-api/api/v1/attributes?pattern=userPassword
 ```
 
-3. Apply Patch for `userPassword` 
+3. Apply Patch for `userPassword`, use inum as path parameter
 - Enter valid regex expression to check the strength of the password.
 - Enter **Minimum length**,the minimum length of a value associated with this attribute.
 - Enter **Maximum length**, the maximum length of a value associated with this attribute.
+Following is the example to have `userPassword` with minimum 8 characters, maximum 20 characters and should be alphanumeric with special characters.
 ```
-   curl -X PATCH -k -H 'Content-Type: application/json-patch+json' \ 
-      -i 'https://<your.jans.server>/jans-config-api/api/v1/attributes/AAEE' \ 
-      -H "Authorization: Bearer put_access_token_here" --data '[
-         {
-          "op": "add",
-          "path": "/attributeValidatio",
-          "value": [
-                       {
-                        "minLength": 8,
-                        "maxLength":20,
-                        "regexp": "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$"
-                       }
-                   ]
-          }
-         ]'
+curl -k --location --request PATCH 'https://<your.jans.server>/jans-config-api/api/v1/attributes/<put_userPassword_inum_here>' \
+ --header 'Content-Type: application/json-patch+json' --header 'Authorization: Bearer <put_access_token_here>' \
+  --data-raw '[{
+    "op": "add",
+    "path": "/attributeValidation",
+    "value": {
+        "minLength": 8,
+        "maxLength":20,
+        "regexp": "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;'\'',?/*~$^+=<>]).{8,20}$"
+    }
+}]'
    ```
 
-
-
-# Create User 
-1. Create a new user using **User Management** screen.
-
-2. Enter user details.
-
-3. Enter password.
-
-4. Save user details.
-
+4. Create a new user using `/jans-config-api/mgt/configuser` endpoint.
 5. Error notification will be displayed if the password does not match the validation.
 
-![update default authentication method](../../assets/image-pwd-validation-notification.png)
+
+## Enable validation through TUI
+1.When using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure `userPassword` attribute validation , navigate via 
+`Auth Server`->`Attributes`->search for `userPassword` attribute->open the attribute details->enable `Enable Custom Validation` field-> Enter value for `Regular expression`, `Minimum Length` & `Maximum Length` fields->Save
+![update default authentication method](../../assets/image-pwd-enable-custom-validation.png)
+2. Create a new user using `Users` TUI menu.
+3. Error notification will be displayed if the password does not match the validation.
+
 
