@@ -62,6 +62,10 @@ class SQLBackend:
                 data_type = f"{data_type}({type_['size']})"
             return data_type
 
+        # probably JSON-like data type
+        if attr in self.client.sql_json_types:
+            return self.client.sql_json_types[attr][self.client.dialect]["type"]
+
         # data type is undefined, hence check from syntax
         syntax = self.client.get_attr_syntax(attr)
         syntax_def = self.client.sql_data_types_mapping[syntax]
