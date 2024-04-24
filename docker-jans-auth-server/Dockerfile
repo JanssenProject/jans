@@ -51,7 +51,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=1.1.2-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-16 07:12'
+ENV CN_BUILD_DATE='2024-04-24 15:39'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -103,7 +103,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=21e4cc39e71d78d35a01aa3143bfd3a3d2657047
+ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -126,7 +126,10 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && cp -R ${JANS_SETUP_DIR}/static/auth/conf /etc/certs \
     && mkdir -p /opt/jans/python/libs \
     && cp jans-casa/extras/casa-external_* /opt/jans/python/libs \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-lock /app/templates/
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-lock /app/templates/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # ======
 # Python
