@@ -10,15 +10,66 @@ User password validation can be set to check the password strength, like the pas
 By default the attribute validation is not enabled.  
 
 
-## Enable validation through Jans-Config-Api
+## Enable user password validation through Command Line Tool (CLI)
+1. Obtain the unique ID, that is inum for `userPassword` attribute.
+```shell
+/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args pattern:userPassword
+```
+    
+2. Obatin the PatchRequest schema
+```shell
+/opt/jans/jans-cli/config-cli.py --schema PatchRequest > /tmp/patch.json
+```
 
+3. Update `/tmp/patch.json` with user password validation details
+- Enter valid regex expression to check the strength of the password.
+- Enter **Minimum length**,the minimum length of a value associated with this attribute.
+- Enter **Maximum length**, the maximum length of a value associated with this attribute.
+Following is the example to have `userPassword` with minimum 8 characters, maximum 20 characters and should be alphanumeric with special characters.
+Example
+
+```shell
+[{
+    "op": "add",
+    "path": "/attributeValidation",
+    "value": {
+        "minLength": 5,
+        "maxLength":15,
+        "regexp": "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$"
+    }
+}]
+```
+
+4. Execute patch operation for `userPassword` attribute.
+```shell
+/opt/jans/jans-cli/config-cli.py --operation-id patch-attributes-by-inum --url-suffix="inum:AAEE" --data /tmp/patch.json
+```
+![update default authentication method](../../assets/image-pwd-enable-custom-validation-jans-cli.png)
+
+5. Create a new user using `post-user` operation.
+
+6. Error notification will be displayed if the password does not match the validation criteria.
+
+
+## Enable user password validation through Jans Text UI (TUI)
+1.When using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure `userPassword` attribute validation , navigate via 
+`Auth Server`->`Attributes`->search for `userPassword` attribute->open the attribute details->enable `Enable Custom Validation` field-> Enter value for `Regular expression`, `Minimum Length` & `Maximum Length` fields->Save
+![update default authentication method](../../assets/image-pwd-enable-custom-validation.png)
+
+2. Create a new user using `Users` TUI menu.
+
+3. Error notification will be displayed if the password does not match the validation criteria.
+
+
+## Enable user password validation through Jans Config API
 1. Obtain the access token
 ```shell
 curl -k -u "<put_client_id_here>:<put_config_api_client_secret_here>" https://<your.jans.server>/jans-auth/restv1/token \
      -d  "grant_type=client_credentials&scope=https://jans.io/oauth/config/attributes.write"
 ```
     
-2. Search for `userPassword` attribute to get its unique ID, that is inum.
+2. Obtain the unique ID, that is inum for `userPassword` attribute.
+```shell
 curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" \
   -H "Authorization:Bearer <put_access_token_here>" 
   -X GET https://<your.jans.server>/jans-config-api/api/v1/attributes?pattern=userPassword
@@ -29,7 +80,7 @@ curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" \
 - Enter **Minimum length**,the minimum length of a value associated with this attribute.
 - Enter **Maximum length**, the maximum length of a value associated with this attribute.
 Following is the example to have `userPassword` with minimum 8 characters, maximum 20 characters and should be alphanumeric with special characters.
-```
+```shell
 curl -k --location --request PATCH 'https://<your.jans.server>/jans-config-api/api/v1/attributes/<put_userPassword_inum_here>' \
  --header 'Content-Type: application/json-patch+json' --header 'Authorization: Bearer <put_access_token_here>' \
   --data-raw '[{
@@ -41,17 +92,8 @@ curl -k --location --request PATCH 'https://<your.jans.server>/jans-config-api/a
         "regexp": "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;'\'',?/*~$^+=<>]).{8,20}$"
     }
 }]'
-   ```
+```
 
 4. Create a new user using `/jans-config-api/mgt/configuser` endpoint.
-5. Error notification will be displayed if the password does not match the validation.
 
-
-## Enable validation through TUI
-1.When using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure `userPassword` attribute validation , navigate via 
-`Auth Server`->`Attributes`->search for `userPassword` attribute->open the attribute details->enable `Enable Custom Validation` field-> Enter value for `Regular expression`, `Minimum Length` & `Maximum Length` fields->Save
-![update default authentication method](../../assets/image-pwd-enable-custom-validation.png)
-2. Create a new user using `Users` TUI menu.
-3. Error notification will be displayed if the password does not match the validation.
-
-
+5. Error notification will be displayed if the password does not match the validation criteria.
