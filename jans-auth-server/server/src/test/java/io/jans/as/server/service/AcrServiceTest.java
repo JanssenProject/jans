@@ -53,6 +53,23 @@ public class AcrServiceTest {
     private AppConfiguration appConfiguration;
 
     @Test
+    public void removeParametersFromAgamaAcr_whenAcrHasParameters_shouldRemoveParameters() {
+        assertEquals(AcrService.removeParametersFromAgamaAcr("agama_flow-parameter1"), "agama_flow");
+        assertEquals(AcrService.removeParametersFromAgamaAcr("agama_io.jans.flow-parameter1"), "agama_io.jans.flow");
+        assertEquals(AcrService.removeParametersFromAgamaAcr("agama_io.jans.flow"), "agama_io.jans.flow");
+    }
+
+    @Test
+    public void removeParametersFromAgamaAcr_whenAuthzRequestIsWithAcrWithParameters_shouldRemoveParameters() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setAcrValues("agama_io.jans.flow-parameter1 acr2");
+
+        AcrService.removeParametersForAgamaAcr(authzRequest);
+
+        assertEquals(authzRequest.getAcrValues(), "agama_io.jans.flow acr2");
+    }
+
+    @Test
     public void isAgama_whenAcrIsNullOrNonAgama_shouldReturnFalse() {
         assertFalse(AcrService.isAgama(null));
         assertFalse(AcrService.isAgama(""));

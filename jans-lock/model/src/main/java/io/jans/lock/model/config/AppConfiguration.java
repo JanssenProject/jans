@@ -60,14 +60,14 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "PDP for policies")
 	private String policyConsumerType;
 
-    @DocProperty(description = "Access token to access Json Uris")
-	private String policiesJsonUrisAccessToken;
+    @DocProperty(description = "Authorization token to access Json Uris")
+	private String policiesJsonUrisAuthorizationToken;
 
-    @DocProperty(description = "List of Json Uris with policies")
+    @DocProperty(description = "List of Json Uris with link to Rego policies")
 	private List<String> policiesJsonUris;
 
-    @DocProperty(description = "Access token to access Zip Uris")
-	private String policiesZipUrisAccessToken;
+    @DocProperty(description = "Authorization token to access Zip Uris")
+	private String policiesZipUrisAuthorizationToken;
 
     @DocProperty(description = "List of Zip Uris with policies")
 	private List<String> policiesZipUris;
@@ -180,12 +180,12 @@ public class AppConfiguration implements Configuration {
 		this.policyConsumerType = policyConsumerType;
 	}
 
-	public String getPoliciesJsonUrisAccessToken() {
-		return policiesJsonUrisAccessToken;
+	public String getPoliciesJsonUrisAuthorizationToken() {
+		return policiesJsonUrisAuthorizationToken;
 	}
 
-	public void setPoliciesJsonUrisAccessToken(String policiesJsonUrisAccessToken) {
-		this.policiesJsonUrisAccessToken = policiesJsonUrisAccessToken;
+	public void setPoliciesJsonUrisAuthorizationToken(String policiesJsonUrisAuthorizationToken) {
+		this.policiesJsonUrisAuthorizationToken = policiesJsonUrisAuthorizationToken;
 	}
 
 	public List<String> getPoliciesJsonUris() {
@@ -196,12 +196,12 @@ public class AppConfiguration implements Configuration {
 		this.policiesJsonUris = policiesJsonUris;
 	}
 
-	public String getPoliciesZipUrisAccessToken() {
-		return policiesZipUrisAccessToken;
+	public String getPoliciesZipUrisAuthorizationToken() {
+		return policiesZipUrisAuthorizationToken;
 	}
 
-	public void setPoliciesZipUrisAccessToken(String policiesZipUrisAccessToken) {
-		this.policiesZipUrisAccessToken = policiesZipUrisAccessToken;
+	public void setPoliciesZipUrisAuthorizationToken(String policiesZipUrisAuthorizationToken) {
+		this.policiesZipUrisAuthorizationToken = policiesZipUrisAuthorizationToken;
 	}
 
 	public List<String> getPoliciesZipUris() {
