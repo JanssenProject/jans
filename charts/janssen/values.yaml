@@ -57,7 +57,7 @@ auth-server:
     limits:
       # -- CPU limit.
       cpu: 2500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to pass java-arguments, so please use `Mi`.
       memory: 2500Mi
     requests:
       # -- CPU request.
@@ -454,7 +454,7 @@ config-api:
     limits:
       # -- CPU limit.
       cpu: 1000m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to pass java-arguments, so please use `Mi`.
       memory: 1000Mi
     requests:
       # -- CPU request.
@@ -557,7 +557,7 @@ fido2:
     limits:
       # -- CPU limit.
       cpu: 500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to pass java-arguments, so please use `Mi`.
       memory: 500Mi
     requests:
       # -- CPU request.
@@ -665,7 +665,7 @@ casa:
     limits:
       # -- CPU limit.
       cpu: 500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to pass java-arguments, so please use `Mi`.
       memory: 500Mi
     requests:
       # -- CPU request.
@@ -1415,7 +1415,7 @@ scim:
     limits:
       # -- CPU limit.
       cpu: 1000m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to pass java-arguments, so please use `Mi`.
       memory: 1000Mi
     requests:
       # -- CPU request.
@@ -1524,7 +1524,7 @@ link:
     limits:
       # -- CPU limit.
       cpu: 500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to pass java-arguments, so please use `Mi`.
       memory: 1000Mi
     requests:
       # -- CPU request.
@@ -1631,7 +1631,7 @@ saml:
     limits:
       # -- CPU limit.
       cpu: 500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to pass java-arguments, so please use `Mi`.
       memory: 1000Mi
     requests:
       # -- CPU request.
