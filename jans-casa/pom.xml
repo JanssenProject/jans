@@ -25,7 +25,7 @@
         <ldapsdk.version>6.0.8</ldapsdk.version>
         <resteasy.version>6.0.3.Final</resteasy.version>
         <tika.version>2.6.0</tika.version>
-        <bc.version>1.74</bc.version>
+        <bc.version>1.78</bc.version>
         <!-- SonarCloud integration properties -->
         <sonar.projectKey>JanssenProject_jans-casa</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>

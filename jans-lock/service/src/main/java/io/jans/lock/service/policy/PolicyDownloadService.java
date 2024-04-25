@@ -119,7 +119,7 @@ public class PolicyDownloadService {
 
 	private void reloadUrisPolicies() {
 		log.debug("Starting URIs policies reload");
-		String policiesJsonUrisAccessToken = encryptionService.decrypt(appConfiguration.getPoliciesJsonUrisAccessToken(), true);
+		String policiesJsonUrisAuthorizationToken = encryptionService.decrypt(appConfiguration.getPoliciesJsonUrisAuthorizationToken(), true);
 		List<String> policiesJsonUris = appConfiguration.getPoliciesJsonUris();
 		if (policiesJsonUris == null) {
 			return;
@@ -134,8 +134,8 @@ public class PolicyDownloadService {
 			List<String> downloadedPolicies = new ArrayList<>();
 
 			HttpGet request = new HttpGet(policiesJsonUri);
-			if (StringHelper.isNotEmpty(policiesJsonUrisAccessToken)) {
-				request.setHeader("Authorization", "Bearer " + policiesJsonUrisAccessToken);
+			if (StringHelper.isNotEmpty(policiesJsonUrisAuthorizationToken)) {
+				request.setHeader("Authorization", "Bearer " + policiesJsonUrisAuthorizationToken);
 			}
 			try {
 				CloseableHttpClient httpClient = httpService.getHttpsClient();
@@ -152,7 +152,7 @@ public class PolicyDownloadService {
 					}
 					
 					for (JsonNode policyUri : policiesArray) {
-						String downloadedPolicy = downloadPolicy(policyUri.asText(), policiesJsonUrisAccessToken);
+						String downloadedPolicy = downloadPolicy(policyUri.asText(), policiesJsonUrisAuthorizationToken);
 						if (StringHelper.isNotEmpty(downloadedPolicy)) {
 							downloadedPolicies.add(downloadedPolicy);
 						}
@@ -180,7 +180,7 @@ public class PolicyDownloadService {
 
 	private void reloadZipPolicies() {
 		log.debug("Starting Zip policies reload");
-		String policiesZipUrisAccessToken = encryptionService.decrypt(appConfiguration.getPoliciesZipUrisAccessToken(), true);
+		String policiesZipUrisAuthorizationToken = encryptionService.decrypt(appConfiguration.getPoliciesZipUrisAuthorizationToken(), true);
 		List<String> policiesZipUris = appConfiguration.getPoliciesZipUris();
 		if (policiesZipUris == null) {
 			return;
@@ -195,8 +195,8 @@ public class PolicyDownloadService {
 			List<String> zipPolicies = new ArrayList<>();
 
 			HttpGet request = new HttpGet(policiesZipUri);
-			if (StringHelper.isNotEmpty(policiesZipUrisAccessToken)) {
-				request.setHeader("Authorization", "Bearer " + policiesZipUrisAccessToken);
+			if (StringHelper.isNotEmpty(policiesZipUrisAuthorizationToken)) {
+				request.setHeader("Authorization", "Bearer " + policiesZipUrisAuthorizationToken);
 			}
 			try {
 				CloseableHttpClient httpClient = httpService.getHttpsClient();
@@ -213,7 +213,7 @@ public class PolicyDownloadService {
 			            		continue;
 			            	}
 	
-			            	if (!fileName.endsWith(".json")) {
+			            	if (!fileName.endsWith(".rego")) {
 			            		continue;
 			            	}
 	
@@ -239,18 +239,18 @@ public class PolicyDownloadService {
 		
 		// Remove policies from unloaded policy Uris 
 		loadedPoliciesZipUris.removeAll(newPoliciesZipUris);
-		for (String policiesJsonUri : loadedPoliciesZipUris) {
-			policyConsumer.removePolicies(policiesJsonUri);
+		for (String policiesRegoUri : loadedPoliciesZipUris) {
+			policyConsumer.removePolicies(policiesRegoUri);
 		}
 		
 		loadedPoliciesZipUris = newPoliciesZipUris;
 		log.debug("End Zip policies reload");
 	}
 
-	private String downloadPolicy(String policyUri, String accessToken) {
+	private String downloadPolicy(String policyUri, String authorizationToken) {
 		HttpGet request = new HttpGet(policyUri);
-		if (StringHelper.isNotEmpty(accessToken)) {
-			request.setHeader("Authorization", "Bearer " + accessToken);
+		if (StringHelper.isNotEmpty(authorizationToken)) {
+			request.setHeader("Authorization", "Bearer " + authorizationToken);
 		}
 
 		try {
