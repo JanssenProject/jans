@@ -151,22 +151,22 @@ public class UserResource extends BaseResource {
             logger.info("User details to be added - customUser:{}, removeNonLDAPAttributes:{}", escapeLog(customUser),
                     removeNonLDAPAttributes);
         }
-
-        // get User object
-        User user = setUserAttributes(customUser);
-
-        // parse birthdate if present
-        userMgmtSrv.parseBirthDateAttribute(user);
-        logger.debug("Create  user:{}", user);
-
-        // checking mandatory attributes
-        checkMissingAttributes(user, null);
-        ignoreCustomAttributes(user, removeNonLDAPAttributes);
-        validateAttributes(user);
-
-        logger.info("Service call to create user:{}", user);
-
+        
         try {
+            // get User object
+            User user = setUserAttributes(customUser);
+
+            // parse birthdate if present
+            userMgmtSrv.parseBirthDateAttribute(user);
+            logger.debug("Create  user:{}", user);
+
+            // checking mandatory attributes
+            checkMissingAttributes(user, null);
+            ignoreCustomAttributes(user, removeNonLDAPAttributes);
+            validateAttributes(user);
+
+            logger.info("Service call to create user:{}", user);
+
             user = userMgmtSrv.addUser(user, true);
             logger.info("User created {}", user);
 
@@ -178,7 +178,7 @@ public class UserResource extends BaseResource {
             logger.info("newly created customUser:{}", customUser);
         }catch(WebApplicationException wex) {
             logger.error("ApplicationException while creating user is:{}, cause:{}", wex, wex.getCause());
-            throwInternalServerException("USER_CREATION_ERROR", wex);
+            throwInternalServerException("USER_CREATION_ERROR", wex.getMessage());
         }catch(Exception ex) {
             logger.error("Exception while creating user is:{}, cause:{}", ex, ex.getCause());
             throwInternalServerException(ex);
@@ -208,22 +208,22 @@ public class UserResource extends BaseResource {
                     removeNonLDAPAttributes);
         }
 
-      
-        // get User object
-        User user = setUserAttributes(customUser);
-
-        // parse birthdate if present
-        userMgmtSrv.parseBirthDateAttribute(user);
-        logger.debug("Create  user:{}", user);
-
-        // checking mandatory attributes
-        List<String> excludeAttributes = List.of(USER_PWD);
-        checkMissingAttributes(user, excludeAttributes);
-        ignoreCustomAttributes(user, removeNonLDAPAttributes);
-        validateAttributes(user);
-
-        logger.info("Call update user:{}", user);
         try {
+            // get User object
+            User user = setUserAttributes(customUser);
+
+            // parse birthdate if present
+            userMgmtSrv.parseBirthDateAttribute(user);
+            logger.debug("Create  user:{}", user);
+
+            // checking mandatory attributes
+            List<String> excludeAttributes = List.of(USER_PWD);
+            checkMissingAttributes(user, excludeAttributes);
+            ignoreCustomAttributes(user, removeNonLDAPAttributes);
+            validateAttributes(user);
+
+            logger.info("Call update user:{}", user);
+
             user = userMgmtSrv.updateUser(user);
             logger.info("Updated user:{}", user);
 
