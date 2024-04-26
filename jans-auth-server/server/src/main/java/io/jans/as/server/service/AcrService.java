@@ -52,8 +52,6 @@ public class AcrService {
     }
 
     public void validateAcrs(AuthzRequest authzRequest, Client client) throws AcrChangedException {
-        removeParametersForAgamaAcr(authzRequest);
-
         applyAcrMappings(authzRequest);
 
         checkClientAuthorizedAcrs(authzRequest, client);
