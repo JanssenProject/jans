@@ -16,6 +16,9 @@ import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
+import io.jans.util.exception.InvalidAttributeException;
+
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -176,14 +179,13 @@ public class UserResource extends BaseResource {
             // get custom user
             customUser = getCustomUser(user, removeNonLDAPAttributes);
             logger.info("newly created customUser:{}", customUser);
-        }catch(WebApplicationException wex) {
-            logger.error("ApplicationException while creating user is:{}, cause:{}", wex, wex.getCause());
-            throwInternalServerException("USER_CREATION_ERROR", wex.getMessage());
+       }catch(InvalidAttributeException iae) {
+            logger.error("ApplicationException while creating user is:{}, cause:{}", iae, iae.getCause());
+            throwInternalServerException("USER_CREATION_ERROR", iae.getMessage());
         }catch(Exception ex) {
             logger.error("Exception while creating user is:{}, cause:{}", ex, ex.getCause());
             throwInternalServerException(ex);
         }
-
         return Response.status(Response.Status.CREATED).entity(customUser).build();
     }
 
@@ -233,9 +235,9 @@ public class UserResource extends BaseResource {
             // get custom user
             customUser = getCustomUser(user, removeNonLDAPAttributes);
             logger.info("updated customUser:{}", customUser);
-        } catch (WebApplicationException wex) {
-            logger.error("ApplicationException while updating user is:{}, cause:{}", wex, wex.getCause());
-            throwInternalServerException("USER_UPDATE_ERROR", wex.getMessage());
+        } catch (InvalidAttributeException iae) {
+            logger.error("ApplicationException while updating user is:{}, cause:{}", iae, iae.getCause());
+            throwInternalServerException("USER_UPDATE_ERROR", iae.getMessage());
         }
         catch (Exception ex) {
             logger.error("Exception while updating user is:{}, cause:{}", ex, ex.getCause());
