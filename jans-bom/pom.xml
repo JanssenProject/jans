@@ -53,7 +53,7 @@
 
 		<guava.version>32.1.1-jre</guava.version>
 	
-		<aws.sns.version>1.12.448</aws.sns.version>
+		<aws.sns.version>1.12.708</aws.sns.version>
 		<jackrabbit.version>2.21.13</jackrabbit.version>
 
 		<bc.version>1.78</bc.version>
