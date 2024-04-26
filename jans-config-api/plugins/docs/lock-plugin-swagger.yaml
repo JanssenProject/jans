@@ -134,13 +134,13 @@ components:
           type: string
         policyConsumerType:
           type: string
-        policiesJsonUrisAuthorizationToken:
+        policiesJsonUrisAccessToken:
           type: string
         policiesJsonUris:
           type: array
           items:
             type: string
-        policiesZipUrisAuthorizationToken:
+        policiesZipUrisAccessToken:
           type: string
         policiesZipUris:
           type: array
