@@ -180,8 +180,8 @@ public class UserResource extends BaseResource {
             customUser = getCustomUser(user, removeNonLDAPAttributes);
             logger.info("newly created customUser:{}", customUser);
        }catch(InvalidAttributeException iae) {
-            logger.error("ApplicationException while creating user is:{}, cause:{}", iae, iae.getCause());
-            throwInternalServerException("USER_CREATION_ERROR", iae.getMessage());
+            logger.error("InvalidAttributeException while creating user is:{}, cause:{}", iae, iae.getCause());
+            throwBadRequestException("USER_CREATION_ERROR", iae.getMessage());
         }catch(Exception ex) {
             logger.error("Exception while creating user is:{}, cause:{}", ex, ex.getCause());
             throwInternalServerException(ex);
@@ -236,8 +236,8 @@ public class UserResource extends BaseResource {
             customUser = getCustomUser(user, removeNonLDAPAttributes);
             logger.info("updated customUser:{}", customUser);
         } catch (InvalidAttributeException iae) {
-            logger.error("ApplicationException while updating user is:{}, cause:{}", iae, iae.getCause());
-            throwInternalServerException("USER_UPDATE_ERROR", iae.getMessage());
+            logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
+            throwBadRequestException("USER_UPDATE_ERROR", iae.getMessage());
         }
         catch (Exception ex) {
             logger.error("Exception while updating user is:{}, cause:{}", ex, ex.getCause());
