@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:23.0.3@sha256:4f72a5b0c076755e806457d96404dd28dc1394013933d7170c154c26db9b6a16 as kc-src
+FROM quay.io/keycloak/keycloak:24.0.2@sha256:4f72a5b0c076755e806457d96404dd28dc1394013933d7170c154c26db9b6a16 as kc-src
 
 FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
 
@@ -24,7 +24,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # ==============
 
 ENV CN_VERSION=1.1.2-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-14 08:51'
+ENV CN_BUILD_DATE='2024-04-24 16:04'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
@@ -40,7 +40,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=21e4cc39e71d78d35a01aa3143bfd3a3d2657047
+ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -167,6 +167,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_SAML_JAVA_OPTIONS="" \
     CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
     CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
+    CN_SSL_CERT_FROM_SECRETS=true \
     KC_HEALTH_ENABLED=true \
     KC_METRICS_ENABLED=true \
     KC_LOG_LEVEL=INFO \

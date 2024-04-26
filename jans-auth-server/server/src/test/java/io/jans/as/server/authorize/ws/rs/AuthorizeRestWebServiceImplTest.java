@@ -56,6 +56,9 @@ public class AuthorizeRestWebServiceImplTest {
     private ErrorResponseFactory errorResponseFactory;
 
     @Mock
+    private AcrService acrService;
+
+    @Mock
     private AuthorizationGrantList authorizationGrantList;
 
     @Mock

@@ -4,4 +4,4 @@ click==8.1.7
 marshmallow==3.21.1
 fqdn==1.5.1
 pem==23.1.0
-git+https://github.com/JanssenProject/jans@21e4cc39e71d78d35a01aa3143bfd3a3d2657047#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
+git+https://github.com/JanssenProject/jans@19f0deb368617c344df24abeff0b913bbbfdd6b9#egg=jans-pycloudlib&subdirectory=jans-pycloudlib

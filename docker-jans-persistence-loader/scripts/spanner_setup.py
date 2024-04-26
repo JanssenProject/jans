@@ -38,9 +38,12 @@ class SpannerBackend:
 
     def get_data_type(self, attr, table=None):
         # check from SQL data types first
-        type_def = self.client.sql_data_types.get(attr)
+        for col in [f"{table}:{attr}", attr]:
+            type_def = self.client.sql_data_types.get(col)
 
-        if type_def:
+            if not type_def:
+                continue
+
             type_ = type_def.get(self.client.dialect)
 
             if table in type_.get("tables", {}):
@@ -50,6 +53,10 @@ class SpannerBackend:
             if "size" in type_:
                 data_type = f"{data_type}({type_['size']})"
             return data_type
+
+        # probably JSON-like data type
+        if attr in self.client.sql_json_types:
+            return self.client.sql_json_types[attr][self.client.dialect]["type"]
 
         # data type is undefined, hence check from syntax
         syntax = self.client.get_attr_syntax(attr)

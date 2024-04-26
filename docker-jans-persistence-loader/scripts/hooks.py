@@ -234,13 +234,13 @@ def transform_auth_dynamic_config_hook(conf, manager):
         conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Content-Type", None)
         should_update = True
 
-    # ensure agama_flow listed in authorizationRequestCustomAllowedParameters
-    if "agama_flow" not in [
+    # ensure agama_flow removed from authorizationRequestCustomAllowedParameters
+    if "agama_flow" in [
         p["paramName"] for p in conf["authorizationRequestCustomAllowedParameters"]
     ]:
-        conf["authorizationRequestCustomAllowedParameters"].append({
-            "paramName": "agama_flow", "returnInResponse": False,
-        })
+        conf["authorizationRequestCustomAllowedParameters"] = list(
+            itertools.takewhile(lambda p: p["paramName"] != "agama_flow", conf["authorizationRequestCustomAllowedParameters"])
+        )
         should_update = True
 
     # add missing agama-level keys
