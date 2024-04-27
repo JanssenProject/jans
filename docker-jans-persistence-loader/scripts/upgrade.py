@@ -369,6 +369,9 @@ class Upgrade:
             else:
                 props = agama_entry.attrs["jansConfProperty"]
 
+            if not isinstance(props, list):
+                props = [props]
+
             props = [json.loads(prop) for prop in props]
 
             # filter out unwanted properties
