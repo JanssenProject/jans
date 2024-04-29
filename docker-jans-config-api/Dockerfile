@@ -40,8 +40,9 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Config API
 # ==========
 
-ENV CN_VERSION=1.1.1
-ENV CN_BUILD_DATE='2024-04-15 05:00'
+ENV CN_VERSION=1.1.2-SNAPSHOT
+ENV CN_BUILD_DATE='2024-04-24 15:56'
+
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -77,7 +78,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=cee1cac845d5701e977a75dcf62d671561983516
+ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -110,7 +111,10 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/dynamic-conf.json /app/templates/jans-config-api/ \
     && cp ${JANS_SETUP_DIR}/setup_app/utils/printVersion.py /opt/jans/bin/printVersion.py \
     && ln -s /opt/jans/bin/printVersion.py /opt/jans/bin/show_version.py \
-    && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/templates/jans-config-api/
+    && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/templates/jans-config-api/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # ======
 # Python
@@ -221,7 +225,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_CONFIG_API_CREATE_SCOPES=true \
     CN_CONFIG_API_JETTY_PORT=8074 \
     CN_CONFIG_API_JETTY_HOST=0.0.0.0 \
-    CN_JETTY_ARGS=""
+    CN_JETTY_ARGS="" \
+    CN_SSL_CERT_FROM_SECRETS=true
 
 # ==========
 # misc stuff
@@ -232,7 +237,7 @@ EXPOSE $CN_CONFIG_API_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.1" \
+    org.opencontainers.image.version="1.1.2" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 
