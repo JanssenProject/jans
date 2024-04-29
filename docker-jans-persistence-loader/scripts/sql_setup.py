@@ -54,6 +54,9 @@ class SQLBackend:
 
             type_ = type_def.get(self.client.dialect) or type_def["mysql"]
 
+            if not type_:
+                continue
+
             if table in type_.get("tables", {}):
                 type_ = type_["tables"][table]
 

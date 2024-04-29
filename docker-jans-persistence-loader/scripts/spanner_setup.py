@@ -46,6 +46,9 @@ class SpannerBackend:
 
             type_ = type_def.get(self.client.dialect)
 
+            if not type_:
+                continue
+
             if table in type_.get("tables", {}):
                 type_ = type_["tables"][table]
 
