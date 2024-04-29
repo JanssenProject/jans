@@ -275,7 +275,7 @@ public class AuthenticationService {
         }
         try {
         	if ((ldapAuthConfigs != null) && (ldapAuthEntryManagers != null)) {
-		       	for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
+		       	for (int i = 0; i < ldapAuthConfigs.size(); i++) {
 		            GluuLdapConfiguration ldapAuthConfig = ldapAuthConfigs.get(i);
 		            PersistenceEntryManager ldapAuthEntryManager = ldapAuthEntryManagers.get(i);
 		
