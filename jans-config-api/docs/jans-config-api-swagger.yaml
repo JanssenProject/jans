@@ -8217,19 +8217,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanView:
+        selected:
           type: boolean
-        adminCanView:
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
-        selected:
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean

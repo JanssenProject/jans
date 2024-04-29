@@ -23,6 +23,7 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.common.*;
+import io.jans.as.server.service.AcrService;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.date.DateFormatterService;
@@ -159,9 +160,11 @@ public class IdTokenFactory {
 
         addTokenExchangeClaims(jwr, executionContext, session);
 
-        if (authorizationGrant.getAcrValues() != null) {
-            jwr.setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
-            setAmrClaim(jwr, authorizationGrant.getAcrValues());
+        String acrValues = authorizationGrant.getAcrValues();
+        acrValues = AcrService.removeParametersFromAgamaAcr(acrValues);
+        if (acrValues != null) {
+            jwr.setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, acrValues);
+            setAmrClaim(jwr, acrValues);
         }
         String nonce = executionContext.getNonce();
         if (StringUtils.isNotBlank(nonce)) {
