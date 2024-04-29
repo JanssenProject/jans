@@ -8219,19 +8219,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanView:
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
         userCanAccess:
           type: boolean
-        userCanView:
-          type: boolean
         whitePagesCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8650,6 +8650,10 @@ components:
           type: boolean
         useHighestLevelScriptIfAcrScriptNotFound:
           type: boolean
+        acrMappings:
+          type: object
+          additionalProperties:
+            type: string
         authenticationFiltersEnabled:
           type: boolean
         clientAuthenticationFiltersEnabled:
@@ -9830,10 +9834,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -10519,10 +10523,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

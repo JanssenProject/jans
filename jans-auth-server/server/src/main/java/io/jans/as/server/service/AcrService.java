@@ -60,6 +60,24 @@ public class AcrService {
         checkAcrChanged(authzRequest, identity.getSessionId()); // check after redirect uri is validated
     }
 
+    public static void removeParametersForAgamaAcr(AuthzRequest authzRequest) {
+        final List<String> acrValues = authzRequest.getAcrValuesList();
+        for (int i = 0; i < acrValues.size(); i++) {
+            final String acr = acrValues.get(i);
+            acrValues.set(i, removeParametersFromAgamaAcr(acr));
+        }
+
+        final String result = implode(acrValues, " ");
+        authzRequest.setAcrValues(result);
+    }
+
+    public static String removeParametersFromAgamaAcr(String acr) {
+        if (isAgama(acr)) {
+            return StringUtils.substringBefore(acr, "-");
+        }
+        return acr;
+    }
+
     public void checkClientAuthorizedAcrs(AuthzRequest authzRequest, Client client) {
         final List<String> authorizedAcrs = client.getAttributes().getAuthorizedAcrValues();
         if (authorizedAcrs.isEmpty()) {

@@ -9,6 +9,7 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
+import io.jans.as.model.util.Base64Util;
 import io.jans.inbound.oauth2.CodeGrantUtil;
 import io.jans.inbound.oauth2.OAuthParams;
 
@@ -37,7 +38,7 @@ import static org.testng.Assert.*;
 
 public class BaseTest {
     
-    private static String AGAMA_ACR = "agama";
+    private static String ACR_PREFIX = "agama_";
     private static Map<String, String> MAP = null;
 
     Logger logger = LogManager.getLogger(getClass());
@@ -63,7 +64,7 @@ public class BaseTest {
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         Properties prop = new Properties();
         prop.load(Files.newBufferedReader(Paths.get(propertiesFile), UTF_8));
-		        
+
         MAP = new Hashtable<>();
         //do not bother about empty keys... but
         //If a value is found null, this will throw a NPE since we are using a Hashtable
@@ -79,19 +80,17 @@ public class BaseTest {
         p.setClientId(MAP.get("clientId"));
         p.setRedirectUri(MAP.get("redirectUri"));
         p.setScopes(Collections.singletonList("openid"));
-
-        String queryParam = URLEncoder.encode(MAP.get("custParamName"), UTF_8);
         
-        StringBuilder builder = new StringBuilder(flowQName);        
+        StringBuilder builder = new StringBuilder(ACR_PREFIX);
+        builder.append(flowQName);
+
         if (inputs != null) {
             JSONObject jo = new JSONObject(inputs);
-            builder.append("-").append(jo.toString());
+            byte[] bytes = jo.toString().getBytes(UTF_8);
+            builder.append("-").append(Base64Util.base64urlencode(bytes));
         }
         
-        Map<String, String> custParams = new HashMap<>();
-        custParams.put("acr_values", AGAMA_ACR);
-        custParams.put(queryParam, builder.toString());        
-        p.setCustParamsAuthReq(custParams);        
+        p.setCustParamsAuthReq(Map.of("acr_values", builder.toString()));        
         
         String url = null; 
         CodeGrantUtil grant = new CodeGrantUtil(p);
