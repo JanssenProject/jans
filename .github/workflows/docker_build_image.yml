@@ -223,6 +223,7 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Sign the images with GitHub OIDC Token
+        if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         env:
           DIGEST: ${{ steps.docker_build.outputs.digest }}
           TAGS: ${{ steps.prep.outputs.tags }}
