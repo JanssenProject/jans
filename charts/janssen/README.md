@@ -85,7 +85,7 @@ Kubernetes: `>=v1.22.0-0`
 | auth-server.replicas | int | `1` | Service replica number. |
 | auth-server.resources | object | `{"limits":{"cpu":"2500m","memory":"2500Mi"},"requests":{"cpu":"2500m","memory":"2500Mi"}}` | Resource specs. |
 | auth-server.resources.limits.cpu | string | `"2500m"` | CPU limit. |
-| auth-server.resources.limits.memory | string | `"2500Mi"` | Memory limit. |
+| auth-server.resources.limits.memory | string | `"2500Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | auth-server.resources.requests.cpu | string | `"2500m"` | CPU request. |
 | auth-server.resources.requests.memory | string | `"2500Mi"` | Memory request. |
 | auth-server.topologySpreadConstraints | object | `{}` | Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ |
@@ -115,7 +115,7 @@ Kubernetes: `>=v1.22.0-0`
 | casa.replicas | int | `1` | Service replica number. |
 | casa.resources | object | `{"limits":{"cpu":"500m","memory":"500Mi"},"requests":{"cpu":"500m","memory":"500Mi"}}` | Resource specs. |
 | casa.resources.limits.cpu | string | `"500m"` | CPU limit. |
-| casa.resources.limits.memory | string | `"500Mi"` | Memory limit. |
+| casa.resources.limits.memory | string | `"500Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | casa.resources.requests.cpu | string | `"500m"` | CPU request. |
 | casa.resources.requests.memory | string | `"500Mi"` | Memory request. |
 | casa.topologySpreadConstraints | object | `{}` | Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ |
@@ -145,7 +145,7 @@ Kubernetes: `>=v1.22.0-0`
 | config-api.replicas | int | `1` | Service replica number. |
 | config-api.resources | object | `{"limits":{"cpu":"1000m","memory":"1000Mi"},"requests":{"cpu":"1000m","memory":"1000Mi"}}` | Resource specs. |
 | config-api.resources.limits.cpu | string | `"1000m"` | CPU limit. |
-| config-api.resources.limits.memory | string | `"1000Mi"` | Memory limit. |
+| config-api.resources.limits.memory | string | `"1000Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | config-api.resources.requests.cpu | string | `"1000m"` | CPU request. |
 | config-api.resources.requests.memory | string | `"1000Mi"` | Memory request. |
 | config-api.topologySpreadConstraints | object | `{}` | Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ |
@@ -262,7 +262,7 @@ Kubernetes: `>=v1.22.0-0`
 | fido2.replicas | int | `1` | Service replica number. |
 | fido2.resources | object | `{"limits":{"cpu":"500m","memory":"500Mi"},"requests":{"cpu":"500m","memory":"500Mi"}}` | Resource specs. |
 | fido2.resources.limits.cpu | string | `"500m"` | CPU limit. |
-| fido2.resources.limits.memory | string | `"500Mi"` | Memory limit. |
+| fido2.resources.limits.memory | string | `"500Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | fido2.resources.requests.cpu | string | `"500m"` | CPU request. |
 | fido2.resources.requests.memory | string | `"500Mi"` | Memory request. |
 | fido2.service.name | string | `"http-fido2"` | The name of the fido2 port within the fido2 service. Please keep it as default. |
@@ -452,7 +452,7 @@ Kubernetes: `>=v1.22.0-0`
 | link.replicas | int | `1` | Service replica number. |
 | link.resources | object | `{"limits":{"cpu":"500m","memory":"1000Mi"},"requests":{"cpu":"500m","memory":"1000Mi"}}` | Resource specs. |
 | link.resources.limits.cpu | string | `"500m"` | CPU limit. |
-| link.resources.limits.memory | string | `"1000Mi"` | Memory limit. |
+| link.resources.limits.memory | string | `"1000Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | link.resources.requests.cpu | string | `"500m"` | CPU request. |
 | link.resources.requests.memory | string | `"1000Mi"` | Memory request. |
 | link.topologySpreadConstraints | object | `{}` | Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ |
@@ -566,7 +566,7 @@ Kubernetes: `>=v1.22.0-0`
 | saml.replicas | int | `1` | Service replica number. |
 | saml.resources | object | `{"limits":{"cpu":"500m","memory":"1000Mi"},"requests":{"cpu":"500m","memory":"1000Mi"}}` | Resource specs. |
 | saml.resources.limits.cpu | string | `"500m"` | CPU limit. |
-| saml.resources.limits.memory | string | `"1000Mi"` | Memory limit. |
+| saml.resources.limits.memory | string | `"1000Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | saml.resources.requests.cpu | string | `"500m"` | CPU request. |
 | saml.resources.requests.memory | string | `"1000Mi"` | Memory request. |
 | saml.topologySpreadConstraints | object | `{}` | Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ |
@@ -595,7 +595,7 @@ Kubernetes: `>=v1.22.0-0`
 | scim.readinessProbe.httpGet.path | string | `"/jans-scim/sys/health-check"` | http readiness probe endpoint |
 | scim.replicas | int | `1` | Service replica number. |
 | scim.resources.limits.cpu | string | `"1000m"` | CPU limit. |
-| scim.resources.limits.memory | string | `"1000Mi"` | Memory limit. |
+| scim.resources.limits.memory | string | `"1000Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | scim.resources.requests.cpu | string | `"1000m"` | CPU request. |
 | scim.resources.requests.memory | string | `"1000Mi"` | Memory request. |
 | scim.service.name | string | `"http-scim"` | The name of the scim port within the scim service. Please keep it as default. |
