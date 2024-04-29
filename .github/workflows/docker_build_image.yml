@@ -48,6 +48,7 @@ jobs:
   docker:
     permissions:
       packages: write
+      id-token: write
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 8
