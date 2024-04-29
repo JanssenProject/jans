@@ -234,4 +234,4 @@ jobs:
           for tag in ${TAGS}; do
             images+="${tag}@${DIGEST} "
           done
-          cosign sign --yes -a author=JanssenProject 
+          cosign sign --yes -a author=JanssenProject ${images}
