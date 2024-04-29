@@ -6,8 +6,10 @@ tags:
 ---
 
 # Password validation
-User password validation can be set to check the password strength, like the password must have at least one uppercase, or lowercase, number, and the length of the password
-By default the attribute validation is not enabled.  
+User password validation can be set to check the password strength,
+like the password must have at least one uppercase, or lowercase, number, and
+the length of the password.
+By default, the password attribute validation is not enabled.
 
 
 ## Enable user password validation through Command Line Tool (CLI)
@@ -15,18 +17,18 @@ By default the attribute validation is not enabled.
 ```shell
 /opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args pattern:userPassword
 ```
-    
+
 2. Obatin the PatchRequest schema
 ```shell
 /opt/jans/jans-cli/config-cli.py --schema PatchRequest > /tmp/patch.json
 ```
 
 3. Update `/tmp/patch.json` with user password validation details
-- Enter valid regex expression to check the strength of the password.
-- Enter **Minimum length**,the minimum length of a value associated with this attribute.
+- Enter a valid regex expression to check the strength of the password.
+- Enter **Minimum length**, the minimum length of a value associated with this attribute.
 - Enter **Maximum length**, the maximum length of a value associated with this attribute.
-Following is the example to have `userPassword` with minimum 8 characters, maximum 20 characters and should be alphanumeric with special characters.
-Example
+  Following is the example of having `userPassword` with minimum 8 characters, maximum 20 characters and should be alphanumeric with special characters.
+  Example
 
 ```shell
 [{
@@ -48,17 +50,17 @@ Example
 
 5. Create a new user using `post-user` operation.
 
-6. Error notification will be displayed if the password does not match the validation criteria.
+6. An error notification will be displayed if the password does not match the validation criteria.
 
 
 ## Enable user password validation through Jans Text UI (TUI)
-1.When using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure `userPassword` attribute validation , navigate via 
-`Auth Server`->`Attributes`->search for `userPassword` attribute->open the attribute details->enable `Enable Custom Validation` field-> Enter value for `Regular expression`, `Minimum Length` & `Maximum Length` fields->Save
+1.When using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure `userPassword` attribute validation , navigate via
+`Auth Server`->`Attributes`->search for `userPassword` attribute->open the attribute details->enable `Enable Custom Validation` field-> Enter a value for `Regular expression`, `Minimum Length` & `Maximum Length` fields->Save
 ![update default authentication method](../../assets/image-pwd-enable-custom-validation.png)
 
 2. Create a new user using `Users` TUI menu.
 
-3. Error notification will be displayed if the password does not match the validation criteria.
+3. An error notification will be displayed if the password does not match the validation criteria.
 
 
 ## Enable user password validation through Jans Config API
@@ -67,7 +69,7 @@ Example
 curl -k -u "<put_client_id_here>:<put_config_api_client_secret_here>" https://<your.jans.server>/jans-auth/restv1/token \
      -d  "grant_type=client_credentials&scope=https://jans.io/oauth/config/attributes.write"
 ```
-    
+
 2. Obtain the unique ID, that is inum for `userPassword` attribute.
 ```shell
 curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" \
@@ -76,10 +78,10 @@ curl -k -i -H "Accept: application/json" -H "Content-Type: application/json" \
 ```
 
 3. Apply Patch for `userPassword`, use inum as path parameter
-- Enter valid regex expression to check the strength of the password.
-- Enter **Minimum length**,the minimum length of a value associated with this attribute.
+- Enter a valid regex expression to check the strength of the password.
+- Enter **Minimum length**, the minimum length of a value associated with this attribute.
 - Enter **Maximum length**, the maximum length of a value associated with this attribute.
-Following is the example to have `userPassword` with minimum 8 characters, maximum 20 characters and should be alphanumeric with special characters.
+  Following is the example of having `userPassword` with minimum 8 characters, maximum 20 characters, and should be alphanumeric with special characters.
 ```shell
 curl -k --location --request PATCH 'https://<your.jans.server>/jans-config-api/api/v1/attributes/<put_userPassword_inum_here>' \
  --header 'Content-Type: application/json-patch+json' --header 'Authorization: Bearer <put_access_token_here>' \
@@ -96,4 +98,4 @@ curl -k --location --request PATCH 'https://<your.jans.server>/jans-config-api/a
 
 4. Create a new user using `/jans-config-api/mgt/configuser` endpoint.
 
-5. Error notification will be displayed if the password does not match the validation criteria.
+5. An error notification will be displayed if the password does not match the validation criteria.
