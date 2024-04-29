@@ -355,7 +355,7 @@ public class AppInitializer {
      * Utility method which can be used in custom scripts
      */
     public PersistenceEntryManager createPersistenceAuthEntryManager(GluuLdapConfiguration persistenceAuthConfig) {
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory();
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class);
         Properties persistenceConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig, persistenceEntryManagerFactory.getPersistenceType());
 
         PersistenceEntryManager persistenceAuthEntryManager =
