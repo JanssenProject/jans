@@ -49,6 +49,8 @@
     "validateSignature",
     "singleLogoutServiceUrl",
     "nameIDPolicyFormat",
+	"principalAttribute",
+	"principalType",
     "idpEntityId",
     "singleSignOnServiceUrl",
     "encryptionPublicKey"
