@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   check-prs-issue:
-    if:  startsWith(github.head_ref, 'release-') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true
+    if:  startsWith(github.head_ref, 'release-') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true && github.repository == 'JanssenProject/jans'
     name: Check PRs issue
     runs-on: ubuntu-latest
     permissions:
