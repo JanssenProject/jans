@@ -21,6 +21,8 @@ jobs:
     # OR
     # when already merged PR is labeled with backport labels
     if: >
+      github.repository == 'JanssenProject/jans'
+      &&
       github.event.pull_request.merged
       && (
         github.event.action == 'closed'
