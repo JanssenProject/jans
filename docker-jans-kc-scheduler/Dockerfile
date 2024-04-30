@@ -103,8 +103,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
-    CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
-    CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
     CN_SSL_CERT_FROM_SECRETS=true
 
 # ==========

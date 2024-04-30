@@ -17,7 +17,7 @@
     <appender name="STDOUT" class="ConsoleAppender">
       <encoder class="PatternLayoutEncoder">
         <charset>UTF-8</charset>
-        <pattern>jans-kc-scheduler - %date{ISO8601}:%-5level [%logger:%line] - %msg%n%ex{short}</pattern>
+        <pattern>${app.logging.prefix}%date{ISO8601}:%-5level [%logger:%line] - %msg%n%ex{short}</pattern>
       </encoder>
     </appender>
 
@@ -47,7 +47,6 @@
     </logger>
 
     <root level="${app.logging.level.root:-INFO}">
-      <appender-ref ref="STDOUT"/>
-      <!-- <appender-ref ref="FILE"/> -->
+      <appender-ref ref="${app.logging.target.root}"/>
     </root>
 </configuration>
