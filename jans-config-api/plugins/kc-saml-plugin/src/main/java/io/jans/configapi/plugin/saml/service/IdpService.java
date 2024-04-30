@@ -233,6 +233,18 @@ public class IdpService {
             //While creating set store token to be true
             identityProvider.setStoreToken(true);
             identityProvider.setAddReadTokenRoleOnCreate(true);
+
+            if (StringUtils.isBlank(identityProvider.getNameIDPolicyFormat())) {
+                identityProvider.setNameIDPolicyFormat(Constants.NAME_ID_POLICY_FORMAT_DEFAULT_VALUE);
+            }
+
+            if (StringUtils.isBlank(identityProvider.getPrincipalAttribute())) {
+                identityProvider.setPrincipalAttribute(Constants.PRINCIPAL_ATTRIBUTE_DEFAULT_VALUE);
+            }
+
+            if (StringUtils.isBlank(identityProvider.getPrincipalType())) {
+                identityProvider.setPrincipalType(Constants.PRINCIPAL_TYPE_DEFAULT_VALUE);
+            }
         }
 
         log.info("After setting default value for identityProvider:{}, update:{}", identityProvider, update);
