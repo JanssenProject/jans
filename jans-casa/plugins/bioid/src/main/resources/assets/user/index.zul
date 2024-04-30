@@ -16,6 +16,7 @@
             <section class="${css.section}">
                 <div class="${css.panel}">
                     <h2 class="f4 dark-blue2">${labels.bioid_title}</h2>
+                    <p>${labels.bioid_text}</p>
                         <z:button href="interlude.zul?start=true"
                             class="${css.primaryButton} lh-tight mr2" target="_blank"
                             label="Start Enrollment Flow" />
