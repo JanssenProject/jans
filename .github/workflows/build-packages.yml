@@ -6,6 +6,7 @@ on:
     - 'v**'
 jobs:
   publish_binary_packages:
+    if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
@@ -143,6 +144,7 @@ jobs:
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
   build_python_packages:
+    if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-20.04
     steps:
     - name: Harden Runner
@@ -213,6 +215,7 @@ jobs:
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
         key: ${{ github.sha }}
   upload_python_packages:
+    if: github.repository == 'JanssenProject/jans'
     needs: build_python_packages
     runs-on: ubuntu-20.04
     strategy:
@@ -293,6 +296,7 @@ jobs:
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
   build_demo_packages:
+    if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner

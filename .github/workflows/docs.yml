@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   docs:
-    if: github.repository_owner == 'JanssenProject'
+    if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
@@ -55,6 +55,7 @@ jobs:
           fi
 
   check_pr:
+    if: github.repository == 'JanssenProject/jans'
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
@@ -111,6 +112,7 @@ jobs:
           
 
   lint_docs:
+    if: github.repository == 'JanssenProject/jans'
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest

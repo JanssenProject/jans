@@ -36,6 +36,7 @@ on:
       - 'jans-link/**'
 jobs:
   build:
+    if: github.repository == 'JanssenProject/jans'
     name: Build wars
     runs-on: ubuntu-latest
     continue-on-error: true
