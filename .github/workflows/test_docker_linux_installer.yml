@@ -112,7 +112,7 @@ jobs:
         name: java-${{ matrix.persistence-backends }}-test-results
         path: "/${{ matrix.persistence-backends }}-reports/*.xml"
 
-    - uses: dorny/test-reporter@1e3a380fe6f25600635b111ddb3547864782656a # v1
+    - uses: dorny/test-reporter@e1a31eb7a0c78439a9eb245286815dfb7f24c132 # v1
       continue-on-error: true
       if: >-
           github.event.pull_request.head.repo.full_name == github.repository ||
