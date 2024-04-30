@@ -29,8 +29,9 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # Casa
 # ====
 
-ENV CN_VERSION=1.1.1
-ENV CN_BUILD_DATE='2024-04-15 05:09'
+ENV CN_VERSION=1.1.2-SNAPSHOT
+ENV CN_BUILD_DATE='2024-04-24 16:05'
+
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
 # Install Casa
@@ -46,7 +47,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-casa/webapps \
 
 # casa plugins
 RUN mkdir -p ${JETTY_BASE}/jans-casa/plugins \
-    && for casa_plugin in strong-authn-settings authorized-clients custom-branding; \
+    && for casa_plugin in acct-linking authorized-clients bioid-plugin custom-branding email_2fa_core strong-authn-settings; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/casa/plugins/${casa_plugin}/${CN_VERSION}/${casa_plugin}-${CN_VERSION}-jar-with-dependencies.jar" -O "${JETTY_BASE}/jans-casa/plugins/${casa_plugin}-${CN_VERSION}.jar"; \
     done
@@ -55,7 +56,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-casa/plugins \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=cee1cac845d5701e977a75dcf62d671561983516
+ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CASA_EXTRAS_DIR=jans-casa/extras
 
@@ -83,7 +84,10 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-casa/* /app/templates/jans-casa/ \
-    && cp ${JANS_CASA_EXTRAS_DIR}/Casa.py /app/static/extension/person_authentication/
+    && cp ${JANS_CASA_EXTRAS_DIR}/Casa.py /app/static/extension/person_authentication/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # ======
 # Python
@@ -188,7 +192,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_JACKRABBIT_ADMIN_ID=admin \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     CN_CASA_JAVA_OPTIONS="" \
-    CN_SSL_CERT_FROM_SECRETS=false \
     GOOGLE_PROJECT_ID="" \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
@@ -202,7 +205,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_CASA_JETTY_PORT=8080 \
     CN_CASA_JETTY_HOST=0.0.0.0 \
     CN_SHARE_AUTH_CONF=true \
-    CN_JETTY_ARGS=""
+    CN_JETTY_ARGS="" \
+    CN_SSL_CERT_FROM_SECRETS=true
 
 # ==========
 # misc stuff
@@ -213,7 +217,7 @@ EXPOSE $CN_CASA_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/casa" \
     org.opencontainers.image.authors="Gluu Inc. <support@gluu.org>" \
     org.opencontainers.image.vendor="Gluu Federation" \
-    org.opencontainers.image.version="1.1.1" \
+    org.opencontainers.image.version="1.1.2" \
     org.opencontainers.image.title="Janssen Casa" \
     org.opencontainers.image.description="Self-service portal for people to manage their account security preferences in the Janssen, like 2FA"
 

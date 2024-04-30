@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.stream.*;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
@@ -67,16 +67,15 @@ public class JansUtil {
         return pluginConfiguration.getScimClientSecret();
     }
 
-    public String getScimOauthScope() {
+    public List<String> getScimOauthScopes() {
         log.debugv("JansUtil::getScimOauthScope() - {0}",
-                pluginConfiguration.getScimOauthScope());
-        return pluginConfiguration.getScimOauthScope();
+                pluginConfiguration.getScimOauthScopes());
+        return pluginConfiguration.getScimOauthScopes();
     }
 
     public String requestScimAccessToken() throws IOException {
         log.debug("JansUtil::requestScimAccessToken() ");
-        List<String> scopes = new ArrayList<>();
-        scopes.add(getScimOauthScope());
+        List<String> scopes = getScimOauthScopes();
         String token = requestAccessToken(getScimClientId(), scopes);
         log.debugv("JansUtil::requestScimAccessToken() - token:{0} ", token);
         return token;

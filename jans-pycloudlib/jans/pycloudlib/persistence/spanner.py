@@ -294,6 +294,9 @@ class SpannerClient(SqlSchemaMixin):
         type_ = self.sql_data_types.get(key, {})
 
         if not type_:
+            type_ = self.sql_json_types.get(key, {})
+
+        if not type_:
             attr_syntax = self.get_attr_syntax(key)
             type_ = self.sql_data_types_mapping[attr_syntax]
 

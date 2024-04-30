@@ -54,6 +54,9 @@ class SQLBackend:
 
             type_ = type_def.get(self.client.dialect) or type_def["mysql"]
 
+            if not type_:
+                continue
+
             if table in type_.get("tables", {}):
                 type_ = type_["tables"][table]
 
@@ -61,6 +64,10 @@ class SQLBackend:
             if "size" in type_:
                 data_type = f"{data_type}({type_['size']})"
             return data_type
+
+        # probably JSON-like data type
+        if attr in self.client.sql_json_types:
+            return self.client.sql_json_types[attr][self.client.dialect]["type"]
 
         # data type is undefined, hence check from syntax
         syntax = self.client.get_attr_syntax(attr)

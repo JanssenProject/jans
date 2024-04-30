@@ -7,20 +7,32 @@ import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.model.user.authenticator.UserAuthenticatorList;
 
 @DataEntry
 @ObjectClass("jansPerson")
 public class BioIdPersonModel extends BasePerson {
 
-    @JsonObject
-    @AttributeName(name = "jansCredential")
-    private Map<String, Map<String, Object>> jansCredential;
+    @AttributeName(name = "jansExtUid")
+    private String[] externalUid;
 
-    public Map<String, Map<String, Object>> getJansCredential() {
-        return jansCredential;
+    @AttributeName(name = "jansAuthenticator")
+    @JsonObject
+    private UserAuthenticatorList authenticatorList;
+
+    public String[] getExternalUid() {
+        return externalUid;
     }
 
-    public void setJansCredential(Map<String, Map<String, Object>> jansCredential) {
-        this.jansCredential = jansCredential;
+    public void setExternalUid(String[] externalUid) {
+        this.externalUid = externalUid;
+    }
+
+    public UserAuthenticatorList getAuthenticatorList() {
+        return authenticatorList;
+    }
+
+    public void setAuthenticatorList(UserAuthenticatorList authenticatorList) {
+        this.authenticatorList = authenticatorList;
     }
 }
