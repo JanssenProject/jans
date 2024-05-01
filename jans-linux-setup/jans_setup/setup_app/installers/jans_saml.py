@@ -274,6 +274,8 @@ class JansSamlInstaller(JettyInstaller):
 
         scheduler_starter_script_source = os.path.join(Config.staticFolder, 'system/systemd/kc-scheduler.sh')
         self.copyFile(scheduler_starter_script_source, os.path.join(Config.scheduler_dir, 'bin'))
+        self.copyFile(self.source_files[8][0], os.path.join(Config.scheduler_dir, 'lib'))
+
         self.run([paths.cmd_chmod, '+x', os.path.join(Config.scheduler_dir, 'bin', os.path.basename(scheduler_starter_script_source))])
 
         # configuration rendering identifiers
