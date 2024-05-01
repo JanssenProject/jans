@@ -43,7 +43,7 @@ Each property part of the JSON object `io.jans.casa.acctlinking.Launcher` holds 
 
 In this case, we are populating the configuration of an OAuth-based provider called "Goooogle". 
 
-The tables shown in [this](https://github.com/JanssenProject/jans/blob/main/docs/agama-catalog/jans/inboundID/README.md#supply-configurations) page list all possible properties to configure a provider. Particularly, two properties deserve the most detail:
+The tables shown in [this](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/agama-catalog/jans/inboundID/README.md#supply-configurations) page list all possible properties to configure a provider. Particularly, two properties deserve the most detail:
 
 1. `flowQname`. Agama projects are made up of flows - think of small "web journeys". This property must contain the name of an existing flow capable of interfacing with the identity provider of interest. Often, there is no need to write such "interfacing" flow. The below are ready-to-use and cover most of real-world cases, specifically  OpenId/OAuth providers that support the **authorization code grant** (see section 1.3 of [rfc6749](https://www.ietf.org/rfc/rfc6749)):
 
@@ -59,7 +59,7 @@ The tables shown in [this](https://github.com/JanssenProject/jans/blob/main/docs
 
 ## Configuring attribute mappings
 
-An introduction to attribute mapping can be found [here](https://github.com/JanssenProject/jans/blob/main/docs/agama-catalog/jans/inboundID/README.md#attribute-mappings). Unless an elaborated processing of attributes is required, a basic knowledge of Java language suffices to write a useful mapping.
+An introduction to attribute mapping can be found [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/agama-catalog/jans/inboundID/README.md#attribute-mappings). Unless an elaborated processing of attributes is required, a basic knowledge of Java language suffices to write a useful mapping.
 
 To write a mapping, you can use the samples provided as a guideline (see folder `lib/io/jans/casa/acctlinking` in the Agama accounts linking project). You can add your mapping in the same file or create a new Java class for this purpose.  Then save your changes, re-package (zip) the project, re-deploy, and update (re-import) the configuration if necessary.
 
