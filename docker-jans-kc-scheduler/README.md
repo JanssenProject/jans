@@ -57,7 +57,6 @@ The following environment variables are supported by the container:
 - `CN_AWS_SECRETS_ENDPOINT_URL`: The URL of AWS secretsmanager service (if omitted, will use the one in specified region).
 - `CN_AWS_SECRETS_PREFIX`: The prefix name of the secrets (default to `jans`).
 - `CN_AWS_SECRETS_REPLICA_FILE`: The location of file contains replica regions definition (if any). This file is mostly used in primary region. Example of contents of the file: `[{"Region": "us-west-1"}]`.
-- `CN_KC_SCHEDULER_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
 - `AWS_DEFAULT_REGION`: The default AWS Region to use, for example, `us-west-1` or `us-west-2`.
 - `AWS_SHARED_CREDENTIALS_FILE`: The location of the shared credentials file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 - `AWS_CONFIG_FILE`: The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
@@ -66,12 +65,22 @@ The following environment variables are supported by the container:
 
 ### Configure app loggers
 
-App loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.
+There are logging levels that can be customized via Java system property, as listed below:
 
-Supported redirect target:
+| Name                                      | Default value |
+|-------------------------------------------|---------------|
+| `app.logging.level.root`                  | `INFO`        |
+| `app.logging.level.apache.http.client`    | `INFO`        |
+| `app.logging.level.apache.http.wire`      | `INFO`        |
+| `app.logging.level.apache.http.header`    | `INFO`        |
 
-- `STDOUT`
-- `FILE`
+To change the value, pass Java system property via `CN_KC_SCHEDULER_JAVA_OPTIONS` environment variable into the container/pod.
+
+Example:
+
+```
+CN_KC_SCHEDULER_JAVA_OPTIONS=-Dapp.logging.level.root=DEBUG -Dapp.logging.level.apache.http.client=DEBUG
+```
 
 Supported level:
 
@@ -80,21 +89,3 @@ Supported level:
 - `INFO`
 - `DEBUG`
 - `TRACE`
-
-The following key-value pairs are the defaults:
-
-```json
-{
-    "scheduler_log_target": "STDOUT",
-    "scheduler_log_level": "INFO",
-    "http_client_log_level": "INFO",
-    "http_wire_log_level": "INFO",
-    "http_header_log_level": "INFO"
-}
-```
-
-To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
-
-```
-{"scheduler_log_target":"STDOUT","enable_stdout_log_prefix":true}
-```

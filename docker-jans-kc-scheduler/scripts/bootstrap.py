@@ -1,6 +1,6 @@
-import json
 import logging.config
 import os
+import shutil
 from string import Template
 
 from jans.pycloudlib import get_manager
@@ -37,9 +37,6 @@ def render_config_props():
         "keycloak_client_id": "admin-cli",
     }
 
-    # merge context from logging configuration
-    ctx.update(configure_logging())
-
     with open("/app/templates/kc-scheduler/config.properties") as f:
         tmpl = Template(f.read())
 
@@ -47,63 +44,10 @@ def render_config_props():
         f.write(tmpl.safe_substitute(ctx))
 
 
-def configure_logging():
-    config = {
-        "scheduler_log_target": "STDOUT",
-        "scheduler_log_level": "INFO",
-        "http_client_log_level": "INFO",
-        "http_wire_log_level": "INFO",
-        "http_header_log_level": "INFO",
-        "log_prefix": "",
-    }
-
-    # pre-populate custom config; format is JSON string of ``dict``
-    try:
-        custom_config = json.loads(os.environ.get("CN_KC_SCHEDULER_APP_LOGGERS", "{}"))
-    except json.decoder.JSONDecodeError as exc:
-        logger.warning(f"Unable to load logging configuration from environment variable; reason={exc}; fallback to defaults")
-        custom_config = {}
-
-    # ensure custom config is ``dict`` type
-    if not isinstance(custom_config, dict):
-        logger.warning("Invalid data type for CN_KC_SCHEDULER_APP_LOGGERS; fallback to defaults")
-        custom_config = {}
-
-    # list of supported levels; OFF is not supported
-    log_levels = ("FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE",)
-
-    # list of supported outputs
-    log_targets = ("STDOUT", "FILE",)
-
-    for k, v in custom_config.items():
-        if k not in config:
-            continue
-
-        if k.endswith("_log_level") and v not in log_levels:
-            logger.warning(f"Invalid {v} log level for {k}; fallback to defaults")
-            v = config[k]
-
-        if k.endswith("_log_target") and v not in log_targets:
-            logger.warning(f"Invalid {v} log output for {k}; fallback to defaults")
-            v = config[k]
-
-        # update the config
-        config[k] = v
-
-    if any([
-        as_boolean(custom_config.get("enable_stdout_log_prefix")),
-        as_boolean(os.environ.get("CN_ENABLE_STDOUT_LOG_PREFIX"))
-    ]):
-        config["log_prefix"] = "jans-kc-scheduler - "
-
-    with open("/app/templates/kc-scheduler/logback.xml") as f:
-        txt = f.read()
-
-    with open("/opt/kc-scheduler/conf/logback.xml", "w") as f:
-        f.write(txt)
-
-    # emit context
-    return config
+def render_logback_config():
+    src = "/app/templates/kc-scheduler/logback.xml"
+    dst = "/opt/kc-scheduler/conf/logback.xml"
+    shutil.copyfile(src, dst)
 
 
 def main():
@@ -123,7 +67,7 @@ def main():
     )
 
     render_config_props()
-    configure_logging()
+    render_logback_config()
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 <configuration debug="false">
 
     <variable name="app.home" value="${app.home:-/opt/kc-scheduler}"/>
-    <variable file="${app.home}/conf/config.properties"/>
+    <!-- <variable file="${app.home}/conf/config.properties"/> -->
     <variable name="app.logdir" value="${app.home}/logs"/>
 
     <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
@@ -17,7 +17,7 @@
     <appender name="STDOUT" class="ConsoleAppender">
       <encoder class="PatternLayoutEncoder">
         <charset>UTF-8</charset>
-        <pattern>${app.logging.prefix}%date{ISO8601}:%-5level [%logger:%line] - %msg%n%ex{short}</pattern>
+        <pattern>jans-kc-scheduler - %date{ISO8601}:%-5level [%logger:%line] - %msg%n%ex{short}</pattern>
       </encoder>
     </appender>
 
@@ -47,6 +47,6 @@
     </logger>
 
     <root level="${app.logging.level.root:-INFO}">
-      <appender-ref ref="${app.logging.target.root}"/>
+      <appender-ref ref="${app.logging.target.root:-STDOUT}"/>
     </root>
 </configuration>
