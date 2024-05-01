@@ -110,6 +110,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
         jansProgress.register(self)
 
         Config.install_time_ldap = time.strftime('%Y%m%d%H%M%SZ', time.gmtime(time.time()))
+        Config.jans_version = base.current_app.app_info['JANS_APP_VERSION']
+
         if not os.path.exists(Config.distFolder):
             print("Please ensure that you are running this script inside Jans container.")
             sys.exit(1)
@@ -654,6 +656,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('opa', 'install_opa'),
                         ('saml', 'install_jans_saml'),
                         ('jans-keycloak-link', 'install_jans_keycloak_link'),
+                        ('kc-scheduler', 'install_jans_saml'),
                         ]
         service_listr = service_list[:]
         service_listr.reverse()
