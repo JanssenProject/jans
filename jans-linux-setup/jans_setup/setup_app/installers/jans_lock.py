@@ -84,7 +84,6 @@ class JansLockInstaller(JettyInstaller):
             self.logIt(f"Adding plugin {plugin_name} to jans-auth")
             self.copyFile(plugin, base.current_app.JansAuthInstaller.custom_lib_dir)
             plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
-            base.current_app.JansAuthInstaller.add_extra_class(plugin_class_path)
             self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
 
     def render_import_templates(self):

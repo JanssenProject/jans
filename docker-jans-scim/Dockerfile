@@ -40,8 +40,10 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # SCIM
 # ====
 
-ENV CN_VERSION=1.1.1
-ENV CN_BUILD_DATE='2024-04-15 04:56'
+
+ENV CN_VERSION=1.1.2-SNAPSHOT
+ENV CN_BUILD_DATE='2024-04-24 15:51'
+
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -59,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=cee1cac845d5701e977a75dcf62d671561983516
+ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
@@ -89,7 +91,10 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/jans-scim/configuration.ldif /app/templates/jans-scim/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-scim/dynamic-conf.json /app/templates/jans-scim/ \
     && cp ${JANS_SETUP_DIR}/templates/jans-scim/static-conf.json /app/templates/jans-scim/ \
-    && cp ${JANS_SCIM_RESOURCE_DIR}/jans-scim-openapi.yaml /app/templates/jans-scim/
+    && cp ${JANS_SCIM_RESOURCE_DIR}/jans-scim-openapi.yaml /app/templates/jans-scim/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # ======
 # Python
@@ -197,7 +202,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_SCIM_JETTY_PORT=8080 \
     CN_SCIM_JETTY_HOST=0.0.0.0 \
-    CN_JETTY_ARGS=""
+    CN_JETTY_ARGS="" \
+    CN_SSL_CERT_FROM_SECRETS=true
 
 # ==========
 # misc stuff
@@ -208,7 +214,7 @@ EXPOSE $CN_SCIM_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/scim" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.1" \
+    org.opencontainers.image.version="1.1.2" \
     org.opencontainers.image.title="Janssen SCIM" \
     org.opencontainers.image.description="SCIM server"
 

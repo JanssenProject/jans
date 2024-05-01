@@ -5,7 +5,7 @@
 
 	<groupId>io.jans.casa.plugins</groupId>
 	<artifactId>${plugin.id}</artifactId>
-	<version>1.1.1</version>
+	<version>1.1.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -76,25 +76,36 @@
 			<artifactId>casa-config</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>agama-inbound</artifactId>
-            <version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-model</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>*</groupId>
 					<artifactId>*</artifactId>
 				</exclusion>
 			</exclusions>
-        </dependency>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>agama-inbound</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	
-        <dependency>
-            <groupId>com.nimbusds</groupId>
-            <artifactId>oauth2-oidc-sdk</artifactId>
-            <version>11.7</version>
-            <scope>provided</scope>
-        </dependency>
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>oauth2-oidc-sdk</artifactId>
+			<version>11.7</version>
+			<scope>provided</scope>
+       		 </dependency>
 	</dependencies>
-
 </project>
