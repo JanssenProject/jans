@@ -119,12 +119,12 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/kc-scheduler" \
     org.opencontainers.image.description=""
 
 RUN mkdir -p /etc/certs \
-    /etc/jans/conf \
-    /usr/share/java
+    /etc/jans/conf
 
 COPY templates /app/templates/
 COPY scripts /app/scripts
-RUN chmod +x /app/scripts/entrypoint.sh
+RUN chmod +x /app/scripts/entrypoint.sh \
+    && ln -sf /app/scripts/entrypoint.sh ${SCHEDULER_HOME}/bin/kc-scheduler.sh
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
 
@@ -135,7 +135,6 @@ RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jans
 RUN chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
     && chmod 664 /opt/java/lib/security/cacerts \
-    && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/kc-scheduler
 
 USER 1000
@@ -143,4 +142,4 @@ USER 1000
 RUN mkdir -p $HOME/.config/gcloud
 
 ENTRYPOINT ["tini", "-e", "143", "-g", "--"]
-CMD ["sh", "/app/scripts/entrypoint.sh"]
+CMD ["sh", "/opt/kc-scheduler/bin/kc-scheduler.sh"]
