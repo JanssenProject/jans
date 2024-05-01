@@ -43,7 +43,7 @@ As an example, connect to your server and run `python3 /opt/jans/jans-cli/jans_c
  
 **Important notes**:
 
-- Usage of OTP via SMS requires the setup of a [Twilio](https://twilio.com) account and extra configuration of the custom script. Check [this](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/twilio-2fa/README.md) document for reference
+- Usage of OTP via SMS requires the setup of a [Twilio](https://twilio.com) account and extra configuration of the custom script. Check [this](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/twilio-2fa/README.md) document for reference
 - Usage of Super Gluu has some [preliminar requisites](https://docs.gluu.org/head/supergluu/admin-guide/) and requires extra configuration of the custom script 
 
 ### Enable methods in Casa
