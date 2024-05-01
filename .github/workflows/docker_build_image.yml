@@ -26,9 +26,9 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link"'
+        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler"'
         required: true
-        default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link'
+        default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler'
       cn_version:
         description: 'The war version to build the image off'
         required: false
@@ -53,7 +53,7 @@ jobs:
     strategy:
       max-parallel: 8
       matrix:
-        docker-images: ["auth-server", "certmanager", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "saml", "keycloak-link"]
+        docker-images: ["auth-server", "certmanager", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "saml", "keycloak-link", "kc-scheduler"]
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
@@ -78,7 +78,7 @@ jobs:
           DEFAULT_ALL=${{ github.event.inputs.services }}
           if [ -z "$DEFAULT_ALL" ]
           then
-            DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link"
+            DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-saml docker-jans-keycloak-link docker-jans-kc-scheduler"
           else
             echo "$DEFAULT_ALL"
           fi
@@ -148,7 +148,7 @@ jobs:
           # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
           if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
             if [[ ${{ github.event_name != 'pull_request' }} ]]; then
-              TEMP_IMG="auth-server certmanager config-api configurator fido2 persistence-loader scim monolith loadtesting-jmeter link casa saml keycloak-link"
+              TEMP_IMG="auth-server certmanager config-api configurator fido2 persistence-loader scim monolith loadtesting-jmeter link casa saml keycloak-link kc-scheduler"
               for i in $TEMP_IMG; do
                 echo "Waiting for $i to be built"
                 sleep 30
