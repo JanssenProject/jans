@@ -1,4 +1,4 @@
-# Strong Authentication Settings Plugin
+# 2FA Settings Plugin
 
 ## Overview
 This plugin allows administrators to configure how and when 2FA is applied. Admins may:
