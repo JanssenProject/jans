@@ -12,6 +12,7 @@ import java.util.Map;
 
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.util.AttributeConstants;
+import io.jans.configapi.model.configuration.AssetMgtConfiguration;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.model.SearchRequest;
@@ -62,7 +63,10 @@ public class AssetService {
 
     @Inject
     DBDocumentService dbDocumentService;
-
+    
+    @Inject
+    AssetMgtConfiguration assetMgtConfiguration;
+    
     public String getDnForAsset(String inum) throws Exception {
         return dbDocumentService.getDnForDocument(inum);
     }
@@ -169,11 +173,12 @@ public class AssetService {
         }
 
         // copy asset on jans-server
-        try (InputStream ins = getInputStream(bos)) {
-            String result = copyAssetOnServer(asset, ins);
-            log.info("Result of asset saved on server :{}", result);
+        if (isAssetServerUploadEnabled()) {
+            try (InputStream ins = getInputStream(bos)) {
+                String result = copyAssetOnServer(asset, ins);
+                log.info("Result of asset saved on server :{}", result);
+            }
         }
-
 
         // Get final asset
         asset = this.getAssetByInum(asset.getInum());
@@ -349,6 +354,23 @@ public class AssetService {
 
     private InputStream getInputStream(ByteArrayOutputStream bos) {
         return authUtil.getInputStream(bos);
+    }
+    
+    private boolean isAssetServerUploadEnabled() {
+        return this.assetMgtConfiguration.isAssetServerUploadEnabled();
+    }
+    
+    private String getServerDirectory(Document asset) {
+        String path = null;
+        if(asset == null) {
+            return path;
+        }
+        
+        List<String> serviceModules = asset.getJansModuleProperty();
+        for(String service : serviceModules) {
+            //To do
+        }
+        return path;
     }
 
 }
