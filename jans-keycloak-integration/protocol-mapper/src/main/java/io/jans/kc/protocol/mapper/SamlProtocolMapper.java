@@ -20,7 +20,7 @@ import org.keycloak.protocol.saml.mappers.SAMLAttributeStatementMapper;
 
 
 
-public class JansSamlProtocolMapper extends AbstractSAMLProtocolMapper implements SAMLAttributeStatementMapper {
+public class SamlProtocolMapper extends AbstractSAMLProtocolMapper implements SAMLAttributeStatementMapper {
     
     private static final String DISPLAY_TYPE = "User Attribute";
     private static final String DISPLAY_CATEGORY = "User Attribute Mapper";

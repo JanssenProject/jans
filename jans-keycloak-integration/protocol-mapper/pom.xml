@@ -9,7 +9,7 @@
   <parent>
     <groupId>io.jans</groupId>
     <artifactId>jans-kc-parent</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2-SNAPSHOT</version>
   </parent>
 
   <prerequisites>
@@ -44,13 +44,7 @@
       <artifactId>keycloak-saml-core-public</artifactId>
     </dependency>
     <!-- end keycloak dependencies-->
-
-    <!-- jans dependencies -->
-    <dependency>
-      <groupId>io.jans</groupId>
-      <artifactId>jans-orm-standalone</artifactId>
-    </dependency>
-    <!-- end jans dependencies -->
+    
   </dependencies>
 
   <build>
