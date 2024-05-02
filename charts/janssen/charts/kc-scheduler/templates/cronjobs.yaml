@@ -186,7 +186,9 @@ spec:
                   path: ldap_password
           {{- end }}
           restartPolicy: Never
+          {{- if not .Values.global.isFqdnRegistered }}
           hostAliases:
             - ip: {{ .Values.global.lbIp }}
               hostnames:
                 - {{ .Values.global.fqdn }}
+          {{- end }}

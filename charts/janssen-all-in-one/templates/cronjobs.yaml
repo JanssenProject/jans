@@ -333,8 +333,10 @@ spec:
                 secretName: {{ .Release.Name }}-sql-pass
           {{- end }}
           restartPolicy: Never
+          {{- if not .Values.isFqdnRegistered  }}
           hostAliases:
             - ip: {{ .Values.lbIp }}
               hostnames:
                 - {{ .Values.fqdn }}
+          {{- end }}
 {{- end }}
