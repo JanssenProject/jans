@@ -373,6 +373,7 @@ def extract_file(zip_file, source, target, ren=False):
                 target_p = Path(target).joinpath(p.name)
                 if not target_p.parent.exists():
                     target_p.parent.mkdir(parents=True)
+            logIt(f"Extracting {source} from {zip_file} to {target}")
             target_p.write_bytes(zip_obj.read(member))
             break
     zip_obj.close()
