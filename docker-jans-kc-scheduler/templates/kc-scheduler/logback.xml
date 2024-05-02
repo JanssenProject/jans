@@ -47,6 +47,7 @@
     </logger>
 
     <root level="${app.logging.level.root:-INFO}">
-      <appender-ref ref="${app.logging.target.root:-STDOUT}"/>
+      <appender-ref ref="STDOUT"/>
+      <appender-ref ref="FILE"/>
     </root>
 </configuration>
