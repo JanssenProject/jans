@@ -50,8 +50,13 @@ public class TrustRelationshipSyncJob extends RecurringJob {
     @Override
     public void run(ExecutionContext context) {
         
-        try {
+        performSyncTasks();
+    }
 
+    
+    private void performSyncTasks() {
+
+        try {
             log.debug("Performing Saml client housekeeping");
             performSamlClientsHousekeeping();
             log.debug("Saml client housekeeping complete");
