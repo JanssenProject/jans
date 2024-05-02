@@ -12,6 +12,8 @@ import java.util.Map;
 
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.util.AttributeConstants;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
+import io.jans.configapi.model.configuration.AssetDirMapping;
 import io.jans.configapi.model.configuration.AssetMgtConfiguration;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AuthUtil;
@@ -32,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -39,6 +42,7 @@ import jakarta.inject.Named;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -65,7 +69,7 @@ public class AssetService {
     DBDocumentService dbDocumentService;
     
     @Inject
-    AssetMgtConfiguration assetMgtConfiguration;
+    private ApiAppConfiguration appConfiguration;
     
     public String getDnForAsset(String inum) throws Exception {
         return dbDocumentService.getDnForDocument(inum);
@@ -326,24 +330,30 @@ public class AssetService {
             throw new InvalidConfigurationException("Asset stream is null!");
         }
 
-        String path = asset.getDescription();
-        String fileName = asset.getDisplayName();
-        String documentStoreModuleName = fileName;
-        log.info("path:{}, fileName:{}, documentStoreModuleName:{}", path, fileName, documentStoreModuleName);
-
-        if (StringUtils.isBlank(path)) {
-            throw new InvalidConfigurationException("Path to copy the asset is null!");
-        }
-
-        if (StringUtils.isBlank(fileName)) {
+     
+        List<String> serviceModules = asset.getJansModuleProperty();
+        String assetFileName = asset.getDisplayName();
+        String documentStoreModuleName = assetFileName;
+        log.info("serviceModules:{}, assetFileName:{}, documentStoreModuleName:{}", serviceModules, assetFileName);
+        
+        if (StringUtils.isBlank(assetFileName)) {
             throw new InvalidConfigurationException("Asset name is null!");
         }
+        
+        for(String serviceName : serviceModules) {
+        
 
-        String filePath = path + File.separator + fileName;
-        log.info("documentStoreService:{}, filePath:{}", documentStoreService, filePath);
-        result = documentStoreService.saveDocumentStream(filePath, null, stream, List.of(documentStoreModuleName));
+        String assetDirectory = this.getServiceAssetDirectory(assetFileName, serviceName);
+        log.info("assetDirectory:{}", assetDirectory);
+        
+        if (StringUtils.isBlank(assetDirectory)) {
+            throw new InvalidConfigurationException("Directory to save asset is null!");
+        }
+        
+
+        result = documentStoreService.saveDocumentStream(assetDirectory, null, stream, List.of(documentStoreModuleName));
         log.info("Asset saving result:{}", result);
-
+        }
         return result;
 
     }
@@ -357,20 +367,59 @@ public class AssetService {
     }
     
     private boolean isAssetServerUploadEnabled() {
-        return this.assetMgtConfiguration.isAssetServerUploadEnabled();
+        return  this.appConfiguration.getAssetMgtConfiguration().isAssetServerUploadEnabled();
     }
     
-    private String getServerDirectory(Document asset) {
+    private String getServiceAssetDirectory(String assetFileName, String serviceName) {
+        
+        log.info("For getting service directory assetFileName:{}, serviceName:{}", assetFileName, serviceName);
+        
         String path = null;
-        if(asset == null) {
+        if(StringUtils.isBlank(assetFileName) || StringUtils.isBlank(serviceName) || this.appConfiguration==null || this.appConfiguration.getAssetMgtConfiguration()==null) {
             return path;
         }
+ 
+        AssetMgtConfiguration assetMgtConfiguration = this.appConfiguration.getAssetMgtConfiguration();
+        StringBuilder sb = new StringBuilder(assetMgtConfiguration.getAssetBaseDirectory());
+        String assetDir = getAssetDirectory(assetFileName);
         
-        List<String> serviceModules = asset.getJansModuleProperty();
-        for(String service : serviceModules) {
-            //To do
+        log.info("assetMgtConfiguration:{}, sb:{}, assetDir:{}", assetMgtConfiguration, sb, assetDir);
+        if(StringUtils.isNotBlank(assetDir)) {
+            sb.append(File.separator);
+            sb.append(assetDir);
         }
+        String baseDir = sb.toString();
+        path = String.format(baseDir, serviceName);
+            
         return path;
+
+    }
+   
+    private String getAssetDirectory(String assetFileName) {
+        log.info("Get asset Directory for assetFileName:{}", assetFileName);
+        
+        String directory = null;
+        if(StringUtils.isBlank(assetFileName) || this.appConfiguration==null || this.appConfiguration.getAssetMgtConfiguration()==null) {
+            return directory;
+        }
+        
+        List<AssetDirMapping> dirMapping = this.appConfiguration.getAssetMgtConfiguration().getAssetDirMapping();
+        log.info("Get asset Directory - dirMapping:{}", dirMapping);
+        if(dirMapping==null || dirMapping.isEmpty()) {
+            return directory;
+        }
+        String fileExtension = FilenameUtils.getExtension(assetFileName);
+        log.info("Get asset Directory - fileExtension:{}", fileExtension);
+        
+        Optional<AssetDirMapping> assetDirMapping = dirMapping.stream().filter(e -> e.getType().contains(fileExtension)).findFirst();
+        log.info("Get asset Directory - assetDirMapping.isPresent():{}", assetDirMapping.isPresent());
+        
+        if(assetDirMapping==null || assetDirMapping.isEmpty()) {
+            return directory;
+        }
+        
+        directory = assetDirMapping.isPresent()? assetDirMapping.get().getDirectory():null;
+        return directory;
     }
 
 }
