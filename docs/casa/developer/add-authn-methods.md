@@ -17,7 +17,7 @@ The main script supports backtracking: if a user is asked to present a specific 
 
 ### Script requisites
 
-To code the script corresponding to the authentication method to add, use the `.py` script found [here](https://github.com/JanssenProject/jans/tree/main/jans-casa/plugins/samples/sample-cred) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
+To code the script corresponding to the authentication method to add, use the `.py` script found [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
 
 - For step 1, `prepareForStep` must only return `True`  
 - For step 1, `getExtraParametersForStep` must only return `None`  
@@ -55,7 +55,7 @@ Depending on the answers, you may like to start instead with plugin development 
 
 ## Enrollment plugin
 
-Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/main/jans-casa/plugins/samples/sample-cred) as a template to start the work. Ensure you have a development environment with:
+Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred) as a template to start the work. Ensure you have a development environment with:
 
 - Java 11 or higher
 - Maven 3.8
@@ -66,7 +66,7 @@ Coding a Casa plugin is mainly a Java development task. You can use the "Sample 
 
 Start with deploying the plugin to get acquainted with the process:
 
-1. Download the `sample-cred` project folder to the local development machine and `cd` to it. You can download the jans repository [here](https://github.com/JanssenProject/jans/archive/refs/heads/main.zip)
+1. Download the `sample-cred` project folder to the local development machine and `cd` to it. You can download the jans repository [here](https://github.com/JanssenProject/jans/archive/refs/heads/vreplace-janssen-version.zip)
 1. Run `mvn -o -Dmaven.test.skip package`
 1. This will generate a `target` folder with a couple of jar files in it
 
