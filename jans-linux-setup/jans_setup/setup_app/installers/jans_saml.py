@@ -269,7 +269,7 @@ class JansSamlInstaller(JettyInstaller):
         #unpack libs
         base.unpack_zip(self.source_files[7][0], os.path.join(Config.scheduler_dir, 'lib'))
         for s_config in ('config.properties', 'logback.xml'):
-            base.extract_file(self.source_files[8][0], f'{s_config}.sample', os.path.join(Config.scheduler_dir, 'conf'))
+            base.extract_file(base.current_app.jans_zip, f'jans-keycloak-integration/job-scheduler/src/main/resources/{s_config}.sample', os.path.join(Config.scheduler_dir, 'conf'))
             os.rename(os.path.join(Config.scheduler_dir, 'conf', f'{s_config}.sample'), os.path.join(Config.scheduler_dir, 'conf', s_config))
 
         scheduler_starter_script_source = os.path.join(Config.staticFolder, 'system/systemd/kc-scheduler.sh')
