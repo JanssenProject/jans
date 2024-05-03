@@ -85,7 +85,7 @@
       {
         "directory": "libs",
         "type": [
-          "lib"
+          "jar"
         ],
         "description": "java archive library."
       },
