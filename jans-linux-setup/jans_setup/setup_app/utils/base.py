@@ -81,6 +81,8 @@ if not (os_type and os_version):
 
 os_name = os_type + os_version
 deb_sysd_clone = os_name.startswith(('ubuntu', 'debian'))
+cron_service = 'crond' if os_type in ['centos', 'red', 'fedora'] else 'cron'
+
 
 # Determine service path
 if (os_type in ('centos', 'red', 'fedora', 'suse') and os_initdaemon == 'systemd') or deb_sysd_clone:

@@ -49,7 +49,7 @@ class JansSamlInstaller(JettyInstaller):
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.systemd_units = ['kc', 'kc-scheduler']
+        self.systemd_units = ['kc']
         self.register_progess()
 
         self.saml_enabled = True
@@ -262,6 +262,8 @@ class JansSamlInstaller(JettyInstaller):
 
     def install_keycloak_scheduler(self):
 
+        scheduler_templates_dir = os.path.join(self.templates_folder, 'kc-scheduler')
+
         # create directories
         for _ in ('bin', 'conf', 'lib', 'logs'):
             self.createDirs(os.path.join(Config.scheduler_dir, _))
@@ -272,15 +274,12 @@ class JansSamlInstaller(JettyInstaller):
             base.extract_file(base.current_app.jans_zip, f'jans-keycloak-integration/job-scheduler/src/main/resources/{s_config}.sample', os.path.join(Config.scheduler_dir, 'conf'))
             os.rename(os.path.join(Config.scheduler_dir, 'conf', f'{s_config}.sample'), os.path.join(Config.scheduler_dir, 'conf', s_config))
 
-        scheduler_starter_script_source = os.path.join(Config.staticFolder, 'system/systemd/kc-scheduler.sh')
-        self.copyFile(scheduler_starter_script_source, os.path.join(Config.scheduler_dir, 'bin'))
         self.copyFile(self.source_files[8][0], os.path.join(Config.scheduler_dir, 'lib'))
-
-        self.run([paths.cmd_chmod, '+x', os.path.join(Config.scheduler_dir, 'bin', os.path.basename(scheduler_starter_script_source))])
 
         # configuration rendering identifiers
         _, jans_auth_config = self.dbUtils.get_oxAuthConfDynamic()
         self.check_clients([('kc_scheduler_api_client_id', '2102.')])
+
         rendering_dict = {
                 'api_url': f'https://{Config.hostname}/jans-config-api',
                 'token_endpoint': jans_auth_config['tokenEndpoint'],
@@ -294,8 +293,27 @@ class JansSamlInstaller(JettyInstaller):
                 'keycloak_admin_password': Config.admin_password,
                 'keycloak_client_id': 'admin-cli',
             }
+
         config_properties_fn = os.path.join(Config.scheduler_dir, 'conf','config.properties')
         config_properties_s = self.render_template(config_properties_fn, pystring=True, rendering_dict=rendering_dict)
         self.writeFile(config_properties_fn, config_properties_s, backup=False)
-
         self.chown(Config.scheduler_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+
+        # render start script
+        self.renderTemplateInOut(
+            os.path.join(scheduler_templates_dir, 'kc-scheduler.sh'),
+            scheduler_templates_dir,
+            os.path.join(Config.scheduler_dir, 'bin')
+            )
+
+        self.run([paths.cmd_chmod, '+x', os.path.join(Config.scheduler_dir, 'bin/kc-scheduler.sh')])
+
+        # render contab entry and restart cron service
+        self.renderTemplateInOut(
+            os.path.join(scheduler_templates_dir, 'kc-scheduler-cron'),
+            scheduler_templates_dir,
+            '/etc/cron.d'
+            )
+
+        if not Config.installed_instance:
+            self.restart(base.cron_service)

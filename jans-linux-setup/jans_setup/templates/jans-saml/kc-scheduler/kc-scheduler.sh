@@ -1,5 +1,9 @@
 #! /bin/bash
 
+JAVA_HOME=%(jre_home)s
+SCHEDULER_HOME=%(scheduler_dir)s
+SCHEDULER_VERSION=v%(jans_version)s
+
 APP_CONFIG_FILE=${SCHEDULER_HOME}/conf/config.properties
 LOG_CONFIG_FILE=${SCHEDULER_HOME}/conf/logback.xml
 

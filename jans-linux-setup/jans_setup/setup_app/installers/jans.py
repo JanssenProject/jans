@@ -572,8 +572,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 self.run([paths.cmd_chmod, '640', p.as_posix()])
 
         if not Config.installed_instance:
-            cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
-            self.restart(cron_service)
+            self.restart(base.cron_service)
 
         # if we are running inside shiv package, copy site pacakages to /opt/dist/jans-setup-packages and add to sys path
 
