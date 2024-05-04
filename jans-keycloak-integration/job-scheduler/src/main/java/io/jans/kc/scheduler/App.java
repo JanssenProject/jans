@@ -49,6 +49,7 @@ public class App {
     private static KeycloakApiFactory keycloakApiFactory = null;
 
     private static boolean running = false;
+    private static boolean isCronJob = true;
     /*
      * Entry point 
      */
@@ -69,23 +70,24 @@ public class App {
             log.debug("Initialization additional application objects");
             SAXUtils.init();
 
-            log.debug("Initializing scheduler ");
-            jobScheduler = createJobScheduler(config);
-            startJobScheduler(jobScheduler);
-
-            log.debug("Starting jans trust relationship sync job");
-            startJansTrustRelationshipSyncJob(config);
-
-
-
-            log.debug("Performing post-startup operations");
-            performPostStartupOperations();
-
-            log.debug("Application startup successful");
-            while(running) {
-                Thread.sleep(1000);
+            if(isCronJob) {
+                log.info("Running as cron, skiping scheduler initialization");
+                runCronJobs();
+                log.info("Jobs run to completion.");
+            }else {
+                log.info("Not running as cron job. Initializing scheduler");
+                jobScheduler = createJobScheduler(config);
+                startJobScheduler(jobScheduler);
+                log.debug("Starting jans trust relationship sync job");
+                startJansTrustRelationshipSyncJob(config);
+                log.debug("Performing post-startup operations");
+                performPostStartupOperations();
+                log.info("Application startup successful");
+                while(running) {
+                    Thread.sleep(1000);
+                }
             }
-            log.debug("Application shutting down");
+            log.info("Application shutthing down");
         }catch(StartupError e) {
             log.error("Application startup failed",e);
             if(jobScheduler != null) {
@@ -157,6 +159,14 @@ public class App {
         }catch(AppConfigException e) {
             throw new StartupError("Could not create quartz job scheduler",e);
         }
+    }
+
+    private static final void runCronJobs() {
+
+        log.debug("Running trust relationship sync cron job");
+        TrustRelationshipSyncJob trsyncjob = new TrustRelationshipSyncJob();
+        trsyncjob.run(null);
+        log.debug("Trust relationship sync cron job complete");
     }
 
     private static final void performPostStartupOperations() {
