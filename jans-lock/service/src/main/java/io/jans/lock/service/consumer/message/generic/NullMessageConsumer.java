@@ -1,4 +1,4 @@
-package io.jans.lock.service.consumer.message;
+package io.jans.lock.service.consumer.message.generic;
 
 import org.slf4j.Logger;
 

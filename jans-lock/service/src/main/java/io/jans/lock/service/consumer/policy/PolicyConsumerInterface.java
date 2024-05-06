@@ -4,7 +4,7 @@
  * Copyright (c) 2023, Janssen Project
  */
 
-package io.jans.service.policy.consumer;
+package io.jans.lock.service.consumer.policy;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
  * 
  * @author Yuriy Movchan Date: 12/20/2023
  */
-public interface MessagePolicyInterface {
+public interface PolicyConsumerInterface {
 	
 	public boolean putPolicies(String sourceUri, List<String> policies);
 
