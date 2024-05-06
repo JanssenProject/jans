@@ -136,6 +136,15 @@ public class SimpleUser extends BaseEntry implements Serializable {
 
     public String getAttribute(String attributeName) {
         Object objectAttribute = getAttributeObject(attributeName);
+        
+        // This code part we need to remove in future. It's for compatibility with existing scripts.
+        if ((objectAttribute == null) && attributeName.equalsIgnoreCase("jansExtUid")) {
+        	String[] externalUids = getExternalUid();
+        	if ((externalUids != null) && (externalUids.length > 0)) {
+        		return externalUids[0];
+        	}
+        	
+        }
 
         return StringHelper.toString(objectAttribute);
     }
