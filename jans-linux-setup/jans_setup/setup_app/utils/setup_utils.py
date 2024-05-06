@@ -493,9 +493,11 @@ class SetupUtils(Crypto64):
                 self.logIt("Writing rendered template {}".format(full_output_file))
                 full_output_file.write_text(rendered_text)
 
-    def render_template(self, tmp_fn, pystring=False):
+    def render_template(self, tmp_fn, pystring=False, rendering_dict=None):
         template_text = self.readFile(tmp_fn)
         format_dict = self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
+        if rendering_dict:
+            format_dict = self.merge_dicts(format_dict, rendering_dict)
         for k in format_dict:
             if isinstance(format_dict[k], bool):
                 format_dict[k] = str(format_dict[k]).lower()
