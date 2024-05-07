@@ -73,6 +73,7 @@ There are logging levels that can be customized via Java system property, as lis
 | `app.logging.level.apache.http.client`    | `INFO`        |
 | `app.logging.level.apache.http.wire`      | `INFO`        |
 | `app.logging.level.apache.http.header`    | `INFO`        |
+| `app.logging.target`                      | `STDOUT`      |
 
 To change the value, pass Java system property via `CN_KC_SCHEDULER_JAVA_OPTIONS` environment variable into the container/pod.
 
@@ -82,10 +83,15 @@ Example:
 CN_KC_SCHEDULER_JAVA_OPTIONS=-Dapp.logging.level.root=DEBUG -Dapp.logging.level.apache.http.client=DEBUG
 ```
 
-Supported level:
+Supported logging level:
 
 - `ERROR`
 - `WARN`
 - `INFO`
 - `DEBUG`
 - `TRACE`
+
+Supported logging target:
+
+- `STDOUT`
+- `FILE`

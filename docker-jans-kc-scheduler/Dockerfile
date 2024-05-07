@@ -9,12 +9,12 @@ RUN apk update \
     && apk add --no-cache openssl python3 tini curl py3-cryptography py3-psycopg2 py3-grpcio bash \
     && apk add --no-cache --virtual .build-deps wget git zip
 
-# ==============
-# KC integration
-# ==============
+# ============
+# KC scheduler
+# ============
 
 ENV CN_VERSION=1.1.2-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-29 08:54'
+ENV CN_BUILD_DATE='2024-05-07 13:32'
 ENV SCHEDULER_HOME=/opt/kc-scheduler
 
 RUN mkdir -p ${SCHEDULER_HOME}/bin \
@@ -26,6 +26,13 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION
     && unzip /tmp/kc-scheduler.zip -d ${SCHEDULER_HOME}/lib \
     && rm -rf /tmp/kc-scheduler.zip \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION}/kc-jans-scheduler-${CN_VERSION}.jar -P ${SCHEDULER_HOME}/lib
+
+# ==================
+# Logback extra libs
+# ==================
+
+RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/janino-3.1.9.jar -P ${SCHEDULER_HOME}/lib \
+    && wget -q https://repo1.maven.org/maven2/org/codehaus/janino/commons-compiler/3.1.9/commons-compiler-3.1.9.jar -P ${SCHEDULER_HOME}/lib
 
 # ======
 # Python
