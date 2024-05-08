@@ -12,7 +12,7 @@ package io.jans.as.model.jwt;
  */
 public enum JwtType {
 
-    JWT("jwt"),
+    JWT("JWT"),
     TX_TOKEN("txn_token"),
     DPOP_PLUS_JWT("dpop+jwt");
 

@@ -8227,9 +8227,9 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8650,6 +8650,10 @@ components:
           type: boolean
         useHighestLevelScriptIfAcrScriptNotFound:
           type: boolean
+        acrMappings:
+          type: object
+          additionalProperties:
+            type: string
         authenticationFiltersEnabled:
           type: boolean
         clientAuthenticationFiltersEnabled:
@@ -9830,10 +9834,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:

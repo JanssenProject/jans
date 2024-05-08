@@ -12,9 +12,13 @@ import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
+import io.jans.util.exception.InvalidAttributeException;
+
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -53,7 +57,6 @@ public class UserResource extends BaseResource {
     private static final String USER = "user";
     private static final String MAIL = "mail";
     private static final String DISPLAY_NAME = "displayName";
-    private static final String JANS_STATUS = "jansStatus";
     private static final String GIVEN_NAME = "givenName";
     private static final String USER_PWD = "userPassword";
     private static final String INUM = "inum";
@@ -151,38 +154,38 @@ public class UserResource extends BaseResource {
             logger.info("User details to be added - customUser:{}, removeNonLDAPAttributes:{}", escapeLog(customUser),
                     removeNonLDAPAttributes);
         }
-
+        
         try {
-        // get User object
-        User user = setUserAttributes(customUser);
+            // get User object
+            User user = setUserAttributes(customUser);
 
-        // parse birthdate if present
-        userMgmtSrv.parseBirthDateAttribute(user);
-        logger.debug("Create  user:{}", user);
+            // parse birthdate if present
+            userMgmtSrv.parseBirthDateAttribute(user);
+            logger.debug("Create  user:{}", user);
 
-        // checking mandatory attributes
-        checkMissingAttributes(user, null);
-        ignoreCustomAttributes(user, removeNonLDAPAttributes);
-        validateAttributes(user);
+            // checking mandatory attributes
+            checkMissingAttributes(user, null);
+            ignoreCustomAttributes(user, removeNonLDAPAttributes);
+            validateAttributes(user);
 
-        logger.info("Service call to create user:{}", user);
-        user = userMgmtSrv.addUser(user, true);
-        logger.info("User created {}", user);
+            logger.info("Service call to create user:{}", user);
 
-        // excludedAttributes
-        user = excludeUserAttributes(user);
+            user = userMgmtSrv.addUser(user, true);
+            logger.info("User created {}", user);
 
-        // get custom user
-        customUser = getCustomUser(user, removeNonLDAPAttributes);
-        logger.info("newly created customUser:{}", customUser);
-        }catch(WebApplicationException wex) {
-            logger.error("ApplicationException while creating user is:{}, cause:{}", wex, wex.getCause());
-            throwInternalServerException("USER_CREATION_ERROR", wex.getMessage());
+            // excludedAttributes
+            user = excludeUserAttributes(user);
+
+            // get custom user
+            customUser = getCustomUser(user, removeNonLDAPAttributes);
+            logger.info("newly created customUser:{}", customUser);
+       }catch(InvalidAttributeException iae) {
+            logger.error("InvalidAttributeException while creating user is:{}, cause:{}", iae, iae.getCause());
+            throwBadRequestException("USER_CREATION_ERROR", iae.getMessage());
         }catch(Exception ex) {
             logger.error("Exception while creating user is:{}, cause:{}", ex, ex.getCause());
             throwInternalServerException(ex);
         }
-
         return Response.status(Response.Status.CREATED).entity(customUser).build();
     }
 
@@ -222,6 +225,7 @@ public class UserResource extends BaseResource {
             validateAttributes(user);
 
             logger.info("Call update user:{}", user);
+
             user = userMgmtSrv.updateUser(user);
             logger.info("Updated user:{}", user);
 
@@ -231,9 +235,9 @@ public class UserResource extends BaseResource {
             // get custom user
             customUser = getCustomUser(user, removeNonLDAPAttributes);
             logger.info("updated customUser:{}", customUser);
-        } catch (WebApplicationException wex) {
-            logger.error("ApplicationException while updating user is:{}, cause:{}", wex, wex.getCause());
-            throwInternalServerException("USER_UPDATE_ERROR", wex.getMessage());
+        } catch (InvalidAttributeException iae) {
+            logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
+            throwBadRequestException("USER_UPDATE_ERROR", iae.getMessage());
         }
         catch (Exception ex) {
             logger.error("Exception while updating user is:{}, cause:{}", ex, ex.getCause());
@@ -400,7 +404,7 @@ public class UserResource extends BaseResource {
         customUser.setOxAuthPersistentJwt(user.getOxAuthPersistentJwt());
         customUser.setUpdatedAt(user.getUpdatedAt());
         customUser.setUserId(user.getUserId());
-
+        customUser.setStatus(user.getStatus());
         ignoreCustomAttributes(customUser, removeNonLDAPAttributes);
         return setCustomUserAttributes(customUser, user);
     }
@@ -408,14 +412,13 @@ public class UserResource extends BaseResource {
     public CustomUser setCustomUserAttributes(CustomUser customUser, User user) {
         customUser.setMail(user.getAttribute(MAIL));
         customUser.setDisplayName(user.getAttribute(DISPLAY_NAME));
-        customUser.setJansStatus(user.getAttribute(JANS_STATUS));
         customUser.setGivenName(user.getAttribute(GIVEN_NAME));
         customUser.setUserPassword(user.getAttribute(USER_PWD));
         customUser.setInum(user.getAttribute(INUM));
+        customUser.setStatus(user.getStatus());
 
         customUser.removeAttribute(MAIL);
         customUser.removeAttribute(DISPLAY_NAME);
-        customUser.removeAttribute(JANS_STATUS);
         customUser.removeAttribute(GIVEN_NAME);
         customUser.removeAttribute(USER_PWD);
         customUser.removeAttribute(INUM);
@@ -433,6 +436,8 @@ public class UserResource extends BaseResource {
         user.setOxAuthPersistentJwt(customUser.getOxAuthPersistentJwt());
         user.setUpdatedAt(customUser.getUpdatedAt());
         user.setUserId(customUser.getUserId());
+        user.setStatus((customUser.getStatus()!=null?customUser.getStatus() : GluuStatus.ACTIVE));     
+        
         return setUserCustomAttributes(customUser, user);
     }
 
@@ -442,20 +447,19 @@ public class UserResource extends BaseResource {
         }
         
         user.setAttribute(DISPLAY_NAME, customUser.getDisplayName(), false);
-        user.setAttribute(JANS_STATUS, customUser.getJansStatus(), false);
         user.setAttribute(GIVEN_NAME, customUser.getGivenName(), false);
-        
         if(StringUtils.isNotBlank(customUser.getUserPassword())) {  
             user.setAttribute(USER_PWD, customUser.getUserPassword(), false);
         }
-        user.setAttribute(INUM, customUser.getInum(), false);
-
-        logger.debug("Custom User - user:{}", user);
+        if(StringUtils.isNotBlank(customUser.getInum())) {    
+            user.setAttribute(INUM, customUser.getInum(), false);
+        }
+        
         return user;
     }
 
     private User ignoreCustomAttributes(User user, boolean removeNonLDAPAttributes) {
-        logger.debug(
+        logger.info(
                 "** validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
                 user, removeNonLDAPAttributes, user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(),
                 userMgmtSrv.isLDAP());

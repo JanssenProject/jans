@@ -234,22 +234,13 @@ def transform_auth_dynamic_config_hook(conf, manager):
         conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Content-Type", None)
         should_update = True
 
-    for grant_type in [
-        "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange",
-        "tx_token",
-    ]:
-        if grant_type not in conf["dynamicGrantTypeDefault"]:
-            conf["dynamicGrantTypeDefault"].append(grant_type)
-            should_update = True
-
-    # ensure agama_flow listed in authorizationRequestCustomAllowedParameters
-    if "agama_flow" not in [
+    # ensure agama_flow removed from authorizationRequestCustomAllowedParameters
+    if "agama_flow" in [
         p["paramName"] for p in conf["authorizationRequestCustomAllowedParameters"]
     ]:
-        conf["authorizationRequestCustomAllowedParameters"].append({
-            "paramName": "agama_flow", "returnInResponse": False,
-        })
+        conf["authorizationRequestCustomAllowedParameters"] = list(
+            itertools.takewhile(lambda p: p["paramName"] != "agama_flow", conf["authorizationRequestCustomAllowedParameters"])
+        )
         should_update = True
 
     # add missing agama-level keys
@@ -274,6 +265,26 @@ def transform_auth_dynamic_config_hook(conf, manager):
         if new_attr not in conf["lockMessageConfig"]:
             conf["lockMessageConfig"][new_attr] = default_val
             conf["lockMessageConfig"].pop(old_attr, None)
+            should_update = True
+
+    # dynamicGrantTypeDefault changed to grantTypesSupportedByDynamicRegistration
+    if "grantTypesSupportedByDynamicRegistration" not in conf:
+        conf["grantTypesSupportedByDynamicRegistration"] = conf.pop("dynamicGrantTypeDefault", [])
+        should_update = True
+
+    for grant_type in [
+        "authorization_code",
+        "implicit",
+        "client_credentials",
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:uma-ticket",
+        "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:token-exchange",
+        "tx_token",
+        "password",
+    ]:
+        if grant_type not in conf["grantTypesSupportedByDynamicRegistration"]:
+            conf["grantTypesSupportedByDynamicRegistration"].append(grant_type)
             should_update = True
 
     # return the conf and flag to determine whether it needs update or not

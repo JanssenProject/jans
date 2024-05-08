@@ -48,6 +48,7 @@ jobs:
   docker:
     permissions:
       packages: write
+      id-token: write
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 8
@@ -58,6 +59,9 @@ jobs:
         uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
         with:
           egress-policy: audit
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.5.0
 
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -146,11 +150,8 @@ jobs:
             if [[ ${{ github.event_name != 'pull_request' }} ]]; then
               TEMP_IMG="auth-server certmanager config-api configurator fido2 persistence-loader scim monolith loadtesting-jmeter link casa saml keycloak-link"
               for i in $TEMP_IMG; do
-                TEMP_TOKEN=$(curl https://ghcr.io/token\?scope\="repository:janssenproject/jans/$i:pull" | jq -r '.token')
-                while [[ $(curl -s -H "Authorization: Bearer ${TEMP_TOKEN}" https://ghcr.io/v2/janssenproject/jans/$i/tags/list | jq -r '.tags' | grep "$VERSION" | tr -d '[:space:]"') != "$VERSION" ]]; do
-                  echo "Waiting for $i to be built"
-                  sleep 30
-                done
+                echo "Waiting for $i to be built"
+                sleep 30
               done
             fi
           fi
@@ -221,3 +222,15 @@ jobs:
       - name: Image digest
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Sign the images with GitHub OIDC Token
+        if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
+        env:
+          DIGEST: ${{ steps.docker_build.outputs.digest }}
+          TAGS: ${{ steps.prep.outputs.tags }}
+        run: |
+          images=""
+          for tag in ${TAGS}; do
+            images+="${tag}@${DIGEST} "
+          done
+          cosign sign --yes -a author=JanssenProject ${images}

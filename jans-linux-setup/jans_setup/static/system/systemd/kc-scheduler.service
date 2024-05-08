@@ -1,0 +1,15 @@
+[Unit]
+Description=Keycloak Scheduler Service
+After=kc.service
+
+[Service]
+Type=simple
+Environment="JAVA_HOME=%(jre_home)s"
+Environment="SCHEDULER_HOME=%(scheduler_dir)s"
+Environment="SCHEDULER_VERSION=v%(jans_version)s"
+ExecStart=%(scheduler_dir)s/bin/kc-scheduler.sh
+User=%(jetty_user)s
+Group=%(jetty_group)s
+
+[Install]
+WantedBy=multi-user.target
