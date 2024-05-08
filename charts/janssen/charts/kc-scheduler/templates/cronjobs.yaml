@@ -1,3 +1,4 @@
+{{ if and (index .Values "global" "kc-scheduler" "enabled") (.Values.global.saml.enabled) -}}
 kind: CronJob
 apiVersion: batch/v1
 metadata:
@@ -192,3 +193,4 @@ spec:
               hostnames:
                 - {{ .Values.global.fqdn }}
           {{- end }}
+{{- end }}
