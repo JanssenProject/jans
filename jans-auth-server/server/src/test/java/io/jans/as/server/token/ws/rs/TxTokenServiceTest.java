@@ -8,6 +8,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.service.ClientService;
+import org.json.JSONObject;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -15,8 +16,7 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Z
@@ -53,6 +53,20 @@ public class TxTokenServiceTest {
 
     @InjectMocks
     private TxTokenService txTokenService;
+
+    @Test
+    public void createResponse_whenCalled_shouldSetTokenTypeToNA() {
+        JSONObject response = TxTokenService.createResponse("token_code_gdfger");
+        assertEquals(response.get("token_type"), "N_A");
+    }
+
+    @Test
+    public void createResponse_whenCalled_mustNotHaveExpiresOrRefreshTokenOrScopeClaims() {
+        JSONObject response = TxTokenService.createResponse("token_code_gdfger");
+        assertFalse(response.has("expires_in"));
+        assertFalse(response.has("refresh_token"));
+        assertFalse(response.has("scope"));
+    }
 
     @Test
     public void isTxTokenFlow_ifRequestedTokenTypeIsNotTxToken_shouldReturnFalse() {
