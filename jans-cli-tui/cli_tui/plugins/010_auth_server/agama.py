@@ -24,7 +24,6 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_table import JansTableWidget
-from wui_components.jans_path_browser import JansPathBrowserWidget
 
 class Agama(DialogUtils):
     def __init__(
