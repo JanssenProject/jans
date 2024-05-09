@@ -45,7 +45,7 @@ Groovy 4.0 and Java 8 or higher. The runtime is Amazon Corretto 17.
 
 ### How to add third party libraries?
 
-You can include jar files in the `lib` directory of a [project](../../../agama/gama-format.md#anatomy-of-a-project). This applies only for VM-based installation of Janssen. Onboarding the jar files require a restart of the authentication server. Additionally, a prior update to file `/opt/jans/jetty/jans-auth/webapps/jans-auth.xml` may be required.
+You can include jar files in the `lib` directory of a [project](../../../agama/gama-format.md#anatomy-of-a-project). This applies only for VM-based installation of Janssen. Onboarding the jar files require a restart of the authentication server.
 
 <!--
 ### A class does not "see" other classes in its own package
