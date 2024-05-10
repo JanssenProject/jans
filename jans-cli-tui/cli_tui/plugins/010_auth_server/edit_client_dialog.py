@@ -779,7 +779,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                  (_("Introspection Signed Response Alg "), 'introspectionSignedResponseAlg',
                  'id_token_signing_alg_values_supported'),
                 (_("Introspection Encrypted Response Alg"), 'introspectionEncryptedResponseAlg',
-                 'id_token_encryption_alg_values_supported'),
+                 'id_token_encryption_enc_values_supported'),
                 (_("Introspection Encrypted Response Enc"), 'introspectionEncryptedResponseEnc',
                  'id_token_encryption_enc_values_supported'),
 
