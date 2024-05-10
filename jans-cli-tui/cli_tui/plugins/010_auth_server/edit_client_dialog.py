@@ -751,10 +751,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.drop_down_select_first = []
 
-        # keep this line until this issue is closed https://github.com/JanssenProject/jans/issues/2372
-        self.myparent.cli_object.openid_configuration['access_token_singing_alg_values_supported'] = [
-            'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512']
-
         for title, swagger_key, openid_key in (
 
                 (_("ID Token Alg for Signing "), 'idTokenSignedResponseAlg',
@@ -764,7 +760,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 (_("ID Token Enc for Encryption"), 'idTokenEncryptedResponseEnc',
                  'id_token_encryption_enc_values_supported'),
                 (_("Access Token Alg for Signing "), 'accessTokenSigningAlg',
-                 'access_token_singing_alg_values_supported'),  # ?? openid key
+                 'access_token_signing_alg_values_supported'),
 
                 (_("User Info for Signing "), 'userInfoSignedResponseAlg',
                  'userinfo_signing_alg_values_supported'),
