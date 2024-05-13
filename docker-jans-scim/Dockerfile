@@ -101,10 +101,13 @@ RUN cd /tmp/jans \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
+RUN apk add --no-cache py3-packaging \
+    && apk add --no-cache --virtual .pip-deps py3-pip py3-wheel \
+    && mkdir -p "$HOME/.config/pip" \
+    && printf "[global]\nbreak-system-packages = true" > "$HOME/.config/pip/pip.conf" \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
-    && pip3 uninstall -y pip wheel
+    && rm -rf "$HOME/.config/pip/pip.conf" \
+    && apk del .pip-deps
 
 # ==========
 # Prometheus

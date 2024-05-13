@@ -59,10 +59,13 @@ RUN apk update \
 # ------
 
 COPY /app/requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
-    && pip3 uninstall -y pip wheel
+RUN apk add --no-cache py3-packaging \
+    && apk add --no-cache --virtual .pip-deps py3-pip py3-wheel \
+    && mkdir -p "$HOME/.config/pip" \
+    && printf "[global]\nbreak-system-packages = true" > "$HOME/.config/pip/pip.conf" \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && rm -rf "$HOME/.config/pip/pip.conf" \
+    && apk del .pip-deps
 
 # -------
 # Cleanup
