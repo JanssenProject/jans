@@ -1,3 +1,10 @@
+---
+tags:
+- Casa
+- Consent
+---
+
+
 # Consent Management Plugin
 
 ## Overview 
