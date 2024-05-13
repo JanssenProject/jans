@@ -45,8 +45,8 @@ spec:
         - name: {{ include "link.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           env:
-          - name: CN_LINK_JAVA_OPTIONS
-            value: {{ include "link.customJavaOptions" . | trim }}
+            - name: CN_LINK_JAVA_OPTIONS
+              value: {{ include "link.customJavaOptions" . | trim }}
             {{- include "link.usr-envs" . | indent 12 }}
             {{- include "link.usr-secret-envs" . | indent 12 }}
           securityContext:
