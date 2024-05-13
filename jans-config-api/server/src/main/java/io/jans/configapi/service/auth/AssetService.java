@@ -178,10 +178,9 @@ public class AssetService {
 
         // copy asset on jans-server
         if (isAssetServerUploadEnabled()) {
-            try (InputStream ins = getInputStream(bos)) {
-                String result = copyAssetOnServer(asset, ins);
-                log.info("Result of asset saved on server :{}", result);
-            }
+            String result = copyAssetOnServer(asset, bos);
+            log.info("Result of asset saved on server :{}", result);
+
         }
 
         // Get final asset
@@ -216,7 +215,7 @@ public class AssetService {
         return status;
     }
 
-    private Document setAssetContent(Document asset, InputStream documentStream)  throws IOException{
+    private Document setAssetContent(Document asset, InputStream documentStream) throws IOException {
         log.info(" an asset - asset:{}, documentStream:{}", asset, documentStream);
         if (asset == null) {
             throw new InvalidAttributeException(" Asset object is null!!!");
@@ -260,7 +259,7 @@ public class AssetService {
         return asset;
     }
 
-    private String copyAssetOnServer(Document asset, InputStream stream) {
+    private String copyAssetOnServer(Document asset, ByteArrayOutputStream stream) throws IOException {
         log.info("Copy asset on server - asset:{}, stream:{}", asset, stream);
         String result = null;
 
@@ -275,8 +274,7 @@ public class AssetService {
         List<String> serviceModules = asset.getJansModuleProperty();
         String assetFileName = asset.getDisplayName();
         String documentStoreModuleName = assetFileName;
-        log.info("Save asset for - serviceModules:{}, assetFileName:{}", serviceModules,
-                assetFileName);
+        log.info("Save asset for - serviceModules:{}, assetFileName:{}", serviceModules, assetFileName);
 
         if (StringUtils.isBlank(assetFileName)) {
             throw new InvalidConfigurationException("Asset name is null!");
@@ -284,7 +282,7 @@ public class AssetService {
 
         String assetDir = this.getAssetDir(assetFileName);
         log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir);
-        
+
         for (String serviceName : serviceModules) {
 
             String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);
@@ -297,14 +295,11 @@ public class AssetService {
             String filePath = serviceDirectory + File.separator + assetFileName;
             log.info("To save asset - documentStoreService:{}, filePath:{} ", documentStoreService, filePath);
 
-            try {
-                result = documentStoreService.saveDocumentStream(filePath, null, stream,
-                        List.of(documentStoreModuleName));
-                log.info("Asset saving result:{}", result);
-            } catch (Exception ex) {
-                log.error("Error while saving asset:{} with fileName:{} from server is:{}", asset.getInum(),
-                        assetFileName, ex);
+            try (InputStream ins = getInputStream(stream)) {
+                result = documentStoreService.saveDocumentStream(filePath, null, ins, List.of(documentStoreModuleName));
+                log.info("Result of asset saved on server :{}", result);
             }
+
         }
         return result;
 
@@ -320,16 +315,15 @@ public class AssetService {
         List<String> serviceModules = asset.getJansModuleProperty();
         String assetFileName = asset.getDisplayName();
 
-        log.info("Asset to be deleted for serviceModules:{}, assetFileName:{}",
-                serviceModules, assetFileName);
+        log.info("Asset to be deleted for serviceModules:{}, assetFileName:{}", serviceModules, assetFileName);
 
         if (StringUtils.isBlank(assetFileName)) {
             throw new InvalidConfigurationException("Asset name is null!");
         }
-        
+
         String assetDir = this.getAssetDir(assetFileName);
         log.info("For removing assetFileName:{} assetDir:{}", assetFileName, assetDir);
-       
+
         for (String serviceName : serviceModules) {
 
             String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);
@@ -429,7 +423,5 @@ public class AssetService {
         directory = assetDirMapping.get().getDirectory();
         return directory;
     }
-    
-    
 
 }
