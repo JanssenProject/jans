@@ -208,6 +208,8 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: ${{ steps.prep.outputs.dockerfilelocation }}
           file: ${{ steps.prep.outputs.dockerfilelocation }}/Dockerfile
+          sbom: true
+          provenance: true
           #target: prod
           # add to platforms comma seperated linux/ppc64leL Issue: py3-grpcio
           # add to platforms comma seperated linux/386 : Issue: openjdk11-jre-headless alpine package not
