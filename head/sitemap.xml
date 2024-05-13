@@ -1876,6 +1876,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-kc-scheduler/</loc>
+         <lastmod>2024-05-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/reference/kubernetes/docker-jans-link/</loc>
          <lastmod>2024-05-13</lastmod>
          <changefreq>daily</changefreq>
