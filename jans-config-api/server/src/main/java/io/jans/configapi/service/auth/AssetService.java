@@ -282,12 +282,13 @@ public class AssetService {
             throw new InvalidConfigurationException("Asset name is null!");
         }
 
+        String assetDir = this.getAssetDir(assetFileName);
+        log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir);
+        
         for (String serviceName : serviceModules) {
 
-            String assetDir = this.getAssetDir(assetFileName);
-            asset.setJansFilePath(assetDir);
             String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);
-            log.info("Save asset from - assetDir:{}, serviceDirectory:{}", assetDir, serviceDirectory);
+            log.info("Save asset for - serviceName:{} in serviceDirectory:{}", serviceName, serviceDirectory);
 
             if (StringUtils.isBlank(serviceDirectory)) {
                 throw new InvalidConfigurationException("Service directory to save asset is null!");
@@ -325,11 +326,12 @@ public class AssetService {
         if (StringUtils.isBlank(assetFileName)) {
             throw new InvalidConfigurationException("Asset name is null!");
         }
-
+        
+        String assetDir = this.getAssetDir(assetFileName);
+        log.info("For removing assetFileName:{} assetDir:{}", assetFileName, assetDir);
+       
         for (String serviceName : serviceModules) {
 
-            String assetDir = this.getAssetDir(assetFileName);
-            asset.setJansFilePath(assetDir);
             String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);
             log.info("Delete asset from - assetDir:{}, serviceDirectory:{}", assetDir, serviceDirectory);
 
