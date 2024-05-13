@@ -81,25 +81,25 @@ public class IdentityProvider extends Entry implements Serializable {
     private String providerId;
 
    @AttributeName
-    protected boolean trustEmail;
+    private boolean trustEmail;
 
     @AttributeName
-    protected boolean storeToken;
+    private boolean storeToken;
 
     @AttributeName
-    protected boolean addReadTokenRoleOnCreate;
+    private boolean addReadTokenRoleOnCreate;
 
     @AttributeName
-    protected boolean authenticateByDefault;
+    private boolean authenticateByDefault;
 
     @AttributeName
-    protected boolean linkOnly;
+    private boolean linkOnly;
 
     @AttributeName
-    protected String firstBrokerLoginFlowAlias;
+    private String firstBrokerLoginFlowAlias;
 
     @AttributeName
-    protected String postBrokerLoginFlowAlias;
+    private String postBrokerLoginFlowAlias;
 
     @AttributeName(name = "jansSAMLspMetaDataFN")
     @Hidden
