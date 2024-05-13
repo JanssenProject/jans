@@ -1,3 +1,10 @@
+---
+tags:
+- Casa
+- 2FA
+---
+
+
 # 2FA Settings Plugin
 
 ## Overview
