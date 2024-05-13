@@ -1,3 +1,10 @@
+---
+tags:
+- Casa
+- Branding
+---
+
+
 # Custom Branding Plugin
 
 ## Overview
