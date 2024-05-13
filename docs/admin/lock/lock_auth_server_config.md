@@ -41,7 +41,7 @@ It has 2 section for PostgreSQL (`postgresConfiguration`) and Redis (`redisConfi
 Full list of properties defined in jans-config-api-swagger.yaml.
 
 
-Second configuration is needed for Jans Auth. In current version Jans Auth calls message API after access_token persistence/removal from/to DB from `GarntService`. Jans Messages API library provides generic API to hide actual PubSub messages publishing/receiving implementation.
+Second configuration is needed for Jans Auth. In current version Jans Auth calls message API after access_token persistence/removal from/to DB from `GrantService`. Jans Messages API library provides generic API to hide actual PubSub messages publishing/receiving implementation.
 
 This is default configuration after server install:
 
