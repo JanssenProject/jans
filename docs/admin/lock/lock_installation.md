@@ -65,7 +65,7 @@ of this document, let us assume that persistence used is PostgreSQL.
   ```
 1. Enable remote connections to PostgreSQL on your main server
 
-     1. Run this command as root to find the configuration fileee
+     1. Run this command as root to find the configuration file.
      ```shell
      su - postgres -c 'psql -U postgres -d postgres -t -c "SHOW config_file;"'
      ```
