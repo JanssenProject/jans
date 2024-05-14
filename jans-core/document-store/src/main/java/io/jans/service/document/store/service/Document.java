@@ -26,8 +26,6 @@ public class Document extends Entry implements Serializable {
 
 	private static final long serialVersionUID = -2812480357430436503L;
 
-	private transient boolean selected;
-
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
@@ -84,14 +82,6 @@ public class Document extends Entry implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public boolean isSelected() {
-		return selected;
-	}
-
-	public void setSelected(boolean selected) {
-		this.selected = selected;
 	}
 
 	public String getDocument() {
