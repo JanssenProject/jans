@@ -73,6 +73,11 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Fido2. Authenticate for step 1"
             identity.setWorkingParameter("platformAuthenticatorAvailable",ServerUtil.getFirstValue(requestParameters, "loginForm:platformAuthenticator"))
 
+            # Modified for Casa compliance
+            authenticated_user = authenticationService.getAuthenticatedUser()
+            if authenticated_user != None:
+                return True
+                
             user_password = credentials.getPassword()
             logged_in = False
             if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
