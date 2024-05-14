@@ -655,7 +655,7 @@ def get_password_from_file(password_file: str) -> str:
     # other formats
     else:
         passwd = raw_passwd
-        logger.warning(f"Using insecure method to load password from {password_file}")
+        logger.warning(f"Using simple method to load password from {password_file}")
 
     # returns plain text
     return passwd.strip()

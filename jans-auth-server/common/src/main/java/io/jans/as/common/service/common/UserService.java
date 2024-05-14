@@ -123,9 +123,9 @@ public abstract class UserService {
 
         User user = new User();
         user.setDn("inum=" + inum + "," + peopleBaseDN);
+        user.setStatus(GluuStatus.ACTIVE);
         user.setCustomAttributes(Arrays.asList(
                 new CustomObjectAttribute("inum", inum),
-                new CustomObjectAttribute("jansStatus", GluuStatus.ACTIVE.getValue()),
                 new CustomObjectAttribute("displayName", "User " + uid + " added via Jans Auth custom plugin")));
         user.setUserId(uid);
 
@@ -151,7 +151,7 @@ public abstract class UserService {
         user.setAttribute("inum", inum, false);
 
         GluuStatus status = active ? GluuStatus.ACTIVE : GluuStatus.REGISTER;
-        user.setAttribute("jansStatus", status.getValue(), false);
+        user.setStatus(status);
 
         if (dataSourceTypeService.isLDAP(user.getDn())) {
 	        List<String> personCustomObjectClassList = getPersonCustomObjectClassList();

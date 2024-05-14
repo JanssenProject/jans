@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.service.AcrService;
 import io.jans.as.server.service.LocalResponseCache;
 import io.jans.as.server.service.cdi.event.ReloadAuthScript;
 import io.jans.as.server.service.external.internal.InternalDefaultPersonAuthenticationType;
@@ -33,6 +34,8 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
 import java.util.Map.Entry;
+
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * Provides factory methods needed to create external authenticator
@@ -368,6 +371,10 @@ public class ExternalAuthenticationService extends ExternalScriptService {
     }
 
     public CustomScriptConfiguration determineCustomScriptConfiguration(AuthenticationScriptUsageType usageType, int authStep, String acr) {
+        if (AcrService.isAgama(acr)) {
+            acr = "agama";
+        }
+
         CustomScriptConfiguration customScriptConfiguration;
         if (authStep == 1) {
             if (StringHelper.isNotEmpty(acr)) {
@@ -383,6 +390,8 @@ public class ExternalAuthenticationService extends ExternalScriptService {
     }
 
     public CustomScriptConfiguration determineCustomScriptConfiguration(AuthenticationScriptUsageType usageType, List<String> acrValues) {
+        log.debug("Determining script by acrs {}, usageType {}", acrValues, usageType);
+
         List<String> authModes = getAuthModesByAcrValues(acrValues);
 
         if (authModes.size() > 0) {
@@ -395,7 +404,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
             }
         }
 
-        if (appConfiguration.getUseHighestLevelScriptIfAcrScriptNotFound()) {
+        if (isTrue(appConfiguration.getUseHighestLevelScriptIfAcrScriptNotFound())) {
             return getDefaultExternalAuthenticator(usageType);
         }
         return null;

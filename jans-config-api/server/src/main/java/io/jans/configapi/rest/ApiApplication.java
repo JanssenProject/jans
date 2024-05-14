@@ -7,6 +7,7 @@
 package io.jans.configapi.rest;
 
 import io.jans.configapi.core.rest.BaseApiApplication;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.rest.resource.auth.*;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.rest.health.ApiHealthCheck;
@@ -20,8 +21,10 @@ import io.swagger.v3.oas.annotations.servers.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.ApplicationPath;
 
+import org.slf4j.Logger;
 /**
  * @author Mougang T.Gasmyr
  *
@@ -47,7 +50,8 @@ import jakarta.ws.rs.ApplicationPath;
                 @Tag(name = "Statistics - User"), @Tag(name = "Health - Check"), @Tag(name = "Server Stats"),
                 @Tag(name = "Auth - Session Management"), @Tag(name = "Organization Configuration"),
                 @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins"),
-                @Tag(name = "Configuration – Config API"), @Tag(name = "Client Authorization")},
+                @Tag(name = "Configuration – Config API"), @Tag(name = "Client Authorization"),
+                @Tag(name = "Jans Assets")},
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })
 
@@ -105,11 +109,21 @@ import jakarta.ws.rs.ApplicationPath;
         @OAuthScope(name = ApiAccessConstants.CONFIG_READ_ACCESS, description = "View Config-API related configuration properties"),
         @OAuthScope(name = ApiAccessConstants.CONFIG_WRITE_ACCESS, description = "Manage Config-API related configuration properties"),
         @OAuthScope(name = ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS, description = "View ClientAuthorizations"),
-        @OAuthScope(name = ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS, description = "Revoke ClientAuthorizations") }
+        @OAuthScope(name = ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS, description = "Revoke ClientAuthorizations"),
+        @OAuthScope(name = ApiAccessConstants.JANS_ASSET_READ_ACCESS, description = "View Jans Assets"),
+        @OAuthScope(name = ApiAccessConstants.JANS_ASSET_WRITE_ACCESS, description = "Manage Jans Assets"),
+        @OAuthScope(name = ApiAccessConstants.JANS_ASSET_DELETE_ACCESS, description = "Delete Jans Assets"),
+        }
 
 )))
 public class ApiApplication extends BaseApiApplication {
 
+    @Inject
+    Logger log;
+    
+    @Inject
+    private ApiAppConfiguration appConfiguration;
+    
     @Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
@@ -142,6 +156,11 @@ public class ApiApplication extends BaseApiApplication {
         classes.add(PluginResource.class);
         classes.add(ConfigApiResource.class);
         classes.add(ClientAuthResource.class);
+        
+        log.info("appConfiguration:{}",appConfiguration );
+        if(appConfiguration!=null && appConfiguration.getAssetMgtConfiguration()!=null && appConfiguration.getAssetMgtConfiguration().isAssetMgtEnabled()) {
+            classes.add(AssetResource.class);
+        }
 
         return classes;
     }

@@ -1,5 +1,9 @@
 package io.jans.ca.plugin.adminui.model.webhook;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
+import io.jans.as.model.config.adminui.KeyValuePair;
+import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
@@ -8,16 +12,18 @@ import io.jans.orm.model.base.Entry;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.apache.commons.collections.MapUtils;
 
 import java.io.Serializable;
 import java.util.*;
-
-@DataEntry(sortBy = {"webhookId"})
+@DataEntry(sortBy = {"inum"})
 @ObjectClass(value = "auiWebhooks")
 public class WebhookEntry extends Entry implements Serializable {
 
-    @AttributeName(name = "webhookId")
-    private String webhookId;
+    @AttributeName(
+            ignoreDuringUpdate = true
+    )
+    private String inum;
     @NotNull
     @AttributeName(name = "displayName")
     @Pattern(
@@ -35,10 +41,10 @@ public class WebhookEntry extends Entry implements Serializable {
     @NotNull
     @AttributeName(name = "url")
     private String url;
-    @AttributeName(name = "httpRequestBody")
     @JsonObject
-    private Map<String, String> httpRequestBody;
-    @NotNull
+    private transient Map<String, Object> httpRequestBody;
+    @AttributeName(name = "httpRequestBody")
+    private String httpRequestBodyString;
     @AttributeName(name = "httpMethod")
     private String httpMethod;
     @AttributeName(name = "jansEnabled")
@@ -53,23 +59,62 @@ public class WebhookEntry extends Entry implements Serializable {
 
     public WebhookEntry(WebhookEntry webhookEntry) {
         super();
-        this.webhookId = webhookEntry.getWebhookId();
+        this.inum = webhookEntry.getInum();
         this.displayName = webhookEntry.getDisplayName();
         this.description = webhookEntry.getDescription();
         this.url = webhookEntry.getUrl();
         this.httpRequestBody = webhookEntry.getHttpRequestBody();
+        // This block of code is checking if the HTTP method of the `webhookEntry` object is one of "POST", "PUT", or
+        // "PATCH". If it is, it then tries to convert the `httpRequestBody` of the `webhookEntry` object to a JSON string
+        // and store it in `httpRequestBodyString`. Additionally, it attempts to convert the `httpRequestBodyString` back
+        // to a map if it is a valid JSON string and store it in `httpRequestBody`. Any `JsonProcessingException` that
+        // occurs during these operations is caught and ignored.
+        if (Lists.newArrayList("POST", "PUT", "PATCH").contains(webhookEntry.getHttpMethod())) {
+            try {
+                if(!MapUtils.isEmpty(webhookEntry.getHttpRequestBody())) {
+                    this.httpRequestBodyString = CommonUtils.mapToJsonString(webhookEntry.getHttpRequestBody());
+                }
+                if(CommonUtils.isValidJson(webhookEntry.getHttpRequestBodyString())) {
+                    this.httpRequestBody = CommonUtils.jsonStringToMap(webhookEntry.getHttpRequestBodyString());
+                }
+            } catch (JsonProcessingException e) {
+                //Ignore catching exception
+            }
+        }
         this.httpMethod = webhookEntry.getHttpMethod();
         this.jansEnabled = webhookEntry.isJansEnabled();
         this.httpHeaders = webhookEntry.getHttpHeaders();
         this.auiFeatureIds = webhookEntry.getAuiFeatureIds();
     }
 
-    public String getWebhookId() {
-        return webhookId;
+    public String getHttpRequestBodyString() {
+        return httpRequestBodyString;
     }
 
-    public void setWebhookId(String webhookId) {
-        this.webhookId = webhookId;
+    /**
+     * The function sets the HTTP request body string and converts it to a map if it is a valid JSON string.
+     *
+     * @param httpRequestBodyString The `setHttpRequestBodyString` method takes a string `httpRequestBodyString` as a
+     * parameter. This method sets the `httpRequestBodyString` field of the class to the provided string. It also attempts
+     * to convert the string to a map if it is a valid JSON string using the `CommonUtils
+     */
+    public void setHttpRequestBodyString(String httpRequestBodyString) {
+        this.httpRequestBodyString = httpRequestBodyString;
+        try {
+            if(CommonUtils.isValidJson(httpRequestBodyString)) {
+                this.httpRequestBody = CommonUtils.jsonStringToMap(httpRequestBodyString);
+            }
+        } catch (JsonProcessingException e) {
+            //Ignore catching exception
+        }
+    }
+
+    public String getInum() {
+        return inum;
+    }
+
+    public void setInum(String inum) {
+        this.inum = inum;
     }
 
     public String getDisplayName() {
@@ -125,15 +170,28 @@ public class WebhookEntry extends Entry implements Serializable {
         this.description = description;
     }
 
-    public Map<String, String> getHttpRequestBody() {
+    public Map<String, Object> getHttpRequestBody() {
         if (httpRequestBody == null) {
             httpRequestBody = new HashMap<>();
         }
         return httpRequestBody;
     }
 
-    public void setHttpRequestBody(Map<String, String> httpRequestBody) {
+    /**
+     * The function `setHttpRequestBody` sets the HTTP request body as a map and converts it to a JSON string using a
+     * utility method.
+     *
+     * @param httpRequestBody A map containing key-value pairs representing the HTTP request body.
+     */
+    public void setHttpRequestBody(Map<String, Object> httpRequestBody) {
         this.httpRequestBody = httpRequestBody;
+        try {
+            if(!MapUtils.isEmpty(httpRequestBody)) {
+                this.httpRequestBodyString = CommonUtils.mapToJsonString(httpRequestBody);
+            }
+        } catch (JsonProcessingException e) {
+            //Ignore catching exception
+        }
     }
 
     public Set<String> getAuiFeatureIds() {
@@ -161,7 +219,7 @@ public class WebhookEntry extends Entry implements Serializable {
     @Override
     public String toString() {
         return "WebhookEntry{" +
-                ", webhookId='" + webhookId + '\'' +
+                ", inum='" + inum + '\'' +
                 ", displayName='" + displayName + '\'' +
                 ", url='" + url + '\'' +
                 ", httpMethod='" + httpMethod + '\'' +

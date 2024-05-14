@@ -1,6 +1,8 @@
 import json
 import logging.config
 import os
+import shutil
+from pathlib import Path
 from string import Template
 
 from jans.pycloudlib import get_manager
@@ -16,6 +18,7 @@ from jans.pycloudlib.persistence import render_spanner_properties
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import get_server_certificate
 
 from settings import LOGGING_CONFIG
 from hooks import get_auth_keys_hook
@@ -23,7 +26,7 @@ from lock import configure_lock_logging
 from lock import LockPersistenceSetup
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("auth")
+logger = logging.getLogger("jans-auth")
 
 manager = get_manager()
 
@@ -76,7 +79,12 @@ def main():
         )
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
-        manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
+        if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
+            manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
+        else:
+            hostname = manager.config.get("hostname")
+            logger.info(f"Pulling SSL certificate from {hostname}")
+            get_server_certificate(hostname, 443, "/etc/certs/web_https.crt")
 
     cert_to_truststore(
         "web_https",
@@ -98,6 +106,8 @@ def main():
     except ValueError:
         # likely secret is not created yet
         logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
+
+    copy_builtin_libs()
 
     if as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
         configure_lock_logging()
@@ -187,6 +197,18 @@ def configure_logging():
     tmpl = Template(txt)
     with open(logfile, "w") as f:
         f.write(tmpl.safe_substitute(config))
+
+
+def copy_builtin_libs():
+    lock_enabled = as_boolean(os.environ.get("CN_LOCK_ENABLED", "false"))
+
+    for src in Path("/opt/jans/jetty/jans-auth/_libs").glob("*.jar"):
+        # skip jans-lock-service and jans-lock-model
+        if lock_enabled is False and src.name.startswith("jans-lock"):
+            continue
+
+        dst = f"/opt/jans/jetty/jans-auth/custom/libs/{src.name}"
+        shutil.copyfile(src, dst)
 
 
 if __name__ == "__main__":

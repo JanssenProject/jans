@@ -45,7 +45,7 @@ Groovy 4.0 and Java 8 or higher. The runtime is Amazon Corretto 17.
 
 ### How to add third party libraries?
 
-You can include jar files in the `lib` directory of a [project](../../../agama/gama-format.md#anatomy-of-a-project). This applies only for VM-based installation of Janssen. Onboarding the jar files require a restart of the authentication server. Additionally, a prior update to file `/opt/jans/jetty/jans-auth/webapps/jans-auth.xml` may be required.
+You can include jar files in the `lib` directory of a [project](../../../agama/gama-format.md#anatomy-of-a-project). This applies only for VM-based installation of Janssen. Onboarding the jar files require a restart of the authentication server.
 
 <!--
 ### A class does not "see" other classes in its own package
@@ -81,7 +81,7 @@ Depending on the package `your` class belongs to, the message may not appear in 
 
 Call method `log` of class `io.jans.agama.engine.script.LogUtils`. This method receives a variable number of arguments as DSL's `Log` does. Thus you can do `LogUtils.log("@w Today is Friday %th", 13)`, as in the logging [examples](../../../agama/language-reference.md#logging).
 
-## How to use Contexts and Dependency Injection (CDI)?
+### How to use Contexts and Dependency Injection (CDI)?
 
 Jans server uses Weld (a CDI reference implementation), and as such makes heavy use of managed beans, scopes, dependency injection, events, etc. Unless the code added is part of a jar [library](#how-to-add-third-party-libraries), annotations related to scopes or dependency injection won't take any effect in your code. This is because the Java container does a thorough scanning of classes upon start, but the source code files in `lib` directory are compiled upon use and modification, as expected in a scripting scenario.
 
@@ -180,4 +180,4 @@ You can assign this value to a variable at the top of your loop declaration. See
 
 ### Can Agama code be called from Java?
 
-No. These two languages are supposed to play roles that should not be mixed, check [here](./recommended-practices.md#about-flow-design).
+No. These two languages are supposed to play roles that should not be mixed, check [here](./agama-best-practices#about-flow-design).

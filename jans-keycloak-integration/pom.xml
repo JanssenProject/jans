@@ -4,7 +4,7 @@
     <groupId>io.jans</groupId>
     <artifactId>jans-kc-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.22</version>
+    <version>1.1.2-SNAPSHOT</version>
     <name>keycloak-integration-parent</name>
 
     <distributionManagement>
@@ -19,15 +19,16 @@
       <maven.min-version>3.3.9</maven.min-version>
       <maven.compiler.source>17</maven.compiler.source>
       <maven.compiler.target>17</maven.compiler.target>
-      <keycloak-server.version>23.0.3</keycloak-server.version>
+      <keycloak-server.version>24.0.3</keycloak-server.version>
       <nimbus.oauth-sdk.version>10.11</nimbus.oauth-sdk.version>
       <nimbus.oauth2-oidc-sdk.version>10.11</nimbus.oauth2-oidc-sdk.version>
       <jackson.coreutils.version>1.8</jackson.coreutils.version>
       <jans.version>${project.version}</jans.version>
       <jakarta.ws-rs-api.version>3.1.0</jakarta.ws-rs-api.version>
       <jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
+      <jakarta.annotation-api.version>3.0.0-M1</jakarta.annotation-api.version>
       <smallrye-config.version>3.4.4</smallrye-config.version>
-      <log4j.version>2.19.0</log4j.version>
+      <log4j.version>2.23.1</log4j.version>
       <slf4j.version>1.7.36</slf4j.version>
       <logback.version>1.4.14</logback.version>
       <jboss-logging.version>3.5.1.Final</jboss-logging.version>
@@ -126,6 +127,13 @@
           <version>${keycloak-server.version}</version>
         </dependency>
 
+        <dependency>
+          <groupId>org.keycloak</groupId>
+          <artifactId>keycloak-saml-core-public</artifactId>
+          <scope>provided</scope>
+          <version>${keycloak-server.version}</version>
+        </dependency>
+
         <!-- end keycloak dependencies-->
 
         <!-- nimbus dependencies -->
@@ -155,6 +163,12 @@
           <groupId>jakarta.servlet</groupId>
           <artifactId>jakarta.servlet-api</artifactId>
           <version>${jakarta.servlet-api.version}</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>jarkarta.annotation</groupId>
+          <artifactId>jakarta.annotation-api</artifactId>
+          <version>${jakarta.annotation-api.version}</version>
           <scope>provided</scope>
         </dependency>
         <!--
@@ -263,8 +277,15 @@
           <version>${quartz-scheduler.version}</version>
         </dependency>
         <!-- end quartz scheduler dependencies -->
-      </dependencies>
 
+        <!-- jans dependencies -->
+        <dependency>
+          <groupId>io.jans</groupId>
+          <artifactId>jans-core-saml</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <!-- end jans dependencies -->
+      </dependencies>
     </dependencyManagement>
 
     <build>

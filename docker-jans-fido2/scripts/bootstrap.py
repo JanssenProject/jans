@@ -23,11 +23,12 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import get_server_certificate
 
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("fido2")
+logger = logging.getLogger("jans-fido2")
 
 manager = get_manager()
 
@@ -79,7 +80,12 @@ def main():
         )
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
-        manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
+        if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
+            manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
+        else:
+            hostname = manager.config.get("hostname")
+            logger.info(f"Pulling SSL certificate from {hostname}")
+            get_server_certificate(hostname, 443, "/etc/certs/web_https.crt")
 
     cert_to_truststore(
         "web_https",

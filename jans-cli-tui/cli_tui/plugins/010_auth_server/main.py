@@ -27,8 +27,7 @@ from prompt_toolkit.formatted_text import HTML
 
 from utils.static import DialogResult, cli_style, common_strings
 from utils.background_tasks import retrieve_enabled_scripts
-from utils.utils import DialogUtils
-from utils.utils import common_data
+from utils.utils import DialogUtils, common_data, get_help_with
 from utils.multi_lang import _
 
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
@@ -108,11 +107,11 @@ class Plugin(DialogUtils):
 
     def help(self):
         current_tab = self.nav_bar.navbar_entries[self.nav_bar.cur_navbar_selection][0]
-        tap_help = getattr(getattr(self, current_tab, None), 'jans_help', None)
-        if tap_help:
-            help_message = tap_help
+        if hasattr(self.oauth_containers[current_tab], 'jans_help'):
+            help_message = self.oauth_containers[current_tab].jans_help
         else:
             help_message = self.app.jans_help
+
         self.app.show_message(_("Help "),help_message,tobefocused=self.app.center_container)
 
     async def retrieve_sopes(self) -> None:
@@ -204,7 +203,7 @@ class Plugin(DialogUtils):
                         on_enter=self.edit_client,
                         on_display=self.app.data_display_dialog,
                         on_delete=self.delete_client,
-                        jans_help=HTML(_("Press key <b>s</b> to save client summary, <b>d</b> to display configurations")),
+                        jans_help=HTML(_("Press key <b>s</b> to save client summary, <b>v</b> to display configurations")),
                         custom_key_bindings=[('s', self.save_client_summary)],
                         headerColor=cli_style.navbar_headcolor,
                         entriesColor=cli_style.navbar_entriescolor,
@@ -223,6 +222,8 @@ class Plugin(DialogUtils):
                         self.clients_container,
                         DynamicContainer(lambda: self.clients_container_buttons)
                      ],style=cli_style.container)
+
+        self.oauth_containers['clients'].jans_help = get_help_with(f'<s>              {_("Save client summary")}\n')
 
 
         self.oauth_containers['keys'] = HSplit([
@@ -283,11 +284,11 @@ class Plugin(DialogUtils):
                         ('keys', 'Ke[y]s'),
                         ('authn', 'Au[t]hn'),
                         ('properties', 'Properti[e]s'),
+                        ('message', 'Messa[g]es'),
                         ('logging', 'Lo[g]ging'),
                         ('ssa', '[S]SA'),
                         ('agama', 'Aga[m]a'),
                         ('attributes', 'Attri[b]utes'),
-                        ('message', 'Loc[k]')
                         ],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
@@ -317,7 +318,6 @@ class Plugin(DialogUtils):
                 set_area.on_page_enter()
 
             self.oauth_main_area = set_area
-
 
     def save_client_summary(self, event):
 
@@ -516,8 +516,9 @@ class Plugin(DialogUtils):
                 self.app.show_message(_("Error getting response"), str(response))
                 return
 
-            self.scopes_container.clear()
             all_data = result.get('entries', [])
+            self.scopes_container.clear()
+            self.scopes_container.all_data = all_data
 
             for d in all_data: 
                 self.scopes_container.add_item(
@@ -583,7 +584,8 @@ class Plugin(DialogUtils):
                         selectes=0,
                         headerColor=cli_style.navbar_headcolor,
                         entriesColor=cli_style.navbar_entriescolor,
-                        all_data=missing_properties
+                        all_data=missing_properties,
+                        on_display=lambda **params: None
                     )
         ])
 

@@ -25,6 +25,8 @@ public class SamlAppConfiguration implements Configuration {
     private String spMetadataUrl;
     private String tokenUrl;
     private String idpUrl;
+    private String extIDPTokenUrl;
+    private String extIDPRedirectUrl;
     private String idpMetadataImportUrl;
 
     private String idpRootDir;
@@ -170,6 +172,22 @@ public class SamlAppConfiguration implements Configuration {
         this.idpUrl = idpUrl;
     }
     
+    public String getExtIDPTokenUrl() {
+        return extIDPTokenUrl;
+    }
+    
+    public void setExtIDPTokenUrl(String extIDPTokenUrl) {
+        this.extIDPTokenUrl = extIDPTokenUrl;
+    }
+    
+    public String getExtIDPRedirectUrl() {
+        return extIDPRedirectUrl;
+    }
+    
+    public void setExtIDPRedirectUrl(String extIDPRedirectUrl) {
+        this.extIDPRedirectUrl = extIDPRedirectUrl;
+    }
+    
     public String getIdpMetadataImportUrl() {
         return idpMetadataImportUrl;
     }
@@ -201,7 +219,7 @@ public class SamlAppConfiguration implements Configuration {
     public void setIdpMetadataTempDir(String idpMetadataTempDir) {
         this.idpMetadataTempDir = idpMetadataTempDir;
     }
-       
+    
     public String getIdpMetadataFile() {
         return idpMetadataFile;
     }
@@ -271,9 +289,10 @@ public class SamlAppConfiguration implements Configuration {
         return "SamlAppConfiguration [applicationName=" + applicationName + ", samlTrustRelationshipDn="
                 + samlTrustRelationshipDn + ", trustedIdpDn=" + trustedIdpDn + ", enabled=" + enabled + ", selectedIdp="
                 + selectedIdp + ", serverUrl=" + serverUrl + ", realm=" + realm + ", clientId=" + clientId
-                + ", grantType=" + grantType + ", scope=" + scope + ", username="
-                + username + ", spMetadataUrl=" + spMetadataUrl + ", tokenUrl=" + tokenUrl
-                + ", idpUrl=" + idpUrl + ", idpMetadataImportUrl=" + idpMetadataImportUrl + ", idpRootDir=" + idpRootDir
+                + ", clientSecret=" + clientSecret + ", grantType=" + grantType + ", scope=" + scope + ", username="
+                + username +  ", spMetadataUrl=" + spMetadataUrl + ", tokenUrl=" + tokenUrl
+                + ", idpUrl=" + idpUrl + ", extIDPTokenUrl=" + extIDPTokenUrl + ", extIDPRedirectUrl="
+                + extIDPRedirectUrl + ", idpMetadataImportUrl=" + idpMetadataImportUrl + ", idpRootDir=" + idpRootDir
                 + ", idpMetadataDir=" + idpMetadataDir + ", idpMetadataTempDir=" + idpMetadataTempDir
                 + ", idpMetadataFile=" + idpMetadataFile + ", spMetadataDir=" + spMetadataDir + ", spMetadataTempDir="
                 + spMetadataTempDir + ", spMetadataFile=" + spMetadataFile + ", ignoreValidation=" + ignoreValidation

@@ -15,9 +15,10 @@ import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
-import io.jans.doc.annotation.DocProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.jans.doc.annotation.DocProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
+
 import java.util.*;
 
 /**
@@ -339,6 +340,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service")
     private String opTosUri;
 
+    @DocProperty(description = "Defines client inactivity period in hours which means that client will be removed once it is passed.")
+    public int cleanUpInactiveClientAfterHoursOfInactivity = -1;
+
+    @DocProperty(description = "Interval for client periodic update timer. Update timer is used to debounce frequent updates of the client to avoid performance degradation.")
+    public int clientPeriodicUpdateTimerInterval = 3;
+
     @DocProperty(description = "The lifetime of the Authorization Code")
     private int authorizationCodeLifetime;
 
@@ -353,6 +360,12 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value specifying whether idToken filters claims based on accessToken")
     private Boolean idTokenFilterClaimsBasedOnAccessToken;
+
+    @DocProperty(description = "Boolean value specifying whether to save access_token, id_token and refresh_token in cache (with cacheKey=sha256Hex(token_code))")
+    private Boolean saveTokensInCache;
+
+    @DocProperty(description = "Boolean value specifying whether to save access_token, id_token and refresh_token in cache and skip persistence in DB at the same time (with cacheKey=sha256Hex(token_code))")
+    private Boolean saveTokensInCacheAndDontSaveInPersistence;
 
     @DocProperty(description = "The lifetime of the short lived Access Token")
     private int accessTokenLifetime;
@@ -444,6 +457,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Enable/Disable usage of highest level script in case ACR script does not exist", defaultValue = "false")
     private Boolean useHighestLevelScriptIfAcrScriptNotFound;
 
+    @DocProperty(description = "The acr mappings. When AS meets key-value in map, it tries to replace 'key' with 'value' as very first thing and use that 'value' in further processing.")
+    private Map<String, String> acrMappings;
+
     @DocProperty(description = "Boolean value specifying whether to enable user authentication filters")
     private Boolean authenticationFiltersEnabled;
 
@@ -513,8 +529,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose if client can update Grant Type values")
     private Boolean enableClientGrantTypeUpdate;
 
-    @DocProperty(description = "This list details which OAuth 2.0 grant types can be set up with the client registration API")
-    private Set<GrantType> dynamicGrantTypeDefault;
+    @DocProperty(description = "This list details which OAuth 2.0 grant types can be set up with the dynamic client registration API")
+    private Set<GrantType> grantTypesSupportedByDynamicRegistration;
 
     @DocProperty(description = "The location for CSS files")
     private String cssLocation;
@@ -585,6 +601,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Choose whether to accept access tokens to call end_session endpoint")
     private Boolean endSessionWithAccessToken;
+
+    @DocProperty(description = "Disables prompt=create user registration functionality")
+    private Boolean disablePromptCreate;
 
     @DocProperty(description = "Sets cookie domain for all cookies created by OP")
     private String cookieDomain;
@@ -2254,6 +2273,22 @@ public class AppConfiguration implements Configuration {
         this.opTosUri = opTosUri;
     }
 
+    public int getCleanUpInactiveClientAfterHoursOfInactivity() {
+        return cleanUpInactiveClientAfterHoursOfInactivity;
+    }
+
+    public void setCleanUpInactiveClientAfterHoursOfInactivity(int cleanUpInactiveClientAfterHoursOfInactivity) {
+        this.cleanUpInactiveClientAfterHoursOfInactivity = cleanUpInactiveClientAfterHoursOfInactivity;
+    }
+
+    public int getClientPeriodicUpdateTimerInterval() {
+        return clientPeriodicUpdateTimerInterval;
+    }
+
+    public void setClientPeriodicUpdateTimerInterval(int clientPeriodicUpdateTimerInterval) {
+        this.clientPeriodicUpdateTimerInterval = clientPeriodicUpdateTimerInterval;
+    }
+
     public int getAuthorizationCodeLifetime() {
         return authorizationCodeLifetime;
     }
@@ -2292,6 +2327,22 @@ public class AppConfiguration implements Configuration {
 
     public void setAccessTokenLifetime(int accessTokenLifetime) {
         this.accessTokenLifetime = accessTokenLifetime;
+    }
+
+    public Boolean getSaveTokensInCache() {
+        return saveTokensInCache;
+    }
+
+    public void setSaveTokensInCache(Boolean saveTokensInCache) {
+        this.saveTokensInCache = saveTokensInCache;
+    }
+
+    public Boolean getSaveTokensInCacheAndDontSaveInPersistence() {
+        return saveTokensInCacheAndDontSaveInPersistence;
+    }
+
+    public void setSaveTokensInCacheAndDontSaveInPersistence(Boolean saveTokensInCacheAndDontSaveInPersistence) {
+        this.saveTokensInCacheAndDontSaveInPersistence = saveTokensInCacheAndDontSaveInPersistence;
     }
 
     public int getUmaRptLifetime() {
@@ -2698,6 +2749,14 @@ public class AppConfiguration implements Configuration {
         this.endSessionWithAccessToken = endSessionWithAccessToken;
     }
 
+    public Boolean getDisablePromptCreate() {
+        return disablePromptCreate;
+    }
+
+    public void setDisablePromptCreate(Boolean disablePromptCreate) {
+        this.disablePromptCreate = disablePromptCreate;
+    }
+
     public String getCookieDomain() {
         return cookieDomain;
     }
@@ -2839,12 +2898,12 @@ public class AppConfiguration implements Configuration {
         this.enableClientGrantTypeUpdate = enableClientGrantTypeUpdate;
     }
 
-    public Set<GrantType> getDynamicGrantTypeDefault() {
-        return dynamicGrantTypeDefault;
+    public Set<GrantType> getGrantTypesSupportedByDynamicRegistration() {
+        return grantTypesSupportedByDynamicRegistration;
     }
 
-    public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
-        this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
+    public void setGrantTypesSupportedByDynamicRegistration(Set<GrantType> grantTypesSupportedByDynamicRegistration) {
+        this.grantTypesSupportedByDynamicRegistration = grantTypesSupportedByDynamicRegistration;
     }
 
     /**
@@ -3390,6 +3449,15 @@ public class AppConfiguration implements Configuration {
 
     public void setUseHighestLevelScriptIfAcrScriptNotFound(Boolean useHighestLevelScriptIfAcrScriptNotFound) {
         this.useHighestLevelScriptIfAcrScriptNotFound = useHighestLevelScriptIfAcrScriptNotFound;
+    }
+
+    public Map<String, String> getAcrMappings() {
+        if (acrMappings == null) acrMappings = new HashMap<>();
+        return acrMappings;
+    }
+
+    public void setAcrMappings(Map<String, String> acrMappings) {
+        this.acrMappings = acrMappings;
     }
 
     public EngineConfig getAgamaConfiguration() {

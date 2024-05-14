@@ -26,6 +26,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class NetworkUtils {
     
     private static Logger LOG = LoggerFactory.getLogger(NetworkUtils.class);
+    
+    public static String makeRedirectUri() {
+        return urlBeforeContextPath() + "/jans-auth/fl/callback";
+    }
 
     public static HTTPResponse sendGet(String url, MultivaluedMap<String, String> headers,
             MultivaluedMap<String, String> parameters) throws IOException {

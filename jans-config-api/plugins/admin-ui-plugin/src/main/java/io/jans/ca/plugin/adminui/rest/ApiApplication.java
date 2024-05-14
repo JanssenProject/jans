@@ -6,8 +6,8 @@
 
 package io.jans.ca.plugin.adminui.rest;
 
+import io.jans.ca.plugin.adminui.rest.adminui.AdminUIResource;
 import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
-import io.jans.ca.plugin.adminui.rest.user.UserManagementResource;
 import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
 import io.jans.ca.plugin.adminui.rest.logging.AuditLoggerResource;
 
@@ -61,7 +61,7 @@ public class ApiApplication extends Application {
         classes.add(OAuth2Resource.class);
         classes.add(AuditLoggerResource.class);
         classes.add(LicenseResource.class);
-        classes.add(UserManagementResource.class);
+        classes.add(AdminUIResource.class);
         classes.add(WebhookResource.class);
         return classes;
     }

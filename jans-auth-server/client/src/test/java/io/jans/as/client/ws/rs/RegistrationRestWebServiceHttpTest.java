@@ -157,7 +157,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setRequestUris(Arrays.asList("http://www.gluu.org/request"));
         registerRequest.setFrontChannelLogoutUri(logoutUri);
         registerRequest.setFrontChannelLogoutSessionRequired(true);
-        registerRequest.setBackchannelLogoutUris(Lists.newArrayList(logoutUri));
+        registerRequest.setBackchannelLogoutUri(logoutUri);
         registerRequest.setBackchannelLogoutSessionRequired(true);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
@@ -181,7 +181,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         AssertBuilder.registerResponse(response).created().check();
         assertNotNull(response.getClaims().get(SCOPE.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
-        assertEquals(logoutUri, new JSONArray(response.getClaims().get(BACKCHANNEL_LOGOUT_URI.toString())).getString(0));
+        assertEquals(logoutUri, response.getClaims().get(BACKCHANNEL_LOGOUT_URI.toString()));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));

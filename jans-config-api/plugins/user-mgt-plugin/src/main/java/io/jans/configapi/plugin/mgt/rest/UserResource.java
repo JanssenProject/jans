@@ -2,6 +2,7 @@ package io.jans.configapi.plugin.mgt.rest;
 
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
+import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.mgt.model.user.CustomUser;
@@ -11,9 +12,13 @@ import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
+import io.jans.util.exception.InvalidAttributeException;
+
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -41,6 +46,8 @@ import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
+import org.apache.commons.lang.StringUtils;
+
 @Path(Constants.CONFIG_USER)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -50,7 +57,6 @@ public class UserResource extends BaseResource {
     private static final String USER = "user";
     private static final String MAIL = "mail";
     private static final String DISPLAY_NAME = "displayName";
-    private static final String JANS_STATUS = "jansStatus";
     private static final String GIVEN_NAME = "givenName";
     private static final String USER_PWD = "userPassword";
     private static final String INUM = "inum";
@@ -134,9 +140,11 @@ public class UserResource extends BaseResource {
     @RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-post.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Created Object"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))),
+            })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     public Response createUser(@Valid CustomUser customUser,
@@ -146,28 +154,38 @@ public class UserResource extends BaseResource {
             logger.info("User details to be added - customUser:{}, removeNonLDAPAttributes:{}", escapeLog(customUser),
                     removeNonLDAPAttributes);
         }
+        
+        try {
+            // get User object
+            User user = setUserAttributes(customUser);
 
-        // get User object
-        User user = setUserAttributes(customUser);
+            // parse birthdate if present
+            userMgmtSrv.parseBirthDateAttribute(user);
+            logger.debug("Create  user:{}", user);
 
-        // parse birthdate if present
-        userMgmtSrv.parseBirthDateAttribute(user);
-        logger.debug("Create  user:{}", user);
+            // checking mandatory attributes
+            checkMissingAttributes(user, null);
+            ignoreCustomAttributes(user, removeNonLDAPAttributes);
+            validateAttributes(user);
 
-        // checking mandatory attributes
-        checkMissingAttributes(user, null);
-        ignoreCustomAttributes(user, removeNonLDAPAttributes);
+            logger.info("Service call to create user:{}", user);
 
-        user = userMgmtSrv.addUser(user, true);
-        logger.debug("User created {}", user);
+            user = userMgmtSrv.addUser(user, true);
+            logger.info("User created {}", user);
 
-        // excludedAttributes
-        user = excludeUserAttributes(user);
+            // excludedAttributes
+            user = excludeUserAttributes(user);
 
-        // get custom user
-        customUser = getCustomUser(user, removeNonLDAPAttributes);
-        logger.info("newly created customUser:{}", customUser);
-
+            // get custom user
+            customUser = getCustomUser(user, removeNonLDAPAttributes);
+            logger.info("newly created customUser:{}", customUser);
+       }catch(InvalidAttributeException iae) {
+            logger.error("InvalidAttributeException while creating user is:{}, cause:{}", iae, iae.getCause());
+            throwBadRequestException("USER_CREATION_ERROR", iae.getMessage());
+        }catch(Exception ex) {
+            logger.error("Exception while creating user is:{}, cause:{}", ex, ex.getCause());
+            throwInternalServerException(ex);
+        }
         return Response.status(Response.Status.CREATED).entity(customUser).build();
     }
 
@@ -177,10 +195,11 @@ public class UserResource extends BaseResource {
     @RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Not Found"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "404", description = "Not Found" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))),
+            })
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     public Response updateUser(@Valid CustomUser customUser,
@@ -191,33 +210,39 @@ public class UserResource extends BaseResource {
                     removeNonLDAPAttributes);
         }
 
-        // get User object
-        User user = setUserAttributes(customUser);
-
-        // parse birthdate if present
-        userMgmtSrv.parseBirthDateAttribute(user);
-        logger.debug("Create  user:{}", user);
-
-        // checking mandatory attributes
-        List<String> excludeAttributes = List.of(USER_PWD);
-        checkMissingAttributes(user, excludeAttributes);
-        ignoreCustomAttributes(user, removeNonLDAPAttributes);
-
         try {
+            // get User object
+            User user = setUserAttributes(customUser);
+
+            // parse birthdate if present
+            userMgmtSrv.parseBirthDateAttribute(user);
+            logger.debug("Create  user:{}", user);
+
+            // checking mandatory attributes
+            List<String> excludeAttributes = List.of(USER_PWD);
+            checkMissingAttributes(user, excludeAttributes);
+            ignoreCustomAttributes(user, removeNonLDAPAttributes);
+            validateAttributes(user);
+
+            logger.info("Call update user:{}", user);
+
             user = userMgmtSrv.updateUser(user);
             logger.info("Updated user:{}", user);
-        } catch (Exception ex) {
-            logger.error("Error while updating user", ex);
+
+            // excludedAttributes
+            user = excludeUserAttributes(user);
+
+            // get custom user
+            customUser = getCustomUser(user, removeNonLDAPAttributes);
+            logger.info("updated customUser:{}", customUser);
+        } catch (InvalidAttributeException iae) {
+            logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
+            throwBadRequestException("USER_UPDATE_ERROR", iae.getMessage());
+        }
+        catch (Exception ex) {
+            logger.error("Exception while updating user is:{}, cause:{}", ex, ex.getCause());
             throwInternalServerException(ex);
         }
-
-        // excludedAttributes
-        user = excludeUserAttributes(user);
-
-        // get custom user
-        customUser = getCustomUser(user, removeNonLDAPAttributes);
-        logger.info("updated customUser:{}", customUser);
-
         return Response.ok(customUser).build();
 
     }
@@ -339,6 +364,10 @@ public class UserResource extends BaseResource {
 
         throwMissingAttributeError(missingAttributes);
     }
+    
+    private void validateAttributes(User user) {
+        userMgmtSrv.validateAttributes(user.getCustomAttributes());
+    }
 
     private List<CustomUser> getCustomUserList(List<User> users, boolean removeNonLDAPAttributes) {
         List<CustomUser> customUserList = new ArrayList<>();
@@ -375,7 +404,7 @@ public class UserResource extends BaseResource {
         customUser.setOxAuthPersistentJwt(user.getOxAuthPersistentJwt());
         customUser.setUpdatedAt(user.getUpdatedAt());
         customUser.setUserId(user.getUserId());
-
+        customUser.setStatus(user.getStatus());
         ignoreCustomAttributes(customUser, removeNonLDAPAttributes);
         return setCustomUserAttributes(customUser, user);
     }
@@ -383,14 +412,13 @@ public class UserResource extends BaseResource {
     public CustomUser setCustomUserAttributes(CustomUser customUser, User user) {
         customUser.setMail(user.getAttribute(MAIL));
         customUser.setDisplayName(user.getAttribute(DISPLAY_NAME));
-        customUser.setJansStatus(user.getAttribute(JANS_STATUS));
         customUser.setGivenName(user.getAttribute(GIVEN_NAME));
         customUser.setUserPassword(user.getAttribute(USER_PWD));
         customUser.setInum(user.getAttribute(INUM));
+        customUser.setStatus(user.getStatus());
 
         customUser.removeAttribute(MAIL);
         customUser.removeAttribute(DISPLAY_NAME);
-        customUser.removeAttribute(JANS_STATUS);
         customUser.removeAttribute(GIVEN_NAME);
         customUser.removeAttribute(USER_PWD);
         customUser.removeAttribute(INUM);
@@ -408,23 +436,30 @@ public class UserResource extends BaseResource {
         user.setOxAuthPersistentJwt(customUser.getOxAuthPersistentJwt());
         user.setUpdatedAt(customUser.getUpdatedAt());
         user.setUserId(customUser.getUserId());
+        user.setStatus((customUser.getStatus()!=null?customUser.getStatus() : GluuStatus.ACTIVE));     
+        
         return setUserCustomAttributes(customUser, user);
     }
 
     private User setUserCustomAttributes(CustomUser customUser, User user) {
-        user.setAttribute(MAIL, customUser.getMail(), false);
+        if(StringUtils.isNotBlank(customUser.getMail())) {        
+            user.setAttribute(MAIL, customUser.getMail(), false);
+        }
+        
         user.setAttribute(DISPLAY_NAME, customUser.getDisplayName(), false);
-        user.setAttribute(JANS_STATUS, customUser.getJansStatus(), false);
         user.setAttribute(GIVEN_NAME, customUser.getGivenName(), false);
-        user.setAttribute(USER_PWD, customUser.getUserPassword(), false);
-        user.setAttribute(INUM, customUser.getInum(), false);
-
-        logger.debug("Custom User - user:{}", user);
+        if(StringUtils.isNotBlank(customUser.getUserPassword())) {  
+            user.setAttribute(USER_PWD, customUser.getUserPassword(), false);
+        }
+        if(StringUtils.isNotBlank(customUser.getInum())) {    
+            user.setAttribute(INUM, customUser.getInum(), false);
+        }
+        
         return user;
     }
 
     private User ignoreCustomAttributes(User user, boolean removeNonLDAPAttributes) {
-        logger.debug(
+        logger.info(
                 "** validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
                 user, removeNonLDAPAttributes, user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(),
                 userMgmtSrv.isLDAP());

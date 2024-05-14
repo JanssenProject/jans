@@ -6,16 +6,32 @@
 
 package io.jans.as.server.service;
 
-import io.jans.as.common.model.common.SimpleUser;
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.slf4j.Logger;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
-import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
@@ -35,28 +51,12 @@ import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.util.ArrayHelper;
 import io.jans.util.Pair;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.ExternalContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
 
 /**
  * Authentication service methods
@@ -127,9 +127,7 @@ public class AuthenticationService {
     public boolean authenticate(String userName, String password) {
         log.debug("Authenticating user with LDAP: username: '{}', credentials: '{}'", userName,
                 System.identityHashCode(credentials));
-
         boolean authenticated = false;
-        boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
 
         com.codahale.metrics.Timer.Context timerContext = null;
         timerContext = metricService
@@ -138,31 +136,13 @@ public class AuthenticationService {
             if ((this.ldapAuthConfigs == null) || (this.ldapAuthConfigs.size() == 0)) {
                 authenticated = localAuthenticate(userName, password);
             } else {
-                authenticated = externalAuthenticate(userName, password);
+                authenticated = externalAuthenticateInternal(userName, password);
             }
         } finally {
             timerContext.stop();
         }
-
-        String userId = userName;
-        if ((identity.getUser() != null) && StringHelper.isNotEmpty(identity.getUser().getUserId())) {
-            userId = identity.getUser().getUserId();
-        }
-        setAuthenticatedUserSessionAttribute(userId, authenticated);
-
-        MetricType metricType;
-        if (authenticated) {
-            metricType = MetricType.USER_AUTHENTICATION_SUCCESS;
-        } else {
-            metricType = MetricType.USER_AUTHENTICATION_FAILURES;
-        }
-
-        metricService.incCounter(metricType);
-
-        if (protectionServiceEnabled) {
-            authenticationProtectionService.storeAttempt(userId, authenticated);
-            authenticationProtectionService.doDelayIfNeeded(userId);
-        }
+        
+        configureUserAfterAuthenticate(userName, authenticated);
 
         return authenticated;
     }
@@ -282,56 +262,89 @@ public class AuthenticationService {
         return new Pair<Boolean, User>(false, null);
     }
 
-    private boolean externalAuthenticate(String keyValue, String password) {
-        for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
-            GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
-            PersistenceEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
-
-            String primaryKey = "uid";
-            if (StringHelper.isNotEmpty(ldapAuthConfig.getPrimaryKey())) {
-                primaryKey = ldapAuthConfig.getPrimaryKey();
-            }
-
-            String localPrimaryKey = "uid";
-            if (StringHelper.isNotEmpty(ldapAuthConfig.getLocalPrimaryKey())) {
-                localPrimaryKey = ldapAuthConfig.getLocalPrimaryKey();
-            }
-
-            boolean authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey,
-                    localPrimaryKey, false);
-            if (authenticated) {
-                return authenticated;
-            }
-        }
-
-        return false;
+    private boolean externalAuthenticateInternal(String keyValue, String password) {
+        return externalAuthenticate(ldapAuthConfigs, ldapAuthEntryManagers, keyValue, password, false, false);
     }
 
-    public boolean authenticate(String keyValue, String password, String primaryKey, String localPrimaryKey) {
-        if (this.ldapAuthConfigs == null) {
-            return authenticate(null, ldapEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+    private boolean externalAuthenticate(List<GluuLdapConfiguration> ldapAuthConfigs, List<PersistenceEntryManager> ldapAuthEntryManagers, String keyValue, String password, boolean updateMetrics, boolean configureUser) {
+        boolean authenticated = false;
+        com.codahale.metrics.Timer.Context timerContext = null;
+        if (updateMetrics) {
+	        timerContext = metricService
+	                .getTimer(MetricType.USER_AUTHENTICATION_RATE).time();
+        }
+        try {
+        	if ((ldapAuthConfigs != null) && (ldapAuthEntryManagers != null)) {
+		       	for (int i = 0; i < ldapAuthConfigs.size(); i++) {
+		            GluuLdapConfiguration ldapAuthConfig = ldapAuthConfigs.get(i);
+		            PersistenceEntryManager ldapAuthEntryManager = ldapAuthEntryManagers.get(i);
+		
+		            String primaryKey = "uid";
+		            if (StringHelper.isNotEmpty(ldapAuthConfig.getPrimaryKey())) {
+		                primaryKey = ldapAuthConfig.getPrimaryKey();
+		            }
+		
+		            String localPrimaryKey = "uid";
+		            if (StringHelper.isNotEmpty(ldapAuthConfig.getLocalPrimaryKey())) {
+		                localPrimaryKey = ldapAuthConfig.getLocalPrimaryKey();
+		            }
+		
+		            authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey,
+		                    localPrimaryKey, false);
+		            if (authenticated) {
+		                break;
+		            }
+		        }
+        	}
+        } finally {
+        	if (timerContext != null) {
+        		timerContext.stop();
+        	}
+        }
+        
+        if (configureUser) {
+        	configureUserAfterAuthenticate(keyValue, authenticated);
         }
 
+        return authenticated;
+    }
+
+    public boolean externalAuthenticate(String keyValue, String password) {
+    	return externalAuthenticate(ldapAuthConfigs, ldapAuthEntryManagers, keyValue, password, true, true);
+    }
+
+    public boolean externalAuthenticate(List<GluuLdapConfiguration> ldapAuthConfigs, List<PersistenceEntryManager> ldapAuthEntryManagers, String keyValue, String password) {
+    	return externalAuthenticate(ldapAuthConfigs, ldapAuthEntryManagers, keyValue, password, true, true);
+    }
+
+    public boolean externalAuthenticate(String keyValue, String password, String primaryKey, String localPrimaryKey) {
         boolean authenticated = false;
-        boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
 
         com.codahale.metrics.Timer.Context timerContext = metricService
                 .getTimer(MetricType.USER_AUTHENTICATION_RATE).time();
         try {
-            for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
-                GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
-                PersistenceEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
-
-                authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey,
-                        localPrimaryKey, false);
-                if (authenticated) {
-                    break;
-                }
-            }
+        	 if (this.ldapAuthConfigs != null) {
+	            for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
+	                GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
+	                PersistenceEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
+	
+	                authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey,
+	                        localPrimaryKey, false);
+	                if (authenticated) {
+	                    break;
+	                }
+	            }
+        	 }
         } finally {
             timerContext.stop();
         }
-        String userId = null;
+
+        configureUserAfterAuthenticate(keyValue, authenticated);
+
+        return authenticated;
+    }
+
+	private void configureUserAfterAuthenticate(String userId, boolean authenticated) {
         if ((identity.getUser() != null) && StringHelper.isNotEmpty(identity.getUser().getUserId())) {
             userId = identity.getUser().getUserId();
         }
@@ -346,13 +359,12 @@ public class AuthenticationService {
 
         metricService.incCounter(metricType);
 
+        boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
         if (protectionServiceEnabled) {
-            authenticationProtectionService.storeAttempt(keyValue, authenticated);
-            authenticationProtectionService.doDelayIfNeeded(keyValue);
+            authenticationProtectionService.storeAttempt(userId, authenticated);
+            authenticationProtectionService.doDelayIfNeeded(userId);
         }
-
-        return authenticated;
-    }
+	}
 
     /*
      * Utility method which can be used in custom scripts
@@ -436,7 +448,7 @@ public class AuthenticationService {
                     if (user != null) {
                         String userDn = user.getDn();
                         log.debug("Attempting to authenticate userDN: {}", userDn);
-                        if (ldapAuthEntryManager.authenticate(userDn, password)) {
+                        if (ldapAuthEntryManager.authenticate(userDn, User.class, password)) {
                             log.debug("User authenticated: {}", userDn);
 
                             log.debug("Attempting to find userDN by local primary key: {}", localPrimaryKey);
@@ -566,20 +578,20 @@ public class AuthenticationService {
             return null;
         }
 
-        SimpleUser sampleUser = new SimpleUser();
-        sampleUser.setDn(baseDn);
+        User user = new User();
+        user.setDn(baseDn);
 
         List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
         customAttributes.add(new CustomObjectAttribute(attributeName, attributeValue));
 
-        sampleUser.setCustomAttributes(customAttributes);
+        user.setCustomAttributes(customAttributes);
 
         log.debug("Searching user by attributes: '{}', baseDn: '{}'", customAttributes, baseDn);
-        List<User> entries = ldapAuthEntryManager.findEntries(sampleUser, 1);
+        List<User> entries = ldapAuthEntryManager.findEntries(user, 1);
         log.debug("Found '{}' entries", entries.size());
 
         if (entries.size() > 0) {
-            SimpleUser foundUser = entries.get(0);
+            User foundUser = entries.get(0);
 
             return ldapAuthEntryManager.find(User.class, foundUser.getDn());
         } else {
@@ -588,9 +600,7 @@ public class AuthenticationService {
     }
 
     private boolean checkUserStatus(User user) {
-        CustomObjectAttribute userStatus = userService.getCustomAttribute(user, "jansStatus");
-
-        if ((userStatus != null) && GluuStatus.ACTIVE.getValue().equalsIgnoreCase(StringHelper.toString(userStatus.getValue()))) {
+        if (GluuStatus.ACTIVE == user.getStatus()) {
             return true;
         }
 
@@ -894,5 +904,4 @@ public class AuthenticationService {
             setExternalScriptExtraParameters(newSessionIdAttributes, authExternalAttributes);
         }
     }
-
 }

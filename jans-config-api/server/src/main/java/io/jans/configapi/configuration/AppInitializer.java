@@ -7,10 +7,11 @@
 package io.jans.configapi.configuration;
 
 import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
+import io.jans.configapi.model.configuration.AssetMgtConfiguration;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
-import io.jans.configapi.service.status.StatusCheckerTimer;
 import io.jans.configapi.service.logger.LoggerService;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
@@ -24,10 +25,8 @@ import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
-import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
-import org.slf4j.Logger;
-import java.util.ArrayList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -44,6 +43,9 @@ import jakarta.servlet.ServletContext;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
+import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
+
+import org.slf4j.Logger;
 
 @ApplicationScoped
 @Named("appInitializer")
@@ -72,9 +74,6 @@ public class AppInitializer {
     private Instance<AuthorizationService> authorizationServiceInstance;
 
     @Inject
-    StatusCheckerTimer statusCheckerTimer;
-
-    @Inject
     private LoggerService loggerService;
 
     @Inject
@@ -100,7 +99,8 @@ public class AppInitializer {
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
         this.createAuthorizationService();
-        log.info("Initialized ApiAppConfiguration:{}", this.configurationFactory.getApiAppConfiguration());
+        ApiAppConfiguration apiAppConfiguration = this.configurationFactory.getApiAppConfiguration();
+        log.info("Initialized ApiAppConfiguration:{}", apiAppConfiguration);
 
         // Initialize python interpreter
         pythonService
@@ -112,14 +112,14 @@ public class AppInitializer {
         // Initialize custom Script
         initCustomScripts();
 
-        // Stats timer
-        statusCheckerTimer.initTimer();
-
         // Schedule timer tasks
         configurationFactory.initTimer();        
 
         // Schedule timer tasks
-        loggerService.initTimer(true);
+        if(!apiAppConfiguration.isDisableLoggerTimer()) {
+            log.debug("LoggerService timer enabled!");
+            loggerService.initTimer(true);
+        }
         
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
     }
@@ -137,6 +137,12 @@ public class AppInitializer {
         return configurationFactory;
     }
 
+    @Produces
+    @ApplicationScoped
+    public AssetMgtConfiguration getAssetMgtConfiguration() {
+        return this.configurationFactory.getApiAppConfiguration().getAssetMgtConfiguration();
+    }
+    
     @Produces
     @ApplicationScoped
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)

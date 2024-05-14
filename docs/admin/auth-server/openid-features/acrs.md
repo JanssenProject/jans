@@ -35,7 +35,7 @@ understanding.
 ### 1. Internal Janssen Server ACR
 
 Janssen server will use internal ACR only if no other authentication method is set or could be invoked.
-This internal ACR, `default_password_auth`, is set to level -1. This means that it has lower
+This internal ACR, `simple_password_auth`, is set to level -1. This means that it has lower
 priority than any other script. This ACR is always available and enabled on any Janssen Server deployment.
 
 This ACR is a simple user-id and password-based authentication mechanism. It authenticates the end-user
@@ -54,6 +54,11 @@ Use the instructions provided in jans-cli [LDAP configuration options](../../con
 To offer highly flexible and pluggable authentication flows, Janssen Server uses script-based ACRs. These ACRs are
 associated with a corresponding [person authentication script](../../developer/scripts/person-authentication.md). To use these ACRs
 in the authentication flow, the associated [script should be enabled](../../developer/scripts/person-authentication.md#enabling-an-authentication-mechanism).
+
+### 4. Agama ACRs
+
+Agama acrs starts from `agama_` prefix. All of them invoke underlying agama bridge script called `agama`.
+General pattern is `agama_<flow name>`.
 
 ## Configuring ACRs in the JANS AS:
 
@@ -95,6 +100,15 @@ ACR's level, nothing is changed and the usual SSO behavior is observed. If the n
 method is requested), and it's not possible to serve such a request using the existing session's context, then the user
 must re-authenticate to continue. If the user succeeds, a new session with a new ACR gets associated.
 
+## ACR mappings (aliases)
+
+There is `acrMappings` AS configuration property which allows to specify aliases for acrs.
+`acrMappings` contains simple map in key-value form.
+
+Lets say RP sends request with `acr_values=loginWithOtpCheck`. If `acrMappings` contains mapping "loginWithOtpCheck":"otp" then
+AS will map `loginWithOtpCheck` to `otp` and will use `acr_values=otp`. 
+It means that script must be called `otp` in this case and not `loginWithOtpCheck`. 
+
 ## Flowchart - How the Jans AS derives an ACR value for a user session :
 
 ```mermaid
@@ -124,6 +138,14 @@ flowchart TD
 - If the default ACR for the server is not configured by the Janssen Server administrator, or it can not be invoked due
   to any reason, then the Janssen Server uses the [internal server ACR](#1-internal-janssen-server-acr) to authenticate
   the end-user.
+
+## Errors 
+
+### unmet_authentication_requirements
+
+If authorization request is sent to Authorization Endpoint with `acr_values` for which 
+AS it not able to find "Person Authentication" custom script, it returns "unmet_authentication_requirements"
+with detail log in `jans-auth.log`.
 
 ## Want to contribute?
 

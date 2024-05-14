@@ -68,6 +68,19 @@ Create user custom defined secret envs
 {{- end }}
 
 {{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "scim.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.global.scim.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" $memory -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory 300) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
 Create topologySpreadConstraints lists
 */}}
 {{- define "scim.topology-spread-constraints"}}

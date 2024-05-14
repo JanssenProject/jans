@@ -6,14 +6,14 @@
 
 package io.jans.as.common.model.common;
 
+import java.util.List;
+
+import org.json.JSONArray;
+
+import io.jans.as.model.exception.InvalidClaimException;
+import io.jans.model.user.SimpleUser;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
-import io.jans.orm.model.base.CustomObjectAttribute;
-import io.jans.util.StringHelper;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author Yuriy Movchan Date: 06/11/2013
@@ -24,62 +24,29 @@ public class User extends SimpleUser {
 
     private static final long serialVersionUID = 6634191420188575733L;
 
-    @Deprecated
-    public void setAttribute(String attributeName, String attributeValue) {
-        setAttribute(attributeName, attributeValue, null);
-    }
+    public Object getAttribute(String attributeName, boolean optional, boolean multivalued) throws InvalidClaimException {
+        Object attribute = null;
 
-    public void setAttribute(String attributeName, String attributeValue, Boolean multiValued) {
-        CustomObjectAttribute attribute = new CustomObjectAttribute(attributeName, attributeValue);
-        if (multiValued != null) {
-            attribute.setMultiValued(multiValued);
-        }
-
-        removeAttribute(attributeName);
-        getCustomAttributes().add(attribute);
-    }
-
-    @Deprecated
-    public void setAttribute(String attributeName, String[] attributeValues) {
-        setAttribute(attributeName, attributeValues, null);
-    }
-
-    public void setAttribute(String attributeName, String[] attributeValues, Boolean multiValued) {
-        CustomObjectAttribute attribute = new CustomObjectAttribute(attributeName, Arrays.asList(attributeValues));
-        if (multiValued != null) {
-            attribute.setMultiValued(multiValued);
-        }
-
-        removeAttribute(attributeName);
-        getCustomAttributes().add(attribute);
-    }
-
-    @Deprecated
-    public void setAttribute(String attributeName, List<String> attributeValues) {
-        setAttribute(attributeName, attributeValues, null);
-    }
-
-    public void setAttribute(String attributeName, List<String> attributeValues, Boolean multiValued) {
-        CustomObjectAttribute attribute = new CustomObjectAttribute(attributeName, attributeValues);
-        if (multiValued != null) {
-            attribute.setMultiValued(multiValued);
-        }
-
-        removeAttribute(attributeName);
-        getCustomAttributes().add(attribute);
-    }
-
-    public void removeAttribute(String attributeName) {
-        for (Iterator<CustomObjectAttribute> it = getCustomAttributes().iterator(); it.hasNext(); ) {
-            if (StringHelper.equalsIgnoreCase(attributeName, it.next().getName())) {
-                it.remove();
-                break;
+        List<Object> values = getAttributeObjectValues(attributeName);
+        if (values != null) {
+            if (multivalued) {
+                JSONArray array = new JSONArray();
+                for (Object v : values) {
+                    array.put(v);
+                }
+                attribute = array;
+            } else {
+                attribute = values.get(0);
             }
         }
-    }
 
-    public String getStatus() {
-        return getAttribute("jansStatus");
+        if (attribute != null) {
+            return attribute;
+        } else if (optional) {
+            return attribute;
+        } else {
+            throw new InvalidClaimException("The claim " + attributeName + " was not found.");
+        }
     }
 
 }

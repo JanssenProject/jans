@@ -119,7 +119,7 @@ The “special” value `null` can be used (responsibly) to represent the absenc
 
 - Access of an unknown property evaluates to `null`: `x.owner` 
 
-- If a key name does not follow the pattern `[a-zA-Z]( _ | [a-zA-Z] | [0-9] )*` an alternative notation must be employed to retrieve or modify the associated value. Click [here](#maps-and-dot-notation) to learn more 
+- If a key name does not follow the pattern `[a-zA-Z]( _ | [a-zA-Z] | [0-9] )*` an alternative notation must be employed to retrieve or modify the associated value. Click <a href="#maps-and-dot-notation">here</a> to learn more 
 
 ## Flow structure
 

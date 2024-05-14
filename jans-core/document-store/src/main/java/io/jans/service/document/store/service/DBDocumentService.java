@@ -15,7 +15,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 
 /**
  * Provides operations with Document
@@ -23,7 +22,6 @@ import jakarta.inject.Named;
  * @author Shekhar L. Date : 29 Sep 2022
  */
 @ApplicationScoped
-@Named("DBDocumentService")
 public class DBDocumentService implements Serializable {
 
 	private static final long serialVersionUID = 65734145678106186L;
@@ -45,6 +43,7 @@ public class DBDocumentService implements Serializable {
 	public static final String inum = "inum";
 	public static final String displayName = "displayName";
 	public static final String description = "description";
+	public static final String alias = "jansAlias";
 
 	@PostConstruct
 	public void init() {
@@ -104,9 +103,9 @@ public class DBDocumentService implements Serializable {
 	 */
 	public String getDnForDocument(String inum) throws Exception {
 		if (StringHelper.isEmpty(inum)) {
-			return String.format("ou=document,%s", "o=gluu");
+			return String.format("ou=document,%s", "o=jans");
 		}
-		return String.format("inum=%s,ou=document,%s", inum, "o=gluu");
+		return String.format("inum=%s,ou=document,%s", inum, "o=jans");
 	}
 
 	/**
@@ -152,7 +151,9 @@ public class DBDocumentService implements Serializable {
 					null);
 			Filter descriptionFilter = Filter.createSubstringFilter(description, null, targetArray,
 					null);
-			searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
+			 Filter aliasFilter = Filter.createSubstringFilter(alias, null, targetArray,
+	                    null);
+			searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, aliasFilter);
 		}
 		List<Document> result = new ArrayList<>();
 		try {
@@ -196,13 +197,30 @@ public class DBDocumentService implements Serializable {
 
 	/**
 	 * Get documents by DisplayName
-	 * 
+	 *
 	 * @param DisplayName
 	 * @return documents
 	 */
 	public Document getDocumentByDisplayName(String DisplayName) throws Exception {
 		Document document = new Document();
 		document.setDisplayName(DisplayName);
+		document.setDn(getDnForDocument(null));;
+		List<Document> documents = persistenceEntryManager.findEntries(document);
+		if ((documents != null) && (documents.size() > 0)) {
+			return documents.get(0);
+		}
+		return null;
+	}
+
+	/**
+	 * Get documents by DisplayName
+	 *
+	 * @param DisplayName
+	 * @return documents
+	 */
+	public Document getDocumentByJansFilePath(String filePath) throws Exception {
+		Document document = new Document();
+		document.setJansFilePath(filePath);
 		document.setDn(getDnForDocument(null));;
 		List<Document> documents = persistenceEntryManager.findEntries(document);
 		if ((documents != null) && (documents.size() > 0)) {

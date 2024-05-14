@@ -17,7 +17,7 @@ from settings import LOGGING_CONFIG
 from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("config-api")
+logger = logging.getLogger("jans-config-api")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
@@ -25,22 +25,17 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 def _transform_api_dynamic_config(conf):
     should_update = False
 
-    if "userExclusionAttributes" not in conf:
-        conf["userExclusionAttributes"] = ["userPassword"]
-        should_update = True
-
-    if "userMandatoryAttributes" not in conf:
-        conf["userMandatoryAttributes"] = [
+    # top-level config that need to be added (if missing)
+    for missing_key, value in [
+        ("userExclusionAttributes", ["userPassword"]),
+        ("userMandatoryAttributes", [
             "mail",
             "displayName",
-            "jansStatus",
+            "status",
             "userPassword",
             "givenName",
-        ]
-        should_update = True
-
-    if "agamaConfiguration" not in conf:
-        conf["agamaConfiguration"] = {
+        ]),
+        ("agamaConfiguration", {
             "mandatoryAttributes": [
                 "qname",
                 "source",
@@ -49,68 +44,90 @@ def _transform_api_dynamic_config(conf):
                 "serialVersionUID",
                 "enabled",
             ],
-        }
-        should_update = True
-
-    if "auditLogConf" not in conf:
-        conf["auditLogConf"] = {
+        }),
+        ("auditLogConf", {
             "enabled": True,
             "headerAttributes": ["User-inum"],
-        }
-        should_update = True
-
-    if "dataFormatConversionConf" not in conf:
-        conf["dataFormatConversionConf"] = {
+        }),
+        ("dataFormatConversionConf", {
             "enabled": True,
             "ignoreHttpMethod": [
                 "@jakarta.ws.rs.GET()",
             ],
-        }
-        should_update = True
+        }),
+        ("customAttributeValidationEnabled", True),
+        ("disableLoggerTimer", False),
+        ("disableAuditLogger", False),
+        ("assetMgtEnabled", True),
+    ]:
+        if missing_key not in conf:
+            conf[missing_key] = value
+            should_update = True
 
     if "plugins" not in conf:
-        conf["plugins"] = [
-            {
-                "name": "admin",
-                "description": "admin-ui plugin",
-                "className": "io.jans.ca.plugin.adminui.rest.ApiApplication",
-            },
-            {
-                "name": "fido2",
-                "description": "fido2 plugin",
-                "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication",
-            },
-            {
-                "name": "scim",
-                "description": "scim plugin",
-                "className": "io.jans.configapi.plugin.scim.rest.ApiApplication",
-            },
-            {
-                "name": "user-management",
-                "description": "user-management plugin",
-                "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication",
-            },
-        ]
-        should_update = True
+        conf["plugins"] = []
 
     # current plugin names to lookup to
     plugins_names = tuple(plugin["name"] for plugin in conf["plugins"])
 
-    if "jans-link" not in plugins_names:
-        conf["plugins"].append({
+    supported_plugins = [
+        {
+            "name": "admin",
+            "description": "admin-ui plugin",
+            "className": "io.jans.ca.plugin.adminui.rest.ApiApplication"
+        },
+        {
+            "name": "fido2",
+            "description": "fido2 plugin",
+            "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication"
+        },
+        {
+            "name": "scim",
+            "description": "scim plugin",
+            "className": "io.jans.configapi.plugin.scim.rest.ApiApplication"
+        },
+        {
+            "name": "user-management",
+            "description": "user-management plugin",
+            "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication"
+        },
+        {
             "name": "jans-link",
             "description": "jans-link plugin",
-            "className": "io.jans.configapi.plugin.link.rest.ApiApplication",
-        })
-        should_update = True
-
-    if "saml" not in plugins_names:
-        conf["plugins"].append({
+            "className": "io.jans.configapi.plugin.link.rest.ApiApplication"
+        },
+        {
             "name": "saml",
             "description": "saml plugin",
             "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
-        })
+        },
+        {
+            "name": "kc-link",
+            "description": "kc-link plugin",
+            "className": "io.jans.configapi.plugin.kc.link.rest.ApiApplication"
+        },
+        {
+            "name": "lock",
+            "description": "lock plugin",
+            "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
+        }
+    ]
+
+    for supported_plugin in supported_plugins:
+        if supported_plugin["name"] not in plugins_names:
+            conf["plugins"].append(supported_plugin)
+            should_update = True
+
+    # userMandatoryAttributes.jansStatus is changed to userMandatoryAttributes.status
+    if "jansStatus" in conf["userMandatoryAttributes"]:
+        conf["userMandatoryAttributes"].remove("jansStatus")
         should_update = True
+
+    if "status" not in conf["userMandatoryAttributes"]:
+        conf["userMandatoryAttributes"].append("status")
+        should_update = True
+
+    # finalized conf and flag to determine update process
     return conf, should_update
 
 
@@ -473,7 +490,7 @@ class Upgrade:
 
         for entry in entries:
             if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
-                creator_attrs = entry.attrs["creatorAttrs"]["v"]
+                creator_attrs = (entry.attrs.get("creatorAttrs") or {}).get("v") or []
             else:
                 creator_attrs = entry.attrs.get("creatorAttrs") or []
 

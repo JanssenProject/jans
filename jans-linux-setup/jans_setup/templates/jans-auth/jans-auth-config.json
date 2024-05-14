@@ -345,7 +345,7 @@
         "ru",
         "tr"
     ],
-    "dynamicGrantTypeDefault":[
+    "grantTypesSupportedByDynamicRegistration":[
         "authorization_code",
         "implicit",
         "client_credentials",
@@ -353,7 +353,8 @@
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
-        "tx_token"
+        "tx_token",
+        "password"
     ],
     "claimsParameterSupported":false,
     "requestParameterSupported":true,
@@ -499,10 +500,6 @@
         {
             "paramName": "customParam5",
             "returnInResponse": true
-        },
-        {
-            "paramName": "agama_flow",
-            "returnInResponse": false
         }
     ],
     "legacyDynamicRegistrationScopeParam": false,
@@ -583,7 +580,7 @@
         "birthdate": "yyyy-MM-dd"
     },
     "lockMessageConfig": {
-        "enableIdTokenMessages" : false,
-        "idTokenMessagesChannel": "id_token"
+        "enableTokenMessages" : false,
+        "tokenMessagesChannel": "jans_token"
     }
 }

@@ -1,4 +1,12 @@
+---
+tags:
+- Casa
+- Branding
+---
+
+
 # Custom Branding Plugin
+
 ## Overview
 This plugin allows admins to apply a design customization by choosing colors, favicon, logo, and footer text to match their company's look and feel. Alternatively, they can supply all assets (images and CSS files) externally to cover more demanding needs.
 
@@ -8,7 +16,7 @@ This plugin allows admins to apply a design customization by choosing colors, fa
     
 ## Installation
 
-1. [Download the plugin](https://maven.gluu.org/maven/org/gluu/casa/plugins/custom-branding/4.5.0.Final/custom-branding-4.5.0.Final-jar-with-dependencies.jar)
+1. [Download the plugin](https://maven.jans.io/maven/io/jans/casa/plugins/custom-branding/replace-janssen-version/custom-branding-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Login to Casa using an administrator account
 

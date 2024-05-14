@@ -83,7 +83,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 	}
 
 	/*
-	 * Message: {"tknTyp" : "id_token", "tknCde": "UUID"}
+	 * Message: {"tknTyp" : "access_token", "tknId": "UUID"}
 	 */
 	@Override
 	@Asynchronous
@@ -93,7 +93,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 		try {
 			JsonNode messageNode = objectMapper.readTree(message);
 			
-			if (!(messageNode.hasNonNull("tknTyp") && messageNode.hasNonNull("tknCde") && messageNode.hasNonNull("tknOp"))) {
+			if (!(messageNode.hasNonNull("tknTyp") && messageNode.hasNonNull("tknId") && messageNode.hasNonNull("tknOp"))) {
 				log.error("Message has missing tknOp or tknTyp, or tknTyp: '{}'", message);
 				return;
 			}
@@ -131,9 +131,9 @@ public class OpaMessageConsumer extends MessageConsumer {
 		ExternalLockContext lockContext = new ExternalLockContext();
 
 		String tknTyp = messageNode.get("tknTyp").asText();
-		String tknCde = messageNode.get("tknCde").asText();
+		String tknId = messageNode.get("tknId").asText();
 		
-		TokenEntity tokenEntity = tokenService.findToken(tknCde);
+		TokenEntity tokenEntity = tokenService.findToken(tknId);
 		log.debug("Token {} loaded successfully", tokenEntity);
 		lockContext.setTokenEntity(tokenEntity);
 
@@ -148,11 +148,10 @@ public class OpaMessageConsumer extends MessageConsumer {
 		}
 
 		// Send rest request to OPA
-		
 		OpaConfiguration opaConfiguration = appConfiguration.getOpaConfiguration();
 		String baseUrl = opaConfiguration.getBaseUrl();
 
-		HttpPut request = new HttpPut(String.format("%s/data/%s/%s", baseUrl, tknTyp, tknCde));
+		HttpPut request = new HttpPut(String.format("%s/data/%s/%s", baseUrl, tknTyp, tknId));
 		addAccessTokenHeader(request, opaConfiguration);
 
 		request.addHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
@@ -167,7 +166,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 			HttpResponse httpResponse = httpClient.execute(request);
 			
 			int statusCode = httpResponse.getStatusLine().getStatusCode();
-			log.debug("Get OPA add data for token '{}' response with status code '{}'", tknCde, statusCode);
+			log.debug("Get OPA add data for token '{}' response with status code '{}'", tknId, statusCode);
 
 			result = (statusCode == HttpStatus.SC_NO_CONTENT) || (statusCode == HttpStatus.SC_NOT_MODIFIED);
 		} catch (IOException ex) {
@@ -175,7 +174,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 		}
 
 		if (result) {
-			loadedTokens.put(tknCde, message, ExpirationPolicy.CREATED, getExpirationInSeconds(tokenEntity), TimeUnit.SECONDS);
+			loadedTokens.put(tknId, message, ExpirationPolicy.CREATED, getExpirationInSeconds(tokenEntity), TimeUnit.SECONDS);
 		}
 		
 		return result;
@@ -201,12 +200,12 @@ public class OpaMessageConsumer extends MessageConsumer {
 
 		// Send rest request to OPA
 		String tknTyp = messageNode.get("tknTyp").asText();
-		String tknCde = messageNode.get("tknCde").asText();
+		String tknId = messageNode.get("tknId").asText();
 
 		OpaConfiguration opaConfiguration = appConfiguration.getOpaConfiguration();
 		String baseUrl = opaConfiguration.getBaseUrl();
 
-		HttpDelete request = new HttpDelete(String.format("%s/data/%s/%s", baseUrl, tknTyp, tknCde));
+		HttpDelete request = new HttpDelete(String.format("%s/data/%s/%s", baseUrl, tknTyp, tknId));
 		addAccessTokenHeader(request, opaConfiguration);
 
 		boolean result = false;
@@ -215,7 +214,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 			HttpResponse httpResponse = httpClient.execute(request);
 
 			int statusCode = httpResponse.getStatusLine().getStatusCode();
-			log.debug("Get OPA remove data for token '{}' response with status code '{}'", tknCde, statusCode);
+			log.debug("Get OPA remove data for token '{}' response with status code '{}'", tknId, statusCode);
 
 			result = statusCode == HttpStatus.SC_NO_CONTENT;
 		} catch (IOException ex) {

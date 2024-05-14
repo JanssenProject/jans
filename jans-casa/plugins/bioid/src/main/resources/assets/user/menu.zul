@@ -1,0 +1,11 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native">
+
+    <li>
+        <a class="db pv3 pl1 ${css.menuItem}" data-priority="${priority}"
+           href="${zkService.contextPath}${base}/user/index.zul">
+           <i class="mh2 fas fa-camera" />
+           <span class="collapsible-menu-item di">${labels.bioid_title}</span>
+        </a>
+    </li>
+
+</z:zk>

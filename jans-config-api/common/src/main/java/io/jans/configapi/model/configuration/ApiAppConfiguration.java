@@ -3,13 +3,15 @@ package io.jans.configapi.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiAppConfiguration implements Configuration {
 
     private boolean configOauthEnabled;
+    private boolean disableLoggerTimer;
+    private boolean disableAuditLogger;
+    private boolean customAttributeValidationEnabled;
     private List<String> apiApprovedIssuer;
     private String apiProtectionType;
     private String apiClientId;
@@ -39,6 +41,8 @@ public class ApiAppConfiguration implements Configuration {
     private AuditLogConf auditLogConf;
     private DataFormatConversionConf dataFormatConversionConf;
     private List<PluginConf> plugins;
+    
+    private AssetMgtConfiguration assetMgtConfiguration;
 
     public boolean isConfigOauthEnabled() {
         return configOauthEnabled;
@@ -46,6 +50,30 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setConfigOauthEnabled(boolean configOauthEnabled) {
         this.configOauthEnabled = configOauthEnabled;
+    }
+
+    public boolean isDisableLoggerTimer() {
+        return disableLoggerTimer;
+    }
+
+    public void setDisableLoggerTimer(boolean disableLoggerTimer) {
+        this.disableLoggerTimer = disableLoggerTimer;
+    }
+
+    public boolean isDisableAuditLogger() {
+        return disableAuditLogger;
+    }
+
+    public void setDisableAuditLogger(boolean disableAuditLogger) {
+        this.disableAuditLogger = disableAuditLogger;
+    }
+
+    public boolean isCustomAttributeValidationEnabled() {
+        return customAttributeValidationEnabled;
+    }
+
+    public void setCustomAttributeValidationEnabled(boolean customAttributeValidationEnabled) {
+        this.customAttributeValidationEnabled = customAttributeValidationEnabled;
     }
 
     public List<String> getApiApprovedIssuer() {
@@ -136,38 +164,20 @@ public class ApiAppConfiguration implements Configuration {
         this.smallryeHealthRootPath = smallryeHealthRootPath;
     }
 
-    public List<CorsConfigurationFilter> getCorsConfigurationFilters() {
-        if (corsConfigurationFilters == null) {
-            corsConfigurationFilters = new ArrayList<>();
-        }
-
-        return corsConfigurationFilters;
-    }
-
-    public void setCorsConfigurationFilters(List<CorsConfigurationFilter> corsConfigurationFilters) {
-        if (corsConfigurationFilters == null) {
-            this.corsConfigurationFilters = new ArrayList<>();
-        } else {
-            this.corsConfigurationFilters = new ArrayList<>();
-            this.corsConfigurationFilters.addAll(corsConfigurationFilters);
-        }
-    }
-
     public List<String> getExclusiveAuthScopes() {
-        if (exclusiveAuthScopes == null) {
-            exclusiveAuthScopes = new ArrayList<>();
-        }
         return exclusiveAuthScopes;
     }
 
     public void setExclusiveAuthScopes(List<String> exclusiveAuthScopes) {
         this.exclusiveAuthScopes = exclusiveAuthScopes;
-        if (exclusiveAuthScopes == null) {
-            this.exclusiveAuthScopes = new ArrayList<>();
-        } else {
-            this.exclusiveAuthScopes = new ArrayList<>();
-            this.exclusiveAuthScopes.addAll(exclusiveAuthScopes);
-        }
+    }
+
+    public List<CorsConfigurationFilter> getCorsConfigurationFilters() {
+        return corsConfigurationFilters;
+    }
+
+    public void setCorsConfigurationFilters(List<CorsConfigurationFilter> corsConfigurationFilters) {
+        this.corsConfigurationFilters = corsConfigurationFilters;
     }
 
     public String getLoggingLevel() {
@@ -203,7 +213,7 @@ public class ApiAppConfiguration implements Configuration {
     }
 
     public int getMaxCount() {
-        return this.maxCount;
+        return maxCount;
     }
 
     public void setMaxCount(int maxCount) {
@@ -225,7 +235,7 @@ public class ApiAppConfiguration implements Configuration {
     public void setUserMandatoryAttributes(List<String> userMandatoryAttributes) {
         this.userMandatoryAttributes = userMandatoryAttributes;
     }
-        
+
     public AgamaConfiguration getAgamaConfiguration() {
         return agamaConfiguration;
     }
@@ -233,7 +243,7 @@ public class ApiAppConfiguration implements Configuration {
     public void setAgamaConfiguration(AgamaConfiguration agamaConfiguration) {
         this.agamaConfiguration = agamaConfiguration;
     }
-        
+
     public AuditLogConf getAuditLogConf() {
         return auditLogConf;
     }
@@ -241,14 +251,14 @@ public class ApiAppConfiguration implements Configuration {
     public void setAuditLogConf(AuditLogConf auditLogConf) {
         this.auditLogConf = auditLogConf;
     }
-    
+
     public DataFormatConversionConf getDataFormatConversionConf() {
         return dataFormatConversionConf;
     }
 
     public void setDataFormatConversionConf(DataFormatConversionConf dataFormatConversionConf) {
         this.dataFormatConversionConf = dataFormatConversionConf;
-    }    
+    }
 
     public List<PluginConf> getPlugins() {
         return plugins;
@@ -258,26 +268,33 @@ public class ApiAppConfiguration implements Configuration {
         this.plugins = plugins;
     }
 
-    @Override
-    public String toString() {
-        return "ApiAppConfiguration [" + " apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
-                + apiProtectionType + ", apiClientId=" + apiClientId + ", apiClientPassword=" + apiClientPassword
-                + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl
-                + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="
-                + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="
-                + authOpenidRevokeUrl + ", smallryeHealthRootPath=" + smallryeHealthRootPath
-                + ", corsConfigurationFilters=" + corsConfigurationFilters + ", exclusiveAuthScopes="
-                + exclusiveAuthScopes + ", loggingLevel=" + loggingLevel + " , loggingLayout=" + loggingLayout
-                + " , externalLoggerConfiguration=" + externalLoggerConfiguration + " , disableJdkLogger="
-                + disableJdkLogger + " , maxCount =" + maxCount
-                + " , userExclusionAttributes="+ userExclusionAttributes
-                + " , userMandatoryAttributes="+ userMandatoryAttributes
-                + " , agamaConfiguration="+ agamaConfiguration
-                + " , auditLogConf="+ auditLogConf
-                + " , dataFormatConversionConf="+ dataFormatConversionConf
-                + " , plugins="+ plugins
-                + "]";
+    public AssetMgtConfiguration getAssetMgtConfiguration() {
+        return assetMgtConfiguration;
     }
 
+    public void setAssetMgtConfiguration(AssetMgtConfiguration assetMgtConfiguration) {
+        this.assetMgtConfiguration = assetMgtConfiguration;
+    }
+
+    @Override
+    public String toString() {
+        return "ApiAppConfiguration [configOauthEnabled=" + configOauthEnabled + ", disableLoggerTimer="
+                + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
+                + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", apiApprovedIssuer="
+                + apiApprovedIssuer + ", apiProtectionType=" + apiProtectionType + ", apiClientId=" + apiClientId
+                + ", apiClientPassword=" + apiClientPassword + ", endpointInjectionEnabled=" + endpointInjectionEnabled
+                + ", authIssuerUrl=" + authIssuerUrl + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl
+                + ", authOpenidIntrospectionUrl=" + authOpenidIntrospectionUrl + ", authOpenidTokenUrl="
+                + authOpenidTokenUrl + ", authOpenidRevokeUrl=" + authOpenidRevokeUrl + ", smallryeHealthRootPath="
+                + smallryeHealthRootPath + ", exclusiveAuthScopes=" + exclusiveAuthScopes
+                + ", corsConfigurationFilters=" + corsConfigurationFilters + ", loggingLevel=" + loggingLevel
+                + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration
+                + ", disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount + ", userExclusionAttributes="
+                + userExclusionAttributes + ", userMandatoryAttributes=" + userMandatoryAttributes
+                + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf=" + auditLogConf
+                + ", dataFormatConversionConf=" + dataFormatConversionConf + ", plugins=" + plugins
+                + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
+    }
+        
 }
 

@@ -45,6 +45,8 @@ spec:
         - name: {{ include "config-api.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           env:
+            - name: CN_CONFIG_API_JAVA_OPTIONS
+              value: {{ include "config-api.customJavaOptions" . | trim }}
             {{- include "config-api.usr-envs" . | indent 12 }}
             {{- include "config-api.usr-secret-envs" . | indent 12 }}
           securityContext:
@@ -100,7 +102,14 @@ spec:
               name: google-sa
               subPath: google-credentials.json
           {{- end }}
-
+          {{ if eq .Values.global.configSecretAdapter "vault" }}
+            - name: vault
+              mountPath: /etc/certs/vault_role_id
+              subPath: vault_role_id
+            - name: vault
+              mountPath: /etc/certs/vault_secret_id
+              subPath: vault_secret_id
+          {{- end }}  
           {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
             {{- if not .Values.global.istio.enabled }}
             - name: cb-crt
@@ -164,6 +173,16 @@ spec:
         - name: google-sa
           secret:
             secretName: {{ .Release.Name }}-google-sa
+      {{- end }}
+      {{ if eq .Values.global.configSecretAdapter "vault" }}
+        - name: vault
+          secret:
+            secretName: {{ .Release.Name }}-vault
+            items:
+            - key: vault_role_id
+              path: vault_role_id
+            - key: vault_secret_id
+              path: vault_secret_id
       {{- end }}
       {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
 

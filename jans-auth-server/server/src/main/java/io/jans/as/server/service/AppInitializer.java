@@ -6,23 +6,10 @@
 
 package io.jans.as.server.service;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.slf4j.Logger;
-
 import com.google.common.collect.Lists;
-
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.as.persistence.model.configuration.IDPAuthConf;
 import io.jans.as.server.model.auth.AuthenticationMode;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.service.cdi.event.AuthConfigurationEvent;
@@ -34,6 +21,8 @@ import io.jans.as.server.service.logger.LoggerService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.service.stat.StatTimer;
 import io.jans.as.server.service.status.ldap.LdapStatusTimer;
+import io.jans.config.GluuConfiguration;
+import io.jans.config.IDPAuthConf;
 import io.jans.exception.ConfigurationException;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleProperty;
@@ -80,6 +69,16 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
+import org.slf4j.Logger;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
@@ -157,6 +156,9 @@ public class AppInitializer {
 
     @Inject
     private CleanerTimer cleanerTimer;
+
+    @Inject
+    private ClientLastUpdateAtTimer clientLastUpdateAtTimer;
 
     @Inject
     private KeyGeneratorTimer keyGeneratorTimer;
@@ -251,6 +253,7 @@ public class AppInitializer {
         loggerService.initTimer(true);
         ldapStatusTimer.initTimer();
         cleanerTimer.initTimer();
+        clientLastUpdateAtTimer.initTimer();
         customScriptManager.initTimer(supportedCustomScriptTypes);
         keyGeneratorTimer.initTimer();
         statTimer.initTimer();
@@ -353,7 +356,7 @@ public class AppInitializer {
      * Utility method which can be used in custom scripts
      */
     public PersistenceEntryManager createPersistenceAuthEntryManager(GluuLdapConfiguration persistenceAuthConfig) {
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory();
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class);
         Properties persistenceConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig, persistenceEntryManagerFactory.getPersistenceType());
 
         PersistenceEntryManager persistenceAuthEntryManager =
@@ -505,8 +508,12 @@ public class AppInitializer {
         }
     }
 
-    private void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
-        // Close existing connections
+    public void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
+    	if (oldPersistenceEntryManagers == null ) {
+    		return;
+    	}
+
+    	// Close existing connections
         for (PersistenceEntryManager oldPersistenceEntryManager : oldPersistenceEntryManagers) {
             log.debug("Attempting to destroy {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME,
                     oldPersistenceEntryManager);
@@ -569,7 +576,16 @@ public class AppInitializer {
         String prefix = persistenceType + "#";
         FileConfiguration configuration = configurationFactory.getPersistenceConfiguration().getConfiguration();
 
-        Properties properties = (Properties) configuration.getProperties().clone();
+        Properties properties = new Properties();
+        
+        // Get properties related to persistent type
+        for (Entry<Object, Object> propItem : configuration.getProperties().entrySet()) {
+        	String key = (String) propItem.getKey();
+        	if (key.startsWith(persistenceType)) {
+        		properties.put(key, propItem.getValue());
+        	}
+        }
+
         if (persistenceAuthConfig != null) {
             properties.setProperty(prefix + "servers", buildServersString(persistenceAuthConfig.getServers()));
 

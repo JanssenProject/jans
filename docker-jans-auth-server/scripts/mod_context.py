@@ -10,12 +10,11 @@ from collections import namedtuple
 
 from jans.pycloudlib.persistence import PersistenceMapper
 from jans.pycloudlib.utils import exec_cmd
-from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("auth")
+logger = logging.getLogger("jans-auth")
 
 
 Library = namedtuple("Library", ["path", "basename", "meta"])
@@ -68,18 +67,7 @@ def get_persistence_common_libs(dirpath):
 
 def get_default_custom_libs(app_name):
     root = f"/opt/jans/jetty/{app_name}"
-
-    excludes = []
-    if not as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
-        cn_version = os.environ.get("CN_VERSION", "")
-        excludes.append(f"{root}/custom/libs/jans-lock-service-{cn_version}.jar")
-
-    libs = []
-    for jar in glob.iglob(f"{root}/custom/libs/*.jar"):
-        if jar in excludes:
-            continue
-        libs.append(jar.replace(root, "."))
-    return libs
+    return [jar.replace(root, ".") for jar in glob.iglob(f"{root}/custom/libs/*.jar")]
 
 
 def get_registered_common_libs(app_name, persistence_type):
