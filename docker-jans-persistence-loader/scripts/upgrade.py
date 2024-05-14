@@ -369,9 +369,10 @@ class Upgrade:
             else:
                 props = agama_entry.attrs["jansConfProperty"]
 
-            if self.backend.type != "couchbase":
-                # try converting to mapping
-                props = [json.loads(prop) for prop in props]
+            if not isinstance(props, list):
+                props = [props]
+
+            props = [json.loads(prop) for prop in props]
 
             # filter out unwanted properties
             new_props = [
@@ -380,8 +381,7 @@ class Upgrade:
             ]
 
             if new_props != props:
-                if self.backend.type != "couchbase":
-                    new_props = [json.dumps(prop) for prop in new_props]
+                new_props = [json.dumps(prop) for prop in new_props]
 
                 if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
                     agama_entry.attrs["jansConfProperty"]["v"] = new_props

@@ -23,10 +23,11 @@ import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
+import io.jans.util.exception.InvalidAttributeException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.ws.rs.WebApplicationException;
+
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections.CollectionUtils;
@@ -521,7 +522,7 @@ public class UserMgmtService {
 
         if (StringUtils.isNotBlank(sb.toString())) {
             logger.error("Attribute validation failed with error msg:{} \n",sb);
-            throw new WebApplicationException(sb.toString());
+            throw new InvalidAttributeException(sb.toString());
         }
 
     }
