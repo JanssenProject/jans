@@ -26,6 +26,8 @@ def _transform_api_dynamic_config(conf):
     should_update = False
 
     # top-level config that need to be added (if missing)
+    asset_mgt = conf.pop("assetMgtEnabled", True)
+
     for missing_key, value in [
         ("userExclusionAttributes", ["userPassword"]),
         ("userMandatoryAttributes", [
@@ -58,7 +60,46 @@ def _transform_api_dynamic_config(conf):
         ("customAttributeValidationEnabled", True),
         ("disableLoggerTimer", False),
         ("disableAuditLogger", False),
-        ("assetMgtEnabled", True),
+        ("assetMgtConfiguration", {
+            "assetMgtEnabled": asset_mgt,
+            "assetServerUploadEnabled": True,
+            "assetBaseDirectory": "/opt/jans/jetty/%s/custom",
+            "assetDirMapping": [
+                {
+                    "directory": "i18n",
+                    "type": [
+                        "properties",
+                    ],
+                    "description": "Resource bundle file.",
+                },
+                {
+                    "directory": "libs",
+                    "type": [
+                        "jar",
+                    ],
+                    "description": "java archive library.",
+                },
+                {
+                    "directory": "pages",
+                    "type": [
+                        "xhtml",
+                    ],
+                    "description": "Web pages.",
+                },
+                {
+                    "directory": "static",
+                    "type": [
+                        "js",
+                        "css",
+                        "png",
+                        "gif",
+                        "jpg",
+                        "jpeg",
+                    ],
+                    "description": "Static resources like Java-script, style-sheet and images.",
+                },
+            ],
+        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
