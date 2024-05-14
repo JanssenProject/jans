@@ -1356,6 +1356,8 @@
         
           
         
+          
+        
       
       
         
@@ -1526,6 +1528,20 @@
     <li class="md-nav__item">
       <a href="../../../kubernetes-ops/custom-attributes/" class="md-nav__link">
         Custom Attributes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../kubernetes-ops/jans-saml/" class="md-nav__link">
+        Jans SAML/Keycloak
       </a>
     </li>
   
@@ -8545,7 +8561,7 @@ identity of a user or a workload and assert an authorization context.
 The authorization context provides information expected to remain
 constant during the execution of a call as it passes through multiple
 workloads.</p>
-<p>Transaction Tokens <a href="https://datatracker.ietf.org/doc/draft-tulshibagwale-oauth-transaction-tokens/">spec</a></p>
+<p>Transaction Tokens <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">spec</a></p>
 <h3 id="transaction-token-jwt">Transaction Token JWT<a class="headerlink" href="#transaction-token-jwt" title="Permanent link">#</a></h3>
 <p><strong>Sample header</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -8567,20 +8583,23 @@ workloads.</p>
 <li><strong>txn</strong> - the unique transaction identifier as
       defined in Section 2.2 of [RFC8417].  When used in the transaction
       token, it identifies the entire call chain.</li>
-<li><strong>sub_id</strong> - the unique identifier of the user
+<li><strong>purp</strong> - a string defining the purpose or intent of this transaction      </li>
+<li><strong>sub</strong> - the unique identifier of the user
       or workload on whose behalf the call chain is being executed.  The
       format of this claim MAY be a Subject Identifier.</li>
 <li><strong>azd</strong> - a JSON object that contains values that remain constant in the call chain.</li>
+<li><strong>rctx</strong> - a JSON object that describes the environmental context of the requested transaction.</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">    </span><span class="s2">&quot;d60f21b7-b6dd-4140-b228-e6be099bc3ce&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="s2">&quot;http://trusted.com&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;req_ctx&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;rctx&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;req_ip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;69.151.72.123&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;sub_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;purp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tx_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3245675432&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://yuriyz-adjusted-coyote.gluu.info&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;azd&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d60f21b7-b6dd-4140-b228-e6be099bc3ce&quot;</span><span class="w"></span>
@@ -8613,7 +8632,7 @@ grant_type=tx_token&amp;audience=http%3A%2F%2Ftrusted.com&amp;subject_token=5fb6
 <span class="err">X</span><span class="mi">-</span><span class="err">Co</span><span class="kc">ntent</span><span class="mi">-</span><span class="err">Type</span><span class="mi">-</span><span class="err">Op</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">:</span><span class="w"> </span><span class="kc">n</span><span class="err">os</span><span class="kc">n</span><span class="err">i</span><span class="kc">ff</span><span class="w"></span>
 <span class="err">X</span><span class="mi">-</span><span class="err">Xss</span><span class="mi">-</span><span class="err">Pro</span><span class="kc">te</span><span class="err">c</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="err">;</span><span class="w"> </span><span class="err">mode=block</span><span class="w"></span>
 
-<span class="p">{</span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="s2">&quot;eyJraWQiOiJjb25uZWN0XzBlZGMxOTIyLTk1MjAtNDFkNi1iZGMyLTk3ZjdmYWMwMzRkMl9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOlsiZDYwZjIxYjctYjZkZC00MTQwLWIyMjgtZTZiZTA5OWJjM2NlIiwiaHR0cDovL3RydXN0ZWQuY29tIl0sInJlcV9jdHgiOnsicmVxX2lwIjoiNjkuMTUxLjcyLjEyMyJ9LCJzdWJfaWQiOiIiLCJpc3MiOiJodHRwczovL3l1cml5ei1hZGp1c3RlZC1jb3lvdGUuZ2x1dS5pbmZvIiwiYXpkIjp7ImNsaWVudF9pZCI6ImQ2MGYyMWI3LWI2ZGQtNDE0MC1iMjI4LWU2YmUwOTliYzNjZSJ9LCJ0eG4iOiIwODBjOGYxOS1kOWVlLTRhMjYtODUyZC0zMmU0ZmRjNmZmNmMiLCJleHAiOjE3MDUwNTQ1NDIsImlhdCI6MTcwNTA1NDM2Mn0.fpPFZpzxitbLw71RgO3O8uSOHJARp16H2THO4YAimJKWiczSE8-DvUAqulEW2nCNN3PRdojXWCe4ipxPSr_0ugLSFWhFKdpLmQqec_udhcV-UWiuGPLfq0XeKte60ESSvj5jgpaBNaaGS2vmFeSLdGrAx1CY2EH06OYrttOrgFFGqMhLJJ1Cpacqa0vmXnHi9gbrS-FIf2_4nNkQKMitQ-m-ec-0J02RjgkEL9zrzFwYNAoE1HEIZNFBhh7GqBejH0cXnR2tBOOz66z83SLqMTAZ-WyaMxmITHGLGLmHZOGyHdiIYME1rLXalrK58XHesMFtB-gae10Ey6w1OIgiAg&quot;</span><span class="p">,</span><span class="nt">&quot;issued_token_type&quot;</span><span class="p">:</span><span class="s2">&quot;urn:ietf:params:oauth:token-type:txn_token&quot;</span><span class="p">,</span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="s2">&quot;txn_token&quot;</span><span class="p">}</span><span class="w"></span>
+<span class="p">{</span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="s2">&quot;eyJraWQiOiJjb25uZWN0XzBlZGMxOTIyLTk1MjAtNDFkNi1iZGMyLTk3ZjdmYWMwMzRkMl9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOlsiZDYwZjIxYjctYjZkZC00MTQwLWIyMjgtZTZiZTA5OWJjM2NlIiwiaHR0cDovL3RydXN0ZWQuY29tIl0sInJlcV9jdHgiOnsicmVxX2lwIjoiNjkuMTUxLjcyLjEyMyJ9LCJzdWJfaWQiOiIiLCJpc3MiOiJodHRwczovL3l1cml5ei1hZGp1c3RlZC1jb3lvdGUuZ2x1dS5pbmZvIiwiYXpkIjp7ImNsaWVudF9pZCI6ImQ2MGYyMWI3LWI2ZGQtNDE0MC1iMjI4LWU2YmUwOTliYzNjZSJ9LCJ0eG4iOiIwODBjOGYxOS1kOWVlLTRhMjYtODUyZC0zMmU0ZmRjNmZmNmMiLCJleHAiOjE3MDUwNTQ1NDIsImlhdCI6MTcwNTA1NDM2Mn0.fpPFZpzxitbLw71RgO3O8uSOHJARp16H2THO4YAimJKWiczSE8-DvUAqulEW2nCNN3PRdojXWCe4ipxPSr_0ugLSFWhFKdpLmQqec_udhcV-UWiuGPLfq0XeKte60ESSvj5jgpaBNaaGS2vmFeSLdGrAx1CY2EH06OYrttOrgFFGqMhLJJ1Cpacqa0vmXnHi9gbrS-FIf2_4nNkQKMitQ-m-ec-0J02RjgkEL9zrzFwYNAoE1HEIZNFBhh7GqBejH0cXnR2tBOOz66z83SLqMTAZ-WyaMxmITHGLGLmHZOGyHdiIYME1rLXalrK58XHesMFtB-gae10Ey6w1OIgiAg&quot;</span><span class="p">,</span><span class="nt">&quot;issued_token_type&quot;</span><span class="p">:</span><span class="s2">&quot;urn:ietf:params:oauth:token-type:txn-token&quot;</span><span class="p">,</span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="s2">&quot;N_A&quot;</span><span class="p">}</span><span class="w"></span>
 </code></pre></div></p>
 <p>Decoded transaction token JWT
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -8621,9 +8640,10 @@ grant_type=tx_token&amp;audience=http%3A%2F%2Ftrusted.com&amp;subject_token=5fb6
 <span class="w">    </span><span class="s2">&quot;d60f21b7-b6dd-4140-b228-e6be099bc3ce&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="s2">&quot;http://trusted.com&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;req_ctx&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;rctx&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;req_ip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;69.151.72.123&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;purp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tx_token&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;sub_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://yuriyz-adjusted-coyote.gluu.info&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;azd&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -8642,7 +8662,7 @@ transaction token (not regular <code>access_token</code>).</p>
 </ul>
 <h3 id="references">References<a class="headerlink" href="#references" title="Permanent link">#</a></h3>
 <ul>
-<li>Transaction Tokens <a href="https://datatracker.ietf.org/doc/draft-tulshibagwale-oauth-transaction-tokens/">spec</a></li>
+<li>Transaction Tokens <a href="https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html">spec</a></li>
 </ul>
 
   <hr>
@@ -8650,7 +8670,7 @@ transaction token (not regular <code>access_token</code>).</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-01-25T16:08:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-01-25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-05-14T15:29:58+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-05-14</span>
       
         <br>
         Created:
