@@ -44,7 +44,8 @@ public class TokenRequest extends ClientAuthnRequest {
     private String actorToken;
     private String actorTokenType;
     private String requestedTokenType;
-    private String rctx;
+    private String requestContext;
+    private String requestDetails;
     private DPoP dpop;
 
     /**
@@ -111,21 +112,39 @@ public class TokenRequest extends ClientAuthnRequest {
     }
 
     /**
-     * Gets request context as json string
+     * Gets request context as base64urlencoded json string
      *
-     * @return request context as json string
+     * @return request context as base64urlencoded json string
      */
-    public String getRctx() {
-        return rctx;
+    public String getRequestContext() {
+        return requestContext;
     }
 
     /**
-     * Sets request context as json string
+     * Sets request context as base64urlencoded json string
      *
-     * @param rctx request context as json string
+     * @param requestContext request context as base64urlencoded json string
      */
-    public void setRctx(String rctx) {
-        this.rctx = rctx;
+    public void setRequestContext(String requestContext) {
+        this.requestContext = requestContext;
+    }
+
+    /**
+     * Gets request details as base64urlencoded json string
+     *
+     * @return request details as base64urlencoded json string
+     */
+    public String getRequestDetails() {
+        return requestDetails;
+    }
+
+    /**
+     * Sets request details as base64urlencoded json string
+     *
+     * @param requestDetails request details as base64urlencoded json string
+     */
+    public void setRequestDetails(String requestDetails) {
+        this.requestDetails = requestDetails;
     }
 
     /**
@@ -359,7 +378,8 @@ public class TokenRequest extends ClientAuthnRequest {
         builder.append("actor_token", actorToken);
         builder.append("actor_token_type", actorTokenType);
         builder.append("requested_token_type", requestedTokenType);
-        builder.append("rctx", rctx);
+        builder.append("request_context", requestContext);
+        builder.append("request_details", requestDetails);
         appendClientAuthnToQuery(builder);
         for (String key : getCustomParameters().keySet()) {
             builder.append(key, getCustomParameters().get(key));
@@ -407,8 +427,11 @@ public class TokenRequest extends ClientAuthnRequest {
         if (StringUtils.isNotBlank(requestedTokenType)) {
             parameters.put("requested_token_type", requestedTokenType);
         }
-        if (StringUtils.isNotBlank(rctx)) {
-            parameters.put("rctx", rctx);
+        if (StringUtils.isNotBlank(requestContext)) {
+            parameters.put("request_context", requestContext);
+        }
+        if (StringUtils.isNotBlank(requestDetails)) {
+            parameters.put("request_details", requestDetails);
         }
         if (password != null && !password.isEmpty()) {
             parameters.put("password", password);
