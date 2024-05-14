@@ -8223,11 +8223,11 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanView:
+        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
