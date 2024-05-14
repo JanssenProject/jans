@@ -42,12 +42,6 @@
 			<version>${jans.version}</version>
 		</dependency>
 
-		<!-- Microprofile -->
-		<dependency>
-		    <groupId>io.smallrye.config</groupId>
-		    <artifactId>smallrye-config</artifactId>
-		</dependency>
-
 		<!-- Others -->
 		<dependency>
 			<groupId>commons-collections</groupId>
