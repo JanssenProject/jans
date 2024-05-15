@@ -13,7 +13,6 @@
   "authOpenidIntrospectionUrl": "${introspectionEndpoint}",
   "authOpenidTokenUrl": "${tokenEndpoint}",
   "authOpenidRevokeUrl": "${tokenRevocationEndpoint}",
-  "smallryeHealthRootPath": "/health-check",
   "disableJdkLogger":true,
   "loggingLevel":"INFO",
   "loggingLayout":"text",
