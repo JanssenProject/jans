@@ -8104,8 +8104,6 @@ components:
           type: boolean
         jansAlias:
           type: string
-        selected:
-          type: boolean
         baseDn:
           type: string
     AttributeValidation:
@@ -8221,8 +8219,6 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
@@ -8234,6 +8230,8 @@ components:
         adminCanAccess:
           type: boolean
         userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9059,6 +9057,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9068,8 +9068,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9867,8 +9865,6 @@ components:
           type: boolean
         disableAuditLogger:
           type: boolean
-        assetMgtEnabled:
-          type: boolean
         customAttributeValidationEnabled:
           type: boolean
         apiApprovedIssuer:
@@ -9930,6 +9926,32 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PluginConf'
+        assetMgtConfiguration:
+          $ref: '#/components/schemas/AssetMgtConfiguration'
+    AssetDirMapping:
+      type: object
+      properties:
+        directory:
+          type: string
+        type:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+    AssetMgtConfiguration:
+      type: object
+      properties:
+        assetMgtEnabled:
+          type: boolean
+        assetServerUploadEnabled:
+          type: boolean
+        assetBaseDirectory:
+          type: string
+        assetDirMapping:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetDirMapping'
     AuditLogConf:
       type: object
       properties:
@@ -10087,14 +10109,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
