@@ -65,11 +65,7 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-timer-weld</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>uma-rs-core</artifactId>
-		</dependency>
-
+	
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>agama-model</artifactId>
@@ -94,7 +90,6 @@
 		</dependency>
 
 
-
 		<!-- Microprofile -->
 		<dependency>
 			<groupId>org.eclipse.microprofile.config</groupId>
@@ -117,18 +112,12 @@
 			<groupId>io.smallrye.config</groupId>
 			<artifactId>smallrye-config</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.smallrye</groupId>
-			<artifactId>smallrye-health</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>io.smallrye</groupId>
 			<artifactId>smallrye-metrics</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client-microprofile</artifactId>
-		</dependency>
+		
 
 		<!-- Validation -->
 		<dependency>
