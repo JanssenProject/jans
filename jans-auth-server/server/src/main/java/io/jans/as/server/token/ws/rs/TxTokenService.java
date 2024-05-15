@@ -26,6 +26,8 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.token.TokenErrorResponseType;
+import io.jans.as.model.token.TokenRequestParam;
+import io.jans.as.model.util.Base64Util;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.*;
@@ -96,92 +98,50 @@ public class TxTokenService {
         final String requestedTokenType = executionContext.getHttpRequest().getParameter("requested_token_type");
         final String subjectToken = executionContext.getHttpRequest().getParameter("subject_token");
         final String subjectTokenType = executionContext.getHttpRequest().getParameter("subject_token_type");
-        final String audience = executionContext.getHttpRequest().getParameter("audience");
-        final String requestContext = executionContext.getHttpRequest().getParameter("rctx");
-        final String scope = executionContext.getHttpRequest().getParameter("scope");
-
-        final Client client = executionContext.getClient();
 
         txTokenValidator.validateRequestedTokenType(requestedTokenType, executionContext.getAuditLog());
         SubjectTokenType subjectTokenTypeEnum = txTokenValidator.validateSubjectTokenType(subjectTokenType, executionContext.getAuditLog());
         AuthorizationGrant subjectGrant = txTokenValidator.validateSubjectToken(subjectToken, subjectTokenTypeEnum, executionContext.getAuditLog());
+
+        TxToken txToken = createTxToken(executionContext, subjectGrant);
+
+        return createResponse(txToken.getCode());
+    }
+
+    public static JSONObject createResponse(String txToken) {
+        JSONObject responseJson = new JSONObject();
+        responseJson.put("issued_token_type", ExchangeTokenType.TX_TOKEN.getName());
+        responseJson.put("token_type", TokenType.N_A.getName());
+        responseJson.put("access_token", txToken);
+        return responseJson;
+    }
+
+    private TxToken createTxToken(ExecutionContext executionContext, AuthorizationGrant subjectGrant) throws Exception {
+        final String audience = executionContext.getHttpRequest().getParameter(TokenRequestParam.AUDIENCE);
+        final String requestContext = executionContext.getHttpRequest().getParameter(TokenRequestParam.REQUEST_CONTEXT);
+        final String requestDetails = executionContext.getHttpRequest().getParameter(TokenRequestParam.REQUEST_DETAILS);
+        final String scope = executionContext.getHttpRequest().getParameter(TokenRequestParam.SCOPE);
+
+        final Client client = executionContext.getClient();
 
         TxTokenGrant txTokenGrant = authorizationGrantList.createTxTokenGrant(new User(), client);
         txTokenGrant.checkScopesPolicy(scope);
 
         executionContext.setGrant(txTokenGrant);
 
-        final JsonWebResponse jwr = createTxTokenJwr(audience, requestContext, executionContext, subjectGrant);
+        final JsonWebResponse jwr = createTxTokenJwr(audience, requestContext, requestDetails, executionContext, subjectGrant);
         final String jwrString = jwr.toString();
 
-        TxToken txToken = new TxToken(getTxTokenLifetime(client));
+        final int txTokenLifetime = getTxTokenLifetime(client);
+        TxToken txToken = new TxToken(txTokenLifetime);
         txToken.setCode(jwrString);
 
         final TokenEntity tokenEntity = txTokenGrant.asToken(txToken);
         txTokenGrant.persist(tokenEntity);
-
-        JSONObject responseJson = new JSONObject();
-        responseJson.put("issued_token_type", ExchangeTokenType.TX_TOKEN.getName());
-        responseJson.put("token_type", TokenType.TX_TOKEN.getName());
-        responseJson.put("access_token", jwrString);
-        return responseJson;
+        return txToken;
     }
 
-    private JsonWebResponse createTxTokenJwr(String audience, String requestContext, ExecutionContext executionContext, AuthorizationGrant authorizationGrant) throws Exception {
-        final Client client = executionContext.getClient();
-
-        KeyEncryptionAlgorithm keyAlgorithm = KeyEncryptionAlgorithm.fromName(client.getAttributes().getTxTokenEncryptedResponseAlg());
-        BlockEncryptionAlgorithm blockAlgorithm = BlockEncryptionAlgorithm.fromName(client.getAttributes().getTxTokenEncryptedResponseEnc());
-
-        if (keyAlgorithm != null && blockAlgorithm != null) {
-            log.trace("Preparing encrypted TxToken with keyEncryptionAlgorithm {}, blockEncryptionAlgorithm: {}", keyAlgorithm, blockAlgorithm);
-            Jwe jwe = new Jwe();
-
-            // Header
-            jwe.getHeader().setType(JwtType.TX_TOKEN);
-            jwe.getHeader().setAlgorithm(keyAlgorithm);
-            jwe.getHeader().setEncryptionMethod(blockAlgorithm);
-
-            // Claims
-            fillPayload(jwe, audience, requestContext, executionContext, authorizationGrant);
-
-            // nested signed jwt payload
-            JwtSigner jwtSigner = newJwtSigner(client);
-            Jwt jwt = jwtSigner.newJwt();
-            jwt.setClaims(jwe.getClaims());
-            jwe.setSignedJWTPayload(signJwt(jwt, client));
-
-            if (keyAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP || keyAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
-                JSONObject jsonWebKeys = CommonUtils.getJwks(client);
-                String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
-                        Algorithm.fromString(keyAlgorithm.getName()),
-                        Use.ENCRYPTION, KeyOpsType.CONNECT);
-                PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, null);
-                jwe.getHeader().setKeyId(keyId);
-
-                if (publicKey == null) {
-                    throw new InvalidJweException("The public key is not valid");
-                }
-
-                JweEncrypter jweEncrypter = new JweEncrypterImpl(keyAlgorithm, blockAlgorithm, publicKey);
-                return jweEncrypter.encrypt(jwe);
-            }
-            if (keyAlgorithm == KeyEncryptionAlgorithm.A128KW || keyAlgorithm == KeyEncryptionAlgorithm.A256KW) {
-                byte[] sharedSymmetricKey = clientService.decryptSecret(client.getClientSecret()).getBytes(StandardCharsets.UTF_8);
-                JweEncrypter jweEncrypter = new JweEncrypterImpl(keyAlgorithm, blockAlgorithm, sharedSymmetricKey);
-                return jweEncrypter.encrypt(jwe);
-            }
-        }
-
-        log.trace("Preparing signed TxToken, client {}", client.getClientId());
-
-        final JwtSigner jwtSigner = newJwtSigner(client);
-        final Jwt jwt = jwtSigner.newJwt();
-        fillPayload(jwt, audience, requestContext, executionContext, authorizationGrant);
-        return jwtSigner.sign();
-    }
-
-    private void fillPayload(JsonWebResponse jwr, String audience, String requestContext, ExecutionContext executionContext, AuthorizationGrant authorizationGrant) {
+    private void fillPayload(JsonWebResponse jwr, String audience, String requestContext, String requestDetails, ExecutionContext executionContext, AuthorizationGrant authorizationGrant) {
         Client client = executionContext.getClient();
 
         Calendar calendar = Calendar.getInstance();
@@ -193,7 +153,8 @@ public class TxTokenService {
         jwr.getClaims().setExpirationTime(expiration);
         jwr.getClaims().setIssuedAt(issuedAt);
         jwr.setClaim("txn", UUID.randomUUID().toString());
-        jwr.setClaim("sub_id", UUID.randomUUID().toString());
+        jwr.setClaim("sub", UUID.randomUUID().toString());
+        jwr.setClaim("purp", JwtType.TX_TOKEN.toString());
 
         Audience.setAudience(jwr.getClaims(), client);
         if (StringUtils.isNotBlank(audience)) {
@@ -201,15 +162,21 @@ public class TxTokenService {
         }
 
         if (StringUtils.isNotBlank(requestContext)) {
-            jwr.getClaims().setClaim("req_ctx", new JSONObject(requestContext));
+            requestContext = Base64Util.base64urldecodeToString(requestContext);
+            jwr.getClaims().setClaim("rctx", new JSONObject(requestContext));
         }
 
         if (authorizationGrant != null) {
-            jwr.setClaim("sub_id", authorizationGrant.getSub());
+            jwr.setClaim("sub", authorizationGrant.getSub());
         }
 
         JSONObject azd = new JSONObject();
+        if (StringUtils.isNotBlank(requestDetails)) {
+            requestDetails = Base64Util.base64urldecodeToString(requestDetails);
+            azd = new JSONObject(requestDetails);
+        }
         azd.put("client_id", client.getClientId());
+
         jwr.getClaims().setClaim("azd", azd);
     }
 
@@ -258,5 +225,60 @@ public class TxTokenService {
 
     public Response.ResponseBuilder error(int status, TokenErrorResponseType type, String reason) {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
+    }
+
+    private JsonWebResponse createTxTokenJwr(String audience, String requestContext, String requestDetails,
+                                             ExecutionContext executionContext, AuthorizationGrant authorizationGrant) throws Exception {
+        final Client client = executionContext.getClient();
+
+        KeyEncryptionAlgorithm keyAlgorithm = KeyEncryptionAlgorithm.fromName(client.getAttributes().getTxTokenEncryptedResponseAlg());
+        BlockEncryptionAlgorithm blockAlgorithm = BlockEncryptionAlgorithm.fromName(client.getAttributes().getTxTokenEncryptedResponseEnc());
+
+        if (keyAlgorithm != null && blockAlgorithm != null) {
+            log.trace("Preparing encrypted TxToken with keyEncryptionAlgorithm {}, blockEncryptionAlgorithm: {}", keyAlgorithm, blockAlgorithm);
+            Jwe jwe = new Jwe();
+
+            // Header
+            jwe.getHeader().setType(JwtType.TX_TOKEN);
+            jwe.getHeader().setAlgorithm(keyAlgorithm);
+            jwe.getHeader().setEncryptionMethod(blockAlgorithm);
+
+            // Claims
+            fillPayload(jwe, audience, requestContext, requestDetails, executionContext, authorizationGrant);
+
+            // nested signed jwt payload
+            JwtSigner jwtSigner = newJwtSigner(client);
+            Jwt jwt = jwtSigner.newJwt();
+            jwt.setClaims(jwe.getClaims());
+            jwe.setSignedJWTPayload(signJwt(jwt, client));
+
+            if (keyAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP || keyAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
+                JSONObject jsonWebKeys = CommonUtils.getJwks(client);
+                String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
+                        Algorithm.fromString(keyAlgorithm.getName()),
+                        Use.ENCRYPTION, KeyOpsType.CONNECT);
+                PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, null);
+                jwe.getHeader().setKeyId(keyId);
+
+                if (publicKey == null) {
+                    throw new InvalidJweException("The public key is not valid");
+                }
+
+                JweEncrypter jweEncrypter = new JweEncrypterImpl(keyAlgorithm, blockAlgorithm, publicKey);
+                return jweEncrypter.encrypt(jwe);
+            }
+            if (keyAlgorithm == KeyEncryptionAlgorithm.A128KW || keyAlgorithm == KeyEncryptionAlgorithm.A256KW) {
+                byte[] sharedSymmetricKey = clientService.decryptSecret(client.getClientSecret()).getBytes(StandardCharsets.UTF_8);
+                JweEncrypter jweEncrypter = new JweEncrypterImpl(keyAlgorithm, blockAlgorithm, sharedSymmetricKey);
+                return jweEncrypter.encrypt(jwe);
+            }
+        }
+
+        log.trace("Preparing signed TxToken, client {}", client.getClientId());
+
+        final JwtSigner jwtSigner = newJwtSigner(client);
+        final Jwt jwt = jwtSigner.newJwt();
+        fillPayload(jwt, audience, requestContext, requestDetails, executionContext, authorizationGrant);
+        return jwtSigner.sign();
     }
 }

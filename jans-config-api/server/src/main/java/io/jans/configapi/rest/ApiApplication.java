@@ -158,7 +158,7 @@ public class ApiApplication extends BaseApiApplication {
         classes.add(ClientAuthResource.class);
         
         log.info("appConfiguration:{}",appConfiguration );
-        if(appConfiguration!=null && appConfiguration.isAssetMgtEnabled()) {
+        if(appConfiguration!=null && appConfiguration.getAssetMgtConfiguration()!=null && appConfiguration.getAssetMgtConfiguration().isAssetMgtEnabled()) {
             classes.add(AssetResource.class);
         }
 

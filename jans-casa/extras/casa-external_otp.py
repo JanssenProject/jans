@@ -358,15 +358,15 @@ class PersonAuthentication(PersonAuthenticationType):
             print "OTP. Find enrollments. Failed to find user"
             return result
 
-        user_custom_ext_attribute = userService.getCustomAttribute(user, "jansExtUid")
-        if user_custom_ext_attribute == None:
+        extUids = user.getExternalUid()
+        if extUids == None:
             return result
 
         #otp_prefix = "%s:" % self.otpType
         otp_prefix = "%s:" % otpType
 
         otp_prefix_length = len(otp_prefix)
-        for user_external_uid in user_custom_ext_attribute.getValues():
+        for user_external_uid in extUids:
             index = user_external_uid.find(otp_prefix)
             if index != -1:
                 if skipPrefix:
@@ -449,7 +449,6 @@ class PersonAuthentication(PersonAuthenticationType):
             #    print "OTP. Process OTP authentication. There is no OTP enrollment for user '%s'" % user_name
             #    facesMessages.add(FacesMessage.SEVERITY_ERROR, "There is no valid OTP user enrollments")
             #    return False
-
             if len(user_enrollments) > 0:
                 for user_enrollment in user_enrollments:
                     user_enrollment_data = user_enrollment.split(";")
@@ -474,7 +473,6 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "OTP. Process HOTP authentication during authentication. Failed to update user entry"
 
             user_enrollments = self.findEnrollments(user_name, "totp")
-
             if len(user_enrollments) > 0:
                 for user_enrollment in user_enrollments:
                     otp_secret_key = self.fromBase64Url(user_enrollment)
