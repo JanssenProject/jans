@@ -26,7 +26,7 @@ The authorization context provides information expected to remain
 constant during the execution of a call as it passes through multiple
 workloads.
 
-Transaction Tokens [spec](https://datatracker.ietf.org/doc/draft-tulshibagwale-oauth-transaction-tokens/)
+Transaction Tokens [spec](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html)
 
 
 ### Transaction Token JWT
@@ -54,10 +54,12 @@ Transaction Tokens [spec](https://datatracker.ietf.org/doc/draft-tulshibagwale-o
 - **txn** - the unique transaction identifier as
       defined in Section 2.2 of [RFC8417].  When used in the transaction
       token, it identifies the entire call chain.
-- **sub_id** - the unique identifier of the user
+- **purp** - a string defining the purpose or intent of this transaction      
+- **sub** - the unique identifier of the user
       or workload on whose behalf the call chain is being executed.  The
       format of this claim MAY be a Subject Identifier.
 - **azd** - a JSON object that contains values that remain constant in the call chain.
+- **rctx** - a JSON object that describes the environmental context of the requested transaction.
 
 ```json
 {
@@ -65,10 +67,11 @@ Transaction Tokens [spec](https://datatracker.ietf.org/doc/draft-tulshibagwale-o
     "d60f21b7-b6dd-4140-b228-e6be099bc3ce",
     "http://trusted.com"
   ],
-  "req_ctx": {
+  "rctx": {
     "req_ip": "69.151.72.123"
   },
-  "sub_id": "",
+  "purp": "tx_token",
+  "sub": "3245675432",
   "iss": "https://yuriyz-adjusted-coyote.gluu.info",
   "azd": {
     "client_id": "d60f21b7-b6dd-4140-b228-e6be099bc3ce"
@@ -109,7 +112,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
 X-Content-Type-Options: nosniff
 X-Xss-Protection: 1; mode=block
 
-{"access_token":"eyJraWQiOiJjb25uZWN0XzBlZGMxOTIyLTk1MjAtNDFkNi1iZGMyLTk3ZjdmYWMwMzRkMl9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOlsiZDYwZjIxYjctYjZkZC00MTQwLWIyMjgtZTZiZTA5OWJjM2NlIiwiaHR0cDovL3RydXN0ZWQuY29tIl0sInJlcV9jdHgiOnsicmVxX2lwIjoiNjkuMTUxLjcyLjEyMyJ9LCJzdWJfaWQiOiIiLCJpc3MiOiJodHRwczovL3l1cml5ei1hZGp1c3RlZC1jb3lvdGUuZ2x1dS5pbmZvIiwiYXpkIjp7ImNsaWVudF9pZCI6ImQ2MGYyMWI3LWI2ZGQtNDE0MC1iMjI4LWU2YmUwOTliYzNjZSJ9LCJ0eG4iOiIwODBjOGYxOS1kOWVlLTRhMjYtODUyZC0zMmU0ZmRjNmZmNmMiLCJleHAiOjE3MDUwNTQ1NDIsImlhdCI6MTcwNTA1NDM2Mn0.fpPFZpzxitbLw71RgO3O8uSOHJARp16H2THO4YAimJKWiczSE8-DvUAqulEW2nCNN3PRdojXWCe4ipxPSr_0ugLSFWhFKdpLmQqec_udhcV-UWiuGPLfq0XeKte60ESSvj5jgpaBNaaGS2vmFeSLdGrAx1CY2EH06OYrttOrgFFGqMhLJJ1Cpacqa0vmXnHi9gbrS-FIf2_4nNkQKMitQ-m-ec-0J02RjgkEL9zrzFwYNAoE1HEIZNFBhh7GqBejH0cXnR2tBOOz66z83SLqMTAZ-WyaMxmITHGLGLmHZOGyHdiIYME1rLXalrK58XHesMFtB-gae10Ey6w1OIgiAg","issued_token_type":"urn:ietf:params:oauth:token-type:txn_token","token_type":"txn_token"}
+{"access_token":"eyJraWQiOiJjb25uZWN0XzBlZGMxOTIyLTk1MjAtNDFkNi1iZGMyLTk3ZjdmYWMwMzRkMl9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOlsiZDYwZjIxYjctYjZkZC00MTQwLWIyMjgtZTZiZTA5OWJjM2NlIiwiaHR0cDovL3RydXN0ZWQuY29tIl0sInJlcV9jdHgiOnsicmVxX2lwIjoiNjkuMTUxLjcyLjEyMyJ9LCJzdWJfaWQiOiIiLCJpc3MiOiJodHRwczovL3l1cml5ei1hZGp1c3RlZC1jb3lvdGUuZ2x1dS5pbmZvIiwiYXpkIjp7ImNsaWVudF9pZCI6ImQ2MGYyMWI3LWI2ZGQtNDE0MC1iMjI4LWU2YmUwOTliYzNjZSJ9LCJ0eG4iOiIwODBjOGYxOS1kOWVlLTRhMjYtODUyZC0zMmU0ZmRjNmZmNmMiLCJleHAiOjE3MDUwNTQ1NDIsImlhdCI6MTcwNTA1NDM2Mn0.fpPFZpzxitbLw71RgO3O8uSOHJARp16H2THO4YAimJKWiczSE8-DvUAqulEW2nCNN3PRdojXWCe4ipxPSr_0ugLSFWhFKdpLmQqec_udhcV-UWiuGPLfq0XeKte60ESSvj5jgpaBNaaGS2vmFeSLdGrAx1CY2EH06OYrttOrgFFGqMhLJJ1Cpacqa0vmXnHi9gbrS-FIf2_4nNkQKMitQ-m-ec-0J02RjgkEL9zrzFwYNAoE1HEIZNFBhh7GqBejH0cXnR2tBOOz66z83SLqMTAZ-WyaMxmITHGLGLmHZOGyHdiIYME1rLXalrK58XHesMFtB-gae10Ey6w1OIgiAg","issued_token_type":"urn:ietf:params:oauth:token-type:txn-token","token_type":"N_A"}
 ```
 
 Decoded transaction token JWT
@@ -119,9 +122,10 @@ Decoded transaction token JWT
     "d60f21b7-b6dd-4140-b228-e6be099bc3ce",
     "http://trusted.com"
   ],
-  "req_ctx": {
+  "rctx": {
     "req_ip": "69.151.72.123"
   },
+  "purp": "tx_token",
   "sub_id": "",
   "iss": "https://yuriyz-adjusted-coyote.gluu.info",
   "azd": {
@@ -141,4 +145,4 @@ transaction token (not regular `access_token`).
 
 ### References
 
-- Transaction Tokens [spec](https://datatracker.ietf.org/doc/draft-tulshibagwale-oauth-transaction-tokens/)
+- Transaction Tokens [spec](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html)
