@@ -9,6 +9,7 @@ import io.jans.as.model.common.*;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.Base64Util;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -62,7 +63,7 @@ public class TxTokenHttpTest extends BaseTest {
         txTokenRequest.setSubjectTokenType(SubjectTokenType.ACCESS_TOKEN.getName());
         txTokenRequest.setRequestedTokenType(ExchangeTokenType.TX_TOKEN.getName());
         txTokenRequest.setAudience("http://trusted.com");
-        txTokenRequest.setRctx("{\"req_ip\":\"69.151.72.123\"}");
+        txTokenRequest.setRequestContext(Base64Util.base64urlencode("{\"req_ip\":\"69.151.72.123\"}"));
 
         TokenClient txTokenClient = newTokenClient(txTokenRequest);
         TokenResponse txTokenResponse = txTokenClient.exec();
@@ -95,7 +96,7 @@ public class TxTokenHttpTest extends BaseTest {
         txTokenRequest.setSubjectTokenType(SubjectTokenType.ACCESS_TOKEN.getName());
         txTokenRequest.setRequestedTokenType(ExchangeTokenType.TX_TOKEN.getName());
         txTokenRequest.setAudience("http://trusted2.com");
-        txTokenRequest.setRctx("{\"req_ip\":\"69.151.72.100\"}");
+        txTokenRequest.setRequestContext("{\"req_ip\":\"69.151.72.100\"}");
 
         TokenClient txTokenClient = newTokenClient(txTokenRequest);
         TokenResponse txTokenResponse = txTokenClient.exec();
