@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.11@sha256:7d9240b84e806f9759560536bac1ca545fc31c02465a4b1ca7131def4f4ab130
+FROM bellsoft/liberica-openjre-alpine:22-37@sha256:10b412f71513e83dc8947ebbdf243002d9ced21f9e6c2f4d6d7c4f34ac81e021
 
 # ===============
 # Alpine packages
