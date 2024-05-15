@@ -24,7 +24,6 @@ public class ApiAppConfiguration implements Configuration {
     private String authOpenidTokenUrl;
     private String authOpenidRevokeUrl;
 
-    private String smallryeHealthRootPath;
     private List<String> exclusiveAuthScopes;
 
     private List<CorsConfigurationFilter> corsConfigurationFilters;
@@ -156,14 +155,6 @@ public class ApiAppConfiguration implements Configuration {
         this.authOpenidRevokeUrl = authOpenidRevokeUrl;
     }
 
-    public String getSmallryeHealthRootPath() {
-        return smallryeHealthRootPath;
-    }
-
-    public void setSmallryeHealthRootPath(String smallryeHealthRootPath) {
-        this.smallryeHealthRootPath = smallryeHealthRootPath;
-    }
-
     public List<String> getExclusiveAuthScopes() {
         return exclusiveAuthScopes;
     }
@@ -285,8 +276,8 @@ public class ApiAppConfiguration implements Configuration {
                 + ", apiClientPassword=" + apiClientPassword + ", endpointInjectionEnabled=" + endpointInjectionEnabled
                 + ", authIssuerUrl=" + authIssuerUrl + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl
                 + ", authOpenidIntrospectionUrl=" + authOpenidIntrospectionUrl + ", authOpenidTokenUrl="
-                + authOpenidTokenUrl + ", authOpenidRevokeUrl=" + authOpenidRevokeUrl + ", smallryeHealthRootPath="
-                + smallryeHealthRootPath + ", exclusiveAuthScopes=" + exclusiveAuthScopes
+                + authOpenidTokenUrl + ", authOpenidRevokeUrl=" + authOpenidRevokeUrl 
+                + ", exclusiveAuthScopes=" + exclusiveAuthScopes
                 + ", corsConfigurationFilters=" + corsConfigurationFilters + ", loggingLevel=" + loggingLevel
                 + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration
                 + ", disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount + ", userExclusionAttributes="
