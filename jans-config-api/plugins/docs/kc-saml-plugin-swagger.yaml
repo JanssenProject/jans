@@ -1051,6 +1051,10 @@ components:
           type: string
         idpUrl:
           type: string
+        extIDPTokenUrl:
+          type: string
+        extIDPRedirectUrl:
+          type: string
         idpMetadataImportUrl:
           type: string
         idpRootDir:
