@@ -74,7 +74,7 @@ public enum TokenErrorResponseType implements IErrorType {
     /**
      * Indicates invalid requested token type.
      *
-     * For transaction token value must be: urn:ietf:params:oauth:token-type:txn_token
+     * For transaction token value must be: urn:ietf:params:oauth:token-type:txn-token
      */
     INVALID_REQUESTED_TOKEN_TYPE("invalid_requested_token_type"),
 

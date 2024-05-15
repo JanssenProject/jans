@@ -34,7 +34,8 @@ public final class TokenRequestParam {
     public static final String ACTOR_TOKEN = "actor_token";
     public static final String ACTOR_TOKEN_TYPE = "actor_token_type";
     public static final String REQUESTED_TOKEN_TYPE = "requested_token_type";
-    public static final String RCTX = "rctx";
+    public static final String REQUEST_CONTEXT = "request_context";
+    public static final String REQUEST_DETAILS = "request_details";
 
 
     // Demonstrating Proof-of-Possession

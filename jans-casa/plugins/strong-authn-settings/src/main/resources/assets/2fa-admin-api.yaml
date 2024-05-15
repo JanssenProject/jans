@@ -2,7 +2,7 @@ swagger: '2.0'
 
 info:
   version: "5.0.0"
-  title: Strong Authentication Settings admin API
+  title: 2FA Settings admin API
   description: Allows to configure 2FA settings programmatically
   license:
     name: Gluu Casa

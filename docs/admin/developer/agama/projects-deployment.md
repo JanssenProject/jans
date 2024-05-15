@@ -123,7 +123,7 @@ Then a transfer of templates and assets from `web` directory followed by copying
 
 **Notes:**
 
-- Developers are required to restart the authentication server and possibly edit the server's XML descriptor for the classes in the jar files to be effectively picked up
+- Developers are required to restart the authentication server for the classes in jar files to be effectively picked up
 - Steps 3 and 4 are carried out only if all flows passed transpilation successfully
 - In Cloud Native environments only one node takes charge of processing a given deployment thoroughly. Other nodes will automatically sync with regards to the files of step 4.
 

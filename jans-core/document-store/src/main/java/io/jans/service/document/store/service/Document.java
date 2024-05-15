@@ -26,8 +26,6 @@ public class Document extends Entry implements Serializable {
 
 	private static final long serialVersionUID = -2812480357430436503L;
 
-	private transient boolean selected;
-
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
@@ -43,6 +41,9 @@ public class Document extends Entry implements Serializable {
 	
 	@AttributeName
 	private Date creationDate;
+
+	@AttributeName
+	private String jansFilePath;
 	
 	@AttributeName
 	private List<String> jansModuleProperty;
@@ -81,14 +82,6 @@ public class Document extends Entry implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public boolean isSelected() {
-		return selected;
-	}
-
-	public void setSelected(boolean selected) {
-		this.selected = selected;
 	}
 
 	public String getDocument() {
@@ -147,11 +140,19 @@ public class Document extends Entry implements Serializable {
         this.jansAlias = jansAlias;
     }
 
+	public String getJansFilePath() {
+		return jansFilePath;
+	}
+
+	public void setJansFilePath(String jansFilePath) {
+		this.jansFilePath = jansFilePath;
+	}
+
     @Override
     public String toString() {
         return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
                 + ", document=" + document + ", creationDate=" + creationDate + ", jansModuleProperty="
                 + jansModuleProperty + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled="
-                + jansEnabled + ", jansAlias=" + jansAlias + "]";
+                + jansEnabled + ", jansAlias=" + jansAlias + " jansFilePath=" + jansFilePath + "]";
     }
 }

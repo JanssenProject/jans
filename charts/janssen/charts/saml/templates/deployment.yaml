@@ -52,8 +52,8 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           env:
-          - name: CN_SAML_JAVA_OPTIONS
-            value: {{ include "saml.customJavaOptions" . | trim }}
+            - name: CN_SAML_JAVA_OPTIONS
+              value: {{ include "saml.customJavaOptions" . | trim }}
             {{- include "saml.usr-envs" . | indent 12 }}
             {{- include "saml.usr-secret-envs" . | indent 12 }}
           {{- if or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local") ( .Values.customScripts) }}
@@ -215,7 +215,7 @@ spec:
           secret:
             secretName: {{ .Release.Name }}-cb-pass
             items:
-              # we are mostly need non-superuser couchbase password file here
+              # we mostly need non-superuser couchbase password file here
               - key: couchbase_password
                 path: couchbase_password
       {{- end }}

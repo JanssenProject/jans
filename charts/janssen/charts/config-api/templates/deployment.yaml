@@ -45,8 +45,8 @@ spec:
         - name: {{ include "config-api.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           env:
-          - name: CN_CONFIG_API_JAVA_OPTIONS
-            value: {{ include "config-api.customJavaOptions" . | trim }}
+            - name: CN_CONFIG_API_JAVA_OPTIONS
+              value: {{ include "config-api.customJavaOptions" . | trim }}
             {{- include "config-api.usr-envs" . | indent 12 }}
             {{- include "config-api.usr-secret-envs" . | indent 12 }}
           securityContext:
@@ -195,7 +195,7 @@ spec:
           secret:
             secretName: {{ .Release.Name }}-cb-pass
             items:
-              # we are mostly need non-superuser couchbase password file here
+              # we mostly need non-superuser couchbase password file here
               - key: couchbase_password
                 path: couchbase_password
       {{- end }}

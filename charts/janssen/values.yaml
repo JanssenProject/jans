@@ -57,7 +57,7 @@ auth-server:
     limits:
       # -- CPU limit.
       cpu: 2500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
       memory: 2500Mi
     requests:
       # -- CPU request.
@@ -454,7 +454,7 @@ config-api:
     limits:
       # -- CPU limit.
       cpu: 1000m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
       memory: 1000Mi
     requests:
       # -- CPU request.
@@ -557,7 +557,7 @@ fido2:
     limits:
       # -- CPU limit.
       cpu: 500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
       memory: 500Mi
     requests:
       # -- CPU request.
@@ -665,7 +665,7 @@ casa:
     limits:
       # -- CPU limit.
       cpu: 500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
       memory: 500Mi
     requests:
       # -- CPU request.
@@ -1049,7 +1049,7 @@ global:
       # Enable saml endpoints /kc
       samlEnabled: false
     # -- passing custom java options to saml. DO NOT PASS JAVA_OPTIONS in envs.
-    cnCustomJavaOptions: "" 
+    cnCustomJavaOptions: ""
   # -- Path to SQL password file
   cnSqlPasswordFile: /etc/jans/conf/sql_password
   # -- Path to Couchbase password file
@@ -1072,6 +1072,9 @@ global:
   kcDbPasswordFile: /etc/jans/conf/kc_db_password
   # -- Path to file contains Keycloak admin credentials (username and password)
   kcAdminCredentialsFile: /etc/jans/conf/kc_admin_creds
+  kc-scheduler:
+    # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
+    enabled: false
 
 # -- Nginx ingress definitions chart
 nginx-ingress:
@@ -1415,7 +1418,7 @@ scim:
     limits:
       # -- CPU limit.
       cpu: 1000m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
       memory: 1000Mi
     requests:
       # -- CPU request.
@@ -1524,7 +1527,7 @@ link:
     limits:
       # -- CPU limit.
       cpu: 500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
       memory: 1000Mi
     requests:
       # -- CPU request.
@@ -1631,7 +1634,7 @@ saml:
     limits:
       # -- CPU limit.
       cpu: 500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
       memory: 1000Mi
     requests:
       # -- CPU request.
@@ -1679,3 +1682,60 @@ saml:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: [ ]
+
+# -- Responsible for synchronizing Keycloak SAML clients
+kc-scheduler:
+  # -- Add custom normal and secret envs to the service
+  usrEnvs:
+    # -- Add custom normal envs to the service
+    # variable1: value1
+    normal: {}
+    # -- Add custom secret envs to the service
+    # variable1: value1
+    secret: {}
+  # -- Add custom dns policy
+  dnsPolicy: ""
+  # -- Add custom dns config
+  dnsConfig: {}
+  image:
+    # -- Image pullPolicy to use for deploying.
+    pullPolicy: IfNotPresent
+    # -- Image  to use for deploying.
+    repository: ghcr.io/janssenproject/jans/kc-scheduler
+    # -- Image  tag to use for deploying.
+    tag: 1.1.2_dev
+    # -- Image Pull Secrets
+    pullSecrets: [ ]
+  # -- Resource specs.
+  resources:
+    limits:
+      # -- CPU limit.
+      cpu: 300m
+      # -- Memory limit.
+      memory: 300Mi
+    requests:
+      # -- CPU request.
+      cpu: 300m
+      # -- Memory request.
+      memory: 300Mi
+  # -- Interval of running the scheduler (in minutes)
+  interval: 10
+  # -- Configure any additional volumes that need to be attached to the pod
+  volumes: []
+  # -- Configure any additional volumesMounts that need to be attached to the containers
+  volumeMounts: []
+  # Actions on lifecycle events such as postStart and preStop
+  # Example
+  # lifecycle:
+  #   postStart:
+  #     exec:
+  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+  lifecycle: {}
+  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
+  additionalLabels: { }
+  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
+  additionalAnnotations: {}
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []

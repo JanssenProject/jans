@@ -97,6 +97,7 @@ nav:
     - Health Check: admin/kubernetes-ops/health-check.md
     - TUI K8s: admin/kubernetes-ops/tui-k8s.md
     - Custom Attributes: admin/kubernetes-ops/custom-attributes.md
+    - Jans SAML/Keycloak: admin/kubernetes-ops/jans-saml.md
   - VM Operation Guide:
     - admin/vm-ops/README.md
     - Upgrade: admin/vm-ops/upgrade.md
@@ -143,6 +144,7 @@ nav:
     - SCIM User Resources: admin/config-guide/user-config.md
     - SCIM Group Management: admin/config-guide/scim-group-config.md
     - Authentication via Device Flow: admin/config-guide/device-flow-config.md
+    - Password Validation: admin/config-guide/user-password-validation.md
   - Database Guide:
     - admin/reference/database/README.md
     - RDBMS Erwin Table: admin/reference/database/rdbms-erwin.md

@@ -127,6 +127,13 @@
           <version>${keycloak-server.version}</version>
         </dependency>
 
+        <dependency>
+          <groupId>org.keycloak</groupId>
+          <artifactId>keycloak-saml-core-public</artifactId>
+          <scope>provided</scope>
+          <version>${keycloak-server.version}</version>
+        </dependency>
+
         <!-- end keycloak dependencies-->
 
         <!-- nimbus dependencies -->
