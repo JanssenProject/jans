@@ -51,7 +51,7 @@ FROM bellsoft/liberica-openjdk-alpine:17.0.11@sha256:b544e908068565e9f2932f8ac85
 # hadolint ignore=DL3018
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache tini bash curl openssl python3 py3-cryptography py3-psycopg2 py3-grpcio nginx \
+    && apk add --no-cache tini bash curl openssl python3 py3-cryptography py3-psycopg2 py3-grpcio nginx py3-packaging py3-setuptools \
     && apk add --no-cache --virtual .build-deps git wget
 
 # ------
@@ -59,8 +59,7 @@ RUN apk update \
 # ------
 
 COPY /app/requirements.txt /app/requirements.txt
-RUN apk add --no-cache py3-packaging \
-    && apk add --no-cache --virtual .pip-deps py3-pip py3-wheel \
+RUN apk add --no-cache --virtual .pip-deps py3-pip py3-wheel \
     && mkdir -p "$HOME/.config/pip" \
     && printf "[global]\nbreak-system-packages = true" > "$HOME/.config/pip/pip.conf" \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
