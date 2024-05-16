@@ -1073,6 +1073,8 @@ components:
           type: string
         ignoreValidation:
           type: boolean
+        setConfigDefaultValue:
+          type: boolean
         idpMetadataMandatoryAttributes:
           type: array
           items:
