@@ -68,7 +68,7 @@ COPY scripts /scripts
 RUN mkdir -p /root/.bzt/jmeter-taurus \
     && wget -q https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-5.6.3.tgz -O /scripts/apache-jmeter-5.6.tgz \
     && tar zxvf /scripts/apache-jmeter-5.6.tgz -C /root/.bzt/jmeter-taurus \
-    && mv /root/.bzt/jmeter-taurus/apache-jmeter-5.6 /root/.bzt/jmeter-taurus/5.6
+    && mv /root/.bzt/jmeter-taurus/apache-jmeter-5.6.3 /root/.bzt/jmeter-taurus/5.6.3
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/loadtesting-jmeter" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
