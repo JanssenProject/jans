@@ -168,6 +168,10 @@ def _transform_api_dynamic_config(conf):
         conf["userMandatoryAttributes"].append("status")
         should_update = True
 
+    if "smallryeHealthRootPath" in conf:
+        conf.pop("smallryeHealthRootPath", None)
+        should_update = True
+
     # finalized conf and flag to determine update process
     return conf, should_update
 
