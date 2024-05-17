@@ -261,18 +261,18 @@ public class IdpService {
         if(!update && samlConfigService.isSetConfigDefaultValue()) {
              if (StringUtils.isBlank(identityProvider.getNameIDPolicyFormat())) {
                 identityProvider.setNameIDPolicyFormat(Constants.NAME_ID_POLICY_FORMAT_DEFAULT_VALUE);
-                config.put(Constants.NAME_ID_POLICY_FORMAT, Constants.NAME_ID_POLICY_FORMAT_DEFAULT_VALUE);
-            }
+              }
+             config.put(Constants.NAME_ID_POLICY_FORMAT, identityProvider.getNameIDPolicyFormat());
 
             if (StringUtils.isBlank(identityProvider.getPrincipalAttribute())) {
                 identityProvider.setPrincipalAttribute(Constants.PRINCIPAL_ATTRIBUTE_DEFAULT_VALUE);
-                config.put(Constants.PRINCIPAL_ATTRIBUTE, Constants.PRINCIPAL_ATTRIBUTE_DEFAULT_VALUE);
             }
+            config.put(Constants.PRINCIPAL_ATTRIBUTE, identityProvider.getPrincipalAttribute());
 
             if (StringUtils.isBlank(identityProvider.getPrincipalType())) {
                 identityProvider.setPrincipalType(Constants.PRINCIPAL_TYPE_DEFAULT_VALUE);
-                config.put(Constants.PRINCIPAL_TYPE, Constants.PRINCIPAL_TYPE_DEFAULT_VALUE);
             }
+            config.put(Constants.PRINCIPAL_ATTRIBUTE, identityProvider.getPrincipalType());
         }
 
         log.info("After setting config default value for identityProvider:{}, update:{}", identityProvider, update);

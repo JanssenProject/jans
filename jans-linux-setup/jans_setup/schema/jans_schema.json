@@ -3222,17 +3222,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Save Document file path in DB",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansFilePath"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "Transpiled code of an agama flow",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -5068,8 +5057,7 @@
         "jansLevel",
         "jansRevision",
         "jansEnabled",
-        "jansAlias",
-        "jansFilePath"
+        "jansAlias"
       ],
       "must": [
         "objectclass"
