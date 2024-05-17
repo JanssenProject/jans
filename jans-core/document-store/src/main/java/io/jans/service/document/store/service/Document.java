@@ -49,7 +49,7 @@ public class Document extends Entry implements Serializable {
 	private List<String> jansModuleProperty;
 
 	@AttributeName
-	private String jansLevel;
+	private Integer jansLevel;
 
 	@AttributeName
 	private String jansRevision;
@@ -108,11 +108,11 @@ public class Document extends Entry implements Serializable {
 		this.jansModuleProperty = jansModuleProperty;
 	}
 
-	public String getJansLevel() {
+	public Integer getJansLevel() {
 		return jansLevel;
 	}
 
-	public void setJansLevel(String jansLevel) {
+	public void setJansLevel(Integer jansLevel) {
 		this.jansLevel = jansLevel;
 	}
 
