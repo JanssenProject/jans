@@ -272,7 +272,7 @@ public class IdpService {
             if (StringUtils.isBlank(identityProvider.getPrincipalType())) {
                 identityProvider.setPrincipalType(Constants.PRINCIPAL_TYPE_DEFAULT_VALUE);
             }
-            config.put(Constants.PRINCIPAL_ATTRIBUTE, identityProvider.getPrincipalType());
+            config.put(Constants.PRINCIPAL_TYPE, identityProvider.getPrincipalType());
         }
 
         log.info("After setting config default value for identityProvider:{}, update:{}", identityProvider, update);

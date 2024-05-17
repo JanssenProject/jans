@@ -8221,17 +8221,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
         adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -10109,14 +10109,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
