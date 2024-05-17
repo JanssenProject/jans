@@ -6,15 +6,10 @@
 
 package io.jans.model.token;
 
+import io.jans.orm.annotation.*;
+
 import java.io.Serializable;
 import java.util.Date;
-
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.Expiration;
-import io.jans.orm.annotation.JsonObject;
-import io.jans.orm.annotation.ObjectClass;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -68,6 +63,8 @@ public class TokenEntity implements Serializable {
     private String claims;
     @AttributeName(name = "tknBndCnf")
     private String tokenBindingHash;
+    @AttributeName(name = "jansId")
+    private String referenceId;
 
     @AttributeName(name = "acr")
     private String authMode;
@@ -83,6 +80,14 @@ public class TokenEntity implements Serializable {
 
     @AttributeName(name = "dpop")
     private String dpop;
+
+    public String getReferenceId() {
+        return referenceId;
+    }
+
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
+    }
 
     public TokenAttributes getAttributes() {
         if (attributes == null) {
