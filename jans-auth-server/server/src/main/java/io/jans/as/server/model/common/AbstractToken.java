@@ -8,7 +8,6 @@ package io.jans.as.server.model.common;
 
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.HashUtil;
-import io.jans.as.model.util.Util;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.annotation.AttributeName;
@@ -55,6 +54,9 @@ public abstract class AbstractToken implements Serializable, Deletable {
 
     @AttributeName(name = "dpop")
     private String dpop;
+
+    @AttributeName(name = "jansId")
+    private String referenceId;
 
     @Expiration
     private int ttl;
@@ -210,6 +212,24 @@ public abstract class AbstractToken implements Serializable, Deletable {
      */
     public synchronized void setRevoked(boolean revoked) {
         this.revoked = revoked;
+    }
+
+    /**
+     * Gets reference id
+     *
+     * @return reference id
+     */
+    public String getReferenceId() {
+        return referenceId;
+    }
+
+    /**
+     * Sets reference id
+     *
+     * @param referenceId reference id
+     */
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
     }
 
     /**
