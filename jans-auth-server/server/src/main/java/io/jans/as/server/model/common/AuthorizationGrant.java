@@ -122,6 +122,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         JsonWebResponse jwr = idTokenFactory.createJwr(this, authorizationCode, accessToken, refreshToken, executionContext);
         final IdToken idToken = new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
+        idToken.setReferenceId(executionContext.getTokenReferenceId());
         if (log.isTraceEnabled())
             log.trace("Created id_token: {}", idToken.getCode());
         return idToken;
@@ -202,6 +203,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     public AccessToken createAccessToken(ExecutionContext context) {
         try {
             context.initFromGrantIfNeeded(this);
+            context.generateRandomTokenReferenceId();
 
             final AccessToken accessToken = super.createAccessToken(context);
             if (accessToken.getExpiresIn() < 0) {
@@ -282,6 +284,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
         jwt.getClaims().setSubjectIdentifier(getSub());
         jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
+        jwt.getClaims().setClaim("jti", context.getTokenReferenceId());
 
         final AuthzDetails authzDetails = getAuthzDetails();
         if (!AuthzDetails.isEmpty(authzDetails)) {
@@ -401,6 +404,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             executionContext.setClaimsAsString(getClaims());
             executionContext.setNonce(nonce);
             executionContext.setState(state);
+            executionContext.generateRandomTokenReferenceId();
 
             final IdToken idToken = createIdTokenInternal(authorizationCode, accessToken, refreshToken, executionContext);
             final AuthorizationGrant grant = executionContext.getGrant();
@@ -488,6 +492,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setUserId(getUserId());
         result.setUserDn(getUserDn());
         result.setClientId(getClientId());
+        result.setReferenceId(token.getReferenceId());
 
         result.getAttributes().setX5cs256(token.getX5ts256());
         result.getAttributes().setDpopJkt(getDpopJkt());

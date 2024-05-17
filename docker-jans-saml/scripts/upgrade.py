@@ -55,6 +55,8 @@ def _transform_saml_dynamic_config(conf):
             "singleSignOnServiceUrl",
             "encryptionPublicKey"
         ]),
+        ("extIDPTokenUrl", "/realms/%s/broker/%s/token"),
+        ("extIDPRedirectUrl", "/kc/realms/%s/protocol/openid-connect/auth?client_id=%s&redirect_uri=%s&response_type=%s&kc_idp_hint=%s"),
     ]:
         # dont update if key exists
         if k in conf:

@@ -4509,7 +4509,8 @@
         "ssnId",
         "attr",
         "tknBndCnf",
-        "dpop"
+        "dpop",
+        "jansId"
       ],
       "must": [
         "objectclass"
