@@ -242,15 +242,9 @@ public class AssetService {
                 return asset;
             }
 
-            String revision = asset.getJansRevision();
-            log.debug(" Current asset revision is:{}", revision);
-            int intRevision = 1;
-            if (revision != null && revision.trim().length() > 0) {
-                intRevision = Integer.parseInt(revision);
-                intRevision = intRevision + 1;
-            }
-            revision = String.valueOf(intRevision);
-            asset.setJansRevision(revision);
+            int intRevision = asset.getJansRevision();
+            log.debug(" Current asset intRevision is:{}", intRevision);
+            asset.setJansRevision(intRevision++);
             log.info("Updated asset revision to asset.getJansRevision():{}", asset.getJansRevision());
         } catch (Exception ex) {
             log.error("Exception while updating asset revision is - ", ex);

@@ -49,7 +49,7 @@ public class Document extends Entry implements Serializable {
 	private Integer jansLevel;
 
 	@AttributeName
-	private String jansRevision;
+	private Integer jansRevision;
 	
 	@AttributeName
 	private boolean jansEnabled;
@@ -113,13 +113,13 @@ public class Document extends Entry implements Serializable {
 		this.jansLevel = jansLevel;
 	}
 
-	public String getJansRevision() {
-		return jansRevision;
-	}
+    public Integer getJansRevision() {
+        return jansRevision;
+    }
 
-	public void setJansRevision(String jansRevision) {
-		this.jansRevision = jansRevision;
-	}
+    public void setJansRevision(Integer jansRevision) {
+        this.jansRevision = jansRevision;
+    }
 
     public boolean isJansEnabled() {
         return jansEnabled;
