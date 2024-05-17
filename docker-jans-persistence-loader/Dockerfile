@@ -29,7 +29,7 @@ RUN apk add --no-cache py3-packaging \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=d2b6df1e15c6a94639cd39737f9f41e7cfaf341f
+ENV JANS_SOURCE_VERSION=5a956d368b6f70f15c0832ca9e65e6019f50d2fc
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
