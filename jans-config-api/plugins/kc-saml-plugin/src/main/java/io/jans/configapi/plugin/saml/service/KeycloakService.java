@@ -287,7 +287,8 @@ public class KeycloakService {
     private JSONObject populateKcConfig(JSONObject jsonObject) {
         logger.info("IDP - jsonObject:{}", jsonObject);
         List<String> kcSamlConfig = getKcSamlConfig();
-
+        logger.info("kcSamlConfig:{}", kcSamlConfig);
+        
         if (jsonObject == null || kcSamlConfig == null || kcSamlConfig.isEmpty()) {
             return jsonObject;
         }
