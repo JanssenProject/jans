@@ -41,9 +41,6 @@ public class Document extends Entry implements Serializable {
 	
 	@AttributeName
 	private Date creationDate;
-
-	@AttributeName
-	private String jansFilePath;
 	
 	@AttributeName
 	private List<String> jansModuleProperty;
@@ -52,7 +49,7 @@ public class Document extends Entry implements Serializable {
 	private Integer jansLevel;
 
 	@AttributeName
-	private String jansRevision;
+	private Integer jansRevision;
 	
 	@AttributeName
 	private boolean jansEnabled;
@@ -116,13 +113,13 @@ public class Document extends Entry implements Serializable {
 		this.jansLevel = jansLevel;
 	}
 
-	public String getJansRevision() {
-		return jansRevision;
-	}
+    public Integer getJansRevision() {
+        return jansRevision;
+    }
 
-	public void setJansRevision(String jansRevision) {
-		this.jansRevision = jansRevision;
-	}
+    public void setJansRevision(Integer jansRevision) {
+        this.jansRevision = jansRevision;
+    }
 
     public boolean isJansEnabled() {
         return jansEnabled;
@@ -140,19 +137,11 @@ public class Document extends Entry implements Serializable {
         this.jansAlias = jansAlias;
     }
 
-	public String getJansFilePath() {
-		return jansFilePath;
-	}
-
-	public void setJansFilePath(String jansFilePath) {
-		this.jansFilePath = jansFilePath;
-	}
-
     @Override
     public String toString() {
         return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
                 + ", document=" + document + ", creationDate=" + creationDate + ", jansModuleProperty="
                 + jansModuleProperty + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled="
-                + jansEnabled + ", jansAlias=" + jansAlias + " jansFilePath=" + jansFilePath + "]";
+                + jansEnabled + ", jansAlias=" + jansAlias + "]";
     }
 }

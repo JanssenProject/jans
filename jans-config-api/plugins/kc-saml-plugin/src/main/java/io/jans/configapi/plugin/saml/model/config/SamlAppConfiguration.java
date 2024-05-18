@@ -39,6 +39,7 @@ public class SamlAppConfiguration implements Configuration {
     private String spMetadataFile;
 
     private boolean ignoreValidation;
+    private boolean setConfigDefaultValue;
 
     private List<String> idpMetadataMandatoryAttributes;
     private List<String> kcAttributes;
@@ -260,6 +261,14 @@ public class SamlAppConfiguration implements Configuration {
         this.ignoreValidation = ignoreValidation;
     }
     
+    public boolean isSetConfigDefaultValue() {
+        return setConfigDefaultValue;
+    }
+
+    public void setSetConfigDefaultValue(boolean setConfigDefaultValue) {
+        this.setConfigDefaultValue = setConfigDefaultValue;
+    }
+    
     public List<String> getIdpMetadataMandatoryAttributes() {
         return idpMetadataMandatoryAttributes;
     }
@@ -283,20 +292,22 @@ public class SamlAppConfiguration implements Configuration {
     public void setKcSamlConfig(List<String> kcSamlConfig) {
         this.kcSamlConfig = kcSamlConfig;
     }
-    
+
     @Override
     public String toString() {
         return "SamlAppConfiguration [applicationName=" + applicationName + ", samlTrustRelationshipDn="
                 + samlTrustRelationshipDn + ", trustedIdpDn=" + trustedIdpDn + ", enabled=" + enabled + ", selectedIdp="
                 + selectedIdp + ", serverUrl=" + serverUrl + ", realm=" + realm + ", clientId=" + clientId
                 + ", clientSecret=" + clientSecret + ", grantType=" + grantType + ", scope=" + scope + ", username="
-                + username +  ", spMetadataUrl=" + spMetadataUrl + ", tokenUrl=" + tokenUrl
+                + username + ", spMetadataUrl=" + spMetadataUrl + ", tokenUrl=" + tokenUrl
                 + ", idpUrl=" + idpUrl + ", extIDPTokenUrl=" + extIDPTokenUrl + ", extIDPRedirectUrl="
                 + extIDPRedirectUrl + ", idpMetadataImportUrl=" + idpMetadataImportUrl + ", idpRootDir=" + idpRootDir
                 + ", idpMetadataDir=" + idpMetadataDir + ", idpMetadataTempDir=" + idpMetadataTempDir
                 + ", idpMetadataFile=" + idpMetadataFile + ", spMetadataDir=" + spMetadataDir + ", spMetadataTempDir="
                 + spMetadataTempDir + ", spMetadataFile=" + spMetadataFile + ", ignoreValidation=" + ignoreValidation
-                + ", idpMetadataMandatoryAttributes=" + idpMetadataMandatoryAttributes + ", kcAttributes="
-                + kcAttributes + ", kcSamlConfig=" + kcSamlConfig + "]";
+                + ", setConfigDefaultValue=" + setConfigDefaultValue + ", idpMetadataMandatoryAttributes="
+                + idpMetadataMandatoryAttributes + ", kcAttributes=" + kcAttributes + ", kcSamlConfig=" + kcSamlConfig
+                + "]";
     }
+    
 }
