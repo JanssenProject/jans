@@ -344,6 +344,17 @@ public class SamlConfigService {
         }
         return ignoreValidation;
     }
+    
+    
+    public boolean isSetConfigDefaultValue() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        boolean setConfigDefaultValue = false;
+        if (samlAppConfiguration != null) {
+            setConfigDefaultValue = samlAppConfiguration.isSetConfigDefaultValue();
+        }
+        return setConfigDefaultValue;
+    }
 
     public List<String> getIdpMetadataMandatoryAttributes() {
         final SamlConf samlConf = getSamlConf();

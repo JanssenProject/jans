@@ -8090,16 +8090,16 @@ components:
         creationDate:
           type: string
           format: date-time
-        jansFilePath:
-          type: string
         jansModuleProperty:
           type: array
           items:
             type: string
         jansLevel:
-          type: string
+          type: integer
+          format: int32
         jansRevision:
-          type: string
+          type: integer
+          format: int32
         jansEnabled:
           type: boolean
         jansAlias:
@@ -8219,19 +8219,19 @@ components:
           type: string
         selected:
           type: boolean
+        whitePagesCanView:
+          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         userCanEdit:
           type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string

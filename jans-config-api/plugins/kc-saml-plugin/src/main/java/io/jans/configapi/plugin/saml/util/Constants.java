@@ -15,6 +15,13 @@ public class Constants {
     private Constants() {
     }
 
+    //Config values
+    public static final String PRINCIPAL_ATTRIBUTE = "principalAttribute";
+    public static final String PRINCIPAL_TYPE  = "principalType";
+    public static final String NAME_ID_POLICY_FORMAT_DEFAULT_VALUE = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
+    public static final String PRINCIPAL_ATTRIBUTE_DEFAULT_VALUE = "uid";
+    public static final String PRINCIPAL_TYPE_DEFAULT_VALUE = "FRIENDLY_ATTRIBUTE";
+    
     public static final String IDP_MODULE = "idp-module";
     public static final String SP_MODULE = "sp-module";
     public static final String REALM_MASTER = "master";
