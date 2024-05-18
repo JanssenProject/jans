@@ -40,7 +40,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=f6a464b7ac3223c5ebec34048a2b5b316c986d83
+ENV JANS_SOURCE_VERSION=a1cd3318a140f8e9b56586dd05599631950aba99
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
