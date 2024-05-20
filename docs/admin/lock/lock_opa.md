@@ -17,3 +17,7 @@ These 2 methods support files download with `Bearer` authentication protection. 
 
 Lock automatically do policies clean up if they were removed from source servers or configuration on next synchronization.
 
+You can use TUI to configure these properties. It is available in `Jans Lock` section.
+
+![image](https://github.com/JanssenProject/jans/assets/39133739/b9f89441-1aef-4760-92c3-13f019209b40)
+
