@@ -276,7 +276,15 @@ public class AssetService {
 
         String assetDir = this.getAssetDir(assetFileName);
         log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir);
-
+        
+        if(StringUtils.isBlank(assetFileName)|| StringUtils.isBlank(FilenameUtils.getExtension(assetFileName)) ){
+            throw new InvalidConfigurationException("Valid file name not provided!");
+        }
+        
+        if (serviceModules == null || serviceModules.isEmpty()) {
+            throw new InvalidConfigurationException("Service module list is null or empty!");
+        }
+        
         for (String serviceName : serviceModules) {
 
             String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);
