@@ -214,6 +214,34 @@ public class SamlConfigService {
         logger.debug("SAML IDP Url - idpUrl:{}", idpUrl);
         return idpUrl;
     }
+    
+    public String getExtIDPTokenUrl(String realm, String idpAliasName ) {
+        logger.debug("Get SAML External IDP Url - realm:{}, idpAliasName:{}", realm, idpAliasName);
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String extIDPTokenUrl = null;
+        if (samlAppConfiguration != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(samlAppConfiguration.getServerUrl()).append(samlAppConfiguration.getExtIDPTokenUrl());
+            extIDPTokenUrl = String.format(sb.toString(), realm, idpAliasName);
+        }
+        logger.debug("SAML Ext IDP Url - extIDPTokenUrl:{}", extIDPTokenUrl);
+        return extIDPTokenUrl;
+    }
+    
+    public String getExtIDPRedirectUrl(String realm, String clientId, String redirectUrl, String responseType, String idpAliasName ) {
+        logger.debug("Get SAML External IDP Redirect Url - realm:{}, clientId:{}, redirectUrl:{}, responseType:{}, idpAliasName:{}", realm, clientId, redirectUrl, responseType, idpAliasName);
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String extIDPRedirectUrl = null;
+        if (samlAppConfiguration != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(samlAppConfiguration.getServerUrl()).append(samlAppConfiguration.getExtIDPRedirectUrl());
+            extIDPRedirectUrl = String.format(sb.toString(), realm, clientId, redirectUrl,  responseType,  idpAliasName);
+        }
+        logger.debug("SAML External IDP Redirect  - extIDPRedirectUrl:{}", extIDPRedirectUrl);
+        return extIDPRedirectUrl;
+    }
 
     public String getIdpMetadataImportUrl(String realm) {
         logger.debug("Get SAML IDP Metadata Import Url - realm:{}", realm);
@@ -315,6 +343,17 @@ public class SamlConfigService {
             ignoreValidation = samlAppConfiguration.isIgnoreValidation();
         }
         return ignoreValidation;
+    }
+    
+    
+    public boolean isSetConfigDefaultValue() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        boolean setConfigDefaultValue = false;
+        if (samlAppConfiguration != null) {
+            setConfigDefaultValue = samlAppConfiguration.isSetConfigDefaultValue();
+        }
+        return setConfigDefaultValue;
     }
 
     public List<String> getIdpMetadataMandatoryAttributes() {

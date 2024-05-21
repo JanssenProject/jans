@@ -8095,15 +8095,15 @@ components:
           items:
             type: string
         jansLevel:
-          type: string
+          type: integer
+          format: int32
         jansRevision:
-          type: string
+          type: integer
+          format: int32
         jansEnabled:
           type: boolean
         jansAlias:
           type: string
-        selected:
-          type: boolean
         baseDn:
           type: string
     AttributeValidation:
@@ -8221,11 +8221,11 @@ components:
           type: boolean
         userCanView:
           type: boolean
+        adminCanView:
+          type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
-          type: boolean
-        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -9865,8 +9865,6 @@ components:
           type: boolean
         disableAuditLogger:
           type: boolean
-        assetMgtEnabled:
-          type: boolean
         customAttributeValidationEnabled:
           type: boolean
         apiApprovedIssuer:
@@ -9890,8 +9888,6 @@ components:
         authOpenidTokenUrl:
           type: string
         authOpenidRevokeUrl:
-          type: string
-        smallryeHealthRootPath:
           type: string
         exclusiveAuthScopes:
           type: array
@@ -9930,6 +9926,32 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PluginConf'
+        assetMgtConfiguration:
+          $ref: '#/components/schemas/AssetMgtConfiguration'
+    AssetDirMapping:
+      type: object
+      properties:
+        directory:
+          type: string
+        type:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+    AssetMgtConfiguration:
+      type: object
+      properties:
+        assetMgtEnabled:
+          type: boolean
+        assetServerUploadEnabled:
+          type: boolean
+        assetBaseDirectory:
+          type: string
+        assetDirMapping:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetDirMapping'
     AuditLogConf:
       type: object
       properties:

@@ -1,6 +1,6 @@
 FROM quay.io/keycloak/keycloak:24.0.3@sha256:0d71412ed56b5f66f7e922efc0c3ff73b3f54ba2fe84fedb5e281a1f90b95bd6 as kc-src
 
-FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
+FROM bellsoft/liberica-openjre-alpine:17.0.11@sha256:7d9240b84e806f9759560536bac1ca545fc31c02465a4b1ca7131def4f4ab130
 
 # ===============
 # Alpine packages
@@ -24,7 +24,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # ==============
 
 ENV CN_VERSION=1.1.2-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-24 16:04'
+ENV CN_BUILD_DATE='2024-05-14 08:59'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
@@ -40,7 +40,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
+ENV JANS_SOURCE_VERSION=f6a464b7ac3223c5ebec34048a2b5b316c986d83
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -71,10 +71,13 @@ RUN cd /tmp/jans \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
+RUN apk add --no-cache py3-packaging \
+    && apk add --no-cache --virtual .pip-deps py3-pip py3-wheel \
+    && mkdir -p "$HOME/.config/pip" \
+    && printf "[global]\nbreak-system-packages = true" > "$HOME/.config/pip/pip.conf" \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
-    && pip3 uninstall -y pip wheel
+    && rm -rf "$HOME/.config/pip/pip.conf" \
+    && apk del .pip-deps
 
 # =======
 # Cleanup

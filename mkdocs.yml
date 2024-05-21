@@ -97,6 +97,7 @@ nav:
     - Health Check: admin/kubernetes-ops/health-check.md
     - TUI K8s: admin/kubernetes-ops/tui-k8s.md
     - Custom Attributes: admin/kubernetes-ops/custom-attributes.md
+    - Jans SAML/Keycloak: admin/kubernetes-ops/jans-saml.md
   - VM Operation Guide:
     - admin/vm-ops/README.md
     - Upgrade: admin/vm-ops/upgrade.md
@@ -461,6 +462,7 @@ nav:
         - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
     - User Guide: 'casa/user-guide.md'
 plugins:
+- include-markdown
 - tags
 - search
 - exclude-search:

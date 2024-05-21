@@ -206,10 +206,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             final AuthzDetails authzDetails = authzDetailsService.validateAuthorizationDetails(authorizationDetails, executionContext);
             executionContext.setAuthzDetails(authzDetails);
 
-            if (txTokenService.isTxTokenFlow(request)) {
-                return txTokenService.processTxToken(executionContext);
-            }
-
             if (gt == GrantType.AUTHORIZATION_CODE) {
                 return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, executionContext);
             } else if (gt == GrantType.REFRESH_TOKEN) {
@@ -223,6 +219,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             } else if (gt == GrantType.DEVICE_CODE) {
                 return processDeviceCodeGrantType(executionContext, deviceCode, scope);
             } else if (gt == GrantType.TOKEN_EXCHANGE) {
+
+                if (txTokenService.isTxTokenFlow(request)) {
+                    return txTokenService.processTxToken(executionContext);
+                }
+
                 final JSONObject responseJson = tokenExchangeService.processTokenExchange(scope, idTokenPreProcessing, executionContext);
                 return response(Response.ok().entity(responseJson.toString()), auditLog);
             }

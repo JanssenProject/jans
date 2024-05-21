@@ -21,6 +21,10 @@ public class Base64Util {
     private Base64Util() {
     }
 
+    public static String base64urlencode(String string) {
+        return Base64Util.base64urlencode(string.getBytes(StandardCharsets.UTF_8));
+    }
+
     public static String base64urlencode(byte[] arg) {
         String s = Base64.encodeBase64String(arg); // Standard base64 encoder
         s = s.split("=")[0]; // Remove any trailing '='s
