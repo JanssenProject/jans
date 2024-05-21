@@ -44,7 +44,7 @@ else
 fi
 
 export JANSSEN_IMAGE
-docker compose -f ${yaml} up
+docker compose -f ${yaml} up -d
 
 
 

@@ -72,11 +72,12 @@ if [[ "$JANS_BUILD_COMMIT" ]]; then
 fi
 # --
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
-  /tmp/jans/docker-jans-monolith/up.sh mysql
+  bash /tmp/jans/docker-jans-monolith/up.sh mysql
 elif [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
-  /tmp/jans/docker-jans-monolith/up.sh postgres
+  bash /tmp/jans/docker-jans-monolith/up.sh postgres
 elif [[ $JANS_PERSISTENCE == "LDAP" ]]; then
-  /tmp/jans/docker-jans-monolith/up.sh ldap
+  bash /tmp/jans/docker-jans-monolith/up.sh ldap
+fi  
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 jans_status="unhealthy"
 # run loop for 5 mins
@@ -134,5 +135,5 @@ echo -e "To restart run:"
 echo -e "/tmp/jans/docker-jans-monolith/up.sh mysql"
 echo -e "or /tmp/jans/docker-jans-monolith/up.sh postgres"
 echo -e "To clean up run:"
-echo -e "/tmp/jans/docker-jans-monolith/clean.sh mysql rm && -rf /tmp/jans"
-echo -e "or /tmp/jans/docker-jans-monolith/clean.sh postgres rm && -rf /tmp/jans"
+echo -e "/tmp/jans/docker-jans-monolith/clean.sh mysql && rm -rf /tmp/jans"
+echo -e "or /tmp/jans/docker-jans-monolith/clean.sh postgres && rm -rf /tmp/jans"

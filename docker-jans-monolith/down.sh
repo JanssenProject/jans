@@ -44,10 +44,12 @@ if ! docker image inspect ${JANSSEN_IMAGE} &> /dev/null; then
 		echo "installation of janssen was sucessfull - an after install image will be created (this can take a while)"
 		docker stop ${JANSSEN_CONTAINER} &> /dev/null;
 		docker commit ${JANSSEN_CONTAINER} ${JANSSEN_IMAGE}
+		#ensure the down will be the same as on up
+		JANSSEN_IMAGE="ghcr.io/janssenproject/jans/monolith:${JANSSEN_VERSION}"
 	fi
 fi
+export JANSSEN_IMAGE
 docker compose -f ${yaml} down
-docker rm -f ${yaml} down
 
 
 
