@@ -9,6 +9,7 @@ package io.jans.lock.service.consumer.message;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.service.consumer.message.generic.NullMessageConsumer;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ApplicationInitialized;
 import io.jans.service.cdi.event.ConfigurationUpdate;
@@ -79,7 +80,7 @@ public class MessageConsumerFactory {
 	@Produces
 	@ApplicationScoped
 	public MessageConsumer produceMessageConsumer() {
-		String messageConsumerType = appConfiguration.getMessageConsumerType();
+		String messageConsumerType = appConfiguration.getPdpType();
 		MessageConsumer messageConsumer = getMessageConsumer(messageConsumerType);
 		
 		return messageConsumer;

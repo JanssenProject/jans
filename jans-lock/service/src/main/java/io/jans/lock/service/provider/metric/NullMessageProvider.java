@@ -1,11 +1,11 @@
-package io.jans.lock.service.consumer.policy;
+package io.jans.lock.service.provider.metric;
 
 import java.util.List;
 
 import org.slf4j.Logger;
 
+import io.jans.lock.service.consumer.policy.PolicyConsumer;
 import io.jans.service.cdi.qualifier.Implementation;
-import io.jans.service.policy.consumer.PolicyConsumer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -17,7 +17,7 @@ import jakarta.inject.Inject;
  */
 @Implementation
 @ApplicationScoped
-public class NullPolicyConsumer extends PolicyConsumer {
+public class NullMessageProvider extends PolicyConsumer {
 	
 	public static String POLICY_CONSUMER_TYPE = "DISABLED";
 
