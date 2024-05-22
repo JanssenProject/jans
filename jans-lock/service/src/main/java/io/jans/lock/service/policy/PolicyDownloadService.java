@@ -25,12 +25,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.service.consumer.policy.PolicyConsumer;
 import io.jans.lock.service.policy.event.PolicyDownloadEvent;
 import io.jans.service.EncryptionService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.net.BaseHttpService;
-import io.jans.service.policy.consumer.PolicyConsumer;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
