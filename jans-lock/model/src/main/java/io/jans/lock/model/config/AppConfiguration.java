@@ -28,6 +28,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "List of token channel names", defaultValue = "jans_token")
 	private List<String> tokenChannels;
 
+    
 	@DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
 	private Boolean disableJdkLogger = true;
 
@@ -39,6 +40,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "The path to the external log4j2 logging configuration")
     private String externalLoggerConfiguration;
+
+    @DocProperty(description = "Channel for metric reports", defaultValue = "jans_pdp_metric")
+	private String metricChannel;
 
     @DocProperty(description = "The interval for metric reporter in seconds")
 	private int metricReporterInterval;
@@ -55,10 +59,8 @@ public class AppConfiguration implements Configuration {
 	
 	private OpaConfiguration opaConfiguration;
 
-    @DocProperty(description = "PDP for data")
-	private String messageConsumerType;
-    @DocProperty(description = "PDP for policies")
-	private String policyConsumerType;
+    @DocProperty(description = "PDP type")
+	private String pdpType;
 
     @DocProperty(description = "Authorization token to access Json Uris")
 	private String policiesJsonUrisAuthorizationToken;
@@ -124,6 +126,14 @@ public class AppConfiguration implements Configuration {
 		this.externalLoggerConfiguration = externalLoggerConfiguration;
 	}
 
+	public String getMetricChannel() {
+		return metricChannel;
+	}
+
+	public void setMetricChannel(String metricChannel) {
+		this.metricChannel = metricChannel;
+	}
+
 	public int getMetricReporterInterval() {
 		return metricReporterInterval;
 	}
@@ -164,20 +174,12 @@ public class AppConfiguration implements Configuration {
 		this.opaConfiguration = opaConfiguration;
 	}
 
-	public String getMessageConsumerType() {
-		return messageConsumerType;
+	public String getPdpType() {
+		return pdpType;
 	}
 
-	public void setMessageConsumerType(String messageConsumerType) {
-		this.messageConsumerType = messageConsumerType;
-	}
-
-	public String getPolicyConsumerType() {
-		return policyConsumerType;
-	}
-
-	public void setPolicyConsumerType(String policyConsumerType) {
-		this.policyConsumerType = policyConsumerType;
+	public void setPdpType(String pdpType) {
+		this.pdpType = pdpType;
 	}
 
 	public String getPoliciesJsonUrisAuthorizationToken() {
