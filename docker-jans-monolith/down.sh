@@ -18,8 +18,8 @@ fi
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 DOCKER_PROJECT=$(basename "$SCRIPT_DIR")
 
-if [ -z "$INSTALLED_JANNSEN_NAME" ]; then
-    INSTALLED_JANNSEN_NAME="after-install-jans"
+if [ -z "$INSTALLED_JANSSEN_NAME" ]; then
+    INSTALLED_JANSSEN_NAME="after-install-jans"
 fi
 
 if [ -z "$JANSSEN_VERSION" ]; then
@@ -36,7 +36,7 @@ fi
 
 cd $SCRIPT_DIR
 
-JANSSEN_IMAGE="${DOCKER_PROJECT}_${INSTALLED_JANNSEN_NAME}:${JANSSEN_VERSION}"
+JANSSEN_IMAGE="${DOCKER_PROJECT}_${INSTALLED_JANSSEN_NAME}:${JANSSEN_VERSION}"
 JANSSEN_CONTAINER="${DOCKER_PROJECT}-${JANSSEN_SERVICE_NAME}-1"
 
 if ! docker image inspect ${JANSSEN_IMAGE} &> /dev/null; then
