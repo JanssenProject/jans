@@ -280,7 +280,6 @@ public class AppInitializer {
 					oldPersistenceEntryManager, oldPersistenceEntryManager.getOperationService());
 		}
 	}
-	
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("Stopping services and closing DB connections at server shutdown...");
