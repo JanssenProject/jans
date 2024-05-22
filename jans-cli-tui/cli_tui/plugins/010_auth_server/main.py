@@ -35,6 +35,7 @@ from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_cli_dialog import JansGDialog
+from wui_components.widget_collections import get_logging_level_widget
 from view_property import ViewProperty
 from edit_client_dialog import EditClientDialog, get_scope_by_inum
 from edit_scope_dialog import EditScopeDialog
@@ -968,15 +969,8 @@ class Plugin(DialogUtils):
         """This method for the Auth Login
         """
         self.oauth_data_container['logging'] = HSplit([
-                        self.app.getTitledWidget(
-                                _('Log Level'),
-                                name='loggingLevel',
-                                widget=DropDownWidget(
-                                    values=[('TRACE', 'TRACE'), ('DEBUG', 'DEBUG'), ('INFO', 'INFO'), ('WARN', 'WARN'), ('ERROR', 'ERROR'), ('FATAL', 'FATAL'), ('OFF', 'OFF')],
-                                    value=self.app.app_configuration.get('loggingLevel')
-                                    ),
-                                jans_help=self.app.get_help_from_schema(self.schema, 'loggingLevel'),
-                                ),
+
+                        get_logging_level_widget(self.app.app_configuration.get('loggingLevel', 'INFO')),
                         self.app.getTitledWidget(
                                 _('Log Layout'),
                                 name='loggingLayout',
@@ -1008,10 +1002,10 @@ class Plugin(DialogUtils):
                             style=cli_style.check_box
                             ),
                         Window(height=1),
-                        HSplit([
+                        VSplit([
                             self.app.getButton(text=_("Save Logging"), name='oauth:logging:save', jans_help=_("Save Auth Server logging configuration"), handler=self.save_logging),
-                            Window(width=100),
-                            ])
+                            ],
+                            align=HorizontalAlign.CENTER)
                      ], style=cli_style.container, width=D())
 
     def save_logging(self) -> None:
