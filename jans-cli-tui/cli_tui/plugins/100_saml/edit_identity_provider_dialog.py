@@ -152,6 +152,24 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
                         widget_style=cli_style.white_bg_widget
                     ),
 
+                    common_data.app.getTitledText(
+                        title=_("Principal Attribute"),
+                        name='principalAttribute',
+                        value=self.data.get('principalAttribute', ''),
+                        style=cli_style.edit_text,
+                        jans_help=_("Principal Attribute"),
+                        widget_style=cli_style.white_bg_widget
+                    ),
+
+                    common_data.app.getTitledText(
+                        title=_("Principal Type"),
+                        name='principalType',
+                        value=self.data.get('principalType', ''),
+                        style=cli_style.edit_text,
+                        jans_help=_("Principal Type"),
+                        widget_style=cli_style.white_bg_widget
+                    )
+
                     ],
                     width=D()
                     )
