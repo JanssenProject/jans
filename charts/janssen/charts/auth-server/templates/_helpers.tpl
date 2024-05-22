@@ -75,8 +75,8 @@ Create JAVA_OPTIONS ENV for passing custom work and detailed logs
 {{- $cnCustomJavaOptions := index .Values.global "auth-server" "cnCustomJavaOptions" }}
 {{- $custom := printf "%s" $cnCustomJavaOptions }}
 {{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
-{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" $memory -}}
-{{- $xmx := printf "-Xmx%dm" (sub $memory 300) -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=512" -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory 700) -}}
 {{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
 {{ $customJavaOptions | trim | quote }}
 {{- end }}
