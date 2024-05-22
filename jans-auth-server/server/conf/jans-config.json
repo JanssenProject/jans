@@ -8,6 +8,7 @@
       "introspection",
       "revoke_token",
       "revoke_session",
+      "global_token_revocation",
       "active_session",
       "end_session",
       "status_session",
