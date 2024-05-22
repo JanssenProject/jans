@@ -57,17 +57,17 @@ public class TrustRelationshipSyncJob extends RecurringJob {
     private void performSyncTasks() {
 
         try {
-            log.debug("Performing Saml client housekeeping");
+            log.info("Performing Saml client housekeeping");
             performSamlClientsHousekeeping();
-            log.debug("Saml client housekeeping complete");
+            log.info("Saml client housekeeping complete");
 
-            log.debug("Creating new managed saml clients");
+            log.info("Creating new managed saml clients");
             createNewManagedSamlClients();
-            log.debug("Creating new managed saml clients complete");
+            log.info("Creating new managed saml clients complete");
             
-            log.debug("Updating existing managed saml clients");
+            log.info("Updating existing managed saml clients");
             updateExistingManagedSamlClients();
-            log.debug("Updating existing managed saml clients complete");
+            log.info("Updating existing managed saml clients complete");
         }catch(Exception e) {
             log.error("Error running tr sync job",e);
         }

@@ -15,6 +15,8 @@
   "spMetadataUrl":"/realms/%s/broker/%s/endpoint/descriptor",
   "tokenUrl":"/realms/%s/protocol/openid-connect/token",
   "idpUrl":"/admin/realms/%s/identity-provider/instances",
+  "extIDPTokenUrl": "/realms/%s/broker/%s/token",
+  "extIDPRedirectUrl": "/kc/realms/%s/protocol/openid-connect/auth?client_id=%s&redirect_uri=%s&response_type=%s&kc_idp_hint=%s",
   "idpMetadataImportUrl":"/admin/realms/%s/identity-provider/import-config",
   "idpRootDir":"/opt/jans/idp/",
   "idpMetadataDir":"/opt/idp/configs/keycloak/idp/metadata",
@@ -24,6 +26,7 @@
   "spMetadataTempDir":"/opt/idp/configs/keycloak/sp/temp_metadata",
   "spMetadataFile":"sp-metadata.xml",
   "ignoreValidation":"false",
+  "setConfigDefaultValue": "true",
   "idpMetadataMandatoryAttributes":[
     "nameIDPolicyFormat",
     "idpEntityId",
@@ -49,6 +52,8 @@
     "validateSignature",
     "singleLogoutServiceUrl",
     "nameIDPolicyFormat",
+	"principalAttribute",
+	"principalType",
     "idpEntityId",
     "singleSignOnServiceUrl",
     "encryptionPublicKey"

@@ -30,6 +30,7 @@ Kubernetes: `>=v1.22.0-0`
 |  | config | 1.1.2-dev |
 |  | config-api | 1.1.2-dev |
 |  | fido2 | 1.1.2-dev |
+|  | kc-scheduler | 1.1.2-dev |
 |  | link | 1.1.2-dev |
 |  | nginx-ingress | 1.1.2-dev |
 |  | opendj | 1.1.2-dev |
@@ -85,7 +86,7 @@ Kubernetes: `>=v1.22.0-0`
 | auth-server.replicas | int | `1` | Service replica number. |
 | auth-server.resources | object | `{"limits":{"cpu":"2500m","memory":"2500Mi"},"requests":{"cpu":"2500m","memory":"2500Mi"}}` | Resource specs. |
 | auth-server.resources.limits.cpu | string | `"2500m"` | CPU limit. |
-| auth-server.resources.limits.memory | string | `"2500Mi"` | Memory limit. |
+| auth-server.resources.limits.memory | string | `"2500Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | auth-server.resources.requests.cpu | string | `"2500m"` | CPU request. |
 | auth-server.resources.requests.memory | string | `"2500Mi"` | Memory request. |
 | auth-server.topologySpreadConstraints | object | `{}` | Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ |
@@ -115,7 +116,7 @@ Kubernetes: `>=v1.22.0-0`
 | casa.replicas | int | `1` | Service replica number. |
 | casa.resources | object | `{"limits":{"cpu":"500m","memory":"500Mi"},"requests":{"cpu":"500m","memory":"500Mi"}}` | Resource specs. |
 | casa.resources.limits.cpu | string | `"500m"` | CPU limit. |
-| casa.resources.limits.memory | string | `"500Mi"` | Memory limit. |
+| casa.resources.limits.memory | string | `"500Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | casa.resources.requests.cpu | string | `"500m"` | CPU request. |
 | casa.resources.requests.memory | string | `"500Mi"` | Memory request. |
 | casa.topologySpreadConstraints | object | `{}` | Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ |
@@ -145,7 +146,7 @@ Kubernetes: `>=v1.22.0-0`
 | config-api.replicas | int | `1` | Service replica number. |
 | config-api.resources | object | `{"limits":{"cpu":"1000m","memory":"1000Mi"},"requests":{"cpu":"1000m","memory":"1000Mi"}}` | Resource specs. |
 | config-api.resources.limits.cpu | string | `"1000m"` | CPU limit. |
-| config-api.resources.limits.memory | string | `"1000Mi"` | Memory limit. |
+| config-api.resources.limits.memory | string | `"1000Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | config-api.resources.requests.cpu | string | `"1000m"` | CPU request. |
 | config-api.resources.requests.memory | string | `"1000Mi"` | Memory request. |
 | config-api.topologySpreadConstraints | object | `{}` | Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ |
@@ -262,7 +263,7 @@ Kubernetes: `>=v1.22.0-0`
 | fido2.replicas | int | `1` | Service replica number. |
 | fido2.resources | object | `{"limits":{"cpu":"500m","memory":"500Mi"},"requests":{"cpu":"500m","memory":"500Mi"}}` | Resource specs. |
 | fido2.resources.limits.cpu | string | `"500m"` | CPU limit. |
-| fido2.resources.limits.memory | string | `"500Mi"` | Memory limit. |
+| fido2.resources.limits.memory | string | `"500Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | fido2.resources.requests.cpu | string | `"500m"` | CPU request. |
 | fido2.resources.requests.memory | string | `"500Mi"` | Memory request. |
 | fido2.service.name | string | `"http-fido2"` | The name of the fido2 port within the fido2 service. Please keep it as default. |
@@ -273,7 +274,7 @@ Kubernetes: `>=v1.22.0-0`
 | fido2.usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |
 | fido2.volumeMounts | list | `[]` | Configure any additional volumesMounts that need to be attached to the containers |
 | fido2.volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
-| global | object | `{"alb":{"ingress":false},"auth-server":{"appLoggers":{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","ldapStatsLogLevel":"INFO","ldapStatsLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"authEncKeys":"RSA1_5 RSA-OAEP","authServerServiceName":"auth-server","authSigKeys":"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512","cnCustomJavaOptions":"","enabled":true,"ingress":{"authServerEnabled":true,"deviceCodeEnabled":true,"firebaseMessagingEnabled":true,"openidConfigEnabled":true,"u2fConfigEnabled":true,"uma2ConfigEnabled":true,"webdiscoveryEnabled":true,"webfingerEnabled":true},"lockEnabled":false},"auth-server-key-rotation":{"enabled":true,"initKeysLife":48},"awsStorageType":"io1","azureStorageAccountType":"Standard_LRS","azureStorageKind":"Managed","casa":{"appLoggers":{"casaLogLevel":"INFO","casaLogTarget":"STDOUT","enableStdoutLogPrefix":"true","timerLogLevel":"INFO","timerLogTarget":"FILE"},"casaServiceName":"casa","cnCustomJavaOptions":"","enabled":true,"ingress":{"casaEnabled":false}},"cloud":{"testEnviroment":false},"cnAwsConfigFile":"/etc/jans/conf/aws_config_file","cnAwsSecretsReplicaRegionsFile":"/etc/jans/conf/aws_secrets_replica_regions","cnAwsSharedCredentialsFile":"/etc/jans/conf/aws_shared_credential_file","cnCouchbasePasswordFile":"/etc/jans/conf/couchbase_password","cnCouchbaseSuperuserPasswordFile":"/etc/jans/conf/couchbase_superuser_password","cnDocumentStoreType":"DB","cnGoogleApplicationCredentials":"/etc/jans/conf/google-credentials.json","cnLdapCacertFile":"/etc/certs/opendj.pem","cnLdapCertFile":"/etc/certs/opendj.crt","cnLdapKeyFile":"/etc/certs/opendj.key","cnLdapPasswordFile":"/etc/jans/conf/ldap_password","cnLdapTruststoreFile":"/etc/certs/opendj.pkcs12","cnLdapTruststorePasswordFile":"/etc/jans/conf/ldap_truststore_password","cnPersistenceType":"sql","cnPrometheusPort":"","cnSqlPasswordFile":"/etc/jans/conf/sql_password","config":{"enabled":true},"config-api":{"appLoggers":{"configApiLogLevel":"INFO","configApiLogTarget":"STDOUT","enableStdoutLogPrefix":"true","ldapStatsLogLevel":"INFO","ldapStatsLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","configApiServerServiceName":"config-api","enabled":true,"ingress":{"configApiEnabled":true},"plugins":"fido2,scim,user-mgt"},"configAdapterName":"kubernetes","configSecretAdapter":"kubernetes","fido2":{"appLoggers":{"enableStdoutLogPrefix":"true","fido2LogLevel":"INFO","fido2LogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","enabled":true,"fido2ServiceName":"fido2","ingress":{"fido2ConfigEnabled":false,"fido2Enabled":false}},"fqdn":"demoexample.jans.io","gcePdStorageType":"pd-standard","isFqdnRegistered":false,"istio":{"additionalAnnotations":{},"additionalLabels":{},"enabled":false,"gateways":[],"ingress":false,"namespace":"istio-system"},"jobTtlSecondsAfterFinished":300,"kcAdminCredentialsFile":"/etc/jans/conf/kc_admin_creds","kcDbPasswordFile":"/etc/jans/conf/kc_db_password","lbIp":"22.22.22.22","link":{"appLoggers":{"enableStdoutLogPrefix":"true","ldapStatsLogLevel":"INFO","ldapStatsLogTarget":"FILE","linkLogLevel":"INFO","linkLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","enabled":false,"ingress":{"linkEnabled":true},"linkServiceName":"link"},"nginx-ingress":{"enabled":true},"opendj":{"enabled":false,"ldapServiceName":"opendj"},"persistence":{"enabled":true},"saml":{"cnCustomJavaOptions":"","enabled":false,"ingress":{"samlEnabled":false},"samlServiceName":"saml"},"scim":{"appLoggers":{"enableStdoutLogPrefix":"true","ldapStatsLogLevel":"INFO","ldapStatsLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scimLogLevel":"INFO","scimLogTarget":"STDOUT","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","enabled":true,"ingress":{"scimConfigEnabled":false,"scimEnabled":false},"scimServiceName":"scim"},"storageClass":{"allowVolumeExpansion":true,"allowedTopologies":[],"mountOptions":["debug"],"parameters":{},"provisioner":"microk8s.io/hostpath","reclaimPolicy":"Retain","volumeBindingMode":"WaitForFirstConsumer"},"usrEnvs":{"normal":{},"secret":{}}}` | Parameters used globally across all services helm charts. |
+| global | object | `{"alb":{"ingress":false},"auth-server":{"appLoggers":{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","ldapStatsLogLevel":"INFO","ldapStatsLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"authEncKeys":"RSA1_5 RSA-OAEP","authServerServiceName":"auth-server","authSigKeys":"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512","cnCustomJavaOptions":"","enabled":true,"ingress":{"authServerEnabled":true,"deviceCodeEnabled":true,"firebaseMessagingEnabled":true,"openidConfigEnabled":true,"u2fConfigEnabled":true,"uma2ConfigEnabled":true,"webdiscoveryEnabled":true,"webfingerEnabled":true},"lockEnabled":false},"auth-server-key-rotation":{"enabled":true,"initKeysLife":48},"awsStorageType":"io1","azureStorageAccountType":"Standard_LRS","azureStorageKind":"Managed","casa":{"appLoggers":{"casaLogLevel":"INFO","casaLogTarget":"STDOUT","enableStdoutLogPrefix":"true","timerLogLevel":"INFO","timerLogTarget":"FILE"},"casaServiceName":"casa","cnCustomJavaOptions":"","enabled":true,"ingress":{"casaEnabled":false}},"cloud":{"testEnviroment":false},"cnAwsConfigFile":"/etc/jans/conf/aws_config_file","cnAwsSecretsReplicaRegionsFile":"/etc/jans/conf/aws_secrets_replica_regions","cnAwsSharedCredentialsFile":"/etc/jans/conf/aws_shared_credential_file","cnCouchbasePasswordFile":"/etc/jans/conf/couchbase_password","cnCouchbaseSuperuserPasswordFile":"/etc/jans/conf/couchbase_superuser_password","cnDocumentStoreType":"DB","cnGoogleApplicationCredentials":"/etc/jans/conf/google-credentials.json","cnLdapCacertFile":"/etc/certs/opendj.pem","cnLdapCertFile":"/etc/certs/opendj.crt","cnLdapKeyFile":"/etc/certs/opendj.key","cnLdapPasswordFile":"/etc/jans/conf/ldap_password","cnLdapTruststoreFile":"/etc/certs/opendj.pkcs12","cnLdapTruststorePasswordFile":"/etc/jans/conf/ldap_truststore_password","cnPersistenceType":"sql","cnPrometheusPort":"","cnSqlPasswordFile":"/etc/jans/conf/sql_password","config":{"enabled":true},"config-api":{"appLoggers":{"configApiLogLevel":"INFO","configApiLogTarget":"STDOUT","enableStdoutLogPrefix":"true","ldapStatsLogLevel":"INFO","ldapStatsLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","configApiServerServiceName":"config-api","enabled":true,"ingress":{"configApiEnabled":true},"plugins":"fido2,scim,user-mgt"},"configAdapterName":"kubernetes","configSecretAdapter":"kubernetes","fido2":{"appLoggers":{"enableStdoutLogPrefix":"true","fido2LogLevel":"INFO","fido2LogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","enabled":true,"fido2ServiceName":"fido2","ingress":{"fido2ConfigEnabled":false,"fido2Enabled":false}},"fqdn":"demoexample.jans.io","gcePdStorageType":"pd-standard","isFqdnRegistered":false,"istio":{"additionalAnnotations":{},"additionalLabels":{},"enabled":false,"gateways":[],"ingress":false,"namespace":"istio-system"},"jobTtlSecondsAfterFinished":300,"kc-scheduler":{"enabled":false},"kcAdminCredentialsFile":"/etc/jans/conf/kc_admin_creds","kcDbPasswordFile":"/etc/jans/conf/kc_db_password","lbIp":"22.22.22.22","link":{"appLoggers":{"enableStdoutLogPrefix":"true","ldapStatsLogLevel":"INFO","ldapStatsLogTarget":"FILE","linkLogLevel":"INFO","linkLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","enabled":false,"ingress":{"linkEnabled":true},"linkServiceName":"link"},"nginx-ingress":{"enabled":true},"opendj":{"enabled":false,"ldapServiceName":"opendj"},"persistence":{"enabled":true},"saml":{"cnCustomJavaOptions":"","enabled":false,"ingress":{"samlEnabled":false},"samlServiceName":"saml"},"scim":{"appLoggers":{"enableStdoutLogPrefix":"true","ldapStatsLogLevel":"INFO","ldapStatsLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scimLogLevel":"INFO","scimLogTarget":"STDOUT","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"cnCustomJavaOptions":"","enabled":true,"ingress":{"scimConfigEnabled":false,"scimEnabled":false},"scimServiceName":"scim"},"storageClass":{"allowVolumeExpansion":true,"allowedTopologies":[],"mountOptions":["debug"],"parameters":{},"provisioner":"microk8s.io/hostpath","reclaimPolicy":"Retain","volumeBindingMode":"WaitForFirstConsumer"},"usrEnvs":{"normal":{},"secret":{}}}` | Parameters used globally across all services helm charts. |
 | global.alb.ingress | bool | `false` | Activates ALB ingress |
 | global.auth-server-key-rotation.enabled | bool | `true` | Boolean flag to enable/disable the auth-server-key rotation cronjob chart. |
 | global.auth-server-key-rotation.initKeysLife | int | `48` | The initial auth server key rotation keys life in hours |
@@ -382,6 +383,7 @@ Kubernetes: `>=v1.22.0-0`
 | global.istio.ingress | bool | `false` | Boolean flag that enables using istio gateway for Janssen. This assumes istio ingress is installed and hence the LB is available. |
 | global.istio.namespace | string | `"istio-system"` | The namespace istio is deployed in. The is normally istio-system. |
 | global.jobTtlSecondsAfterFinished | int | `300` | https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/ |
+| global.kc-scheduler.enabled | bool | `false` | Boolean flag to enable/disable the kc-scheduler cronjob chart. |
 | global.kcAdminCredentialsFile | string | `"/etc/jans/conf/kc_admin_creds"` | Path to file contains Keycloak admin credentials (username and password) |
 | global.kcDbPasswordFile | string | `"/etc/jans/conf/kc_db_password"` | Path to file contains password for database access |
 | global.lbIp | string | `"22.22.22.22"` | The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `global.fqdn` is globally resolvable. |
@@ -432,6 +434,27 @@ Kubernetes: `>=v1.22.0-0`
 | global.usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service. Envs defined in global.userEnvs will be globally available to all services |
 | global.usrEnvs.normal | object | `{}` | Add custom normal envs to the service. variable1: value1 |
 | global.usrEnvs.secret | object | `{}` | Add custom secret envs to the service. variable1: value1 |
+| kc-scheduler | object | `{"additionalAnnotations":{},"additionalLabels":{},"customScripts":[],"dnsConfig":{},"dnsPolicy":"","image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/kc-scheduler","tag":"1.1.2_dev"},"interval":10,"lifecycle":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for synchronizing Keycloak SAML clients |
+| kc-scheduler.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
+| kc-scheduler.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
+| kc-scheduler.customScripts | list | `[]` | Add custom scripts that have been mounted to run before the entrypoint. - /tmp/custom.sh - /tmp/custom2.sh |
+| kc-scheduler.dnsConfig | object | `{}` | Add custom dns config |
+| kc-scheduler.dnsPolicy | string | `""` | Add custom dns policy |
+| kc-scheduler.image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
+| kc-scheduler.image.pullSecrets | list | `[]` | Image Pull Secrets |
+| kc-scheduler.image.repository | string | `"ghcr.io/janssenproject/jans/kc-scheduler"` | Image  to use for deploying. |
+| kc-scheduler.image.tag | string | `"1.1.2_dev"` | Image  tag to use for deploying. |
+| kc-scheduler.interval | int | `10` | Interval of running the scheduler (in minutes) |
+| kc-scheduler.resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
+| kc-scheduler.resources.limits.cpu | string | `"300m"` | CPU limit. |
+| kc-scheduler.resources.limits.memory | string | `"300Mi"` | Memory limit. |
+| kc-scheduler.resources.requests.cpu | string | `"300m"` | CPU request. |
+| kc-scheduler.resources.requests.memory | string | `"300Mi"` | Memory request. |
+| kc-scheduler.usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service |
+| kc-scheduler.usrEnvs.normal | object | `{}` | Add custom normal envs to the service variable1: value1 |
+| kc-scheduler.usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |
+| kc-scheduler.volumeMounts | list | `[]` | Configure any additional volumesMounts that need to be attached to the containers |
+| kc-scheduler.volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
 | link | object | `{"additionalAnnotations":{},"additionalLabels":{},"customScripts":[],"dnsConfig":{},"dnsPolicy":"","hpa":{"behavior":{},"enabled":true,"maxReplicas":10,"metrics":[],"minReplicas":1,"targetCPUUtilizationPercentage":50},"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/link","tag":"1.1.2_dev"},"lifecycle":{},"livenessProbe":{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5},"pdb":{"enabled":true,"maxUnavailable":"90%"},"readinessProbe":{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"initialDelaySeconds":25,"periodSeconds":25,"timeoutSeconds":5},"replicas":1,"resources":{"limits":{"cpu":"500m","memory":"1000Mi"},"requests":{"cpu":"500m","memory":"1000Mi"}},"topologySpreadConstraints":{},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Link. |
 | link.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
 | link.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
@@ -452,7 +475,7 @@ Kubernetes: `>=v1.22.0-0`
 | link.replicas | int | `1` | Service replica number. |
 | link.resources | object | `{"limits":{"cpu":"500m","memory":"1000Mi"},"requests":{"cpu":"500m","memory":"1000Mi"}}` | Resource specs. |
 | link.resources.limits.cpu | string | `"500m"` | CPU limit. |
-| link.resources.limits.memory | string | `"1000Mi"` | Memory limit. |
+| link.resources.limits.memory | string | `"1000Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | link.resources.requests.cpu | string | `"500m"` | CPU request. |
 | link.resources.requests.memory | string | `"1000Mi"` | Memory request. |
 | link.topologySpreadConstraints | object | `{}` | Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ |
@@ -566,7 +589,7 @@ Kubernetes: `>=v1.22.0-0`
 | saml.replicas | int | `1` | Service replica number. |
 | saml.resources | object | `{"limits":{"cpu":"500m","memory":"1000Mi"},"requests":{"cpu":"500m","memory":"1000Mi"}}` | Resource specs. |
 | saml.resources.limits.cpu | string | `"500m"` | CPU limit. |
-| saml.resources.limits.memory | string | `"1000Mi"` | Memory limit. |
+| saml.resources.limits.memory | string | `"1000Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | saml.resources.requests.cpu | string | `"500m"` | CPU request. |
 | saml.resources.requests.memory | string | `"1000Mi"` | Memory request. |
 | saml.topologySpreadConstraints | object | `{}` | Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ |
@@ -595,7 +618,7 @@ Kubernetes: `>=v1.22.0-0`
 | scim.readinessProbe.httpGet.path | string | `"/jans-scim/sys/health-check"` | http readiness probe endpoint |
 | scim.replicas | int | `1` | Service replica number. |
 | scim.resources.limits.cpu | string | `"1000m"` | CPU limit. |
-| scim.resources.limits.memory | string | `"1000Mi"` | Memory limit. |
+| scim.resources.limits.memory | string | `"1000Mi"` | Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units. |
 | scim.resources.requests.cpu | string | `"1000m"` | CPU request. |
 | scim.resources.requests.memory | string | `"1000Mi"` | Memory request. |
 | scim.service.name | string | `"http-scim"` | The name of the scim port within the scim service. Please keep it as default. |

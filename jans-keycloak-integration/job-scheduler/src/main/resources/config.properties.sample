@@ -1,13 +1,5 @@
 # scheduler configuration file
 
-# logging configuration 
-app.logging.level.root=INFO
-app.logging.level.apache.http.client=INFO
-app.logging.level.apache.http.wire=INFO
-app.logging.level.apache.http.header=INFO
-app.logging.loghistory=180
-
-
 # quartz scheduler configuration
 app.scheduler.quartz.name=kc-jans-scheduler
 app.scheduler.quartz.instanceid=AUTO

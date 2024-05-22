@@ -44,8 +44,6 @@ import java.util.stream.*;
 import org.slf4j.Logger;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
-import io.swagger.v3.oas.annotations.Hidden;
-
 @Path(ApiConstants.JANS_ASSETS)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -152,34 +150,6 @@ public class AssetResource extends ConfigBaseResource {
         }
         logger.info("Asset fetched based on name:{} are:{}", name, assets);
         return Response.ok(assets).build();
-    }
-
-    @Hidden
-    @Operation(summary = "Fetch asset stream by name.", description = "Fetch asset stream by name.", operationId = "get-asset-stream-by-name", tags = {
-            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-asset-by-name.json"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
-    @GET
-    @Path(ApiConstants.STREAM + ApiConstants.NAME_PARAM_PATH)
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
-    public Response getAssetStreamByName(
-            @Parameter(description = "Asset Name") @PathParam(ApiConstants.NAME) @NotNull String name) {
-
-        log.info("Fetch asset stream identified by name:{} ", name);
-        InputStream assetStream = null;
-        try {
-            assetStream = assetService.readAssetStream(name);
-            log.debug(" Fetched  assetStream:{} ", assetStream);
-        } catch (Exception ex) {
-            log.error("Application Error while reading asset stream is - status:{}", ex.getMessage());
-            throwInternalServerException(APPLICATION_ERROR, ex);
-        }
-        return Response.status(Response.Status.OK).entity(assetStream).build();
     }
 
     @Operation(summary = "Upload new asset", description = "Upload new asset", operationId = "post-new-asset", tags = {

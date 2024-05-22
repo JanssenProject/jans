@@ -259,7 +259,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 return True
             elif self.twoStep:
-                authenticated_user = self.processBasicAuthentication(credentials)
+                # Modified for Casa compliance
+                authenticated_user = authenticationService.getAuthenticatedUser()
+                if authenticated_user == None:
+                    authenticated_user = self.processBasicAuthentication(credentials)
+
                 if authenticated_user == None:
                     return False
 

@@ -234,6 +234,28 @@ Kubernetes: `>=v1.22.0-0`
 | istio.ingress | bool | `false` | Boolean flag that enables using istio gateway for Janssen. This assumes istio ingress is installed and hence the LB is available. |
 | istio.namespace | string | `"istio-system"` | The namespace istio is deployed in. The is normally istio-system. |
 | istio.tlsSecretName | string | `"istio-tls-certificate"` |  |
+| kc-scheduler | object | `{"additionalAnnotations":{},"additionalLabels":{},"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":false,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/kc-scheduler","tag":"1.1.2_dev"},"interval":10,"lifecycle":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for synchronizing Keycloak SAML clients |
+| kc-scheduler.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
+| kc-scheduler.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
+| kc-scheduler.customScripts | list | `[]` | Add custom scripts that have been mounted to run before the entrypoint. - /tmp/custom.sh - /tmp/custom2.sh |
+| kc-scheduler.dnsConfig | object | `{}` | Add custom dns config |
+| kc-scheduler.dnsPolicy | string | `""` | Add custom dns policy |
+| kc-scheduler.enabled | bool | `false` | Boolean flag to enable/disable the kc-scheduler cronjob chart. |
+| kc-scheduler.image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
+| kc-scheduler.image.pullSecrets | list | `[]` | Image Pull Secrets |
+| kc-scheduler.image.repository | string | `"ghcr.io/janssenproject/jans/kc-scheduler"` | Image  to use for deploying. |
+| kc-scheduler.image.tag | string | `"1.1.2_dev"` | Image  tag to use for deploying. |
+| kc-scheduler.interval | int | `10` | Interval of running the scheduler (in minutes) |
+| kc-scheduler.resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
+| kc-scheduler.resources.limits.cpu | string | `"300m"` | CPU limit. |
+| kc-scheduler.resources.limits.memory | string | `"300Mi"` | Memory limit. |
+| kc-scheduler.resources.requests.cpu | string | `"300m"` | CPU request. |
+| kc-scheduler.resources.requests.memory | string | `"300Mi"` | Memory request. |
+| kc-scheduler.usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service |
+| kc-scheduler.usrEnvs.normal | object | `{}` | Add custom normal envs to the service variable1: value1 |
+| kc-scheduler.usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |
+| kc-scheduler.volumeMounts | list | `[]` | Configure any additional volumesMounts that need to be attached to the containers |
+| kc-scheduler.volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
 | kcAdminCredentialsFile | string | `"/etc/jans/conf/kc_admin_creds"` | Path to file contains Keycloak admin credentials (username and password) |
 | kcDbPasswordFile | string | `"/etc/jans/conf/kc_db_password"` | Path to file contains password for database access |
 | lbIp | string | `"22.22.22.22"` | The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `fqdn` is globally resolvable. |

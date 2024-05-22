@@ -57,32 +57,32 @@ public class App {
 
         log.info("Application starting ...");
         try {
-            log.debug("Loading application configuration");
+            log.info("Loading application configuration");
             config = loadApplicationConfiguration();
-            log.debug("Application configuration loaded successfully. {}",config.toString());
+            log.info("Application configuration loaded successfully. {}",config.toString());
 
 
-            log.debug("Setting up access to external apis");
+            log.info("Setting up access to external apis");
             jansConfigApiFactory = JansConfigApiFactory.createFactory(config);
             keycloakApiFactory = KeycloakApiFactory.createFactory(config);
 
             //initialize application objects
-            log.debug("Initialization additional application objects");
+            log.info("Initialization additional application objects");
             SAXUtils.init();
 
             if(isCronJob) {
-                log.debug("Running as cron, skiping scheduler initialization");
+                log.info("Running as cron, skiping scheduler initialization");
                 runCronJobs();
-                log.debug("Jobs run to completion.");
+                log.info("Jobs run to completion.");
             }else {
-                log.debug("Not running as cron job. Initializing scheduler");
+                log.info("Not running as cron job. Initializing scheduler");
                 jobScheduler = createJobScheduler(config);
                 startJobScheduler(jobScheduler);
-                log.debug("Starting jans trust relationship sync job");
+                log.info("Starting jans trust relationship sync job");
                 startJansTrustRelationshipSyncJob(config);
-                log.debug("Performing post-startup operations");
+                log.info("Performing post-startup operations");
                 performPostStartupOperations();
-                log.debug("Application startup successful");
+                log.info("Application startup successful");
                 while(running) {
                     Thread.sleep(1000);
                 }

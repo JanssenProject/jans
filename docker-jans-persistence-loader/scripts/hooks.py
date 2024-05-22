@@ -269,22 +269,19 @@ def transform_auth_dynamic_config_hook(conf, manager):
 
     # dynamicGrantTypeDefault changed to grantTypesSupportedByDynamicRegistration
     if "grantTypesSupportedByDynamicRegistration" not in conf:
-        conf["grantTypesSupportedByDynamicRegistration"] = conf.pop("dynamicGrantTypeDefault", [
-            "urn:ietf:params:oauth:grant-type:uma-ticket",
-            "implicit",
-            "urn:ietf:params:oauth:grant-type:token-exchange",
-            "urn:ietf:params:oauth:grant-type:device_code",
-            "client_credentials",
-            "refresh_token",
-            "authorization_code",
-            "tx_token",
-        ])
+        conf["grantTypesSupportedByDynamicRegistration"] = conf.pop("dynamicGrantTypeDefault", [])
         should_update = True
 
     for grant_type in [
+        "authorization_code",
+        "implicit",
+        "client_credentials",
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
         "tx_token",
+        "password",
     ]:
         if grant_type not in conf["grantTypesSupportedByDynamicRegistration"]:
             conf["grantTypesSupportedByDynamicRegistration"].append(grant_type)

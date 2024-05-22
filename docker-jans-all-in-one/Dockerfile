@@ -46,12 +46,12 @@ FROM ${JANS_SAML_IMAGE} AS jans-saml-src
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.9@sha256:915d7a6c5874638a735296a99ac28c4a9cefb9bfda2bef796fc564449d44d6cc
+FROM bellsoft/liberica-openjdk-alpine:17.0.11@sha256:b544e908068565e9f2932f8ac850d0471ec153e711e0fd416d9131d090f1f10d
 
 # hadolint ignore=DL3018
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache tini bash curl openssl python3 py3-cryptography py3-psycopg2 py3-grpcio nginx \
+    && apk add --no-cache tini bash curl openssl python3 py3-cryptography py3-psycopg2 py3-grpcio nginx py3-packaging py3-setuptools \
     && apk add --no-cache --virtual .build-deps git wget
 
 # ------
@@ -59,10 +59,12 @@ RUN apk update \
 # ------
 
 COPY /app/requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
-    && pip3 uninstall -y pip wheel
+RUN apk add --no-cache --virtual .pip-deps py3-pip py3-wheel \
+    && mkdir -p "$HOME/.config/pip" \
+    && printf "[global]\nbreak-system-packages = true" > "$HOME/.config/pip/pip.conf" \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && rm -rf "$HOME/.config/pip/pip.conf" \
+    && apk del .pip-deps
 
 # -------
 # Cleanup

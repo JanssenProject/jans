@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
+FROM bellsoft/liberica-openjre-alpine:17.0.11@sha256:7d9240b84e806f9759560536bac1ca545fc31c02465a4b1ca7131def4f4ab130
 
 # ===============
 # Alpine packages
@@ -16,17 +16,20 @@ RUN apk update \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
-    && pip3 uninstall -y pip wheel
+RUN apk add --no-cache py3-packaging \
+    && apk add --no-cache --virtual .pip-deps py3-pip py3-wheel \
+    && mkdir -p "$HOME/.config/pip" \
+    && printf "[global]\nbreak-system-packages = true" > "$HOME/.config/pip/pip.conf" \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && rm -rf "$HOME/.config/pip/pip.conf" \
+    && apk del .pip-deps
 
 # =====================
 # jans-linux-setup sync
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=cf875ec7fdba5785b37b839bfec04c700001252c
+ENV JANS_SOURCE_VERSION=d2b6df1e15c6a94639cd39737f9f41e7cfaf341f
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources

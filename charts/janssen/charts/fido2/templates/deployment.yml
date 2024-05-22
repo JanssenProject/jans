@@ -49,8 +49,8 @@ spec:
           runAsUser: 1000
           runAsNonRoot: true
         env:
-        - name: CN_FIDO2_JAVA_OPTIONS
-          value: {{ include "fido2.customJavaOptions" . | trim }}
+          - name: CN_FIDO2_JAVA_OPTIONS
+            value: {{ include "fido2.customJavaOptions" . | trim }}
           {{- include "fido2.usr-envs" . | indent 12 }}
           {{- include "fido2.usr-secret-envs" . | indent 12 }}
         {{- if or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local") ( .Values.customScripts) }}
@@ -210,7 +210,7 @@ spec:
           secret:
             secretName: {{ .Release.Name }}-cb-pass
             items:
-              # we are mostly need non-superuser couchbase password file here
+              # we mostly need non-superuser couchbase password file here
               - key: couchbase_password
                 path: couchbase_password
       {{- end }}

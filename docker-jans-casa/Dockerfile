@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
+FROM bellsoft/liberica-openjre-alpine:17.0.11@sha256:7d9240b84e806f9759560536bac1ca545fc31c02465a4b1ca7131def4f4ab130
 
 # ===============
 # Alpine packages
@@ -94,10 +94,13 @@ RUN cd /tmp/jans \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
+RUN apk add --no-cache py3-packaging \
+    && apk add --no-cache --virtual .pip-deps py3-pip py3-wheel \
+    && mkdir -p "$HOME/.config/pip" \
+    && printf "[global]\nbreak-system-packages = true" > "$HOME/.config/pip/pip.conf" \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
-    && pip3 uninstall -y pip wheel
+    && rm -rf "$HOME/.config/pip/pip.conf" \
+    && apk del .pip-deps
 
 # ==========
 # Prometheus

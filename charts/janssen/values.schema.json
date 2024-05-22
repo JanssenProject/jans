@@ -918,6 +918,11 @@
       ,
       "type": "object",
       "properties": {}
+    },
+    "kc-scheduler": {
+      "description": "Responsible for synchronizing Keycloak SAML clients",
+      "type": "object",
+      "properties": {}
     }
   },
   "allOf": [
@@ -950,6 +955,9 @@
     },
     {
       "$ref": "#/definitions/saml-enabled"
+    },
+    {
+      "$ref": "#/definitions/kc-scheduler-enabled"
     }
   ],
   "definitions": {
@@ -2455,6 +2463,119 @@
                 }
               }
             }
+          }
+        }
+      },
+      "else": true
+    },
+    "kc-scheduler-enabled": {
+      "if": {
+        "properties": {
+          "global": {
+            "properties": {
+              "kc-scheduler": {
+                "properties": {
+                  "enabled": {
+                    "const": "true"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "kc-scheduler": {
+            "properties": {
+              "usrEnvs": {
+                "description": "Add custom normal and secret envs to the service",
+                "type": "object",
+                "properties": {
+                  "normal": {
+                    "description": "Add custom normal envs to the service",
+                    "type": "object"
+                  },
+                  "secret": {
+                    "description": "Add custom secret envs to the service",
+                    "type": "object"
+                  }
+                }
+              },
+              "dnsPolicy": {
+                "description": "Add custom dns policy",
+                "type": "string",
+                "pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+              },
+              "dnsConfig": {
+                "description": "Add custom dns config",
+                "type": "object"
+              },
+              "image": {
+                "type": "object",
+                "properties": {
+                  "pullPolicy": {
+                    "description": "Image pullPolicy to use for deploying.",
+                    "type": "string",
+                    "pattern": "^(Always|Never|IfNotPresent)$"
+                  },
+                  "repository": {
+                    "description": "Image  to use for deploying",
+                    "type": "string"
+                  },
+                  "tag": {
+                    "description": "Image  tag to use for deploying.",
+                    "type": "string",
+                    "pattern": "^[a-z0-9-_.]+$"
+                  }
+                }
+              },
+              "interval": {
+                "description": "Interval of running the scheduler (in minutes)",
+                "type": "integer"
+              },
+              "resources": {
+                "description": "Resource specs.",
+                "type": "object",
+                "properties": {
+                  "limits": {
+                    "type": "object",
+                    "properties": {
+                      "cpu": {
+                        "description": "CPU limit.",
+                        "type": "string",
+                        "pattern": "^[0-9m]+$"
+                      },
+                      "memory": {
+                        "description": "Memory limit.",
+                        "type": "string",
+                        "pattern": "^[0-9Mi]+$"
+                      }
+                    }
+                  },
+                  "requests": {
+                    "type": "object",
+                    "properties": {
+                      "cpu": {
+                        "description": "CPU request.",
+                        "type": "string",
+                        "pattern": "^[0-9m]+$"
+                      },
+                      "memory": {
+                        "description": "Memory request.",
+                        "type": "string",
+                        "pattern": "^[0-9Mi]+$"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "image",
+              "resources",
+              "interval"
+            ]
           }
         }
       },

@@ -207,6 +207,22 @@ public class GrantService {
         }
     }
 
+    public TokenEntity getGrantByReferenceId(String referenceId) {
+        try {
+            final List<TokenEntity> grants = persistenceEntryManager.findEntries(tokenBaseDn(), TokenEntity.class, Filter.createEqualityFilter("jansId", referenceId));
+            if (grants.size() > 1) {
+                log.error("Found more then one tokens by referenceId {}", referenceId);
+                return null;
+            }
+            if (grants.size() == 1) {
+                return grants.get(0);
+            }
+        } catch (Exception e) {
+            logException(e);
+        }
+        return null;
+    }
+
     private void logException(Exception e) {
         if (isTrue(appConfiguration.getLogNotFoundEntityAsError())) {
             log.error(e.getMessage(), e);

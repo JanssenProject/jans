@@ -197,30 +197,13 @@ public class DBDocumentService implements Serializable {
 
 	/**
 	 * Get documents by DisplayName
-	 *
+	 * 
 	 * @param DisplayName
 	 * @return documents
 	 */
 	public Document getDocumentByDisplayName(String DisplayName) throws Exception {
 		Document document = new Document();
 		document.setDisplayName(DisplayName);
-		document.setDn(getDnForDocument(null));;
-		List<Document> documents = persistenceEntryManager.findEntries(document);
-		if ((documents != null) && (documents.size() > 0)) {
-			return documents.get(0);
-		}
-		return null;
-	}
-
-	/**
-	 * Get documents by DisplayName
-	 *
-	 * @param DisplayName
-	 * @return documents
-	 */
-	public Document getDocumentByJansFilePath(String filePath) throws Exception {
-		Document document = new Document();
-		document.setJansFilePath(filePath);
 		document.setDn(getDnForDocument(null));;
 		List<Document> documents = persistenceEntryManager.findEntries(document);
 		if ((documents != null) && (documents.size() > 0)) {
