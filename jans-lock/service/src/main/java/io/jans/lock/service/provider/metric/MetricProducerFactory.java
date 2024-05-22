@@ -4,12 +4,12 @@
  * Copyright (c) 2023, Janssen Project
  */
 
-package io.jans.lock.service.consumer.policy;
+package io.jans.lock.service.provider.metric;
 
 import org.slf4j.Logger;
 
 import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.service.consumer.policy.generic.NullPolicyConsumer;
+import io.jans.lock.service.consumer.policy.PolicyConsumer;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ApplicationInitialized;
 import io.jans.service.cdi.event.ConfigurationUpdate;
@@ -22,12 +22,12 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 
 /**
- * Message consumer factory
+ * Metric producer factory
  *
- * @author Yuriy Movchan Date: 12/20/2023
+ * @author Yuriy Movchan Date: 05/03/2024
  */
 @ApplicationScoped
-public class PolicyConsumerFactory {
+public class MetricProducerFactory {
 
 	@Inject
 	private Logger log;
@@ -83,7 +83,7 @@ public class PolicyConsumerFactory {
 		}
 		
 		log.error("Failed to find policy consumer with type '{}'. Using null policy consumer", policyConsumerType);
-		return policyConsumerProviderInstances.select(NullPolicyConsumer.class).get();
+		return policyConsumerProviderInstances.select(NullMessageProvider.class).get();
 	}
 
 }
