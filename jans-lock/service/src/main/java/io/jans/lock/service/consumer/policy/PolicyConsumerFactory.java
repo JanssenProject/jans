@@ -9,11 +9,11 @@ package io.jans.lock.service.consumer.policy;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.service.consumer.policy.generic.NullPolicyConsumer;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ApplicationInitialized;
 import io.jans.service.cdi.event.ConfigurationUpdate;
 import io.jans.service.cdi.qualifier.Implementation;
-import io.jans.service.policy.consumer.PolicyConsumer;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -68,7 +68,7 @@ public class PolicyConsumerFactory {
 	@Produces
 	@ApplicationScoped
 	public PolicyConsumer producePolicyConsumer() {
-		String policyConsumerType = appConfiguration.getPolicyConsumerType();
+		String policyConsumerType = appConfiguration.getPdpType();
 		PolicyConsumer policyConsumer = buildPolicyConsumer(policyConsumerType);
 		
 		return policyConsumer;

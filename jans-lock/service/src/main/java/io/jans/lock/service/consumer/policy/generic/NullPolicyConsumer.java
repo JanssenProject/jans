@@ -1,11 +1,11 @@
-package io.jans.lock.service.consumer.policy;
+package io.jans.lock.service.consumer.policy.generic;
 
 import java.util.List;
 
 import org.slf4j.Logger;
 
+import io.jans.lock.service.consumer.policy.PolicyConsumer;
 import io.jans.service.cdi.qualifier.Implementation;
-import io.jans.service.policy.consumer.PolicyConsumer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -47,7 +47,7 @@ public class NullPolicyConsumer extends PolicyConsumer {
 
 	@Override
 	public void destroy() {
-		log.debug("Destory Policies");
+		log.debug("Destroy Policies");
 	}
 
 }

@@ -4,16 +4,14 @@
  * Copyright (c) 2023, Janssen Project
  */
 
-package io.jans.service.policy.consumer;
+package io.jans.lock.service.provider.metric;
 
 /**
  * Base message consumer
  * 
  * @author Yuriy Movchan Date: 12/20/2023
  */
-public abstract class PolicyConsumer implements MessagePolicyInterface {
-
-	public abstract String getPolicyConsumerType();
+public abstract class MetricProvider implements MetricProviderInterface {
 
 	public abstract void destroy();
 

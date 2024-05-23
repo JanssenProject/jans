@@ -26,12 +26,12 @@ import com.unboundid.util.Base64;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.OpaConfiguration;
+import io.jans.lock.service.consumer.policy.PolicyConsumer;
 import io.jans.lock.service.external.ExternalLockService;
 import io.jans.lock.service.external.context.ExternalLockContext;
 import io.jans.service.EncryptionService;
 import io.jans.service.cdi.qualifier.Implementation;
 import io.jans.service.net.BaseHttpService;
-import io.jans.service.policy.consumer.PolicyConsumer;
 import io.jans.util.StringHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -175,7 +175,7 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 		Map<String, List<String>> clonedLoadedPolicies = new HashMap<>(loadedPolicies);
 		loadedPolicies.clear();
 
-		log.debug("Destory Policies");
+		log.debug("Destroy Policies");
 		for (String sourceUri : clonedLoadedPolicies.keySet()) {
 			removePolicies(sourceUri);
 		}

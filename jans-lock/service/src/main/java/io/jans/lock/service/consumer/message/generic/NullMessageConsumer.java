@@ -1,4 +1,4 @@
-package io.jans.lock.service.consumer.message;
+package io.jans.lock.service.consumer.message.generic;
 
 import org.slf4j.Logger;
 
@@ -47,7 +47,7 @@ public class NullMessageConsumer extends MessageConsumer {
 
 	@Override
 	public void destroy() {
-		log.debug("Destory Messages");
+		log.debug("Destroy Messages");
 	}
 
 	@Override
