@@ -47,7 +47,7 @@ public class NullPolicyConsumer extends PolicyConsumer {
 
 	@Override
 	public void destroy() {
-		log.debug("Destory Policies");
+		log.debug("Destroy Policies");
 	}
 
 }

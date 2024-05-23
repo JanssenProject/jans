@@ -13,8 +13,6 @@ package io.jans.lock.service.provider.metric;
  */
 public abstract class MetricProvider implements MetricProviderInterface {
 
-	public abstract String getPolicyConsumerType();
-
 	public abstract void destroy();
 
 }
