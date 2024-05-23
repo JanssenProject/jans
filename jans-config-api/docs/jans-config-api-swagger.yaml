@@ -574,7 +574,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PagedResult'
+                $ref: '#/components/schemas/DocumentPagedResult'
               examples:
                 Response example:
                   description: Response example
@@ -659,7 +659,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PagedResult'
+                $ref: '#/components/schemas/DocumentPagedResult'
               examples:
                 Response example:
                   description: Response example
@@ -8063,17 +8063,6 @@ components:
           type: string
         description:
           type: string
-    AssetForm:
-      required:
-      - assetFile
-      - document
-      type: object
-      properties:
-        document:
-          $ref: '#/components/schemas/Document'
-        assetFile:
-          type: string
-          format: binary
     Document:
       type: object
       properties:
@@ -8106,6 +8095,33 @@ components:
           type: string
         baseDn:
           type: string
+    DocumentPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+    AssetForm:
+      required:
+      - assetFile
+      - document
+      type: object
+      properties:
+        document:
+          $ref: '#/components/schemas/Document'
+        assetFile:
+          type: string
+          format: binary
     AttributeValidation:
       type: object
       properties:
@@ -8219,17 +8235,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanAccess:
-          type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -10545,10 +10561,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

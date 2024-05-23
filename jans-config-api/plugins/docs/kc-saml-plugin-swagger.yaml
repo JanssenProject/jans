@@ -1135,10 +1135,6 @@ components:
           maxLength: 4000
           minLength: 0
           type: string
-        rootUrl:
-          type: string
-        adminUrl:
-          type: string
         baseUrl:
           type: string
         surrogateAuthRequired:
@@ -1174,9 +1170,6 @@ components:
           type: array
           items:
             type: string
-        url:
-          pattern: "^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]"
-          type: string
         spLogoutURL:
           pattern: "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])"
           type: string

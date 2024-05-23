@@ -143,6 +143,18 @@ public class AssetService {
         return documents;
     }
 
+    public PagedResult<Document> searchAssetByName(SearchRequest searchRequest) throws Exception {
+        log.info("Search asset with searchRequest:{}", searchRequest);
+
+        Filter nameFilter = Filter.createSubstringFilter("NAME", null, new String[] { searchRequest.getFilter() },
+                null);
+
+        log.debug("Asset Search nameFilter:{}", nameFilter);
+        return persistenceEntryManager.findPagedEntries(getDnForAsset(null), Document.class, nameFilter, null,
+                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
+    }
+
     public Document saveAsset(Document asset, InputStream documentStream) throws Exception {
         log.info("Save asset - asset:{}, documentStream:{}", asset, documentStream);
 
@@ -276,15 +288,15 @@ public class AssetService {
 
         String assetDir = this.getAssetDir(assetFileName);
         log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir);
-        
-        if(StringUtils.isBlank(assetFileName)|| StringUtils.isBlank(FilenameUtils.getExtension(assetFileName)) ){
+
+        if (StringUtils.isBlank(assetFileName) || StringUtils.isBlank(FilenameUtils.getExtension(assetFileName))) {
             throw new InvalidConfigurationException("Valid file name not provided!");
         }
-        
+
         if (serviceModules == null || serviceModules.isEmpty()) {
             throw new InvalidConfigurationException("Service module list is null or empty!");
         }
-        
+
         for (String serviceName : serviceModules) {
 
             String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);
