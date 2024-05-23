@@ -210,37 +210,6 @@ class EditTRDialog(JansGDialog, DialogUtils):
                     jans_help=_("Description for TR"),
                     widget_style=cli_style.white_bg_widget
                 ),
-                self.app.getTitledCheckBox(
-                    _("Surrogate Auth Required"),
-                    name='surrogateAuthRequired',
-                    checked=self.data.get('surrogateAuthRequired', False),
-                    jans_help=_("Is this TR enabled?"),
-                    style=cli_style.check_box
-                ),
-                self.app.getTitledText(
-                    title=_("Root URL"),
-                    name='rootUrl',
-                    value=self.data.get('rootUrl', ''),
-                    style=cli_style.edit_text,
-                    jans_help=_("Root URL for TR"),
-                    widget_style=cli_style.white_bg_widget
-                ),
-                self.app.getTitledText(
-                    title=_("Admin URL"),
-                    name='adminUrl',
-                    value=self.data.get('adminUrl', ''),
-                    style=cli_style.edit_text,
-                    jans_help=_("Admin URL for TR"),
-                    widget_style=cli_style.white_bg_widget
-                ),
-                self.app.getTitledText(
-                    title=_("URL"),
-                    name='url',
-                    value=self.data.get('url', ''),
-                    style=cli_style.edit_text,
-                    jans_help=_("URL for TR"),
-                    widget_style=cli_style.white_bg_widget
-                ),
                 self.app.getTitledText(
                     title=_("Service Provider Logout URL"),
                     name='spLogoutURL',
