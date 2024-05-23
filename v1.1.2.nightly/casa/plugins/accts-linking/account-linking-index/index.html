@@ -8528,19 +8528,19 @@
 <p>In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and <code>git</code> installed. </p>
 <ol>
 <li>
-<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/replace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
+<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/1.1.2.nightly/acct-linking-1.1.2.nightly-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
 </li>
 <li>
-<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/replace-janssen-version/agama-inbound-replace-janssen-version.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
+<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/1.1.2.nightly/agama-inbound-1.1.2.nightly.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
 </li>
 <li>
 <p>In the server, create a <code>casa</code> directory inside <code>/opt/jans/jetty/jans-auth/custom/pages</code></p>
 </li>
 <li>
-<p>Download the file <code>https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/acct-linking/extras/login.xhtml</code> and copy it to the previously created folder  </p>
+<p>Download the file <code>https://github.com/JanssenProject/jans/raw/v1.1.2.nightly/jans-casa/plugins/acct-linking/extras/login.xhtml</code> and copy it to the previously created folder  </p>
 </li>
 <li>
-<p>Download the file <code>https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/acct-linking/extras/Casa.py</code>. Open TUI or the admin UI (for Flex), and locate the custom script whose name is <code>casa</code>. Update the contents of the script with the contents of the file </p>
+<p>Download the file <code>https://github.com/JanssenProject/jans/raw/v1.1.2.nightly/jans-casa/plugins/acct-linking/extras/Casa.py</code>. Open TUI or the admin UI (for Flex), and locate the custom script whose name is <code>casa</code>. Update the contents of the script with the contents of the file </p>
 </li>
 <li>
 <p>In TUI, ensure the custom script named <code>agama</code> is enabled</p>
