@@ -47,7 +47,7 @@ public class NullMessageConsumer extends MessageConsumer {
 
 	@Override
 	public void destroy() {
-		log.debug("Destory Messages");
+		log.debug("Destroy Messages");
 	}
 
 	@Override
