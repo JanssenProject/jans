@@ -242,15 +242,9 @@ public class AssetService {
                 return asset;
             }
 
-            String revision = asset.getJansRevision();
-            log.debug(" Current asset revision is:{}", revision);
-            int intRevision = 1;
-            if (revision != null && revision.trim().length() > 0) {
-                intRevision = Integer.parseInt(revision);
-                intRevision = intRevision + 1;
-            }
-            revision = String.valueOf(intRevision);
-            asset.setJansRevision(revision);
+            int intRevision = asset.getJansRevision();
+            log.debug(" Current asset intRevision is:{}", intRevision);
+            asset.setJansRevision(intRevision++);
             log.info("Updated asset revision to asset.getJansRevision():{}", asset.getJansRevision());
         } catch (Exception ex) {
             log.error("Exception while updating asset revision is - ", ex);
@@ -282,7 +276,15 @@ public class AssetService {
 
         String assetDir = this.getAssetDir(assetFileName);
         log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir);
-
+        
+        if(StringUtils.isBlank(assetFileName)|| StringUtils.isBlank(FilenameUtils.getExtension(assetFileName)) ){
+            throw new InvalidConfigurationException("Valid file name not provided!");
+        }
+        
+        if (serviceModules == null || serviceModules.isEmpty()) {
+            throw new InvalidConfigurationException("Service module list is null or empty!");
+        }
+        
         for (String serviceName : serviceModules) {
 
             String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);

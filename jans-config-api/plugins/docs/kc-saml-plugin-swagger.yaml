@@ -944,6 +944,10 @@ components:
           type: string
         nameIDPolicyFormat:
           type: string
+        principalAttribute:
+          type: string
+        principalType:
+          type: string
         idpEntityId:
           type: string
         singleSignOnServiceUrl:
@@ -1068,6 +1072,8 @@ components:
         spMetadataFile:
           type: string
         ignoreValidation:
+          type: boolean
+        setConfigDefaultValue:
           type: boolean
         idpMetadataMandatoryAttributes:
           type: array

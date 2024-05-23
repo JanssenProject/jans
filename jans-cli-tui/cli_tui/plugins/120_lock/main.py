@@ -149,31 +149,31 @@ class Plugin(DialogUtils):
                     text_type='integer'
                 ),
 
+                common_data.app.getTitledText(
+                    title=_("Metric Channel"),
+                    name='metricChannel',
+                    value=self.data.get('metricChannel', ''),
+                    style=cli_style.edit_text,
+                    widget_style=cli_style.black_bg_widget
+                ),
+
+                common_data.app.getTitledText(
+                    title=_("PDP Type"),
+                    name='pdpType',
+                    value=self.data.get('pdpType', 'OPA'),
+                    style=cli_style.edit_text,
+                    widget_style=cli_style.black_bg_widget
+                ),
+
                 Frame(
                     title=_("OPA Configuration"),
                     body=HSplit([self.opa_config_base_url, self.opa_config_accessToken]),
                 ),
 
                 common_data.app.getTitledText(
-                    title=_("Message Consumer Type"),
-                    name='messageConsumerType',
-                    value=self.data.get('messageConsumerType', 'OPA'),
-                    style=cli_style.edit_text,
-                    widget_style=cli_style.black_bg_widget
-                ),
-
-                common_data.app.getTitledText(
-                    title=_("Policy Consumer Type"),
-                    name='policyConsumerType',
-                    value=self.data.get('policyConsumerType', 'OPA'),
-                    style=cli_style.edit_text,
-                    widget_style=cli_style.black_bg_widget
-                ),
-
-                common_data.app.getTitledText(
-                    title=_("Policies JSON URIs Access Token"),
-                    name='policiesJsonUrisAccessToken',
-                    value=self.data.get('policiesJsonUrisAccessToken', ''),
+                    title=_("Policies JSON URIs Authorization Token"),
+                    name='policiesJsonUrisAuthorizationToken',
+                    value=self.data.get('policiesJsonUrisAuthorizationToken', ''),
                     style=cli_style.edit_text,
                     widget_style=cli_style.black_bg_widget
                 ),
@@ -189,9 +189,9 @@ class Plugin(DialogUtils):
                 ),
 
                 common_data.app.getTitledText(
-                    title=_("Policies Zip URIs Access Token"),
-                    name='policiesZipUrisAccessToken',
-                    value=self.data.get('policiesZipUrisAccessToken', ''),
+                    title=_("Policies Zip URIs Authorization Token"),
+                    name='policiesZipUrisAuthorizationToken',
+                    value=self.data.get('policiesZipUrisAuthorizationToken', ''),
                     style=cli_style.edit_text,
                     widget_style=cli_style.black_bg_widget
                 ),

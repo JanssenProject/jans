@@ -8090,16 +8090,16 @@ components:
         creationDate:
           type: string
           format: date-time
-        jansFilePath:
-          type: string
         jansModuleProperty:
           type: array
           items:
             type: string
         jansLevel:
-          type: string
+          type: integer
+          format: int32
         jansRevision:
-          type: string
+          type: integer
+          format: int32
         jansEnabled:
           type: boolean
         jansAlias:
@@ -8219,11 +8219,11 @@ components:
           type: string
         selected:
           type: boolean
+        userCanView:
+          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
-          type: boolean
-        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
@@ -10109,14 +10109,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
