@@ -175,7 +175,7 @@ public class OpaPolicyConsumer extends PolicyConsumer {
 		Map<String, List<String>> clonedLoadedPolicies = new HashMap<>(loadedPolicies);
 		loadedPolicies.clear();
 
-		log.debug("Destory Policies");
+		log.debug("Destroy Policies");
 		for (String sourceUri : clonedLoadedPolicies.keySet()) {
 			removePolicies(sourceUri);
 		}

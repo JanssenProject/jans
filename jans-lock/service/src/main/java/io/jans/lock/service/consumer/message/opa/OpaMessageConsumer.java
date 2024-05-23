@@ -253,7 +253,7 @@ public class OpaMessageConsumer extends MessageConsumer {
 
 	@Override
 	public void destroy() {
-		log.debug("Destory Messages");
+		log.debug("Destroy Messages");
 	}
 
 }

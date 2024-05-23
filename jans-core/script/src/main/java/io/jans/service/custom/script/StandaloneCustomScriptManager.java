@@ -64,7 +64,7 @@ public class StandaloneCustomScriptManager extends CustomScriptManager {
 		reloadTimerEvent(null);
 	}
 
-	public void destory() {
+	public void destroy() {
 		super.destroy(null);
 	}
 
