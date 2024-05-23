@@ -9,7 +9,6 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.lock.LockExtensionType;
 import io.jans.service.custom.script.ExternalScriptService;
-import jakarta.ejb.DependsOn;
 import jakarta.enterprise.context.ApplicationScoped;
 
 /**
