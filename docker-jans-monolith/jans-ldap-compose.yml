@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   jans:
-    image: ghcr.io/janssenproject/jans/monolith:1.1.2_dev
+    image: ${JANSSEN_IMAGE:-ghcr.io/janssenproject/jans/monolith:1.1.2_dev}
     restart: always
     ports:
       - "443:443"
@@ -28,6 +28,10 @@ services:
       - ./jans-config-api-custom:/opt/jans/jetty/jans-config-api/custom
       - ./jans-fido2-custom:/opt/jans/jetty/jans-fido2/custom
       - ./jans-scim-custom:/opt/jans/jetty/jans-scim/custom
+      - ./jans-auth-log:/opt/jans/jetty/jans-auth/logs
+      - ./jans-config-api-log:/opt/jans/jetty/jans-config-api/logs
+      - ./jans-scim-log:/opt/jans/jetty/jans-scim/logs
+      - ./jans-fido2-log:/opt/jans/jetty/jans-fido2/log
 volumes:
   db-data:
 networks:

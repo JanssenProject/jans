@@ -9,7 +9,7 @@
 	<name>jans lock service</name>
 
 	<parent>
-		<artifactId>jans-lock-server-parent</artifactId>
+		<artifactId>jans-lock-master-parent</artifactId>
 		<groupId>io.jans</groupId>
 		<version>1.1.2-SNAPSHOT</version>
 	</parent>
