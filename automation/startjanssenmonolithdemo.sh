@@ -72,12 +72,12 @@ if [[ "$JANS_BUILD_COMMIT" ]]; then
 fi
 # --
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
-  docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml up -d
+  bash /tmp/jans/docker-jans-monolith/up.sh mysql
 elif [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
-  docker compose -f /tmp/jans/docker-jans-monolith/jans-postgres-compose.yml up -d
+  bash /tmp/jans/docker-jans-monolith/up.sh postgres
 elif [[ $JANS_PERSISTENCE == "LDAP" ]]; then
-  docker compose -f /tmp/jans/docker-jans-monolith/jans-ldap-compose.yml up -d
-fi
+  bash /tmp/jans/docker-jans-monolith/up.sh ldap
+fi  
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 jans_status="unhealthy"
 # run loop for 5 mins
@@ -128,6 +128,12 @@ EOF
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."
 echo -e "Add the following record to your local computers' hosts file to engage with the services $EXT_IP $JANS_FQDN"
+echo -e "To stop run:"
+echo -e "/tmp/jans/docker-jans-monolith/down.sh mysql"
+echo -e "or /tmp/jans/docker-jans-monolith/down.sh postgres"
+echo -e "To restart run:"
+echo -e "/tmp/jans/docker-jans-monolith/up.sh mysql"
+echo -e "or /tmp/jans/docker-jans-monolith/up.sh postgres"
 echo -e "To clean up run:"
-echo -e "docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml down && rm -rf /tmp/jans"
-echo -e "or docker compose -f /tmp/jans/docker-jans-monolith/jans-postgres-compose.yml down && rm -rf /tmp/jans"
+echo -e "/tmp/jans/docker-jans-monolith/clean.sh mysql && rm -rf /tmp/jans"
+echo -e "or /tmp/jans/docker-jans-monolith/clean.sh postgres && rm -rf /tmp/jans"
