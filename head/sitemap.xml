@@ -146,6 +146,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/auth-server/endpoints/global-token-revocation/</loc>
+         <lastmod>2024-05-24</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/auth-server/endpoints/introspection/</loc>
          <lastmod>2024-05-24</lastmod>
          <changefreq>daily</changefreq>
