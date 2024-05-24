@@ -21,6 +21,7 @@ public final class ConfigurationResponseClaim {
     public static final String TOKEN_ENDPOINT = "token_endpoint";
     public static final String REVOCATION_ENDPOINT = "revocation_endpoint";
     public static final String SESSION_REVOCATION_ENDPOINT = "session_revocation_endpoint";
+    public static final String GLOBAL_TOKEN_REVOCATION_ENDPOINT = "global_token_revocation_endpoint";
     public static final String USER_INFO_ENDPOINT = "userinfo_endpoint";
     public static final String CLIENT_INFO_ENDPOINT = "clientinfo_endpoint";
     public static final String CHECK_SESSION_IFRAME = "check_session_iframe";
