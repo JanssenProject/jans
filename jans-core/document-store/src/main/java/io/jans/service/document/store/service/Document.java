@@ -29,7 +29,6 @@ public class Document extends Entry implements Serializable {
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
-
 	@AttributeName
 	private String displayName;
 
