@@ -263,7 +263,6 @@ public abstract class BaseTest {
         if (StringHelper.isEmpty(propertiesFile)) {
             propertiesFile = "target/test-classes/testng.properties";
         }
-        propertiesFile = "U:\\janssen\\jans\\jans-auth-server\\client\\src\\test\\resources\\easycloud.properties";
 
         FileInputStream conf = new FileInputStream(propertiesFile);
         Properties prop = new Properties();
