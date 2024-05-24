@@ -66,9 +66,6 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName
     private String baseUrl;
 
-    @AttributeName(name = "surrogateAuthRequired")
-    private boolean surrogateAuthRequired;
-
     @AttributeName(name = "jansEnabled")
     private boolean enabled;
 
@@ -181,14 +178,6 @@ public class TrustRelationship extends Entry implements Serializable {
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
-    }
-
-    public boolean isSurrogateAuthRequired() {
-        return surrogateAuthRequired;
-    }
-
-    public void setSurrogateAuthRequired(boolean surrogateAuthRequired) {
-        this.surrogateAuthRequired = surrogateAuthRequired;
     }
 
     public boolean isEnabled() {
@@ -351,7 +340,7 @@ public class TrustRelationship extends Entry implements Serializable {
     public String toString() {
         return "TrustRelationship [inum=" + inum + ", owner=" + owner + ", name=" + name + ", displayName="
                 + displayName + ", description=" + description 
-                + ", baseUrl=" + baseUrl + ", surrogateAuthRequired=" + surrogateAuthRequired + ", enabled=" + enabled
+                + ", baseUrl=" + baseUrl + ", enabled=" + enabled
                 + ", alwaysDisplayInConsole=" + alwaysDisplayInConsole + ", clientAuthenticatorType="
                 + clientAuthenticatorType + ", secret=" + secret + ", registrationAccessToken="
                 + registrationAccessToken + ", consentRequired=" + consentRequired + ", spMetaDataSourceType="

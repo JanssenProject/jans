@@ -1137,8 +1137,6 @@ components:
           type: string
         baseUrl:
           type: string
-        surrogateAuthRequired:
-          type: boolean
         enabled:
           type: boolean
         alwaysDisplayInConsole:

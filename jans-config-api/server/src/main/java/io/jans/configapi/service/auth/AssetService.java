@@ -166,6 +166,10 @@ public class AssetService {
             throw new InvalidAttributeException(" Document data stream object is null!!!");
         }
 
+        // validation
+        validateFileExtension(asset);
+        validateModules(asset);
+
         ByteArrayOutputStream bos = getByteArrayOutputStream(documentStream);
         log.trace("Asset ByteArrayOutputStream :{}", bos);
 
@@ -173,6 +177,7 @@ public class AssetService {
         try (InputStream is = new Base64InputStream(getInputStream(bos), true)) {
             asset = setAssetContent(asset, is);
         }
+
         // save asset in DB store
         String inum = asset.getInum();
         log.trace("inum of asset to be saved is:{}", inum);
@@ -228,7 +233,7 @@ public class AssetService {
     }
 
     private Document setAssetContent(Document asset, InputStream documentStream) throws IOException {
-        log.info(" an asset - asset:{}, documentStream:{}", asset, documentStream);
+        log.info(" Set asset content - asset:{}, documentStream:{}", asset, documentStream);
         if (asset == null) {
             throw new InvalidAttributeException(" Asset object is null!!!");
         }
@@ -243,7 +248,7 @@ public class AssetService {
         // update asset revision
         updateRevision(asset);
 
-        log.info("\n * Successfully updated asset");
+        log.info("Successfully updated asset");
         return asset;
     }
 
@@ -256,7 +261,7 @@ public class AssetService {
 
             int intRevision = asset.getJansRevision();
             log.debug(" Current asset intRevision is:{}", intRevision);
-            asset.setJansRevision(intRevision++);
+            asset.setJansRevision(++intRevision);
             log.info("Updated asset revision to asset.getJansRevision():{}", asset.getJansRevision());
         } catch (Exception ex) {
             log.error("Exception while updating asset revision is - ", ex);
@@ -288,14 +293,6 @@ public class AssetService {
 
         String assetDir = this.getAssetDir(assetFileName);
         log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir);
-
-        if (StringUtils.isBlank(assetFileName) || StringUtils.isBlank(FilenameUtils.getExtension(assetFileName))) {
-            throw new InvalidConfigurationException("Valid file name not provided!");
-        }
-
-        if (serviceModules == null || serviceModules.isEmpty()) {
-            throw new InvalidConfigurationException("Service module list is null or empty!");
-        }
 
         for (String serviceName : serviceModules) {
 
@@ -373,6 +370,10 @@ public class AssetService {
         return this.appConfiguration.getAssetMgtConfiguration().isAssetServerUploadEnabled();
     }
 
+    private String getFileExtension(String fileName) {
+        return FilenameUtils.getExtension(fileName);
+    }
+
     private String getAssetDir(String assetFileName) {
         log.info("Get asset directory assetFileName:{}", assetFileName);
         StringBuilder sb = new StringBuilder();
@@ -423,7 +424,7 @@ public class AssetService {
         if (dirMapping == null || dirMapping.isEmpty()) {
             return directory;
         }
-        String fileExtension = FilenameUtils.getExtension(assetFileName);
+        String fileExtension = this.getFileExtension(assetFileName);
         log.info("Get asset Directory - fileExtension:{}", fileExtension);
 
         Optional<AssetDirMapping> assetDirMapping = dirMapping.stream().filter(e -> e.getType().contains(fileExtension))
@@ -436,6 +437,89 @@ public class AssetService {
 
         directory = assetDirMapping.get().getDirectory();
         return directory;
+    }
+
+    private boolean isFileExtensionValidationEnabled() {
+        return this.appConfiguration.getAssetMgtConfiguration().isFileExtensionValidationEnabled();
+    }
+
+    private boolean isModuleNameValidationEnabled() {
+        return this.appConfiguration.getAssetMgtConfiguration().isModuleNameValidationEnabled();
+    }
+
+    private List<String> getValidModuleName() {
+        return this.appConfiguration.getAssetMgtConfiguration().getJansModules();
+    }
+
+    private List<String> getValidFileExtension() {
+        List<String> validFileExtension = new ArrayList<>();
+
+        if (appConfiguration.getAssetMgtConfiguration().getAssetDirMapping() == null
+                || appConfiguration.getAssetMgtConfiguration().getAssetDirMapping().isEmpty()) {
+            return validFileExtension;
+        }
+
+        this.appConfiguration.getAssetMgtConfiguration().getAssetDirMapping().stream().filter(e -> e.getType() != null)
+                .map(p -> validFileExtension.addAll(p.getType()));
+        log.info("validFileExtension:{}  - ", validFileExtension);
+
+        return validFileExtension;
+    }
+
+    private void validateFileExtension(Document asset) {
+
+        if (asset == null || appConfiguration.getAssetMgtConfiguration() == null
+                || appConfiguration.getAssetMgtConfiguration().getAssetDirMapping() == null
+                || appConfiguration.getAssetMgtConfiguration().getAssetDirMapping().isEmpty()
+                || !isFileExtensionValidationEnabled()) {
+            return;
+        }
+
+        String fileName = asset.getDisplayName();
+        String fileExtension = this.getFileExtension(fileName);
+        List<String> validFileExtensions = this.getValidFileExtension();
+        log.info("Checking valid file extention - fileName:{}, fileExtension:{}, validFileExtensions:{}", fileName,
+                fileExtension, validFileExtensions);
+
+        if (StringUtils.isBlank(fileName) || StringUtils.isBlank(fileExtension)) {
+            throw new InvalidConfigurationException("Valid file name not provided!");
+        }
+
+        if (validFileExtensions.isEmpty()) {
+            return;
+        }
+
+        boolean isValidExtension = validFileExtensions.contains(fileExtension);
+
+        if (!isValidExtension) {
+            throw new InvalidConfigurationException("Valid file type are '{" + validFileExtensions + "}', '{"
+                    + fileExtension + "}' name not supported!");
+        }
+
+    }
+
+    private void validateModules(Document asset) {
+
+        if (asset == null || asset.getJansModuleProperty() == null || asset.getJansModuleProperty().isEmpty()) {
+            throw new InvalidConfigurationException("Service module list is null or empty!");
+        }
+
+        List<String> validModules = getValidModuleName();
+        log.info("validModules:{} ", validModules);
+
+        if (validModules == null || validModules.isEmpty() || !isModuleNameValidationEnabled()) {
+            return;
+        }
+
+        List<String> invalidModuleList = authUtil.findMissingElements(asset.getJansModuleProperty(), validModules);
+        log.info("invalidModuleList:{}", invalidModuleList);
+
+        if (invalidModuleList != null && !invalidModuleList.isEmpty()) {
+            throw new InvalidConfigurationException(
+                    "Valid modules are '{" + validModules + "}', '{" + invalidModuleList + "}' not supported!");
+
+        }
+
     }
 
 }
