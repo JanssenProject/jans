@@ -308,7 +308,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
 
 
     def get_attribute_by_inum(self, inum: str) -> dict:
-        for attribute in common_data.scopes:
+        for attribute in common_data.jans_attributes:
             if attribute['inum'] == inum or attribute['dn'] == inum:
                 return attribute
         return {}
@@ -317,7 +317,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
         for attribute_dn in self.data['releasedAttributes']:
             attribute = self.get_attribute_by_inum(attribute_dn)
             if attribute:
-                label = attribute['id']
+                label = attribute.get('displayName') or attribute['name']
                 if [attribute_dn, label] not in self.tr_attribute_entries:
                     self.tr_attribute_entries.append([attribute_dn, label])
                     if hasattr(self, 'released_attributes_container'):
@@ -339,10 +339,10 @@ class EditTRDialog(JansGDialog, DialogUtils):
             self.fill_tr_attributes()
 
         attribute_list = []
-        for attribute in common_data.scopes:
-            if not attribute_exists(attribute['dn']):
+        for attribute in common_data.jans_attributes:
+            if attribute['status'] == 'active' and not attribute_exists(attribute['dn']):
                 attribute_list.append(
-                    (attribute['dn'], attribute.get('id', '') or attribute['inum']))
+                    (attribute['dn'], attribute.get('displayName', '') or attribute['name']))
 
             attribute_list.sort(key=lambda x: x[1])
 
