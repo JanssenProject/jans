@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Z
@@ -82,8 +82,10 @@ public class GlobalTokenRevocationHttpTest extends BaseTest {
 
         // 5. request User Info with access token
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
-        userInfoClient.execUserInfo(tokenResponse.getAccessToken());
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(tokenResponse.getAccessToken());
         showClient(userInfoClient);
+
+        assertNull(userInfoResponse.getErrorType()); // no error
 
         // 6. revoke token by user uid=userId
         GlobalTokenRevocationClientRequest revocationRequest = new GlobalTokenRevocationClientRequest();
@@ -97,9 +99,11 @@ public class GlobalTokenRevocationHttpTest extends BaseTest {
         globalTokenRevocationClient.exec(revocationRequest);
         showClient(globalTokenRevocationClient);
 
-        // 7. request User Info with access token which is revoked
+        // 7. request User Info with access token which is revoked -> error type is not null
         userInfoClient = new UserInfoClient(userInfoEndpoint);
-        userInfoClient.execUserInfo(tokenResponse.getAccessToken());
+        userInfoResponse = userInfoClient.execUserInfo(tokenResponse.getAccessToken());
         showClient(userInfoClient);
+
+        assertNotNull(userInfoResponse.getErrorType()); // no error
     }
 }
