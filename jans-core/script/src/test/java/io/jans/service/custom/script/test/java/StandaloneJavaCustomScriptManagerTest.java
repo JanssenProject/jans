@@ -71,7 +71,7 @@ public class StandaloneJavaCustomScriptManagerTest {
 
             assertEquals(jsonObject.getString("key_from_java"), "value_from_script_on_java");
         } finally {
-            customScriptManager.destory();
+            customScriptManager.destroy();
         }
     }
 }
