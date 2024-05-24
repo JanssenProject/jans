@@ -157,7 +157,7 @@ public class AssetResource extends ConfigBaseResource {
             log.error("No asset found with the name:{}", name);
             throwNotFoundException(NOT_FOUND_ERROR, String.format(ASSET_NOT_FOUND, name));
         }
-        logger.info("Asset fetched based on name:{} are:{}", name, documentPagedResult);
+        logger.info("Asset fetched based on name are:{}", documentPagedResult);
         return Response.ok(documentPagedResult).build();
     }
 
