@@ -29,8 +29,6 @@ public interface IAuthorizationGrantList {
 
     ClientCredentialsGrant createClientCredentialsGrant(User user, Client client);
 
-    TxTokenGrant createTxTokenGrant(User user, Client client);
-
     ResourceOwnerPasswordCredentialsGrant createResourceOwnerPasswordCredentialsGrant(User user, Client client);
 
     TokenExchangeGrant createTokenExchangeGrant(User user, Client client);
