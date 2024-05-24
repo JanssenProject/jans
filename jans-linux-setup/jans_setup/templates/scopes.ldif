@@ -168,7 +168,7 @@ description: global_token_revocation scope is required to be able call /global-t
 displayName: global_token_revocation
 inum: 7D92
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansDefScope: false
+jansDefScope: true
 jansId: global_token_revocation
 jansScopeTyp: openid
 objectClass: top
