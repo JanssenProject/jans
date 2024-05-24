@@ -271,10 +271,10 @@ public class GrantService {
         return grants;
     }
 
-    public List<TokenEntity> getGrantsByUserId(String userId) {
+    public List<TokenEntity> getGrantsByUserDn(String userDn) {
         List<TokenEntity> grants = new ArrayList<>();
         try {
-            List<TokenEntity> tokenEntities = persistenceEntryManager.findEntries(tokenBaseDn(), TokenEntity.class, Filter.createEqualityFilter("ssnId", userId));
+            List<TokenEntity> tokenEntities = persistenceEntryManager.findEntries(tokenBaseDn(), TokenEntity.class, Filter.createEqualityFilter("jansUsrDN", userDn));
             if (tokenEntities != null) {
                 grants.addAll(tokenEntities);
             }

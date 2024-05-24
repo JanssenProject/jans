@@ -6,6 +6,11 @@
         <listener class-name="io.jans.as.client.RetryListener"/>
     </listeners>
 
+    <test name="Global Token Revocation Http Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.revoke.GlobalTokenRevocationHttpTest"/>
+        </classes>
+    </test>
     <test name="Transaction Token Http Test" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.token.TxTokenHttpTest"/>

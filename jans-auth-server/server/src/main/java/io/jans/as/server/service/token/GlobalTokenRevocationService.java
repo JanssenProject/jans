@@ -83,7 +83,7 @@ public class GlobalTokenRevocationService {
         log.debug("Revoked {} user's sessions (user: {})", sessionIdList != null ? sessionIdList.size() : 0, user.getUserId());
 
         // remove tokens
-        final List<TokenEntity> grants = grantService.getGrantsByUserId(user.getUserId());
+        final List<TokenEntity> grants = grantService.getGrantsByUserDn(user.getDn());
         grantService.removeSilently(grants);
 
         log.debug("Revoked {} tokens (user: {})", grants != null ? grants.size() : 0, user.getUserId());
