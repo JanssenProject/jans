@@ -124,7 +124,7 @@ public class TxTokenService {
 
         final Client client = executionContext.getClient();
 
-        TxTokenGrant txTokenGrant = authorizationGrantList.createTxTokenGrant(new User(), client);
+        TokenExchangeGrant txTokenGrant = authorizationGrantList.createTokenExchangeGrant(new User(), client);
         txTokenGrant.checkScopesPolicy(scope);
 
         executionContext.setGrant(txTokenGrant);
