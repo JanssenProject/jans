@@ -858,6 +858,10 @@ public class SessionIdService {
     }
 
     public void remove(List<SessionId> list) {
+        if (list == null || list.isEmpty()) {
+            return; // nothing to do
+        }
+
         for (SessionId id : list) {
             try {
                 remove(id);
