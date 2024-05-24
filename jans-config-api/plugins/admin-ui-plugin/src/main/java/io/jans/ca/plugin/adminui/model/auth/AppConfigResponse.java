@@ -32,6 +32,8 @@ public class AppConfigResponse {
     private Integer sessionTimeoutInMins;
     @Schema(description = "Additional Authentication Parameters", accessMode = Schema.AccessMode.READ_WRITE)
     private List<KeyValuePair> additionalParameters;
+    @Schema(description = "Config API hostname", accessMode = Schema.AccessMode.READ_ONLY)
+    private String configApiHost;
 
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
@@ -127,5 +129,13 @@ public class AppConfigResponse {
 
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
+    }
+
+    public String getConfigApiHost() {
+        return configApiHost;
+    }
+
+    public void setConfigApiHost(String configApiHost) {
+        this.configApiHost = configApiHost;
     }
 }
