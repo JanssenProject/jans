@@ -57,21 +57,7 @@ public class TrustRelationship extends Entry implements Serializable {
     @Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
     @AttributeName
     private String description;
-
-    // Access settings
-    /**
-     * Root URL appended to relative URLs
-     */
-    @AttributeName
-    private String rootUrl;
-
-    /**
-     * URL to the admin interface of the client.
-     * 
-     */
-    @AttributeName
-    private String adminUrl;
-
+    
     /**
      * Default URL, Home URL to use when the auth server needs to redirect or link
      * back to the client.
@@ -79,9 +65,6 @@ public class TrustRelationship extends Entry implements Serializable {
      */
     @AttributeName
     private String baseUrl;
-
-    @AttributeName(name = "surrogateAuthRequired")
-    private boolean surrogateAuthRequired;
 
     @AttributeName(name = "jansEnabled")
     private boolean enabled;
@@ -133,10 +116,6 @@ public class TrustRelationship extends Entry implements Serializable {
 
     @AttributeName(name = "jansReleasedAttr")
     private List<String> releasedAttributes;
-
-    @Pattern(regexp = "^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", message = "Please enter a valid SP url, including protocol (http/https)")
-    @AttributeName(name = "url")
-    private String url;
 
     @Pattern(regexp = "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])", message = "Please enter a valid url, including protocol (http/https)")
     @AttributeName(name = "jansPostLogoutRedirectURI")
@@ -193,36 +172,12 @@ public class TrustRelationship extends Entry implements Serializable {
         this.description = description;
     }
 
-    public String getRootUrl() {
-        return rootUrl;
-    }
-
-    public void setRootUrl(String rootUrl) {
-        this.rootUrl = rootUrl;
-    }
-
-    public String getAdminUrl() {
-        return adminUrl;
-    }
-
-    public void setAdminUrl(String adminUrl) {
-        this.adminUrl = adminUrl;
-    }
-
     public String getBaseUrl() {
         return baseUrl;
     }
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
-    }
-
-    public boolean isSurrogateAuthRequired() {
-        return surrogateAuthRequired;
-    }
-
-    public void setSurrogateAuthRequired(boolean surrogateAuthRequired) {
-        this.surrogateAuthRequired = surrogateAuthRequired;
     }
 
     public boolean isEnabled() {
@@ -329,14 +284,6 @@ public class TrustRelationship extends Entry implements Serializable {
         this.releasedAttributes = releasedAttributes;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
     public String getSpLogoutURL() {
         return spLogoutURL;
     }
@@ -392,14 +339,14 @@ public class TrustRelationship extends Entry implements Serializable {
     @Override
     public String toString() {
         return "TrustRelationship [inum=" + inum + ", owner=" + owner + ", name=" + name + ", displayName="
-                + displayName + ", description=" + description + ", rootUrl=" + rootUrl + ", adminUrl=" + adminUrl
-                + ", baseUrl=" + baseUrl + ", surrogateAuthRequired=" + surrogateAuthRequired + ", enabled=" + enabled
+                + displayName + ", description=" + description 
+                + ", baseUrl=" + baseUrl + ", enabled=" + enabled
                 + ", alwaysDisplayInConsole=" + alwaysDisplayInConsole + ", clientAuthenticatorType="
                 + clientAuthenticatorType + ", secret=" + secret + ", registrationAccessToken="
                 + registrationAccessToken + ", consentRequired=" + consentRequired + ", spMetaDataSourceType="
                 + spMetaDataSourceType + ", samlMetadata=" + samlMetadata + ", redirectUris="
                 + Arrays.toString(redirectUris) + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL
-                + ", metaLocation=" + metaLocation + ", releasedAttributes=" + releasedAttributes + ", url=" + url
+                + ", metaLocation=" + metaLocation + ", releasedAttributes=" + releasedAttributes 
                 + ", spLogoutURL=" + spLogoutURL + ", status=" + status + ", validationStatus=" + validationStatus
                 + ", validationLog=" + validationLog + ", profileConfigurations=" + profileConfigurations + "]";
     }

@@ -17,16 +17,30 @@ public class AssetMgtConfiguration {
     private boolean assetServerUploadEnabled;
 
     /**
+     * Flag indicating if file extension validation is enabled
+     */
+    private boolean fileExtensionValidationEnabled;
+
+    /**
+     * Flag indicating if service module name extension validation is enabled
+     */
+    private boolean moduleNameValidationEnabled;
+
+    /**
      * Base directory on server to upload the asset
      */
     private String assetBaseDirectory;
 
     /**
+     * List of supported service module where asset can be uploaded
+     */
+    private List<String> jansModules;
+
+    /**
      * Asset type mapped to server directory
      */
     private List<AssetDirMapping> assetDirMapping;
-    
-    
+
     public boolean isAssetMgtEnabled() {
         return assetMgtEnabled;
     }
@@ -34,7 +48,7 @@ public class AssetMgtConfiguration {
     public void setAssetMgtEnabled(boolean assetMgtEnabled) {
         this.assetMgtEnabled = assetMgtEnabled;
     }
-    
+
     public boolean isAssetServerUploadEnabled() {
         return assetServerUploadEnabled;
     }
@@ -43,12 +57,36 @@ public class AssetMgtConfiguration {
         this.assetServerUploadEnabled = assetServerUploadEnabled;
     }
 
+    public boolean isFileExtensionValidationEnabled() {
+        return fileExtensionValidationEnabled;
+    }
+
+    public void setFileExtensionValidationEnabled(boolean fileExtensionValidationEnabled) {
+        this.fileExtensionValidationEnabled = fileExtensionValidationEnabled;
+    }
+
+    public boolean isModuleNameValidationEnabled() {
+        return moduleNameValidationEnabled;
+    }
+
+    public void setModuleNameValidationEnabled(boolean moduleNameValidationEnabled) {
+        this.moduleNameValidationEnabled = moduleNameValidationEnabled;
+    }
+
     public String getAssetBaseDirectory() {
         return assetBaseDirectory;
     }
 
     public void setAssetBaseDirectory(String assetBaseDirectory) {
         this.assetBaseDirectory = assetBaseDirectory;
+    }
+
+    public List<String> getJansModules() {
+        return jansModules;
+    }
+
+    public void setJansModules(List<String> jansModules) {
+        this.jansModules = jansModules;
     }
 
     public List<AssetDirMapping> getAssetDirMapping() {
@@ -62,8 +100,9 @@ public class AssetMgtConfiguration {
     @Override
     public String toString() {
         return "AssetMgtConfiguration [assetMgtEnabled=" + assetMgtEnabled + ", assetServerUploadEnabled="
-                + assetServerUploadEnabled + ", assetBaseDirectory=" + assetBaseDirectory + ", assetDirMapping="
-                + assetDirMapping + "]";
+                + assetServerUploadEnabled + ", fileExtensionValidationEnabled=" + fileExtensionValidationEnabled
+                + ", moduleNameValidationEnabled=" + moduleNameValidationEnabled + ", assetBaseDirectory="
+                + assetBaseDirectory + ", jansModules=" + jansModules + ", assetDirMapping=" + assetDirMapping + "]";
     }
 
 }
