@@ -94,7 +94,7 @@ POST /jans-auth/restv1/token HTTP/1.1
 Host: yuriyz-adjusted-coyote.gluu.info
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=tx_token&audience=http%3A%2F%2Ftrusted.com&subject_token=5fb696ac-638a-4dbf-81cd-27daeb61caf9&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token&requested_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Atxn_token&rctx=%7B%22req_ip%22%3A%2269.151.72.123%22%7D
+grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&audience=http%3A%2F%2Ftrusted.com&subject_token=5fb696ac-638a-4dbf-81cd-27daeb61caf9&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token&requested_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Atxn_token&rctx=%7B%22req_ip%22%3A%2269.151.72.123%22%7D
 ```
 
 **Sample response**
