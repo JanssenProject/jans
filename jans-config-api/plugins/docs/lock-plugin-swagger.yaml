@@ -117,8 +117,6 @@ components:
           type: string
         externalLoggerConfiguration:
           type: string
-        metricChannel:
-          type: string
         metricReporterInterval:
           type: integer
           format: int32
@@ -132,15 +130,17 @@ components:
           format: int32
         opaConfiguration:
           $ref: '#/components/schemas/OpaConfiguration'
-        pdpType:
+        messageConsumerType:
           type: string
-        policiesJsonUrisAuthorizationToken:
+        policyConsumerType:
+          type: string
+        policiesJsonUrisAccessToken:
           type: string
         policiesJsonUris:
           type: array
           items:
             type: string
-        policiesZipUrisAuthorizationToken:
+        policiesZipUrisAccessToken:
           type: string
         policiesZipUris:
           type: array
