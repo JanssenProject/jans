@@ -146,7 +146,7 @@ public class AssetService {
     public PagedResult<Document> searchAssetByName(SearchRequest searchRequest) throws Exception {
         log.info("Search asset with searchRequest:{}", searchRequest);
 
-        Filter nameFilter = Filter.createSubstringFilter("NAME", null, new String[] { searchRequest.getFilter() },
+        Filter nameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.DISPLAY_NAME), null, new String[] { searchRequest.getFilter() },
                 null);
 
         log.debug("Asset Search nameFilter:{}", nameFilter);
@@ -459,8 +459,12 @@ public class AssetService {
             return validFileExtension;
         }
 
-        this.appConfiguration.getAssetMgtConfiguration().getAssetDirMapping().stream().filter(e -> e.getType() != null)
-                .map(p -> validFileExtension.addAll(p.getType()));
+        List<AssetDirMapping> assetDir = this.appConfiguration.getAssetMgtConfiguration().getAssetDirMapping();
+
+        for (AssetDirMapping dir : assetDir) {
+            validFileExtension.addAll(dir.getType());
+        }
+
         log.info("validFileExtension:{}  - ", validFileExtension);
 
         return validFileExtension;
