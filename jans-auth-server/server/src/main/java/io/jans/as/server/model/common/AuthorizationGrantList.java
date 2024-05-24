@@ -123,14 +123,6 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
-    public TxTokenGrant createTxTokenGrant(User user, Client client) {
-        TxTokenGrant grant = grantInstance.select(TxTokenGrant.class).get();
-        grant.init(user, client);
-
-        return grant;
-    }
-
-    @Override
     public ResourceOwnerPasswordCredentialsGrant createResourceOwnerPasswordCredentialsGrant(User user, Client client) {
         ResourceOwnerPasswordCredentialsGrant grant = grantInstance.select(ResourceOwnerPasswordCredentialsGrant.class).get();
         grant.init(user, client);
@@ -338,17 +330,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                         result = deviceCodeGrant;
                         break;
+                    case TX_TOKEN:
                     case TOKEN_EXCHANGE:
                         TokenExchangeGrant tokenExchangeGrant = grantInstance.select(TokenExchangeGrant.class).get();
                         tokenExchangeGrant.init(user, AuthorizationGrantType.TOKEN_EXCHANGE, client, tokenEntity.getCreationDate());
 
                         result = tokenExchangeGrant;
-                        break;
-                    case TX_TOKEN:
-                        TxTokenGrant txTokenGrant = grantInstance.select(TxTokenGrant.class).get();
-                        txTokenGrant.init(user, AuthorizationGrantType.TX_TOKEN, client, tokenEntity.getCreationDate());
-
-                        result = txTokenGrant;
                         break;
                     default:
                         return null;
