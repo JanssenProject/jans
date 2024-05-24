@@ -16,20 +16,18 @@ RUN apk update \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN apk add --no-cache py3-packaging \
-    && apk add --no-cache --virtual .pip-deps py3-pip py3-wheel \
-    && mkdir -p "$HOME/.config/pip" \
-    && printf "[global]\nbreak-system-packages = true" > "$HOME/.config/pip/pip.conf" \
+RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
-    && rm -rf "$HOME/.config/pip/pip.conf" \
-    && apk del .pip-deps
+    && pip3 uninstall -y pip wheel
 
 # =====================
 # jans-linux-setup sync
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=d2b6df1e15c6a94639cd39737f9f41e7cfaf341f
+ENV JANS_SOURCE_VERSION=a1cd3318a140f8e9b56586dd05599631950aba99
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources

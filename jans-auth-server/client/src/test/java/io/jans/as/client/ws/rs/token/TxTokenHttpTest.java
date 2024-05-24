@@ -58,7 +58,7 @@ public class TxTokenHttpTest extends BaseTest {
         String subjectToken = subjectTokenResponse.getAccessToken();
 
         // 3. Request tx token using the subject token
-        TokenRequest txTokenRequest = new TokenRequest(GrantType.TX_TOKEN);
+        TokenRequest txTokenRequest = new TokenRequest(GrantType.TOKEN_EXCHANGE);
         txTokenRequest.setSubjectToken(subjectToken);
         txTokenRequest.setSubjectTokenType(SubjectTokenType.ACCESS_TOKEN.getName());
         txTokenRequest.setRequestedTokenType(ExchangeTokenType.TX_TOKEN.getName());
@@ -91,7 +91,7 @@ public class TxTokenHttpTest extends BaseTest {
     public void txTokenReplace() throws InvalidJwtException {
         showTitle("txTokenReplace");
 
-        TokenRequest txTokenRequest = new TokenRequest(GrantType.TX_TOKEN);
+        TokenRequest txTokenRequest = new TokenRequest(GrantType.TOKEN_EXCHANGE);
         txTokenRequest.setSubjectToken(txToken);
         txTokenRequest.setSubjectTokenType(SubjectTokenType.ACCESS_TOKEN.getName());
         txTokenRequest.setRequestedTokenType(ExchangeTokenType.TX_TOKEN.getName());
@@ -114,7 +114,7 @@ public class TxTokenHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "tx token test",
                 io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setGrantTypes(List.of(GrantType.TX_TOKEN, GrantType.CLIENT_CREDENTIALS));
+        registerRequest.setGrantTypes(List.of(GrantType.TOKEN_EXCHANGE, GrantType.CLIENT_CREDENTIALS));
         registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 

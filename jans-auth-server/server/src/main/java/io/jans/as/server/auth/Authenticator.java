@@ -206,6 +206,7 @@ public class Authenticator {
                 && (servletRequest.getRequestURI().endsWith("/token")
                 || servletRequest.getRequestURI().endsWith("/revoke")
                 || servletRequest.getRequestURI().endsWith("/revoke_session")
+                || servletRequest.getRequestURI().endsWith("/global-token-revocation")
                 || servletRequest.getRequestURI().endsWith("/userinfo")
                 || servletRequest.getRequestURI().endsWith("/bc-authorize")
                 || servletRequest.getRequestURI().endsWith("/par")
