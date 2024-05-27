@@ -72,11 +72,6 @@ public enum GrantType implements HasParamName, AttributeEnum {
     REFRESH_TOKEN("refresh_token"),
 
     /**
-     * Transaction Token grant
-     */
-    TX_TOKEN("tx_token"),
-
-    /**
      * Representing a requesting party, to use a permission ticket to request
      * an OAuth 2.0 access token to gain access to a protected resource
      * asynchronously from the time a resource owner grants access.

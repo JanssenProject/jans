@@ -723,7 +723,7 @@ public class AppInitializer {
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("Stopping services and closing DB connections at server shutdown...");
-        log.debug("Checking who intiated destory", new Throwable());
+        log.debug("Checking who intiated destroy", new Throwable());
 
         metricService.close();
 

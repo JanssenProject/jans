@@ -24,12 +24,11 @@
 
    "policiesJsonUris": [
    ],
-   "policiesJsonUrisAccessToken" : "",
+   "policiesJsonUrisAuthorizationToken" : "",
 
    "policiesZipUris": [
    ],
-   "policiesZipUrisAccessToken" : "",
+   "policiesZipUrisAuthorizationToken" : "",
 
-   "messageConsumerType": "OPA",
-   "policyConsumerType": "OPA"
+   "pdpType": "OPA"
 }

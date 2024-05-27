@@ -101,6 +101,7 @@ public abstract class BaseTest {
     protected String jwksUri;
     protected String archivedJwksUri;
     protected String registrationEndpoint;
+    protected String globalTokenRevocationEndpoint;
     protected String configurationEndpoint;
     protected String introspectionEndpoint;
     protected String deviceAuthzEndpoint;
@@ -373,6 +374,14 @@ public abstract class BaseTest {
 
     public void setRegistrationEndpoint(String registrationEndpoint) {
         this.registrationEndpoint = registrationEndpoint;
+    }
+
+    public String getGlobalTokenRevocationEndpoint() {
+        return globalTokenRevocationEndpoint;
+    }
+
+    public void setGlobalTokenRevocationEndpoint(String globalTokenRevocationEndpoint) {
+        this.globalTokenRevocationEndpoint = globalTokenRevocationEndpoint;
     }
 
     public String getIntrospectionEndpoint() {
@@ -1000,6 +1009,7 @@ public abstract class BaseTest {
             jwksUri = response.getJwksUri();
             archivedJwksUri = response.getArchivedJwksUri();
             registrationEndpoint = response.getRegistrationEndpoint();
+            globalTokenRevocationEndpoint = response.getGlobalTokenRevocationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
             parEndpoint = response.getParEndpoint();
             deviceAuthzEndpoint = response.getDeviceAuthzEndpoint();
@@ -1023,6 +1033,7 @@ public abstract class BaseTest {
             jwksUri = context.getCurrentXmlTest().getParameter("jwksUri");
             archivedJwksUri = context.getCurrentXmlTest().getParameter("archivedJwksUri");
             registrationEndpoint = context.getCurrentXmlTest().getParameter("registrationEndpoint");
+            globalTokenRevocationEndpoint = context.getCurrentXmlTest().getParameter("globalTokenRevocationEndpoint");
             configurationEndpoint = context.getCurrentXmlTest().getParameter("configurationEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
             parEndpoint = context.getCurrentXmlTest().getParameter("parEndpoint");

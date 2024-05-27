@@ -271,6 +271,19 @@ public class GrantService {
         return grants;
     }
 
+    public List<TokenEntity> getGrantsByUserDn(String userDn) {
+        List<TokenEntity> grants = new ArrayList<>();
+        try {
+            List<TokenEntity> tokenEntities = persistenceEntryManager.findEntries(tokenBaseDn(), TokenEntity.class, Filter.createEqualityFilter("jansUsrDN", userDn));
+            if (tokenEntities != null) {
+                grants.addAll(tokenEntities);
+            }
+        } catch (Exception e) {
+            logException(e);
+        }
+        return grants;
+    }
+
     public void logout(String sessionDn) {
         final List<TokenEntity> tokens = getGrantsBySessionDn(sessionDn);
         filterOutRefreshTokenFromDeletion(tokens);
