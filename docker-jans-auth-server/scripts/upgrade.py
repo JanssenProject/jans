@@ -34,9 +34,10 @@ def _transform_lock_dynamic_config(conf):
 
     # add missing top-level keys
     for missing_key, value in [
-        ("policiesJsonUrisAccessToken", ""),
+        ("policiesJsonUrisAuthorizationToken", conf.pop("policiesJsonUrisAccessToken", "")),
         ("policiesZipUris", []),
-        ("policiesZipUrisAccessToken", ""),
+        ("policiesZipUrisAuthorizationToken", conf.pop("policiesZipUrisAccessToken", "")),
+        ("pdpType", "OPA"),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -58,6 +59,12 @@ def _transform_lock_dynamic_config(conf):
         with contextlib.suppress(ValueError):
             conf["tokenChannels"].remove("id_token")
         should_update = True
+
+    # removed attrs
+    for rm_attr in ["messageConsumerType", "policyConsumerType"]:
+        if rm_attr in conf:
+            conf.pop(rm_attr, None)
+            should_update = True
 
     # return modified config (if any) and update flag
     return conf, should_update
