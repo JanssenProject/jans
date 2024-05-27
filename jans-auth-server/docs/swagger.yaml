@@ -2674,6 +2674,40 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         500:
           $ref: '#/components/responses/InternalServerError'
+  /global-token-revocation:
+    post:
+      tags:
+        - Global Token Revocation
+      summary: Global Token Revocation
+      description: Revoke all tokens for user (requires global_token_revocation scope).
+      operationId: global-token-revocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sub_id:
+                  type: object
+                  properties:
+                    format:
+                      type: string
+                      description: any user attribute that identifies user. E.g. uid or mail.
+                      example: uid
+                    id:
+                      type: string
+                      example: 46dkfde5
+                  required:
+                    - format
+                    - id
+      responses:
+        204:
+          description: OK - Returned if request was processed successfully. Means user is correctly idendified and AS cleared tokens and sessions associated with it.
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalServerError'
   /end_session:
     get:
       tags:

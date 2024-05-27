@@ -26,6 +26,8 @@
             <class name="io.jans.as.server.service.DiscoveryServiceTest" />
             <class name="io.jans.as.server.service.AcrServiceTest" />
 
+            <class name="io.jans.as.server.service.token.GlobalTokenRevocationServiceTest" />
+
             <class name="io.jans.as.server.auth.DpopServiceTest" />
             <class name="io.jans.as.server.token.ws.rs.TokenExchangeServiceTest" />
             <class name="io.jans.as.server.token.ws.rs.TxTokenServiceTest" />
