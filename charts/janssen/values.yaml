@@ -455,12 +455,12 @@ config-api:
       # -- CPU limit.
       cpu: 1000m
       # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
-      memory: 1000Mi
+      memory: 1200Mi
     requests:
       # -- CPU request.
       cpu: 1000m
       # -- Memory request.
-      memory: 1000Mi
+      memory: 1200Mi
   # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
     # -- http liveness probe endpoint
@@ -1419,12 +1419,12 @@ scim:
       # -- CPU limit.
       cpu: 1000m
       # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
-      memory: 1000Mi
+      memory: 1200Mi
     requests:
       # -- CPU request.
       cpu: 1000m
       # -- Memory request.
-      memory: 1000Mi
+      memory: 1200Mi
   service:
     # -- The name of the scim port within the scim service. Please keep it as default.
     name: http-scim
@@ -1528,12 +1528,12 @@ link:
       # -- CPU limit.
       cpu: 500m
       # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
-      memory: 1000Mi
+      memory: 1200Mi
     requests:
       # -- CPU request.
       cpu: 500m
       # -- Memory request.
-      memory: 1000Mi
+      memory: 1200Mi
   # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
     # -- http liveness probe endpoint
@@ -1635,12 +1635,12 @@ saml:
       # -- CPU limit.
       cpu: 500m
       # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
-      memory: 1000Mi
+      memory: 1200Mi
     requests:
       # -- CPU request.
       cpu: 500m
       # -- Memory request.
-      memory: 1000Mi
+      memory: 1200Mi
   # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
     # -- http liveness probe endpoint
