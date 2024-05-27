@@ -166,7 +166,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
     for grant_type in [
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
-        "tx_token",
     ]:
         if grant_type not in conf["grantTypesSupported"]:
             conf["grantTypesSupported"].append(grant_type)
@@ -261,7 +260,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
-        "tx_token",
         "password",
     ]:
         if grant_type not in conf["grantTypesSupportedByDynamicRegistration"]:
@@ -292,6 +290,12 @@ def transform_auth_dynamic_config_hook(conf, manager):
     ]:
         if flag not in conf["featureFlags"]:
             conf["featureFlags"].append(flag)
+            should_update = True
+
+    # remove tx_token
+    for attr in ["grantTypesSupported", "grantTypesSupportedByDynamicRegistration"]:
+        if "tx_token" in conf[attr]:
+            conf[attr].remove("tx_token")
             should_update = True
 
     # return the conf and flag to determine whether it needs update or not
