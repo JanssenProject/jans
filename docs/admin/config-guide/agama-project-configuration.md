@@ -2,21 +2,37 @@
 tags:
   - administration
   - configuration
-  - agama
+  - agama project
+subtitle: Learn how to manage and change Agama project configuration 
 ---
 > Prerequisite: Know how to use the Janssen CLI in [command-line mode](config-tools/jans-cli/README.md)
 
-# Agama
+# Agama project configuration
+
+You can use any of the available configuration tools to perform this 
+configuration based on your need.
+
+=== "Use Command-line"
+
+    Learn how to use Jans CLI [here]() or Jump straight to 
+    [configuration steps](#using-command-line)
+
+=== "Use Text-based UI"
+
+    Learn how to use Jans Text-based UI (TUI) [here]() or Jump straight to
+    [configuration steps](#update-agama-project)
+
+##  Using Command Line
 
 In Janssen, You can deploy and customize agama project using commandline. To get the details of Janssen commandline feature of Agama, you can run this command as below:
 
-```
+```shell
 /opt/jans/jans-cli/config-cli.py --info Agama
 ```
 
 It will show you the details of available operation-id for Agama.
 
-```
+```text
 Operation ID: get-agama-prj-by-name
   Description: Fetches deployed Agama project based on name.
   Parameters:
@@ -57,19 +73,16 @@ Operation ID: get-agama-prj
 
 -->
 
-## List of Deployed Projects
+### List of Deployed Projects
 
 To retrieve the list of deployed agama projects:
 
-```
+```shell
 /opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj
 ```
 
 To get details of all the agama flows:
-
-```
-/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj
-Please wait while retrieving data ...
+```json
 {
   "start": 0,
   "totalEntriesCount": 1,
@@ -103,9 +116,10 @@ Please wait while retrieving data ...
 }
 ```
 
-It will display the total number of agama flows that are enabled and their list. You can get modified list using supported parameters. 
+It will display the total number of agama flows that are enabled and their list. 
+You can get modified list using supported parameters. 
 
-### Endpoint Arguments
+#### Endpoint Arguments
 
 `start`: Should be an integer value. It's an index value of starting point of the list.
 
@@ -113,10 +127,13 @@ It will display the total number of agama flows that are enabled and their list.
 
 **Example:**
 
+```shell title="Command"
+/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj \
+--endpoint-args start:1,count:1
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj --endpoint-args start:1,count:1
 
-Please wait while retrieving data ...
+
+```json title="Sample Output" linenums="1"
 {
   "start": 1,
   "totalEntriesCount": 3,
@@ -143,18 +160,22 @@ Please wait while retrieving data ...
 
 ```
 
-## View Agama Project By Name
+### View Agama Project By Name
 
 You can get the details of an Agama project deployed in Janssen by the project name. Commandline for this operation as below:
 
-```
+```shell
 /opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-by-name --endpoint-args name:"agama-project-name"
 ```
 
 **Example:**
-```
+```shell
 /opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-by-name --endpoint-args name:testAuth
-Please wait while retrieving data ...
+```
+
+It will show the result similar to below:
+
+```json
 {
   "dn": "jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans",
   "id": "3a0e91a4-b79b-37c2-9df7-122247e8ed9c",
@@ -182,30 +203,38 @@ Please wait while retrieving data ...
 }
 ```
 
-## Post Agama Project in Janssen 
+### Post Agama Project in Janssen 
 
 Also, You can deploy agama project in Janssen through commandline.
 
-```
+```shell
 /opt/jans/jans-cli/config-cli.py --operation-id post-agama-prj --endpoint-args name:agama-project-name
 ```
 
 **Example:**
 
-Let's upload [a test project](../../../assets/agama/journey.zip)
+Let's upload [a test project](../../../assets/agama/journey.zip) Zip file in the folder(/tmp/journey.zip).
 
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id=post-agama-prj --url-suffix="name:Agama Lab Journey" --data /tmp/journey.zip
-Server Response:
+```
+
+It will show the result similar to below:
+
+```json
 {
   "message": "A deployment task for project Agama Lab Journey has been queued. Use the GET endpoint to poll status"
 }
 ```
-
 To get uploaded projects:
-
+```shell
+/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj
 ```
-Please wait while retrieving data ...
+
+It will show the result similar to below:
+
+```json
+
 {
   "start": 0,
   "totalEntriesCount": 1,
@@ -289,11 +318,22 @@ Please wait while retrieving data ...
 }
 ```
 
-Let's update configuration for this project with [sample project configuration](../../../assets/agama/journey-configs.json):
+Let's update configuration for this project:
+
+Download the [sample project configuration](../../../assets/agama/journey-configs.json) in the folder(/tmp/journey-configs.json).
+```shell
+wget https://docs.jans.io/v1.1.1/assets/agama/journey-configs.json
+```
+
+Update configuration:
 
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id=put-agama-prj --url-suffix "name:Agama Lab Journey" --data /tmp/journey-configs.json 
-Server Response:
+```
+
+It will show the result similar to below:
+
+```json
 {
   "io.jans.agamaLab.registration": true,
   "io.jans.agamaLab.main": true,
@@ -305,55 +345,61 @@ Server Response:
 ```
 
 
-## Retrieve Agama Project Configuration
+### Retrieve Agama Project Configuration
 
 To retrieve agama project configuration:
 
-```
+```shell
 /opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-configs --endpoint-args name:agama-project-name
 ```
 
-## Update Agama Project
+### Update Agama Project
 
 To update existing agama project:
-```
+```shell
 /optjans/jans-cli/config-cli.py --operation-id put-agama-prj --endpoint-args name:agama-project-name
 ```
 
-## Delete Agama Project
+### Delete Agama Project
 
 To delete agama project by its name:
-```
+```shell
 /opt/jans/jans-cli/config-cli.py --operation-id delete-agama-prj --endpoint-args name:agama-project-name
 ```
 
-
-# Agama Flow Configuration
+### Agama Flow Configuration
 
 If you already deployed agama projects successfully in your janssen server through [above](#agama) operations, you can check those agama flow status with these below operations:
 
-```
+```shell
 /opt/jans/jans-cli/config-cli.py --info AgamaConfiguration
+```
 
+It will show the result similar to below:
+
+```text
 Operation ID: agama-syntax-check
   Description: Determine if the text passed is valid Agama code
   Parameters:
   qname: Agama Flow name [string]
 ```
 
-## Agama Flow Syntax
+#### Agama Flow Syntax
 
-```
+```shell
 /opt/jans/jans-cli/config-cli.py --operation-id agama-syntax-check --url-suffix qname:
 ```
 
 You can do some syntax check with this operation-id. It will help to find out syntax error in agama low code projects. 
 
 ***Example***:
-```
+```shell
 /opt/jans/jans-cli/config-cli.py --operation-id agama-syntax-check --url-suffix qname:"imShakil.co.test"
+```
 
-Server Response:
+It will show the result similar to below:
+
+```json
 {
   "error": "mismatched input 'newline' expecting 'Flow'",
   "symbol": "[@0,0:-1='newline',<9>,1:0]",

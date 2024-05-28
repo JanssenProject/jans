@@ -27,7 +27,8 @@ markdown_extensions:
     - class: mermaid
       format: !!python/name:pymdownx.superfences.fence_code_format
       name: mermaid
-- pymdownx.tabbed
+- pymdownx.tabbed:
+    alternate_style: true
 - pymdownx.emoji:
     emoji_generator: !!python/name:materialx.emoji.to_svg
     emoji_index: !!python/name:materialx.emoji.twemoji
