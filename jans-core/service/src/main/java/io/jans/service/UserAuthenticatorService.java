@@ -14,7 +14,6 @@ import io.jans.model.user.authenticator.UserAuthenticator;
 import io.jans.model.user.authenticator.UserAuthenticatorList;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.mail.Authenticator;
 
 /**
  * Provides operations with user authenticators
