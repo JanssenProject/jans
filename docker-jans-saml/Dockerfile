@@ -36,20 +36,21 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
     && unzip /tmp/kc-authn-deps.zip -d /opt/keycloak/providers \
     && rm -rf /tmp/kc-authn-deps.zip
 
-# =====================
-# jans-linux-setup sync
-# =====================
+# ===========
+# Assets sync
+# ===========
 
-ENV JANS_SOURCE_VERSION=d36fc8061d6c7d64c8cfc40ab7c59282f8165682
+ENV JANS_SOURCE_VERSION=c89fb50f1ccfdba8ac8f6e050ff3648e3106bdb3
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
-RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+# we are using partial-clone and sparse-checkout to get the assets
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout add ${JANS_SETUP_DIR}
+    && git sparse-checkout add ${JANS_SETUP_DIR} \
+    && git sparse-checkout add jans-pycloudlib
 
 RUN mkdir -p /app/static/rdbm \
     /app/schema \

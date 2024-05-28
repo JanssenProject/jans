@@ -23,6 +23,18 @@ ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VE
 RUN mkdir -p /opt/jans/configurator/javalibs \
     && wget -q ${CN_SOURCE_URL} -P /opt/jans/configurator/javalibs/
 
+# ===========
+# Assets sync
+# ===========
+
+ENV JANS_SOURCE_VERSION=c89fb50f1ccfdba8ac8f6e050ff3648e3106bdb3
+
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_SOURCE_VERSION} \
+    && git sparse-checkout add jans-pycloudlib
+
 # ======
 # Python
 # ======
@@ -39,7 +51,7 @@ RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MAN
 # =======
 
 RUN apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* /tmp/jans
 
 # =======
 # License
