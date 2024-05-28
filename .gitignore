@@ -123,7 +123,7 @@ venv.bak/
 /site
 
 bin/
-.pydevproject/
+.pydevproject
 
 # mypy
 .mypy_cache/
