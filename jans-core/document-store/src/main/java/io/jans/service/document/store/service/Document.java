@@ -42,7 +42,7 @@ public class Document extends Entry implements Serializable {
 	private Date creationDate;
 	
 	@AttributeName
-	private List<String> jansModuleProperty;
+	private List<String> jansServices;
 
 	@AttributeName
 	private Integer jansLevel;
@@ -136,11 +136,19 @@ public class Document extends Entry implements Serializable {
         this.jansAlias = jansAlias;
     }
 
+	public List<String> getJansServices() {
+		return jansServices;
+	}
+
+	public void setJansServices(List<String> jansServices) {
+		this.jansServices = jansServices;
+	}
+
     @Override
     public String toString() {
         return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
-                + ", document=" + document + ", creationDate=" + creationDate + ", jansModuleProperty="
-                + jansModuleProperty + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled="
+                + ", document=" + document + ", creationDate=" + creationDate + ", jansServices="
+                + jansServices + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled="
                 + jansEnabled + ", jansAlias=" + jansAlias + "]";
     }
 }
