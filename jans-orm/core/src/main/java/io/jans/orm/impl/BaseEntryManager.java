@@ -1442,24 +1442,14 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			return null;
 		}
 
-		Object[] attributeValues = getAttributeValues(propertyName, jsonObject, propertyValue, multiValued);
+		AttributeData attributeData = getAttributeValues(propertyName, ldapAttributeName, jsonObject, propertyValue, multiValued);
 
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(String.format("Property: %s, LdapProperty: %s, PropertyValue: %s", propertyName,
-					ldapAttributeName, Arrays.toString(attributeValues)));
-		}
-
-		if (attributeValues.length == 0) {
-			attributeValues = new String[] {};
-		} else if ((attributeValues.length == 1) && (attributeValues[0] == null)) {
-			return null;
-		}
-
-		return new AttributeData(ldapAttributeName, attributeValues, multiValued);
+		return attributeData;
 	}
 
-	private Object[] getAttributeValues(String propertyName, boolean jsonObject, Object propertyValue, boolean multiValued) {
+	private AttributeData getAttributeValues(String propertyName, String ldapAttributeName, boolean jsonObject, Object propertyValue, boolean multiValued) {
 		Object[] attributeValues = new Object[1];
+		boolean jsonValue = false;
 
 		boolean nativeType = getNativeAttributeValue(propertyValue, attributeValues, multiValued);
 		if (nativeType) {
@@ -1492,13 +1482,26 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				}
 			}
 		} else if (jsonObject) {
+			jsonValue = true;
 			attributeValues[0] = convertValueToJson(propertyValue);
 		} else {
 			throw new MappingException("Entry property '" + propertyName
 					+ "' should has getter with String, String[], Boolean, Integer, Long, Date, List<String>, AttributeEnum or AttributeEnum[]"
 					+ " return type or has annotation JsonObject");
 		}
-		return attributeValues;
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(String.format("Property: %s, LdapProperty: %s, PropertyValue: %s", propertyName,
+					ldapAttributeName, Arrays.toString(attributeValues)));
+		}
+
+		if (attributeValues.length == 0) {
+			attributeValues = new String[] {};
+		} else if ((attributeValues.length == 1) && (attributeValues[0] == null)) {
+			return null;
+		}
+		
+		return new AttributeData(ldapAttributeName, attributeValues, multiValued, jsonValue);
 	}
 
 	/*
