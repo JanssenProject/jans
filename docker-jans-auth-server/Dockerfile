@@ -92,9 +92,9 @@ RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSIO
     && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-service/${JANS_LOCK_VERSION}/jans-lock-service-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
     && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-model/${JANS_LOCK_VERSION}/jans-lock-model-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
 
-# =====================
-# jans-linux-setup sync
-# =====================
+# ===========
+# Assets sync
+# ===========
 
 RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/ftl \
@@ -108,13 +108,14 @@ ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
-RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add agama/misc \
     && git sparse-checkout add jans-linux-setup/jans_setup \
     && git sparse-checkout add jans-casa/extras \
+    && git sparse-checkout add jans-pycloudlib \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \

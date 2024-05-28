@@ -74,22 +74,23 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
         wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
     done
 
-# =====================
-# jans-linux-setup sync
-# =====================
+# ===========
+# Assets sync
+# ===========
 
-ENV JANS_SOURCE_VERSION=d36fc8061d6c7d64c8cfc40ab7c59282f8165682
+ENV JANS_SOURCE_VERSION=c89fb50f1ccfdba8ac8f6e050ff3648e3106bdb3
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
-RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+# we are using partial-clone and sparse-checkout to get the assets
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
-    && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES}
+    && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES} \
+    && git sparse-checkout add jans-pycloudlib
 
 RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
