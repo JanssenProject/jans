@@ -3,4 +3,4 @@ grpcio==1.59.3
 click==8.1.7
 marshmallow==3.21.2
 fqdn==1.5.1
-git+https://github.com/JanssenProject/jans@19f0deb368617c344df24abeff0b913bbbfdd6b9#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
+/tmp/jans/jans-pycloudlib
