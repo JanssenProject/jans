@@ -61,6 +61,7 @@ The following environment variables are supported by the container:
 - `AWS_SHARED_CREDENTIALS_FILE`: The location of the shared credentials file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 - `AWS_CONFIG_FILE`: The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 - `AWS_PROFILE`: The default profile to use, if any.
+- `CN_SSL_CERT_FROM_DOMAIN`: Validate certificate is downloaded from given domain. If set to `true` (default to `false`), raise an error if cert is not downloaded. Note that the flag is ignored if mounted SSL cert and key files exist.
 
 ## Commands
 
