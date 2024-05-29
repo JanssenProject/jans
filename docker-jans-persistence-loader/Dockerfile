@@ -16,7 +16,7 @@ RUN apk update \
 # ===========
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=c89fb50f1ccfdba8ac8f6e050ff3648e3106bdb3
+ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
