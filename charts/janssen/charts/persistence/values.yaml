@@ -18,7 +18,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/persistence
   # -- Image  tag to use for deploying.
-  tag: 1.1.2_dev
+  tag: 1.1.2-1
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Resource specs.
