@@ -41,7 +41,7 @@ public class Document extends Entry implements Serializable {
 	@AttributeName
 	private Date creationDate;
 	
-	@AttributeName
+	@AttributeName(name = "jansService")
 	private List<String> jansServices;
 
 	@AttributeName

@@ -2309,10 +2309,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Module property",
+      "desc": "Jans Service property",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jansServices"
+        "jansService"
       ],
       "json": true,
       "multivalued": true,
