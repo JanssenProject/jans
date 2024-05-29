@@ -470,5 +470,38 @@ public class UserResource extends BaseResource {
 
         return user;
     }
+    
+    private void validateRequest(CustomUser customUser, boolean isUpdate, boolean removeNonLDAPAttributes) {
+        logger.info("Validate and process user request - customUser:{}, isUpdate:{}, removeNonLDAPAttributes:{}",customUser, isUpdate, removeNonLDAPAttributes);
+       // get User object
+        User user = setUserAttributes(customUser);
+
+        // parse birthdate if present
+        userMgmtSrv.parseBirthDateAttribute(user);
+        logger.debug("Create  user:{}", user);
+
+        // checking mandatory attributes
+        checkMissingAttributes(user, null);
+        ignoreCustomAttributes(user, removeNonLDAPAttributes);
+        validateAttributes(user);
+
+        logger.info("Service call to create user:{}", user);
+
+        if(isUpdate) {
+            logger.info("Updated user:{}", user);
+        }else {
+            user = userMgmtSrv.addUser(user, true);
+            logger.info("Created new user:{}", user);
+        }
+        
+
+        // excludedAttributes
+        user = excludeUserAttributes(user);
+
+        // get custom user
+        customUser = getCustomUser(user, removeNonLDAPAttributes);
+        logger.info("newly created customUser:{}", customUser);
+        
+    }
 
 }
