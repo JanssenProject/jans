@@ -22,8 +22,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g."v1.1.1")'
-        default: "v1.1.1"
+        description: 'Version tag (e.g."v1.1.2")'
+        default: "v1.1.2"
         required: false
 concurrency:
   group: run-once
