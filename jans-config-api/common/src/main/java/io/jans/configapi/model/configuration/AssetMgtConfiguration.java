@@ -84,7 +84,7 @@ public class AssetMgtConfiguration {
 
     public void setAssetDirMapping(List<AssetDirMapping> assetDirMapping) {
         this.assetDirMapping = assetDirMapping;
-    }4
+    }
 
     /**
      * List of supported service module where asset can be uploaded
