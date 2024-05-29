@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.1](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.8.2...v1.1.1) (2024-03-12)
+## [1.1.0](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.8.2...v1.1.0) (2024-03-12)
 
 
 ### Features
