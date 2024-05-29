@@ -63,6 +63,48 @@ func resourceCustomUser() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"external_uid": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "External UID.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"authenticator": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "User authenticator",
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"authenticators": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Authenticators.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Authenticator ID.",
+									},
+									"type": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Authenticator Type.",
+									},
+									"custom": {
+										Type:        schema.TypeMap,
+										Optional:    true,
+										Description: "Custom.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			"custom_attributes": {
 				Type:        schema.TypeList,
 				Optional:    true,
