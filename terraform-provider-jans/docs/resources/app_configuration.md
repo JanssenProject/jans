@@ -27,6 +27,7 @@ resource "jans_app_configuration" "global" {
 - `access_token_signing_alg_values_supported` (List of String) A list of the access token signing algorithms (alg values) supported by the OP. 
 							One of "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", 
 							"ES512", "PS256", "PS384", "PS512"
+- `acr_mappings` (Map of String) A map of ACR mappings. Example: { "acr1": "script1", "acr2": "script2" }
 - `active_session_authorization_scope` (String) Authorization Scope for active session.
 - `agama_configuration` (Block List, Max: 1) Engine Config which offers an alternative way to build authentication flows in Janssen server (see [below for nested schema](#nestedblock--agama_configuration))
 - `all_response_types_supported` (List of String) List of all response types supported.
@@ -77,10 +78,12 @@ resource "jans_app_configuration" "global" {
 - `claims_parameter_supported` (Boolean) Specifies whether the OP supports use of the claim’s parameter.
 - `clean_service_batch_chunk_size` (Number) Each clean up iteration fetches chunk of expired data per base dn and removes it from storage. Example: 10000
 - `clean_service_interval` (Number) Time interval for the Clean Service in seconds. Example: 60
+- `clean_up_inactive_client_after_hours_of_inactivity` (Number) The time interval in hours after which the client is considered inactive.
 - `client_authentication_filters` (Block List) List of client authentication filters. (see [below for nested schema](#nestedblock--client_authentication_filters))
 - `client_authentication_filters_enabled` (Boolean) Boolean value specifying whether to enable client authentication filters.
 - `client_black_list` (List of String) Black List for Client Redirection URIs.
 - `client_info_endpoint` (String) The Client Info endpoint URL. Example: https://server.example.com/restv1/clientinfo
+- `client_periodic_update_timer_interval` (Number) The time interval in seconds for the client periodic update timer.
 - `client_reg_default_to_code_flow_with_refresh` (Boolean) Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.
 - `client_white_list` (List of String) White List for Client Redirection URIs.
 - `configuration_update_interval` (Number) The interval for configuration update in seconds.
@@ -112,6 +115,7 @@ resource "jans_app_configuration" "global" {
 - `disable_authn_for_max_age_zero` (Boolean) Boolean value specifying whether to disable authentication for max age zero.
 - `disable_jdk_logger` (Boolean) Boolean value specifying whether to enable JDK Loggers.
 - `disable_prompt_consent` (Boolean) Boolean value specifying whether to disable prompt consent.
+- `disable_prompt_create` (Boolean) Boolean value specifying whether to disable prompt create.
 - `disable_prompt_login` (Boolean) Boolean value specifying whether to disable prompt login.
 - `disable_u2f_endpoint` (Boolean) Enable/Disable U2F endpoints.
 - `discovery_allowed_keys` (List of String) List of configuration response claim allowed to be displayed in discovery endpoint. Example: authorization_endpoint, 
@@ -127,9 +131,6 @@ resource "jans_app_configuration" "global" {
 - `dpop_signing_alg_values_supported` (List of String) Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported.
 - `dpop_timeframe` (Number) Demonstration of Proof-of-Possession (DPoP) timeout.
 - `dpop_use_nonce` (Boolean) Demonstration of Proof-of-Possession (DPoP) nonce usage.
-- `dynamic_grant_type_default` (List of String) List of the OAuth 2.0 Grant Type values that it's possible to set via client 
-							registration API. One of 'none', 'authorization_code', 'implicit', 'password', 'client_credentials', 'refresh_token', 
-							'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:openid:params:grant-type:ciba', 'urn:ietf:params:oauth:grant-type:device_code', 'tx_token'.
 - `dynamic_registration_allowed_password_grant_scopes` (List of String) List of grant scopes for dynamic registration.
 - `dynamic_registration_custom_attributes` (List of String) Custom attributes for the Dynamic registration. One of 'jansTrustedClnt'.
 - `dynamic_registration_custom_object_class` (String) LDAP custom object class for dynamic registration.
@@ -162,6 +163,9 @@ resource "jans_app_configuration" "global" {
 							"client_credentials", "implicit", "password", "refresh_token", "urn:ietf:params:oauth:grant-type:device_code", 
 							"urn:ietf:params:oauth:grant-type:token-exchange", "urn:ietf:params:oauth:grant-type:uma-ticket", 
 							"urn:openid:params:grant-type:ciba".
+- `grant_types_supported_by_dynamic_registration` (List of String) List of the OAuth 2.0 Grant Type values that it's possible to set via client 
+							registration API. One of 'none', 'authorization_code', 'implicit', 'password', 'client_credentials', 'refresh_token', 
+							'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:openid:params:grant-type:ciba', 'urn:ietf:params:oauth:grant-type:device_code', 'tx_token'.
 - `http_logging_enabled` (Boolean) Enable/Disable request/response logging filter.
 - `http_logging_exclude_paths` (List of String) List of base URI for which request/response logging filter should not record activity. Example: "/auth/img", "/auth/stylesheet"
 - `http_logging_response_body_content` (Boolean) Boolean value specifying whether to log response body content.
@@ -364,7 +368,6 @@ Optional:
 - `page_mismatch_error_page` (String)
 - `root_dir` (String)
 - `scripts_path` (String)
-- `serialize_rules` (Map of List of String)
 - `templates_path` (String)
 
 
