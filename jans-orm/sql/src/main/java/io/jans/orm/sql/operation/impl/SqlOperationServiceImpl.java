@@ -21,6 +21,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -199,7 +200,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 				if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
 					sqlInsertQuery.columns(Expressions.path(Object.class, attribute.getName()));
-					sqlInsertQuery.values(convertValueToDbJson(attribute.getValues()));
+					sqlInsertQuery.values(convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
 				} else {
 					sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
 					sqlInsertQuery.values(attribute.getValue());
@@ -248,13 +249,13 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 				AttributeModificationType type = attributeMod.getModificationType();
                 if ((AttributeModificationType.ADD == type) || (AttributeModificationType.FORCE_UPDATE == type)) {
 					if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
-    					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues()));
+    					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
     				} else {
     					sqlUpdateQuery.set(path, attribute.getValue());
     				}
                 } else if (AttributeModificationType.REPLACE == type) {
 					if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
-    					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues()));
+    					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
     				} else {
     					sqlUpdateQuery.set(path, attribute.getValue());
     				}
@@ -923,7 +924,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         }
     }
 
-	private Object convertValueToDbJson(Object propertyValue) {
+	private Object convertValueToDbJson(Object propertyValue, Boolean jsonValue) {
 		try {
 			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
 				Object[] attributeValue;
@@ -937,21 +938,24 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					attributeValue = new Object[] { propertyValue };
 				}
 	
-				String value = JSON_OBJECT_MAPPER.writeValueAsString(attributeValue);
+				String value = JSON_OBJECT_MAPPER.writeValueAsString((Object[]) propertyValue);
 	
 				return new JsonString(value);
 			} else {
-				JsonAttributeValue attributeValue;
+				if (Boolean.TRUE.equals(jsonValue)) {
+					String value = String.format("{ \"v\" : %s}", ((Object[]) propertyValue)[0]);
+					return value;
+				}
+
+				HashMap<String, Object> attributeValue = new HashMap<>();				
 				if (propertyValue == null) {
-					attributeValue = new JsonAttributeValue();
+					attributeValue.put("v", null);
 				} if (propertyValue instanceof List) {
-					attributeValue = new JsonAttributeValue(((List<?>) propertyValue).toArray());
+					attributeValue.put("v", ((List<?>) propertyValue).toArray());
 				} else if (propertyValue.getClass().isArray()) {
-					attributeValue = new JsonAttributeValue((Object[]) propertyValue);
+					attributeValue.put("v", ((Object[]) propertyValue));
 				} else if (propertyValue instanceof Map) {
-					attributeValue = new JsonAttributeValue(new Object[] { propertyValue });
-				} else {
-					attributeValue = new JsonAttributeValue(new Object[] { propertyValue });
+					attributeValue.put("v", new Object[] { propertyValue });
 				}
 
 				String value = JSON_OBJECT_MAPPER.writeValueAsString(attributeValue);
@@ -972,11 +976,16 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 				return values;
 			} else {
-				JsonAttributeValue attributeValue = JSON_OBJECT_MAPPER.readValue(jsonValue, JsonAttributeValue.class);
+				HashMap<String, Object> attributeValue = JSON_OBJECT_MAPPER.readValue(jsonValue, HashMap.class);
 				
 				Object[] values = null;
-				if (attributeValue != null) {
-					values = attributeValue.getValues();
+				if ((attributeValue != null) && attributeValue.containsKey("v")) {
+					Object rawValues = attributeValue.get("v");
+					if (rawValues instanceof List) {
+						return ((List) rawValues).toArray();
+					} else {
+						values = new Object[] { JSON_OBJECT_MAPPER.writeValueAsString(rawValues) };
+					}
 				}
 	
 				return values;
