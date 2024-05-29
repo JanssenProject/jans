@@ -71,6 +71,7 @@ func Provider() *schema.Provider {
 			"jans_agama_deployment":              resourceAgamaDeployment(),
 			"jans_api_app_configuration":         resourceApiAppConfiguration(),
 			"jans_app_configuration":             resourceAppConfiguration(),
+			"jans_asset":                         resourceAsset(),
 			"jans_attribute":                     resourceAttribute(),
 			"jans_cache_configuration":           resourceCacheConfiguration(),
 			"jans_custom_user":                   resourceCustomUser(),
