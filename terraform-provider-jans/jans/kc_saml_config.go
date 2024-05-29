@@ -22,6 +22,8 @@ type KCSAMLConfiguration struct {
 	SpMetadataUrl                  string   `schema:"sp_metadata_url" json:"spMetadataUrl"`
 	TokenUrl                       string   `schema:"token_url" json:"tokenUrl"`
 	IdpUrl                         string   `schema:"idp_url" json:"idpUrl"`
+	ExtIDPTokenUrl                 string   `schema:"ext_idp_token_url" json:"extIDPTokenUrl"`
+	ExtIDPRedirectUrl              string   `schema:"ext_idp_redirect_url" json:"extIDPRedirectUrl"`
 	IdpMetadataImportUrl           string   `schema:"idp_metadata_import_url" json:"idpMetadataImportUrl"`
 	IdpRootDir                     string   `schema:"idp_root_dir" json:"idpRootDir"`
 	IdpMetadataDir                 string   `schema:"idp_metadata_dir" json:"idpMetadataDir"`
