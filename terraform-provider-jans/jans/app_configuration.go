@@ -8,18 +8,19 @@ import (
 // EngineConfiguration enables an alternative way to build authentication
 // flows in the Janssen server.
 type EngineConfiguration struct {
-	Enabled                     bool                `schema:"enabled" json:"enabled"`
-	RootDir                     string              `schema:"root_dir" json:"rootDir"`
-	TemplatesPath               string              `schema:"templates_path" json:"templatesPath"`
-	ScriptsPath                 string              `schema:"scripts_path" json:"scriptsPath"`
-	MaxItemsLoggedInCollections int                 `schema:"max_items_logged_in_collections" json:"maxItemsLoggedInCollections"`
-	PageMismatchErrorPage       string              `schema:"page_mismatch_error_page" json:"pageMismatchErrorPage"`
-	InterruptionErrorPage       string              `schema:"interruption_error_page" json:"interruptionErrorPage"`
-	CrashErrorPage              string              `schema:"crash_error_page" json:"crashErrorPage"`
-	FinishedFlowPage            string              `schema:"finished_flow_page" json:"finishedFlowPage"`
-	BridgeScriptPage            string              `schema:"bridge_script_page" json:"bridgeScriptPage"`
-	SerializeRules              map[string][]string `schema:"serialize_rules" json:"serializeRules"`
-	DefaultResponseHeaders      map[string]string   `schema:"default_response_headers" json:"defaultResponseHeaders"`
+	Enabled                     bool   `schema:"enabled" json:"enabled"`
+	RootDir                     string `schema:"root_dir" json:"rootDir"`
+	TemplatesPath               string `schema:"templates_path" json:"templatesPath"`
+	ScriptsPath                 string `schema:"scripts_path" json:"scriptsPath"`
+	MaxItemsLoggedInCollections int    `schema:"max_items_logged_in_collections" json:"maxItemsLoggedInCollections"`
+	PageMismatchErrorPage       string `schema:"page_mismatch_error_page" json:"pageMismatchErrorPage"`
+	InterruptionErrorPage       string `schema:"interruption_error_page" json:"interruptionErrorPage"`
+	CrashErrorPage              string `schema:"crash_error_page" json:"crashErrorPage"`
+	FinishedFlowPage            string `schema:"finished_flow_page" json:"finishedFlowPage"`
+	BridgeScriptPage            string `schema:"bridge_script_page" json:"bridgeScriptPage"`
+	// TODO: we have to figure out a way to support this in the terraform schema
+	// SerializeRules              map[string][]string `schema:"serialize_rules" json:"serializeRules"`
+	DefaultResponseHeaders map[string]string `schema:"default_response_headers" json:"defaultResponseHeaders"`
 }
 
 // CibaEndUserNotificationConfig represents the configuration properties for
@@ -207,6 +208,8 @@ type AppConfiguration struct {
 	RequestUriBlockList                                       []string                              `schema:"request_uri_block_list" json:"requestUriBlockList"`
 	OpPolicyUri                                               string                                `schema:"op_policy_uri" json:"opPolicyUri"`
 	OpTosUri                                                  string                                `schema:"op_tos_uri" json:"opTosUri"`
+	CleanUpInactiveClientAfterHoursOfInactivity               int                                   `schema:"clean_up_inactive_client_after_hours_of_inactivity" json:"cleanUpInactiveClientAfterHoursOfInactivity"`
+	ClientPeriodicUpdateTimerInterval                         int                                   `schema:"client_periodic_update_timer_interval" json:"clientPeriodicUpdateTimerInterval"`
 	AuthorizationCodeLifetime                                 int                                   `schema:"authorization_code_lifetime" json:"authorizationCodeLifetime"`
 	RefreshTokenLifetime                                      int                                   `schema:"refresh_token_lifetime" json:"refreshTokenLifetime"`
 	TxTokenLifetime                                           int                                   `schema:"tx_token_lifetime" json:"txTokenLifetime"`
@@ -246,6 +249,7 @@ type AppConfiguration struct {
 	ExpirationNotificatorIntervalInSeconds                    int                                   `schema:"expiration_notificator_interval_in_seconds" json:"expirationNotificatorIntervalInSeconds"`
 	RedirectUrisRegexEnabled                                  bool                                  `schema:"redirect_uris_regex_enabled" json:"redirectUrisRegexEnabled"`
 	UseHighestLevelScriptIfAcrScriptNotFound                  bool                                  `schema:"use_highest_level_script_if_acr_script_not_found" json:"useHighestLevelScriptIfAcrScriptNotFound"`
+	AcrMappings                                               map[string]string                     `schema:"acr_mappings" json:"acrMappings"`
 	AuthenticationFiltersEnabled                              bool                                  `schema:"authentication_filters_enabled" json:"authenticationFiltersEnabled"`
 	ClientAuthenticationFiltersEnabled                        bool                                  `schema:"client_authentication_filters_enabled" json:"clientAuthenticationFiltersEnabled"`
 	ClientRegDefaultToCodeFlowWithRefresh                     bool                                  `schema:"client_reg_default_to_code_flow_with_refresh" json:"clientRegDefaultToCodeFlowWithRefresh"`
@@ -268,7 +272,7 @@ type AppConfiguration struct {
 	ConfigurationUpdateInterval                               int                                   `schema:"configuration_update_interval" json:"configurationUpdateInterval"`
 	LogNotFoundEntityAsError                                  bool                                  `schema:"log_not_found_entity_as_error" json:"logNotFoundEntityAsError"`
 	EnableClientGrantTypeUpdate                               bool                                  `schema:"enable_client_grant_type_update" json:"enableClientGrantTypeUpdate"`
-	DynamicGrantTypeDefault                                   []string                              `schema:"dynamic_grant_type_default" json:"dynamicGrantTypeDefault"`
+	GrantTypesSupportedByDynamicRegistration                  []string                              `schema:"grant_types_supported_by_dynamic_registration" json:"grantTypesSupportedByDynamicRegistration"`
 	CssLocation                                               string                                `schema:"css_location" json:"cssLocation"`
 	JsLocation                                                string                                `schema:"js_location" json:"jsLocation"`
 	ImgLocation                                               string                                `schema:"img_location" json:"imgLocation"`
@@ -292,6 +296,7 @@ type AppConfiguration struct {
 	IntrospectionSkipAuthorization                            bool                                  `schema:"introspection_skip_authorization" json:"introspectionSkipAuthorization"`
 	IntrospectionRestrictBasicAuthnToOwnTokens                bool                                  `schema:"introspection_restrict_basic_authn_to_own_tokens" json:"introspectionRestrictBasicAuthnToOwnTokens"`
 	EndSessionWithAccessToken                                 bool                                  `schema:"end_session_with_access_token" json:"endSessionWithAccessToken"`
+	DisablePromptCreate                                       bool                                  `schema:"disable_prompt_create" json:"disablePromptCreate"`
 	CookieDomain                                              string                                `schema:"cookie_domain" json:"cookieDomain"`
 	EnabledOAuthAuditLogging                                  bool                                  `schema:"enabled_oauth_audit_logging" json:"enabledOAuthAuditLogging"`
 	JmsBrokerUriSet                                           []string                              `schema:"jms_broker_uri_set" json:"jmsBrokerUriSet"`

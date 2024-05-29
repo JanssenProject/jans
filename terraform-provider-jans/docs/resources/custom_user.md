@@ -51,8 +51,10 @@ resource "jans_custom_user" "test" {
 
 ### Optional
 
+- `authenticator` (Block List, Max: 1) User authenticator (see [below for nested schema](#nestedblock--authenticator))
 - `custom_attributes` (Block List) dn of associated clients with the user. (see [below for nested schema](#nestedblock--custom_attributes))
 - `custom_object_classes` (List of String)
+- `external_uid` (List of String) External UID.
 - `ox_auth_persistent_jwt` (List of String) Persistent JWT.
 - `user_password` (String) User password
 
@@ -64,6 +66,24 @@ resource "jans_custom_user" "test" {
 - `id` (String) The ID of this resource.
 - `inum` (String) XRI i-number. Identifier to uniquely identify the user.
 - `updated_at` (String) Time the information of the person was last updated. Seconds from 1970-01-01T0:0:0Z
+
+<a id="nestedblock--authenticator"></a>
+### Nested Schema for `authenticator`
+
+Optional:
+
+- `authenticators` (Block List) Authenticators. (see [below for nested schema](#nestedblock--authenticator--authenticators))
+
+<a id="nestedblock--authenticator--authenticators"></a>
+### Nested Schema for `authenticator.authenticators`
+
+Optional:
+
+- `custom` (Map of String) Custom.
+- `id` (String) Authenticator ID.
+- `type` (String) Authenticator Type.
+
+
 
 <a id="nestedblock--custom_attributes"></a>
 ### Nested Schema for `custom_attributes`
