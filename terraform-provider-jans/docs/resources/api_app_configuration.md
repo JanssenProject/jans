@@ -28,6 +28,7 @@ resource "jans_api_app_configuration" "global" {
 - `api_client_id` (String)
 - `api_client_password` (String)
 - `api_protection_type` (String)
+- `asset_mgt_configuration` (Block List) (see [below for nested schema](#nestedblock--asset_mgt_configuration))
 - `audit_log_conf` (Block List) (see [below for nested schema](#nestedblock--audit_log_conf))
 - `auth_issuer_url` (String)
 - `auth_openid_configuration_url` (String)
@@ -37,7 +38,9 @@ resource "jans_api_app_configuration" "global" {
 - `config_oauth_enabled` (Boolean)
 - `cors_configuration_filters` (Block List) (see [below for nested schema](#nestedblock--cors_configuration_filters))
 - `data_format_conversion_conf` (Block List) (see [below for nested schema](#nestedblock--data_format_conversion_conf))
+- `disable_audit_logger` (Boolean)
 - `disable_jdk_logger` (Boolean)
+- `disable_logger_timer` (Boolean)
 - `endpoint_injection_enabled` (Boolean)
 - `exclusive_auth_scopes` (List of String)
 - `external_logger_configuration` (String)
@@ -60,6 +63,27 @@ Optional:
 
 - `mandatory_attributes` (List of String)
 - `optional_attributes` (List of String)
+
+
+<a id="nestedblock--asset_mgt_configuration"></a>
+### Nested Schema for `asset_mgt_configuration`
+
+Optional:
+
+- `asset_base_directory` (String)
+- `asset_dir_mappings` (Block List) (see [below for nested schema](#nestedblock--asset_mgt_configuration--asset_dir_mappings))
+- `asset_mgt_enabled` (Boolean)
+- `asset_server_upload_enabled` (Boolean)
+
+<a id="nestedblock--asset_mgt_configuration--asset_dir_mappings"></a>
+### Nested Schema for `asset_mgt_configuration.asset_dir_mappings`
+
+Optional:
+
+- `description` (String)
+- `directory` (String)
+- `type` (List of String)
+
 
 
 <a id="nestedblock--audit_log_conf"></a>
