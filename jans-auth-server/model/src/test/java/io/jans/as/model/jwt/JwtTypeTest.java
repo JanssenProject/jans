@@ -11,6 +11,11 @@ import static org.testng.Assert.assertNull;
 public class JwtTypeTest {
 
     @Test
+    public void jwtTypeHeader_mustBeUppercased() {
+        assertEquals(JwtType.JWT.toString(), "JWT");
+    }
+
+    @Test
     public void fromString_withDifferentCasesSensitiveValues_shouldReturnCorrectValue() {
         assertEquals(JwtType.fromString("jwt"), JwtType.JWT);
         assertEquals(JwtType.fromString("Jwt"), JwtType.JWT);

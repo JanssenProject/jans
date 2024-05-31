@@ -81,6 +81,8 @@ if not (os_type and os_version):
 
 os_name = os_type + os_version
 deb_sysd_clone = os_name.startswith(('ubuntu', 'debian'))
+cron_service = 'crond' if os_type in ['centos', 'red', 'fedora'] else 'cron'
+
 
 # Determine service path
 if (os_type in ('centos', 'red', 'fedora', 'suse') and os_initdaemon == 'systemd') or deb_sysd_clone:
@@ -373,6 +375,7 @@ def extract_file(zip_file, source, target, ren=False):
                 target_p = Path(target).joinpath(p.name)
                 if not target_p.parent.exists():
                     target_p.parent.mkdir(parents=True)
+            logIt(f"Extracting {source} from {zip_file} to {target}")
             target_p.write_bytes(zip_obj.read(member))
             break
     zip_obj.close()

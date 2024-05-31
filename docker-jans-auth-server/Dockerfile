@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-alpine:17.0.9@sha256:915d7a6c5874638a735296a99ac28c4a9cefb9bfda2bef796fc564449d44d6cc
+FROM bellsoft/liberica-openjdk-alpine:17.0.11@sha256:b544e908068565e9f2932f8ac850d0471ec153e711e0fd416d9131d090f1f10d
 
 # ===============
 # Alpine packages
@@ -50,8 +50,8 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.1.2-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-24 15:39'
+ENV CN_VERSION=1.1.3-SNAPSHOT
+ENV CN_BUILD_DATE='2024-05-29 11:39'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -92,9 +92,9 @@ RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSIO
     && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-service/${JANS_LOCK_VERSION}/jans-lock-service-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
     && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-model/${JANS_LOCK_VERSION}/jans-lock-model-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
 
-# =====================
-# jans-linux-setup sync
-# =====================
+# ===========
+# Assets sync
+# ===========
 
 RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/ftl \
@@ -103,18 +103,19 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
+ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
-RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add agama/misc \
     && git sparse-checkout add jans-linux-setup/jans_setup \
     && git sparse-checkout add jans-casa/extras \
+    && git sparse-checkout add jans-pycloudlib \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
@@ -136,7 +137,8 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
+RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
@@ -265,7 +267,7 @@ EXPOSE $CN_AUTH_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.2" \
+    org.opencontainers.image.version="1.1.3" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 

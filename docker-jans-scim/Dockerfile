@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-alpine:17.0.9@sha256:915d7a6c5874638a735296a99ac28c4a9cefb9bfda2bef796fc564449d44d6cc
+FROM bellsoft/liberica-openjdk-alpine:17.0.11@sha256:b544e908068565e9f2932f8ac850d0471ec153e711e0fd416d9131d090f1f10d
 
 # ===============
 # Alpine packages
@@ -41,8 +41,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 
-ENV CN_VERSION=1.1.2-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-24 15:51'
+ENV CN_VERSION=1.1.3-SNAPSHOT
+ENV CN_BUILD_DATE='2024-05-29 11:49'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
@@ -57,22 +57,23 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-scim --add-module=server,deploy,resources,http,http-forwarded,jsp,websocket,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-scim.war /tmp/WEB-INF
 
-# =====================
-# jans-linux-setup sync
-# =====================
+# ===========
+# Assets sync
+# ===========
 
-ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
+ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
-RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+# we are using partial-clone and sparse-checkout to get the assets
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
-    && git sparse-checkout add ${JANS_SCIM_RESOURCE_DIR}
+    && git sparse-checkout add ${JANS_SCIM_RESOURCE_DIR} \
+    && git sparse-checkout add jans-pycloudlib
 
 RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
@@ -101,7 +102,8 @@ RUN cd /tmp/jans \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
+RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
@@ -214,7 +216,7 @@ EXPOSE $CN_SCIM_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/scim" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.2" \
+    org.opencontainers.image.version="1.1.3" \
     org.opencontainers.image.title="Janssen SCIM" \
     org.opencontainers.image.description="SCIM server"
 

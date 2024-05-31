@@ -3,7 +3,6 @@
   "disableLoggerTimer": false,
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
-  "assetMgtEnabled": true,
   "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",
   "apiClientId": "${jca_client_id}",
@@ -14,7 +13,6 @@
   "authOpenidIntrospectionUrl": "${introspectionEndpoint}",
   "authOpenidTokenUrl": "${tokenEndpoint}",
   "authOpenidRevokeUrl": "${tokenRevocationEndpoint}",
-  "smallryeHealthRootPath": "/health-check",
   "disableJdkLogger":true,
   "loggingLevel":"INFO",
   "loggingLayout":"text",
@@ -69,6 +67,57 @@
     "enabled": true,
     "ignoreHttpMethod": [
       "@jakarta.ws.rs.GET()"
+    ]
+  },
+  "assetMgtConfiguration":{
+    "assetMgtEnabled":true,
+    "assetServerUploadEnabled":true,
+    "fileExtensionValidationEnabled":true,
+    "moduleNameValidationEnabled":true,
+    "assetBaseDirectory":"/opt/jans/jetty/%s/custom",
+    "jansModules":[
+      "jans-auth",
+      "jans-casa",
+      "jans-config-api",
+      "jans-fido2",
+      "jans-link",
+      "jans-lock",
+      "jans-scim"
+    ],
+    "assetDirMapping":[
+      {
+        "directory":"i18n",
+        "type":[
+          "properties"
+        ],
+        "description":"Resource bundle file."
+      },
+      {
+        "directory":"libs",
+        "type":[
+          "jar"
+        ],
+        "description":"java archive library."
+      },
+      {
+        "directory":"pages",
+        "type":[
+          "xhtml"
+        ],
+        "description":"Web pages."
+      },
+      {
+        "directory":"static",
+        "type":[
+          "js",
+          "css",
+          "png",
+          "gif",
+          "jpg",
+          "jpeg"
+        ],
+        "description":"Static resources like Java-script, style-sheet and images."
+      }
     ]
   },
   "plugins": [

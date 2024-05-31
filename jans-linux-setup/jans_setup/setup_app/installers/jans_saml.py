@@ -39,6 +39,8 @@ class JansSamlInstaller(JettyInstaller):
         (os.path.join(Config.dist_jans_dir, 'kc-jans-authn-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-authn-plugin/{0}/kc-jans-authn-plugin-{0}.jar').format(base.current_app.app_info['jans_version'])),
         (os.path.join(Config.dist_jans_dir, 'kc-jans-authn-plugin-deps.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-authn-plugin/{0}/kc-jans-authn-plugin-{0}-deps.zip').format(base.current_app.app_info['jans_version'])),
         (os.path.join(Config.dist_jans_dir, 'kc-saml-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/kc-saml-plugin/{0}/kc-saml-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
+        (os.path.join(Config.dist_jans_dir, 'kc-jans-scheduler-deps.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-scheduler/{0}/kc-jans-scheduler-{0}-deps.zip').format(base.current_app.app_info['jans_version'])),
+        (os.path.join(Config.dist_jans_dir, 'kc-jans-scheduler.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/kc-jans-scheduler/{0}/kc-jans-scheduler-{0}.jar').format(base.current_app.app_info['jans_version'])),
             ]
 
     def __init__(self):
@@ -75,15 +77,19 @@ class JansSamlInstaller(JettyInstaller):
         Config.jans_idp_sp_metadata_root_dir = os.path.join(self.idp_config_root_dir, 'sp/metadata')
         Config.jans_idp_sp_metadata_temp_dir = os.path.join(self.idp_config_root_dir, 'sp/temp_metadata')
 
+        Config.scheduler_dir = os.path.join(Config.opt_dir, 'kc-scheduler')
+
         Config.idp_config_hostname = Config.hostname
         Config.keycloack_hostname = Config.hostname
 
+        self.kc_admin_realm = 'master'
+        self.kc_admin_username = 'admin'
 
     def install(self):
         """installation steps"""
         self.create_clients()
         self.install_keycloack()
-
+        self.install_keycloak_scheduler()
 
     def render_import_templates(self):
         self.logIt("Preparing base64 encodings configuration files")
@@ -212,12 +218,12 @@ class JansSamlInstaller(JettyInstaller):
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             kc_tmp_config = os.path.join(tmp_dir, 'kcadm-jans.config')
-            self.run([kcadm_cmd, 'config', 'credentials', '--server', kcm_server_url, '--realm', 'master', '--user', 'admin', '--password', 'admin', '--config', kc_tmp_config], env=env)
+            self.run([kcadm_cmd, 'config', 'credentials', '--server', kcm_server_url, '--realm', self.kc_admin_realm, '--user', self.kc_admin_username, '--password', 'admin', '--config', kc_tmp_config], env=env)
 
-            self.run([kcadm_cmd, 'config', 'credentials', '--server', kcm_server_url, '--realm', 'master', '--user', 'admin', '--password', Config.admin_password, '--config', kc_tmp_config], env=env)
+            self.run([kcadm_cmd, 'config', 'credentials', '--server', kcm_server_url, '--realm', self.kc_admin_realm, '--user', self.kc_admin_username, '--password', Config.admin_password, '--config', kc_tmp_config], env=env)
 
             # Change default password
-            self.run([kcadm_cmd, 'set-password', '-r', 'master', '--username', 'admin', '--new-password',  Config.admin_password, '--config', kc_tmp_config], env=env)
+            self.run([kcadm_cmd, 'set-password', '-r', self.kc_admin_realm, '--username', self.kc_admin_username, '--new-password', Config.admin_password, '--config', kc_tmp_config], env=env)
 
             # create realm
             self.run([kcadm_cmd, 'create', 'realms', '-f', os.path.join(jans_api_output_dir, jans_api_realm_fn),'--config', kc_tmp_config], env=env)
@@ -253,3 +259,64 @@ class JansSamlInstaller(JettyInstaller):
 
             # create userstorage provider component
             self.run([kcadm_cmd, 'create', 'components', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_userstorage_provider_component_fn), '--config', kc_tmp_config], env=env)
+
+    def install_keycloak_scheduler(self):
+
+        scheduler_templates_dir = os.path.join(self.templates_folder, 'kc-scheduler')
+
+        # create directories
+        for _ in ('bin', 'conf', 'lib', 'logs'):
+            self.createDirs(os.path.join(Config.scheduler_dir, _))
+
+        #unpack libs
+        base.unpack_zip(self.source_files[7][0], os.path.join(Config.scheduler_dir, 'lib'))
+        for s_config in ('config.properties', 'logback.xml'):
+            base.extract_file(base.current_app.jans_zip, f'jans-keycloak-integration/job-scheduler/src/main/resources/{s_config}.sample', os.path.join(Config.scheduler_dir, 'conf'))
+            os.rename(os.path.join(Config.scheduler_dir, 'conf', f'{s_config}.sample'), os.path.join(Config.scheduler_dir, 'conf', s_config))
+
+        self.copyFile(self.source_files[8][0], os.path.join(Config.scheduler_dir, 'lib'))
+
+        # configuration rendering identifiers
+        _, jans_auth_config = self.dbUtils.get_oxAuthConfDynamic()
+        self.check_clients([('kc_scheduler_api_client_id', '2102.')])
+
+        rendering_dict = {
+                'api_url': f'https://{Config.hostname}/jans-config-api',
+                'token_endpoint': jans_auth_config['tokenEndpoint'],
+                'client_id': Config.kc_scheduler_api_client_id,
+                'client_secret': Config.kc_scheduler_api_client_pw,
+                'scopes': '',
+                'auth_method': 'basic',
+                'keycloak_admin_url': f'https://{Config.idp_config_hostname}/kc',
+                'keycloak_admin_realm': self.kc_admin_realm,
+                'keycloak_admin_username': self.kc_admin_username,
+                'keycloak_admin_password': Config.admin_password,
+                'keycloak_client_id': 'admin-cli',
+            }
+
+        config_properties_fn = os.path.join(Config.scheduler_dir, 'conf','config.properties')
+        config_properties_s = self.render_template(config_properties_fn, pystring=True, rendering_dict=rendering_dict)
+        self.writeFile(config_properties_fn, config_properties_s, backup=False)
+        self.chown(Config.scheduler_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+
+        # render start script
+        self.renderTemplateInOut(
+            os.path.join(scheduler_templates_dir, 'kc-scheduler.sh'),
+            scheduler_templates_dir,
+            os.path.join(Config.scheduler_dir, 'bin')
+            )
+
+        self.run([paths.cmd_chmod, '+x', os.path.join(Config.scheduler_dir, 'bin/kc-scheduler.sh')])
+
+        # render contab entry and restart cron service
+        self.renderTemplateInOut(
+            os.path.join(scheduler_templates_dir, 'kc-scheduler-cron'),
+            scheduler_templates_dir,
+            '/etc/cron.d'
+            )
+
+        if not Config.installed_instance:
+            self.restart(base.cron_service)
+
+    def installed(self):
+        return os.path.exists(self.idp_config_data_dir)

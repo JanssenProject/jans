@@ -169,7 +169,7 @@ spec:
               secret:
                 secretName: {{ .Release.Name }}-cb-pass
                 items:
-                  # we are mostly need non-superuser couchbase password file here
+                  # we mostly need non-superuser couchbase password file here
                   - key: couchbase_password
                     path: couchbase_password
           {{- end }}

@@ -25,6 +25,8 @@ public class SamlAppConfiguration implements Configuration {
     private String spMetadataUrl;
     private String tokenUrl;
     private String idpUrl;
+    private String extIDPTokenUrl;
+    private String extIDPRedirectUrl;
     private String idpMetadataImportUrl;
 
     private String idpRootDir;
@@ -37,6 +39,7 @@ public class SamlAppConfiguration implements Configuration {
     private String spMetadataFile;
 
     private boolean ignoreValidation;
+    private boolean setConfigDefaultValue;
 
     private List<String> idpMetadataMandatoryAttributes;
     private List<String> kcAttributes;
@@ -170,6 +173,22 @@ public class SamlAppConfiguration implements Configuration {
         this.idpUrl = idpUrl;
     }
     
+    public String getExtIDPTokenUrl() {
+        return extIDPTokenUrl;
+    }
+    
+    public void setExtIDPTokenUrl(String extIDPTokenUrl) {
+        this.extIDPTokenUrl = extIDPTokenUrl;
+    }
+    
+    public String getExtIDPRedirectUrl() {
+        return extIDPRedirectUrl;
+    }
+    
+    public void setExtIDPRedirectUrl(String extIDPRedirectUrl) {
+        this.extIDPRedirectUrl = extIDPRedirectUrl;
+    }
+    
     public String getIdpMetadataImportUrl() {
         return idpMetadataImportUrl;
     }
@@ -201,7 +220,7 @@ public class SamlAppConfiguration implements Configuration {
     public void setIdpMetadataTempDir(String idpMetadataTempDir) {
         this.idpMetadataTempDir = idpMetadataTempDir;
     }
-       
+    
     public String getIdpMetadataFile() {
         return idpMetadataFile;
     }
@@ -242,6 +261,14 @@ public class SamlAppConfiguration implements Configuration {
         this.ignoreValidation = ignoreValidation;
     }
     
+    public boolean isSetConfigDefaultValue() {
+        return setConfigDefaultValue;
+    }
+
+    public void setSetConfigDefaultValue(boolean setConfigDefaultValue) {
+        this.setConfigDefaultValue = setConfigDefaultValue;
+    }
+    
     public List<String> getIdpMetadataMandatoryAttributes() {
         return idpMetadataMandatoryAttributes;
     }
@@ -265,19 +292,22 @@ public class SamlAppConfiguration implements Configuration {
     public void setKcSamlConfig(List<String> kcSamlConfig) {
         this.kcSamlConfig = kcSamlConfig;
     }
-    
+
     @Override
     public String toString() {
         return "SamlAppConfiguration [applicationName=" + applicationName + ", samlTrustRelationshipDn="
                 + samlTrustRelationshipDn + ", trustedIdpDn=" + trustedIdpDn + ", enabled=" + enabled + ", selectedIdp="
                 + selectedIdp + ", serverUrl=" + serverUrl + ", realm=" + realm + ", clientId=" + clientId
-                + ", grantType=" + grantType + ", scope=" + scope + ", username="
+                + ", clientSecret=" + clientSecret + ", grantType=" + grantType + ", scope=" + scope + ", username="
                 + username + ", spMetadataUrl=" + spMetadataUrl + ", tokenUrl=" + tokenUrl
-                + ", idpUrl=" + idpUrl + ", idpMetadataImportUrl=" + idpMetadataImportUrl + ", idpRootDir=" + idpRootDir
+                + ", idpUrl=" + idpUrl + ", extIDPTokenUrl=" + extIDPTokenUrl + ", extIDPRedirectUrl="
+                + extIDPRedirectUrl + ", idpMetadataImportUrl=" + idpMetadataImportUrl + ", idpRootDir=" + idpRootDir
                 + ", idpMetadataDir=" + idpMetadataDir + ", idpMetadataTempDir=" + idpMetadataTempDir
                 + ", idpMetadataFile=" + idpMetadataFile + ", spMetadataDir=" + spMetadataDir + ", spMetadataTempDir="
                 + spMetadataTempDir + ", spMetadataFile=" + spMetadataFile + ", ignoreValidation=" + ignoreValidation
-                + ", idpMetadataMandatoryAttributes=" + idpMetadataMandatoryAttributes + ", kcAttributes="
-                + kcAttributes + ", kcSamlConfig=" + kcSamlConfig + "]";
+                + ", setConfigDefaultValue=" + setConfigDefaultValue + ", idpMetadataMandatoryAttributes="
+                + idpMetadataMandatoryAttributes + ", kcAttributes=" + kcAttributes + ", kcSamlConfig=" + kcSamlConfig
+                + "]";
     }
+    
 }

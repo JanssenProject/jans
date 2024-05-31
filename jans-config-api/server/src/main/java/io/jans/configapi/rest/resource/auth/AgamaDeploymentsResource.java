@@ -54,7 +54,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDeployments(@QueryParam("start") int start, @QueryParam("count") int count) {
+    public Response getDeployments(@Parameter(description = "Start index for the result")  @QueryParam("start") int start, @Parameter(description = "Search size - count of the results to return") @QueryParam("count") int count) {
         
         // this is NOT a search but a paged listing
         int maxcount = getMaxCount();
@@ -101,7 +101,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
             superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.NAME_PARAM_PATH)
     public Response deploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME)
-                String projectName, @QueryParam("autoconfigure") String autoconfigure, byte[] gamaBinary) {
+                String projectName, @Parameter(description = "Boolean value to indicating to auto configure the project ") @QueryParam("autoconfigure") String autoconfigure, @Parameter(description = "Agama gama file") byte[] gamaBinary) {
         
         if (gamaBinary == null)
             return Response.status(Response.Status.BAD_REQUEST)
@@ -202,7 +202,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
             superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.CONFIGS + ApiConstants.NAME_PARAM_PATH)
     public Response setConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName,
-            Map<String, Map<String, Object>> flowsConfigs) {
+            @Parameter(description = "Agama flow config, key is `name` of config property and `value` is the property value. ") Map<String, Map<String, Object>> flowsConfigs) {
 
         if (flowsConfigs == null) {
             return Response.status(Response.Status.BAD_REQUEST)

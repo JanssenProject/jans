@@ -26,8 +26,7 @@ III. These changes should be applied to oxAuth config.
       "client_credentials",
       "refresh_token",
       "urn:ietf:params:oauth:grant-type:uma-ticket",
-      "urn:ietf:params:oauth:grant-type:token-exchange",
-      "tx_token"
+      "urn:ietf:params:oauth:grant-type:token-exchange"
    ],
 
 5. "legacyIdTokenClaims":true

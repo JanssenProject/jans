@@ -26,11 +26,8 @@ public class Document extends Entry implements Serializable {
 
 	private static final long serialVersionUID = -2812480357430436503L;
 
-	private transient boolean selected;
-
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
-
 
 	@AttributeName
 	private String displayName;
@@ -43,18 +40,15 @@ public class Document extends Entry implements Serializable {
 	
 	@AttributeName
 	private Date creationDate;
-
-	@AttributeName
-	private String jansFilePath;
 	
 	@AttributeName
 	private List<String> jansModuleProperty;
 
 	@AttributeName
-	private String jansLevel;
+	private Integer jansLevel;
 
 	@AttributeName
-	private String jansRevision;
+	private Integer jansRevision;
 	
 	@AttributeName
 	private boolean jansEnabled;
@@ -86,14 +80,6 @@ public class Document extends Entry implements Serializable {
 		this.description = description;
 	}
 
-	public boolean isSelected() {
-		return selected;
-	}
-
-	public void setSelected(boolean selected) {
-		this.selected = selected;
-	}
-
 	public String getDocument() {
 		return document;
 	}
@@ -118,21 +104,21 @@ public class Document extends Entry implements Serializable {
 		this.jansModuleProperty = jansModuleProperty;
 	}
 
-	public String getJansLevel() {
+	public Integer getJansLevel() {
 		return jansLevel;
 	}
 
-	public void setJansLevel(String jansLevel) {
+	public void setJansLevel(Integer jansLevel) {
 		this.jansLevel = jansLevel;
 	}
 
-	public String getJansRevision() {
-		return jansRevision;
-	}
+    public Integer getJansRevision() {
+        return jansRevision;
+    }
 
-	public void setJansRevision(String jansRevision) {
-		this.jansRevision = jansRevision;
-	}
+    public void setJansRevision(Integer jansRevision) {
+        this.jansRevision = jansRevision;
+    }
 
     public boolean isJansEnabled() {
         return jansEnabled;
@@ -150,19 +136,11 @@ public class Document extends Entry implements Serializable {
         this.jansAlias = jansAlias;
     }
 
-	public String getJansFilePath() {
-		return jansFilePath;
-	}
-
-	public void setJansFilePath(String jansFilePath) {
-		this.jansFilePath = jansFilePath;
-	}
-
     @Override
     public String toString() {
         return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
                 + ", document=" + document + ", creationDate=" + creationDate + ", jansModuleProperty="
                 + jansModuleProperty + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled="
-                + jansEnabled + ", jansAlias=" + jansAlias + " jansFilePath=" + jansFilePath + "]";
+                + jansEnabled + ", jansAlias=" + jansAlias + "]";
     }
 }

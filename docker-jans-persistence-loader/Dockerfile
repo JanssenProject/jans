@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
+FROM bellsoft/liberica-openjre-alpine:17.0.11@sha256:7d9240b84e806f9759560536bac1ca545fc31c02465a4b1ca7131def4f4ab130
 
 # ===============
 # Alpine packages
@@ -11,35 +11,26 @@ RUN apk update \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
-# ======
-# Python
-# ======
-
-COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
-    && pip3 uninstall -y pip wheel
-
-# =====================
-# jans-linux-setup sync
-# =====================
+# ===========
+# Assets sync
+# ===========
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
+ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
 # note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
-RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+# we are using partial-clone and sparse-checkout to get the assets
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
     && git sparse-checkout add ${JANS_SCRIPT_CATALOG_DIR} \
-    && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES}
+    && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES} \
+    && git sparse-checkout add jans-pycloudlib
 
 RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/static/opendj /app/templates
 
@@ -60,15 +51,23 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/static/site/site.ldif /app/templates/o_site.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
-# cleanup
-RUN rm -rf /tmp/jans
+# ======
+# Python
+# ======
+
+COPY requirements.txt /app/requirements.txt
+RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel setuptools \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
 
 # =======
 # Cleanup
 # =======
 
 RUN apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* /tmp/jans
 
 # =======
 # License
@@ -169,7 +168,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/persistence-loader" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.2" \
+    org.opencontainers.image.version="1.1.3" \
     org.opencontainers.image.title="Janssen Authorization Server Persistence loader" \
     org.opencontainers.image.description="Generate initial data for persistence layer"
 

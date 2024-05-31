@@ -21,10 +21,25 @@ type AgamaConfiguration struct {
 	OptionalAttributes  []string `schema:"optional_attributes" json:"optionalAttributes"`
 }
 
+type AssetDirMapping struct {
+	Directory   string   `schema:"directory" json:"directory"`
+	Type        []string `schema:"type" json:"type"`
+	Description string   `schema:"description" json:"description"`
+}
+
+type AssetMgtConfiguration struct {
+	AssetMgtEnabled          bool              `schema:"asset_mgt_enabled" json:"assetMgtEnabled"`
+	AssetServerUploadEnabled bool              `schema:"asset_server_upload_enabled" json:"assetServerUploadEnabled"`
+	AssetBaseDirectory       string            `schema:"asset_base_directory" json:"assetBaseDirectory"`
+	AssetDirMappings         []AssetDirMapping `schema:"asset_dir_mappings" json:"assetDirMappings"`
+}
+
 // PersistenceConfiguration represents the persistence configuration
 // of the Janssen server.
 type ApiAppConfiguration struct {
 	ConfigOauthEnabled          bool                      `schema:"config_oauth_enabled" json:"configOauthEnabled"`
+	DisableLoggerTimer          bool                      `schema:"disable_logger_timer" json:"disableLoggerTimer"`
+	DisableAuditLogger          bool                      `schema:"disable_audit_logger" json:"disableAuditLogger"`
 	ApiApprovedIssuer           []string                  `schema:"api_approved_issuer" json:"apiApprovedIssuer"`
 	ApiProtectionType           string                    `schema:"api_protection_type" json:"apiProtectionType"`
 	ApiClientId                 string                    `schema:"api_client_id" json:"apiClientId"`
@@ -49,6 +64,7 @@ type ApiAppConfiguration struct {
 	AuditLogConf                AuditLogConf              `schema:"audit_log_conf" json:"auditLogConf"`
 	DataFormatConversionConf    DataFormatConversionConf  `schema:"data_format_conversion_conf" json:"dataFormatConversionConf"`
 	Plugins                     []PluginConf              `schema:"plugins" json:"plugins"`
+	AssetMgtConfiguration       AssetMgtConfiguration     `schema:"asset_mgt_configuration" json:"assetMgtConfiguration"`
 }
 
 // GetApiAppConfiguration returns the current API configuration.

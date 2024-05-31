@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
+FROM bellsoft/liberica-openjre-alpine:17.0.11@sha256:7d9240b84e806f9759560536bac1ca545fc31c02465a4b1ca7131def4f4ab130
 
 # ===============
 # Alpine packages
@@ -29,8 +29,8 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # Casa
 # ====
 
-ENV CN_VERSION=1.1.2-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-24 16:05'
+ENV CN_VERSION=1.1.3-SNAPSHOT
+ENV CN_BUILD_DATE='2024-05-29 12:00'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
@@ -52,22 +52,23 @@ RUN mkdir -p ${JETTY_BASE}/jans-casa/plugins \
         wget -nv "https://jenkins.jans.io/maven/io/jans/casa/plugins/${casa_plugin}/${CN_VERSION}/${casa_plugin}-${CN_VERSION}-jar-with-dependencies.jar" -O "${JETTY_BASE}/jans-casa/plugins/${casa_plugin}-${CN_VERSION}.jar"; \
     done
 
-# =====================
-# jans-linux-setup sync
-# =====================
+# ===========
+# Assets sync
+# ===========
 
-ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
+ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CASA_EXTRAS_DIR=jans-casa/extras
 
 # note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
-RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+# we are using partial-clone and sparse-checkout to get the assets
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
-    && git sparse-checkout add ${JANS_CASA_EXTRAS_DIR}
+    && git sparse-checkout add ${JANS_CASA_EXTRAS_DIR} \
+    && git sparse-checkout add jans-pycloudlib
 
 RUN mkdir -p /app/static/rdbm \
     /app/schema \
@@ -94,7 +95,8 @@ RUN cd /tmp/jans \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
+RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
@@ -217,7 +219,7 @@ EXPOSE $CN_CASA_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/casa" \
     org.opencontainers.image.authors="Gluu Inc. <support@gluu.org>" \
     org.opencontainers.image.vendor="Gluu Federation" \
-    org.opencontainers.image.version="1.1.2" \
+    org.opencontainers.image.version="1.1.3" \
     org.opencontainers.image.title="Janssen Casa" \
     org.opencontainers.image.description="Self-service portal for people to manage their account security preferences in the Janssen, like 2FA"
 
