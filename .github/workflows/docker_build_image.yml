@@ -232,7 +232,12 @@ jobs:
           TAGS: ${{ steps.prep.outputs.tags }}
         run: |
           images=""
-          for tag in ${TAGS}; do
+          for tag in ${TAGS//,/ }; do
+            if [[ $tag == *"_dev"* && $TAGS == *","* ]]; then
+              continue
+            fi
             images+="${tag}@${DIGEST} "
           done
-          cosign sign --yes -a author=JanssenProject ${images}
+          if [[ -n $images ]]; then
+            cosign sign --yes -a author=JanssenProject ${images}
+          fi
