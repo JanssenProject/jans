@@ -8243,13 +8243,13 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanEdit:
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
+        userCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
@@ -8430,7 +8430,6 @@ components:
             - password
             - client_credentials
             - refresh_token
-            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -8743,7 +8742,6 @@ components:
             - password
             - client_credentials
             - refresh_token
-            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -9034,6 +9032,7 @@ components:
             - INTROSPECTION
             - REVOKE_TOKEN
             - REVOKE_SESSION
+            - GLOBAL_TOKEN_REVOCATION
             - ACTIVE_SESSION
             - END_SESSION
             - STATUS_SESSION
@@ -9538,7 +9537,6 @@ components:
             - password
             - client_credentials
             - refresh_token
-            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -10139,14 +10137,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
