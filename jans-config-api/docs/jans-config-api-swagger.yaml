@@ -8241,19 +8241,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
         adminCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
+        userCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8430,7 +8430,6 @@ components:
             - password
             - client_credentials
             - refresh_token
-            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -8743,7 +8742,6 @@ components:
             - password
             - client_credentials
             - refresh_token
-            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -9034,6 +9032,7 @@ components:
             - INTROSPECTION
             - REVOKE_TOKEN
             - REVOKE_SESSION
+            - GLOBAL_TOKEN_REVOCATION
             - ACTIVE_SESSION
             - END_SESSION
             - STATUS_SESSION
@@ -9079,6 +9078,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9088,8 +9089,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9538,7 +9537,6 @@ components:
             - password
             - client_credentials
             - refresh_token
-            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba

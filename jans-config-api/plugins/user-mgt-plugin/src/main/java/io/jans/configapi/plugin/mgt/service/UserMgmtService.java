@@ -89,14 +89,15 @@ public class UserMgmtService {
         boolean useLowercaseFilter = configurationService.isLowercaseFilter(userService.getPeopleBaseDn());
         logger.info("For searching user user useLowercaseFilter?:{}", useLowercaseFilter);
 
-        Filter displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter, givenNameFilter, middleNameFilter, nicknameFilter, snFilter, searchFilter = null;
+        Filter displayNameFilter, descriptionFilter, mailFilter, uidFilter, inumFilter, givenNameFilter,
+                middleNameFilter, nicknameFilter, snFilter, searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
                 logger.info("For searching user - assertionValue:{}", assertionValue);
                 assertionValue = StringHelper.toLowerCase(assertionValue);
-                String[] targetArray = new String[] {  assertionValue };
+                String[] targetArray = new String[] { assertionValue };
                 logger.info("For searching user - targetArray?:{}", targetArray);
 
                 if (useLowercaseFilter) {
@@ -106,10 +107,14 @@ public class UserMgmtService {
                             Filter.createLowercaseFilter(AttributeConstants.DESCRIPTION), null, targetArray, null);
                     mailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.MAIL),
                             null, targetArray, null);
-                    givenNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("givenName"), null, targetArray, null);
-                    middleNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("middleName"), null, targetArray, null);
-                    nicknameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("nickname"), null, targetArray, null);
-                    snFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("sn"), null, targetArray, null);
+                    givenNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("givenName"), null,
+                            targetArray, null);
+                    middleNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("middleName"), null,
+                            targetArray, null);
+                    nicknameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("nickname"), null,
+                            targetArray, null);
+                    snFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("sn"), null, targetArray,
+                            null);
                     uidFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray,
                             null);
                 } else {
@@ -126,8 +131,8 @@ public class UserMgmtService {
                 }
 
                 inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-                filters.add(
-                        Filter.createORFilter(displayNameFilter, descriptionFilter, mailFilter, uidFilter, givenNameFilter, middleNameFilter, nicknameFilter, snFilter, inumFilter));
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, mailFilter, uidFilter,
+                        givenNameFilter, middleNameFilter, nicknameFilter, snFilter, inumFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
@@ -142,6 +147,26 @@ public class UserMgmtService {
         pagedResult.setEntries(users);
         return pagedResult;
 
+    }
+
+    public List<User> getUserByName(String name) {
+        logger.info("Get user by name:{} ", name);
+        String[] targetArray = new String[] { name };
+        Filter nameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray, null);
+
+        List<User> users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, nameFilter);
+        logger.trace("Asset by name:{} are users:{}", name, users);
+        return users;
+    }
+
+    public List<User> getUserByEmail(String email) {
+        logger.info("Get user by email:{} ", email);
+        String[] targetArray = new String[] { email };
+        Filter emailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray, null);
+
+        List<User> users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, emailFilter);
+        logger.trace("Asset by email:{} are users:{}", email, users);
+        return users;
     }
 
     public void removeUser(User user) {
@@ -414,9 +439,10 @@ public class UserMgmtService {
     }
 
     public User addUser(User user, boolean active) {
-        logger.info("\n Creating user:{}, user.getCustomAttributes():{}, active:{}", user, user.getCustomAttributes(), active);
+        logger.info("\n Creating user:{}, user.getCustomAttributes():{}, active:{}", user, user.getCustomAttributes(),
+                active);
         user = userService.addUser(user, active);
-        logger.info("New user:{}, user.getCustomAttributes():{} \n", user, user.getCustomAttributes());
+        logger.info("New user:{}\n", user);
         // remove inactive claims
         if (user != null) {
             List<User> users = new ArrayList<>();
@@ -424,7 +450,7 @@ public class UserMgmtService {
             users = this.verifyCustomAttributes(users);
             if (users != null && !users.isEmpty()) {
                 user = users.get(0);
-            }           
+            }
         }
         return user;
     }
@@ -432,7 +458,7 @@ public class UserMgmtService {
     public User updateUser(User user) {
         logger.info("\n Updating user:{}, user.getCustomAttributes():{}", user, user.getCustomAttributes());
         user = userService.updateUser(user);
-        logger.info("Updated user:{}, user.getCustomAttributes():{} \n", user, user.getCustomAttributes());
+        logger.info("Updated user:{} \n", user);
         // remove inactive claims
         if (user != null) {
             List<User> users = new ArrayList<>();
@@ -440,7 +466,7 @@ public class UserMgmtService {
             users = this.verifyCustomAttributes(users);
             if (users != null && !users.isEmpty()) {
                 user = users.get(0);
-            }  
+            }
         }
         return user;
     }
@@ -474,8 +500,8 @@ public class UserMgmtService {
 
             if (CollectionUtils.isNotEmpty(attList)
                     && !GluuStatus.ACTIVE.getValue().equalsIgnoreCase(attList.get(0).getStatus().getValue())) {
-                logger.info("\n\n*** Removing attribute as it is not active attributeName: {} , status:{} ***\n", attributeName,
-                        attList.get(0).getStatus().getValue());
+                logger.info("\n\n*** Removing attribute as it is not active attributeName: {} , status:{} ***\n",
+                        attributeName, attList.get(0).getStatus().getValue());
                 it.remove();
             }
         }
@@ -502,7 +528,8 @@ public class UserMgmtService {
         }
         StringBuilder sb = new StringBuilder();
         for (CustomObjectAttribute customObjectAttribute : customAttributes) {
-            logger.info("customObjectAttribute:{}, customObjectAttribute.getName():{}", customObjectAttribute, customObjectAttribute.getName());
+            logger.info("customObjectAttribute:{}, customObjectAttribute.getName():{}", customObjectAttribute,
+                    customObjectAttribute.getName());
             JansAttribute attribute = attributeService.getAttributeByName(customObjectAttribute.getName());
             AttributeValidation validation = null;
             if (attribute != null) {
@@ -521,7 +548,7 @@ public class UserMgmtService {
         }
 
         if (StringUtils.isNotBlank(sb.toString())) {
-            logger.error("Attribute validation failed with error msg:{} \n",sb);
+            logger.error("Attribute validation failed with error msg:{} \n", sb);
             throw new InvalidAttributeException(sb.toString());
         }
 
@@ -577,8 +604,8 @@ public class UserMgmtService {
         logger.info("Validate reuslt for attributeName:{} is sb :{} ", attributeName, sb);
 
         if (StringUtils.isNotBlank(sb.toString())) {
-            sb.insert(0, "'"+attributeName+"' -> ");
-            sb.append("  ");        
+            sb.insert(0, "'" + attributeName + "' -> ");
+            sb.append("  ");
         }
         return sb.toString();
     }
