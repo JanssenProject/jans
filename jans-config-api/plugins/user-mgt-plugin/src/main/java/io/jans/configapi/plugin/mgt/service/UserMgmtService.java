@@ -162,7 +162,7 @@ public class UserMgmtService {
     public List<User> getUserByEmail(String email) {
         logger.info("Get user by email:{} ", email);
         String[] targetArray = new String[] { email };
-        Filter emailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, targetArray, null);
+        Filter emailFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter("mail"), null, targetArray, null);
 
         List<User> users = persistenceEntryManager.findEntries(userService.getPeopleBaseDn(), User.class, emailFilter);
         logger.trace("Asset by email:{} are users:{}", email, users);

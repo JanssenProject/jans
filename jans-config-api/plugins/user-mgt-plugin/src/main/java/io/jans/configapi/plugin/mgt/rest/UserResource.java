@@ -242,6 +242,9 @@ public class UserResource extends BaseResource {
             // get custom user
             customUser = getCustomUser(user, removeNonLDAPAttributes);
             logger.info("updated customUser:{}", customUser);
+        } catch (ApiApplicationException ae) {
+            logger.error(ApiErrorResponse.UPDATE_USER_ERROR.getDescription(), ae);
+            throwBadRequestException("USER_UPDATE_ERROR", ae.getMessage());
         } catch (InvalidAttributeException iae) {
             logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
             throwBadRequestException("USER_UPDATE_ERROR", iae.getMessage());
