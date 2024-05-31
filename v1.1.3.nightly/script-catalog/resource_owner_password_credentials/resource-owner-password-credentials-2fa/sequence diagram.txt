@@ -1,0 +1,73 @@
+title 2FA Resource Owner Password Credentials
+
+actor Subject
+participant mobile
+participant NWD Mobile App
+participant Jans Auth Server
+participant ROPC Script
+participant LDAP
+participant OTP Service
+participant SMS Gateway
+
+Subject->NWD Mobile App: open
+Subject->NWD Mobile App: input mobile/email
+NWD Mobile App->Jans Auth Server: /token?__step=1
+Jans Auth Server->ROPC Script: authenticate()
+ROPC Script->LDAP: verify mobile/email exists
+
+alt mobile or email not found
+ROPC Script->Jans Auth Server: Set http header \n X-Nwd-Authn: User not found
+ROPC Script->Jans Auth Server: authenticate() -> False
+Jans Auth Server->NWD Mobile App: Send http response\n 401 Unauthorized
+end //mobile or email not found
+
+alt mobile or email found
+
+ROPC Script->OTP Service: Generate OTP
+ROPC Script->Jans Auth Server: Create \n Unauthenticated Session
+ROPC Script->Jans Auth Server: Set http header \n X-Nwd-Authn: Proceed <session_id>
+ROPC Script->Jans Auth Server: authenticate() -> False
+Jans Auth Server->NWD Mobile App: Send response \n401 Unauthorized
+OTP Service->SMS Gateway: send OTP
+SMS Gateway->mobile: deliver OTP
+Subject->mobile: Read OTP
+Subject->NWD Mobile App: Enter OTP
+NWD Mobile App->NWD Mobile App: Set username to otp
+NWD Mobile App->Jans Auth Server: /token?__step=2&__session_id=<session_id>
+Jans Auth Server->ROPC Script: authenticate() 
+ROPC Script->Jans Auth Server: Retrieve session
+ROPC Script->ROPC Script: Verify OTP
+
+alt otp unverified
+ROPC Script->Jans Auth Server: Set http header \n X-Nwd-Authn: Invalid OTP <session_id>
+ROPC Script->Jans Auth Server: authenticate() -> False
+Jans Auth Server->NWD Mobile App:Send http response \n 401 Unauthorized
+end //otp unverified
+
+alt otp verified
+
+ROPC Script->Jans Auth Server: Update session state
+ROPC Script->Jans Auth Server: Set http header \n X-Nwd-Authn: Proceed <session_id>
+ROPC Script->Jans Auth Server: authenticate() -> False
+Jans Auth Server->NWD Mobile App: Send response \n401 Unauthorized
+NWD Mobile App->Subject: Prompt for Password
+Subject->NWD Mobile App: Enter Password
+NWD Mobile App->Jans Auth Server: /token?__step=3
+Jans Auth Server->ROPC Script: authenticate()
+ROPC Script->Jans Auth Server: Retrieve session
+ROPC Script->Jans Auth Server: authenticate user\nusing username and password)
+
+alt auth_success
+ROPC Script->Jans Auth Server: authenticate() -> True
+Jans Auth Server->NWD Mobile App: send http response \n 200 ok / access token
+end //auth success
+
+alt auth_error
+ROPC Script->Jans Auth Server: Set http header \n X-Nwd-Authn: Failure <session_id>
+ROPC Script->Jans Auth Server: authenticate() -> False
+Jans Auth Server->NWD Mobile App: Send http response \n401 Unauthorized
+end //auth_error
+
+end //otp verified 
+
+end //mobile or email found 
