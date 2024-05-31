@@ -1,3 +1,5 @@
+import binascii
+import contextlib
 import json
 import logging.config
 import re
@@ -14,6 +16,7 @@ from marshmallow.fields import Email
 from marshmallow.fields import List
 from marshmallow.fields import Str
 from marshmallow.fields import Int
+from marshmallow.fields import Method
 from marshmallow.validate import ContainsOnly
 from marshmallow.validate import Length
 from marshmallow.validate import Predicate
@@ -127,6 +130,28 @@ class ParamSchema(Schema):
         dump_default=48,
         strict=True,
     )
+
+    google_credentials = Method(deserialize="mapping_or_string")
+
+    def mapping_or_string(self, value):
+        if not isinstance(value, (dict, str)):
+            raise ValidationError("Value must be a mapping or string type")
+
+        if isinstance(value, str) and value:
+            # decode base64 string if necessary
+            try:
+                with contextlib.suppress(UnicodeDecodeError):
+                    value = b64decode(value).decode()
+            except binascii.Error as exc:
+                raise ValidationError("Value isn't a mapping") from exc
+
+            try:
+                value = json.loads(value)
+            except json.decoder.JSONDecodeError as exc:
+                raise ValidationError("Value isn't a mapping") from exc
+
+        # finalized type is a mapping
+        return value
 
     @validates("hostname")
     def validate_fqdn(self, value):
