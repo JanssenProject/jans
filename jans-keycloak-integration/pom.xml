@@ -61,6 +61,7 @@
       <module>storage-spi</module>
       <module>job-scheduler</module>
       <module>protocol-mapper</module>
+      <module>spi</module>
     </modules>
 
     <repositories>
