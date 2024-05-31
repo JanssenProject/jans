@@ -57,16 +57,15 @@ import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
+import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
-import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.operation.auth.PasswordEncryptionHelper;
 import io.jans.orm.sql.impl.SqlBatchOperationWraper;
 import io.jans.orm.sql.model.ConvertedExpression;
-import io.jans.orm.sql.model.JsonAttributeValue;
 import io.jans.orm.sql.model.JsonString;
 import io.jans.orm.sql.model.SearchReturnDataType;
 import io.jans.orm.sql.model.TableMapping;
@@ -927,6 +926,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private Object convertValueToDbJson(Object propertyValue, Boolean jsonValue) {
 		try {
 			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
+
 				Object[] attributeValue;
 				if (propertyValue == null) {
 					attributeValue = new Object[0];
@@ -937,8 +937,22 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 				} else {
 					attributeValue = new Object[] { propertyValue };
 				}
+
+				if (Boolean.TRUE.equals(jsonValue)) {
+					StringBuilder jsonString = new StringBuilder("[");
+					int count = 0;
+					for (Object val : attributeValue) {
+						if (count > 0) {
+							jsonString.append(", ");
+						}
+						jsonString.append(String.format("%s", val));
+						count++;
+					}
+					jsonString.append("]");
+					return new JsonString(jsonString.toString());
+				}
 	
-				String value = JSON_OBJECT_MAPPER.writeValueAsString((Object[]) propertyValue);
+				String value = JSON_OBJECT_MAPPER.writeValueAsString((Object[]) attributeValue);
 	
 				return new JsonString(value);
 			} else {
@@ -970,9 +984,16 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private Object[] convertDbJsonToValue(String jsonValue) {
 		try {
-//			Object[] values = JSON_OBJECT_MAPPER.readValue(jsonValue, Object[].class);
 			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
 				Object[] values = JSON_OBJECT_MAPPER.readValue(jsonValue, Object[].class);
+
+				if (values != null) {
+					for (int i = 0; i < values.length; i++) {
+						if (!(values[i] instanceof String)) {
+							values[i] = JSON_OBJECT_MAPPER.writeValueAsString(values[i]);
+						}
+					}
+				}
 
 				return values;
 			} else {
