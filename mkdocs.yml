@@ -98,6 +98,7 @@ nav:
     - TUI K8s: admin/kubernetes-ops/tui-k8s.md
     - Custom Attributes: admin/kubernetes-ops/custom-attributes.md
     - Jans SAML/Keycloak: admin/kubernetes-ops/jans-saml.md
+    - Memory Dump: admin/kubernetes-ops/memory-dump.md
   - VM Operation Guide:
     - admin/vm-ops/README.md
     - Upgrade: admin/vm-ops/upgrade.md
