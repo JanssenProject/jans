@@ -22,6 +22,7 @@ import io.jans.service.document.store.service.Document;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -159,6 +160,46 @@ public class AssetResource extends ConfigBaseResource {
         }
         logger.info("Asset fetched based on name are:{}", documentPagedResult);
         return Response.ok(documentPagedResult).build();
+    }
+
+    @Operation(summary = "Gets asset services", description = "Gets asset services", operationId = "get-asset-services", tags = {
+            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type = "enum")))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.SERVICES)
+    public Response getJansServices() {
+
+        List<String> services = assetService.getValidModuleName();
+
+        logger.info("Asset fetched based on services:{}", services);
+        return Response.ok(services).build();
+    }
+
+    @Operation(summary = "Get valid asset types", description = "Get valid asset types", operationId = "get-asset-types", tags = {
+            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type = "enum")))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.ASSET_TYPE)
+    public Response getValidAssetTypes() {
+
+        List<String> validTypes = assetService.getValidFileExtension();
+
+        logger.info("validTypes:{}", validTypes);
+        return Response.ok(validTypes).build();
     }
 
     @Operation(summary = "Upload new asset", description = "Upload new asset", operationId = "post-new-asset", tags = {
