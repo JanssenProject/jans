@@ -8,8 +8,8 @@ subtitle: Learn how to manage and change Agama project configuration
 
 # Agama project configuration
 
-You can use any of the available configuration tools to perform this 
-configuration based on your need.
+You can use any of the available configuration tools to perform this
+configuration based on your needs.
 
 === "Use Command-line"
 
@@ -24,20 +24,19 @@ configuration based on your need.
 
 ##  Using Command Line
 
-In Janssen Server, You can deploy and customize Agama project using commandline.
-To get the details of Janssen commandline operations relevant to Agama projects
-, you can check the operations under `Agama` task using the  
-command as below:
+In the Janssen Server, You can deploy and customize the Agama project using the command line.
+To get the details of Janssen command line operations relevant to Agama projects, you can check the operations under `Agama` task using the  
+command below:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --info Agama
 ```
 
-It will show you the details of available operation-id for Agama.
+It will show you the details of the available operation-id for Agama.
 
 ```text
 Operation ID: get-agama-prj-by-name
-  Description: Fetches deployed Agama project based on name.
+  Description: Fetches deployed the Agama project based on the name.
   Parameters:
   name: Agama project name [string]
 Operation ID: post-agama-prj
@@ -67,7 +66,7 @@ Operation ID: get-agama-prj
 ```
 
 In the sections below, we will see how to use these operations to manage Agama
-projects via commandline. 
+projects via command line.
 
 ### List Deployed Projects
 
@@ -77,8 +76,8 @@ To retrieve the list of deployed Agama projects:
 /opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj
 ```
 
-The output will display the total number of Agama projects that are enabled and 
-their list. You can get modified list using supported parameters.
+The output will display the total number of Agama projects that are enabled and
+their list. You can get a modified list using supported parameters.
 
 ```json title="Sample Output" linenums="1"
 {
@@ -116,13 +115,13 @@ their list. You can get modified list using supported parameters.
 
 #### Endpoint Arguments
 
-Endpoint arguments are parameters passed to an API or function to specify 
+Endpoint arguments are parameters passed to an API or function to specify
 how and what data to retrieve or process.
 
-`start`: Should be an integer value. It's an index value of starting point of 
+`start`: Should be an integer value. It's an index value of the starting point of
 the list.
 
-`count`: Should be an integer value. Total entries number you want to display. 
+`count`: Should be an integer value. Total entries number you want to display.
 
 **Example:**
 
@@ -160,7 +159,7 @@ the list.
 
 ### View Agama Project By Name
 
-You can get the details of an Agama project deployed in Janssen by the project name. Commandline for this operation as below:
+You can get the details of an Agama project deployed in Janssen by the project name. The command line for this operation is as below:
 
 ```bash title="Sample Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-by-name \
@@ -201,9 +200,9 @@ You can get the details of an Agama project deployed in Janssen by the project n
 }
 ```
 
-### Post Agama Project in Janssen 
+### Post Agama Project in Janssen
 
-You can deploy Agama project in Janssen through commandline.
+You can deploy the Agama project in Janssen through the command line.
 
 ```bash title="Sample Command"
 /opt/jans/jans-cli/config-cli.py --operation-id post-agama-prj \
@@ -213,9 +212,9 @@ You can deploy Agama project in Janssen through commandline.
 **Example:**
 
 Let's upload [a test project](../../../assets/agama/journey.zip) Zip file.
-Assuming that the zip file has been downloaded in the folder at 
+Assuming that the zip file has been downloaded in the folder at
 path `/tmp/journey.zip`, the command below will upload a new Agama project with
-specified name in the Janssen Server. 
+specified name in the Janssen Server.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id=post-agama-prj \
@@ -228,12 +227,12 @@ specified name in the Janssen Server.
 }
 ```
 
-Now the project should be available in the 
+Now the project should be available in the
 [list of deployed projects](#list-deployed-projects).
 
 ### Retrieve Agama Project Configuration
 
-To retrieve Agama project configuration:
+To retrieve the Agama project configuration:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-configs \
@@ -242,13 +241,13 @@ To retrieve Agama project configuration:
 
 ### Update Agama Project
 
-Let's update configuration for this project:
+Let's update the configuration for this project:
 
-Take the 
-[sample project configuration](../../../assets/agama/journey-configs.json) and 
+Take the
+[sample project configuration](../../../assets/agama/journey-configs.json) and
 keep it under `/tmp/journey-configs.json`.
 
-Make few test changes to the configuration and run the command below to
+Make a few test changes to the configuration and run the command below to
 update the configuration:
 
 ```bash title="Command"
@@ -270,7 +269,7 @@ update the configuration:
 
 ### Delete Agama Project
 
-To delete Agama project by its name, use the command below
+To delete an Agama project by its name, use the command below
 
 ```bash title="Sample Command"
 /opt/jans/jans-cli/config-cli.py --operation-id delete-agama-prj \
@@ -280,7 +279,7 @@ To delete Agama project by its name, use the command below
 ### Agama Flow Configuration
 
 `AgamaConfiguration` task groups operations that help understand the correctness
-of the deployed Agama project configuration. 
+of the deployed Agama project configuration.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --info AgamaConfiguration
@@ -303,8 +302,8 @@ DSL related errors, run the command below:
 --url-suffix qname:"fully-qualified-flow-name"
 ```
 
-You can do some syntax check with this operation-id. 
-It will help to find out syntax error in Agama low code projects. 
+You can do some syntax checks with this operation-id.
+It will help to find out syntax errors in Agama low code projects.
 
 ***Example***:
 
@@ -325,7 +324,7 @@ It will help to find out syntax error in Agama low code projects.
 
 ##  Using Text-based UI
 
-In Janssen, You can deploy and customize Agama project using 
+In Janssen, You can deploy and customize an Agama project using
 the [Text-Based UI](./config-tools/jans-tui/README.md).
 
 You can start TUI using the command below:
@@ -336,15 +335,15 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 
 ### Agama Project Screen
 
-Navigate to `Auth Server` -> `Agama` to open Agama projects screen as shown in 
-the image below. 
+Navigate to `Auth Server` -> `Agama` to open the Agama projects screen as shown in
+the image below.
 
-* To get list of currenly added projects, bring the control to `Search` box
-  (using the tab key), and press `Enter`. Type search string to search for 
+* To get the list of currently added projects, bring the control to `Search` box
+  (using the tab key), and press `Enter`. Type the search string to search for
   projects with matching names.
 
-* Deploy a new project using `Upload Project` button. It'll open explore 
-  dialogue. Using this dialogue, navigate the file-system and select the 
+* Deploy a new project using `Upload Project` button. It'll open explore
+  dialogue. Using this dialogue, navigate the file system and select  
   the `.gama` archive for the new project.
 
 ![image](../../assets/agama_projects.png)
@@ -352,10 +351,10 @@ the image below.
 ### Agama Project Help Menu
 
 TUI provides key-press commands to open various dialogues that help manage and
-configure Agama projects. All the key-press commands are listed in help menu.
-Press `F1` to bring up help menu as shown in the screen below.
+configure Agama projects. All the key-press commands are listed in the help menu.
+Press `F1` to bring up the help menu as shown in the screen below.
 
- ![image](../../assets/agama_help_screen.png)
+![image](../../assets/agama_help_screen.png)
 
 ### Agama Project Detail Screen
 
@@ -364,20 +363,19 @@ Press `F1` to bring up help menu as shown in the screen below.
 ![image](../../assets/agama_project_detail.png)
 
 ### Agama Project Configuration Screen
-    
+
 * In the below screenshot, we can manage the configuration for the Agama project.
 
 * Both exporting and importing the configuration are options.
-* The sample configuration can serve as a template. Export it and make the 
-necessary changes in it and import it back in order to correctly configure 
-the project.
+* The sample configuration can serve as a template. Export it and make the
+  necessary changes to it and import it back in order to correctly configure
+  the project.
 
 ![image](../../assets/manage_config_for_agama_project.png)
 
 * In the below screenshot, showing the add configurations screen.
 
 ![image](../../assets/add_configurations_screen.png)
-
 
 
 
