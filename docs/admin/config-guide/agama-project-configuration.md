@@ -368,8 +368,8 @@ Press `F1` to bring up the help menu as shown in the screen below.
 
 ### Agama Project Detail Screen
 
-Using appropriate key-press command from [help screen](#agama-project-help-menu)
-to bring up the project detail screen as shown in the image below. 
+Use the appropriate key-press command from [help screen](#agama-project-help-menu)
+to bring up the project detail screen which is shown in the image below. 
 
 ![image](../../assets/agama_project_detail.png)
 
@@ -380,10 +380,15 @@ these errors and the corresponding flows.
 All the flows in the project are also listed by their fully qualified names.
 Fully qualified names are useful when invoking flows.
 
+Project details screen also shows the JSON configuration by navigating to and 
+pressing the `View Configuration` button. 
+
+
+
 ### Agama Project Configuration Screen
 
-Using appropriate key-press command from [help screen](#agama-project-help-menu)
-to bring up the Agama project configuration screen as shown in the image below.
+Use the appropriate key-press command from [help screen](#agama-project-help-menu)
+to bring up the Agama project configuration screen which is shown in the image below.
 
 * The screen allows export and import of the configuration.
 * The sample configuration can serve as a template. Export it into a file, then
