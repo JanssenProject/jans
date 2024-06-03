@@ -1,4 +1,4 @@
-{{ if index .Values "auth-server-key-rotation" "enabled" -}}
+{{- if index .Values "auth-server-key-rotation" "enabled" -}}
 kind: CronJob
 apiVersion: batch/v1
 metadata:
@@ -157,6 +157,8 @@ spec:
           restartPolicy: Never
 {{- end }}
 
+---
+
 {{ if and (index .Values "kc-scheduler" "enabled") (.Values.saml.enabled) -}}
 kind: CronJob
 apiVersion: batch/v1
@@ -249,11 +251,6 @@ spec:
                   mountPath: {{ .Values.cnCouchbasePasswordFile }}
                   subPath: couchbase_password
               {{- end }}
-                {{- if or (eq .Values.cnPersistenceType "sql") (eq .Values.cnPersistenceType "hybrid") }}
-                - name: sql-pass
-                  mountPath: {{ .Values.cnSqlPasswordFile }}
-                  subPath: sql_password
-                {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -316,11 +313,6 @@ spec:
               secret:
                 secretName: {{ .Release.Name }}-cb-crt
             {{- end }}
-          {{- end }}
-          {{- if or (eq .Values.cnPersistenceType "sql") (eq .Values.cnPersistenceType "hybrid") }}
-            - name: sql-pass
-              secret:
-                secretName: {{ .Release.Name }}-sql-pass
           {{- end }}
           restartPolicy: Never
           {{- if not .Values.isFqdnRegistered  }}
