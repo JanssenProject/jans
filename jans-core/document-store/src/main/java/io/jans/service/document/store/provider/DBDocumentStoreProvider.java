@@ -102,7 +102,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 				oxDocument.setDn(dn);
 				oxDocument.setDescription(description);
 				oxDocument.setJansEnabled(true);
-				oxDocument.setJansModuleProperty(moduleList);
+				oxDocument.setJansService(moduleList);
 				documentService.addDocument(oxDocument);
 				return path;
 		} catch (Exception ex) {
@@ -126,7 +126,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			oxDocument.setDn(dn);
 			oxDocument.setDescription(description);
 			oxDocument.setJansEnabled(true);
-			oxDocument.setJansModuleProperty(moduleList);
+			oxDocument.setJansService(moduleList);
 			documentService.addDocument(oxDocument);
 			return path;
 		} catch (Exception e) {
