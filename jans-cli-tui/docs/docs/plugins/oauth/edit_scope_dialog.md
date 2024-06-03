@@ -1,1 +1,0 @@
-::: plugins.010_oxauth.edit_scope_dialog

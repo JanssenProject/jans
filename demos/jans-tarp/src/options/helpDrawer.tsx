@@ -85,6 +85,22 @@ export default function HelpDrawer({ isOpen, handleDrawer }) {
           />
         </Card>
       </Box>
+      <Box sx={{ width: 575 }} role="presentation">
+        <Card sx={{ maxWidth: 575 }}>
+          <CardContent>
+            <Typography gutterBottom variant="h5" component="div">
+              Optional
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              For <b>'Acr Values'</b> input, you can also add a new ACR option.
+            </Typography>
+          </CardContent>
+          <CardMedia
+            sx={{ height: 459 }}
+            image={'tarpDocs5.png'}
+          />
+        </Card>
+      </Box>
     </>
   );
 
