@@ -22,6 +22,14 @@ configuration based on your needs.
     [here](./config-tools/jans-tui/README.md) or Jump straight to
     [configuration steps](#using-text-based-ui)
 
+=== "Use REST API"
+
+    Learn how to use Janssen Server Config API 
+    [here](./config-tools/config-api/README.md) or Jump straight to
+    [configuration steps](#using-configuration-rest-api)
+
+[here](./config-tools/config-api/README.md)
+
 ##  Using Command Line
 
 In the Janssen Server, you can deploy and customize the Agama project using the
@@ -398,7 +406,8 @@ configure the project.
 ![image](../../assets/tui-agama-project-manage-conf.png)
 
 
+## Using Configuration REST API
 
-
-
-
+Janssen Server Configuration REST API exposes relavent endpoints for managing
+and configuring Agama projects. Endpoint details are publish in the [Swagger 
+document](./../reference/openapi.md).
