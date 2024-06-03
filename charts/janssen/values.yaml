@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.1.2_dev
+    tag: 1.1.3_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -124,7 +124,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.1.2_dev
+    tag: 1.1.3_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -348,7 +348,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.1.2_dev
+    tag: 1.1.3_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- LDAP admin password if OpenDJ is used for persistence.
@@ -444,7 +444,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.1.2_dev
+    tag: 1.1.3_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -455,12 +455,12 @@ config-api:
       # -- CPU limit.
       cpu: 1000m
       # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
-      memory: 1000Mi
+      memory: 1200Mi
     requests:
       # -- CPU request.
       cpu: 1000m
       # -- Memory request.
-      memory: 1000Mi
+      memory: 1200Mi
   # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
     # -- http liveness probe endpoint
@@ -547,7 +547,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.1.2_dev
+    tag: 1.1.3_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -655,7 +655,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 1.1.2_dev
+    tag: 1.1.3_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1325,7 +1325,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.1.2_dev
+    tag: 1.1.3_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1409,7 +1409,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 1.1.2_dev
+    tag: 1.1.3_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1419,12 +1419,12 @@ scim:
       # -- CPU limit.
       cpu: 1000m
       # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
-      memory: 1000Mi
+      memory: 1200Mi
     requests:
       # -- CPU request.
       cpu: 1000m
       # -- Memory request.
-      memory: 1000Mi
+      memory: 1200Mi
   service:
     # -- The name of the scim port within the scim service. Please keep it as default.
     name: http-scim
@@ -1517,7 +1517,7 @@ link:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/link
     # -- Image  tag to use for deploying.
-    tag: 1.1.2_dev
+    tag: 1.1.3_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1528,12 +1528,12 @@ link:
       # -- CPU limit.
       cpu: 500m
       # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
-      memory: 1000Mi
+      memory: 1200Mi
     requests:
       # -- CPU request.
       cpu: 500m
       # -- Memory request.
-      memory: 1000Mi
+      memory: 1200Mi
   # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
     # -- http liveness probe endpoint
@@ -1624,7 +1624,7 @@ saml:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/saml
     # -- Image  tag to use for deploying.
-    tag: 1.1.2_dev
+    tag: 1.1.3_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1635,12 +1635,12 @@ saml:
       # -- CPU limit.
       cpu: 500m
       # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
-      memory: 1000Mi
+      memory: 1200Mi
     requests:
       # -- CPU request.
       cpu: 500m
       # -- Memory request.
-      memory: 1000Mi
+      memory: 1200Mi
   # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
     # -- http liveness probe endpoint
@@ -1703,7 +1703,7 @@ kc-scheduler:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/kc-scheduler
     # -- Image  tag to use for deploying.
-    tag: 1.1.2_dev
+    tag: 1.1.3_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.

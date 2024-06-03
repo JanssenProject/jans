@@ -944,6 +944,10 @@ components:
           type: string
         nameIDPolicyFormat:
           type: string
+        principalAttribute:
+          type: string
+        principalType:
+          type: string
         idpEntityId:
           type: string
         singleSignOnServiceUrl:
@@ -1069,6 +1073,8 @@ components:
           type: string
         ignoreValidation:
           type: boolean
+        setConfigDefaultValue:
+          type: boolean
         idpMetadataMandatoryAttributes:
           type: array
           items:
@@ -1129,14 +1135,8 @@ components:
           maxLength: 4000
           minLength: 0
           type: string
-        rootUrl:
-          type: string
-        adminUrl:
-          type: string
         baseUrl:
           type: string
-        surrogateAuthRequired:
-          type: boolean
         enabled:
           type: boolean
         alwaysDisplayInConsole:
@@ -1168,9 +1168,6 @@ components:
           type: array
           items:
             type: string
-        url:
-          pattern: "^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]"
-          type: string
         spLogoutURL:
           pattern: "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])"
           type: string

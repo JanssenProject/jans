@@ -13,7 +13,7 @@ RUN apk update \
 # KC scheduler
 # ============
 
-ENV CN_VERSION=1.1.2-SNAPSHOT
+ENV CN_VERSION=1.1.3-SNAPSHOT
 ENV CN_BUILD_DATE='2024-05-07 13:32'
 ENV SCHEDULER_HOME=/opt/kc-scheduler
 
@@ -34,25 +34,37 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-scheduler/${CN_VERSION
 RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/janino-3.1.9.jar -P ${SCHEDULER_HOME}/lib \
     && wget -q https://repo1.maven.org/maven2/org/codehaus/janino/commons-compiler/3.1.9/commons-compiler-3.1.9.jar -P ${SCHEDULER_HOME}/lib
 
+# ===========
+# Assets sync
+# ===========
+
+ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the assets
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_SOURCE_VERSION} \
+    && git sparse-checkout add jans-pycloudlib
+
 # ======
 # Python
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN apk add --no-cache py3-packaging \
-    && apk add --no-cache --virtual .pip-deps py3-pip py3-wheel \
-    && mkdir -p "$HOME/.config/pip" \
-    && printf "[global]\nbreak-system-packages = true" > "$HOME/.config/pip/pip.conf" \
+RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
-    && rm -rf "$HOME/.config/pip/pip.conf" \
-    && apk del .pip-deps
+    && pip3 uninstall -y pip wheel
 
 # =======
 # Cleanup
 # =======
 
 RUN apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* /tmp/jans
 
 # =======
 # License
@@ -124,7 +136,7 @@ EXPOSE $CN_SAML_HTTP_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/kc-scheduler" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.2" \
+    org.opencontainers.image.version="1.1.3" \
     org.opencontainers.image.title="Janssen KC scheduler" \
     org.opencontainers.image.description=""
 

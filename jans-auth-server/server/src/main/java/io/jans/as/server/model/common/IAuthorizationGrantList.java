@@ -29,8 +29,6 @@ public interface IAuthorizationGrantList {
 
     ClientCredentialsGrant createClientCredentialsGrant(User user, Client client);
 
-    TxTokenGrant createTxTokenGrant(User user, Client client);
-
     ResourceOwnerPasswordCredentialsGrant createResourceOwnerPasswordCredentialsGrant(User user, Client client);
 
     TokenExchangeGrant createTokenExchangeGrant(User user, Client client);
@@ -46,6 +44,8 @@ public interface IAuthorizationGrantList {
     AuthorizationGrant getAuthorizationGrantByAccessToken(String tokenCode);
 
     AuthorizationGrant getAuthorizationGrantByIdToken(String idToken);
+
+    AuthorizationGrant getAuthorizationGrantByReferenceId(String idToken);
 
     CIBAGrant getCIBAGrant(String authReqId);
 

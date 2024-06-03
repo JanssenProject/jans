@@ -69,35 +69,47 @@
       "@jakarta.ws.rs.GET()"
     ]
   },
-  "assetMgtConfiguration": {
-    "assetMgtEnabled": true,
-    "assetServerUploadEnabled": true,
-    "assetBaseDirectory": "/opt/jans/jetty/%s/custom",
-    "assetDirMapping": [
+  "assetMgtConfiguration":{
+    "assetMgtEnabled":true,
+    "assetServerUploadEnabled":true,
+    "fileExtensionValidationEnabled":true,
+    "moduleNameValidationEnabled":true,
+    "assetBaseDirectory":"/opt/jans/jetty/%s/custom",
+    "jansServiceModule":[
+      "jans-auth",
+      "jans-casa",
+      "jans-config-api",
+      "jans-fido2",
+      "jans-link",
+      "jans-lock",
+      "jans-scim",
+      "jans-keycloak-link"
+    ],
+    "assetDirMapping":[
       {
-        "directory": "i18n",
-        "type": [
+        "directory":"i18n",
+        "type":[
           "properties"
         ],
-        "description": "Resource bundle file."
+        "description":"Resource bundle file."
       },
       {
-        "directory": "libs",
-        "type": [
+        "directory":"libs",
+        "type":[
           "jar"
         ],
-        "description": "java archive library."
+        "description":"java archive library."
       },
       {
-        "directory": "pages",
-        "type": [
+        "directory":"pages",
+        "type":[
           "xhtml"
         ],
-        "description": "Web pages."
+        "description":"Web pages."
       },
       {
-        "directory": "static",
-        "type": [
+        "directory":"static",
+        "type":[
           "js",
           "css",
           "png",
@@ -105,7 +117,7 @@
           "jpg",
           "jpeg"
         ],
-        "description": "Static resources like Java-script, style-sheet and images."
+        "description":"Static resources like Java-script, style-sheet and images."
       }
     ]
   },
@@ -150,7 +162,7 @@
       "description": "lock plugin",
       "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
     }
-	
+
   ]
 }
 

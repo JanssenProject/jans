@@ -317,3 +317,6 @@ class JansSamlInstaller(JettyInstaller):
 
         if not Config.installed_instance:
             self.restart(base.cron_service)
+
+    def installed(self):
+        return os.path.exists(self.idp_config_data_dir)

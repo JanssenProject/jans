@@ -462,6 +462,7 @@ nav:
         - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
     - User Guide: 'casa/user-guide.md'
 plugins:
+- include-markdown
 - tags
 - search
 - exclude-search:

@@ -2,12 +2,16 @@ import json
 import logging.config
 import os
 import random
+import ssl
 import socket
 import time
 from functools import partial
+from pathlib import Path
 from uuid import uuid4
 
 import click
+from cryptography import x509
+from cryptography.x509.oid import NameOID
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for
@@ -344,28 +348,14 @@ class CtxGenerator:
         # check from mounted files
         if not (os.path.isfile(ssl_cert) and os.path.isfile(ssl_key)):
             # no mounted files, hence download from frontend
-            ingress_addr = ""
-            if "CN_INGRESS_ADDRESS" in os.environ:
-                ingress_addr = os.environ.get("CN_INGRESS_ADDRESS")
-            ingress_servername = os.environ.get("CN_INGRESS_SERVERNAME") or ingress_addr
+            addr = os.environ.get("CN_INGRESS_ADDRESS") or self.ctx["config"]["hostname"]
+            servername = os.environ.get("CN_INGRESS_SERVERNAME") or addr
 
-            if ingress_addr and ingress_servername:
-                logger.warning(
-                    f"Unable to find mounted {ssl_cert} and {ssl_key}; "
-                    f"trying to download from {ingress_addr}:443 (servername {ingress_servername})"  # noqa: C812
-                )
-
-                try:
-                    # cert will be downloaded into `ssl_cert` path
-                    get_server_certificate(ingress_addr, 443, ssl_cert, ingress_servername)
-                    # since cert is downloaded, key must mounted
-                    # or generate empty file
-                    if not os.path.isfile(ssl_key):
-                        with open(ssl_key, "w") as f:
-                            f.write("")
-                except (socket.gaierror, socket.timeout, OSError) as exc:
-                    # address not resolved or timed out
-                    logger.warning(f"Unable to download cert; reason={exc}")
+            logger.warning(
+                f"Unable to find mounted {ssl_cert} and {ssl_key}; "
+                f"trying to download from {addr}:443 (servername {servername})"
+            )
+            cert_from_domain(addr, servername, 443, ssl_cert, ssl_key, self.ctx["config"]["hostname"])
 
         # no mounted nor downloaded files, hence we need to create self-generated files
         if not (os.path.isfile(ssl_cert) and os.path.isfile(ssl_key)):
@@ -508,6 +498,76 @@ def _dump_to_file(manager, filepath, type_):
     data = json.dumps(data, sort_keys=True, indent=4)
     with open(filepath, "w") as f:
         f.write(data)
+
+
+def cert_from_domain(addr, servername, port, certfile, keyfile, dns):
+    known_exceptions = (
+        socket.gaierror,
+        socket.timeout,
+        ConnectionRefusedError,
+        TimeoutError,
+        ConnectionResetError,
+        ssl.SSLEOFError,
+        ssl.SSLError,
+        OSError,
+    )
+    cert_downloaded = False
+
+    try:
+        # cert will be downloaded into `ssl_cert` path
+        get_server_certificate(addr, port, certfile, servername)
+        is_cert_valid = parse_cert(certfile, dns)
+
+        if not is_cert_valid:
+            logger.warning(f"The domain {dns} cannot be found in certificate SubjectAlternativeName or CommonName.")
+            Path(certfile).unlink(missing_ok=True)
+        else:
+            cert_downloaded = True
+            if not os.path.isfile(keyfile):
+                # since cert is downloaded, key must be mounted or simply generate empty file
+                with open(keyfile, "w") as f:
+                    f.write("")
+
+    except known_exceptions as exc:
+        # common error message on cert download attempt
+        logger.warning(
+            f"Unable to download SSL cert from {addr}. The certificate maybe missing "
+            f"or another issue encountered while trying to download the cert; reason={exc}."
+        )
+
+    env_name = "CN_SSL_CERT_FROM_DOMAIN"
+    if not cert_downloaded and as_boolean(os.environ.get(env_name, "false")):
+        raise RuntimeError(
+            f"Exiting the process due to the environment variable {env_name} is set to true. "
+            f"To skip this error, set the environment variable {env_name} to false."
+        )
+
+
+def parse_cert(certfile, dns):
+    with open(certfile) as f:
+        pem_data = f.read()
+
+    cert = x509.load_pem_x509_certificate(pem_data.encode())
+
+    # check for DNS in SAN
+    try:
+        san = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
+    except x509.extensions.ExtensionNotFound:
+        san = None
+
+    # check whether dns is in SAN
+    if san and dns in san.value.get_values_for_type(x509.DNSName):
+        # DNS is found and matched
+        return True
+
+    # check CommonName in subject
+    common_names = [name.value for name in cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)]
+    if dns in common_names:
+        return True
+
+    # default value
+    return False
+
 
 # ============
 # CLI commands
