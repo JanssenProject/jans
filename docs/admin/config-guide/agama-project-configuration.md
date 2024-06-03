@@ -356,7 +356,7 @@ the image below.
   dialogue. Using this dialogue, navigate the file system and select  
   the `.gama` archive for the new project.
 
-![image](../../assets/agama_projects.png)
+![image](../../assets/tui-agama-project-list.png)
 
 ### Agama Project Help Menu
 
@@ -364,14 +364,14 @@ TUI provides key-press commands to open various dialogues that help manage and
 configure Agama projects. All the key-press commands are listed in the help menu.
 Press `F1` to bring up the help menu as shown in the screen below.
 
-![image](../../assets/agama_help_screen.png)
+![image](../../assets/tui-agama-project-help.png)
 
 ### Agama Project Detail Screen
 
 Use the appropriate key-press command from [help screen](#agama-project-help-menu)
 to bring up the project detail screen which is shown in the image below. 
 
-![image](../../assets/agama_project_detail.png)
+![image](../../assets/tui-agama-project-details.png)
 
 Project details screen shows important details pertaining to the Agama project.
 In case the project deployment is facing an error, this screen also shows
@@ -383,7 +383,7 @@ Fully qualified names are useful when invoking flows.
 Project details screen also shows the JSON configuration by navigating to and 
 pressing the `View Configuration` button. 
 
-
+![image](../../assets/tui-agama-project-view-conf.png)
 
 ### Agama Project Configuration Screen
 
@@ -395,7 +395,7 @@ to bring up the Agama project configuration screen which is shown in the image b
 make the necessary changes to it and import it back in order to correctly 
 configure the project.
 
-![image](../../assets/manage_config_for_agama_project.png)
+![image](../../assets/tui-agama-project-manage-conf.png)
 
 
 
