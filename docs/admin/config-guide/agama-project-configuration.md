@@ -13,12 +13,13 @@ configuration based on your need.
 
 === "Use Command-line"
 
-    Learn how to use Jans CLI [here]() or Jump straight to 
+    Learn how to use Jans CLI [here](./config-tools/jans-cli/README.md) or Jump straight to 
     [configuration steps](#using-command-line)
 
 === "Use Text-based UI"
 
-    Learn how to use Jans Text-based UI (TUI) [here]() or Jump straight to
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](./config-tools/jans-tui/README.md) or Jump straight to
     [configuration steps](#using-text-based-ui)
 
 ##  Using Command Line
@@ -324,32 +325,37 @@ It will help to find out syntax error in Agama low code projects.
 
 ##  Using Text-based UI
 
-In Janssen, You can deploy and customize Agama project using Text-Based UI.
+In Janssen, You can deploy and customize Agama project using 
+the [Text-Based UI](./config-tools/jans-tui/README.md).
 
-You can run it by executing:
+You can start TUI using the command below:
 
-```title="Command"
+```bash title="Command"
 sudo /opt/jans/jans-cli/jans_cli_tui.py
 ```
-### Agama Help 
-
-* You first access the help screen by using the `F1` key, 
-where all operating instructions for the Agama are displayed.
-  
-
-* In below screenshot, showing the Agama help screen.
-
- ![image](../../assets/agama_help_screen.png)
 
 ### Agama Project Screen
 
-* In below screenshot, we are getting the list of existing Agama projects. 
+Navigate to `Auth Server` -> `Agama` to open Agama projects screen as shown in 
+the image below. 
 
-* With the button which is located on right upper side named "Upload Project", it's possible to create new project.
+* To get list of currenly added projects, bring the control to `Search` box
+  (using the tab key), and press `Enter`. Type search string to search for 
+  projects with matching names.
 
-* We can search the Agama project by project name.
+* Deploy a new project using `Upload Project` button. It'll open explore 
+  dialogue. Using this dialogue, navigate the file-system and select the 
+  the `.gama` archive for the new project.
 
 ![image](../../assets/agama_projects.png)
+
+### Agama Project Help Menu
+
+TUI provides key-press commands to open various dialogues that help manage and
+configure Agama projects. All the key-press commands are listed in help menu.
+Press `F1` to bring up help menu as shown in the screen below.
+
+ ![image](../../assets/agama_help_screen.png)
 
 ### Agama Project Detail Screen
 
@@ -362,6 +368,9 @@ where all operating instructions for the Agama are displayed.
 * In the below screenshot, we can manage the configuration for the Agama project.
 
 * Both exporting and importing the configuration are options.
+* The sample configuration can serve as a template. Export it and make the 
+necessary changes in it and import it back in order to correctly configure 
+the project.
 
 ![image](../../assets/manage_config_for_agama_project.png)
 
