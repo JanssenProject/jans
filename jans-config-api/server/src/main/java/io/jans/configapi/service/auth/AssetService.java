@@ -146,8 +146,8 @@ public class AssetService {
     public PagedResult<Document> searchAssetByName(SearchRequest searchRequest) throws Exception {
         log.info("Search asset with searchRequest:{}", searchRequest);
 
-        Filter nameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.DISPLAY_NAME), null, new String[] { searchRequest.getFilter() },
-                null);
+        Filter nameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.DISPLAY_NAME),
+                null, new String[] { searchRequest.getFilter() }, null);
 
         log.debug("Asset Search nameFilter:{}", nameFilter);
         return persistenceEntryManager.findPagedEntries(getDnForAsset(null), Document.class, nameFilter, null,
@@ -232,6 +232,29 @@ public class AssetService {
         return status;
     }
 
+    public List<String> getValidModuleName() {
+        return this.appConfiguration.getAssetMgtConfiguration().getJansServiceModule();
+    }
+
+    public List<String> getValidFileExtension() {
+        List<String> validFileExtension = new ArrayList<>();
+
+        if (appConfiguration.getAssetMgtConfiguration().getAssetDirMapping() == null
+                || appConfiguration.getAssetMgtConfiguration().getAssetDirMapping().isEmpty()) {
+            return validFileExtension;
+        }
+
+        List<AssetDirMapping> assetDir = this.appConfiguration.getAssetMgtConfiguration().getAssetDirMapping();
+
+        for (AssetDirMapping dir : assetDir) {
+            validFileExtension.addAll(dir.getType());
+        }
+
+        log.info("validFileExtension:{}  - ", validFileExtension);
+
+        return validFileExtension;
+    }
+
     private Document setAssetContent(Document asset, InputStream documentStream) throws IOException {
         log.info(" Set asset content - asset:{}, documentStream:{}", asset, documentStream);
         if (asset == null) {
@@ -282,7 +305,7 @@ public class AssetService {
             throw new InvalidConfigurationException("Asset stream is null!");
         }
 
-        List<String> serviceModules = asset.getJansModuleProperty();
+        List<String> serviceModules = asset.getJansService();
         String assetFileName = asset.getDisplayName();
         String documentStoreModuleName = assetFileName;
         log.info("Save asset for - serviceModules:{}, assetFileName:{}", serviceModules, assetFileName);
@@ -323,7 +346,7 @@ public class AssetService {
             return deleteStatus;
         }
 
-        List<String> serviceModules = asset.getJansModuleProperty();
+        List<String> serviceModules = asset.getJansService();
         String assetFileName = asset.getDisplayName();
 
         log.info("Asset to be deleted for serviceModules:{}, assetFileName:{}", serviceModules, assetFileName);
@@ -447,29 +470,6 @@ public class AssetService {
         return this.appConfiguration.getAssetMgtConfiguration().isModuleNameValidationEnabled();
     }
 
-    private List<String> getValidModuleName() {
-        return this.appConfiguration.getAssetMgtConfiguration().getJansModules();
-    }
-
-    private List<String> getValidFileExtension() {
-        List<String> validFileExtension = new ArrayList<>();
-
-        if (appConfiguration.getAssetMgtConfiguration().getAssetDirMapping() == null
-                || appConfiguration.getAssetMgtConfiguration().getAssetDirMapping().isEmpty()) {
-            return validFileExtension;
-        }
-
-        List<AssetDirMapping> assetDir = this.appConfiguration.getAssetMgtConfiguration().getAssetDirMapping();
-
-        for (AssetDirMapping dir : assetDir) {
-            validFileExtension.addAll(dir.getType());
-        }
-
-        log.info("validFileExtension:{}  - ", validFileExtension);
-
-        return validFileExtension;
-    }
-
     private void validateFileExtension(Document asset) {
 
         if (asset == null || appConfiguration.getAssetMgtConfiguration() == null
@@ -504,7 +504,7 @@ public class AssetService {
 
     private void validateModules(Document asset) {
 
-        if (asset == null || asset.getJansModuleProperty() == null || asset.getJansModuleProperty().isEmpty()) {
+        if (asset == null || asset.getJansService() == null || asset.getJansService().isEmpty()) {
             throw new InvalidConfigurationException("Service module list is null or empty!");
         }
 
@@ -515,7 +515,7 @@ public class AssetService {
             return;
         }
 
-        List<String> invalidModuleList = authUtil.findMissingElements(asset.getJansModuleProperty(), validModules);
+        List<String> invalidModuleList = authUtil.findMissingElements(asset.getJansService(), validModules);
         log.info("invalidModuleList:{}", invalidModuleList);
 
         if (invalidModuleList != null && !invalidModuleList.isEmpty()) {
