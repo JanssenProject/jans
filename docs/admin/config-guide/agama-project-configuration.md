@@ -17,9 +17,9 @@ tasks.
 
 === "Use Command-line"
 
-    Use the command line to perform actions from the shell. Learn how to use Jans CLI 
-    [here](./config-tools/jans-cli/README.md) or jump straight to the 
-    [configuration steps](#using-command-line)
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to 
+    the [configuration steps](#using-command-line)
 
 === "Use Text-based UI"
 
