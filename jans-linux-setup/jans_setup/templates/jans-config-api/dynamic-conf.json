@@ -75,14 +75,15 @@
     "fileExtensionValidationEnabled":true,
     "moduleNameValidationEnabled":true,
     "assetBaseDirectory":"/opt/jans/jetty/%s/custom",
-    "jansModules":[
+    "jansServiceModule":[
       "jans-auth",
       "jans-casa",
       "jans-config-api",
       "jans-fido2",
       "jans-link",
       "jans-lock",
-      "jans-scim"
+      "jans-scim",
+      "jans-keycloak-link"
     ],
     "assetDirMapping":[
       {
@@ -161,7 +162,7 @@
       "description": "lock plugin",
       "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
     }
-	
+
   ]
 }
 

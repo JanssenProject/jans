@@ -81,6 +81,8 @@ public class ApiConstants {
     public static final String JANS_ASSETS = "/jans-assets";
     public static final String UPLOAD = "/upload";
     public static final String STREAM = "/stream";
+    public static final String SERVICES = "/services";
+    public static final String ASSET_TYPE = "/asset-type";
     
     public static final String APP_VERSION = "/app-version";
     public static final String SERVER_STAT = "/server-stat";
