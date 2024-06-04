@@ -27,7 +27,8 @@ markdown_extensions:
     - class: mermaid
       format: !!python/name:pymdownx.superfences.fence_code_format
       name: mermaid
-- pymdownx.tabbed
+- pymdownx.tabbed:
+    alternate_style: true
 - pymdownx.emoji:
     emoji_generator: !!python/name:materialx.emoji.to_svg
     emoji_index: !!python/name:materialx.emoji.twemoji
@@ -127,7 +128,7 @@ nav:
         - Monitoring: admin/config-guide/config-tools/config-api/monitoring.md
         - Plugins: admin/config-guide/config-tools/config-api/plugins.md
       - CURL: admin/config-guide/config-tools/curl-guide.md
-    - Agama Configuration: admin/config-guide/agama-configuration.md
+    - Agama Project Configuration: admin/config-guide/agama-project-configuration.md
     - Attribute: admin/config-guide/attribute-configuration.md
     - Default Authentication: admin/config-guide/default-authentication-method-config.md
     - Cache Configuration: admin/config-guide/cache-configuration.md
