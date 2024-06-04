@@ -12,14 +12,14 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/head/admin/config-guide/agama-configuration/">
+        <link rel="canonical" href="https://jans.io/docs/head/admin/config-guide/agama-project-configuration/">
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
     
     
       
-        <title>Agama Configuration - Janssen Documentation</title>
+        <title>Agama Project Configuration - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#agama" class="md-skip">
+        <a href="#agama-project-configuration" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Agama Configuration
+              Agama Project Configuration
             
           </span>
         </div>
@@ -2181,12 +2181,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Agama Configuration
+          Agama Project Configuration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Agama Configuration
+        Agama Project Configuration
       </a>
       
         
@@ -2205,11 +2205,19 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#list-of-deployed-projects" class="md-nav__link">
-    List of Deployed Projects
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
   </a>
   
-    <nav class="md-nav" aria-label="List of Deployed Projects">
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-deployed-projects" class="md-nav__link">
+    List Deployed Projects
+  </a>
+  
+    <nav class="md-nav" aria-label="List Deployed Projects">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2223,38 +2231,111 @@
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#view-agama-project-by-name" class="md-nav__link">
     View Agama Project By Name
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#post-agama-project-in-janssen" class="md-nav__link">
     Post Agama Project in Janssen
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#retrieve-agama-project-configuration" class="md-nav__link">
     Retrieve Agama Project Configuration
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#update-agama-project" class="md-nav__link">
     Update Agama Project
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#delete-agama-project" class="md-nav__link">
     Delete Agama Project
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama-flow-configuration" class="md-nav__link">
+    Agama Flow Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Agama Flow Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agama-flow-dsl-syntax" class="md-nav__link">
+    Agama Flow DSL Syntax
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Text-based UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agama-project-screen" class="md-nav__link">
+    Agama Project Screen
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama-project-help-menu" class="md-nav__link">
+    Agama Project Help Menu
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama-project-detail-screen" class="md-nav__link">
+    Agama Project Detail Screen
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama-project-configuration-screen" class="md-nav__link">
+    Agama Project Configuration Screen
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
   </a>
   
 </li>
@@ -8487,11 +8568,19 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#list-of-deployed-projects" class="md-nav__link">
-    List of Deployed Projects
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
   </a>
   
-    <nav class="md-nav" aria-label="List of Deployed Projects">
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-deployed-projects" class="md-nav__link">
+    List Deployed Projects
+  </a>
+  
+    <nav class="md-nav" aria-label="List Deployed Projects">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -8505,38 +8594,111 @@
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#view-agama-project-by-name" class="md-nav__link">
     View Agama Project By Name
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#post-agama-project-in-janssen" class="md-nav__link">
     Post Agama Project in Janssen
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#retrieve-agama-project-configuration" class="md-nav__link">
     Retrieve Agama Project Configuration
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#update-agama-project" class="md-nav__link">
     Update Agama Project
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#delete-agama-project" class="md-nav__link">
     Delete Agama Project
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama-flow-configuration" class="md-nav__link">
+    Agama Flow Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Agama Flow Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agama-flow-dsl-syntax" class="md-nav__link">
+    Agama Flow DSL Syntax
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Text-based UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agama-project-screen" class="md-nav__link">
+    Agama Project Screen
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama-project-help-menu" class="md-nav__link">
+    Agama Project Help Menu
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama-project-detail-screen" class="md-nav__link">
+    Agama Project Detail Screen
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama-project-configuration-screen" class="md-nav__link">
+    Agama Project Configuration Screen
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
   </a>
   
 </li>
@@ -8570,29 +8732,56 @@
     
       
       
-        <span class="md-tag">agama</span>
+        <span class="md-tag">agama project</span>
       
     
   </nav>
 
 
 
-  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/config-guide/agama-configuration.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/config-guide/agama-project-configuration.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<blockquote>
-<p>Prerequisite: Know how to use the Janssen CLI in <a href="../config-tools/jans-cli/">command-line mode</a></p>
-</blockquote>
-<h1 id="agama">Agama<a class="headerlink" href="#agama" title="Permanent link">#</a></h1>
-<p>In Janssen, You can deploy and customize agama project using commandline. To get the details of Janssen commandline feature of Agama, you can run this command as below:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info Agama
+<h1 id="agama-project-configuration">Agama project configuration<a class="headerlink" href="#agama-project-configuration" title="Permanent link">#</a></h1>
+<p>Agama project configuration involves adding and removing Agama projects to 
+Janssen Server along with configuring and troubleshooting these project 
+deployments.</p>
+<p>The Janssen Server provides multiple configuration tools to perform these
+tasks.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use the command line to perform actions from the terminal. Learn how to 
+use Jans CLI <a href="../config-tools/jans-cli/">here</a> or jump straight to 
+the <a href="#using-command-line">configuration steps</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use a fully functional text-based user interface from the terminal. 
+Learn how to use Jans Text-based UI (TUI) 
+<a href="../config-tools/jans-tui/">here</a> or jump straight to the
+<a href="#using-text-based-ui">configuration steps</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use REST API for programmatic access or invoke via tools like CURL or 
+Postman. Learn how to use Janssen Server Config API 
+<a href="../config-tools/config-api/">here</a> or Jump straight to the
+<a href="#using-configuration-rest-api">configuration steps</a></p>
+</div>
+</div>
+</div>
+<h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
+<p>In the Janssen Server, you can deploy and customize the Agama project using the
+command line. To get the details of Janssen command line operations relevant to
+Agama projects, you can check the operations under <code>Agama</code> task using the
+command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info Agama
 </code></pre></div>
-<p>It will show you the details of available operation-id for Agama.</p>
+<p>It will show the details of the available operation-ids for Agama.</p>
 <div class="highlight"><pre><span></span><code>Operation ID: get-agama-prj-by-name
-  Description: Fetches deployed Agama project based on name.
+  Description: Fetches deployed the Agama project based on the name.
   Parameters:
   name: Agama project name [string]
 Operation ID: post-agama-prj
@@ -8620,276 +8809,365 @@ Operation ID: get-agama-prj
   start: No description is provided for this parameter [integer]
   count: No description is provided for this parameter [integer]
 </code></pre></div>
-<!-- Table to be added later
-
-|Operation-id       | url-suffix    |  endpoint-args    |  Description  | Example   |
-|---    |---    |---    |---    |---    |
-| `get-agama-prj`   | NA    |  `start`,`count`  |       |       |
-|   `post-agama-prj`    |  `name`   |  NA   |       |       |
-|       |       |       |       |       |
-
--->
-
-<h2 id="list-of-deployed-projects">List of Deployed Projects<a class="headerlink" href="#list-of-deployed-projects" title="Permanent link">#</a></h2>
-<p>To retrieve the list of deployed agama projects:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj
+<p>In the sections below, we will see how to configure and manage Agama
+projects via the command line using the above operations.</p>
+<h3 id="list-deployed-projects">List Deployed Projects<a class="headerlink" href="#list-deployed-projects" title="Permanent link">#</a></h3>
+<p>Use the <code>get-agama-prj</code> operation to retrieve the list of deployed Agama
+projects:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj
 </code></pre></div>
-<p>To get details of all the agama flows:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj
-Please wait while retrieving data ...
-{
-  &quot;start&quot;: 0,
-  &quot;totalEntriesCount&quot;: 1,
-  &quot;entriesCount&quot;: 1,
-  &quot;entries&quot;: [
-    {
-      &quot;dn&quot;: &quot;jansId=46546e9a-fed6-34d0-ba63-b615233b2115,ou=deployments,ou=agama,o=jans&quot;,
-      &quot;id&quot;: &quot;46546e9a-fed6-34d0-ba63-b615233b2115&quot;,
-      &quot;createdAt&quot;: &quot;2023-08-13T14:45:27&quot;,
-      &quot;taskActive&quot;: false,
-      &quot;finishedAt&quot;: &quot;2023-08-13T14:45:43&quot;,
-      &quot;details&quot;: {
-        &quot;error&quot;: &quot;There were problems processing one or more flows&quot;,
-        &quot;flowsError&quot;: {
-          &quot;mmrraju.np.test.me&quot;: null,
-          &quot;mmrraju.test2.agama&quot;: null,
-          &quot;mmrraju.u2f.me&quot;: &quot;Syntax error: mismatched input &#39;&lt;EOF&gt;&#39; expecting {&#39;|&#39;, &#39;Log&#39;, &#39;Trigger&#39;, &#39;Call&#39;, &#39;RRF&#39;, &#39;When&#39;, &#39;Repeat&#39;, &#39;Iterate over&#39;, &#39;Match&#39;, &#39;Finish&#39;, &#39;RFAC&#39;, ALPHANUM, QNAME, DOTEXPR, DOTIDXEXPR, WS}\nSymbol: [@9,43:42=&#39;&lt;EOF&gt;&#39;,&lt;-1&gt;,2:23]\nLine: 2\nColumn: 24&quot;
-        },
-        &quot;projectMetadata&quot;: {
-          &quot;projectName&quot;: &quot;user_pass_auth&quot;,
-          &quot;author&quot;: &quot;mmrraju&quot;,
-          &quot;type&quot;: &quot;community&quot;,
-          &quot;description&quot;: &quot;This is password based authentication&quot;,
-          &quot;version&quot;: &quot;1.0.34&quot;,
-          &quot;configs&quot;: null
-        }
-      },
-      &quot;baseDn&quot;: &quot;jansId=46546e9a-fed6-34d0-ba63-b615233b2115,ou=deployments,ou=agama,o=jans&quot;
-    }
-  ]
-}
+<p>The output will list Agama projects that are added to this Janssen Server
+deployment.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=46546e9a-fed6-34d0-ba63-b615233b2115,ou=deployments,ou=agama,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;46546e9a-fed6-34d0-ba63-b615233b2115&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-13T14:45:27&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;taskActive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;finishedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-13T14:45:43&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;There were problems processing one or more flows&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;flowsError&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;mmrraju.np.test.me&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;mmrraju.test2.agama&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;mmrraju.u2f.me&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Syntax error: mismatched input &#39;&lt;EOF&gt;&#39; expecting {&#39;|&#39;, &#39;Log&#39;, &#39;Trigger&#39;, &#39;Call&#39;, &#39;RRF&#39;, &#39;When&#39;, &#39;Repeat&#39;, &#39;Iterate over&#39;, &#39;Match&#39;, &#39;Finish&#39;, &#39;RFAC&#39;, ALPHANUM, QNAME, DOTEXPR, DOTIDXEXPR, WS}\nSymbol: [@9,43:42=&#39;&lt;EOF&gt;&#39;,&lt;-1&gt;,2:23]\nLine: 2\nColumn: 24&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;projectMetadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;projectName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user_pass_auth&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mmrraju&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;community&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;This is password based authentication&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.34&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=46546e9a-fed6-34d0-ba63-b615233b2115,ou=deployments,ou=agama,o=jans&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h4 id="endpoint-arguments">Endpoint Arguments<a class="headerlink" href="#endpoint-arguments" title="Permanent link">#</a></h4>
+<p>Endpoint arguments are parameters passed to an API or function to specify
+how and what data to retrieve or process.</p>
+<p>There are two endpoint arguments available to the <code>get-agama-prj</code> operation.</p>
+<ul>
+<li>
+<p><code>start</code>: Should be an integer value. It's an index value of the starting point 
+  of the list.</p>
+</li>
+<li>
+<p><code>count</code>: Should be an integer value. Total entries number you want to display.</p>
+</li>
+</ul>
+<p>For example, to fetch details of the project at index 1 only, use the command
+below.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj <span class="se">\</span>
+--endpoint-args start:1,count:1
 </code></pre></div>
-<p>It will display the total number of agama flows that are enabled and their list. You can get modified list using supported parameters. </p>
-<h3 id="endpoint-arguments">Endpoint Arguments<a class="headerlink" href="#endpoint-arguments" title="Permanent link">#</a></h3>
-<p><code>start</code>: Should be an integer value. It's an index value of starting point of the list.</p>
-<p><code>count</code>: Should be an integer value. Total entries number you want to display. </p>
-<p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj --endpoint-args start:1,count:1
-
-Please wait while retrieving data ...
-{
-  &quot;start&quot;: 1,
-  &quot;totalEntriesCount&quot;: 3,
-  &quot;entriesCount&quot;: 1,
-  &quot;entries&quot;: [
-    {
-      &quot;dn&quot;: &quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;,
-      &quot;id&quot;: &quot;3a0e91a4-b79b-37c2-9df7-122247e8ed9c&quot;,
-      &quot;createdAt&quot;: &quot;2023-08-15T05:56:19&quot;,
-      &quot;taskActive&quot;: false,
-      &quot;finishedAt&quot;: &quot;2023-08-15T05:56:42&quot;,
-      &quot;details&quot;: {
-        &quot;error&quot;: &quot;Archive missing web and/or code subdirectories&quot;,
-        &quot;flowsError&quot;: null,
-        &quot;projectMetadata&quot;: {
-          &quot;projectName&quot;: &quot;testAuth&quot;,
-          &quot;configs&quot;: null
-        }
-      },
-      &quot;baseDn&quot;: &quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;
-    }
-  ]
-}
-</code></pre></div>
-<h2 id="view-agama-project-by-name">View Agama Project By Name<a class="headerlink" href="#view-agama-project-by-name" title="Permanent link">#</a></h2>
-<p>You can get the details of an Agama project deployed in Janssen by the project name. Commandline for this operation as below:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-by-name --endpoint-args name:&quot;agama-project-name&quot;
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;totalEntriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;entriesCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3a0e91a4-b79b-37c2-9df7-122247e8ed9c&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-15T05:56:19&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;taskActive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;finishedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-08-15T05:56:42&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Archive missing web and/or code subdirectories&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;flowsError&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;projectMetadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;projectName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testAuth&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="view-agama-project-by-name">View Agama Project By Name<a class="headerlink" href="#view-agama-project-by-name" title="Permanent link">#</a></h3>
+<p>You can get the details of an Agama project deployed in the Janssen Server
+by the project name. The command line for this operation is as below:</p>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-by-name <span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;agama-project-name&quot;</span>
 </code></pre></div>
 <p><strong>Example:</strong>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-by-name --endpoint-args name:testAuth
-Please wait while retrieving data ...
-{
-  &quot;dn&quot;: &quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;,
-  &quot;id&quot;: &quot;3a0e91a4-b79b-37c2-9df7-122247e8ed9c&quot;,
-  &quot;createdAt&quot;: 1687247278717,
-  &quot;taskActive&quot;: false,
-  &quot;finishedAt&quot;: 1687247288646,
-  &quot;assets&quot;: null,
-  &quot;details&quot;: {
-    &quot;folders&quot;: null,
-    &quot;libs&quot;: [],
-    &quot;flowsError&quot;: {
-      &quot;imShakil.co.basicAuth&quot;: null
-    },
-    &quot;error&quot;: null,
-    &quot;projectMetadata&quot;: {
-      &quot;projectName&quot;: &quot;testAuth&quot;,
-      &quot;author&quot;: &quot;imShakil&quot;,
-      &quot;type&quot;: &quot;community&quot;,
-      &quot;description&quot;: &quot;testing authentication with janssen server&quot;,
-      &quot;version&quot;: &quot;1.0.0&quot;,
-      &quot;configs&quot;: null
-    }
-  },
-  &quot;baseDn&quot;: &quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;
-}
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-by-name <span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;testAuth&quot;</span>
 </code></pre></div></p>
-<h2 id="post-agama-project-in-janssen">Post Agama Project in Janssen<a class="headerlink" href="#post-agama-project-in-janssen" title="Permanent link">#</a></h2>
-<p>Also, You can deploy agama project in Janssen through commandline.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-agama-prj --endpoint-args name:agama-project-name
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3a0e91a4-b79b-37c2-9df7-122247e8ed9c&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;createdAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1687247278717</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;taskActive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;finishedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1687247288646</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;assets&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;folders&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;libs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;flowsError&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;imShakil.co.basicAuth&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;projectMetadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;projectName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testAuth&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;imShakil&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;community&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testing authentication with janssen server&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jansId=3a0e91a4-b79b-37c2-9df7-122247e8ed9c,ou=deployments,ou=agama,o=jans&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="post-agama-project-in-janssen">Post Agama Project in Janssen<a class="headerlink" href="#post-agama-project-in-janssen" title="Permanent link">#</a></h3>
+<p>You can deploy the Agama project in the Janssen Server through the command line
+using the <code>post-agama-prj</code> operation. Here the <code>agama-project-file</code> is an
+archive file that holds the bundled Agama project and follows the
+<a href="../../../agama/gama-format/">.gama</a> specification.</p>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-agama-prj <span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;name:project-name&quot;</span> --data agama-project-file
 </code></pre></div>
 <p><strong>Example:</strong></p>
-<p>Let's upload <a href="../../../assets/agama/journey.zip">a test project</a></p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id=post-agama-prj --url-suffix=&quot;name:Agama Lab Journey&quot; --data /tmp/journey.zip
-Server Response:
-{
-  &quot;message&quot;: &quot;A deployment task for project Agama Lab Journey has been queued. Use the GET endpoint to poll status&quot;
-}
+<p>Let's upload <a href="../../../assets/agama/journey.zip">a test project</a> Zip file.
+This zip file contains the artifacts of an Agama project and follows the <code>.gama</code>
+specification.
+Assuming that the zip file has been downloaded in the folder at
+path <code>/tmp/journey.zip</code>, the command below will upload a new Agama project with
+specified name in the Janssen Server.</p>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id<span class="o">=</span>post-agama-prj <span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;name:Agama Lab Journey&quot;</span> --data /tmp/journey.zip
 </code></pre></div>
-<p>To get uploaded projects:</p>
-<div class="highlight"><pre><span></span><code>Please wait while retrieving data ...
-{
-  &quot;start&quot;: 0,
-  &quot;totalEntriesCount&quot;: 1,
-  &quot;entriesCount&quot;: 1,
-  &quot;entries&quot;: [
-    {
-      &quot;dn&quot;: &quot;jansId=a17e9a67-d44f-3b83-9e4d-4bebab375913,ou=deployments,ou=agama,o=jans&quot;,
-      &quot;id&quot;: &quot;a17e9a67-d44f-3b83-9e4d-4bebab375913&quot;,
-      &quot;createdAt&quot;: &quot;2024-03-12T18:15:29&quot;,
-      &quot;taskActive&quot;: false,
-      &quot;finishedAt&quot;: &quot;2024-03-12T18:15:33&quot;,
-      &quot;details&quot;: {
-        &quot;error&quot;: &quot;There were problems processing one or more flows&quot;,
-        &quot;autoconfigure&quot;: false,
-        &quot;flowsError&quot;: {
-          &quot;io.jans.agamalab.credsEnrollment.fido2&quot;: &quot;Qualified name mismatch: io.jans.agamalab.credsEnrollment.fido2 vs. io.jans.agamaLab.credsEnrollment.fido2&quot;,
-          &quot;io.jans.agamaLab.registration&quot;: null,
-          &quot;io.jans.agamaLab.credsEnrollment.otp&quot;: null,
-          &quot;io.jans.agamaLab.authenticator.otp&quot;: null,
-          &quot;io.jans.agamaLab.authenticator.super_gluu&quot;: null,
-          &quot;io.jans.agamaLab.credsEnrollment.super_gluu&quot;: null,
-          &quot;io.jans.inbound.oauth2.AuthzCode&quot;: null,
-          &quot;io.jans.agamaLab.emailVerification&quot;: null,
-          &quot;io.jans.agamaLab.authenticator&quot;: null,
-          &quot;io.jans.agamaLab.authenticator.fido2&quot;: null,
-          &quot;io.jans.inbound.oauth2.AuthzCodeWithUserInfo&quot;: null,
-          &quot;io.jans.agamaLab.main&quot;: null,
-          &quot;io.jans.agamaLab.githubAuthn&quot;: null,
-          &quot;io.jans.agamaLab.credsEnrollment&quot;: null
-        },
-        &quot;projectMetadata&quot;: {
-          &quot;projectName&quot;: &quot;Agama Lab Journey&quot;,
-          &quot;author&quot;: &quot;jgomer2001&quot;,
-          &quot;type&quot;: &quot;Community&quot;,
-          &quot;configs&quot;: {
-            &quot;io.jans.agamaLab.credsEnrollment.super_gluu&quot;: {
-              &quot;timeout&quot;: 80
-            },
-            &quot;io.jans.agamaLab.authenticator.super_gluu&quot;: {
-              &quot;timeout&quot;: 80
-            },
-            &quot;io.jans.agamaLab.credsEnrollment.otp&quot;: {
-              &quot;timeout&quot;: 80,
-              &quot;maxAttempts&quot;: 4
-            },
-            &quot;io.jans.agamaLab.githubAuthn&quot;: {
-              &quot;authzEndpoint&quot;: &quot;https://github.com/login/oauth/authorize&quot;,
-              &quot;tokenEndpoint&quot;: &quot;https://github.com/login/oauth/access_token&quot;,
-              &quot;userInfoEndpoint&quot;: &quot;https://api.github.com/user&quot;,
-              &quot;clientId&quot;: &quot;YOUR CLIENT ID HERE&quot;,
-              &quot;clientSecret&quot;: &quot;YOUR CLIENT SECRET&quot;,
-              &quot;scopes&quot;: [
-                &quot;user&quot;
-              ]
-            },
-            &quot;io.jans.agamaLab.main&quot;: {
-              &quot;minCredsRequired&quot;: 2,
-              &quot;supportedMethods&quot;: [
-                &quot;otp&quot;,
-                &quot;fido2&quot;
-              ]
-            },
-            &quot;io.jans.agamaLab.registration&quot;: {
-              &quot;recaptcha&quot;: {
-                &quot;enabled&quot;: false,
-                &quot;site_key&quot;: &quot;SITE KEY (if enabled was set to true), see deployment instructions&quot;
-              },
-              &quot;zohoCRM&quot;: {
-                &quot;clientId&quot;: &quot;see deployment instructions&quot;,
-                &quot;clientSecret&quot;: &quot;&quot;,
-                &quot;refreshToken&quot;: &quot;&quot;,
-                &quot;accountsUrl&quot;: &quot;https://accounts.zoho.com (domain-specific Zoho Accounts URL - the domain hosting the token endpoint)&quot;
-              }
-            }
-          }
-        }
-      },
-      &quot;baseDn&quot;: &quot;jansId=a17e9a67-d44f-3b83-9e4d-4bebab375913,ou=deployments,ou=agama,o=jans&quot;
-    }
-  ]
-}
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A deployment task for project Agama Lab Journey has been queued. Use the GET endpoint to poll status&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
-<p>Let's update configuration for this project with <a href="../../../assets/agama/journey-configs.json">sample project configuration</a>:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id=put-agama-prj --url-suffix &quot;name:Agama Lab Journey&quot; --data /tmp/journey-configs.json 
-Server Response:
-{
-  &quot;io.jans.agamaLab.registration&quot;: true,
-  &quot;io.jans.agamaLab.main&quot;: true,
-  &quot;io.jans.agamaLab.credsEnrollment.otp&quot;: true,
-  &quot;io.jans.agamaLab.authenticator.super_gluu&quot;: true,
-  &quot;io.jans.agamaLab.credsEnrollment.super_gluu&quot;: true,
-  &quot;io.jans.agamaLab.githubAuthn&quot;: true
-}
+<p>Now the project should be available in the
+<a href="#list-deployed-projects">list of deployed projects</a>.</p>
+<h3 id="retrieve-agama-project-configuration">Retrieve Agama Project Configuration<a class="headerlink" href="#retrieve-agama-project-configuration" title="Permanent link">#</a></h3>
+<p>To retrieve the Agama project configuration, use the <code>get-agama-prj-configs</code>
+operation.</p>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-configs <span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;name:agama-project-name&quot;</span>
 </code></pre></div>
-<h2 id="retrieve-agama-project-configuration">Retrieve Agama Project Configuration<a class="headerlink" href="#retrieve-agama-project-configuration" title="Permanent link">#</a></h2>
-<p>To retrieve agama project configuration:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-configs --endpoint-args name:agama-project-name
+<h3 id="update-agama-project">Update Agama Project<a class="headerlink" href="#update-agama-project" title="Permanent link">#</a></h3>
+<p>Let's update the configuration for project that we uploaded in
+<a href="#post-agama-project-in-janssen">the section above</a>:</p>
+<p>Take the
+<a href="../../../assets/agama/journey-configs.json">sample project configuration</a> and
+keep it under <code>/tmp/journey-configs.json</code>.</p>
+<p>Make a few test changes to the configuration and run the command below to
+update the configuration:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id<span class="o">=</span>put-agama-prj <span class="se">\</span>
+--url-suffix <span class="s2">&quot;name:Agama Lab Journey&quot;</span> --data /tmp/journey-configs.json 
 </code></pre></div>
-<h2 id="update-agama-project">Update Agama Project<a class="headerlink" href="#update-agama-project" title="Permanent link">#</a></h2>
-<p>To update existing agama project:
-<div class="highlight"><pre><span></span><code>/optjans/jans-cli/config-cli.py --operation-id put-agama-prj --endpoint-args name:agama-project-name
-</code></pre></div></p>
-<h2 id="delete-agama-project">Delete Agama Project<a class="headerlink" href="#delete-agama-project" title="Permanent link">#</a></h2>
-<p>To delete agama project by its name:
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-agama-prj --endpoint-args name:agama-project-name
-</code></pre></div></p>
-<h1 id="agama-flow-configuration">Agama Flow Configuration<a class="headerlink" href="#agama-flow-configuration" title="Permanent link">#</a></h1>
-<p>If you already deployed agama projects successfully in your janssen server through <a href="#agama">above</a> operations, you can check those agama flow status with these below operations:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info AgamaConfiguration
-
-Operation ID: agama-syntax-check
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.registration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.main&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.credsEnrollment.otp&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.authenticator.super_gluu&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.credsEnrollment.super_gluu&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;io.jans.agamaLab.githubAuthn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="delete-agama-project">Delete Agama Project<a class="headerlink" href="#delete-agama-project" title="Permanent link">#</a></h3>
+<p>To delete an Agama project by its name, use the <code>delete-agama-prj</code> operation.</p>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-agama-prj <span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;agama-project-name&quot;</span>
+</code></pre></div>
+<h3 id="agama-flow-configuration">Agama Flow Configuration<a class="headerlink" href="#agama-flow-configuration" title="Permanent link">#</a></h3>
+<p><code>AgamaConfiguration</code> task groups operations that help understand the correctness
+of the deployed Agama project configuration.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info AgamaConfiguration
+</code></pre></div>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code>Operation ID: agama-syntax-check
   Description: Determine if the text passed is valid Agama code
   Parameters:
   qname: Agama Flow name [string]
+</code></pre></div></td></tr></table></div>
+<h4 id="agama-flow-dsl-syntax">Agama Flow DSL Syntax<a class="headerlink" href="#agama-flow-dsl-syntax" title="Permanent link">#</a></h4>
+<p>To check if a deployed Agama project is running into Agama
+DSL related errors, use the <code>agama-syntax-check</code> operation as below:</p>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id agama-syntax-check <span class="se">\</span>
+--url-suffix qname:<span class="s2">&quot;fully-qualified-flow-name&quot;</span>
 </code></pre></div>
-<h2 id="agama-flow-syntax">Agama Flow Syntax<a class="headerlink" href="#agama-flow-syntax" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id agama-syntax-check --url-suffix qname:
+<p><strong><em>Example</em></strong>:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id agama-syntax-check <span class="se">\</span>
+--url-suffix qname:<span class="s2">&quot;imShakil.co.test&quot;</span>
 </code></pre></div>
-<p>You can do some syntax check with this operation-id. It will help to find out syntax error in agama low code projects. </p>
-<p><strong><em>Example</em></strong>:
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id agama-syntax-check --url-suffix qname:&quot;imShakil.co.test&quot;
-
-Server Response:
-{
-  &quot;error&quot;: &quot;mismatched input &#39;newline&#39; expecting &#39;Flow&#39;&quot;,
-  &quot;symbol&quot;: &quot;[@0,0:-1=&#39;newline&#39;,&lt;9&gt;,1:0]&quot;,
-  &quot;line&quot;: 1,
-  &quot;column&quot;: 0,
-  &quot;message&quot;: &quot;Syntax error: mismatched input &#39;newline&#39; expecting &#39;Flow&#39;\nSymbol: [@0,0:-1=&#39;newline&#39;,&lt;9&gt;,1:0]\nLine: 1\nColumn: 1&quot;
-}
-</code></pre></div></p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mismatched input &#39;newline&#39; expecting &#39;Flow&#39;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;symbol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;[@0,0:-1=&#39;newline&#39;,&lt;9&gt;,1:0]&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;line&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;column&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Syntax error: mismatched input &#39;newline&#39; expecting &#39;Flow&#39;\nSymbol: [@0,0:-1=&#39;newline&#39;,&lt;9&gt;,1:0]\nLine: 1\nColumn: 1&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
+<p>In Janssen, You can deploy and customize an Agama project using
+the <a href="../config-tools/jans-tui/">Text-Based UI</a> also.</p>
+<p>You can start TUI using the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo /opt/jans/jans-cli/jans_cli_tui.py
+</code></pre></div>
+<h3 id="agama-project-screen">Agama Project Screen<a class="headerlink" href="#agama-project-screen" title="Permanent link">#</a></h3>
+<p>Navigate to <code>Auth Server</code> -&gt; <code>Agama</code> to open the Agama projects screen as shown 
+in the image below.</p>
+<ul>
+<li>
+<p>To get the list of currently added projects, bring the control to <code>Search</code> box
+  (using the tab key), and press <code>Enter</code>. Type the search string to search for
+  projects with matching names.</p>
+</li>
+<li>
+<p>Deploy a new project using <code>Upload Project</code> button. It'll open the explore
+  dialogue. Using this dialogue, navigate the file system and select<br />
+  the <code>.gama</code> archive for the new project.</p>
+</li>
+</ul>
+<p><img alt="image" src="../../../assets/tui-agama-project-list.png" /></p>
+<h3 id="agama-project-help-menu">Agama Project Help Menu<a class="headerlink" href="#agama-project-help-menu" title="Permanent link">#</a></h3>
+<p>TUI provides key-press commands to open various dialogues that help manage and
+configure Agama projects. All the key-press commands are listed in the help menu.
+Press <code>F1</code> to bring up the help menu as shown in the screen below.</p>
+<p><img alt="image" src="../../../assets/tui-agama-project-help.png" /></p>
+<h3 id="agama-project-detail-screen">Agama Project Detail Screen<a class="headerlink" href="#agama-project-detail-screen" title="Permanent link">#</a></h3>
+<p>Use the appropriate key-press command from <a href="#agama-project-help-menu">help screen</a>
+to bring up the project detail screen which is shown in the image below.</p>
+<p><img alt="image" src="../../../assets/tui-agama-project-details.png" /></p>
+<p>The project details screen shows important details about the Agama project.
+In case the project deployment is facing an error, this screen also shows
+these errors and the corresponding flows.</p>
+<p>All the flows in the project are also listed by their fully qualified names.
+Fully qualified names are useful when invoking flows.</p>
+<p>The project details screen also shows the JSON configuration by navigating to and
+pressing the <code>View Configuration</code> button.</p>
+<p><img alt="image" src="../../../assets/tui-agama-project-view-conf.png" /></p>
+<h3 id="agama-project-configuration-screen">Agama Project Configuration Screen<a class="headerlink" href="#agama-project-configuration-screen" title="Permanent link">#</a></h3>
+<p>Use the appropriate key-press command from <a href="#agama-project-help-menu">help screen</a>
+to bring up the Agama project configuration screen which is shown in the image 
+below.</p>
+<ul>
+<li>The screen allows the export and import of the configuration.</li>
+<li>The sample configuration can serve as a template. Export it into a file, then
+  make the necessary changes to it and import it back to correctly
+  configure the project.</li>
+</ul>
+<p><img alt="image" src="../../../assets/tui-agama-project-manage-conf.png" /></p>
+<h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
+<p>Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring Agama projects. Endpoint details are published in the <a href="../../reference/openapi/">Swagger
+document</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-03-13T18:31:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-03-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-04T17:16:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-04</span>
       
         <br>
         Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-07-05T07:37:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-07-05</span>
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-04T17:16:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-04</span>
       
     
   </small>
