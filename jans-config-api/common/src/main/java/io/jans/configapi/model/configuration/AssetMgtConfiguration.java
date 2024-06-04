@@ -34,7 +34,7 @@ public class AssetMgtConfiguration {
     /**
      * List of supported service module where asset can be uploaded
      */
-    private List<String> jansModules;
+    private List<String> jansServiceModule;
 
     /**
      * Asset type mapped to server directory
@@ -81,14 +81,6 @@ public class AssetMgtConfiguration {
         this.assetBaseDirectory = assetBaseDirectory;
     }
 
-    public List<String> getJansModules() {
-        return jansModules;
-    }
-
-    public void setJansModules(List<String> jansModules) {
-        this.jansModules = jansModules;
-    }
-
     public List<AssetDirMapping> getAssetDirMapping() {
         return assetDirMapping;
     }
@@ -97,12 +89,19 @@ public class AssetMgtConfiguration {
         this.assetDirMapping = assetDirMapping;
     }
 
+    public List<String> getJansServiceModule() {
+        return jansServiceModule;
+    }
+
+    public void setJansServiceModule(List<String> jansServiceModule) {
+        this.jansServiceModule = jansServiceModule;
+    }
+
     @Override
     public String toString() {
         return "AssetMgtConfiguration [assetMgtEnabled=" + assetMgtEnabled + ", assetServerUploadEnabled="
                 + assetServerUploadEnabled + ", fileExtensionValidationEnabled=" + fileExtensionValidationEnabled
                 + ", moduleNameValidationEnabled=" + moduleNameValidationEnabled + ", assetBaseDirectory="
-                + assetBaseDirectory + ", jansModules=" + jansModules + ", assetDirMapping=" + assetDirMapping + "]";
+                + assetBaseDirectory + ", jansServiceModule=" + jansServiceModule + ", assetDirMapping=" + assetDirMapping + "]";
     }
-
 }

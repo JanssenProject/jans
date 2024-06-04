@@ -237,7 +237,7 @@ func resourceKCSamlTRRead(ctx context.Context, d *schema.ResourceData, m any) di
 		return diag.FromErr(err)
 	}
 
-	tflog.Debug(ctx, "ResourceKCSamlTRRead: Read trust relationship: inum=%s, dn=%s", map[string]any{"Inum": tr.Inum})
+	tflog.Debug(ctx, "ResourceKCSamlTRRead: Read trust relationship", map[string]any{"Inum": tr.Inum})
 
 	return nil
 }
