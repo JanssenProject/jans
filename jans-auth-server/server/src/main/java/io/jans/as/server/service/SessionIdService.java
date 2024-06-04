@@ -63,6 +63,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import static io.jans.as.server.service.AcrService.isAgama;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
@@ -189,7 +190,8 @@ public class SessionIdService {
             }
 
             List<String> acrValuesList = acrValuesList(acrValuesStr);
-            boolean isAcrChanged = !acrValuesList.isEmpty() && !acrValuesList.contains(sessionAcr);
+            boolean isAgama = isAgama(sessionAcr) && !acrValuesList.isEmpty() && isAgama(acrValuesList.iterator().next());
+            boolean isAcrChanged = !acrValuesList.isEmpty() && !acrValuesList.contains(sessionAcr) && !isAgama;
             if (isAcrChanged) {
                 Map<String, Integer> acrToLevel = externalAuthenticationService.acrToLevelMapping();
                 Integer sessionAcrLevel = Util.asInt(acrToLevel.get(externalAuthenticationService.scriptName(sessionAcr)), -1);
