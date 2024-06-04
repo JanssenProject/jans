@@ -32,6 +32,8 @@ import static io.jans.as.model.util.StringUtils.implode;
 @Named
 public class AcrService {
 
+    public static final String AGAMA = "agama";
+
     @Inject
     private Logger log;
 
@@ -48,7 +50,7 @@ public class AcrService {
     private AppConfiguration appConfiguration;
 
     public static boolean isAgama(String acr) {
-        return StringUtils.isNotBlank(acr) &&  acr.startsWith("agama_");
+        return StringUtils.isNotBlank(acr) && (acr.startsWith("agama_") || acr.equalsIgnoreCase(AGAMA));
     }
 
     public void validateAcrs(AuthzRequest authzRequest, Client client) throws AcrChangedException {
