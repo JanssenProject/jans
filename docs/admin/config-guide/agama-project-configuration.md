@@ -8,33 +8,40 @@ subtitle: Learn how to manage and change Agama project configuration
 
 # Agama project configuration
 
-You can use any of the available configuration tools to perform this
-configuration based on your needs.
+Agama project configuration involves adding and removing Agama projects to 
+Janssen Server along with configuring and troubleshooting these project 
+deployments.
+
+The Janssen Server provides multiple configuration tools to perform these
+tasks.
 
 === "Use Command-line"
 
-    Learn how to use Jans CLI [here](./config-tools/jans-cli/README.md) or Jump straight to 
+    Use the command line to perform actions from the shell. Learn how to use Jans CLI 
+    [here](./config-tools/jans-cli/README.md) or jump straight to the 
     [configuration steps](#using-command-line)
 
 === "Use Text-based UI"
 
+    Use a fully functional text-based user interface from the terminal. 
     Learn how to use Jans Text-based UI (TUI) 
-    [here](./config-tools/jans-tui/README.md) or Jump straight to
+    [here](./config-tools/jans-tui/README.md) or jump straight to the
     [configuration steps](#using-text-based-ui)
 
 === "Use REST API"
 
-    Learn how to use Janssen Server Config API 
-    [here](./config-tools/config-api/README.md) or Jump straight to
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](./config-tools/config-api/README.md) or Jump straight to the
     [configuration steps](#using-configuration-rest-api)
 
-[here](./config-tools/config-api/README.md)
+
 
 ##  Using Command Line
 
 In the Janssen Server, you can deploy and customize the Agama project using the
-command line. To get the details of Janssen command line operations relevant to 
-Agama projects, you can check the operations under `Agama` task using the 
+command line. To get the details of Janssen command line operations relevant to
+Agama projects, you can check the operations under `Agama` task using the
 command below:
 
 ```bash title="Command"
@@ -75,19 +82,19 @@ Operation ID: get-agama-prj
 ```
 
 In the sections below, we will see how to configure and manage Agama
-projects via command line using the above operations.
+projects via the command line using the above operations.
 
 ### List Deployed Projects
 
-Use the `get-agama-prj` operation to retrieve the list of deployed Agama 
+Use the `get-agama-prj` operation to retrieve the list of deployed Agama
 projects:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj
 ```
 
-The output will list Agama projects that are added to this Janssen Server 
-deployment. 
+The output will list Agama projects that are added to this Janssen Server
+deployment.
 
 ```json title="Sample Output" linenums="1"
 {
@@ -130,12 +137,12 @@ how and what data to retrieve or process.
 
 There are two endpoint arguments available to the `get-agama-prj` operation.
 
-- `start`: Should be an integer value. It's an index value of the starting point of
-the list.
+- `start`: Should be an integer value. It's an index value of the starting point 
+  of the list.
 
 - `count`: Should be an integer value. Total entries number you want to display.
 
-For example, to fetch details of the project at index 1 only, use the command 
+For example, to fetch details of the project at index 1 only, use the command
 below.
 
 ```bash title="Command"
@@ -217,8 +224,8 @@ by the project name. The command line for this operation is as below:
 ### Post Agama Project in Janssen
 
 You can deploy the Agama project in the Janssen Server through the command line
-using the `post-agama-prj` operation. Here the `agama-project-file` is an 
-archive file that holds the bundled Agama project and follows the 
+using the `post-agama-prj` operation. Here the `agama-project-file` is an
+archive file that holds the bundled Agama project and follows the
 [.gama](../../agama/gama-format.md) specification.
 
 ```bash title="Sample Command"
@@ -261,7 +268,7 @@ operation.
 
 ### Update Agama Project
 
-Let's update the configuration for project that we uploaded in 
+Let's update the configuration for project that we uploaded in
 [the section above](#post-agama-project-in-janssen):
 
 Take the
@@ -353,14 +360,14 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 
 ### Agama Project Screen
 
-Navigate to `Auth Server` -> `Agama` to open the Agama projects screen as shown in
-the image below.
+Navigate to `Auth Server` -> `Agama` to open the Agama projects screen as shown 
+in the image below.
 
 * To get the list of currently added projects, bring the control to `Search` box
   (using the tab key), and press `Enter`. Type the search string to search for
   projects with matching names.
 
-* Deploy a new project using `Upload Project` button. It'll open explore
+* Deploy a new project using `Upload Project` button. It'll open the explore
   dialogue. Using this dialogue, navigate the file system and select  
   the `.gama` archive for the new project.
 
@@ -377,37 +384,38 @@ Press `F1` to bring up the help menu as shown in the screen below.
 ### Agama Project Detail Screen
 
 Use the appropriate key-press command from [help screen](#agama-project-help-menu)
-to bring up the project detail screen which is shown in the image below. 
+to bring up the project detail screen which is shown in the image below.
 
 ![image](../../assets/tui-agama-project-details.png)
 
-Project details screen shows important details pertaining to the Agama project.
+The project details screen shows important details about the Agama project.
 In case the project deployment is facing an error, this screen also shows
 these errors and the corresponding flows.
 
 All the flows in the project are also listed by their fully qualified names.
 Fully qualified names are useful when invoking flows.
 
-Project details screen also shows the JSON configuration by navigating to and 
-pressing the `View Configuration` button. 
+The project details screen also shows the JSON configuration by navigating to and
+pressing the `View Configuration` button.
 
 ![image](../../assets/tui-agama-project-view-conf.png)
 
 ### Agama Project Configuration Screen
 
 Use the appropriate key-press command from [help screen](#agama-project-help-menu)
-to bring up the Agama project configuration screen which is shown in the image below.
+to bring up the Agama project configuration screen which is shown in the image 
+below.
 
-* The screen allows export and import of the configuration.
+* The screen allows the export and import of the configuration.
 * The sample configuration can serve as a template. Export it into a file, then
-make the necessary changes to it and import it back in order to correctly 
-configure the project.
+  make the necessary changes to it and import it back to correctly
+  configure the project.
 
 ![image](../../assets/tui-agama-project-manage-conf.png)
 
 
 ## Using Configuration REST API
 
-Janssen Server Configuration REST API exposes relavent endpoints for managing
-and configuring Agama projects. Endpoint details are publish in the [Swagger 
+Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring Agama projects. Endpoint details are published in the [Swagger
 document](./../reference/openapi.md).
