@@ -169,6 +169,10 @@ public class SessionIdService {
         return acr;
     }
 
+    public static boolean isAgamaInSessionAndRequest(String sessionAcr, List<String> acrValuesList) {
+        return isAgama(sessionAcr) && !acrValuesList.isEmpty() && isAgama(acrValuesList.iterator().next());
+    }
+
     // #34 - update session attributes with each request
     // 1) redirect_uri change -> update session
     // 2) acr change -> throw acr change exception
@@ -190,8 +194,7 @@ public class SessionIdService {
             }
 
             List<String> acrValuesList = acrValuesList(acrValuesStr);
-            boolean isAgama = isAgama(sessionAcr) && !acrValuesList.isEmpty() && isAgama(acrValuesList.iterator().next());
-            boolean isAcrChanged = !acrValuesList.isEmpty() && !acrValuesList.contains(sessionAcr) && !isAgama;
+            boolean isAcrChanged = !acrValuesList.isEmpty() && !acrValuesList.contains(sessionAcr) && !isAgamaInSessionAndRequest(sessionAcr, acrValuesList);
             if (isAcrChanged) {
                 Map<String, Integer> acrToLevel = externalAuthenticationService.acrToLevelMapping();
                 Integer sessionAcrLevel = Util.asInt(acrToLevel.get(externalAuthenticationService.scriptName(sessionAcr)), -1);
@@ -916,9 +919,16 @@ public class SessionIdService {
 
         HashSet<String> resultAcrs = new HashSet<>();
         for (String acr : acrs) {
-            resultAcrs.add(externalAuthenticationService.scriptName(acr));
+            String acrForScript = isAgama(acr) ? AcrService.AGAMA : acr;
+            final String scriptName = externalAuthenticationService.scriptName(acrForScript);
+            if (StringUtils.isNotBlank(scriptName)) {
+                resultAcrs.add(acr);
+            }
         }
 
+        if (log.isTraceEnabled()) {
+            log.trace("acrValuesList {}", resultAcrs);
+        }
         return new ArrayList<>(resultAcrs);
     }
 
