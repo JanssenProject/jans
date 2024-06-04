@@ -144,6 +144,7 @@ class Plugin(DialogUtils):
 
 
         def display_file_browser_dialog():
+            file_browser_dialog.future = asyncio.futures.Future()
             common_data.app.show_jans_dialog(file_browser_dialog)
 
 
