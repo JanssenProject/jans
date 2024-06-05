@@ -94,6 +94,7 @@ public abstract class BaseTest {
     protected String gluuConfigurationEndpoint;
     protected String tokenEndpoint;
     protected String tokenRevocationEndpoint;
+    protected String tokenStatusListEndpoint;
     protected String userInfoEndpoint;
     protected String clientInfoEndpoint;
     protected String checkSessionIFrame;
@@ -302,6 +303,14 @@ public abstract class BaseTest {
 
     public void setAuthorizationChallengeEndpoint(String authorizationChallengeEndpoint) {
         this.authorizationChallengeEndpoint = authorizationChallengeEndpoint;
+    }
+
+    public String getTokenStatusListEndpoint() {
+        return tokenStatusListEndpoint;
+    }
+
+    public void setTokenStatusListEndpoint(String tokenStatusListEndpoint) {
+        this.tokenStatusListEndpoint = tokenStatusListEndpoint;
     }
 
     public String getTokenEndpoint() {
@@ -1000,6 +1009,7 @@ public abstract class BaseTest {
 
             authorizationEndpoint = response.getAuthorizationEndpoint();
             authorizationChallengeEndpoint = response.getAuthorizationChallengeEndpoint();
+            tokenStatusListEndpoint = response.getTokenStatusListEndpoint();
             tokenEndpoint = response.getTokenEndpoint();
             tokenRevocationEndpoint = response.getRevocationEndpoint();
             userInfoEndpoint = response.getUserInfoEndpoint();
@@ -1024,6 +1034,7 @@ public abstract class BaseTest {
 
             authorizationEndpoint = context.getCurrentXmlTest().getParameter("authorizationEndpoint");
             authorizationChallengeEndpoint = context.getCurrentXmlTest().getParameter("authorizationChallengeEndpoint");
+            tokenStatusListEndpoint = context.getCurrentXmlTest().getParameter("tokenStatusListEndpoint");
             tokenEndpoint = context.getCurrentXmlTest().getParameter("tokenEndpoint");
             tokenRevocationEndpoint = context.getCurrentXmlTest().getParameter("tokenRevocationEndpoint");
             userInfoEndpoint = context.getCurrentXmlTest().getParameter("userInfoEndpoint");
