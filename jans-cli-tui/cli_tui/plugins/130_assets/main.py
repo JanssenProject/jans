@@ -144,6 +144,7 @@ class Plugin(DialogUtils):
 
 
         def display_file_browser_dialog():
+
             file_browser_dialog = jans_file_browser_dialog(
                 common_data.app,
                 path=common_data.app.browse_path,

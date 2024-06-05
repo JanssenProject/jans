@@ -1,5 +1,6 @@
 package io.jans.as.server.service;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.common.UserService;
@@ -81,6 +82,18 @@ public class SessionIdServiceTest {
 
     @Mock
     private StatService statService;
+
+    @Test
+    public void isAgamaInSessionAndRequest_forAgama_shouldReturnTrue() {
+        assertTrue(SessionIdService.isAgamaInSessionAndRequest("agama", Lists.newArrayList("agama_io.jans.agamaLab.main")));
+        assertTrue(SessionIdService.isAgamaInSessionAndRequest("agama", Lists.newArrayList("agama")));
+    }
+
+    @Test
+    public void isAgamaInSessionAndRequest_forBasic_shouldReturnFalse() {
+        assertFalse(SessionIdService.isAgamaInSessionAndRequest("agama", Lists.newArrayList("basic")));
+        assertFalse(SessionIdService.isAgamaInSessionAndRequest("basic", Lists.newArrayList("agama_io.jans.agamaLab.main")));
+    }
 
     @Test
     public void hasAllScopes_whenSessionIsNull_shouldReturnFalse() {

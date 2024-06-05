@@ -167,6 +167,8 @@ spec:
           restartPolicy: Never
 {{- end }}
 
+---
+
 {{ if and (index .Values "kc-scheduler" "enabled") (.Values.saml.enabled) -}}
 kind: CronJob
 apiVersion: batch/v1
