@@ -507,7 +507,7 @@ Repeat 3 times max
 ```
 
 </td>
-		<td>A loop that runs 3 iterations at most.<br/>A page is shown at every iteration.<br/>If the value entered by the user matches that of `month` variable, the loop is aborted earlier</td>
+		<td>A loop that runs 3 iterations at most.<br/>A page is shown at every iteration.<br/>If the value entered by the user matches that of <code>month</code> variable, the loop is aborted earlier</td>
 	</tr>
 	<tr>
 <td>
@@ -572,7 +572,7 @@ Iterate over human using attribute
 ```
 
 </td>
-		<td>Iterates over the keys of the map printing both the key and its associated value. To learn about the <code>.$</code> notation see [Maps and dot notation](#maps-and-dot-notation)</td>
+		<td>Iterates over the keys of the map printing both the key and its associated value. To learn about the <code>.$</code> notation see <a href="#maps-and-dot-notation">Maps and dot notation</a></td>
 	</tr>
 	<tr>
 <td>
