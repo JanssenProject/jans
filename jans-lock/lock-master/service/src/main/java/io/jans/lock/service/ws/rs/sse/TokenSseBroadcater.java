@@ -1,7 +1,7 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
- * Copyright (c) 2023, Janssen Project
+ * Copyright (c) 2024, Janssen Project
  */
 
 package io.jans.lock.service.ws.rs.sse;
@@ -34,7 +34,6 @@ public class TokenSseBroadcater {
 
 	@Inject
 	private SseBroadcaster sseBroadcaster;
-
 
 	@PostConstruct
 	public void init() {
