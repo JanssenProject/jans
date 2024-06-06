@@ -22,8 +22,8 @@ from utils.static import DialogResult, cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_spinner import Spinner
+from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
-
 
 
 class Plugin(DialogUtils):
@@ -62,7 +62,9 @@ class Plugin(DialogUtils):
         """The initialization for this plugin
         """
 
+        self.app.create_background_task(self.get_initial_data())
         self.app.create_background_task(self.get_assets())
+
 
     def set_center_frame(self) -> None:
         """center frame content
@@ -113,9 +115,7 @@ class Plugin(DialogUtils):
                 self.app.show_message(common_strings.error, HTML(_("Please fill <b>Description</b> and <b>Display Name</b>")), tobefocused=dialog)
                 return
 
-            for prop in data['jansModuleProperty'][:]:
-                if not prop:
-                    data['jansModuleProperty'].remove(prop)
+            data['jansService'] = [data.pop('jansService')]
 
             data.pop('document', None)
             form_data = {'assetFile': self.asset_file_path, 'document': data}
@@ -144,6 +144,15 @@ class Plugin(DialogUtils):
 
 
         def display_file_browser_dialog():
+
+            file_browser_dialog = jans_file_browser_dialog(
+                common_data.app,
+                path=common_data.app.browse_path,
+                browse_type=BrowseType.file,
+                ok_handler=read_asset,
+                extensions=[f'.{e}' for e in common_data.asset_types]
+            )
+
             common_data.app.show_jans_dialog(file_browser_dialog)
 
 
@@ -165,9 +174,18 @@ class Plugin(DialogUtils):
                             )
         enabled_widget = common_data.app.getTitledCheckBox(_("Enabled"), name='jansEnabled', checked=data.get('jansEnabled'), style=cli_style.check_box)
         description_widget = common_data.app.getTitledText(_("Description"), name='description', value=data.get('description', ''), style=cli_style.edit_text_required)
-        #selected_widget = common_data.app.getTitledCheckBox(_("Selected"), name='selected', checked=data.get('selected'), style=cli_style.check_box)
-        jans_module_widget = common_data.app.getTitledText(_("Jans Module Properties"), name='jansModuleProperty', value='\n'.join(data.get('jansModuleProperty', [])), height=3, jans_list_type=True, style=cli_style.edit_text, jans_help=_("Enter property each line"))
-        #document_widget = common_data.app.getTitledText(_("Document"), name='document', height=3, value=data.get('document', ''), style=cli_style.edit_text)
+
+        jans_serice_widget = self.app.getTitledWidget(
+                                    _("Jans Service"),
+                                    name='jansService',
+                                    widget=DropDownWidget(
+                                        values=[(s,s) for s in common_data.asset_services],
+                                        value=data.get('jansService', common_data.asset_services)[0],
+                                        select_one_option=False
+                                        ),
+                                    jans_help=_("Select Jans Service"),
+                                    style=cli_style.edit_text
+                                    )
 
         save_button = Button(_("Save"), handler=save_asset)
         save_button.keep_dialog = True
@@ -186,16 +204,11 @@ class Plugin(DialogUtils):
             description_widget,
             jans_level_widget,
             enabled_widget,
-            #selected_widget,
-            jans_module_widget,
-            #document_widget,
+            jans_serice_widget,
             ],
              width=D())
 
         edit_asset_dialog = JansGDialog(common_data.app, title=title, body=body, buttons=buttons, width=common_data.app.dialog_width)
-
-        file_browser_dialog = jans_file_browser_dialog(common_data.app, path=common_data.app.browse_path, browse_type=BrowseType.file, ok_handler=read_asset)
-
 
         common_data.app.show_jans_dialog(edit_asset_dialog)
 
@@ -241,7 +254,7 @@ class Plugin(DialogUtils):
         self.app.start_progressing(_("Retreiving assets from server..."))
         response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
         self.app.stop_progressing()
-        
+
         try:
             result = response.json()
         except Exception as e:
@@ -266,3 +279,19 @@ class Plugin(DialogUtils):
                 self.assets_list_box.add_item((asset_info['inum'], asset_info['displayName'], asset_info['jansEnabled'], asset_info['creationDate']))
 
             self.assets_container = self.assets_list_box
+
+
+    async def get_initial_data(self) -> None:
+        if not hasattr(common_data, 'asset_services'):
+            response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, {'operation_id': 'get-asset-services'})
+            try:
+                common_data.asset_services = response.json()
+            except Exception as e:
+                self.app.logger.error(f"Fail to get asset services: {e}")
+
+        if not hasattr(common_data, 'asset_types'):
+            response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, {'operation_id': 'get-asset-types'})
+            try:
+                common_data.asset_types = response.json()
+            except Exception as e:
+                self.app.logger.error(f"Fail to get asset types: {e}")
