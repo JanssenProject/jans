@@ -20,7 +20,7 @@ public class AuthUtil {
 
     @Inject
     ConfService confService;
-
+    
     @Inject
     ClientService cltSrv;
 
