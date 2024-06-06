@@ -6,8 +6,19 @@
 
 package io.jans.as.server.service;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang3.BooleanUtils;
+import org.json.JSONArray;
+import org.slf4j.Logger;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.config.StaticConfiguration;
@@ -23,18 +34,8 @@ import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import org.apache.commons.lang3.BooleanUtils;
-import org.json.JSONArray;
-import org.slf4j.Logger;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * Provides operations with clients.
@@ -43,8 +44,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * @author Yuriy Movchan Date: 04/15/2014
  * @version October 22, 2016
  */
-@Stateless
-@Named
+@ApplicationScoped
 public class ClientService {
 
     @Inject
