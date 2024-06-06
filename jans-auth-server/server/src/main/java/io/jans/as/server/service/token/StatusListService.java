@@ -4,14 +4,11 @@ import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.service.DiscoveryService;
-import io.jans.orm.PersistenceEntryManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.core.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Yuriy Z
@@ -29,9 +26,7 @@ public class StatusListService {
     private DiscoveryService discoveryService;
 
     @Inject
-    private PersistenceEntryManager persistenceEntryManager;
-
-    private final AtomicInteger localIndex = new AtomicInteger(0);
+    private StatusListIndexService statusListIndexService;
 
     public Response requestStatusList(String acceptHeader) {
         log.debug("Attempting to request token_status_list, acceptHeader: {} ...", acceptHeader);
@@ -49,18 +44,12 @@ public class StatusListService {
         }
 
         final JSONObject indexAndUri = new JSONObject();
-        indexAndUri.put("idx", nextIndex());
+        indexAndUri.put("idx", statusListIndexService.nextIndex());
         indexAndUri.put("uri", discoveryService.getTokenStatusListEndpoint());
 
         final JSONObject statusList = new JSONObject();
         statusList.put("status_list", indexAndUri);
 
         jwr.getClaims().setClaim("status", statusList);
-    }
-
-    private int nextIndex() {
-        final int nextIndex = localIndex.incrementAndGet();
-        // todo
-        return nextIndex;
     }
 }

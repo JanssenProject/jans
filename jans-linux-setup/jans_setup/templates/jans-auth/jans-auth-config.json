@@ -375,6 +375,8 @@
     "idTokenLifetime":3600,
     "txTokenLifetime":180,
     "spontaneousScopeLifetime":86400,
+    "tokenIndexAllocationBlockSize":10,
+    "tokenIndexLimit":10000000,
     "accessTokenLifetime":300,
     "umaResourceLifetime":1728000,
     "umaRptLifetime": 3600,

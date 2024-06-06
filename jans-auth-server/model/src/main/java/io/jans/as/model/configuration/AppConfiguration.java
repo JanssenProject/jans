@@ -37,6 +37,9 @@ public class AppConfiguration implements Configuration {
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
     public static final String DEFAULT_AUTHORIZATION_CHALLENGE_ACR = "default_challenge";
 
+    public static final int DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 10;
+    public static final int DEFAULT_TOKEN_STATUS_LIST_INDEX_LIMIT = 10000000;  // 10M - AS resets back to 1 after reaching this limit
+
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
 
@@ -198,6 +201,12 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "The lifetime of spontaneous scope in seconds")
     private int spontaneousScopeLifetime;
+
+    @DocProperty(description = "Specifies how many token status list indexes AS can reserve at once (when token_status_list feature flag is enabled). Default to 10.")
+    private int tokenIndexAllocationBlockSize = DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE;
+
+    @DocProperty(description = "Specifies token status list index limit. When AS reachs it, it will reset index back to 0. Default to 10M.")
+    private int tokenIndexLimit = DEFAULT_TOKEN_STATUS_LIST_INDEX_LIMIT;
 
     @DocProperty(description = "Specifies which LDAP attribute is used for the subject identifier claim")
     private String openidSubAttribute;
@@ -2392,6 +2401,22 @@ public class AppConfiguration implements Configuration {
 
     public void setSpontaneousScopeLifetime(int spontaneousScopeLifetime) {
         this.spontaneousScopeLifetime = spontaneousScopeLifetime;
+    }
+
+    public int getTokenIndexAllocationBlockSize() {
+        return tokenIndexAllocationBlockSize;
+    }
+
+    public void setTokenIndexAllocationBlockSize(int tokenIndexAllocationBlockSize) {
+        this.tokenIndexAllocationBlockSize = tokenIndexAllocationBlockSize;
+    }
+
+    public int getTokenIndexLimit() {
+        return tokenIndexLimit;
+    }
+
+    public void setTokenIndexLimit(int tokenIndexLimit) {
+        this.tokenIndexLimit = tokenIndexLimit;
     }
 
     public int getCleanServiceInterval() {

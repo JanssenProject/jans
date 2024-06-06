@@ -3,6 +3,7 @@ package io.jans.model.tokenstatus;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Random;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -89,6 +90,29 @@ public class StatusListTest {
         statusList.set(11, 3);
 
         assertEncodedValueAndPrintDecoded("eNo76fITAAPfAgc", statusList);
+    }
+
+    @Test(enabled = true) // it's test for manual run to understand the size of list depending on tokens count
+    public void getLst_forManualRun() throws IOException {
+
+        // bit size = 2 (means 4 statuses)
+        // token count - to list length
+        // 1000      - 326
+        // 10000     - 2720
+        // 100000    - 26836
+        // 1000000   - 268278
+        // 10M       - 2682738
+        // 100M      - 26825504
+        // 1000M     - 268252111
+        Random random = new Random();
+        StatusList statusList = new StatusList( 2);
+
+        for (int i = 0; i < 10000000; i++) {
+            final int randomValue = random.nextInt(3);
+            statusList.set(i, randomValue);
+        }
+
+        System.out.println(statusList.getLst().length());
     }
 
     private static void assertEncodedValueAndPrintDecoded(String expectedEncodedValue, StatusList statusList) throws IOException {
