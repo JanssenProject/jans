@@ -1,6 +1,5 @@
 package io.jans.as.server.service.token;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.jans.as.server.model.config.ConfigurationFactory;
@@ -24,8 +23,6 @@ public class StatusListIndexService {
 
 	@Inject
 	private ConfigurationFactory configurationFactory;
-
-    private final AtomicInteger localIndex = new AtomicInteger(0);
 
     private ReentrantLock allocatedLock = new ReentrantLock();
 	
