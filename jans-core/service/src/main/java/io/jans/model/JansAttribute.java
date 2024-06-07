@@ -109,9 +109,6 @@ public class JansAttribute extends Entry implements Serializable {
 	@Transient
 	private boolean custom;
 
-	@Transient
-	private boolean requred;
-
 	@JsonObject
 	@AttributeName(name = "jansValidation")
 	private AttributeValidation attributeValidation;
@@ -287,14 +284,6 @@ public class JansAttribute extends Entry implements Serializable {
 		this.custom = custom;
 	}
 
-	public boolean isRequred() {
-		return requred;
-	}
-
-	public void setRequred(boolean requred) {
-		this.requred = requred;
-	}
-
 	public String getTooltip() {
 		return tooltip;
 	}
@@ -376,7 +365,6 @@ public class JansAttribute extends Entry implements Serializable {
 		result = prime * result + ((claimName == null) ? 0 : claimName.hashCode());
 		result = prime * result + ((oxMultiValuedAttribute == null) ? 0 : oxMultiValuedAttribute.hashCode());
 		result = prime * result + ((scimCustomAttr == null) ? 0 : scimCustomAttr.hashCode());
-		result = prime * result + (requred ? 1231 : 1237);
 		result = prime * result + ((saml1Uri == null) ? 0 : saml1Uri.hashCode());
 		result = prime * result + ((saml2Uri == null) ? 0 : saml2Uri.hashCode());
 		result = prime * result + ((seeAlso == null) ? 0 : seeAlso.hashCode());

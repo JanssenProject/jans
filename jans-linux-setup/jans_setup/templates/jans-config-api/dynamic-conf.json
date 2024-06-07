@@ -17,6 +17,7 @@
   "loggingLevel":"INFO",
   "loggingLayout":"text",
   "externalLoggerConfiguration":"",
+  "maxCount": 200,
   "exclusiveAuthScopes": [
     "jans_stat",
     "https://jans.io/scim/users.read",
