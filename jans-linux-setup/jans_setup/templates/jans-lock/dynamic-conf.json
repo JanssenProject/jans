@@ -1,4 +1,6 @@
 {
+   "baseEndpoint" : "https://%(hostname)s/jans-lock/v1",
+
    "tokenChannels":[
          "jans_token"
       ],
