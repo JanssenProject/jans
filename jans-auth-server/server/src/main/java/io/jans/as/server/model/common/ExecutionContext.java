@@ -67,6 +67,7 @@ public class ExecutionContext {
     private String nonce;
     private String state;
     private String tokenReferenceId = IdUtil.randomShortUUID();
+    private Integer statusListIndex;
 
     private boolean includeIdTokenClaims;
 
@@ -158,6 +159,14 @@ public class ExecutionContext {
         executionContext.attributes.putAll(context.attributes);
 
         return executionContext;
+    }
+
+    public Integer getStatusListIndex() {
+        return statusListIndex;
+    }
+
+    public void setStatusListIndex(Integer statusListIndex) {
+        this.statusListIndex = statusListIndex;
     }
 
     public String generateRandomTokenReferenceId() {

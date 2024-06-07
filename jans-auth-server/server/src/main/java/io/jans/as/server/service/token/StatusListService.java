@@ -4,6 +4,7 @@ import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.DiscoveryService;
 import io.jans.as.server.service.cluster.TokenPoolService;
 import io.jans.model.token.TokenPool;
@@ -108,14 +109,19 @@ public class StatusListService {
         return result;
     }
 
-    public void addStatusClaimWithIndex(JsonWebResponse jwr) {
+    public void addStatusClaimWithIndex(JsonWebResponse jwr, ExecutionContext executionContext) {
         if (!errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.TOKEN_STATUS_LIST)) {
             log.trace("Skipped status claim addition because {} feature flag is disabled.", FeatureFlagType.TOKEN_STATUS_LIST.getValue());
             return;
         }
 
+        final Integer index = executionContext.getStatusListIndex();
+        if (index == null || index < 0) {
+            return; // index is not set. It must be set into context to be saved in both entity bean and jwt consistently
+        }
+
         final JSONObject indexAndUri = new JSONObject();
-        indexAndUri.put("idx", statusListIndexService.nextIndex());
+        indexAndUri.put("idx", index);
         indexAndUri.put("uri", discoveryService.getTokenStatusListEndpoint());
 
         final JSONObject statusList = new JSONObject();

@@ -28,6 +28,10 @@ public class StatusListIndexService {
 	
     private TokenPool tokenPool = null;
 
+    public Integer next() {
+        return nextIndex().getFirst();
+    }
+
     public Pair<Integer, TokenPool> nextIndex() {
     	// Create copy of variable to make sure that another Thread not changed it
     	TokenPool localTokenPool = tokenPool;

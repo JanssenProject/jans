@@ -162,7 +162,7 @@ public class IdTokenFactory {
             jwr.setClaim("sid", session.getOutsideSid());
         }
 
-        statusListService.addStatusClaimWithIndex(jwr);
+        statusListService.addStatusClaimWithIndex(jwr, executionContext);
 
         addTokenExchangeClaims(jwr, executionContext, session);
 
