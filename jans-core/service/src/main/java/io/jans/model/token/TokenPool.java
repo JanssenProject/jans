@@ -6,6 +6,7 @@ import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
+import jakarta.persistence.Transient;
 
 /**
  * @author Yuriy Movchan
@@ -35,6 +36,12 @@ public class TokenPool extends BaseEntry {
     @AttributeName(name = "lockKey")
     private String lockkey;
 
+    @Transient
+    private transient Integer startIndex;
+
+    @Transient
+    private transient Integer endIndex;
+    
 	public Integer getId() {
 		return id;
 	}
@@ -81,6 +88,22 @@ public class TokenPool extends BaseEntry {
 
 	public void setLockkey(String lockkey) {
 		this.lockkey = lockkey;
+	}
+
+	public Integer getStartIndex() {
+		return startIndex;
+	}
+
+	public void setStartIndex(Integer startIndex) {
+		this.startIndex = startIndex;
+	}
+
+	public Integer getEndIndex() {
+		return endIndex;
+	}
+
+	public void setEndIndex(Integer endIndex) {
+		this.endIndex = endIndex;
 	}
 
 }
