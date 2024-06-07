@@ -12,7 +12,7 @@ import jakarta.persistence.Transient;
  * @author Yuriy Movchan
  * @version 1.0, 06/03/2024
  */
-@DataEntry(sortBy = "jansId")
+@DataEntry(sortBy = "jansNum")
 @ObjectClass(value = "jansTokenPool")
 public class TokenPool extends BaseEntry {
 
