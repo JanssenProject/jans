@@ -1,13 +1,13 @@
 package io.jans.as.server.service.token;
 
-import java.util.concurrent.locks.ReentrantLock;
-
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.service.cluster.TokenPoolService;
 import io.jans.model.token.TokenPool;
 import io.jans.util.Pair;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Yuriy Z
@@ -35,7 +35,7 @@ public class StatusListIndexService {
     	if (localTokenPool != null) {
     		newIndex = localTokenPool.nextIndex();
     		if (newIndex != -1) {
-    			return new Pair<Integer, TokenPool>(newIndex, localTokenPool);
+    			return new Pair<>(newIndex, localTokenPool);
     		}
     	}
 
@@ -46,20 +46,21 @@ public class StatusListIndexService {
 			if (System.identityHashCode(localTokenPool) != System.identityHashCode(tokenPool)) {
 				// Try to get index from new pool which another threads gets already
 				localTokenPool = tokenPool;
-	    		newIndex = localTokenPool.nextIndex();
-	    		if (newIndex != -1) {
-	    			return new Pair<Integer, TokenPool>(newIndex, localTokenPool);
-	    		}
+				if (localTokenPool != null) {
+                    newIndex = localTokenPool.nextIndex();
+                    if (newIndex != -1) {
+                        return new Pair<>(newIndex, localTokenPool);
+                    }
+                }
 			}
 			
 			// Allocate new ToeknPool
 			tokenPool = tokenPoolService.allocate(configurationFactory.getNodeId());
 
 			newIndex = tokenPool.nextIndex();
-			return new Pair<Integer, TokenPool>(newIndex, tokenPool);
+			return new Pair<>(newIndex, tokenPool);
 		} finally {
 			allocatedLock.unlock();
 		}
     }
-
 }

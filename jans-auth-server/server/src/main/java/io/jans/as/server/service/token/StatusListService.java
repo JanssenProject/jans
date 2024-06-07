@@ -97,7 +97,7 @@ public class StatusListService {
             try {
                 StatusList poolStatusList = StatusList.fromEncoded(pool.getData(), bitSize);
                 for (int i = 0; i < poolStatusList.getBitSetLength(); i++) {
-                    result.set(pool.getId() + i, poolStatusList.get(i));
+                    result.set(pool.getStartIndex() + i, poolStatusList.get(i));
                 }
 
             } catch (Exception e) {
