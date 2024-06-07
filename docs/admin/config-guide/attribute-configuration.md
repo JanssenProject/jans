@@ -122,7 +122,6 @@ Calling with params limit=1
       "urn": "urn:jans:dir:attribute-def:inum",
       "oxMultiValuedAttribute": false,
       "custom": false,
-      "requred": false,
       "adminCanAccess": true,
       "adminCanView": true,
       "adminCanEdit": true,
@@ -175,7 +174,6 @@ Please wait while retrieving data ...
       "urn": "http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/profile",
       "oxMultiValuedAttribute": false,
       "custom": false,
-      "requred": false,
       "adminCanAccess": true,
       "adminCanView": true,
       "adminCanEdit": true,
@@ -209,7 +207,6 @@ Please wait while retrieving data ...
       "urn": "http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/picture",
       "oxMultiValuedAttribute": false,
       "custom": false,
-      "requred": false,
       "adminCanAccess": true,
       "adminCanView": true,
       "adminCanEdit": true,
@@ -269,7 +266,6 @@ It will return as below:
   "oxMultiValuedAttribute": true,
   "jansHideOnDiscovery": true,
   "custom": false,
-  "requred": true,
   "attributeValidation": {
     "minLength": {
       "type": "integer",
@@ -331,7 +327,6 @@ It will create a new attribute into the Attribute list with updated `inum & dn`:
   "oxMultiValuedAttribute": true,
   "jansHideOnDiscovery": true,
   "custom": false,
-  "requred": false,
   "tooltip": "string",
   "adminCanAccess": false,
   "adminCanView": false,
@@ -414,7 +409,6 @@ Server Response:
   "scimCustomAttr": null,
   "oxMultiValuedAttribute": false,
   "custom": false,
-  "requred": false,
   "attributeValidation": null,
   "tooltip": null,
   "jansHideOnDiscovery": null
@@ -470,7 +464,6 @@ Getting access token for scope https://jans.io/oauth/config/attributes.readonly
   "scimCustomAttr": null,
   "oxMultiValuedAttribute": false,
   "custom": false,
-  "requred": false,
   "attributeValidation": null,
   "tooltip": null,
   "jansHideOnDiscovery": null
@@ -554,7 +547,6 @@ Before patching the attribute, its properties are:
   "scimCustomAttr": null,
   "oxMultiValuedAttribute": false,
   "custom": false,
-  "requred": false,
   "attributeValidation": null,
   "tooltip": null,
   "jansHideOnDiscovery": null
@@ -602,7 +594,6 @@ Server Response:
   "scimCustomAttr": null,
   "oxMultiValuedAttribute": false,
   "custom": false,
-  "requred": false,
   "attributeValidation": null,
   "tooltip": null,
   "jansHideOnDiscovery": true
