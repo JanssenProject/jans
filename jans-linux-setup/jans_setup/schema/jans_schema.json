@@ -5105,7 +5105,7 @@
         "description",
         "document",
         "creationDate",
-        "jansServices",
+        "jansService",
         "jansLevel",
         "jansRevision",
         "jansEnabled",

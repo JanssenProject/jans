@@ -75,7 +75,7 @@
     "fileExtensionValidationEnabled":true,
     "moduleNameValidationEnabled":true,
     "assetBaseDirectory":"/opt/jans/jetty/%s/custom",
-    "jansServices":[
+    "jansServiceModule":[
       "jans-auth",
       "jans-casa",
       "jans-config-api",
