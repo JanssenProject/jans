@@ -37,6 +37,7 @@ public class AppConfiguration implements Configuration {
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
     public static final String DEFAULT_AUTHORIZATION_CHALLENGE_ACR = "default_challenge";
 
+    public static final int DEFAULT_STATUS_LIST_BIT_SIZE = 2;
     public static final int DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
     public static final int DEFAULT_TOKEN_STATUS_LIST_INDEX_LIMIT = 10000000;  // 10M - AS resets back to 1 after reaching this limit
 
@@ -201,6 +202,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "The lifetime of spontaneous scope in seconds")
     private int spontaneousScopeLifetime;
+
+    @DocProperty(description = "Specifies status list bit size. (2 bits - 4 statuses, 4 bits - 16 statuses). Default to 2.")
+    private int statusListBitSize = DEFAULT_STATUS_LIST_BIT_SIZE;
 
     @DocProperty(description = "Specifies how many token status list indexes AS can reserve at once (when token_status_list feature flag is enabled). Default to 10.")
     private int tokenIndexAllocationBlockSize = DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE;
@@ -2401,6 +2405,14 @@ public class AppConfiguration implements Configuration {
 
     public void setSpontaneousScopeLifetime(int spontaneousScopeLifetime) {
         this.spontaneousScopeLifetime = spontaneousScopeLifetime;
+    }
+
+    public int getStatusListBitSize() {
+        return statusListBitSize;
+    }
+
+    public void setStatusListBitSize(int statusListBitSize) {
+        this.statusListBitSize = statusListBitSize;
     }
 
     public int getTokenIndexAllocationBlockSize() {

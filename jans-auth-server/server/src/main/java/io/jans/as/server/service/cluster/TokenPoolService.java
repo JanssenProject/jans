@@ -111,6 +111,18 @@ public class TokenPoolService {
 		return null;
 	}
 
+    /**
+     * Gets token pool by global status list index
+     *
+     * @param index global status list index
+     * @return token pool
+     */
+	public TokenPool getTokenPoolByIndex(int index) {
+		int poolId = index / tokenIndexAllocationBlockSize;
+		
+		return getTokenPoolById(poolId);
+    }
+
 	/**
 	 * returns a list of all TokenPools associated with CluterNode
 	 *
