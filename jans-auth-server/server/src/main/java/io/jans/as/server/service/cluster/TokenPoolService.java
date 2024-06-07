@@ -166,9 +166,8 @@ public class TokenPoolService {
 				// if lock is ours reset entry and return it
 				if (lockKey.equals(lockedTokenPool.getLockKey())) {
 					reset(tokenPool, nodeId);
+					return tokenPool;
 				}
-				
-				return tokenPool;
 			} catch (EntryPersistenceException ex) {
 				log.trace("Unexpected error happened during entry lock", ex);
 			}
@@ -218,6 +217,7 @@ public class TokenPoolService {
 	public void release(TokenPool tokenPool) {
 		tokenPool.setData(null);
 		tokenPool.setLastUpdate(null);
+		tokenPool.setExpirationDate(null);
 		tokenPool.setNodeId(null);
 		tokenPool.setLockKey(null);
 		
@@ -229,9 +229,11 @@ public class TokenPoolService {
 	}
 
 	public void reset(TokenPool tokenPool, Integer nodeId) {
+		long currentTime = System.currentTimeMillis();
 		tokenPool.setNodeId(nodeId);
 		tokenPool.setData(null);
-		tokenPool.setLastUpdate(new Date());
+		tokenPool.setLastUpdate(new Date(currentTime));
+		tokenPool.setExpirationDate(new Date(currentTime + 60* 1000)); // Expiration should be more than current time
 		
 		update(tokenPool);
 	}

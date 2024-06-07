@@ -1,6 +1,7 @@
 package io.jans.model.token;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -33,6 +34,9 @@ public class TokenPool extends BaseEntry {
     @AttributeName(name = "jansLastUpd")
     private Date lastUpdate;
 
+    @AttributeName(name = "exp")
+    private Date expirationDate;
+
     @AttributeName(name = "lockKey")
     private String lockKey;
 
@@ -41,6 +45,9 @@ public class TokenPool extends BaseEntry {
 
     @Transient
     private transient Integer endIndex;
+    
+    @Transient
+    private transient AtomicInteger currentIndex = new AtomicInteger(-1);
     
 	public Integer getId() {
 		return id;
@@ -82,6 +89,14 @@ public class TokenPool extends BaseEntry {
 		this.lastUpdate = lastUpdate;
 	}
 
+	public Date getExpirationDate() {
+		return expirationDate;
+	}
+
+	public void setExpirationDate(Date expirationDate) {
+		this.expirationDate = expirationDate;
+	}
+
 	public String getLockKey() {
 		return lockKey;
 	}
@@ -96,6 +111,7 @@ public class TokenPool extends BaseEntry {
 
 	public void setStartIndex(Integer startIndex) {
 		this.startIndex = startIndex;
+		this.currentIndex.set(startIndex);
 	}
 
 	public Integer getEndIndex() {
@@ -104,6 +120,23 @@ public class TokenPool extends BaseEntry {
 
 	public void setEndIndex(Integer endIndex) {
 		this.endIndex = endIndex;
+	}
+	
+	public int nextIndex() {
+		// This block not used for while and were expired already
+		if ((expirationDate == null) || expirationDate.before(new Date())) {
+			return -1;
+		}
+
+		int nextIndex = currentIndex.getAndIncrement();
+		if (nextIndex > endIndex) {
+			// Index out of pool range
+			return -1;
+		}
+		
+		// Correct index
+		return nextIndex;
+		
 	}
 
 }
