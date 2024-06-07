@@ -36,6 +36,9 @@ public class TokenPoolManager {
 	private ConfigurationFactory configurationFactory;
 
 	@Inject
+	private TokenPoolService tokenPoolService;
+
+	@Inject
 	private Event<TimerEvent> timerEvent;
 
 	private AtomicBoolean isActive;
@@ -49,8 +52,8 @@ public class TokenPoolManager {
 	public void initTimer() {
 		log.debug("Initializing Policy Download Service Timer");
 
-		final int delay = 10;
-		final int interval = 10;
+		final int delay = 30;
+		final int interval = 30;
 
 		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new TokenPoolUpdateEvent(),
 				Scheduled.Literal.INSTANCE));
@@ -78,7 +81,7 @@ public class TokenPoolManager {
 	private void updateTokenPools() {
 		Integer nodeId = configurationFactory.getNodeId();
 		
-		// TODO: Update TokenPools in DB associated with this node
+		// TODO: Revoked tokens updates?
 		
 	}
 

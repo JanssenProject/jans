@@ -32,6 +32,8 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class TokenPoolService {
+	
+	public static long DELAY_AFTER_EXPIRATION = 3 * 60 * 1000; // 3 hours
 
 	@Inject
 	private Logger log;
@@ -128,10 +130,10 @@ public class TokenPoolService {
 	 *
 	 * @return list of TokenPools
 	 */
-	public List<TokenPool> getClusterNodeTokenPools(Integer clusterNodeId) {
+	public List<TokenPool> getClusterNodeTokenPools(Integer nodeId) {
 		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNodes();
 
-		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, Filter.createEqualityFilter("jansNodeId", clusterNodeId)));
+		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, Filter.createEqualityFilter("jansNodeId", nodeId)));
 	}
 
 	public List<String> getTokenPoolsDns(List<Integer> nodeIds) {
@@ -146,10 +148,26 @@ public class TokenPoolService {
 
 		return tokenPoolsDns;
 	}
-	
+
+	/**
+	 * returns a list of expired TokenPools
+	 *
+	 * @return list of TokenPools
+	 */
+	public List<TokenPool> getTokenPoolsExpired() {
+		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNodes();
+		
+		Date expirationDate = new Date(System.currentTimeMillis() + DELAY_AFTER_EXPIRATION);
+		
+		Filter filter = Filter.createORFilter(Filter.createEqualityFilter("tokenStatus", TokenPoolStatus.FREE),
+				Filter.createGreaterOrEqualFilter("expirationDate", entryManager.encodeTime(tokenPoolsBaseDn, expirationDate)));
+
+		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, filter));
+	}
+
 	public TokenPool allocate(Integer nodeId) {
-		// Try to use existing entry
-		List<TokenPool> tokenPools = getTokenPools(TokenPoolStatus.FREE);
+		// Try to use existing expired entry
+		List<TokenPool> tokenPools = getTokenPoolsExpired();
 		
 		for (TokenPool tokenPool : tokenPools) {
 			// Attempt to set random value in lockKey
@@ -163,7 +181,7 @@ public class TokenPoolService {
 				// Load token after update
 				TokenPool lockedTokenPool = getTokenPoolByDn(tokenPool.getDn());
 				
-				// if lock is ours reset entry and return it
+				// If lock is ours reset entry and return it
 				if (lockKey.equals(lockedTokenPool.getLockKey())) {
 					reset(tokenPool, nodeId);
 					return tokenPool;
