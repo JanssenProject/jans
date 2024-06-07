@@ -3,42 +3,30 @@ package io.jans.configapi.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AssetMgtConfiguration {
 
-    /**
-     * Flag indicating if asset management functionality is enabled
-     */
+    @Schema(description = "Flag indicating if asset management functionality is enabled.")
     private boolean assetMgtEnabled;
 
-    /**
-     * Flag indicating if asset upload to server is enabled
-     */
+    @Schema(description = "Flag indicating if asset upload to server is enabled.")
     private boolean assetServerUploadEnabled;
 
-    /**
-     * Flag indicating if file extension validation is enabled
-     */
+    @Schema(description = "Flag indicating if file extension validation is enabled.")
     private boolean fileExtensionValidationEnabled;
 
-    /**
-     * Flag indicating if service module name extension validation is enabled
-     */
+    @Schema(description = "Flag indicating if service module name extension validation is enabled.")
     private boolean moduleNameValidationEnabled;
 
-    /**
-     * Base directory on server to upload the asset
-     */
+    @Schema(description = "Base directory on server to upload the asset.")
     private String assetBaseDirectory;
 
-    /**
-     * List of supported service module where asset can be uploaded
-     */
+    @Schema(description = "List of supported service module where asset can be uploaded.")
     private List<String> jansServiceModule;
 
-    /**
-     * Asset type mapped to server directory
-     */
+    @Schema(description = "Asset type mapped to server directory.")
     private List<AssetDirMapping> assetDirMapping;
 
     public boolean isAssetMgtEnabled() {

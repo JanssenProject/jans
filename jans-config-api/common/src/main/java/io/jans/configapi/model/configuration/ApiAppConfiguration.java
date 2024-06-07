@@ -2,45 +2,96 @@ package io.jans.configapi.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
+import io.jans.configapi.util.ApiConstants;
 
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiAppConfiguration implements Configuration {
 
+    @Schema(description = "OAuth authentication enable/disable flag. Default value `true`.")
     private boolean configOauthEnabled;
+    
+    @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `true`Default value `false`.")
     private boolean disableLoggerTimer;
+    
+    @Schema(description = "Flag to enable/disable request audit. Default value `false`.")
     private boolean disableAuditLogger;
+    
+    @Schema(description = "Flag to enable/disable check if custom attribue is declared in schema. Default value `true`.")
     private boolean customAttributeValidationEnabled;
+    
+    @Schema(description = "List of approved external Auth server to validate token.")
     private List<String> apiApprovedIssuer;
+    
+    @Schema(description = "Name of supported API protection mechansim. Supported type is `OAuth2`.")
     private String apiProtectionType;
+    
+    @Schema(description = "Config-API client ID.")
     private String apiClientId;
+    
+    @Schema(description = "Config-API client password.")
     private String apiClientPassword;
-
+  
     private boolean endpointInjectionEnabled;
+    
+    @Schema(description = "Issuer Identifier of Jans OpenID Connect Provider.")
     private String authIssuerUrl;
+    
+    @Schema(description = "Jans OpenID Connect Provider Well-Known Configuration URL.")
     private String authOpenidConfigurationUrl;
+    
+    @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Authorization Endpoint.")
     private String authOpenidIntrospectionUrl;
+    
+    @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint.")
     private String authOpenidTokenUrl;
+    
+    @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Revoke Token Endpoint.")
     private String authOpenidRevokeUrl;
 
+    @Schema(description = "List of oAuth scope that can be validity for an access tokens only by underlying Jans Auth server.")
     private List<String> exclusiveAuthScopes;
 
+    @Schema(description = "CORS configuration filter properties.")
     private List<CorsConfigurationFilter> corsConfigurationFilters;
 
+    @Schema(description = "Specify logging level of Loggers. Default level is `INFO`.")
     private String loggingLevel;
+    
+    @Schema(description = "Log4j logging layout. Default value `TEXT`.")
     private String loggingLayout;
+    
+    @Schema(description = "The path to the external log4j2 logging configuration.")
     private String externalLoggerConfiguration;
+    
+    @Schema(description = "Choose whether to disable JDK loggers.")
     private Boolean disableJdkLogger = true;
+    
+    @Schema(description = "Maximum number of results per page in search endpoints.")
     private int maxCount;
     
+    @Schema(description = "User attribute that should not be returned in response.")
     private List<String> userExclusionAttributes;
+    
+    @Schema(description = "List of User mandatory attribute for user creation request.")
     private List<String> userMandatoryAttributes;
+    
+    @Schema(description = "Agama configuration details.")
     private AgamaConfiguration agamaConfiguration;
+    
+    @Schema(description = "Audit Log configuration details.")
     private AuditLogConf auditLogConf;
+    
+    @Schema(description = "Configuration for data-type converstion.")
     private DataFormatConversionConf dataFormatConversionConf;
+    
+    @Schema(description = "Details of enabled plugins.")
     private List<PluginConf> plugins;
     
+    @Schema(description = "Asset management configuration details.")
     private AssetMgtConfiguration assetMgtConfiguration;
 
     public boolean isConfigOauthEnabled() {
@@ -209,6 +260,9 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setMaxCount(int maxCount) {
         this.maxCount = maxCount;
+        if(this.maxCount<=0) {
+            this.maxCount = ApiConstants.DEFAULT_MAX_COUNT;
+        }
     }
 
     public List<String> getUserExclusionAttributes() {
