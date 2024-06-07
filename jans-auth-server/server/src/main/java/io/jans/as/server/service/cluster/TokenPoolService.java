@@ -12,7 +12,7 @@ import java.util.List;
 import org.slf4j.Logger;
 
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.server.model.cluster.TokenPool;
+import io.jans.model.token.TokenPool;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;

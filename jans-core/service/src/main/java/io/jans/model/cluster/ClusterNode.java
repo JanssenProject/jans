@@ -1,4 +1,4 @@
-package io.jans.as.server.model.cluster;
+package io.jans.model.cluster;
 
 import java.util.Date;
 
