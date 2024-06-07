@@ -114,6 +114,10 @@ public class StatusList {
         return value;
     }
 
+    public int getBitSetLength() {
+        return list.length();
+    }
+
     @Override
     public String toString() {
         StringBuilder val = new StringBuilder();

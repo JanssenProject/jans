@@ -6,17 +6,16 @@
 
 package io.jans.as.server.service.cluster;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.model.token.TokenPool;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Yuriy Movchan
@@ -62,6 +61,16 @@ public class TokenPoolService {
 
 		return entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, Filter.createPresenceFilter("jansNum"));
 	}
+
+    /**
+     * Gets token pool by global status list index
+     *
+     * @param index global status list index
+     * @return token pool
+     */
+	public TokenPool getTokenPoolByIndex(int index) {
+	    throw new UnsupportedOperationException("WIP"); // todo
+    }
 
 	/**
 	 * returns a list of all TokenPools associated with CluterNode
