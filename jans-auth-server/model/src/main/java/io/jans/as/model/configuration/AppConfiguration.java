@@ -37,7 +37,7 @@ public class AppConfiguration implements Configuration {
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
     public static final String DEFAULT_AUTHORIZATION_CHALLENGE_ACR = "default_challenge";
 
-    public static final int DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 10;
+    public static final int DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
     public static final int DEFAULT_TOKEN_STATUS_LIST_INDEX_LIMIT = 10000000;  // 10M - AS resets back to 1 after reaching this limit
 
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")

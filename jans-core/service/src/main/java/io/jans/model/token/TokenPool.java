@@ -28,13 +28,13 @@ public class TokenPool extends BaseEntry {
     private String data;
 
     @AttributeName(name = "tokenStatus")
-    private TokenStatus status;
+    private TokenPoolStatus status;
 
     @AttributeName(name = "jansLastUpd")
     private Date lastUpdate;
 
     @AttributeName(name = "lockKey")
-    private String lockkey;
+    private String lockKey;
 
     @Transient
     private transient Integer startIndex;
@@ -66,11 +66,11 @@ public class TokenPool extends BaseEntry {
 		this.data = data;
 	}
 
-	public TokenStatus getStatus() {
+	public TokenPoolStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(TokenStatus status) {
+	public void setStatus(TokenPoolStatus status) {
 		this.status = status;
 	}
 
@@ -82,12 +82,12 @@ public class TokenPool extends BaseEntry {
 		this.lastUpdate = lastUpdate;
 	}
 
-	public String getLockkey() {
-		return lockkey;
+	public String getLockKey() {
+		return lockKey;
 	}
 
-	public void setLockkey(String lockkey) {
-		this.lockkey = lockkey;
+	public void setLockKey(String lockKey) {
+		this.lockKey = lockKey;
 	}
 
 	public Integer getStartIndex() {

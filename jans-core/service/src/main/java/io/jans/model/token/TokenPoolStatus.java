@@ -17,22 +17,22 @@ import io.jans.orm.annotation.AttributeEnum;
  * @author Yuriy Movchan
  * @version 1.0, 06/03/2024
  */
-public enum TokenStatus implements AttributeEnum {
+public enum TokenPoolStatus implements AttributeEnum {
 
-    ACTIVE("inuse", "Inuse"), INACTIVE("free", "Free");
+    INUSE("inuse", "Inuse"), FREE("free", "Free");
 
     private String value;
     private String displayName;
 
-    private static Map<String, TokenStatus> MAP_BY_VALUES = new HashMap<String, TokenStatus>();
+    private static Map<String, TokenPoolStatus> MAP_BY_VALUES = new HashMap<String, TokenPoolStatus>();
 
     static {
-        for (TokenStatus enumType : values()) {
+        for (TokenPoolStatus enumType : values()) {
             MAP_BY_VALUES.put(enumType.getValue(), enumType);
         }
     }
 
-    TokenStatus(String value, String displayName) {
+    TokenPoolStatus(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }
@@ -45,7 +45,7 @@ public enum TokenStatus implements AttributeEnum {
         return displayName;
     }
 
-    public static TokenStatus getByValue(String value) {
+    public static TokenPoolStatus getByValue(String value) {
         return MAP_BY_VALUES.get(value);
     }
 
