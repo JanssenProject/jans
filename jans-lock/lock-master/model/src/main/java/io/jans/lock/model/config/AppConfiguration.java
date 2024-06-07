@@ -24,11 +24,13 @@ import jakarta.enterprise.inject.Vetoed;
 public class AppConfiguration implements Configuration {
 
 	private String baseDN;
+	
+    @DocProperty(description = "Lock base endpoint URL")
+    private String baseEndpoint;
 
     @DocProperty(description = "List of token channel names", defaultValue = "jans_token")
 	private List<String> tokenChannels;
 
-    
 	@DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
 	private Boolean disableJdkLogger = true;
 
@@ -80,6 +82,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setBaseDN(String baseDN) {
 		this.baseDN = baseDN;
+	}
+
+	public String getBaseEndpoint() {
+		return baseEndpoint;
+	}
+
+	public void setBaseEndpoint(String baseEndpoint) {
+		this.baseEndpoint = baseEndpoint;
 	}
 
 	public List<String> getTokenChannels() {
