@@ -6,7 +6,18 @@
 
 package io.jans.as.server.service;
 
+import static org.apache.commons.lang.BooleanUtils.isTrue;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.LockMessageConfig;
@@ -21,26 +32,15 @@ import io.jans.service.CacheService;
 import io.jans.service.MessageService;
 import io.jans.service.cache.CacheConfiguration;
 import io.jans.util.StringHelper;
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @version November 28, 2018
  */
-@Stateless
-@Named
+@ApplicationScoped
 public class GrantService {
 
     @Inject
