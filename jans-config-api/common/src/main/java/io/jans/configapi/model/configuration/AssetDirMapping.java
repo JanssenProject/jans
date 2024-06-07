@@ -3,22 +3,18 @@ package io.jans.configapi.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AssetDirMapping {
 
-    /**
-     * Relative path to asset base directory
-     */
+    @Schema(description = "Relative path to asset base directory.")
     private String directory;
 
-    /**
-     * List of file extention that are stored in directory
-     */
+    @Schema(description = "List of file extention that are stored in directory.")
     private List<String> type;
 
-    /**
-     * Description of assets stored in directory
-     */
+    @Schema(description = "Description of assets stored in directory.")
     private String description;
 
     public String getDirectory() {
