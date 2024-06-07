@@ -720,6 +720,72 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans_asset-read
+  /api/v1/jans-assets/services:
+    get:
+      tags:
+      - Jans Assets
+      summary: Gets asset services
+      description: Gets asset services
+      operationId: get-asset-services
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/jans_asset-read
+  /api/v1/jans-assets/asset-type:
+    get:
+      tags:
+      - Jans Assets
+      summary: Get valid asset types
+      description: Get valid asset types
+      operationId: get-asset-types
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/jans_asset-read
   /api/v1/jans-assets/upload:
     put:
       tags:
@@ -940,7 +1006,6 @@ paths:
                                 "urn": "urn:mace:dir:attribute-def:departmentNumber",
                                 "oxMultiValuedAttribute": false,
                                 "custom": false,
-                                "requred": false,
                                 "whitePagesCanView": false,
                                 "adminCanEdit": true,
                                 "userCanView": true,
@@ -974,7 +1039,6 @@ paths:
                                 "urn": "urn:mace:dir:attribute-def:phone_number",
                                 "oxMultiValuedAttribute": false,
                                 "custom": false,
-                                "requred": false,
                                 "whitePagesCanView": false,
                                 "adminCanEdit": true,
                                 "userCanView": true,
@@ -1023,7 +1087,6 @@ paths:
                       "name": "qaattribute",
                       "origin": "jansPerson",
                       "jansMultivaluedAttr": false,
-                      "requred": false,
                       "status": "active",
                       "urn": "urn:mace:dir:attribute-def:qaattribute",
                       "userCanAccess": true,
@@ -1061,7 +1124,6 @@ paths:
                         "name": "qaattribute",
                         "origin": "jansPerson",
                         "jansMultivaluedAttr": false,
-                        "requred": false,
                         "status": "active",
                         "urn": "urn:mace:dir:attribute-def:qaattribute",
                         "userCanAccess": true,
@@ -1113,7 +1175,6 @@ paths:
                       "name": "qaattribute",
                       "origin": "jansPerson",
                       "jansMultivaluedAttr": false,
-                      "requred": false,
                       "status": "active",
                       "urn": "urn:mace:dir:attribute-def:qaattribute",
                       "userCanAccess": true,
@@ -1151,7 +1212,6 @@ paths:
                         "name": "qaattribute",
                         "origin": "jansPerson",
                         "jansMultivaluedAttr": false,
-                        "requred": false,
                         "status": "active",
                         "urn": "urn:mace:dir:attribute-def:qaattribute",
                         "userCanAccess": true,
@@ -1222,7 +1282,6 @@ paths:
                         "urn": "urn:mace:dir:attribute-def:departmentNumber",
                         "oxMultiValuedAttribute": false,
                         "custom": false,
-                        "requred": false,
                         "whitePagesCanView": false,
                         "adminCanEdit": true,
                         "userCanView": true,
@@ -1316,7 +1375,6 @@ paths:
                         "name": "qaattribute",
                         "origin": "jansPerson",
                         "jansMultivaluedAttr": false,
-                        "requred": false,
                         "status": "active",
                         "urn": "urn:mace:dir:attribute-def:qaattribute",
                         "userCanAccess": true,
@@ -8085,7 +8143,7 @@ components:
         creationDate:
           type: string
           format: date-time
-        jansModuleProperty:
+        jansService:
           type: array
           items:
             type: string
@@ -8233,27 +8291,25 @@ components:
           type: boolean
         custom:
           type: boolean
-        requred:
-          type: boolean
         attributeValidation:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8430,7 +8486,6 @@ components:
             - password
             - client_credentials
             - refresh_token
-            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -8743,7 +8798,6 @@ components:
             - password
             - client_credentials
             - refresh_token
-            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -9034,6 +9088,7 @@ components:
             - INTROSPECTION
             - REVOKE_TOKEN
             - REVOKE_SESSION
+            - GLOBAL_TOKEN_REVOCATION
             - ACTIVE_SESSION
             - END_SESSION
             - STATUS_SESSION
@@ -9079,6 +9134,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9088,8 +9145,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9194,6 +9249,7 @@ components:
           format: int32
         corsRequestDecorate:
           type: boolean
+      description: CORS configuration filter properties.
     EngineConfig:
       type: object
       properties:
@@ -9538,7 +9594,6 @@ components:
             - password
             - client_credentials
             - refresh_token
-            - tx_token
             - urn:ietf:params:oauth:grant-type:uma-ticket
             - urn:ietf:params:oauth:grant-type:token-exchange
             - urn:openid:params:grant-type:ciba
@@ -9872,72 +9927,110 @@ components:
       properties:
         mandatoryAttributes:
           type: array
+          description: List of attributes required to create the Agama Flow.
           items:
             type: string
+            description: List of attributes required to create the Agama Flow.
         optionalAttributes:
           type: array
+          description: List of attributes that are optional.
           items:
             type: string
+            description: List of attributes that are optional.
+      description: Agama configuration details.
     ApiAppConfiguration:
       type: object
       properties:
         configOauthEnabled:
           type: boolean
+          description: OAuth authentication enable/disable flag. Default value `true`.
         disableLoggerTimer:
           type: boolean
+          description: Flag to enable/disable timer to dynamically reflect log configuration
+            changes. Default value `true`Default value `false`.
         disableAuditLogger:
           type: boolean
+          description: Flag to enable/disable request audit. Default value `false`.
         customAttributeValidationEnabled:
           type: boolean
+          description: Flag to enable/disable check if custom attribue is declared
+            in schema. Default value `true`.
         apiApprovedIssuer:
           type: array
+          description: List of approved external Auth server to validate token.
           items:
             type: string
+            description: List of approved external Auth server to validate token.
         apiProtectionType:
           type: string
+          description: Name of supported API protection mechansim. Supported type
+            is `OAuth2`.
         apiClientId:
           type: string
+          description: Config-API client ID.
         apiClientPassword:
           type: string
+          description: Config-API client password.
         endpointInjectionEnabled:
           type: boolean
         authIssuerUrl:
           type: string
+          description: Issuer Identifier of Jans OpenID Connect Provider.
         authOpenidConfigurationUrl:
           type: string
+          description: Jans OpenID Connect Provider Well-Known Configuration URL.
         authOpenidIntrospectionUrl:
           type: string
+          description: Jans URL of the OpenID Connect Provider's OAuth 2.0 Authorization
+            Endpoint.
         authOpenidTokenUrl:
           type: string
+          description: Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint.
         authOpenidRevokeUrl:
           type: string
+          description: Jans URL of the OpenID Connect Provider's OAuth 2.0 Revoke
+            Token Endpoint.
         exclusiveAuthScopes:
           type: array
+          description: List of oAuth scope that can be validity for an access tokens
+            only by underlying Jans Auth server.
           items:
             type: string
+            description: List of oAuth scope that can be validity for an access tokens
+              only by underlying Jans Auth server.
         corsConfigurationFilters:
           type: array
+          description: CORS configuration filter properties.
           items:
             $ref: '#/components/schemas/CorsConfigurationFilter'
         loggingLevel:
           type: string
+          description: Specify logging level of Loggers. Default level is `INFO`.
         loggingLayout:
           type: string
+          description: Log4j logging layout. Default value `TEXT`.
         externalLoggerConfiguration:
           type: string
+          description: The path to the external log4j2 logging configuration.
         disableJdkLogger:
           type: boolean
+          description: Choose whether to disable JDK loggers.
         maxCount:
           type: integer
+          description: Maximum number of results per page in search endpoints.
           format: int32
         userExclusionAttributes:
           type: array
+          description: User attribute that should not be returned in response.
           items:
             type: string
+            description: User attribute that should not be returned in response.
         userMandatoryAttributes:
           type: array
+          description: List of User mandatory attribute for user creation request.
           items:
             type: string
+            description: List of User mandatory attribute for user creation request.
         agamaConfiguration:
           $ref: '#/components/schemas/AgamaConfiguration'
         auditLogConf:
@@ -9946,6 +10039,7 @@ components:
           $ref: '#/components/schemas/DataFormatConversionConf'
         plugins:
           type: array
+          description: Details of enabled plugins.
           items:
             $ref: '#/components/schemas/PluginConf'
         assetMgtConfiguration:
@@ -9955,64 +10049,92 @@ components:
       properties:
         directory:
           type: string
+          description: Relative path to asset base directory.
         type:
           type: array
+          description: List of file extention that are stored in directory.
           items:
             type: string
+            description: List of file extention that are stored in directory.
         description:
           type: string
+          description: Description of assets stored in directory.
+      description: Asset type mapped to server directory.
     AssetMgtConfiguration:
       type: object
       properties:
         assetMgtEnabled:
           type: boolean
+          description: Flag indicating if asset management functionality is enabled.
         assetServerUploadEnabled:
           type: boolean
+          description: Flag indicating if asset upload to server is enabled.
         fileExtensionValidationEnabled:
           type: boolean
+          description: Flag indicating if file extension validation is enabled.
         moduleNameValidationEnabled:
           type: boolean
+          description: Flag indicating if service module name extension validation
+            is enabled.
         assetBaseDirectory:
           type: string
-        jansModules:
+          description: Base directory on server to upload the asset.
+        jansServiceModule:
           type: array
+          description: List of supported service module where asset can be uploaded.
           items:
             type: string
+            description: List of supported service module where asset can be uploaded.
         assetDirMapping:
           type: array
+          description: Asset type mapped to server directory.
           items:
             $ref: '#/components/schemas/AssetDirMapping'
+      description: Asset management configuration details.
     AuditLogConf:
       type: object
       properties:
         enabled:
           type: boolean
+          description: Flag to enable and disable audit log.
         ignoreHttpMethod:
           type: array
+          description: HTTP methods for which audit is disabled.
           items:
             type: string
+            description: HTTP methods for which audit is disabled.
         headerAttributes:
           type: array
+          description: List of header HTTP attributes whose value is to be logged.
           items:
             type: string
+            description: List of header HTTP attributes whose value is to be logged.
+      description: Audit Log configuration details.
     DataFormatConversionConf:
       type: object
       properties:
         enabled:
           type: boolean
+          description: Flag to enable and disable data conversion.
         ignoreHttpMethod:
           type: array
+          description: HTTP methods for which data conversion is to be disabled.
           items:
             type: string
+            description: HTTP methods for which data conversion is to be disabled.
+      description: Configuration for data-type converstion.
     PluginConf:
       type: object
       properties:
         name:
           type: string
+          description: Name of the plugin.
         description:
           type: string
+          description: Description of the plugin.
         className:
           type: string
+          description: Plugin application class.
     SmtpConfiguration:
       type: object
       properties:
@@ -10139,14 +10261,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

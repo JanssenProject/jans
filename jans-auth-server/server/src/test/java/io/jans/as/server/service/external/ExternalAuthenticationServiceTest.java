@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
+import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -34,6 +35,9 @@ public class ExternalAuthenticationServiceTest {
 
     @Mock
     private AppConfiguration appConfiguration;
+
+    @Mock
+    private Logger log;
 
     @Mock
     private InternalDefaultPersonAuthenticationType authenticationType;
