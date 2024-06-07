@@ -21,7 +21,6 @@
     "urn": "urn:mace:dir:attribute-def:departmentNumber",
     "oxMultiValuedAttribute": false,
     "custom": false,
-    "requred": false,
     "whitePagesCanView": false,
     "adminCanEdit": true,
     "userCanView": true,
