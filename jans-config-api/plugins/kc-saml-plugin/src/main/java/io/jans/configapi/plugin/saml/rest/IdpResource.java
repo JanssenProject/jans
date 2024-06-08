@@ -40,7 +40,6 @@ import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -60,8 +59,6 @@ public class IdpResource extends BaseResource {
     private static final String UNAUTHORIZED = "Unauthorized";
     private static final String UNAUTHORIZED_MSG = "Realm client authorization failed while creating IDP.";
     private static final String APPLICATION_ERROR = "Application Error";
-    private static final String SERVER_ERROR = "Server Error";
-    
 
     private class IdentityProviderPagedResult extends PagedResult<IdentityProvider> {
     };
@@ -304,7 +301,7 @@ public class IdpResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_DELETE_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteIdentityProvider(
-            @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) throws Exception {
+            @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) throws IOException {
         if (log.isDebugEnabled()) {
             log.debug("IdentityProvider to be deleted - inum:{} ", escapeLog(inum));
         }

@@ -37,7 +37,6 @@ public class ResteasyInitializer extends Application {
 
 	@Override
     public Set<Class<?>> getClasses() {
-		System.out.println("!!!!!!!!!!!!!!!2");
         HashSet<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(ConfigurationRestWebService.class);
 
