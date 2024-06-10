@@ -11,7 +11,7 @@ import io.jans.orm.model.base.BaseEntry;
  * @author Yuriy Movchan
  * @version 1.0, 06/03/2024
  */
-@DataEntry(sortBy = "jansId")
+@DataEntry(sortBy = "jansNum")
 @ObjectClass(value = "jansNode")
 public class ClusterNode extends BaseEntry {
 
@@ -30,7 +30,7 @@ public class ClusterNode extends BaseEntry {
     private Date lastUpdate;
 
     @AttributeName(name = "lockKey")
-    private String lockkey;
+    private String lockKey;
 
 	public Integer getId() {
 		return id;
@@ -64,12 +64,12 @@ public class ClusterNode extends BaseEntry {
 		this.lastUpdate = lastUpdate;
 	}
 
-	public String getLockkey() {
-		return lockkey;
+	public String getLockKey() {
+		return lockKey;
 	}
 
-	public void setLockkey(String lockkey) {
-		this.lockkey = lockkey;
+	public void setLockKey(String lockKey) {
+		this.lockKey = lockKey;
 	}
 
 }

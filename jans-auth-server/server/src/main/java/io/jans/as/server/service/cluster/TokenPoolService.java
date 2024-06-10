@@ -165,6 +165,14 @@ public class TokenPoolService {
 		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, filter));
 	}
 
+	protected void persist(TokenPool tokenPool) {
+		entryManager.persist(tokenPool);
+	}
+
+	public void update(TokenPool tokenPool) {
+		entryManager.merge(tokenPool);
+	}
+
 	public TokenPool allocate(Integer nodeId) {
 		// Try to use existing expired entry
 		List<TokenPool> tokenPools = getTokenPoolsExpired();
@@ -209,7 +217,7 @@ public class TokenPoolService {
 			String lockKey = UUID.randomUUID().toString();
 			tokenPool.setLockKey(lockKey);
 
-			// Do persist ooperation in try/catch for safety and do not throw error to upper
+			// Do persist operation in try/catch for safety and do not throw error to upper
 			// levels
 			try {
 				persist(lastTokenPool);
@@ -242,10 +250,6 @@ public class TokenPoolService {
 		update(tokenPool);
 	}
 
-	protected void persist(TokenPool tokenPool) {
-		entryManager.persist(tokenPool);
-	}
-
 	public void reset(TokenPool tokenPool, Integer nodeId) {
 		long currentTime = System.currentTimeMillis();
 		tokenPool.setNodeId(nodeId);
@@ -254,10 +258,6 @@ public class TokenPoolService {
 		tokenPool.setExpirationDate(new Date(currentTime + 60* 1000)); // Expiration should be more than current time
 		
 		update(tokenPool);
-	}
-
-	public void update(TokenPool tokenPool) {
-		entryManager.merge(tokenPool);
 	}
 
 	private TokenPool setIndexes(TokenPool tokenPool) {

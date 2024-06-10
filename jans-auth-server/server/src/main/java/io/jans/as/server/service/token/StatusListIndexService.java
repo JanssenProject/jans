@@ -1,6 +1,7 @@
 package io.jans.as.server.service.token;
 
 import io.jans.as.server.model.config.ConfigurationFactory;
+import io.jans.as.server.service.cluster.ClusterManager;
 import io.jans.as.server.service.cluster.TokenPoolService;
 import io.jans.model.token.TokenPool;
 import io.jans.util.Pair;
@@ -22,7 +23,7 @@ public class StatusListIndexService {
     private TokenPoolService tokenPoolService;
 
 	@Inject
-	private ConfigurationFactory configurationFactory;
+	private ClusterManager clusterManager;
 
     private ReentrantLock allocatedLock = new ReentrantLock();
 	
@@ -59,7 +60,7 @@ public class StatusListIndexService {
 			}
 			
 			// Allocate new ToeknPool
-			tokenPool = tokenPoolService.allocate(configurationFactory.getNodeId());
+			tokenPool = tokenPoolService.allocate(clusterManager.getClusterNodeId());
 
 			newIndex = tokenPool.nextIndex();
 			return new Pair<>(newIndex, tokenPool);
