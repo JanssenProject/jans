@@ -45,13 +45,13 @@ public interface ConfigRestWebService {
 			@Context SecurityContext sec);
 
 	@GET
+	@Path("/config/schema")
+	@Produces({ MediaType.APPLICATION_JSON })
+	Response processSchemaRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
+
+	@GET
 	@Path("/config/policy")
 	@Produces({ MediaType.APPLICATION_JSON })
 	Response processPolicyRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
-
-	@GET
-	@Path("​/config/schema")
-	@Produces({ MediaType.APPLICATION_JSON })
-	Response processSchemaRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 }
