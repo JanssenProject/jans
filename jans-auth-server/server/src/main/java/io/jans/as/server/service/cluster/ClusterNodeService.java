@@ -66,7 +66,7 @@ public class ClusterNodeService {
 	 * @return list of ClusterNodes
 	 */
 	public List<ClusterNode> getAllClusterNodes() {
-		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNodes();
+		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNode();
 
 		return entryManager.findEntries(clusterNodesBaseDn, ClusterNode.class, Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH));
 	}
@@ -90,7 +90,7 @@ public class ClusterNodeService {
 	 * @return TokenPool
 	 */
 	public ClusterNode getClusterNodeLast() {
-		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNodes();
+		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNode();
 		
 		PagedResult<ClusterNode> pagedResult = entryManager.findPagedEntries(clusterNodesBaseDn, ClusterNode.class, Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH), null, "jansNum", SortOrder.DESCENDING, 1, 1, 1);
 		if (pagedResult.getEntriesCount() >= 1) {
@@ -107,7 +107,7 @@ public class ClusterNodeService {
 	 * @return list of ClusterNodes
 	 */
 	public List<ClusterNode> getClusterNodesExpired() {
-		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNodes();
+		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNode();
 		
 		Date expirationDate = new Date(System.currentTimeMillis() + DELAY_AFTER_EXPIRATION);
 		
@@ -216,7 +216,7 @@ public class ClusterNodeService {
 	}
 
 	public String getDnForClusterNode(Integer id) {
-		return String.format("jansNum=%d,%s", id, staticConfiguration.getBaseDn().getNodes());
+		return String.format("jansNum=%d,%s", id, staticConfiguration.getBaseDn().getNode());
 	}
 
 }

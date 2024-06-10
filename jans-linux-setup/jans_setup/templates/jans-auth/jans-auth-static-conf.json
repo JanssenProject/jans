@@ -18,6 +18,7 @@
         "sectorIdentifiers": "ou=sector_identifiers,o=jans",
         "archivedJwks": "ou=archived_jwks,o=jans",
         "ciba": "ou=ciba,o=jans",
-        "ssa": "ou=ssa,o=jans"
+        "ssa": "ou=ssa,o=jans",
+        "node": "ou=node,o=jans"
     }
 }
