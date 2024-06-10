@@ -12,7 +12,7 @@ public enum TokenStatus {
 
     private final int value;
 
-    private static Map<Integer, TokenStatus> mapByValues = new HashMap<>();
+    private static final Map<Integer, TokenStatus> mapByValues = new HashMap<>();
 
     static {
         for (TokenStatus enumType : values()) {

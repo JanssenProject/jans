@@ -1,6 +1,6 @@
 package io.jans.as.server.service.token;
 
-import io.jans.as.server.model.config.ConfigurationFactory;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.cluster.ClusterManager;
 import io.jans.as.server.service.cluster.TokenPoolService;
 import io.jans.model.token.TokenPool;
@@ -29,6 +29,9 @@ public class StatusListIndexService {
     @Inject
     private TokenPoolService tokenPoolService;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
 	@Inject
 	private ClusterManager clusterManager;
 
@@ -44,7 +47,7 @@ public class StatusListIndexService {
 
             log.trace("Updating status list at index {} with status {} ...", index, status);
 
-            final int bitSize = configurationFactory.getAppConfiguration().getStatusListBitSize();
+            final int bitSize = appConfiguration.getStatusListBitSize();
             final TokenPool indexHolder = tokenPoolService.getTokenPoolByIndex(index);
             final String data = indexHolder.getData();
 
