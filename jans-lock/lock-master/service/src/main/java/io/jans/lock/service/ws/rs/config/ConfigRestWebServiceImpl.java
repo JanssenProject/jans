@@ -46,7 +46,7 @@ public class ConfigRestWebServiceImpl implements ConfigRestWebService {
 
 		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
 		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-		builder.entity("{\"res\" : \"ok\"}");
+		builder.entity("{\"res\" : \"ok_config\"}");
 
 		return builder.build();
 	}
@@ -58,19 +58,7 @@ public class ConfigRestWebServiceImpl implements ConfigRestWebService {
 
 		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
 		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-		builder.entity("{\"res\" : \"ok\"}");
-
-		return builder.build();
-	}
-
-	@Override
-	public Response processPolicyRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-		log.debug("Processing Policy request");
-		Response.ResponseBuilder builder = Response.ok();
-
-		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-		builder.entity("{\"res\" : \"ok\"}");
+		builder.entity("{\"res\" : \"ok_issuers\"}");
 
 		return builder.build();
 	}
@@ -82,9 +70,22 @@ public class ConfigRestWebServiceImpl implements ConfigRestWebService {
 
 		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
 		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-		builder.entity("{\"res\" : \"ok\"}");
+		builder.entity("{\"res\" : \"ok_schema\"}");
 
 		return builder.build();
 	}
+
+	@Override
+	public Response processPolicyRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
+		log.debug("Processing Policy request");
+		Response.ResponseBuilder builder = Response.ok();
+
+		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
+		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
+		builder.entity("{\"res\" : \"ok_policy\"}");
+
+		return builder.build();
+	}
+
 
 }
