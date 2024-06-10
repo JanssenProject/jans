@@ -67,8 +67,8 @@ public class BaseDnConfiguration {
 	private String fido2Assertion;
     @XmlElement(name = "archivedJwks")
     private String archivedJwks;
-    @XmlElement(name = "nodes")
-    private String nodes;
+    @XmlElement(name = "node")
+    private String node;
 
     public String getArchivedJwks() {
         return archivedJwks;
@@ -246,12 +246,12 @@ public class BaseDnConfiguration {
 		this.fido2Assertion = fido2Assertion;
 	}
 
-	public String getNodes() {
-		return nodes;
+	public String getNode() {
+		return node;
 	}
 
-	public void setNodes(String nodes) {
-		this.nodes = nodes;
+	public void setNode(String node) {
+		this.node = node;
 	}
 
 }

@@ -6,7 +6,19 @@
 
 package io.jans.as.server.service;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -15,6 +27,7 @@ import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.service.cdi.event.AuthConfigurationEvent;
 import io.jans.as.server.service.cdi.event.ReloadAuthScript;
 import io.jans.as.server.service.ciba.CibaRequestsProcessorJob;
+import io.jans.as.server.service.cluster.ClusterManager;
 import io.jans.as.server.service.expiration.ExpirationNotificatorTimer;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.logger.LoggerService;
@@ -69,16 +82,6 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
-import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.slf4j.Logger;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
@@ -138,6 +141,9 @@ public class AppInitializer {
 
     @Inject
     private PythonService pythonService;
+    
+    @Inject
+    private ClusterManager clusterManager;
 
     @Inject
     private MetricService metricService;
@@ -248,6 +254,7 @@ public class AppInitializer {
         initSchedulerService();
 
         // Schedule timer tasks
+        clusterManager.initTimer();
         metricService.initTimer();
         configurationFactory.initTimer();
         loggerService.initTimer(true);

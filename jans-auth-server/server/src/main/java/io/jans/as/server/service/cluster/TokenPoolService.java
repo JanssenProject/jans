@@ -80,7 +80,7 @@ public class TokenPoolService {
 	 * @return list of TokenPools
 	 */
 	public List<TokenPool> getAllTokenPools() {
-		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNodes();
+		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNode();
 
 		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, Filter.createPresenceFilter("jansNum")));
 	}
@@ -91,7 +91,7 @@ public class TokenPoolService {
 	 * @return list of TokenPools
 	 */
 	public List<TokenPool> getTokenPools(TokenPoolStatus status) {
-		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNodes();
+		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNode();
 
 		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, Filter.createEqualityFilter("tokenStatus", status)));
 	}
@@ -102,7 +102,7 @@ public class TokenPoolService {
 	 * @return TokenPool
 	 */
 	public TokenPool getTokenPoolLast() {
-		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNodes();
+		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNode();
 		
 		PagedResult<TokenPool> pagedResult = entryManager.findPagedEntries(tokenPoolsBaseDn, TokenPool.class, Filter.createPresenceFilter("jansNum"), null, "jansNum", SortOrder.DESCENDING, 1, 1, 1);
 		if (pagedResult.getEntriesCount() >= 1) {
@@ -131,7 +131,7 @@ public class TokenPoolService {
 	 * @return list of TokenPools
 	 */
 	public List<TokenPool> getClusterNodeTokenPools(Integer nodeId) {
-		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNodes();
+		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNode();
 
 		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, Filter.createEqualityFilter("jansNodeId", nodeId)));
 	}
@@ -155,7 +155,7 @@ public class TokenPoolService {
 	 * @return list of TokenPools
 	 */
 	public List<TokenPool> getTokenPoolsExpired() {
-		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNodes();
+		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNode();
 		
 		Date expirationDate = new Date(System.currentTimeMillis() + DELAY_AFTER_EXPIRATION);
 		
@@ -163,6 +163,14 @@ public class TokenPoolService {
 				Filter.createGreaterOrEqualFilter("expirationDate", entryManager.encodeTime(tokenPoolsBaseDn, expirationDate)));
 
 		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, filter));
+	}
+
+	protected void persist(TokenPool tokenPool) {
+		entryManager.persist(tokenPool);
+	}
+
+	public void update(TokenPool tokenPool) {
+		entryManager.merge(tokenPool);
 	}
 
 	public TokenPool allocate(Integer nodeId) {
@@ -209,7 +217,7 @@ public class TokenPoolService {
 			String lockKey = UUID.randomUUID().toString();
 			tokenPool.setLockKey(lockKey);
 
-			// Do persist ooperation in try/catch for safety and do not throw error to upper
+			// Do persist operation in try/catch for safety and do not throw error to upper
 			// levels
 			try {
 				persist(lastTokenPool);
@@ -242,10 +250,6 @@ public class TokenPoolService {
 		update(tokenPool);
 	}
 
-	protected void persist(TokenPool tokenPool) {
-		entryManager.persist(tokenPool);
-	}
-
 	public void reset(TokenPool tokenPool, Integer nodeId) {
 		long currentTime = System.currentTimeMillis();
 		tokenPool.setNodeId(nodeId);
@@ -254,10 +258,6 @@ public class TokenPoolService {
 		tokenPool.setExpirationDate(new Date(currentTime + 60* 1000)); // Expiration should be more than current time
 		
 		update(tokenPool);
-	}
-
-	public void update(TokenPool tokenPool) {
-		entryManager.merge(tokenPool);
 	}
 
 	private TokenPool setIndexes(TokenPool tokenPool) {
@@ -285,7 +285,7 @@ public class TokenPoolService {
 	}
 
 	public String getDnForTokenPool(Integer id) {
-		return String.format("jansNum=%d,%s", id, staticConfiguration.getBaseDn().getNodes());
+		return String.format("jansNum=%d,%s", id, staticConfiguration.getBaseDn().getNode());
 	}
 
 }

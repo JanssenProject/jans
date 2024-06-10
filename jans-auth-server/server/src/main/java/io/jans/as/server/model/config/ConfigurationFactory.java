@@ -157,8 +157,6 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
     private long loadedRevision = -1;
     private boolean loadedFromLdap = true;
 
-	private Integer nodeId = 0;
-
     @PostConstruct
     public void init() {
         log.info("Initializing ConfigurationFactory ...");
@@ -603,9 +601,5 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
     public String getContextPath() {
         return contextPath;
     }
-
-	public Integer getNodeId() {
-		return nodeId ;
-	}
 
 }
