@@ -79,7 +79,7 @@ public class Transpiler {
             throw new RuntimeException("Unable to read utility script", e);
         }
 
-        FM_CONFIG = new Configuration(Configuration.VERSION_2_3_32);
+        FM_CONFIG = new Configuration(Configuration.VERSION_2_3_33);
         FM_CONFIG.setClassLoaderForTemplateLoading(CLS_LOADER, "/");
         FM_CONFIG.setDefaultEncoding(UTF_8.toString());
         FM_CONFIG.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);

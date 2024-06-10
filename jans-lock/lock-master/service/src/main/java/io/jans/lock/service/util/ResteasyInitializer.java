@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package io.jans.lock.server.service;
+package io.jans.lock.service.util;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import io.jans.lock.ws.rs.HealthCheckController;
+import io.jans.lock.service.ws.rs.ConfigurationRestWebService;
+import io.jans.lock.service.ws.rs.audit.AuditRestWebServiceImpl;
+import io.jans.lock.service.ws.rs.config.ConfigRestWebServiceImpl;
+import io.jans.lock.service.ws.rs.sse.SseRestWebServiceImpl;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 
@@ -27,15 +30,20 @@ import jakarta.ws.rs.core.Application;
 /**
  * Integration with Resteasy
  * 
- * @author Yuriy Movchan Date: 12/12/2023
+ * @author Yuriy Movchan Date: 06/06/2024
  */
-@ApplicationPath("/sys")
-public class SystemResteasyInitializer extends Application {	
+@ApplicationPath("/v1")
+public class ResteasyInitializer extends Application {	
 
 	@Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(HealthCheckController.class);
+        classes.add(ConfigurationRestWebService.class);
+
+        classes.add(AuditRestWebServiceImpl.class);
+        classes.add(ConfigRestWebServiceImpl.class);
+
+        classes.add(SseRestWebServiceImpl.class);
 
         return classes;
     }

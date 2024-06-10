@@ -1,4 +1,6 @@
 {
+   "baseEndpoint" : "https://%(hostname)s/%(base_endpoint)s/v1",
+
    "tokenChannels":[
          "jans_token"
       ],
