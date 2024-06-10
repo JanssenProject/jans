@@ -49,7 +49,7 @@ class JansLockInstaller(JettyInstaller):
         self.opa_dir = os.path.join(Config.opt_dir, 'opa')
         self.opa_bin_dir = os.path.join(self.opa_dir, 'bin')
         self.opa_log_dir = os.path.join(self.opa_dir, 'logs')
-
+        self.base_endpoint = 'jans-lock' if Config.get('install_jans_lock_as_server') else 'jans-auth'
 
     def install(self):
         if Config.get('install_jans_lock_as_server'):
@@ -71,6 +71,7 @@ class JansLockInstaller(JettyInstaller):
             base.current_app.ConfigApiInstaller.source_files.append(self.source_files[3])
             base.current_app.ConfigApiInstaller.install_plugin('lock-plugin')
 
+        self.apache_lock_config()
 
     def install_as_server(self):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
@@ -109,6 +110,27 @@ class JansLockInstaller(JettyInstaller):
         self.renderTemplateInOut(self.message_conf_json, self.template_dir, self.output_dir)
         message_conf_json = self.readFile(self.message_conf_json)
         self.dbUtils.set_configuration('jansMessageConf', message_conf_json)
+
+    def apache_lock_config(self):
+        apache_config = self.readFile(base.current_app.HttpdInstaller.https_jans_fn).splitlines()
+        if Config.get('install_jans_lock_as_server'):
+            proxy_context = 'jans-lock'
+            proxy_port = Config.jans_lock_port
+        else:
+            proxy_port = Config.jans_auth_port
+            proxy_context = 'jans-auth'
+
+        jans_lock_well_known_proxy_pass = f'    ProxyPass   /.well-known/lock-master-configuration http://localhost:{proxy_port}/{proxy_context}/v1/configuration'
+        jans_lock_well_known_proxy_pass += f'\n\n    <Location /jans-lock>\n     Header edit Set-Cookie ^((?!opbs|session_state).*)$ $1;HttpOnly\n     ProxyPass http://localhost:{proxy_port}/{proxy_context} retry=5 connectiontimeout=60 timeout=60\n     Order deny,allow\n     Allow from all\n    </Location>\n'
+
+
+        proyx_pass_n = 0
+        for i, l in enumerate(apache_config):
+            if l.strip().startswith('ProxyErrorOverride') and l.strip().endswith('On'):
+                proyx_pass_n = i
+
+        apache_config.insert(proyx_pass_n-1, jans_lock_well_known_proxy_pass)
+        self.writeFile(base.current_app.HttpdInstaller.https_jans_fn, '\n'.join(apache_config), backup=False)
 
 
     def install_opa(self):
