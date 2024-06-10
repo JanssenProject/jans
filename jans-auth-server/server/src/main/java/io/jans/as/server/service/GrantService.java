@@ -6,34 +6,33 @@
 
 package io.jans.as.server.service;
 
-import static org.apache.commons.lang.BooleanUtils.isTrue;
+import com.google.common.collect.Lists;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.LockMessageConfig;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.CacheGrant;
+import io.jans.as.server.service.token.StatusListIndexService;
+import io.jans.as.server.util.TokenHashUtil;
+import io.jans.model.token.TokenEntity;
+import io.jans.model.token.TokenType;
+import io.jans.model.tokenstatus.TokenStatus;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.search.filter.Filter;
+import io.jans.service.CacheService;
+import io.jans.service.MessageService;
+import io.jans.util.StringHelper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import com.google.common.collect.Lists;
-
-import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.configuration.LockMessageConfig;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.CacheGrant;
-import io.jans.as.server.util.TokenHashUtil;
-import io.jans.model.token.TokenEntity;
-import io.jans.model.token.TokenType;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.search.filter.Filter;
-import io.jans.service.CacheService;
-import io.jans.service.MessageService;
-import io.jans.service.cache.CacheConfiguration;
-import io.jans.util.StringHelper;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -65,7 +64,7 @@ public class GrantService {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private CacheConfiguration cacheConfiguration;
+    private StatusListIndexService statusListIndexService;
 
     public static String generateGrantId() {
         return UUID.randomUUID().toString();
@@ -153,6 +152,8 @@ public class GrantService {
             if (shouldSaveInCache()) {
                 cacheService.remove(token.getTokenCode());
             }
+
+            statusListIndexService.updateStatusAtIndex(token.getAttributes().getStatusListIndex(), TokenStatus.REVOKED);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

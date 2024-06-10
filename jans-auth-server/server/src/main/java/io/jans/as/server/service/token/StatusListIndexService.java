@@ -3,9 +3,13 @@ package io.jans.as.server.service.token;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.service.cluster.TokenPoolService;
 import io.jans.model.token.TokenPool;
+import io.jans.model.tokenstatus.StatusList;
+import io.jans.model.tokenstatus.TokenStatus;
 import io.jans.util.Pair;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -19,6 +23,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class StatusListIndexService {
 
     @Inject
+    private Logger log;
+
+    @Inject
     private TokenPoolService tokenPoolService;
 
 	@Inject
@@ -27,6 +34,32 @@ public class StatusListIndexService {
     private ReentrantLock allocatedLock = new ReentrantLock();
 	
     private TokenPool tokenPool = null;
+
+    public void updateStatusAtIndex(int index, TokenStatus status) {
+        try {
+            if (index < 0) {
+                return; // invalid
+            }
+
+            log.trace("Updating status list at index {} with status {} ...", index, status);
+
+            final int bitSize = configurationFactory.getAppConfiguration().getStatusListBitSize();
+            final TokenPool indexHolder = tokenPoolService.getTokenPoolByIndex(index);
+            final String data = indexHolder.getData();
+
+            final StatusList statusList = StringUtils.isNotBlank(data) ? StatusList.fromEncoded(data, bitSize) : new StatusList(bitSize);
+            statusList.set(index, status.getValue());
+
+            indexHolder.setData(statusList.getLst());
+
+            tokenPoolService.update(indexHolder);
+
+            log.trace("Updated status list at index {} with status {} successfully.", index, status);
+
+        } catch (Exception e) {
+            log.error("Failed to update token list status at index " + index + " with status " + status, e);
+        }
+    }
 
     public Integer next() {
         return nextIndex().getFirst();
