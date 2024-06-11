@@ -50,7 +50,7 @@ public class AcrService {
     private AppConfiguration appConfiguration;
 
     public static boolean isAgama(String acr) {
-        return StringUtils.isNotBlank(acr) && (acr.startsWith("agama_") || acr.equalsIgnoreCase(AGAMA));
+        return StringUtils.isNotBlank(acr) && (acr.startsWith("agama_") || AGAMA.equalsIgnoreCase(acr));
     }
 
     public void validateAcrs(AuthzRequest authzRequest, Client client) throws AcrChangedException {
@@ -158,7 +158,7 @@ public class AcrService {
         }
 
         if (isAgama(acrValues.get(0))) {
-            return Lists.newArrayList("agama");
+            return Lists.newArrayList(AcrService.AGAMA);
         }
 
         return acrValues;
