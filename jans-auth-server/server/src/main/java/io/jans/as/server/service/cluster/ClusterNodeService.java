@@ -173,7 +173,7 @@ public class ClusterNodeService {
 			// Do persist operation in try/catch for safety and do not throw error to upper
 			// levels
 			try {
-				persist(lastClusterNode);
+				persist(clusterNode);
 
 				// Load node after update
 				ClusterNode lockedClusterNode = getClusterNodeByDn(clusterNode.getDn());

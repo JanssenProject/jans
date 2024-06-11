@@ -220,7 +220,7 @@ public class TokenPoolService {
 			// Do persist operation in try/catch for safety and do not throw error to upper
 			// levels
 			try {
-				persist(lastTokenPool);
+				persist(tokenPool);
 
 				// Load token after update
 				TokenPool lockedTokenPool = getTokenPoolByDn(tokenPool.getDn());
