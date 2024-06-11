@@ -1,1 +1,7 @@
 schema_url = "https://api.github.com/repos/nynymike/cedar-playground/contents/gluu_lock.cedarschema?ref=main"
+
+# Policy Store Settings
+[policy_store]
+use_static_store = false
+remote_uri = "https://api.github.com/repos/nynymike/cedar-playground/contents/gluu_lock.cedarschema?ref=main"
+use_brotli_decompression = false # Whether the policy store is to be decopmressed using Brotli

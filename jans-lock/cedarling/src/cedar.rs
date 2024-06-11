@@ -1,4 +1,5 @@
 use cedar_policy::*;
+use wasm_bindgen::UnwrapThrowExt;
 
 // SAFETY: Webassembly is single-threaded, so this is safe. The statics are also scoped
 pub(crate) fn entities(swap: Option<Entities>) -> &'static Entities {
@@ -6,7 +7,7 @@ pub(crate) fn entities(swap: Option<Entities>) -> &'static Entities {
 
 	unsafe {
 		swap.map(|s| ENTITIES = Some(s));
-		ENTITIES.as_ref().unwrap()
+		ENTITIES.as_ref().unwrap_throw()
 	}
 }
 
@@ -15,7 +16,7 @@ pub(crate) fn policies(swap: Option<PolicySet>) -> &'static PolicySet {
 
 	unsafe {
 		swap.map(|s| ENTITIES = Some(s));
-		ENTITIES.as_ref().unwrap()
+		ENTITIES.as_ref().unwrap_throw()
 	}
 }
 

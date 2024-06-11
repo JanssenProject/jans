@@ -6,6 +6,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+brotli = "6.0.0"
 cedar-policy = { version = "3.2.0", features = ["wasm"] }
 console_error_panic_hook = "0.1.7"
 serde = { version = "*", features = ["derive"] }
@@ -25,7 +26,7 @@ features = [
 	'RequestMode',
 	'RequestInit',
 	'EventSource',
-	'MessageEvent'
+	'MessageEvent',
 ]
 
 [dev-dependencies]

@@ -1,3 +1,5 @@
+use std::{borrow::Cow, str};
+
 use cedar_policy::*;
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::{prelude::*, throw_val};
@@ -18,22 +20,36 @@ static_toml::static_toml! {
 }
 
 #[wasm_bindgen]
-pub async fn init(auth: JsValue, entities: Option<String>, policies: Option<String>) {
-	let tokens = from_value::<types::Tokens>(auth).unwrap();
+pub async fn init(tokens: JsValue, entities: Option<String>) {
+	let tokens = from_value::<types::Tokens>(tokens).unwrap_throw();
 	let schema = utils::fetch_schema().await;
 	cedar::schema(Some(schema));
 
 	if let Some(entities) = entities {
-		let entities = utils::get_str(&entities, &tokens).await.expect_throw("Can't fetch entities from URL");
-		let entities = Entities::from_json_str(&entities, cedar::schema(None)).unwrap();
+		let entities = utils::get(&entities).await.expect_throw("Can't fetch entities from URL");
+		let entities = Entities::from_json_str(str::from_utf8(&entities).unwrap_throw(), cedar::schema(None)).unwrap_throw();
 		cedar::entities(Some(entities));
 	}
 
-	if let Some(policies) = policies {
-		let policies = utils::get_str(&policies, &tokens).await.expect_throw("Can't fetch policies from URL");
-		let policies: PolicySet = policies.parse().unwrap();
-		cedar::policies(Some(policies));
-	}
+	// Load Policy Store
+	let vector;
+	let mut raw = if CONFIG.policy_store.use_static_store {
+		include_bytes!("../policies.store")
+	} else {
+		vector = utils::get(&CONFIG.policy_store.remote_uri).await.expect_throw("Can't fetch policies from remote location");
+		vector.as_slice()
+	};
+
+	let decompressed = if CONFIG.policy_store.use_brotli_decompression {
+		let mut buffer = Vec::with_capacity(raw.len());
+		brotli::BrotliDecompress(&mut raw, &mut buffer).expect_throw("Unable to Decompress Policy Store!");
+		Cow::Owned(buffer)
+	} else {
+		Cow::Borrowed(raw)
+	};
+
+	let policies: PolicySet = str::from_utf8(&decompressed).unwrap_throw().parse().unwrap_throw();
+	cedar::policies(Some(policies));
 
 	// register sse
 	let sse = EventSource::new(&tokens.sse_url).unwrap_throw();
@@ -56,10 +72,10 @@ pub async fn init(auth: JsValue, entities: Option<String>, policies: Option<Stri
 
 #[wasm_bindgen]
 pub async fn authz(req: JsValue) -> JsValue {
-	let request = from_value::<types::Request>(req).unwrap();
+	let request = from_value::<types::Request>(req).unwrap_throw();
 
 	let request = cedar_policy::Request::from(request);
 	let response = cedar::authorizer().is_authorized(&request, cedar::policies(None), cedar::entities(None));
 
-	to_value(&response.decision()).unwrap()
+	to_value(&response.decision()).unwrap_throw()
 }

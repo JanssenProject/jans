@@ -1,4 +1,6 @@
-#[derive(serde::Deserialize, serde::Serialize, Debug)]
+use wasm_bindgen::UnwrapThrowExt;
+
+#[derive(serde::Deserialize, serde::Serialize, Debug, Default)]
 pub struct Tokens {
 	#[serde(rename = "access_token")]
 	pub(crate) access: String,
@@ -21,10 +23,10 @@ pub struct Request {
 
 impl From<Request> for cedar_policy::Request {
 	fn from(value: Request) -> cedar_policy::Request {
-		let principal = value.principal.parse().unwrap();
-		let action = value.action.parse().unwrap();
-		let resource = value.resource.parse().unwrap();
+		let principal = value.principal.parse().unwrap_throw();
+		let action = value.action.parse().unwrap_throw();
+		let resource = value.resource.parse().unwrap_throw();
 
-		cedar_policy::Request::new(Some(principal), Some(action), Some(resource), cedar_policy::Context::empty(), None).unwrap()
+		cedar_policy::Request::new(Some(principal), Some(action), Some(resource), cedar_policy::Context::empty(), None).unwrap_throw()
 	}
 }
