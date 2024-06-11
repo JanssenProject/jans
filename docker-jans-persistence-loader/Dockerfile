@@ -16,7 +16,7 @@ RUN apk update \
 # ===========
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
+ENV JANS_SOURCE_VERSION=d83bd17f860cefe5c6732b672127cbf55ad97f82
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -121,10 +121,10 @@ ENV CN_SECRET_ADAPTER=vault \
 ENV CN_PERSISTENCE_TYPE=couchbase \
     CN_HYBRID_MAPPING="{}" \
     CN_COUCHBASE_URL=localhost \
-    CN_COUCHBASE_USER=admin \
+    CN_COUCHBASE_USER=jans \
     CN_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \
     CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
-    CN_COUCHBASE_SUPERUSER="" \
+    CN_COUCHBASE_SUPERUSER=admin \
     CN_COUCHBASE_SUPERUSER_PASSWORD_FILE=/etc/jans/conf/couchbase_superuser_password \
     CN_COUCHBASE_INDEX_NUM_REPLICA=0 \
     CN_LDAP_URL=localhost:1636 \

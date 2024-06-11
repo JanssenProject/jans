@@ -3,4 +3,5 @@ grpcio==1.59.3
 click==8.1.7
 marshmallow==3.21.2
 fqdn==1.5.1
+pem==23.1.0
 /tmp/jans/jans-pycloudlib

@@ -90,11 +90,6 @@ spec:
                   mountPath: {{ .Values.global.cnCouchbasePasswordFile }}
                   subPath: couchbase_password
               {{- end }}
-                {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-                - name: sql-pass
-                  mountPath: {{ .Values.global.cnSqlPasswordFile }}
-                  subPath: sql_password
-                {{- end }}
                 {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
                 - name: ldap-pass
                   mountPath: {{ .Values.global.cnLdapPasswordFile }}
@@ -172,11 +167,6 @@ spec:
                   # we mostly need non-superuser couchbase password file here
                   - key: couchbase_password
                     path: couchbase_password
-          {{- end }}
-          {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-            - name: sql-pass
-              secret:
-                secretName: {{ .Release.Name }}-sql-pass
           {{- end }}
           {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
             - name: ldap-pass

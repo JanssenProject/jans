@@ -61,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-keycloak-link/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
+ENV JANS_SOURCE_VERSION=d83bd17f860cefe5c6732b672127cbf55ad97f82
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -172,7 +172,7 @@ ENV CN_PERSISTENCE_TYPE=ldap \
     CN_LDAP_URL=localhost:1636 \
     CN_LDAP_USE_SSL=true \
     CN_COUCHBASE_URL=localhost \
-    CN_COUCHBASE_USER=admin \
+    CN_COUCHBASE_USER=jans \
     CN_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \
     CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
     CN_COUCHBASE_CONN_TIMEOUT=10000 \

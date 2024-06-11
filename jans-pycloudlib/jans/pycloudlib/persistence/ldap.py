@@ -256,3 +256,15 @@ class LdapClient:
 
                 for dn, entry in parser.parse():
                     self._add_entry(dn, entry)
+
+
+def sync_ldap_password(manager: Manager) -> None:
+    """Pull secret contains password to access LDAP server.
+
+    Args:
+        manager: An instance of manager class.
+    """
+    password_file = os.environ.get("CN_LDAP_PASSWORD_FILE", "/etc/jans/conf/ldap_password")
+
+    if not os.path.isfile(password_file):
+        manager.secret.to_file("ldap_password", password_file)

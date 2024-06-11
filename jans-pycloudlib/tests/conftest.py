@@ -128,8 +128,13 @@ def spanner_client(gmanager, monkeypatch, google_creds):
 
 
 @pytest.fixture
-def sql_client(gmanager):
+def sql_client(gmanager, tmpdir, monkeypatch):
     from jans.pycloudlib.persistence.sql import SqlClient
+    from jans.pycloudlib.persistence.sql import sync_sql_password
 
+    src = tmpdir.join("sql_password")
+    src.write("secret")
+    monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(src))
+    sync_sql_password(gmanager)
     client = SqlClient(gmanager)
     yield client
