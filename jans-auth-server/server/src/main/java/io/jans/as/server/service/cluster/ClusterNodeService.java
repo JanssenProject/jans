@@ -30,7 +30,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class ClusterNodeService {
 
-	public static long DELAY_AFTER_EXPIRATION = 3 * 1000; // 3 minutes
+	public static long DELAY_AFTER_EXPIRATION = 3 * 60 * 1000; // 3 minutes
 	public static String CLUSTER_TYPE_JANS_AUTH = "jans-auth";
 
 	@Inject

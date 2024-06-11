@@ -33,7 +33,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class TokenPoolService {
 	
-	public static long DELAY_AFTER_EXPIRATION = 3 * 60 * 1000; // 3 hours
+	public static long DELAY_AFTER_EXPIRATION = 3 * 60 * 60 * 1000; // 3 hours
 
 	@Inject
 	private Logger log;
