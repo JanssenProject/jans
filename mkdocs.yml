@@ -376,7 +376,6 @@ nav:
     - USB Authenticator Support: admin/fido/usb-authn.md
     - Platform Authenticator Support: admin/fido/platform-authn.md
     - Bluetooth Authenticator Support: admin/fido/bluetooth-authn.md
-    - SCIM Extension: admin/fido/scim.md
   - SCIM Admin Guide:
     - admin/scim/README.md
     - Configuration: admin/scim/config.md
