@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.common.*;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
@@ -37,6 +38,7 @@ public class AppConfiguration implements Configuration {
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
     public static final String DEFAULT_AUTHORIZATION_CHALLENGE_ACR = "default_challenge";
 
+    public static final int DEFAULT_STATUS_LIST_RESPONSE_JWT_LIFETIME = 600; // 10min
     public static final int DEFAULT_STATUS_LIST_BIT_SIZE = 2;
     public static final int DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
     public static final int DEFAULT_TOKEN_STATUS_LIST_INDEX_LIMIT = 10000000;  // 10M - AS resets back to 1 after reaching this limit
@@ -203,13 +205,19 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The lifetime of spontaneous scope in seconds")
     private int spontaneousScopeLifetime;
 
-    @DocProperty(description = "Specifies status list bit size. (2 bits - 4 statuses, 4 bits - 16 statuses). Default to 2.")
+    @DocProperty(description = "Specifies status list bit size. (2 bits - 4 statuses, 4 bits - 16 statuses). Defaults to 2.")
     private int statusListBitSize = DEFAULT_STATUS_LIST_BIT_SIZE;
 
-    @DocProperty(description = "Specifies how many token status list indexes AS can reserve at once (when token_status_list feature flag is enabled). Default to 10.")
+    @DocProperty(description = "The status list signature algorithm to sign response JWT. Defaults to RS256.")
+    private String statusListResponseJwtSignatureAlgorithm = SignatureAlgorithm.RS256.getName();
+
+    @DocProperty(description = "The status list response JWT lifetime (used to set exp claim in JWT).")
+    private int statusListResponseJwtLifetime = DEFAULT_STATUS_LIST_RESPONSE_JWT_LIFETIME;
+
+    @DocProperty(description = "Specifies how many token status list indexes AS can reserve at once (when token_status_list feature flag is enabled). Defaults to 100.")
     private int tokenIndexAllocationBlockSize = DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE;
 
-    @DocProperty(description = "Specifies token status list index limit. When AS reachs it, it will reset index back to 0. Default to 10M.")
+    @DocProperty(description = "Specifies token status list index limit. When AS reachs it, it will reset index back to 0. Defaults to 10M.")
     private int tokenIndexLimit = DEFAULT_TOKEN_STATUS_LIST_INDEX_LIMIT;
 
     @DocProperty(description = "Specifies which LDAP attribute is used for the subject identifier claim")
@@ -2405,6 +2413,22 @@ public class AppConfiguration implements Configuration {
 
     public void setSpontaneousScopeLifetime(int spontaneousScopeLifetime) {
         this.spontaneousScopeLifetime = spontaneousScopeLifetime;
+    }
+
+    public int getStatusListResponseJwtLifetime() {
+        return statusListResponseJwtLifetime;
+    }
+
+    public void setStatusListResponseJwtLifetime(int statusListResponseJwtLifetime) {
+        this.statusListResponseJwtLifetime = statusListResponseJwtLifetime;
+    }
+
+    public String getStatusListResponseJwtSignatureAlgorithm() {
+        return statusListResponseJwtSignatureAlgorithm;
+    }
+
+    public void setStatusListResponseJwtSignatureAlgorithm(String statusListResponseJwtSignatureAlgorithm) {
+        this.statusListResponseJwtSignatureAlgorithm = statusListResponseJwtSignatureAlgorithm;
     }
 
     public int getStatusListBitSize() {
