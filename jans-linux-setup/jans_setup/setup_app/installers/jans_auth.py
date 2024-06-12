@@ -15,6 +15,8 @@ from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.static import AppType, InstallOption, SetupProfiles
 
+Config.jans_auth_port = '8081'
+
 class JansAuthInstaller(JettyInstaller):
 
     source_files = [
