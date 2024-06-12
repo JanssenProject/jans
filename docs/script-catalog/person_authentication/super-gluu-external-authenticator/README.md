@@ -289,4 +289,4 @@ A user's Super Gluu device(s) can be removed by a Janssen administrator by direc
 Now the old device is gone and the user can enroll a new device
 
 ### Device management using SCIM
-See the [SCIM documentation](../../scim/README.md) on how to manage Super Gluu devices, using the SCIM protocol.
+See the [SCIM documentation](../../admin/usermgmt/usermgmt-scim#fido-2-devices) on how to manage Super Gluu devices, using the SCIM protocol.

@@ -399,29 +399,29 @@ It is possible to determine if a given LDAP attribute is being mapped to a SCIM 
 
 ## FIDO Devices
 
-A FIDO device represents a user credential stored in the Jans Server LDAP that is compliant with the [FIDO](https://fidoalliance.org/) standard. These devices are used as a second factor in a setting of strong authentication.
+A FIDO device represents a user credential stored in the Jans Server database that is compliant with the [FIDO](https://fidoalliance.org/) standard. These devices are used as a second factor in a setting of strong authentication.
 
-Having FIDO devices as one of resource types allow application developers querying, updating and deleting already existing (added) devices. Addition of devices do not take place through the service since this process requires direct end-user interaction, ie. device enrolling.
+FIDO devices were superseded by [FIDO 2](#fido2-devices) devices in Jans Server.
 
-The following is a summary of features of a Fido Device SCIM resource:
+## FIDO 2 devices
 
-* Schema URN: `urn:ietf:params:scim:schemas:core:2.0:FidoDevice`
+FIDO 2 devices are credentials that adhere to the more current Fido 2.0 initiative (WebAuthn + CTAP). Examples of FIDO 2 devices are USB security keys and Super Gluu devices.
 
-* Name of resource: `FidoDevice`
+The SCIM endpoints for FIDO 2 allow application developers to query, update and delete already existing devices. Addition of devices do not take place through the service since this process requires direct end-user interaction, ie. device enrolling.
 
-* Endpoint URL (relative to base URL of service): `/jans-scim/restv1/v2/FidoDevices`
+The schema attributes for a device of this kind can be found by hitting the URL  `https://<jans-server>/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Fido2Device`
 
-* Device attributes: Attributes pertaining to this resource type are listed by visiting the URL `https://<jans-server>/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:FidoDevice`
-
+To distinguish between regular FIDO2 and SuperGluu devices, note only SuperGluu entries have the attribute `deviceData` populated (i.e. not null)
 
 ### Example: Querying Enrolled Devices
-Say we are interested in having a list of Super Gluu devices users have enrolled and whose operating system is iOS. In a setting of test mode, we may issue a query like this:
+
+Say we are interested in having a list of Super Gluu devices users have enrolled and whose operating system is iOS. We may issue a query like this:
 
 ```
-curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 'filter=deviceData co "ios"' -d count=10 -o output.json https://<jans-server>/jans-scim/restv1/v2/FidoDevices
+curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 'filter=deviceData co "ios"' -d count=10 https://<jans-server>/jans-scim/restv1/v2/Fido2Devices
 ```
 
-In response `output.json` will be like that.
+The response will be like:
 
 ```
 {
@@ -435,7 +435,7 @@ In response `output.json` will be like that.
     {
       "id": "...",
       "meta": {...},
-      "schemas": ["urn:ietf:params:scim:schemas:core:2.0:FidoDevice"],
+      "schemas": ["urn:ietf:params:scim:schemas:core:2.0:Fido2Device"],
       "userId": "...",
       ...
       "deviceData": "{...}",
@@ -444,23 +444,6 @@ In response `output.json` will be like that.
     ...
   ]
 }
-```
-### FIDO 2 devices
-
-The following is a summary of features of a Fido Device SCIM resource:
-
-* Schema URN: `urn:ietf:params:scim:schemas:core:2.0:Fido2Device`
-
-* Name of resource: `Fido2Device`
-
-* Endpoint URL (relative to base URL of service): `/jans-scim/restv1/v2/Fido2Devices`
-
-Device attributes: Attributes pertaining to this resource type are listed by visiting the URL `https://<jans-server>/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Fido2Device`
-
-Quering for enrolled devices
-
-```
-curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode -d count=10 -o output.json https://<jans-server>/jans-scim/restv1/v2/Fido2Devices
 ```
 
 ## Potential performance issues with Group endpoints
@@ -509,15 +492,3 @@ Here, you have some useful tips before you start:
 
 6. In this user management guide with SCIM, we have already touched upon the fundamentals of SCIM in Jans Server and shown a good amount of sample requests for manipulation of user information. However, keep in mind the SCIM spec documents are definitely the key reference to build working request messages, specially [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643), and [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644).
 
-
-## This content is in progress
-
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
-
-## Have questions in the meantime?
-
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
-
-## Want to contribute?
-
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
