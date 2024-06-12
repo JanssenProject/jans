@@ -23,7 +23,7 @@ logger = logging.getLogger("jans-auth")
 Entry = namedtuple("Entry", ["id", "attrs"])
 
 
-def _transform_lock_dynamic_config(conf):
+def _transform_lock_dynamic_config(conf, manager):
     should_update = False
 
     opa_url = os.environ.get("CN_OPA_URL", "http://localhost:8181/v1")
@@ -33,11 +33,13 @@ def _transform_lock_dynamic_config(conf):
         should_update = True
 
     # add missing top-level keys
+    hostname = manager.config.get("hostname")
     for missing_key, value in [
         ("policiesJsonUrisAuthorizationToken", conf.pop("policiesJsonUrisAccessToken", "")),
         ("policiesZipUris", []),
         ("policiesZipUrisAuthorizationToken", conf.pop("policiesZipUrisAccessToken", "")),
         ("pdpType", "OPA"),
+        ("baseEndpoint", f"https://{hostname}/jans-lock/v1"),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -241,7 +243,7 @@ class Upgrade:
             with contextlib.suppress(json.decoder.JSONDecodeError):
                 entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
 
-        conf, should_update = _transform_lock_dynamic_config(entry.attrs["jansConfDyn"])
+        conf, should_update = _transform_lock_dynamic_config(entry.attrs["jansConfDyn"], self.manager)
 
         if should_update:
             if self.backend.type != "couchbase":
