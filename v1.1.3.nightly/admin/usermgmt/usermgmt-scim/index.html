@@ -6557,8 +6557,6 @@
         
           
         
-          
-        
       
       
         
@@ -6687,20 +6685,6 @@
     <li class="md-nav__item">
       <a href="../../fido/bluetooth-authn/" class="md-nav__link">
         Bluetooth Authenticator Support
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../fido/scim/" class="md-nav__link">
-        SCIM Extension
       </a>
     </li>
   
@@ -7466,19 +7450,19 @@
     FIDO Devices
   </a>
   
-    <nav class="md-nav" aria-label="FIDO Devices">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido-2-devices" class="md-nav__link">
+    FIDO 2 devices
+  </a>
+  
+    <nav class="md-nav" aria-label="FIDO 2 devices">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#example-querying-enrolled-devices" class="md-nav__link">
     Example: Querying Enrolled Devices
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fido-2-devices" class="md-nav__link">
-    FIDO 2 devices
   </a>
   
 </li>
@@ -7512,27 +7496,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
   
 </li>
       
@@ -8753,19 +8716,19 @@
     FIDO Devices
   </a>
   
-    <nav class="md-nav" aria-label="FIDO Devices">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido-2-devices" class="md-nav__link">
+    FIDO 2 devices
+  </a>
+  
+    <nav class="md-nav" aria-label="FIDO 2 devices">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#example-querying-enrolled-devices" class="md-nav__link">
     Example: Querying Enrolled Devices
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fido-2-devices" class="md-nav__link">
-    FIDO 2 devices
   </a>
   
 </li>
@@ -8799,27 +8762,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
   
 </li>
       
@@ -9217,28 +9159,18 @@ response looks like
 <p>SCIM <a href="https://datatracker.ietf.org/doc/html/rfc7643">schema spec</a> does not use LDAP attribute names but a different naming convention for resource attributes (note this is not the case of custom attributes where the SCIM name used is that of the LDAP attribute).</p>
 <p>It is possible to determine if a given LDAP attribute is being mapped to a SCIM attribute. For that you need to check in Jans TUI <code>Auth-Server &gt;&gt; Attributes</code> and click on any attributes. Check <code>Include in SCIM Extension:</code> is <code>true</code> or <code>false</code>. Whenever you try to map any LDAP attribute to a SCIM attribute keep it's value <code>true</code>.  </p>
 <h2 id="fido-devices">FIDO Devices<a class="headerlink" href="#fido-devices" title="Permanent link">#</a></h2>
-<p>A FIDO device represents a user credential stored in the Jans Server LDAP that is compliant with the <a href="https://fidoalliance.org/">FIDO</a> standard. These devices are used as a second factor in a setting of strong authentication.</p>
-<p>Having FIDO devices as one of resource types allow application developers querying, updating and deleting already existing (added) devices. Addition of devices do not take place through the service since this process requires direct end-user interaction, ie. device enrolling.</p>
-<p>The following is a summary of features of a Fido Device SCIM resource:</p>
-<ul>
-<li>
-<p>Schema URN: <code>urn:ietf:params:scim:schemas:core:2.0:FidoDevice</code></p>
-</li>
-<li>
-<p>Name of resource: <code>FidoDevice</code></p>
-</li>
-<li>
-<p>Endpoint URL (relative to base URL of service): <code>/jans-scim/restv1/v2/FidoDevices</code></p>
-</li>
-<li>
-<p>Device attributes: Attributes pertaining to this resource type are listed by visiting the URL <code>https://&lt;jans-server&gt;/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:FidoDevice</code></p>
-</li>
-</ul>
+<p>A FIDO device represents a user credential stored in the Jans Server database that is compliant with the <a href="https://fidoalliance.org/">FIDO</a> standard. These devices are used as a second factor in a setting of strong authentication.</p>
+<p>FIDO devices were superseded by <a href="#fido2-devices">FIDO 2</a> devices in Jans Server.</p>
+<h2 id="fido-2-devices">FIDO 2 devices<a class="headerlink" href="#fido-2-devices" title="Permanent link">#</a></h2>
+<p>FIDO 2 devices are credentials that adhere to the more current Fido 2.0 initiative (WebAuthn + CTAP). Examples of FIDO 2 devices are USB security keys and Super Gluu devices.</p>
+<p>The SCIM endpoints for FIDO 2 allow application developers to query, update and delete already existing devices. Addition of devices do not take place through the service since this process requires direct end-user interaction, ie. device enrolling.</p>
+<p>The schema attributes for a device of this kind can be found by hitting the URL  <code>https://&lt;jans-server&gt;/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Fido2Device</code></p>
+<p>To distinguish between regular FIDO2 and SuperGluu devices, note only SuperGluu entries have the attribute <code>deviceData</code> populated (i.e. not null)</p>
 <h3 id="example-querying-enrolled-devices">Example: Querying Enrolled Devices<a class="headerlink" href="#example-querying-enrolled-devices" title="Permanent link">#</a></h3>
-<p>Say we are interested in having a list of Super Gluu devices users have enrolled and whose operating system is iOS. In a setting of test mode, we may issue a query like this:</p>
-<div class="highlight"><pre><span></span><code>curl -k -G -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; --data-urlencode &#39;filter=deviceData co &quot;ios&quot;&#39; -d count=10 -o output.json https://&lt;jans-server&gt;/jans-scim/restv1/v2/FidoDevices
+<p>Say we are interested in having a list of Super Gluu devices users have enrolled and whose operating system is iOS. We may issue a query like this:</p>
+<div class="highlight"><pre><span></span><code>curl -k -G -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; --data-urlencode &#39;filter=deviceData co &quot;ios&quot;&#39; -d count=10 https://&lt;jans-server&gt;/jans-scim/restv1/v2/Fido2Devices
 </code></pre></div>
-<p>In response <code>output.json</code> will be like that.</p>
+<p>The response will be like:</p>
 <div class="highlight"><pre><span></span><code>{
   &quot;totalResults&quot;: ...,
   &quot;itemsPerPage&quot;: ...,
@@ -9250,7 +9182,7 @@ response looks like
     {
       &quot;id&quot;: &quot;...&quot;,
       &quot;meta&quot;: {...},
-      &quot;schemas&quot;: [&quot;urn:ietf:params:scim:schemas:core:2.0:FidoDevice&quot;],
+      &quot;schemas&quot;: [&quot;urn:ietf:params:scim:schemas:core:2.0:Fido2Device&quot;],
       &quot;userId&quot;: &quot;...&quot;,
       ...
       &quot;deviceData&quot;: &quot;{...}&quot;,
@@ -9259,23 +9191,6 @@ response looks like
     ...
   ]
 }
-</code></pre></div>
-<h3 id="fido-2-devices">FIDO 2 devices<a class="headerlink" href="#fido-2-devices" title="Permanent link">#</a></h3>
-<p>The following is a summary of features of a Fido Device SCIM resource:</p>
-<ul>
-<li>
-<p>Schema URN: <code>urn:ietf:params:scim:schemas:core:2.0:Fido2Device</code></p>
-</li>
-<li>
-<p>Name of resource: <code>Fido2Device</code></p>
-</li>
-<li>
-<p>Endpoint URL (relative to base URL of service): <code>/jans-scim/restv1/v2/Fido2Devices</code></p>
-</li>
-</ul>
-<p>Device attributes: Attributes pertaining to this resource type are listed by visiting the URL <code>https://&lt;jans-server&gt;/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Fido2Device</code></p>
-<p>Quering for enrolled devices</p>
-<div class="highlight"><pre><span></span><code>curl -k -G -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; --data-urlencode -d count=10 -o output.json https://&lt;jans-server&gt;/jans-scim/restv1/v2/Fido2Devices
 </code></pre></div>
 <h2 id="potential-performance-issues-with-group-endpoints">Potential performance issues with Group endpoints<a class="headerlink" href="#potential-performance-issues-with-group-endpoints" title="Permanent link">#</a></h2>
 <p>In SCIM a group resource basically consists of an identifier, a display name, and a collection of members associated to it. Also, every member is made up of a user identifier, his display name, and other attributes. As a consequence, retrieving group information requires making a correlation with existing user data. Since Gluu database model does not follow a relational database pattern this may entail a considerable amount of user queries when groups contain thousands of members.</p>
@@ -9325,19 +9240,13 @@ response looks like
 <p>In this user management guide with SCIM, we have already touched upon the fundamentals of SCIM in Jans Server and shown a good amount of sample requests for manipulation of user information. However, keep in mind the SCIM spec documents are definitely the key reference to build working request messages, specially <a href="https://datatracker.ietf.org/doc/html/rfc7643">RFC 7643</a>, and <a href="https://datatracker.ietf.org/doc/html/rfc7644">RFC 7644</a>.</p>
 </li>
 </ol>
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-10-26T06:08:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-10-26</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-12T13:47:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-12</span>
       
         <br>
         Created:
