@@ -39,6 +39,7 @@ import jakarta.ws.rs.core.Response;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.*;
 
@@ -177,6 +178,9 @@ public class AssetResource extends ConfigBaseResource {
     public Response getJansServices() {
 
         List<String> services = assetService.getValidModuleName();
+        if(services == null) {
+            services = Collections.emptyList();
+        }
 
         logger.info("Asset fetched based on services:{}", services);
         return Response.ok(services).build();

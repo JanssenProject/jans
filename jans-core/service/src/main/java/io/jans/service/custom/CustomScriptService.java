@@ -132,7 +132,7 @@ public class CustomScriptService extends AbstractCustomScriptService {
     }
 
     public List<CustomScript> findActiveCustomScripts() {
-        Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("jansEnabled"), true);
+        Filter filter = Filter.createEqualityFilter("jansEnabled", true);
         List<CustomScript> activeScripts = persistenceEntryManager.findEntries(baseDn(), CustomScript.class, filter, 0);
         log.debug(" activeScripts:{}", activeScripts);
         return activeScripts;

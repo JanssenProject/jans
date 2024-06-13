@@ -247,6 +247,7 @@ public class CustomScriptResource extends ConfigBaseResource {
 
         customScriptService.update(customScript);
         
+        logger.debug("Check if script is enabled:{}", existingScript.isEnabled());
         //check if acr is to be updated
         if(!existingScript.isEnabled()) {
             updateAuthenticationMethod(existingScript);
@@ -436,19 +437,20 @@ public class CustomScriptResource extends ConfigBaseResource {
     }
     
     private void updateAuthenticationMethod(CustomScript customScript) {
-        logger.debug("customScript:{}", customScript);
+        logger.debug("Check for AuthenticationMethod customScript:{}", customScript);
        
         String defaultAcr = getAuthenticationMethod();
-        logger.debug("defaultAcr:{}", defaultAcr);
+        logger.debug("Current defaultAcr:{}", defaultAcr);
 
         if (customScript == null || StringUtils.isBlank(defaultAcr) || !defaultAcr.equalsIgnoreCase(customScript.getName())) {
             return;
         }
 
         String scriptName = customScript.getName();
+        logger.debug("scriptName:{}", scriptName);
         // If custom script is default acr and is disabled then remove default acr
-        if (defaultAcr.equalsIgnoreCase(scriptName) && customScript.isEnabled()) {
-            logger.debug("removing defaultAcr");
+        if (defaultAcr.equalsIgnoreCase(scriptName) && !customScript.isEnabled()) {
+            logger.debug(String.format("\n\n Removing defaultAcr as the script{%s} is disabled ", scriptName));
             removeAuthenticationMethod();
             defaultAcr = getAuthenticationMethod();
             logger.debug("defaultAcr:{}", defaultAcr);

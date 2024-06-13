@@ -8315,11 +8315,11 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
@@ -10281,14 +10281,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -10717,10 +10717,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
