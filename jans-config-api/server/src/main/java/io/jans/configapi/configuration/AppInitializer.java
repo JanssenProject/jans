@@ -8,6 +8,7 @@ package io.jans.configapi.configuration;
 
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
+import io.jans.configapi.model.configuration.AssetMgtConfiguration;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
@@ -136,6 +137,12 @@ public class AppInitializer {
         return configurationFactory;
     }
 
+    @Produces
+    @ApplicationScoped
+    public AssetMgtConfiguration getAssetMgtConfiguration() {
+        return this.configurationFactory.getApiAppConfiguration().getAssetMgtConfiguration();
+    }
+    
     @Produces
     @ApplicationScoped
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)

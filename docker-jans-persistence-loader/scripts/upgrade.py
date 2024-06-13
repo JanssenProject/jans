@@ -325,17 +325,20 @@ class Upgrade:
         scim_id = JANS_SCIM_SCRIPT_DN
         basic_id = JANS_BASIC_SCRIPT_DN
         duo_id = "inum=5018-F9CF,ou=scripts,o=jans"
+        agama_id = "inum=BADA-BADA,ou=scripts,o=jans"
 
         if self.backend.type in ("sql", "spanner"):
             kwargs = {"table_name": "jansCustomScr"}
             scim_id = doc_id_from_dn(scim_id)
             basic_id = doc_id_from_dn(basic_id)
             duo_id = doc_id_from_dn(duo_id)
+            agama_id = doc_id_from_dn(agama_id)
         elif self.backend.type == "couchbase":
             kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
             scim_id = id_from_dn(scim_id)
             basic_id = id_from_dn(basic_id)
             duo_id = id_from_dn(duo_id)
+            agama_id = id_from_dn(agama_id)
 
         # toggle scim script
         scim_entry = self.backend.get_entry(scim_id, **kwargs)
@@ -343,6 +346,7 @@ class Upgrade:
 
         if scim_entry and scim_entry.attrs["jansEnabled"] != scim_enabled:
             scim_entry.attrs["jansEnabled"] = scim_enabled
+            scim_entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(scim_entry.id, scim_entry.attrs, **kwargs)
 
         # always enable basic script
@@ -350,12 +354,42 @@ class Upgrade:
 
         if basic_entry and not as_boolean(basic_entry.attrs["jansEnabled"]):
             basic_entry.attrs["jansEnabled"] = True
+            basic_entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(basic_entry.id, basic_entry.attrs, **kwargs)
 
         # delete DUO entry
         duo_entry = self.backend.get_entry(duo_id, **kwargs)
         if duo_entry and not as_boolean(os.environ.get("CN_DUO_ENABLED")):
             self.backend.delete_entry(duo_entry.id, **kwargs)
+
+        agama_entry = self.backend.get_entry(agama_id, **kwargs)
+        if agama_entry:
+            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                props = agama_entry.attrs["jansConfProperty"]["v"]
+            else:
+                props = agama_entry.attrs["jansConfProperty"]
+
+            if not isinstance(props, list):
+                props = [props]
+
+            props = [json.loads(prop) for prop in props]
+
+            # filter out unwanted properties
+            new_props = [
+                prop for prop in props
+                if prop["value1"] != "default_flow_name" and prop["value2"] != "agama_flow"
+            ]
+
+            if new_props != props:
+                new_props = [json.dumps(prop) for prop in new_props]
+
+                if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                    agama_entry.attrs["jansConfProperty"]["v"] = new_props
+                else:
+                    agama_entry.attrs["jansConfProperty"] = new_props
+
+                agama_entry.attrs["jansRevision"] += 1
+                self.backend.modify_entry(agama_entry.id, agama_entry.attrs, **kwargs)
 
     def update_auth_dynamic_config(self):
         # default to ldap persistence

@@ -171,7 +171,7 @@ def doc_id_from_dn(dn: str) -> str:
 
     if doc_id == "jans":
         doc_id = "_"
-    return doc_id
+    return doc_id  # noqa: R504
 
 
 class SqlSchemaMixin:
@@ -180,11 +180,10 @@ class SqlSchemaMixin:
     @property
     def schema_files(self) -> list[str]:
         """Get list of schema files."""
-        files = [
+        return [
             "/app/schema/jans_schema.json",
             "/app/schema/custom_schema.json",
         ]
-        return files
 
     @cached_property
     def sql_data_types(self) -> dict[str, dict[str, _t.Any]]:
@@ -220,6 +219,20 @@ class SqlSchemaMixin:
         """Get a mapping of OpenDJ attribute types from pre-defined file."""
         with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
             return json.loads(f.read())  # type: ignore
+
+    @cached_property
+    def sql_json_types(self):
+        json_types = {}
+        for attr_type in self.attr_types:
+            for attr in attr_type["names"]:
+                if not attr_type.get("rdbm_json_column"):
+                    continue
+                json_types[attr] = {
+                    "mysql": {"type": "JSON"},
+                    "pgsql": {"type": "JSONB"},
+                    "spanner": {"type": "ARRAY<STRING(MAX)>"},
+                }
+        return json_types
 
     def get_attr_syntax(self, attr: str) -> str:
         """Get attribute syntax.
@@ -459,6 +472,9 @@ class SqlClient(SqlSchemaMixin):
             values: Pre-transformed values.
         """
         type_ = self.sql_data_types.get(key, {})
+
+        if not type_:
+            type_ = self.sql_json_types.get(key, {})
 
         if not type_:
             attr_syntax = self.get_attr_syntax(key)

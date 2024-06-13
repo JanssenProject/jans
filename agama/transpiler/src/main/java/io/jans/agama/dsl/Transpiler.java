@@ -79,6 +79,8 @@ public class Transpiler {
             throw new RuntimeException("Unable to read utility script", e);
         }
 
+        //Using a value higher than 2.3.32 for "incompatible improvements version" gives trouble.
+        //Raising this value requires troubleshooting of this lib (agama-transpiler)
         FM_CONFIG = new Configuration(Configuration.VERSION_2_3_32);
         FM_CONFIG.setClassLoaderForTemplateLoading(CLS_LOADER, "/");
         FM_CONFIG.setDefaultEncoding(UTF_8.toString());

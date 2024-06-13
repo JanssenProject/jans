@@ -36,6 +36,7 @@ on:
       - 'jans-link/**'
 jobs:
   build:
+    if: github.repository == 'JanssenProject/jans'
     name: Build wars
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -45,7 +46,7 @@ jobs:
         fldrpath: ['jans-bom','agama','jans-fido2','jans-core','jans-auth-server','jans-orm','jans-config-api','jans-scim','jans-keycloak-integration','jans-link','jans-keycloak-link','jans-lock']
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
       with:
         egress-policy: audit
 

@@ -144,14 +144,10 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
         self.AS_SSA = configurationAttributes.get("AS_SSA").getValue2()
 
-        # Upon client creation, this value is populated, after that this call will not go through in subsequent script restart
+        # Client registration should not happen here but in the standalone super gluu script
         if StringHelper.isEmptyString(self.AS_CLIENT_ID):
-            clientRegistrationResponse = self.registerScanClient(self.AS_ENDPOINT, self.AS_ENDPOINT, self.AS_SSA, customScript)
-            if clientRegistrationResponse == None:
-                print "Super-Gluu. Failed to register Scan client!!!"
-            else:
-                self.AS_CLIENT_ID = clientRegistrationResponse['client_id']
-                self.AS_CLIENT_SECRET = clientRegistrationResponse['client_secret']
+            print "Super-Gluu. Scan client credentials missing"
+            return False
 
         if StringHelper.isNotEmptyString(self.AS_CLIENT_ID) and StringHelper.isNotEmptyString(self.AS_CLIENT_SECRET):
             self.enabledPushNotifications = self.initPushNotificationService(configurationAttributes)
@@ -259,7 +255,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 return True
             elif self.twoStep:
-                authenticated_user = self.processBasicAuthentication(credentials)
+                # Modified for Casa compliance
+                authenticated_user = authenticationService.getAuthenticatedUser()
+                if authenticated_user == None:
+                    authenticated_user = self.processBasicAuthentication(credentials)
+
                 if authenticated_user == None:
                     return False
 

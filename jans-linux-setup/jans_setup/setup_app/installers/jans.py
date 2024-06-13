@@ -110,6 +110,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
         jansProgress.register(self)
 
         Config.install_time_ldap = time.strftime('%Y%m%d%H%M%SZ', time.gmtime(time.time()))
+        Config.jans_version = base.current_app.app_info['JANS_APP_VERSION']
+
         if not os.path.exists(Config.distFolder):
             print("Please ensure that you are running this script inside Jans container.")
             sys.exit(1)
@@ -570,8 +572,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 self.run([paths.cmd_chmod, '640', p.as_posix()])
 
         if not Config.installed_instance:
-            cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
-            self.restart(cron_service)
+            self.restart(base.cron_service)
 
         # if we are running inside shiv package, copy site pacakages to /opt/dist/jans-setup-packages and add to sys path
 
@@ -654,6 +655,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('opa', 'install_opa'),
                         ('saml', 'install_jans_saml'),
                         ('jans-keycloak-link', 'install_jans_keycloak_link'),
+                        ('kc-scheduler', 'install_jans_saml'),
                         ]
         service_listr = service_list[:]
         service_listr.reverse()

@@ -1,3 +1,10 @@
+---
+tags:
+- Casa
+- Biometrical
+---
+
+
 # BioID plugin
 
 ## Overview
@@ -10,7 +17,7 @@ This plugin allows users to enroll their BioID facial biometrics.
 
 ## Installation
 
-1. [Download the plugin jar]()
+1. [Download](https://maven.jans.io/maven/io/jans/casa/plugins/bioid-plugin/replace-janssen-version/bioid-plugin-replace-janssen-version-jar-with-dependencies.jar) the plugin jar.
 1. Log into Casa as an administrator, navigate to `Administration Console > Casa plugins` and add the plugin jar
 1. Restart the casa service: `sudo systemctl restart jans-casa`
 1. Using the TUI, enable the `agama` custom script

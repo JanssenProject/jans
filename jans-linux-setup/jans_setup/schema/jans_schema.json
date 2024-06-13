@@ -2309,6 +2309,19 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "Jans Service property",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansService"
+      ],
+      "json": true,
+      "multivalued": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "Conf property",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3834,6 +3847,28 @@
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "principalAttribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "principalAttribute"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "principalType",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "principalType"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
     }
   ],
   "objectClasses": [
@@ -4487,7 +4522,8 @@
         "ssnId",
         "attr",
         "tknBndCnf",
-        "dpop"
+        "dpop",
+        "jansId"
       ],
       "must": [
         "objectclass"
@@ -5031,7 +5067,7 @@
         "description",
         "document",
         "creationDate",
-        "jansModuleProperty",
+        "jansService",
         "jansLevel",
         "jansRevision",
         "jansEnabled",
@@ -5113,6 +5149,8 @@
         "validateSignature",
         "singleLogoutServiceUrl",
         "nameIDPolicyFormat",
+        "principalAttribute",
+        "principalType",
         "entityId",
         "singleSignOnServiceUrl",
         "encryptionPublicKey",

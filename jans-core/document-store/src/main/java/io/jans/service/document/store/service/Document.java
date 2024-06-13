@@ -18,118 +18,98 @@ import io.jans.orm.model.base.Entry;
  * @author Shekhar L. Date: 01.10.2022
  */
 
-
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansDocument")
 @JsonInclude(Include.NON_NULL)
 public class Document extends Entry implements Serializable {
 
-	private static final long serialVersionUID = -2812480357430436503L;
+    private static final long serialVersionUID = -2812480357430436503L;
 
-	private transient boolean selected;
+    @AttributeName(ignoreDuringUpdate = true)
+    private String inum;
 
-	@AttributeName(ignoreDuringUpdate = true)
-	private String inum;
+    @AttributeName
+    private String displayName;
 
+    @AttributeName
+    private String description;
 
-	@AttributeName
-	private String displayName;
+    @AttributeName
+    private String document;
 
-	@AttributeName
-	private String description;
+    @AttributeName
+    private Date creationDate;
 
-	@AttributeName
-	private String document;
-	
-	@AttributeName
-	private Date creationDate;
-	
-	@AttributeName
-	private List<String> jansModuleProperty;
+    @AttributeName(name = "jansService")
+    private List<String> jansService;
 
-	@AttributeName
-	private String jansLevel;
+    @AttributeName
+    private Integer jansLevel;
 
-	@AttributeName
-	private String jansRevision;
-	
-	@AttributeName
-	private boolean jansEnabled;
-	
-	@AttributeName
-	private String jansAlias;
+    @AttributeName
+    private Integer jansRevision;
 
-	public String getInum() {
-		return inum;
-	}
+    @AttributeName
+    private boolean jansEnabled;
 
-	public void setInum(String inum) {
-		this.inum = inum;
-	}
+    @AttributeName
+    private String jansAlias;
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    public String getInum() {
+        return inum;
+    }
 
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
-	}
+    public void setInum(String inum) {
+        this.inum = inum;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDisplayName() {
+        return displayName;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 
-	public boolean isSelected() {
-		return selected;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setSelected(boolean selected) {
-		this.selected = selected;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public String getDocument() {
-		return document;
-	}
+    public String getDocument() {
+        return document;
+    }
 
-	public void setDocument(String document) {
-		this.document = document;
-	}
+    public void setDocument(String document) {
+        this.document = document;
+    }
 
-	public Date getCreationDate() {
-		return creationDate;
-	}
+    public Date getCreationDate() {
+        return creationDate;
+    }
 
-	public void setCreationDate(Date creationDate) {
-		this.creationDate = creationDate;
-	}
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
 
-	public List<String> getJansModuleProperty() {
-		return jansModuleProperty;
-	}
+    public Integer getJansLevel() {
+        return jansLevel;
+    }
 
-	public void setJansModuleProperty(List<String> jansModuleProperty) {
-		this.jansModuleProperty = jansModuleProperty;
-	}
+    public void setJansLevel(Integer jansLevel) {
+        this.jansLevel = jansLevel;
+    }
 
-	public String getJansLevel() {
-		return jansLevel;
-	}
+    public Integer getJansRevision() {
+        return jansRevision;
+    }
 
-	public void setJansLevel(String jansLevel) {
-		this.jansLevel = jansLevel;
-	}
-
-	public String getJansRevision() {
-		return jansRevision;
-	}
-
-	public void setJansRevision(String jansRevision) {
-		this.jansRevision = jansRevision;
-	}
+    public void setJansRevision(Integer jansRevision) {
+        this.jansRevision = jansRevision;
+    }
 
     public boolean isJansEnabled() {
         return jansEnabled;
@@ -146,12 +126,20 @@ public class Document extends Entry implements Serializable {
     public void setJansAlias(String jansAlias) {
         this.jansAlias = jansAlias;
     }
+    
+    public List<String> getJansService() {
+        return jansService;
+    }
+
+    public void setJansService(List<String> jansService) {
+        this.jansService = jansService;
+    }
 
     @Override
     public String toString() {
         return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
-                + ", document=" + document + ", creationDate=" + creationDate + ", jansModuleProperty="
-                + jansModuleProperty + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled="
-                + jansEnabled + ", jansAlias=" + jansAlias + "]";
+                + ", document=" + document + ", creationDate=" + creationDate + ", jansService=" + jansService
+                + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled=" + jansEnabled
+                + ", jansAlias=" + jansAlias + "]";
     }
 }

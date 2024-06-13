@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * @version September 30, 2021
  */
 public enum TokenType {
+    N_A("N_A"),
+
     /**
      * The bearer token type is defined in [ietf-oauth-v2-bearer]
      */

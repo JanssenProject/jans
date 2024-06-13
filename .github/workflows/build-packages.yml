@@ -6,6 +6,7 @@ on:
     - 'v**'
 jobs:
   publish_binary_packages:
+    if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
@@ -44,7 +45,7 @@ jobs:
 
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
       with:
         egress-policy: audit
 
@@ -143,10 +144,11 @@ jobs:
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
   build_python_packages:
+    if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-20.04
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
       with:
         egress-policy: audit
 
@@ -213,6 +215,7 @@ jobs:
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
         key: ${{ github.sha }}
   upload_python_packages:
+    if: github.repository == 'JanssenProject/jans'
     needs: build_python_packages
     runs-on: ubuntu-20.04
     strategy:
@@ -220,7 +223,7 @@ jobs:
         name: [ubuntu, suse]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
       with:
         egress-policy: audit
 
@@ -293,10 +296,11 @@ jobs:
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
   build_demo_packages:
+    if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
       with:
         egress-policy: audit
 

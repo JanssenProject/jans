@@ -32,6 +32,8 @@ import static io.jans.as.model.util.StringUtils.implode;
 @Named
 public class AcrService {
 
+    public static final String AGAMA = "agama";
+
     @Inject
     private Logger log;
 
@@ -48,7 +50,7 @@ public class AcrService {
     private AppConfiguration appConfiguration;
 
     public static boolean isAgama(String acr) {
-        return StringUtils.isNotBlank(acr) &&  acr.startsWith("agama_");
+        return StringUtils.isNotBlank(acr) && (acr.startsWith("agama_") || AGAMA.equalsIgnoreCase(acr));
     }
 
     public void validateAcrs(AuthzRequest authzRequest, Client client) throws AcrChangedException {
@@ -58,6 +60,24 @@ public class AcrService {
 
         checkAcrScriptIsAvailable(authzRequest);
         checkAcrChanged(authzRequest, identity.getSessionId()); // check after redirect uri is validated
+    }
+
+    public static void removeParametersForAgamaAcr(AuthzRequest authzRequest) {
+        final List<String> acrValues = authzRequest.getAcrValuesList();
+        for (int i = 0; i < acrValues.size(); i++) {
+            final String acr = acrValues.get(i);
+            acrValues.set(i, removeParametersFromAgamaAcr(acr));
+        }
+
+        final String result = implode(acrValues, " ");
+        authzRequest.setAcrValues(result);
+    }
+
+    public static String removeParametersFromAgamaAcr(String acr) {
+        if (isAgama(acr)) {
+            return StringUtils.substringBefore(acr, "-");
+        }
+        return acr;
     }
 
     public void checkClientAuthorizedAcrs(AuthzRequest authzRequest, Client client) {
@@ -138,7 +158,7 @@ public class AcrService {
         }
 
         if (isAgama(acrValues.get(0))) {
-            return Lists.newArrayList("agama");
+            return Lists.newArrayList(AcrService.AGAMA);
         }
 
         return acrValues;

@@ -36,7 +36,7 @@ Additional authenticators and use cases can be supported via [custom plugins](#e
 
 ## 2FA enrollment APIs
 
-To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/main/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:   
+To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:   
 
 - Phone numbers for SMS OTP
 - OTP apps, cards, or dongles  
@@ -44,7 +44,7 @@ To facilitate 2FA device enrollment during account registration, or elsewhere in
 
 ## Configuration via APIs
 
-Besides a comprehensive graphical [admin console](./administration/admin-console.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/main/jans-casa/app/src/main/webapp/admin-api.yaml).
+Besides a comprehensive graphical [admin console](./administration/admin-console.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml).
 
 ## Existing plugins
 
@@ -54,6 +54,7 @@ Casa is a plugin-oriented, Java web application. Existing functionality can be e
 - [Consent management](./plugins/consent-management.md) 
 - [Custom branding](./plugins/custom-branding.md)  
 - [2FA settings](./plugins/2fa-settings.md)
+- [BioID](./plugins/bioid.md)
 
 If you are interested in onboarding additional authentication methods to Casa, read this [guide](./developer/add-authn-methods.md).
 

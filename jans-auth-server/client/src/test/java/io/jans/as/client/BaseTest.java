@@ -101,6 +101,7 @@ public abstract class BaseTest {
     protected String jwksUri;
     protected String archivedJwksUri;
     protected String registrationEndpoint;
+    protected String globalTokenRevocationEndpoint;
     protected String configurationEndpoint;
     protected String introspectionEndpoint;
     protected String deviceAuthzEndpoint;
@@ -375,6 +376,14 @@ public abstract class BaseTest {
         this.registrationEndpoint = registrationEndpoint;
     }
 
+    public String getGlobalTokenRevocationEndpoint() {
+        return globalTokenRevocationEndpoint;
+    }
+
+    public void setGlobalTokenRevocationEndpoint(String globalTokenRevocationEndpoint) {
+        this.globalTokenRevocationEndpoint = globalTokenRevocationEndpoint;
+    }
+
     public String getIntrospectionEndpoint() {
         return introspectionEndpoint;
     }
@@ -442,6 +451,7 @@ public abstract class BaseTest {
         //driver = new InternetExplorerDriver();
 
         driver = new HtmlUnitDriver(true);
+        driver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
     }
 
     public void stopSelenium() {
@@ -812,7 +822,7 @@ public abstract class BaseTest {
 
         final String previousURL = driver.getCurrentUrl();
         doNotAllowButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, 1);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         wait.until((WebDriver d) -> (d.getCurrentUrl() != previousURL));
 
         String authorizationResponseStr = driver.getCurrentUrl();
@@ -871,7 +881,7 @@ public abstract class BaseTest {
 
             navigateToAuhorizationUrl(driver, driver.getCurrentUrl());
 
-            new WebDriverWait(driver, PageConfig.WAIT_OPERATION_TIMEOUT)
+            new WebDriverWait(driver, Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
                     .until(webDriver -> !webDriver.getCurrentUrl().contains("/authorize"));
         }
 
@@ -999,6 +1009,7 @@ public abstract class BaseTest {
             jwksUri = response.getJwksUri();
             archivedJwksUri = response.getArchivedJwksUri();
             registrationEndpoint = response.getRegistrationEndpoint();
+            globalTokenRevocationEndpoint = response.getGlobalTokenRevocationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
             parEndpoint = response.getParEndpoint();
             deviceAuthzEndpoint = response.getDeviceAuthzEndpoint();
@@ -1022,6 +1033,7 @@ public abstract class BaseTest {
             jwksUri = context.getCurrentXmlTest().getParameter("jwksUri");
             archivedJwksUri = context.getCurrentXmlTest().getParameter("archivedJwksUri");
             registrationEndpoint = context.getCurrentXmlTest().getParameter("registrationEndpoint");
+            globalTokenRevocationEndpoint = context.getCurrentXmlTest().getParameter("globalTokenRevocationEndpoint");
             configurationEndpoint = context.getCurrentXmlTest().getParameter("configurationEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
             parEndpoint = context.getCurrentXmlTest().getParameter("parEndpoint");

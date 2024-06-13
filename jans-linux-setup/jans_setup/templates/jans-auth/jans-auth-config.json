@@ -8,6 +8,7 @@
       "introspection",
       "revoke_token",
       "revoke_session",
+      "global_token_revocation",
       "active_session",
       "end_session",
       "status_session",
@@ -17,7 +18,8 @@
       "metric",
       "stat",
       "par",
-      "ssa"
+      "ssa",
+      "global_token_revocation"
     ],
     "issuer":"https://%(hostname)s",
     "baseEndpoint":"https://%(hostname)s/jans-auth/restv1",
@@ -80,8 +82,7 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange",
-        "tx_token"
+        "urn:ietf:params:oauth:grant-type:token-exchange"
     ],
     "subjectTypesSupported":[
         "public",
@@ -353,7 +354,7 @@
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
-        "tx_token"
+        "password"
     ],
     "claimsParameterSupported":false,
     "requestParameterSupported":true,
@@ -499,10 +500,6 @@
         {
             "paramName": "customParam5",
             "returnInResponse": true
-        },
-        {
-            "paramName": "agama_flow",
-            "returnInResponse": false
         }
     ],
     "legacyDynamicRegistrationScopeParam": false,

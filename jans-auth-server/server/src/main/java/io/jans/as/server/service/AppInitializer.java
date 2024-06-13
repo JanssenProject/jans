@@ -75,6 +75,7 @@ import org.slf4j.Logger;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -355,7 +356,7 @@ public class AppInitializer {
      * Utility method which can be used in custom scripts
      */
     public PersistenceEntryManager createPersistenceAuthEntryManager(GluuLdapConfiguration persistenceAuthConfig) {
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory();
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class);
         Properties persistenceConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig, persistenceEntryManagerFactory.getPersistenceType());
 
         PersistenceEntryManager persistenceAuthEntryManager =
@@ -507,8 +508,12 @@ public class AppInitializer {
         }
     }
 
-    private void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
-        // Close existing connections
+    public void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
+    	if (oldPersistenceEntryManagers == null ) {
+    		return;
+    	}
+
+    	// Close existing connections
         for (PersistenceEntryManager oldPersistenceEntryManager : oldPersistenceEntryManagers) {
             log.debug("Attempting to destroy {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME,
                     oldPersistenceEntryManager);
@@ -571,7 +576,16 @@ public class AppInitializer {
         String prefix = persistenceType + "#";
         FileConfiguration configuration = configurationFactory.getPersistenceConfiguration().getConfiguration();
 
-        Properties properties = (Properties) configuration.getProperties().clone();
+        Properties properties = new Properties();
+        
+        // Get properties related to persistent type
+        for (Entry<Object, Object> propItem : configuration.getProperties().entrySet()) {
+        	String key = (String) propItem.getKey();
+        	if (key.startsWith(persistenceType)) {
+        		properties.put(key, propItem.getValue());
+        	}
+        }
+
         if (persistenceAuthConfig != null) {
             properties.setProperty(prefix + "servers", buildServersString(persistenceAuthConfig.getServers()));
 
@@ -709,7 +723,7 @@ public class AppInitializer {
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("Stopping services and closing DB connections at server shutdown...");
-        log.debug("Checking who intiated destory", new Throwable());
+        log.debug("Checking who intiated destroy", new Throwable());
 
         metricService.close();
 

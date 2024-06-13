@@ -165,6 +165,13 @@ spec:
               secret:
                 secretName: {{ .Release.Name }}-cb-crt
             {{- end }}
+            - name: cb-pass
+              secret:
+                secretName: {{ .Release.Name }}-cb-pass
+                items:
+                  # we mostly need non-superuser couchbase password file here
+                  - key: couchbase_password
+                    path: couchbase_password
           {{- end }}
           {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
             - name: sql-pass

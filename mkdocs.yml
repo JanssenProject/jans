@@ -27,7 +27,8 @@ markdown_extensions:
     - class: mermaid
       format: !!python/name:pymdownx.superfences.fence_code_format
       name: mermaid
-- pymdownx.tabbed
+- pymdownx.tabbed:
+    alternate_style: true
 - pymdownx.emoji:
     emoji_generator: !!python/name:materialx.emoji.to_svg
     emoji_index: !!python/name:materialx.emoji.twemoji
@@ -97,6 +98,8 @@ nav:
     - Health Check: admin/kubernetes-ops/health-check.md
     - TUI K8s: admin/kubernetes-ops/tui-k8s.md
     - Custom Attributes: admin/kubernetes-ops/custom-attributes.md
+    - Jans SAML/Keycloak: admin/kubernetes-ops/jans-saml.md
+    - Memory Dump: admin/kubernetes-ops/memory-dump.md
   - VM Operation Guide:
     - admin/vm-ops/README.md
     - Upgrade: admin/vm-ops/upgrade.md
@@ -125,7 +128,7 @@ nav:
         - Monitoring: admin/config-guide/config-tools/config-api/monitoring.md
         - Plugins: admin/config-guide/config-tools/config-api/plugins.md
       - CURL: admin/config-guide/config-tools/curl-guide.md
-    - Agama Configuration: admin/config-guide/agama-configuration.md
+    - Agama Project Configuration: admin/config-guide/agama-project-configuration.md
     - Attribute: admin/config-guide/attribute-configuration.md
     - Default Authentication: admin/config-guide/default-authentication-method-config.md
     - Cache Configuration: admin/config-guide/cache-configuration.md
@@ -143,6 +146,7 @@ nav:
     - SCIM User Resources: admin/config-guide/user-config.md
     - SCIM Group Management: admin/config-guide/scim-group-config.md
     - Authentication via Device Flow: admin/config-guide/device-flow-config.md
+    - Password Validation: admin/config-guide/user-password-validation.md
   - Database Guide:
     - admin/reference/database/README.md
     - RDBMS Erwin Table: admin/reference/database/rdbms-erwin.md
@@ -372,7 +376,6 @@ nav:
     - USB Authenticator Support: admin/fido/usb-authn.md
     - Platform Authenticator Support: admin/fido/platform-authn.md
     - Bluetooth Authenticator Support: admin/fido/bluetooth-authn.md
-    - SCIM Extension: admin/fido/scim.md
   - SCIM Admin Guide:
     - admin/scim/README.md
     - Configuration: admin/scim/config.md
@@ -460,6 +463,7 @@ nav:
         - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
     - User Guide: 'casa/user-guide.md'
 plugins:
+- include-markdown
 - tags
 - search
 - exclude-search:

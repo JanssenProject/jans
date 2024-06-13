@@ -58,7 +58,8 @@ def _transform_api_dynamic_config(conf):
         ("customAttributeValidationEnabled", True),
         ("disableLoggerTimer", False),
         ("disableAuditLogger", False),
-        ("assetMgtEnabled", True),
+        ("assetMgtConfiguration", {}),
+        ("maxCount", 200),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -126,6 +127,60 @@ def _transform_api_dynamic_config(conf):
     if "status" not in conf["userMandatoryAttributes"]:
         conf["userMandatoryAttributes"].append("status")
         should_update = True
+
+    if "smallryeHealthRootPath" in conf:
+        conf.pop("smallryeHealthRootPath", None)
+        should_update = True
+
+    # asset management
+    asset_attrs = {
+        "assetMgtEnabled": conf.pop("assetMgtEnabled", True),
+        "assetServerUploadEnabled": True,
+        "assetBaseDirectory": "/opt/jans/jetty/%s/custom",
+        "assetDirMapping": [
+            {
+                "directory": "i18n",
+                "type": ["properties"],
+                "description": "Resource bundle file.",
+            },
+            {
+                "directory": "libs",
+                "type": ["jar"],
+                "description": "java archive library.",
+            },
+            {
+                "directory": "pages",
+                "type": ["xhtml"],
+                "description": "Web pages.",
+            },
+            {
+                "directory": "static",
+                "type": ["js", "css", "png", "gif", "jpg", "jpeg"],
+                "description": "Static resources like Java-script, style-sheet and images.",
+            },
+        ],
+        "fileExtensionValidationEnabled": True,
+        "moduleNameValidationEnabled": True,
+        "jansServiceModule": conf["assetMgtConfiguration"].pop("jansModules", []),
+    }
+    for k, v in asset_attrs.items():
+        if k not in conf["assetMgtConfiguration"]:
+            conf["assetMgtConfiguration"][k] = v
+            should_update = True
+
+    for module in [
+        "jans-auth",
+        "jans-casa",
+        "jans-config-api",
+        "jans-fido2",
+        "jans-link",
+        "jans-lock",
+        "jans-scim",
+        "jans-keycloak-link",
+    ]:
+        if module not in conf["assetMgtConfiguration"]["jansServiceModule"]:
+            conf["assetMgtConfiguration"]["jansServiceModule"].append(module)
+            should_update = True
 
     # finalized conf and flag to determine update process
     return conf, should_update

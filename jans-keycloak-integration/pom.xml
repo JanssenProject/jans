@@ -4,7 +4,7 @@
     <groupId>io.jans</groupId>
     <artifactId>jans-kc-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.3-SNAPSHOT</version>
     <name>keycloak-integration-parent</name>
 
     <distributionManagement>
@@ -124,6 +124,13 @@
           <groupId>org.keycloak</groupId>
           <artifactId>keycloak-admin-client</artifactId>
           <scope>compile</scope>
+          <version>${keycloak-server.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>org.keycloak</groupId>
+          <artifactId>keycloak-saml-core-public</artifactId>
+          <scope>provided</scope>
           <version>${keycloak-server.version}</version>
         </dependency>
 

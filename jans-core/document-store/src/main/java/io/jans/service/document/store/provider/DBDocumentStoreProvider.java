@@ -102,7 +102,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 				oxDocument.setDn(dn);
 				oxDocument.setDescription(description);
 				oxDocument.setJansEnabled(true);
-				oxDocument.setJansModuleProperty(moduleList);
+				oxDocument.setJansService(moduleList);
 				documentService.addDocument(oxDocument);
 				return path;
 		} catch (Exception ex) {
@@ -126,7 +126,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			oxDocument.setDn(dn);
 			oxDocument.setDescription(description);
 			oxDocument.setJansEnabled(true);
-			oxDocument.setJansModuleProperty(moduleList);
+			oxDocument.setJansService(moduleList);
 			documentService.addDocument(oxDocument);
 			return path;
 		} catch (Exception e) {
@@ -216,6 +216,45 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			log.error("Failed to remove document file '{}'", path, e);
 			throw new DocumentException(e);
 		}
+	}
+
+	public String renameDocumentByDisplayName(String currentPath, String destinationPath) {
+		log.debug("Rename document: '{}' -> '{}'", currentPath, destinationPath);
+		Document oxDocument;
+		try {
+			oxDocument = documentService.getDocumentByDisplayName(currentPath);
+			if (oxDocument == null) {
+				log.error("Document doesn't Exist with the name  '{}'", currentPath);
+				return null;
+			}
+			oxDocument.setDisplayName(destinationPath);
+			documentService.updateDocument(oxDocument);
+			Document oxDocumentDestination = documentService.getDocumentByDisplayName(destinationPath);
+			if (oxDocumentDestination == null) {
+				log.error("Failed to rename to destination file '{}'", destinationPath);
+				return null;
+			}
+		} catch (Exception e) {
+			log.error("Failed to rename to destination file '{}'", destinationPath);
+			throw new WriteDocumentException(e);
+		}
+
+		return destinationPath;
+	}
+
+	public String readDocumentByDisplayName(String filePath) {
+		log.debug("location of document: '{}'", filePath);
+		Document oxDocument;
+		try {
+			oxDocument = documentService.getDocumentByDisplayName(filePath);
+			if (oxDocument != null) {
+				return oxDocument.getDocument();
+			}
+		} catch (Exception e) {
+			log.error("Failed to location of document as stream from file path'{}'", filePath, e);
+			throw new DocumentException(e);
+		}
+		return null;
 	}
 
 }

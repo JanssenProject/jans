@@ -1,3 +1,10 @@
+---
+tags:
+- Casa
+- Consent
+---
+
+
 # Consent Management Plugin
 
 ## Overview 
@@ -9,7 +16,7 @@ The Consent Management plugin gives end-users the ability to view and revoke pre
 
 ## Installation
 
-1. [Download the plugin](https://maven.gluu.org/maven/org/gluu/casa/plugins/authorized-clients/4.5.0.Final/authorized-clients-4.5.0.Final-jar-with-dependencies.jar)
+1. [Download the plugin](https://maven.jans.io/maven/io/jans/casa/plugins/authorized-clients/replace-janssen-version/authorized-clients-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Login to Casa using an administrator account
 
