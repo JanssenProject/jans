@@ -173,6 +173,12 @@ class SecretSchema(Schema):
         description="Vault SecretID",
     )
 
+    kc_db_password = String(
+        load_default="",
+        dump_default="",
+        description="Password for Keycloak RDBMS user",
+    )
+
     @post_load
     def transform_b64(self, in_data, **kwargs):
         # list of attrs that maybe base64 string and need to be decoded
