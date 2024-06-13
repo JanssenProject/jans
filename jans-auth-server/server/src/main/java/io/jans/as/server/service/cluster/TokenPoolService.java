@@ -33,6 +33,8 @@ import jakarta.inject.Inject;
 public class TokenPoolService {
 	
 	public static long DELAY_AFTER_EXPIRATION = 3 * 60 * 60 * 1000; // 3 hours
+	public static long LOCK_WAIT_BEFORE_UPDATE = 3 * 1000; // 30 seconds
+	public static long DELAY_IF_LOCKED = 500; // 50 milliseconds
 
 	@Inject
 	private Logger log;
@@ -160,6 +162,64 @@ public class TokenPoolService {
 		entryManager.merge(tokenPool);
 	}
 
+	public TokenPool updateWithLock(TokenPool tokenPool) {
+		// Specify maximum timeout to update entry (for case if node(s) hang during update) and to avoid data override
+		long maxWaitTime = System.currentTimeMillis() + LOCK_WAIT_BEFORE_UPDATE;
+
+		TokenPool loadedTokenPool;
+
+		boolean updated = false;
+		int countAttempts = 1;
+		do {
+			loadedTokenPool = getTokenPoolByDn(tokenPool.getDn());
+
+			boolean readyForUpdate = System.currentTimeMillis() > maxWaitTime;
+
+			if (loadedTokenPool.getLockKey() == null) {
+				// No lock found
+				// Attempt to set random value in lockKey
+				String lockKey = UUID.randomUUID().toString();
+				tokenPool.setLockKey(lockKey);
+
+				// Do persist operation in try/catch for safety and do not throw error to upper levels
+				try {
+					persist(tokenPool);
+
+					// Load token after update
+					loadedTokenPool = getTokenPoolByDn(tokenPool.getDn());
+
+					// if lock is ours do data update and release lock
+					if (lockKey.equals(loadedTokenPool.getLockKey())) {
+						readyForUpdate = true;
+					}
+				} catch (EntryPersistenceException ex) {
+					log.trace("Unexpected error happened during entry lock", ex);
+				}
+			} else {
+				try {
+					Thread.sleep(DELAY_IF_LOCKED);
+				} catch (InterruptedException ex) {
+					log.debug("Failed to delay before next lock attempt", ex);
+				}
+			}
+
+			if (readyForUpdate) {
+				loadedTokenPool.setLockKey(null);
+				loadedTokenPool.setData(tokenPool.getData());
+				loadedTokenPool.setLastUpdate(new Date());
+				loadedTokenPool.setExpirationDate(tokenPool.getExpirationDate());
+
+				update(loadedTokenPool);
+
+				log.debug("Updated token pool with lock after attempt No: '{}'", countAttempts);
+
+				updated = true;
+			}
+		} while (!updated);
+		
+		return loadedTokenPool;
+	}
+
 	public TokenPool allocate(Integer nodeId) {
 		// Try to use existing expired entry
 		List<TokenPool> tokenPools = getTokenPoolsExpired();
@@ -186,7 +246,7 @@ public class TokenPoolService {
 		}
 		
 		// There are no free entries. server need to add new one with next index
-		int maxSteps  = 10;
+		int maxSteps = 10;
 		do {
 			TokenPool lastTokenPool = getTokenPoolLast();
 
@@ -214,7 +274,6 @@ public class TokenPoolService {
 				if (lockKey.equals(lockedTokenPool.getLockKey())) {
 					return reset(tokenPool, nodeId);
 				}
-
 			} catch (EntryPersistenceException ex) {
 				log.trace("Unexpected error happened during entry lock", ex);
 			}
@@ -240,7 +299,7 @@ public class TokenPoolService {
 		tokenPool.setNodeId(nodeId);
 		tokenPool.setData(null);
 		tokenPool.setLastUpdate(new Date(currentTime));
-		tokenPool.setExpirationDate(new Date(currentTime + 60* 1000)); // Expiration should be more than current time
+		tokenPool.setExpirationDate(new Date(currentTime + 60 * 1000)); // Expiration should be more than current time
 		tokenPool.setLockKey(null);
 		
 		update(tokenPool);

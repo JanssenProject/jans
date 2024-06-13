@@ -111,7 +111,7 @@ public class ClusterNodeService {
 		
 		Date expirationDate = new Date(System.currentTimeMillis() + DELAY_AFTER_EXPIRATION);
 		
-		Filter filter = Filter.createORFilter(Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH),
+		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH),
 				Filter.createGreaterOrEqualFilter("jansLastUpd", entryManager.encodeTime(clusterNodesBaseDn, expirationDate)));
 
 		return entryManager.findEntries(clusterNodesBaseDn, ClusterNode.class, filter);
@@ -143,8 +143,7 @@ public class ClusterNodeService {
 				
 				// If lock is ours reset entry and return it
 				if (lockKey.equals(lockedClusterNode.getLockKey())) {
-					reset(clusterNode);
-					return clusterNode;
+					return reset(clusterNode);
 				}
 			} catch (EntryPersistenceException ex) {
 				log.trace("Unexpected error happened during entry lock", ex);
@@ -170,8 +169,7 @@ public class ClusterNodeService {
 			String lockKey = UUID.randomUUID().toString();
 			clusterNode.setLockKey(lockKey);
 
-			// Do persist operation in try/catch for safety and do not throw error to upper
-			// levels
+			// Do persist operation in try/catch for safety and do not throw error to upper levels
 			try {
 				persist(clusterNode);
 
@@ -180,7 +178,7 @@ public class ClusterNodeService {
 
 				// if lock is ours return it
 				if (lockKey.equals(lockedClusterNode.getLockKey())) {
-					return clusterNode;
+					return reset(clusterNode);
 				}
 
 			} catch (EntryPersistenceException ex) {
@@ -207,12 +205,15 @@ public class ClusterNodeService {
 		update(clusterNode);
 	}
 
-	public void reset(ClusterNode clusterNode) {
+	public ClusterNode reset(ClusterNode clusterNode) {
 		Date currentTime = new Date();
 		clusterNode.setCreationDate(currentTime);
 		clusterNode.setLastUpdate(currentTime);
+		clusterNode.setLockKey(null);
 		
 		update(clusterNode);
+		
+		return clusterNode;
 	}
 
 	public String getDnForClusterNode(Integer id) {
