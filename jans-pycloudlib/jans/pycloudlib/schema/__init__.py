@@ -24,6 +24,8 @@ from marshmallow.validate import Length
 from marshmallow.validate import Predicate
 from marshmallow.validate import Range
 
+from jans.pycloudlib.version import __version__
+
 logger = logging.getLogger(__name__)
 
 PASSWD_RGX = re.compile(
@@ -292,7 +294,7 @@ class ConfigurationSchema(Schema):
 def get_schema_spec():
     spec = APISpec(
         title="Janssen cloud-native configuration",
-        version="1.1.3",
+        version=__version__,
         openapi_version="3.0.2",
         plugins=[MarshmallowPlugin()],
     )
