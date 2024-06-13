@@ -85,14 +85,14 @@ cron_service = 'crond' if os_type in ['centos', 'red', 'fedora'] else 'cron'
 
 
 # Determine service path
-if (os_type in ('centos', 'red', 'fedora', 'suse') and os_initdaemon == 'systemd') or deb_sysd_clone:
+if (os_type in ('almalinux','centos', 'red', 'fedora', 'suse') and os_initdaemon == 'systemd') or deb_sysd_clone:
     service_path = shutil.which('systemctl')
 elif os_type in ['debian', 'ubuntu']:
     service_path = '/usr/sbin/service'
 else:
     service_path = '/sbin/service'
 
-if os_type in ('centos', 'red', 'fedora'):
+if os_type in ('almalinux','centos', 'red', 'fedora'):
     clone_type = 'rpm'
     httpd_name = 'httpd'
 elif os_type == 'suse':
