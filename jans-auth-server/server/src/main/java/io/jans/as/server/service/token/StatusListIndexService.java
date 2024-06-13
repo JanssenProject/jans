@@ -56,7 +56,7 @@ public class StatusListIndexService {
 
             indexHolder.setData(statusList.getLst());
 
-            tokenPoolService.update(indexHolder);
+            tokenPoolService.updateWithLock(indexHolder);
 
             log.trace("Updated status list at index {} with status {} successfully.", index, status);
 
