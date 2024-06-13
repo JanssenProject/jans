@@ -310,17 +310,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Token entry list status",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "tokenStatus"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "Entry lock key",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -5335,7 +5324,6 @@
         "jansNum",
         "jansNodeId",
         "dat",
-        "tokenStatus",
         "jansLastUpd",
         "exp",
         "lockKey"

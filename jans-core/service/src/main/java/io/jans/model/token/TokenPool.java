@@ -28,9 +28,6 @@ public class TokenPool extends BaseEntry {
     @AttributeName(name = "dat")
     private String data;
 
-    @AttributeName(name = "tokenStatus")
-    private TokenPoolStatus status;
-
     @AttributeName(name = "jansLastUpd")
     private Date lastUpdate;
 
@@ -71,14 +68,6 @@ public class TokenPool extends BaseEntry {
 
 	public void setData(String data) {
 		this.data = data;
-	}
-
-	public TokenPoolStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(TokenPoolStatus status) {
-		this.status = status;
 	}
 
 	public Date getLastUpdate() {

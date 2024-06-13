@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.model.token.TokenPool;
-import io.jans.model.token.TokenPoolStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
@@ -86,17 +85,6 @@ public class TokenPoolService {
 	}
 
 	/**
-	 * returns a list of TokenPools with specific status
-	 *
-	 * @return list of TokenPools
-	 */
-	public List<TokenPool> getTokenPools(TokenPoolStatus status) {
-		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNode();
-
-		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, Filter.createEqualityFilter("tokenStatus", status)));
-	}
-
-	/**
 	 * returns last TokenPool or null if none
 	 *
 	 * @return TokenPool
@@ -159,8 +147,7 @@ public class TokenPoolService {
 		
 		Date expirationDate = new Date(System.currentTimeMillis() + DELAY_AFTER_EXPIRATION);
 		
-		Filter filter = Filter.createORFilter(Filter.createEqualityFilter("tokenStatus", TokenPoolStatus.FREE),
-				Filter.createGreaterOrEqualFilter("expirationDate", entryManager.encodeTime(tokenPoolsBaseDn, expirationDate)));
+		Filter filter = Filter.createGreaterOrEqualFilter("expirationDate", entryManager.encodeTime(tokenPoolsBaseDn, expirationDate));
 
 		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, filter));
 	}
@@ -191,8 +178,7 @@ public class TokenPoolService {
 				
 				// If lock is ours reset entry and return it
 				if (lockKey.equals(lockedTokenPool.getLockKey())) {
-					reset(tokenPool, nodeId);
-					return tokenPool;
+					return reset(tokenPool, nodeId);
 				}
 			} catch (EntryPersistenceException ex) {
 				log.trace("Unexpected error happened during entry lock", ex);
@@ -211,7 +197,6 @@ public class TokenPoolService {
 			tokenPool.setDn(getDnForTokenPool(lastTokenPoolIndex));
 			tokenPool.setNodeId(nodeId);
 			tokenPool.setLastUpdate(new Date());
-			tokenPool.setStatus(TokenPoolStatus.INUSE);
 
 			// Attempt to set random value in lockKey
 			String lockKey = UUID.randomUUID().toString();
@@ -227,7 +212,7 @@ public class TokenPoolService {
 
 				// if lock is ours return it
 				if (lockKey.equals(lockedTokenPool.getLockKey())) {
-					return tokenPool;
+					return reset(tokenPool, nodeId);
 				}
 
 			} catch (EntryPersistenceException ex) {
@@ -250,14 +235,17 @@ public class TokenPoolService {
 		update(tokenPool);
 	}
 
-	public void reset(TokenPool tokenPool, Integer nodeId) {
+	public TokenPool reset(TokenPool tokenPool, Integer nodeId) {
 		long currentTime = System.currentTimeMillis();
 		tokenPool.setNodeId(nodeId);
 		tokenPool.setData(null);
 		tokenPool.setLastUpdate(new Date(currentTime));
 		tokenPool.setExpirationDate(new Date(currentTime + 60* 1000)); // Expiration should be more than current time
+		tokenPool.setLockKey(null);
 		
 		update(tokenPool);
+		
+		return tokenPool;
 	}
 
 	private TokenPool setIndexes(TokenPool tokenPool) {
