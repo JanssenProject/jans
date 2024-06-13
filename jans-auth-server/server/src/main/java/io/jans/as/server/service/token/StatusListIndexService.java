@@ -35,7 +35,7 @@ public class StatusListIndexService {
 	@Inject
 	private ClusterManager clusterManager;
 
-    private ReentrantLock allocatedLock = new ReentrantLock();
+    private final ReentrantLock allocatedLock = new ReentrantLock();
 	
     private TokenPool tokenPool = null;
 

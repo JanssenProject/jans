@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
@@ -41,6 +43,13 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
  */
 @ApplicationScoped
 public class GrantService {
+
+    private static final ExecutorService statusListPool = Executors.newFixedThreadPool(5, runnable -> {
+        Thread thread = new Thread(runnable);
+        thread.setName("grant_service_status_list_pool");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     @Inject
     private Logger log;
@@ -153,7 +162,9 @@ public class GrantService {
                 cacheService.remove(token.getTokenCode());
             }
 
-            statusListIndexService.updateStatusAtIndex(token.getAttributes().getStatusListIndex(), TokenStatus.REVOKED);
+            statusListPool.execute(() -> {
+                statusListIndexService.updateStatusAtIndex(token.getAttributes().getStatusListIndex(), TokenStatus.REVOKED);
+            });
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
