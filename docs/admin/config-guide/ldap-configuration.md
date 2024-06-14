@@ -13,7 +13,7 @@ tags:
 Let's run the following command to get operation-id details of LDAP Database COnfiguration.
 
 ```
-/opt/jans/jans-cli/config-cli.py --info DatabaseLDAPConfiguration
+/opt/jans/jans-cli/config-cli.py --info DatabaseLdapConfiguration
 ```
 
 It comes with the following options:
