@@ -51,6 +51,8 @@ public class AppConfiguration implements Configuration, Serializable {
     private Boolean disableJdkLogger = true;
     @DocProperty(description = "Boolean value specifying whether to enable local in-memory cache")
     private Boolean useLocalCache = false;
+    @DocProperty(description = "Boolean value specifying whether to bypass the validation defined upon the password attribute")
+    private boolean skipDefinedPasswordValidation;
 
     public String getBaseDN() {
 		return baseDN;
@@ -195,6 +197,14 @@ public class AppConfiguration implements Configuration, Serializable {
 
 	public void setUseLocalCache(Boolean useLocalCache) {
 		this.useLocalCache = useLocalCache;
+	}
+
+	public boolean isSkipDefinedPasswordValidation() {
+		return skipDefinedPasswordValidation;
+	}
+
+	public void setSkipDefinedPasswordValidation(boolean skipDefinedPasswordValidation) {
+		this.skipDefinedPasswordValidation = skipDefinedPasswordValidation;
 	}
 
 }
