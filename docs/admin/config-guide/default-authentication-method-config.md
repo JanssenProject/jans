@@ -146,8 +146,8 @@ in the [Swagger document](./../reference/openapi.md).
 
 !!! Note
 
-Default authentication method being set is validated the against enabled custom script.
-If the script is not active then following error notification will be displayed
+Default authentication method when set is validated against the active custom script.
+If the script is not active then the following error notification is returned by API.
 ```{
     "code": "400",
     "message": "INVALID_ACR",
