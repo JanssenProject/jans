@@ -6,16 +6,9 @@
 
 package io.jans.as.server.service.cluster;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import org.slf4j.Logger;
-
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.model.token.TokenPool;
+import io.jans.model.token.StatusTokenPool;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
@@ -24,13 +17,19 @@ import io.jans.orm.search.filter.Filter;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Yuriy Movchan
  * @version 1.0, 06/03/2024
  */
 @ApplicationScoped
-public class TokenPoolService {
+public class StatusTokenPoolService {
 	
 	public static long DELAY_AFTER_EXPIRATION = 3 * 60 * 60 * 1000; // 3 hours
 	public static long LOCK_WAIT_BEFORE_UPDATE = 3 * 1000; // 30 seconds
@@ -62,8 +61,8 @@ public class TokenPoolService {
 	 *
 	 * @return TokenPool
 	 */
-	public TokenPool getTokenPoolByDn(String dn) {
-		return setIndexes(entryManager.find(TokenPool.class, dn));
+	public StatusTokenPool getTokenPoolByDn(String dn) {
+		return setIndexes(entryManager.find(StatusTokenPool.class, dn));
 	}
 
 	/**
@@ -71,8 +70,8 @@ public class TokenPoolService {
 	 *
 	 * @return TokenPool
 	 */
-	public TokenPool getTokenPoolById(Integer id) {
-		return setIndexes(entryManager.find(TokenPool.class, getDnForTokenPool(id)));
+	public StatusTokenPool getTokenPoolById(Integer id) {
+		return setIndexes(entryManager.find(StatusTokenPool.class, getDnForTokenPool(id)));
 	}
 
 	/**
@@ -80,10 +79,10 @@ public class TokenPoolService {
 	 *
 	 * @return list of TokenPools
 	 */
-	public List<TokenPool> getAllTokenPools() {
+	public List<StatusTokenPool> getAllTokenPools() {
 		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNode();
 
-		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, Filter.createPresenceFilter("jansNum")));
+		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, StatusTokenPool.class, Filter.createPresenceFilter("jansNum")));
 	}
 
 	/**
@@ -91,10 +90,10 @@ public class TokenPoolService {
 	 *
 	 * @return TokenPool
 	 */
-	public TokenPool getTokenPoolLast() {
+	public StatusTokenPool getTokenPoolLast() {
 		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNode();
 		
-		PagedResult<TokenPool> pagedResult = entryManager.findPagedEntries(tokenPoolsBaseDn, TokenPool.class, Filter.createPresenceFilter("jansNum"), null, "jansNum", SortOrder.DESCENDING, 1, 1, 1);
+		PagedResult<StatusTokenPool> pagedResult = entryManager.findPagedEntries(tokenPoolsBaseDn, StatusTokenPool.class, Filter.createPresenceFilter("jansNum"), null, "jansNum", SortOrder.DESCENDING, 1, 1, 1);
 		if (pagedResult.getEntriesCount() >= 1) {
 			return setIndexes(pagedResult.getEntries().get(0));
 		}
@@ -109,7 +108,7 @@ public class TokenPoolService {
      * @param index global status list index
      * @return token pool
      */
-	public TokenPool getTokenPoolByIndex(int index) {
+	public StatusTokenPool getTokenPoolByIndex(int index) {
 		int poolId = index / tokenIndexAllocationBlockSize;
 		
 		return getTokenPoolById(poolId);
@@ -120,17 +119,17 @@ public class TokenPoolService {
 	 *
 	 * @return list of TokenPools
 	 */
-	public List<TokenPool> getClusterNodeTokenPools(Integer nodeId) {
+	public List<StatusTokenPool> getClusterNodeTokenPools(Integer nodeId) {
 		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNode();
 
-		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, Filter.createEqualityFilter("jansNodeId", nodeId)));
+		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, StatusTokenPool.class, Filter.createEqualityFilter("jansNodeId", nodeId)));
 	}
 
 	public List<String> getTokenPoolsDns(List<Integer> nodeIds) {
 		List<String> tokenPoolsDns = new ArrayList<>();
 
 		for (Integer nodeId : nodeIds) {
-			TokenPool clusterNode = getTokenPoolById(nodeId);
+			StatusTokenPool clusterNode = getTokenPoolById(nodeId);
 			if (clusterNode != null) {
 				tokenPoolsDns.add(clusterNode.getDn());
 			}
@@ -144,29 +143,29 @@ public class TokenPoolService {
 	 *
 	 * @return list of TokenPools
 	 */
-	public List<TokenPool> getTokenPoolsExpired() {
+	public List<StatusTokenPool> getTokenPoolsExpired() {
 		String tokenPoolsBaseDn = staticConfiguration.getBaseDn().getNode();
 		
 		Date expirationDate = new Date(System.currentTimeMillis() + DELAY_AFTER_EXPIRATION);
 		
 		Filter filter = Filter.createGreaterOrEqualFilter("expirationDate", entryManager.encodeTime(tokenPoolsBaseDn, expirationDate));
 
-		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, TokenPool.class, filter));
+		return setIndexes(entryManager.findEntries(tokenPoolsBaseDn, StatusTokenPool.class, filter));
 	}
 
-	protected void persist(TokenPool tokenPool) {
+	protected void persist(StatusTokenPool tokenPool) {
 		entryManager.persist(tokenPool);
 	}
 
-	public void update(TokenPool tokenPool) {
+	public void update(StatusTokenPool tokenPool) {
 		entryManager.merge(tokenPool);
 	}
 
-	public TokenPool updateWithLock(TokenPool tokenPool) {
+	public StatusTokenPool updateWithLock(StatusTokenPool tokenPool) {
 		// Specify maximum timeout to update entry (for case if node(s) hang during update) and to avoid data override
 		long maxWaitTime = System.currentTimeMillis() + LOCK_WAIT_BEFORE_UPDATE;
 
-		TokenPool loadedTokenPool;
+		StatusTokenPool loadedTokenPool;
 
 		boolean updated = false;
 		int countAttempts = 1;
@@ -220,11 +219,11 @@ public class TokenPoolService {
 		return loadedTokenPool;
 	}
 
-	public TokenPool allocate(Integer nodeId) {
+	public StatusTokenPool allocate(Integer nodeId) {
 		// Try to use existing expired entry
-		List<TokenPool> tokenPools = getTokenPoolsExpired();
+		List<StatusTokenPool> tokenPools = getTokenPoolsExpired();
 		
-		for (TokenPool tokenPool : tokenPools) {
+		for (StatusTokenPool tokenPool : tokenPools) {
 			// Attempt to set random value in lockKey
 			String lockKey = UUID.randomUUID().toString();
 			tokenPool.setLockKey(lockKey);
@@ -234,7 +233,7 @@ public class TokenPoolService {
 				update(tokenPool);
 				
 				// Load token after update
-				TokenPool lockedTokenPool = getTokenPoolByDn(tokenPool.getDn());
+				StatusTokenPool lockedTokenPool = getTokenPoolByDn(tokenPool.getDn());
 				
 				// If lock is ours reset entry and return it
 				if (lockKey.equals(lockedTokenPool.getLockKey())) {
@@ -248,11 +247,11 @@ public class TokenPoolService {
 		// There are no free entries. server need to add new one with next index
 		int maxSteps = 10;
 		do {
-			TokenPool lastTokenPool = getTokenPoolLast();
+			StatusTokenPool lastTokenPool = getTokenPoolLast();
 
 			Integer lastTokenPoolIndex = lastTokenPool == null ? 0 : lastTokenPool.getId() + 1;
 
-			TokenPool tokenPool = new TokenPool();
+			StatusTokenPool tokenPool = new StatusTokenPool();
 			tokenPool.setId(lastTokenPoolIndex);
 			tokenPool.setDn(getDnForTokenPool(lastTokenPoolIndex));
 			tokenPool.setNodeId(nodeId);
@@ -268,7 +267,7 @@ public class TokenPoolService {
 				persist(tokenPool);
 
 				// Load token after update
-				TokenPool lockedTokenPool = getTokenPoolByDn(tokenPool.getDn());
+				StatusTokenPool lockedTokenPool = getTokenPoolByDn(tokenPool.getDn());
 
 				// if lock is ours return it
 				if (lockKey.equals(lockedTokenPool.getLockKey())) {
@@ -284,7 +283,7 @@ public class TokenPoolService {
 		throw new EntryPersistenceException("Failed to allocate TokenPool!!!");
 	}
 
-	public void release(TokenPool tokenPool) {
+	public void release(StatusTokenPool tokenPool) {
 		tokenPool.setData(null);
 		tokenPool.setLastUpdate(null);
 		tokenPool.setExpirationDate(null);
@@ -294,7 +293,7 @@ public class TokenPoolService {
 		update(tokenPool);
 	}
 
-	public TokenPool reset(TokenPool tokenPool, Integer nodeId) {
+	public StatusTokenPool reset(StatusTokenPool tokenPool, Integer nodeId) {
 		long currentTime = System.currentTimeMillis();
 		tokenPool.setNodeId(nodeId);
 		tokenPool.setData(null);
@@ -307,7 +306,7 @@ public class TokenPoolService {
 		return tokenPool;
 	}
 
-	private TokenPool setIndexes(TokenPool tokenPool) {
+	private StatusTokenPool setIndexes(StatusTokenPool tokenPool) {
 		if (tokenPool == null) {
 			return tokenPool;
 		}
@@ -320,12 +319,12 @@ public class TokenPoolService {
 		return tokenPool;
 	}
 
-	private List<TokenPool> setIndexes(List<TokenPool> tokenPools) {
+	private List<StatusTokenPool> setIndexes(List<StatusTokenPool> tokenPools) {
 		if (tokenPools == null) {
 			return tokenPools;
 		}
 
-		for (TokenPool tokenPool : tokenPools) {
+		for (StatusTokenPool tokenPool : tokenPools) {
 			setIndexes(tokenPool);
 		}
 		return tokenPools;

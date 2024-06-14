@@ -12,8 +12,8 @@ import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.token.JwtSigner;
 import io.jans.as.server.service.DiscoveryService;
-import io.jans.as.server.service.cluster.TokenPoolService;
-import io.jans.model.token.TokenPool;
+import io.jans.as.server.service.cluster.StatusTokenPoolService;
+import io.jans.model.token.StatusTokenPool;
 import io.jans.model.tokenstatus.StatusList;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -49,7 +49,7 @@ public class StatusListService {
     private DiscoveryService discoveryService;
 
     @Inject
-    private TokenPoolService tokenPoolService;
+    private StatusTokenPoolService statusTokenPoolService;
 
     @Inject
     private WebKeysConfiguration webKeysConfiguration;
@@ -60,7 +60,7 @@ public class StatusListService {
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.TOKEN_STATUS_LIST);
 
         try {
-            final List<TokenPool> pools = tokenPoolService.getAllTokenPools();
+            final List<StatusTokenPool> pools = statusTokenPoolService.getAllTokenPools();
             final StatusList statusList = join(pools);
 
             final boolean isJsonRequested = CONTENT_TYPE_STATUSLIST_JSON.equalsIgnoreCase(acceptHeader);
@@ -94,11 +94,11 @@ public class StatusListService {
         return createResponseJwt(jsonObject);
     }
 
-    public StatusList join(List<TokenPool> pools) {
+    public StatusList join(List<StatusTokenPool> pools) {
         final int bitSize = appConfiguration.getStatusListBitSize();
 
         StatusList result = new StatusList(bitSize);
-        for (TokenPool pool : pools) {
+        for (StatusTokenPool pool : pools) {
             try {
                 StatusList poolStatusList = StatusList.fromEncoded(pool.getData(), bitSize);
                 for (int i = 0; i < poolStatusList.getBitSetLength(); i++) {

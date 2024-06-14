@@ -1,13 +1,13 @@
 package io.jans.model.token;
 
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 import jakarta.persistence.Transient;
+
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Yuriy Movchan
@@ -15,7 +15,7 @@ import jakarta.persistence.Transient;
  */
 @DataEntry(sortBy = "jansNum")
 @ObjectClass(value = "jansTokenPool")
-public class TokenPool extends BaseEntry {
+public class StatusTokenPool extends BaseEntry {
 
 	private static final long serialVersionUID = -2122431771066187529L;
 
