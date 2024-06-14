@@ -143,3 +143,14 @@ authentication method.
 Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring the Default Authentication Method. Endpoint details are published
 in the [Swagger document](./../reference/openapi.md).
+
+!!! Note
+
+Default authentication method being set is validated the against enabled custom script.
+If the script is not active then following error notification will be displayed
+```{
+    "code": "400",
+    "message": "INVALID_ACR",
+    "description": "Authentication script {acr} is not active"
+}
+```
