@@ -2222,9 +2222,74 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Cache Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Cache Configuration
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-cache-configuration" class="md-nav__link">
+    Get Cache Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patch-cache-configuration" class="md-nav__link">
+    Patch Cache Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-patch-operation" class="md-nav__link">
+    Quick Patch Operation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -8385,6 +8450,55 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-cache-configuration" class="md-nav__link">
+    Get Cache Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patch-cache-configuration" class="md-nav__link">
+    Patch Cache Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-patch-operation" class="md-nav__link">
+    Quick Patch Operation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -8426,148 +8540,219 @@
 
 
 <h1 id="cache-configuration">Cache Configuration<a class="headerlink" href="#cache-configuration" title="Permanent link">#</a></h1>
-<blockquote>
-<p>Prerequisite: Know how to use the Janssen CLI in <a href="../config-tools/jans-cli/">command-line mode</a></p>
-</blockquote>
-<p>Cache Configuration supports two types of operation through the Single Line command of Janssen CLI.
-Let's get the information for Cache Configuration.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info CacheConfiguration
+<p>The Janssen Server provides multiple configuration tools to perform these
+tasks.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use the command line to perform actions from the terminal. Learn how to 
+use Jans CLI <a href="../config-tools/jans-cli/">here</a> or jump straight to 
+the <a href="#using-command-line">Using Command Line</a></p>
+</div>
+<div class="tabbed-block">
+<p>Cache configuration is not possible in Text-based UI.</p>
+</div>
+<div class="tabbed-block">
+<p>Use REST API for programmatic access or invoke via tools like CURL or 
+Postman. Learn how to use Janssen Server Config API 
+<a href="../config-tools/config-api/">here</a> or Jump straight to the
+<a href="#using-configuration-rest-api">Using Configuration REST API</a></p>
+</div>
+</div>
+</div>
+<h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
+<p>To get the details of Janssen command line operations relevant to the cache
+configuration, you can check the operations under <code>CacheConfiguration</code>
+using the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info CacheConfiguration
 </code></pre></div>
 <p>It prints below two operations:
-<div class="highlight"><pre><span></span><code>Operation ID: get-config-cache
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Operation ID: get-config-cache
   Description: Returns cache configuration.
 Operation ID: patch-config-cache
-  Description: Partially modifies cache configuration.
-  Schema: Array of /components/schemas/PatchRequest
+  Description: Patch cache configuration
+  Schema: Array of JsonPatch
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema JsonPatch
 </code></pre></div></p>
-<h1 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">#</a></h1>
-<ul>
-<li><a href="#cache-configuration">Cache Configuration</a></li>
-<li><a href="#table-of-contents">Table of Contents</a></li>
-<li><a href="#get-cache-configuration">Get Cache Configuration</a></li>
-<li><a href="#patch-cache-configuration">Patch Cache Configuration</a></li>
-<li><a href="#quick-patch-operation">Quick Patch Operation</a></li>
-</ul>
-<h2 id="get-cache-configuration">Get Cache Configuration<a class="headerlink" href="#get-cache-configuration" title="Permanent link">#</a></h2>
-<p>You can get the current Cache Configuration of your Janssen Server by performing this operation.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-cache
+<h3 id="get-cache-configuration">Get Cache Configuration<a class="headerlink" href="#get-cache-configuration" title="Permanent link">#</a></h3>
+<p>You can get the current Cache Configuration of your Janssen Server by
+performing this operation.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-cache
 </code></pre></div>
-<p>It will show the Cache configuration with details.</p>
-<div class="highlight"><pre><span></span><code>{
-  &quot;cacheProviderType&quot;: &quot;NATIVE_PERSISTENCE&quot;,
-  &quot;memcachedConfiguration&quot;: {
-    &quot;servers&quot;: &quot;localhost:11211&quot;,
-    &quot;maxOperationQueueLength&quot;: 100000,
-    &quot;bufferSize&quot;: 32768,
-    &quot;defaultPutExpiration&quot;: 60,
-    &quot;connectionFactoryType&quot;: &quot;DEFAULT&quot;
-  },
-  &quot;redisConfiguration&quot;: {
-    &quot;redisProviderType&quot;: &quot;STANDALONE&quot;,
-    &quot;servers&quot;: &quot;localhost:6379&quot;,
-    &quot;password&quot;: null,
-    &quot;defaultPutExpiration&quot;: 60,
-    &quot;sentinelMasterGroupName&quot;: null,
-    &quot;useSSL&quot;: false,
-    &quot;sslTrustStoreFilePath&quot;: null,
-    &quot;maxIdleConnections&quot;: 10,
-    &quot;maxTotalConnections&quot;: 500,
-    &quot;connectionTimeout&quot;: 3000,
-    &quot;soTimeout&quot;: 3000,
-    &quot;maxRetryAttempts&quot;: 5
-  },
-  &quot;inMemoryConfiguration&quot;: {
-    &quot;defaultPutExpiration&quot;: 60
-  },
-  &quot;nativePersistenceConfiguration&quot;: {
-    &quot;defaultPutExpiration&quot;: 60,
-    &quot;defaultCleanupBatchSize&quot;: 10000,
-    &quot;deleteExpiredOnGetRequest&quot;: false
-  }
-}
-</code></pre></div>
-<h2 id="patch-cache-configuration">Patch Cache Configuration<a class="headerlink" href="#patch-cache-configuration" title="Permanent link">#</a></h2>
-<p>You may need to update Cache configuration, In that case <code>patch-config-cache</code> can be used to modify cache configuration.</p>
+<p>It will show the Cache configuration details.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;cacheProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NATIVE_PERSISTENCE&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;memcachedConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost:11211&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;maxOperationQueueLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100000</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;bufferSize&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32768</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;connectionFactoryType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DEFAULT&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;inMemoryConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;redisConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;redisProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STANDALONE&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost:6379&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;maxIdleConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;maxTotalConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;connectionTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;soTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;maxRetryAttempts&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;nativePersistenceConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;defaultCleanupBatchSize&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;deleteExpiredOnGetRequest&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;disableAttemptUpdateBeforeInsert&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="patch-cache-configuration">Patch Cache Configuration<a class="headerlink" href="#patch-cache-configuration" title="Permanent link">#</a></h3>
+<p>You may need to update Cache configuration, In that case
+<code>patch-config-cache</code> can be used to modify the cache configuration.</p>
 <div class="highlight"><pre><span></span><code>Operation ID: patch-config-cache
-  Description: Partially modifies cache configuration.
-  Schema: Array of /components/schemas/PatchRequest
+  Description: Patch cache configuration
+  Schema: Array of JsonPatch
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema JsonPatch
 </code></pre></div>
-<p>Let's see the sample schema of cache configuration.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest &gt; /tmp/patch-cache.json
-
-{
-  &quot;op&quot;: &quot;add&quot;,
-  &quot;path&quot;: &quot;string&quot;,
-  &quot;value&quot;: {}
-}
+<p>The <code>patch-config-cache</code> operation uses the
+<a href="https://jsonpatch.com/#the-patch">JSON Patch</a> schema to describe
+the configuration change. Refer
+<a href="../config-tools/jans-cli/#patch-request-schema">here</a> to know more about
+schema.</p>
+<p>For instance, to perform a <code>replace</code> operation at
+<code>memcachedConfiguration/bufferSize</code> and change it from <code>32768</code> to <code>32788</code>,
+the JSON Patch data would look like below:</p>
+<div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">[</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;memcachedConfiguration/bufferSize&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;32788&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </code></pre></div>
-<p>Let, We want to replace <code>memcachedConfiguration/bufferSize</code>:</p>
-<p>We can edit this json as follows (remember to make it an array):</p>
-<div class="highlight"><pre><span></span><code>nano /tmp/patch-cache.json
-
-[
-  {
-  &quot;op&quot;: &quot;replace&quot;,
-  &quot;path&quot;: &quot;memcachedConfiguration/bufferSize&quot;,
-  &quot;value&quot;: &quot;32788&quot;
-  }
-]
+<p>Store the above JSON Patch data in a file, for instance,
+<code>/tmp/patch-cache.json</code></p>
+<p>Using the above file, perform the operation as below:</p>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache <span class="se">\</span>
+--data /tmp/patch-cache.json
 </code></pre></div>
-<p>Now, let's do the operation: 
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache --data /tmp/patch-cache.json
-
-
-Getting access token for scope https://jans.io/oauth/config/cache.write
-Server Response:
-{
-  &quot;cacheProviderType&quot;: &quot;NATIVE_PERSISTENCE&quot;,
-  &quot;memcachedConfiguration&quot;: {
-    &quot;servers&quot;: &quot;localhost:11211&quot;,
-    &quot;maxOperationQueueLength&quot;: 100000,
-    &quot;bufferSize&quot;: 32788,
-    &quot;defaultPutExpiration&quot;: 60,
-    &quot;connectionFactoryType&quot;: &quot;DEFAULT&quot;
-  },
-  &quot;redisConfiguration&quot;: {
-    &quot;redisProviderType&quot;: &quot;STANDALONE&quot;,
-    &quot;servers&quot;: &quot;localhost:6379&quot;,
-    &quot;password&quot;: null,
-    &quot;defaultPutExpiration&quot;: 60,
-    &quot;sentinelMasterGroupName&quot;: null,
-    &quot;useSSL&quot;: false,
-    &quot;sslTrustStoreFilePath&quot;: null,
-    &quot;maxIdleConnections&quot;: 10,
-    &quot;maxTotalConnections&quot;: 500,
-    &quot;connectionTimeout&quot;: 3000,
-    &quot;soTimeout&quot;: 3000,
-    &quot;maxRetryAttempts&quot;: 5
-  },
-  &quot;inMemoryConfiguration&quot;: {
-    &quot;defaultPutExpiration&quot;: 60
-  },
-  &quot;nativePersistenceConfiguration&quot;: {
-    &quot;defaultPutExpiration&quot;: 60,
-    &quot;defaultCleanupBatchSize&quot;: 10000,
-    &quot;deleteExpiredOnGetRequest&quot;: false
-  }
-</code></pre></div></p>
-<p>You see <code>bufferSize</code> has changed. You may want to know more about patching cache configuration. Please, have a look to <a href="../config-tools/jans-cli/#patch-request-schema">this link</a> to know more about how you can modify the schema file.</p>
-<h2 id="quick-patch-operation">Quick Patch Operation<a class="headerlink" href="#quick-patch-operation" title="Permanent link">#</a></h2>
-<p>In case you need to do a quick patch operation, you can do that also. For example, let's say we would like to replace <code>defaultPutExpiration</code> value from <code>nativePersistenceConfiguration</code>. We can do that simply by the following command line:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache --patch-replace nativePersistenceConfiguration/defaultPutExpiration:90
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;cacheProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NATIVE_PERSISTENCE&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;memcachedConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost:11211&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;maxOperationQueueLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100000</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;bufferSize&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32788</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;connectionFactoryType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DEFAULT&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;inMemoryConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;redisConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;redisProviderType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STANDALONE&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost:6379&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;maxIdleConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;maxTotalConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;connectionTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;soTimeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;maxRetryAttempts&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;nativePersistenceConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;defaultPutExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;defaultCleanupBatchSize&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;deleteExpiredOnGetRequest&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;disableAttemptUpdateBeforeInsert&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="quick-patch-operation">Quick Patch Operation<a class="headerlink" href="#quick-patch-operation" title="Permanent link">#</a></h3>
+<p>In case you need to do a quick patch operation, you can do that also.
+For example, let's say we would like to replace <code>defaultPutExpiration</code>
+value from <code>nativePersistenceConfiguration</code>. We can do that simply by
+the following command line:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache <span class="se">\</span>
+--patch-replace nativePersistenceConfiguration/defaultPutExpiration:90
 </code></pre></div>
-<p>It will change the value with given one. There are few option to do such quick patch operations. Please check them out from <a href="../config-tools/jans-cli/#quick-patch-operations">here</a>.</p>
+<p>It will change the value with the given one. There are few options to do
+such quick patch operations. Please check them out from <a href="../config-tools/jans-cli/#quick-patch-operations">here</a>.</p>
+<h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
+<p>Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring Cache. Endpoint details are published in the <a href="../../reference/openapi/">Swagger
+document</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-08-03T16:21:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-08-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-14T06:02:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-14</span>
       
         <br>
         Created:
