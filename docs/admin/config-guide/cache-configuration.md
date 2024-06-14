@@ -5,50 +5,65 @@ tags:
   - cache
 ---
 
+
+
 # Cache Configuration
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](config-tools/jans-cli/README.md)
+The Janssen Server provides multiple configuration tools to perform these
+tasks.
 
-Cache Configuration supports two types of operation through the Single Line command of Janssen CLI.
-Let's get the information for Cache Configuration.
+=== "Use Command-line"
 
-```
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
+
+=== "Use Text-based UI"
+
+    Cache configuration is not possible in Text-based UI.
+
+=== "Use REST API"
+
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](./config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
+
+
+
+## Using Command Line
+
+To get the details of Janssen command line operations relevant to the cache
+configuration, you can check the operations under `CacheConfiguration`
+using the command below:
+
+```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --info CacheConfiguration
 ```
 
 It prints below two operations:
-```text
-
+```text title="Output"
 Operation ID: get-config-cache
   Description: Returns cache configuration.
 Operation ID: patch-config-cache
-  Description: Partially modifies cache configuration.
-  Schema: Array of /components/schemas/PatchRequest
+  Description: Patch cache configuration
+  Schema: Array of JsonPatch
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
-
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema JsonPatch
 ```
 
-Table of Contents
-=================
+### Get Cache Configuration
 
-- [Cache Configuration](#cache-configuration)
-- [Table of Contents](#table-of-contents)
-  - [Get Cache Configuration](#get-cache-configuration)
-  - [Patch Cache Configuration](#patch-cache-configuration)
-  - [Quick Patch Operation](#quick-patch-operation)
+You can get the current Cache Configuration of your Janssen Server by
+performing this operation.
 
-## Get Cache Configuration
-
-You can get the current Cache Configuration of your Janssen Server by performing this operation.
-
-```commandline
+```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-cache
 ```
 
-It will show the Cache configuration with details.
+It will show the Cache configuration details.
 
-```text
+```json title="Sample Output" linenums="1" 
 {
   "cacheProviderType": "NATIVE_PERSISTENCE",
   "memcachedConfiguration": {
@@ -58,62 +73,54 @@ It will show the Cache configuration with details.
     "defaultPutExpiration": 60,
     "connectionFactoryType": "DEFAULT"
   },
+  "inMemoryConfiguration": {
+    "defaultPutExpiration": 60
+  },
   "redisConfiguration": {
     "redisProviderType": "STANDALONE",
     "servers": "localhost:6379",
-    "password": null,
     "defaultPutExpiration": 60,
-    "sentinelMasterGroupName": null,
     "useSSL": false,
-    "sslTrustStoreFilePath": null,
     "maxIdleConnections": 10,
     "maxTotalConnections": 500,
     "connectionTimeout": 3000,
     "soTimeout": 3000,
     "maxRetryAttempts": 5
   },
-  "inMemoryConfiguration": {
-    "defaultPutExpiration": 60
-  },
   "nativePersistenceConfiguration": {
     "defaultPutExpiration": 60,
     "defaultCleanupBatchSize": 10000,
-    "deleteExpiredOnGetRequest": false
+    "deleteExpiredOnGetRequest": false,
+    "disableAttemptUpdateBeforeInsert": false
   }
 }
+
 ```
 
-## Patch Cache Configuration
+### Patch Cache Configuration
 
-You may need to update Cache configuration, In that case `patch-config-cache` can be used to modify cache configuration.
+You may need to update Cache configuration, In that case
+`patch-config-cache` can be used to modify the cache configuration.
 
 ```text
 Operation ID: patch-config-cache
-  Description: Partially modifies cache configuration.
-  Schema: Array of /components/schemas/PatchRequest
+  Description: Patch cache configuration
+  Schema: Array of JsonPatch
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema JsonPatch
 ```
 
-Let's see the sample schema of cache configuration.
+The `patch-config-cache` operation uses the
+[JSON Patch](https://jsonpatch.com/#the-patch) schema to describe
+the configuration change. Refer
+[here](config-tools/jans-cli/README.md#patch-request-schema) to know more about
+schema.
 
-```text
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest > /tmp/patch-cache.json
+For instance, to perform a `replace` operation at
+`memcachedConfiguration/bufferSize` and change it from `32768` to `32788`,
+the JSON Patch data would look like below:
 
-{
-  "op": "add",
-  "path": "string",
-  "value": {}
-}
-```
-
-Let, We want to replace `memcachedConfiguration/bufferSize`:
-
-We can edit this json as follows (remember to make it an array):
-
-```commandline
-nano /tmp/patch-cache.json
-
+```json title="Input"
 [
   {
   "op": "replace",
@@ -123,13 +130,17 @@ nano /tmp/patch-cache.json
 ]
 ```
 
-Now, let's do the operation: 
-```text
-/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache --data /tmp/patch-cache.json
+Store the above JSON Patch data in a file, for instance,
+`/tmp/patch-cache.json`
 
+Using the above file, perform the operation as below:
 
-Getting access token for scope https://jans.io/oauth/config/cache.write
-Server Response:
+```bash title="Sample Command"
+/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache \
+--data /tmp/patch-cache.json
+```
+
+```json title="Sample Output" linenums="1"
 {
   "cacheProviderType": "NATIVE_PERSISTENCE",
   "memcachedConfiguration": {
@@ -139,40 +150,47 @@ Server Response:
     "defaultPutExpiration": 60,
     "connectionFactoryType": "DEFAULT"
   },
+  "inMemoryConfiguration": {
+    "defaultPutExpiration": 60
+  },
   "redisConfiguration": {
     "redisProviderType": "STANDALONE",
     "servers": "localhost:6379",
-    "password": null,
     "defaultPutExpiration": 60,
-    "sentinelMasterGroupName": null,
     "useSSL": false,
-    "sslTrustStoreFilePath": null,
     "maxIdleConnections": 10,
     "maxTotalConnections": 500,
     "connectionTimeout": 3000,
     "soTimeout": 3000,
     "maxRetryAttempts": 5
   },
-  "inMemoryConfiguration": {
-    "defaultPutExpiration": 60
-  },
   "nativePersistenceConfiguration": {
     "defaultPutExpiration": 60,
     "defaultCleanupBatchSize": 10000,
-    "deleteExpiredOnGetRequest": false
+    "deleteExpiredOnGetRequest": false,
+    "disableAttemptUpdateBeforeInsert": false
   }
-```
-
-You see `bufferSize` has changed. You may want to know more about patching cache configuration. Please, have a look to [this link](config-tools/jans-cli/README.md#patch-request-schema) to know more about how you can modify the schema file.
-
-
-## Quick Patch Operation
-
-In case you need to do a quick patch operation, you can do that also. For example, let's say we would like to replace `defaultPutExpiration` value from `nativePersistenceConfiguration`. We can do that simply by the following command line:
+}
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache --patch-replace nativePersistenceConfiguration/defaultPutExpiration:90
+
+### Quick Patch Operation
+
+In case you need to do a quick patch operation, you can do that also.
+For example, let's say we would like to replace `defaultPutExpiration`
+value from `nativePersistenceConfiguration`. We can do that simply by
+the following command line:
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache \
+--patch-replace nativePersistenceConfiguration/defaultPutExpiration:90
 ```
 
-It will change the value with given one. There are few option to do such quick patch operations. Please check them out from [here](config-tools/jans-cli/README.md#quick-patch-operations).
+It will change the value with the given one. There are few options to do
+such quick patch operations. Please check them out from [here](config-tools/jans-cli/README.md#quick-patch-operations).
 
+## Using Configuration REST API
+
+Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring Cache. Endpoint details are published in the [Swagger
+document](./../reference/openapi.md).
