@@ -7,7 +7,7 @@ tags:
 
 # Log Management
 
-Logging for Janssen Server modules is managed at individual module level.
+Logging for Janssen Server modules is managed at the individual module level.
 Meaning there is no single switch or configuration that will enable or disable
 logs for all modules. Each module can be individually configured and can be
 configured differently when it comes to logging.
@@ -51,7 +51,8 @@ corresponding modules to update logging related properties. For instance:
 
 In the Janssen Server, you can deploy and customize the Logging Configuration using the
 command line. To get the details of Janssen command line operations relevant to
-Logging configuration, you can check the operations under `ConfigurationLogging` task using the
+Logging configuration, you can check the operations under 
+`ConfigurationLogging` task using the
 command below:
 
 ```bash title="Command"
