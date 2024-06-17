@@ -7,8 +7,24 @@ tags:
 
 # Log Management
 
-The Janssen Server provides multiple configuration tools to perform these
-tasks.
+Logging for Janssen Server modules is managed at individual module level.
+Meaning there is no single switch or configuration that will enable or disable
+logs for all modules. Each module can be individually configured and can be
+configured differently when it comes to logging.
+
+Logging for `jans-auth` service is what we are going to discuss in detail 
+in this document.
+Logging for other modules is configured by changing the module's 
+property values. Use the documentation on how to update configuration 
+properties for 
+corresponding modules to update logging related properties. For instance:
+
+[//]: # (TODO: not sure if the sections below exist in respective docs. But)
+[//]: # (if not then we need to add this content and link it here)
+- [Updating properties for Fido2 module]()
+- [Updating properties for SCIM module]()
+
+## Log Configuration For jans-auth
 
 === "Use Command-line"
 
