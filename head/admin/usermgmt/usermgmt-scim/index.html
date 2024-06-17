@@ -9168,7 +9168,8 @@ response looks like
 <p>To distinguish between regular FIDO2 and SuperGluu devices, note only SuperGluu entries have the attribute <code>deviceData</code> populated (i.e. not null)</p>
 <h3 id="example-querying-enrolled-devices">Example: Querying Enrolled Devices<a class="headerlink" href="#example-querying-enrolled-devices" title="Permanent link">#</a></h3>
 <p>Say we are interested in having a list of Super Gluu devices users have enrolled and whose operating system is iOS. We may issue a query like this:</p>
-<div class="highlight"><pre><span></span><code>curl -k -G -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; --data-urlencode &#39;filter=deviceData co &quot;ios&quot;&#39; -d count=10 https://&lt;jans-server&gt;/jans-scim/restv1/v2/Fido2Devices
+<div class="highlight"><pre><span></span><code>curl -k -G -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; --data-urlencode 
+&#39;filter=deviceData co &quot;ios&quot;&#39; -d count=10 https://&lt;jans-server&gt;/jans-scim/restv1/v2/Fido2Devices
 </code></pre></div>
 <p>The response will be like:</p>
 <div class="highlight"><pre><span></span><code>{
@@ -9246,7 +9247,7 @@ response looks like
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-12T13:47:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-17T05:14:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-17</span>
       
         <br>
         Created:
