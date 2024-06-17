@@ -148,7 +148,7 @@ accurate data corresponding to each field.
 * Once all valid information has been inputted, the user has the option
 to save the logging configuration.
 
-![image](../../assets/logging-configuration-TUI.png)
+![image](../../assets/tui-logging-config.png)
 
 ## Using Configuration REST API
 
