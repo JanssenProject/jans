@@ -11,6 +11,19 @@ The Janssen Server allows administrators to set and manage the default
 authentication method for the authentication server.
 The Janssen Server provides multiple configuration tools to perform these tasks.
 
+!!! Note
+
+    Default authentication method when set, is validated against the active custom script.
+    If the script is not active then the following error notification is returned by API.
+    ```{
+        "code": "400",
+        "message": "INVALID_ACR",
+        "description": "Authentication script {acr} is not active"
+    }
+    ```
+
+    See [script documentation](custom-scripts-config.md#update-an-existing-custom-script) to know how to enable/disable custom scripts.
+
 === "Use Command-line"
 
     Use the command line to perform actions from the terminal. Learn how to
@@ -144,13 +157,3 @@ Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring the Default Authentication Method. Endpoint details are published
 in the [Swagger document](./../reference/openapi.md).
 
-!!! Note
-
-Default authentication method when set is validated against the active custom script.
-If the script is not active then the following error notification is returned by API.
-```{
-    "code": "400",
-    "message": "INVALID_ACR",
-    "description": "Authentication script {acr} is not active"
-}
-```
