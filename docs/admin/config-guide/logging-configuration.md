@@ -146,7 +146,7 @@ You will get the updated result as below:
 
 ## Using-text-based-ui
 
-In Janssen, You can manage Logging configuration method using
+In Janssen, You can manage Logging configuration using
 the [Text-Based UI](./config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
@@ -159,11 +159,9 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 * Navigate to `Auth Server` -> `Logging` to open the Logging screen as shown
 in the image below.
 
-* Various fields are accessible on this page, where users can input
-accurate data corresponding to each field.
+* Logging screen allows the administrator to set logging parameters as per
+the requirements.
 
-* Once all valid information has been inputted, the user has the option
-to save the logging configuration.
 
 ![image](../../assets/tui-logging-config.png)
 
