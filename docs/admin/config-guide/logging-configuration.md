@@ -171,3 +171,8 @@ to save the logging configuration.
 Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring logging. Endpoint details are published in the [Swagger
 document](./../reference/openapi.md).
+
+## Default Log Location
+
+On a VM installation, logs for `jans-auth` module are generated at
+`/opt/jans/jetty/jans-auth/logs/`.
