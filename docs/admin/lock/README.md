@@ -102,7 +102,7 @@ context. Third, domains can publish central data for local decision making, for
 example information about how the end user authenticated.
 
 The Auth Server Lock token stream is highly confidential. Lock must present a
-valid OAuth access token to Auth Server in order subscribe to the token
+valid OAuth access token to Auth Server in order to subscribe to the token
 stream. Domains should only use Lock for trusted first party services with
 a private network. Each Lock Client instance uses OAuth dynamic client
 registration with a software statement to enable asymmetric client
