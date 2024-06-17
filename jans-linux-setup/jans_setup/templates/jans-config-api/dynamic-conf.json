@@ -3,6 +3,7 @@
   "disableLoggerTimer": false,
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
+  "acrValidationEnabled": true,
   "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",
   "apiClientId": "${jca_client_id}",

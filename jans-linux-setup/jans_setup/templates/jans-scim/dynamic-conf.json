@@ -13,6 +13,7 @@
     "bulkMaxOperations": 30,
     "bulkMaxPayloadSize": 3072000,
     "userExtensionSchemaURI": "urn:ietf:params:scim:schemas:extension:gluu:2.0:User",
+    "skipDefinedPasswordValidation": false,
 
     "useLocalCache":true,
 

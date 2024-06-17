@@ -15,6 +15,7 @@ Relevant configuration properties of the Jans SCIM server are summarized in the 
 |bulkMaxOperations|30|Maximum number of operations admitted in a single bulk request|
 |bulkMaxPayloadSize|3072000|Maximum payload size in bytes admitted in a single bulk request|
 |userExtensionSchemaURI|`urn:ietf:params:scim:schemas:extension:gluu:2.0:User`|URI schema associated to the User Extension|
+|skipDefinedPasswordValidation|false|Whether the validation rules defined for the password attribute in the server should be bypassed when a user is created/updated|
 |loggingLevel|`INFO`|The logging [level](./logs.md)|
 
 ## Configuration management using CLI

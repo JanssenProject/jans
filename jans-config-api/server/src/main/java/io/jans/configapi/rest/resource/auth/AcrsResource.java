@@ -7,12 +7,15 @@
 package io.jans.configapi.rest.resource.auth;
 
 import io.jans.config.GluuConfiguration;
+import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.rest.model.AuthenticationMethod;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-
+import io.jans.model.custom.script.model.CustomScript;
+import io.jans.service.custom.CustomScriptService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,6 +24,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
+
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -44,7 +49,13 @@ public class AcrsResource extends ConfigBaseResource {
     Logger log;
 
     @Inject
+    private ApiAppConfiguration appConfiguration;
+
+    @Inject
     ConfigurationService configurationService;
+
+    @Inject
+    CustomScriptService customScriptService;
 
     @Operation(summary = "Gets default authentication method.", description = "Gets default authentication method.", operationId = "get-acrs", tags = {
             "Default Authentication Method" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -71,9 +82,9 @@ public class AcrsResource extends ConfigBaseResource {
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AuthenticationMethod.class), examples = @ExampleObject(name = "Request json example", value = "example/acr/acr.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AuthenticationMethod.class))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "Unauthorized"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS }, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
@@ -85,11 +96,35 @@ public class AcrsResource extends ConfigBaseResource {
         }
 
         if (authenticationMethod != null) {
+            validateAuthenticationMethod(authenticationMethod.getDefaultAcr());
+
             final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
             gluuConfiguration.setAuthenticationMode(authenticationMethod.getDefaultAcr());
             configurationService.merge(gluuConfiguration);
         }
         return Response.ok(authenticationMethod).build();
+    }
+
+    private void validateAuthenticationMethod(String authenticationMode) {
+        log.debug("\n\n\n authenticationMethod:{}, appConfiguration.isAcrValidationEnabled():{}", authenticationMode,
+                appConfiguration.isAcrValidationEnabled());
+        List<CustomScript> activeScripts = customScriptService.findActiveCustomScripts();
+        log.debug("\n\n\n activeScripts:{}", activeScripts);
+
+        if (!appConfiguration.isAcrValidationEnabled() || StringUtils.isBlank(authenticationMode)
+                || activeScripts == null || activeScripts.isEmpty()) {
+            return;
+        }
+
+        // if authentication validation check is enabled and acr being set is not active
+        // then throw error
+        if (appConfiguration.isAcrValidationEnabled()) {
+            final String authMethod = authenticationMode;
+            if (activeScripts.stream().noneMatch(e -> e.getName().equalsIgnoreCase(authMethod))) {
+                throwBadRequestException("INVALID_ACR",
+                        String.format("Authentication script {%s} is not active", authenticationMode));
+            }
+        }
     }
 
 }

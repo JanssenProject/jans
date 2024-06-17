@@ -11,8 +11,10 @@ import com.github.fge.jsonpatch.JsonPatchException;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
+import io.jans.config.GluuConfiguration;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
+import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.service.custom.CustomScriptService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
@@ -61,6 +63,10 @@ public class CustomScriptResource extends ConfigBaseResource {
 
     @Inject
     CustomScriptService customScriptService;
+    
+
+    @Inject
+    ConfigurationService configurationService;
 
     @Operation(summary = "Gets a list of custom scripts", description = "Gets a list of custom scripts", operationId = "get-config-scripts", tags = {
             "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -240,6 +246,13 @@ public class CustomScriptResource extends ConfigBaseResource {
         logger.debug("Custom Script to be updated {}", customScript);
 
         customScriptService.update(customScript);
+        
+        logger.debug("Check if script is enabled:{}", existingScript.isEnabled());
+        //check if acr is to be updated
+        if(!existingScript.isEnabled()) {
+            updateAuthenticationMethod(existingScript);
+        }        
+        
         return Response.ok(customScript).build();
     }
 
@@ -262,6 +275,12 @@ public class CustomScriptResource extends ConfigBaseResource {
             }
             CustomScript existingScript = customScriptService.getScriptByInum(inum);
             customScriptService.remove(existingScript);
+            
+            //check if acr is to be updated
+            if(existingScript!=null) {
+                updateAuthenticationMethod(existingScript);
+            }            
+            
             return Response.noContent().build();
         } catch (Exception ex) {
             logger.info("Error deleting script by inum " + inum, ex);
@@ -297,7 +316,12 @@ public class CustomScriptResource extends ConfigBaseResource {
         updateRevision(existingScript, existingScript);
         customScriptService.update(existingScript);
         existingScript = customScriptService.getScriptByInum(inum);
-
+        
+        //check if acr is to be updated
+        if(!existingScript.isEnabled()) {
+            updateAuthenticationMethod(existingScript);
+        }       
+        
         logger.debug(" Custom Script Resource after patch - existingScript:{}", existingScript);
         return Response.ok(existingScript).build();
     }
@@ -410,6 +434,39 @@ public class CustomScriptResource extends ConfigBaseResource {
         
         logger.debug("script revision after update - customScript.getRevision():{}", customScript.getRevision());
         return customScript;
+    }
+    
+    private void updateAuthenticationMethod(CustomScript customScript) {
+        logger.debug("Check for AuthenticationMethod customScript:{}", customScript);
+       
+        String defaultAcr = getAuthenticationMethod();
+        logger.debug("Current defaultAcr:{}", defaultAcr);
+
+        if (customScript == null || StringUtils.isBlank(defaultAcr) || !defaultAcr.equalsIgnoreCase(customScript.getName())) {
+            return;
+        }
+
+        String scriptName = customScript.getName();
+        logger.debug("scriptName:{}", scriptName);
+        // If custom script is default acr and is disabled then remove default acr
+        if (defaultAcr.equalsIgnoreCase(scriptName) && !customScript.isEnabled()) {
+            logger.debug(String.format("\n\n Removing defaultAcr as the script{%s} is disabled ", scriptName));
+            removeAuthenticationMethod();
+            defaultAcr = getAuthenticationMethod();
+            logger.debug("defaultAcr:{}", defaultAcr);
+        }
+
+    }
+
+    private String getAuthenticationMethod() {
+        final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
+        return gluuConfiguration.getAuthenticationMode();
+    }
+
+    private void removeAuthenticationMethod() {
+        final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
+        gluuConfiguration.setAuthenticationMode(null);
+        configurationService.merge(gluuConfiguration);
     }
 
 }

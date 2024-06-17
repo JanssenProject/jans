@@ -388,8 +388,6 @@ Use the inum of our dummy user, **Jensen Barbara**.
 Check your LDAP or via Jans TUI to see that **Bjensen** is gone.
 
 
-
-
 ## How is SCIM data stored?
 
 SCIM [schema spec](https://datatracker.ietf.org/doc/html/rfc7643) does not use LDAP attribute names but a different naming convention for resource attributes (note this is not the case of custom attributes where the SCIM name used is that of the LDAP attribute).
@@ -418,7 +416,8 @@ To distinguish between regular FIDO2 and SuperGluu devices, note only SuperGluu 
 Say we are interested in having a list of Super Gluu devices users have enrolled and whose operating system is iOS. We may issue a query like this:
 
 ```
-curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 'filter=deviceData co "ios"' -d count=10 https://<jans-server>/jans-scim/restv1/v2/Fido2Devices
+curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 
+'filter=deviceData co "ios"' -d count=10 https://<jans-server>/jans-scim/restv1/v2/Fido2Devices
 ```
 
 The response will be like:
