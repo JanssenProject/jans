@@ -95,6 +95,13 @@
       <artifactId>commons-dbcp2</artifactId>
       <version>2.12.0</version>
     </dependency>
+
+    <!-- nimbus dependencies -->
+    <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>oauth2-oidc-sdk</artifactId>
+    </dependency>
+    <!-- end nimbus dependencies -->
   </dependencies>
 
   <build>
