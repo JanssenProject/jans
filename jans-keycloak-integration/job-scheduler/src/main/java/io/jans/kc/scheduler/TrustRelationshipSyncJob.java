@@ -39,12 +39,7 @@ public class TrustRelationshipSyncJob extends RecurringJob {
         this.keycloakApi = App.keycloakApi();
         this.realm = App.configuration().keycloakResourcesRealm();
         this.samlUserAttributeMapperId = App.configuration().keycloakResourcesSamlUserAttributeMapper();
-        try {
-            this.authnBrowserFlow = keycloakApi.getAuthenticationFlowFromAlias(realm,App.configuration().keycloakResourcesBrowserFlowAlias());
-        }catch(Exception e) {
-            log.warn("Could not properly initialize sync job",e);
-            this.authnBrowserFlow = null;
-        }
+        this.authnBrowserFlow = keycloakApi.getAuthenticationFlowFromAlias(realm,App.configuration().keycloakResourcesBrowserFlowAlias());
     }
     
     @Override
