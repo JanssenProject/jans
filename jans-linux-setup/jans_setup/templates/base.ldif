@@ -148,6 +148,11 @@ objectClass: top
 objectClass: organizationalUnit
 ou: archived_jwks
 
+dn: ou=node,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: node
+
 dn: ou=document,o=jans
 objectClass: top
 objectClass: organizationalUnit
