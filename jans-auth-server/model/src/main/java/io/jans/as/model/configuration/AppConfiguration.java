@@ -41,7 +41,6 @@ public class AppConfiguration implements Configuration {
     public static final int DEFAULT_STATUS_LIST_RESPONSE_JWT_LIFETIME = 600; // 10min
     public static final int DEFAULT_STATUS_LIST_BIT_SIZE = 2;
     public static final int DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
-    public static final int DEFAULT_TOKEN_STATUS_LIST_INDEX_LIMIT = 10000000;  // 10M - AS resets back to 1 after reaching this limit
 
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
@@ -216,9 +215,6 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Specifies how many token status list indexes AS can reserve at once (when token_status_list feature flag is enabled). Defaults to 100.")
     private int tokenIndexAllocationBlockSize = DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE;
-
-    @DocProperty(description = "Specifies token status list index limit. When AS reachs it, it will reset index back to 0. Defaults to 10M.")
-    private int tokenIndexLimit = DEFAULT_TOKEN_STATUS_LIST_INDEX_LIMIT;
 
     @DocProperty(description = "Specifies which LDAP attribute is used for the subject identifier claim")
     private String openidSubAttribute;
@@ -2445,14 +2441,6 @@ public class AppConfiguration implements Configuration {
 
     public void setTokenIndexAllocationBlockSize(int tokenIndexAllocationBlockSize) {
         this.tokenIndexAllocationBlockSize = tokenIndexAllocationBlockSize;
-    }
-
-    public int getTokenIndexLimit() {
-        return tokenIndexLimit;
-    }
-
-    public void setTokenIndexLimit(int tokenIndexLimit) {
-        this.tokenIndexLimit = tokenIndexLimit;
     }
 
     public int getCleanServiceInterval() {
