@@ -9,6 +9,7 @@ import io.jans.as.model.common.*;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.Base64Util;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -57,12 +58,12 @@ public class TxTokenHttpTest extends BaseTest {
         String subjectToken = subjectTokenResponse.getAccessToken();
 
         // 3. Request tx token using the subject token
-        TokenRequest txTokenRequest = new TokenRequest(GrantType.TX_TOKEN);
+        TokenRequest txTokenRequest = new TokenRequest(GrantType.TOKEN_EXCHANGE);
         txTokenRequest.setSubjectToken(subjectToken);
         txTokenRequest.setSubjectTokenType(SubjectTokenType.ACCESS_TOKEN.getName());
         txTokenRequest.setRequestedTokenType(ExchangeTokenType.TX_TOKEN.getName());
         txTokenRequest.setAudience("http://trusted.com");
-        txTokenRequest.setRctx("{\"req_ip\":\"69.151.72.123\"}");
+        txTokenRequest.setRequestContext(Base64Util.base64urlencode("{\"req_ip\":\"69.151.72.123\"}"));
 
         TokenClient txTokenClient = newTokenClient(txTokenRequest);
         TokenResponse txTokenResponse = txTokenClient.exec();
@@ -90,12 +91,12 @@ public class TxTokenHttpTest extends BaseTest {
     public void txTokenReplace() throws InvalidJwtException {
         showTitle("txTokenReplace");
 
-        TokenRequest txTokenRequest = new TokenRequest(GrantType.TX_TOKEN);
+        TokenRequest txTokenRequest = new TokenRequest(GrantType.TOKEN_EXCHANGE);
         txTokenRequest.setSubjectToken(txToken);
         txTokenRequest.setSubjectTokenType(SubjectTokenType.ACCESS_TOKEN.getName());
         txTokenRequest.setRequestedTokenType(ExchangeTokenType.TX_TOKEN.getName());
         txTokenRequest.setAudience("http://trusted2.com");
-        txTokenRequest.setRctx("{\"req_ip\":\"69.151.72.100\"}");
+        txTokenRequest.setRequestContext("{\"req_ip\":\"69.151.72.100\"}");
 
         TokenClient txTokenClient = newTokenClient(txTokenRequest);
         TokenResponse txTokenResponse = txTokenClient.exec();
@@ -113,7 +114,7 @@ public class TxTokenHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "tx token test",
                 io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setGrantTypes(List.of(GrantType.TX_TOKEN, GrantType.CLIENT_CREDENTIALS));
+        registerRequest.setGrantTypes(List.of(GrantType.TOKEN_EXCHANGE, GrantType.CLIENT_CREDENTIALS));
         registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 

@@ -470,8 +470,8 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
 	client := &http.Client{Transport: tr}
 
 	// b, _ := httputil.DumpRequest(req, true)
-	// fmt.Print("REQUEST:\n")
-	// fmt.Printf("%s\n", b)
+	// tflog.Info(ctx, "Request", map[string]any{"req": string(b)})
+	// fmt.Printf("Request:\n%s\n", string(b))
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -479,8 +479,8 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
 	}
 
 	// b, _ = httputil.DumpResponse(resp, true)
-	// fmt.Print("RESPONSE:\n")
-	// fmt.Printf("%s\n", b)
+	// tflog.Info(ctx, "Response", map[string]any{"resp": string(b)})
+	// fmt.Printf("Response:\n%s\n", string(b))
 
 	if resp.StatusCode == 400 {
 		// try to read error message

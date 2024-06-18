@@ -18,6 +18,7 @@ import io.jans.as.server.authorize.ws.rs.AuthzRequest;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.token.TokenEntity;
+import io.jans.util.IdUtil;
 import jakarta.faces.context.ExternalContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -65,6 +66,7 @@ public class ExecutionContext {
 
     private String nonce;
     private String state;
+    private String tokenReferenceId = IdUtil.randomShortUUID();
 
     private boolean includeIdTokenClaims;
 
@@ -156,6 +158,19 @@ public class ExecutionContext {
         executionContext.attributes.putAll(context.attributes);
 
         return executionContext;
+    }
+
+    public String generateRandomTokenReferenceId() {
+        tokenReferenceId = IdUtil.randomShortUUID();
+        return tokenReferenceId;
+    }
+
+    public String getTokenReferenceId() {
+        return tokenReferenceId;
+    }
+
+    public void setTokenReferenceId(String tokenReferenceId) {
+        this.tokenReferenceId = tokenReferenceId;
     }
 
     public ExecutionContext copy() {

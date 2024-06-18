@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
+FROM bellsoft/liberica-openjre-alpine:17.0.11@sha256:7d9240b84e806f9759560536bac1ca545fc31c02465a4b1ca7131def4f4ab130
 
 # ===============
 # Alpine packages
@@ -15,20 +15,33 @@ RUN apk update \
 
 # JAR files required to generate OpenID Connect keys
 
-ENV CN_VERSION=1.1.2-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-24 15:36'
+ENV CN_VERSION=1.1.3-SNAPSHOT
+ENV CN_BUILD_DATE='2024-06-07 15:36'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN mkdir -p /opt/jans/configurator/javalibs \
     && wget -q ${CN_SOURCE_URL} -P /opt/jans/configurator/javalibs/
 
+# ===========
+# Assets sync
+# ===========
+
+ENV JANS_SOURCE_VERSION=a24c0b95a3ee892bccc1882e4f328bab5f35645a
+
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_SOURCE_VERSION} \
+    && git sparse-checkout add jans-pycloudlib
+
 # ======
 # Python
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
+RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
@@ -38,7 +51,7 @@ RUN python3 -m ensurepip \
 # =======
 
 RUN apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* /tmp/jans
 
 # =======
 # License
@@ -109,7 +122,7 @@ ENV CN_WAIT_MAX_TIME=300 \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/configurator" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.2" \
+    org.opencontainers.image.version="1.1.3" \
     org.opencontainers.image.title="Janssen Configuration Manager" \
     org.opencontainers.image.description="Manage config and secret"
 

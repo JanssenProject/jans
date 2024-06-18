@@ -68,6 +68,12 @@ public class IdentityProvider extends Entry implements Serializable {
     @AttributeName(name = "nameIDPolicyFormat")
     private String nameIDPolicyFormat;
     
+    @AttributeName(name = "principalAttribute")
+    private String principalAttribute;
+    
+    @AttributeName(name = "principalType")
+    private String principalType;
+    
     @AttributeName(name = "entityId")
     private String idpEntityId;
     
@@ -81,25 +87,25 @@ public class IdentityProvider extends Entry implements Serializable {
     private String providerId;
 
    @AttributeName
-    protected boolean trustEmail;
+    private boolean trustEmail;
 
     @AttributeName
-    protected boolean storeToken;
+    private boolean storeToken;
 
     @AttributeName
-    protected boolean addReadTokenRoleOnCreate;
+    private boolean addReadTokenRoleOnCreate;
 
     @AttributeName
-    protected boolean authenticateByDefault;
+    private boolean authenticateByDefault;
 
     @AttributeName
-    protected boolean linkOnly;
+    private boolean linkOnly;
 
     @AttributeName
-    protected String firstBrokerLoginFlowAlias;
+    private String firstBrokerLoginFlowAlias;
 
     @AttributeName
-    protected String postBrokerLoginFlowAlias;
+    private String postBrokerLoginFlowAlias;
 
     @AttributeName(name = "jansSAMLspMetaDataFN")
     @Hidden
@@ -184,7 +190,7 @@ public class IdentityProvider extends Entry implements Serializable {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }   
+    }
 
     public String getSigningCertificate() {
         return signingCertificate;
@@ -216,6 +222,22 @@ public class IdentityProvider extends Entry implements Serializable {
 
     public void setNameIDPolicyFormat(String nameIDPolicyFormat) {
         this.nameIDPolicyFormat = nameIDPolicyFormat;
+    }
+
+    public String getPrincipalAttribute() {
+        return principalAttribute;
+    }
+
+    public void setPrincipalAttribute(String principalAttribute) {
+        this.principalAttribute = principalAttribute;
+    }
+
+    public String getPrincipalType() {
+        return principalType;
+    }
+
+    public void setPrincipalType(String principalType) {
+        this.principalType = principalType;
     }
 
     public String getIdpEntityId() {
@@ -384,16 +406,16 @@ public class IdentityProvider extends Entry implements Serializable {
                 + displayName + ", description=" + description + ", realm=" + realm + ", enabled=" + enabled
                 + ", signingCertificate=" + signingCertificate + ", validateSignature=" + validateSignature
                 + ", singleLogoutServiceUrl=" + singleLogoutServiceUrl + ", nameIDPolicyFormat=" + nameIDPolicyFormat
-                + ", idpEntityId=" + idpEntityId + ", singleSignOnServiceUrl=" + singleSignOnServiceUrl
-                + ", encryptionPublicKey=" + encryptionPublicKey + ", providerId=" + providerId + ", trustEmail="
-                + trustEmail + ", storeToken=" + storeToken + ", addReadTokenRoleOnCreate=" + addReadTokenRoleOnCreate
-                + ", authenticateByDefault=" + authenticateByDefault + ", linkOnly=" + linkOnly
-                + ", firstBrokerLoginFlowAlias=" + firstBrokerLoginFlowAlias + ", postBrokerLoginFlowAlias="
-                + postBrokerLoginFlowAlias + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL
-                + ", spMetaDataLocation=" + spMetaDataLocation + ", idpMetaDataFN=" + idpMetaDataFN
-                + ", idpMetaDataURL=" + idpMetaDataURL + ", idpMetaDataLocation=" + idpMetaDataLocation + ", status="
-                + status + ", validationStatus=" + validationStatus + ", validationLog=" + validationLog 
-                + "]";
-    }
+                + ", principalAttribute=" + principalAttribute + ", principalType=" + principalType + ", idpEntityId="
+                + idpEntityId + ", singleSignOnServiceUrl=" + singleSignOnServiceUrl + ", encryptionPublicKey="
+                + encryptionPublicKey + ", providerId=" + providerId + ", trustEmail=" + trustEmail + ", storeToken="
+                + storeToken + ", addReadTokenRoleOnCreate=" + addReadTokenRoleOnCreate + ", authenticateByDefault="
+                + authenticateByDefault + ", linkOnly=" + linkOnly + ", firstBrokerLoginFlowAlias="
+                + firstBrokerLoginFlowAlias + ", postBrokerLoginFlowAlias=" + postBrokerLoginFlowAlias
+                + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL + ", spMetaDataLocation="
+                + spMetaDataLocation + ", idpMetaDataFN=" + idpMetaDataFN + ", idpMetaDataURL=" + idpMetaDataURL
+                + ", idpMetaDataLocation=" + idpMetaDataLocation + ", status=" + status + ", validationStatus="
+                + validationStatus + ", validationLog=" + validationLog + "]";
+    }   
       
 }

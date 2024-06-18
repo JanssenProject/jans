@@ -77,7 +77,7 @@ public class StandaloneCustomScriptManagerTest {
 		sampleIdpExternalScriptService.executeExternalUpdateAttributesMethods(context2);
 
 		// Destroy custom script manager and scripts
-		customScriptManager.destory();
+		customScriptManager.destroy();
 	}
 
 }

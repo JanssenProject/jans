@@ -1,6 +1,6 @@
 FROM quay.io/keycloak/keycloak:24.0.3@sha256:0d71412ed56b5f66f7e922efc0c3ff73b3f54ba2fe84fedb5e281a1f90b95bd6 as kc-src
 
-FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
+FROM bellsoft/liberica-openjre-alpine:17.0.11@sha256:7d9240b84e806f9759560536bac1ca545fc31c02465a4b1ca7131def4f4ab130
 
 # ===============
 # Alpine packages
@@ -23,8 +23,8 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.1.2-SNAPSHOT
-ENV CN_BUILD_DATE='2024-04-24 16:04'
+ENV CN_VERSION=1.1.3-SNAPSHOT
+ENV CN_BUILD_DATE='2024-06-07 16:00'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
@@ -36,20 +36,21 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERS
     && unzip /tmp/kc-authn-deps.zip -d /opt/keycloak/providers \
     && rm -rf /tmp/kc-authn-deps.zip
 
-# =====================
-# jans-linux-setup sync
-# =====================
+# ===========
+# Assets sync
+# ===========
 
-ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
+ENV JANS_SOURCE_VERSION=a24c0b95a3ee892bccc1882e4f328bab5f35645a
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
-RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+# we are using partial-clone and sparse-checkout to get the assets
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout add ${JANS_SETUP_DIR}
+    && git sparse-checkout add ${JANS_SETUP_DIR} \
+    && git sparse-checkout add jans-pycloudlib
 
 RUN mkdir -p /app/static/rdbm \
     /app/schema \
@@ -71,7 +72,8 @@ RUN cd /tmp/jans \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
+RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
@@ -190,7 +192,7 @@ EXPOSE $CN_SAML_HTTP_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.2" \
+    org.opencontainers.image.version="1.1.3" \
     org.opencontainers.image.title="Janssen SAML" \
     org.opencontainers.image.description=""
 

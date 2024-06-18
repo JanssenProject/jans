@@ -24,6 +24,22 @@ func TestAuthConfigMapping(t *testing.T) {
 
 }
 
+func TestAppConfigGet(t *testing.T) {
+	client, err := NewInsecureClient(host, user, pass)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+
+	cfg, err := client.GetAppConfiguration(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Printf("cfg: %+v", cfg)
+}
+
 func TestPatchAuthConfig(t *testing.T) {
 
 	client, err := NewInsecureClient(host, user, pass)

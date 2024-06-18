@@ -38,7 +38,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=1b6bb3e6675db31cc4a62277250a66dd7af95137
+ENV JANS_SOURCE_VERSION=a24c0b95a3ee892bccc1882e4f328bab5f35645a
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -81,11 +81,11 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/monolith" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.2" \
+    org.opencontainers.image.version="1.1.3" \
     org.opencontainers.image.title="Janssen Monolith Image" \
     org.opencontainers.image.description="Janssen Authorization server"
 
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
-CMD ["/bin/bash", "-c", "exec /app/scripts/entrypoint.sh --log-target=journal 3>&1"]
+CMD ["/bin/bash", "-c", "rm -rf /opt/jetty-11.0/temp/*; exec /app/scripts/entrypoint.sh --log-target=journal 3>&1"]

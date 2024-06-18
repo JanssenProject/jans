@@ -87,7 +87,7 @@ class Plugin(DialogUtils):
             if result.lower() == 'yes':
                 self.requested_parties_container.remove_item(kwargs['selected'])
                 self.app.stop_progressing()
-                
+
             return result
 
         asyncio.ensure_future(coroutine())

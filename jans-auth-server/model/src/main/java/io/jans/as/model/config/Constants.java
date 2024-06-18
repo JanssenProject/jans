@@ -56,7 +56,7 @@ public class Constants {
     public static final String SUBJECT_TOKEN_TYPE_ID_TOKEN = "urn:ietf:params:oauth:token-type:id_token";
     public static final String ACTOR_TOKEN_TYPE_DEVICE_SECRET = "urn:x-oath:params:oauth:token-type:device-secret";
     public static final String TOKEN_TYPE_ACCESS_TOKEN = "urn:ietf:params:oauth:token-type:access_token";
-    public static final String TOKEN_TYPE_TX_TOKEN = "urn:ietf:params:oauth:token-type:txn_token";
+    public static final String TOKEN_TYPE_TX_TOKEN = "urn:ietf:params:oauth:token-type:txn-token";
 
     public static final String CONTENT_TYPE_APPLICATION_JSON_UTF_8 = "application/json;charset=UTF-8";
 
