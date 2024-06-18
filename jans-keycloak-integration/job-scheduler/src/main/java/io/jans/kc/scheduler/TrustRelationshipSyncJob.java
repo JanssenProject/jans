@@ -212,14 +212,19 @@ public class TrustRelationshipSyncJob extends RecurringJob {
 
         List<ProtocolMapper> protmappers = releasedattributes.stream().map((r)-> {
             log.debug("Preparing to add released attribute {} to managed saml client with clientId {}",r.getName(),client.clientId());
-            return ProtocolMapper
+            /*return ProtocolMapper
                     .samlUserAttributeMapper(samlUserAttributeMapperId)
                     .name(generateKeycloakUniqueProtocolMapperName(r))
                     .userAttribute(r.getName())
                     .friendlyName(r.getDisplayName()!=null?r.getDisplayName():r.getName())
                     .attributeName(r.getSaml2Uri())
                     .attributeNameFormatUriReference()
-                    .build();
+                    .build(); */
+            return ProtocolMapper
+                   .samlUserAttributeMapper(samlUserAttributeMapperId)
+                   .name(generateKeycloakUniqueProtocolMapperName(r))
+                   .jansAttributeName(r.getName())
+                   .build();
         }).toList();
 
         keycloakApi.addProtocolMappersToManagedSamlClient(realm, client, protmappers);
@@ -228,12 +233,16 @@ public class TrustRelationshipSyncJob extends RecurringJob {
     private void updateManagedSamlClientProtocolMapper(ManagedSamlClient client, ProtocolMapper mapper, JansAttributeRepresentation releasedattribute) {
 
         log.debug("Updating managed client released attribute. Client id: {} / Attribute name: {}",client.clientId(),releasedattribute.getName());
-        ProtocolMapper newmapper = ProtocolMapper
+        /*ProtocolMapper newmapper = ProtocolMapper
             .samlUserAttributeMapper(mapper)
             .userAttribute(releasedattribute.getName())
             .friendlyName(releasedattribute.getDisplayName()!=null?releasedattribute.getDisplayName():releasedattribute.getName())
             .attributeName(releasedattribute.getSaml2Uri())
             .attributeNameFormatUriReference()
+            .build(); */
+        ProtocolMapper newmapper = ProtocolMapper
+            .samlUserAttributeMapper(mapper)
+            .jansAttributeName(releasedattribute.getName())
             .build();
         keycloakApi.updateManagedSamlClientProtocolMapper(realm, client,newmapper);
     }

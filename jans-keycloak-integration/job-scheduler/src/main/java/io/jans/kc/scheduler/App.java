@@ -87,7 +87,7 @@ public class App {
                     Thread.sleep(1000);
                 }
             }
-            log.info("Application shutthing down");
+            log.info("Application shutting down");
         }catch(StartupError e) {
             log.error("Application startup failed",e);
             if(jobScheduler != null) {
