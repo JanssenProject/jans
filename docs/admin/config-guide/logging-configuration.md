@@ -175,3 +175,7 @@ document](./../reference/openapi.md).
 
 On a VM installation, logs for `jans-auth` module are generated at
 `/opt/jans/jetty/jans-auth/logs/`.
+
+## Cloud-Native Deployments
+
+Logging configuration for a cloud-native deployment is [detailed here](../kubernetes-ops/logs.md)
