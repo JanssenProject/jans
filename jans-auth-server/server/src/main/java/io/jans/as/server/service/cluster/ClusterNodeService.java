@@ -6,14 +6,8 @@
 
 package io.jans.as.server.service.cluster;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import org.slf4j.Logger;
-
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.exception.ConfigurationException;
 import io.jans.model.cluster.ClusterNode;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -22,6 +16,13 @@ import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.tika.utils.StringUtils;
+import org.slf4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Yuriy Movchan
@@ -96,7 +97,6 @@ public class ClusterNodeService {
 		if (pagedResult.getEntriesCount() >= 1) {
 			return pagedResult.getEntries().get(0);
 		}
-		
 
 		return null;
 	}
@@ -108,6 +108,9 @@ public class ClusterNodeService {
 	 */
 	public List<ClusterNode> getClusterNodesExpired() {
 		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNode();
+		if (StringUtils.isBlank(clusterNodesBaseDn)) {
+            throw new ConfigurationException("ou=node is not configured in static configuration of AS (jansConfStatic).");
+        }
 		
 		Date expirationDate = new Date(System.currentTimeMillis() + DELAY_AFTER_EXPIRATION);
 		
