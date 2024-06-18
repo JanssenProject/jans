@@ -95,6 +95,13 @@ public class App {
             }
             System.exit(-1);
             return;
+        }catch(Exception e) {
+            log.error("Fatal error starting application",e);
+            if(jobScheduler != null ) {
+                jobScheduler.stop();
+            }
+            System.exit(-1);
+            return;
         }
 
     }
@@ -271,7 +278,7 @@ public class App {
         public void run() {
 
             try {
-                log.debug("Shutting down application");
+                log.info("Shutting down application");
                 if (jobScheduler != null) {
                     jobScheduler.stop();
                 }
