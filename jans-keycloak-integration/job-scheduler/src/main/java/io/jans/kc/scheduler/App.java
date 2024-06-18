@@ -90,7 +90,6 @@ public class App {
             log.info("Application shutting down");
         }catch(StartupError e) {
             log.error("Application startup failed",e);
-            log.info("Application startup failed",e);
             if(jobScheduler != null) {
                 jobScheduler.stop();
             }
@@ -98,7 +97,6 @@ public class App {
             return;
         }catch(Exception e) {
             log.error("Fatal error starting application",e);
-            log.info("Application startup failed",e);
             if(jobScheduler != null ) {
                 jobScheduler.stop();
             }

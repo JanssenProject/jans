@@ -39,7 +39,8 @@ public class QuartzJobWrapper implements Job {
             ExecutionContext effectivecontext = new QuartzExecutionContext(context.getMergedJobDataMap());
             job.run(effectivecontext);
         } catch(ReflectiveOperationException e) {
-            e.printStackTrace();
+            throw new JobExecutionException("Failed to run job " + jobname,e);
+        }catch(Exception e) {
             throw new JobExecutionException("Failed to run job " + jobname,e);
         }
     }
