@@ -152,8 +152,6 @@ where the default method is marked with `x` under the `Default` column.
 
 ### Update Default Authentication Method
 
-![image](../../assets/tui-authn-method-detail.png)
-
 Bring the tab focus to the authentication method that should be the new default
 method. Hit `Enter` to open the dialog as shown above. Using the checkbox for
 `Default Authen Method` the current method can be made the default 
