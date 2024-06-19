@@ -24,6 +24,8 @@ The Janssen Server provides multiple configuration tools to perform these tasks.
 
     See [script documentation](custom-scripts-config.md#update-an-existing-custom-script) to know how to enable/disable custom scripts.
 
+    Also, to understand how Janssen Server picks the authentication method *in absence* of default authentication method, refer to [ACR documentation](../auth-server/openid-features/acrs.md#flowchart---how-the-jans-as-derives-an-acr-value-for-a-user-session-)
+
 === "Use Command-line"
 
     Use the command line to perform actions from the terminal. Learn how to
