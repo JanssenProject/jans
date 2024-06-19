@@ -64,7 +64,7 @@ public class ClusterNodeManager {
 	}
 
 	@Asynchronous
-	public void reloadPoliciesTimerEvent(@Observes @Scheduled TokenPoolUpdateEvent tokenPoolUpdateEvent) {
+	public void reloadNodesTimerEvent(@Observes @Scheduled TokenPoolUpdateEvent tokenPoolUpdateEvent) {
 		if (this.isActive.get()) {
 			return;
 		}
@@ -76,7 +76,7 @@ public class ClusterNodeManager {
 		try {
 			updateClusterNode();
 		} catch (Throwable ex) {
-			log.error("Exception happened while reloading policies", ex);
+			log.error("Exception happened while reloading nodes", ex);
 		} finally {
 			this.isActive.set(false);
 		}

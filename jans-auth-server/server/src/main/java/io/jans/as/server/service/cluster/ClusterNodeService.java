@@ -95,7 +95,7 @@ public class ClusterNodeService {
 	public ClusterNode getClusterNodeLast() {
 		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNode();
 		
-		PagedResult<ClusterNode> pagedResult = entryManager.findPagedEntries(clusterNodesBaseDn, ClusterNode.class, Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH), null, "jansNum", SortOrder.DESCENDING, 1, 1, 1);
+		PagedResult<ClusterNode> pagedResult = entryManager.findPagedEntries(clusterNodesBaseDn, ClusterNode.class, Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH), null, "jansNum", SortOrder.DESCENDING, 0, 1, 1);
 		if (pagedResult.getEntriesCount() >= 1) {
 			return pagedResult.getEntries().get(0);
 		}
@@ -131,8 +131,11 @@ public class ClusterNodeService {
 	}
 
 	public ClusterNode allocate() {
+        log.debug("Allocation ... ");
+
 		// Try to use existing expired entry
 		List<ClusterNode> clusterNodes = getClusterNodesExpired();
+        log.debug("Allocation - found {} expired nodes.", clusterNodes.size());
 		
 		for (ClusterNode clusterNode : clusterNodes) {
 			// Attempt to set random value in lockKey
@@ -151,6 +154,8 @@ public class ClusterNodeService {
 				    log.debug("Re-using existing node {}", lockedClusterNode.getId());
 					return reset(clusterNode);
 				}
+
+                log.debug("Failed to lock node {}", lockedClusterNode.getId());
 			} catch (EntryPersistenceException ex) {
 				log.debug("Unexpected error happened during entry lock", ex);
 			}
@@ -162,6 +167,7 @@ public class ClusterNodeService {
             log.debug("Attempting to persist new token list. Attempt {} out of {} ...", attempt, ATTEMPT_LIMIT);
 
 			ClusterNode lastClusterNode = getClusterNodeLast();
+			log.debug("lastClusterNode - {}", lastClusterNode != null ? lastClusterNode.getId() : -1);
 
 			Integer lastClusterNodeIndex = lastClusterNode == null ? 0 : lastClusterNode.getId() + 1;
 
