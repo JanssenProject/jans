@@ -56,10 +56,10 @@ public class ClusterNodeManager {
 	public void initTimer() {
 		log.debug("Initializing Policy Download Service Timer");
 
-		final int delay = 30;
-		final int interval = 30;
+		final int delayInSeconds = 30;
+		final int intervalInSeconds = 30;
 
-		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new TokenPoolUpdateEvent(),
+		timerEvent.fire(new TimerEvent(new TimerSchedule(delayInSeconds, intervalInSeconds), new TokenPoolUpdateEvent(),
 				Scheduled.Literal.INSTANCE));
 	}
 

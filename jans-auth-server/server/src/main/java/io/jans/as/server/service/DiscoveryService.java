@@ -40,28 +40,28 @@ public class DiscoveryService {
     private Logger log;
 
     @Inject
-    private transient AppConfiguration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @Inject
-    private transient ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
+    private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
 
     @Inject
-    private transient CIBAConfigurationService cibaConfigurationService;
+    private CIBAConfigurationService cibaConfigurationService;
 
     @Inject
-    private transient LocalResponseCache localResponseCache;
+    private LocalResponseCache localResponseCache;
 
     @Inject
-    private transient ExternalAuthenticationService externalAuthenticationService;
+    private ExternalAuthenticationService externalAuthenticationService;
 
     @Inject
-    private transient ExternalDynamicScopeService externalDynamicScopeService;
+    private ExternalDynamicScopeService externalDynamicScopeService;
 
     @Inject
-    private transient ScopeService scopeService;
+    private ScopeService scopeService;
 
     @Inject
-    private transient AttributeService attributeService;
+    private AttributeService attributeService;
 
     public JSONObject process() {
         JSONObject jsonObj = new JSONObject();

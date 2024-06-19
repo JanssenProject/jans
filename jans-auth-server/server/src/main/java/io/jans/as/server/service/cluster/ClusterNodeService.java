@@ -17,6 +17,7 @@ import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.tika.utils.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -33,8 +34,11 @@ public class ClusterNodeService {
 
     public static final int ATTEMPT_LIMIT = 10;
 
-    public static final long DELAY_AFTER_EXPIRATION = 3 * 60 * 1000; // 3 minutes
-	public static final String CLUSTER_TYPE_JANS_AUTH = "jans-auth";
+    public static final long DELAY_AFTER_EXPIRATION = 3 * 60 * 1000L; // 3 minutes
+    public static final String CLUSTER_TYPE_JANS_AUTH = "jans-auth";
+    public static final String JANS_TYPE_ATTR_NAME = "jansType";
+
+    public static final String lockKey = UUID.randomUUID().toString();
 
 	@Inject
 	private Logger log;
@@ -71,8 +75,8 @@ public class ClusterNodeService {
 	public List<ClusterNode> getAllClusterNodes() {
 		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNode();
 
-		return entryManager.findEntries(clusterNodesBaseDn, ClusterNode.class, Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH));
-	}
+        return entryManager.findEntries(clusterNodesBaseDn, ClusterNode.class, getTypeFilter());
+    }
 
 	public List<String> getClusterNodesDns(List<Integer> nodeIds) {
 		List<String> clusterNodesDns = new ArrayList<>();
@@ -94,11 +98,11 @@ public class ClusterNodeService {
 	 */
 	public ClusterNode getClusterNodeLast() {
 		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNode();
-		
-		PagedResult<ClusterNode> pagedResult = entryManager.findPagedEntries(clusterNodesBaseDn, ClusterNode.class, Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH), null, "jansNum", SortOrder.DESCENDING, 0, 1, 1);
-		if (pagedResult.getEntriesCount() >= 1) {
-			return pagedResult.getEntries().get(0);
-		}
+
+        PagedResult<ClusterNode> pagedResult = entryManager.findPagedEntries(clusterNodesBaseDn, ClusterNode.class, getTypeFilter(), null, "jansNum", SortOrder.DESCENDING, 0, 1, 1);
+        if (pagedResult.getEntriesCount() >= 1) {
+            return pagedResult.getEntries().get(0);
+        }
 
 		return null;
 	}
@@ -113,14 +117,19 @@ public class ClusterNodeService {
 		if (StringUtils.isBlank(clusterNodesBaseDn)) {
             throw new ConfigurationException("ou=node is not configured in static configuration of AS (jansConfStatic).");
         }
-		
-		Date expirationDate = new Date(System.currentTimeMillis() + DELAY_AFTER_EXPIRATION);
-		
-		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH),
-				Filter.createGreaterOrEqualFilter("jansLastUpd", entryManager.encodeTime(clusterNodesBaseDn, expirationDate)));
+
+        Date expirationDate = new Date(System.currentTimeMillis() + DELAY_AFTER_EXPIRATION);
+
+        Filter filter = Filter.createANDFilter(getTypeFilter(),
+                Filter.createGreaterOrEqualFilter("jansLastUpd", entryManager.encodeTime(clusterNodesBaseDn, expirationDate)));
 
 		return entryManager.findEntries(clusterNodesBaseDn, ClusterNode.class, filter);
 	}
+
+    @NotNull
+    private Filter getTypeFilter() {
+        return Filter.createEqualityFilter(JANS_TYPE_ATTR_NAME, CLUSTER_TYPE_JANS_AUTH);
+    }
 
 	protected void persist(ClusterNode clusterNode) {
 		entryManager.persist(clusterNode);
@@ -131,86 +140,86 @@ public class ClusterNodeService {
 	}
 
 	public ClusterNode allocate() {
-        log.debug("Allocation ... ");
+        log.debug("Allocation, lockKey {}... ", lockKey);
 
-		// Try to use existing expired entry
-		List<ClusterNode> clusterNodes = getClusterNodesExpired();
-        log.debug("Allocation - found {} expired nodes.", clusterNodes.size());
-		
-		for (ClusterNode clusterNode : clusterNodes) {
-			// Attempt to set random value in lockKey
-			String lockKey = UUID.randomUUID().toString();
-			clusterNode.setLockKey(lockKey);
-			
-			// Do lock operation in try/catch for safety and do not throw error to upper levels 
+		// Try to use existing expired entry (node is expired if not used for 3 minutes)
+		List<ClusterNode> expiredNodes = getClusterNodesExpired();
+        log.debug("Allocation - found {} expired nodes.", expiredNodes.size());
+
+		for (ClusterNode expiredNode : expiredNodes) {
+			// Do lock operation in try/catch for safety and do not throw error to upper levels
 			try {
-				update(clusterNode);
-				
+                Date currentTime = new Date();
+
+                expiredNode.setCreationDate(currentTime);
+                expiredNode.setLastUpdate(currentTime);
+                expiredNode.setLockKey(lockKey);
+
+				update(expiredNode);
+
 				// Load node after update
-				ClusterNode lockedClusterNode = getClusterNodeByDn(clusterNode.getDn());
-				
+				ClusterNode lockedNode = getClusterNodeByDn(expiredNode.getDn());
+
 				// If lock is ours reset entry and return it
-				if (lockKey.equals(lockedClusterNode.getLockKey())) {
-				    log.debug("Re-using existing node {}", lockedClusterNode.getId());
-					return reset(clusterNode);
+				if (lockKey.equals(lockedNode.getLockKey())) {
+				    log.debug("Re-using existing node {}, lockKey {}", lockedNode.getId(), lockKey);
+					return lockedNode;
 				}
 
-                log.debug("Failed to lock node {}", lockedClusterNode.getId());
+                log.debug("Failed to lock node {}, lockKey {}", lockedNode.getId(), lockKey);
 			} catch (EntryPersistenceException ex) {
 				log.debug("Unexpected error happened during entry lock", ex);
 			}
 		}
-		
+
 		// There are no free entries. server need to add new one with next index
 		int attempt  = 1;
 		do {
-            log.debug("Attempting to persist new token list. Attempt {} out of {} ...", attempt, ATTEMPT_LIMIT);
+            log.debug("Attempting to persist new node. Attempt {} out of {} ...", attempt, ATTEMPT_LIMIT);
 
 			ClusterNode lastClusterNode = getClusterNodeLast();
-			log.debug("lastClusterNode - {}", lastClusterNode != null ? lastClusterNode.getId() : -1);
+			log.debug("lastClusterNode - {}, lockKey {}", lastClusterNode != null ? lastClusterNode.getId() : -1, lockKey);
 
 			Integer lastClusterNodeIndex = lastClusterNode == null ? 0 : lastClusterNode.getId() + 1;
 
 			Date currentTime = new Date();
-			ClusterNode clusterNode = new ClusterNode();
-			clusterNode.setId(lastClusterNodeIndex);
-			clusterNode.setDn(getDnForClusterNode(lastClusterNodeIndex));
-			clusterNode.setCreationDate(currentTime);
-			clusterNode.setLastUpdate(currentTime);
-			clusterNode.setType(CLUSTER_TYPE_JANS_AUTH);
 
-			// Attempt to set random value in lockKey
-			String lockKey = UUID.randomUUID().toString();
-			clusterNode.setLockKey(lockKey);
+			ClusterNode node = new ClusterNode();
+			node.setId(lastClusterNodeIndex);
+			node.setDn(getDnForClusterNode(lastClusterNodeIndex));
+			node.setCreationDate(currentTime);
+			node.setLastUpdate(currentTime);
+			node.setType(CLUSTER_TYPE_JANS_AUTH);
+			node.setLockKey(lockKey);
 
 			// Do persist operation in try/catch for safety and do not throw error to upper levels
 			try {
-				persist(clusterNode);
+				persist(node);
 
 				// Load node after update
-				ClusterNode lockedClusterNode = getClusterNodeByDn(clusterNode.getDn());
+				ClusterNode lockedNode = getClusterNodeByDn(node.getDn());
 
 				// if lock is ours return it
-				if (lockKey.equals(lockedClusterNode.getLockKey())) {
-				    log.debug("Successfully create new cluster node {}", clusterNode.getId());
-					return reset(clusterNode);
+				if (lockKey.equals(lockedNode.getLockKey())) {
+				    log.debug("Successfully create new cluster node {}, lockKey {}", node.getId(), lockKey);
+					return node;
 				}
 			} catch (EntryPersistenceException ex) {
-				log.debug("Unexpected error happened during entry lock", ex);
+				log.debug("Unexpected error happened during entry lock, lockKey " + lockKey, ex);
 			}
 
             attempt++;
 		} while (attempt <= ATTEMPT_LIMIT);
 
-		// This should not happens
-		throw new EntryPersistenceException("Failed to allocate ClusterNode!!!");
+		// This should not happen
+		throw new EntryPersistenceException("Failed to allocate ClusterNode!!! lockKey: " + lockKey);
 	}
 
 	public void release(ClusterNode clusterNode) {
 		clusterNode.setLastUpdate(null);
 		clusterNode.setCreationDate(null);
 		clusterNode.setLockKey(null);
-		
+
 		update(clusterNode);
 	}
 
@@ -224,10 +233,9 @@ public class ClusterNodeService {
 		Date currentTime = new Date();
 		clusterNode.setCreationDate(currentTime);
 		clusterNode.setLastUpdate(currentTime);
-		clusterNode.setLockKey(null);
-		
+
 		update(clusterNode);
-		
+
 		return clusterNode;
 	}
 
