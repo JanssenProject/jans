@@ -164,7 +164,7 @@ parser.add_argument("--op-mode", choices=['get', 'post', 'put', 'patch', 'delete
 parser.add_argument("--endpoint-args",
                     help="Arguments to pass endpoint separated by comma. For example limit:5,status:INACTIVE")
 
-parser.add_argument("--schema", help="Get sample json schema")
+parser.add_argument("--schema-sample", help="Get sample json schema template")
 
 parser.add_argument("-CC", "--config-api-mtls-client-cert", help="Path to SSL Certificate file")
 parser.add_argument("-CK", "--config-api-mtls-client-key", help="Path to SSL Key file")
@@ -1102,7 +1102,7 @@ class JCA_CLI:
             schema_path_string = '{}{}'.format(mode_suffix, os.path.basename(schema_path))
             if ' ' in schema_path_string:
                 schema_path_string = '\"{}\"'.format(schema_path_string)
-            print("To get sample schema type {0}{2} --schema <schema>, for example {0}{2} --schema {1}".format(sys.argv[0], schema_path_string, scim_arg))
+            print("To get sample schema type {0}{2} --schema-sample <schema>, for example {0}{2} --schema-sample {1}".format(sys.argv[0], schema_path_string, scim_arg))
 
     def render_json_entry(self, val):
         if isinstance(val, str) and val.startswith('_file '):
