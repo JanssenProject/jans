@@ -1452,32 +1452,39 @@ class JCA_CLI:
             return
 
         sample_schema = OrderedDict()
-        for prop_name in schema.get('properties', {}):
-            prop = schema['properties'][prop_name]
+
+        def get_sample_prop(prop):
             if 'default' in prop:
-                sample_schema[prop_name] = prop['default']
+                return prop['default']
             elif 'example' in prop:
-                sample_schema[prop_name] = prop['example']
+                return prop['example']
             elif 'enum' in prop:
-                sample_schema[prop_name] = random.choice(prop['enum'])
+                return random.choice(prop['enum'])
             elif prop.get('type') == 'object':
-                sample_schema[prop_name] = prop.get('properties', {})
+                sub_prop = OrderedDict()
+                for sp in prop.get('properties', {}):
+                    sub_prop[sp] = get_sample_prop(prop['properties'][sp])
+                return sub_prop
             elif prop.get('type') == 'array':
                 if 'items' in prop:
                     if 'enum' in prop['items']:
-                        sample_schema[prop_name] = [random.choice(prop['items']['enum'])]
+                        return [random.choice(prop['items']['enum'])]
                     elif 'type' in prop['items']:
-                        sample_schema[prop_name] = [prop['items']['type']]
+                        return [prop['items']['type']]
                 else:
-                    sample_schema[prop_name] = []
+                    return []
             elif prop.get('type') == 'boolean':
-                sample_schema[prop_name] = random.choice((True, False))
+                return random.choice((True, False))
             elif prop.get('type') == 'integer':
-                sample_schema[prop_name] = random.randint(1,200)
+                return random.randint(1,200)
             elif prop.get('type') == 'string' and prop.get('format') == 'binary':
-                sample_schema[prop_name] = file_data_type
+                return file_data_type
             else:
-                sample_schema[prop_name]='string'
+                return 'string'
+
+        for prop_name in schema.get('properties', {}):
+            prop = schema['properties'][prop_name]
+            sample_schema[prop_name] = get_sample_prop(prop)
 
         print(json.dumps(sample_schema, indent=2))
 
@@ -1527,8 +1534,8 @@ def main():
 
         if args.info:
             cli_object.help_for(args.info)
-        elif args.schema:
-            cli_object.get_sample_schema(args.schema)
+        elif args.schema_sample:
+            cli_object.get_sample_schema(args.schema_sample)
         elif args.operation_id:
             cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
         elif args.output_access_token:
