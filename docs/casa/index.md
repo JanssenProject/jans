@@ -50,7 +50,7 @@ Besides a comprehensive graphical [admin console](./administration/admin-console
 
 Casa is a plugin-oriented, Java web application. Existing functionality can be extended and new functionality and APIs can be introduced through plugins. Currently, there are plugins available for the following:
 
-- [Accounts linking](./plugins/accts-linking/index.md)
+- [Accounts linking](./plugins/accts-linking/account-linking-index.md)
 - [Consent management](./plugins/consent-management.md) 
 - [Custom branding](./plugins/custom-branding.md)  
 - [2FA settings](./plugins/2fa-settings.md)
