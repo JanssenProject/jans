@@ -6,10 +6,6 @@
 
 package io.jans.as.server.service.cluster;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.slf4j.Logger;
-
 import io.jans.as.server.service.cdi.event.TokenPoolUpdateEvent;
 import io.jans.model.cluster.ClusterNode;
 import io.jans.service.cdi.async.Asynchronous;
@@ -23,13 +19,16 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
+import org.slf4j.Logger;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Movchan
  * @version 1.0, 06/03/2024
  */
 @ApplicationScoped
-public class ClusterManager {
+public class ClusterNodeManager {
 
 	@Inject
 	private Logger log;

@@ -31,8 +31,10 @@ import java.util.UUID;
 @ApplicationScoped
 public class ClusterNodeService {
 
-	public static long DELAY_AFTER_EXPIRATION = 3 * 60 * 1000; // 3 minutes
-	public static String CLUSTER_TYPE_JANS_AUTH = "jans-auth";
+    public static final int ATTEMPT_LIMIT = 10;
+
+    public static final long DELAY_AFTER_EXPIRATION = 3 * 60 * 1000; // 3 minutes
+	public static final String CLUSTER_TYPE_JANS_AUTH = "jans-auth";
 
 	@Inject
 	private Logger log;
@@ -146,16 +148,19 @@ public class ClusterNodeService {
 				
 				// If lock is ours reset entry and return it
 				if (lockKey.equals(lockedClusterNode.getLockKey())) {
+				    log.debug("Re-using existing node {}", lockedClusterNode.getId());
 					return reset(clusterNode);
 				}
 			} catch (EntryPersistenceException ex) {
-				log.trace("Unexpected error happened during entry lock", ex);
+				log.debug("Unexpected error happened during entry lock", ex);
 			}
 		}
 		
 		// There are no free entries. server need to add new one with next index
-		int maxSteps  = 10;
+		int attempt  = 1;
 		do {
+            log.debug("Attempting to persist new token list. Attempt {} out of {} ...", attempt, ATTEMPT_LIMIT);
+
 			ClusterNode lastClusterNode = getClusterNodeLast();
 
 			Integer lastClusterNodeIndex = lastClusterNode == null ? 0 : lastClusterNode.getId() + 1;
@@ -181,14 +186,15 @@ public class ClusterNodeService {
 
 				// if lock is ours return it
 				if (lockKey.equals(lockedClusterNode.getLockKey())) {
+				    log.debug("Successfully create new cluster node {}", clusterNode.getId());
 					return reset(clusterNode);
 				}
-
 			} catch (EntryPersistenceException ex) {
-				log.trace("Unexpected error happened during entry lock", ex);
+				log.debug("Unexpected error happened during entry lock", ex);
 			}
-			log.debug("Attempting to persist new token list. Attempt before fail: '{}'", maxSteps);
-		} while (maxSteps >= 0);		
+
+            attempt++;
+		} while (attempt <= ATTEMPT_LIMIT);
 
 		// This should not happens
 		throw new EntryPersistenceException("Failed to allocate ClusterNode!!!");

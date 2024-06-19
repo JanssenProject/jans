@@ -1,7 +1,7 @@
 package io.jans.as.server.service.token;
 
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.service.cluster.ClusterManager;
+import io.jans.as.server.service.cluster.ClusterNodeManager;
 import io.jans.as.server.service.cluster.StatusTokenPoolService;
 import io.jans.model.token.StatusTokenPool;
 import io.jans.model.tokenstatus.StatusList;
@@ -33,7 +33,7 @@ public class StatusListIndexService {
     private AppConfiguration appConfiguration;
 
 	@Inject
-	private ClusterManager clusterManager;
+	private ClusterNodeManager clusterManager;
 
     private final ReentrantLock allocatedLock = new ReentrantLock();
 	
