@@ -129,7 +129,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         executionContext.initFromGrantIfNeeded(this);
 
         Integer statusListIndex = null;
-        if (errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.TOKEN_STATUS_LIST)) {
+        if (errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.STATUS_LIST)) {
             statusListIndex = statusListIndexService.next();
             executionContext.setStatusListIndex(statusListIndex);
         }
@@ -224,7 +224,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             final AccessToken accessToken = super.createAccessToken(context);
 
             Integer statusListIndex = null;
-            if (errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.TOKEN_STATUS_LIST)) {
+            if (errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.STATUS_LIST)) {
                 statusListIndex = statusListIndexService.next();
                 context.setStatusListIndex(statusListIndex);
                 accessToken.setStatusListIndex(statusListIndex);

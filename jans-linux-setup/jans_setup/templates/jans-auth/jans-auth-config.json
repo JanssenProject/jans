@@ -19,7 +19,8 @@
       "stat",
       "par",
       "ssa",
-      "global_token_revocation"
+      "global_token_revocation",
+      "status_list"
     ],
     "issuer":"https://%(hostname)s",
     "baseEndpoint":"https://%(hostname)s/jans-auth/restv1",

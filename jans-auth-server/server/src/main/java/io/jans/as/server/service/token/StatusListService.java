@@ -57,7 +57,7 @@ public class StatusListService {
     public Response requestStatusList(String acceptHeader) {
         log.debug("Attempting to request token_status_list, acceptHeader: {} ...", acceptHeader);
 
-        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.TOKEN_STATUS_LIST);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.STATUS_LIST);
 
         try {
             final List<StatusTokenPool> pools = statusTokenPoolService.getAllTokenPools();
@@ -114,8 +114,8 @@ public class StatusListService {
     }
 
     public void addStatusClaimWithIndex(JsonWebResponse jwr, ExecutionContext executionContext) {
-        if (!errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.TOKEN_STATUS_LIST)) {
-            log.trace("Skipped status claim addition because {} feature flag is disabled.", FeatureFlagType.TOKEN_STATUS_LIST.getValue());
+        if (!errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.STATUS_LIST)) {
+            log.trace("Skipped status claim addition because {} feature flag is disabled.", FeatureFlagType.STATUS_LIST.getValue());
             return;
         }
 
