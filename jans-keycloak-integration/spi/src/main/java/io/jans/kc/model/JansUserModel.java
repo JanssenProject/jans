@@ -9,12 +9,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.keycloak.component.ComponentModel;
+
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.GroupModel;
+import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.RoleModel;
 import org.keycloak.models.SubjectCredentialManager;
 import org.keycloak.storage.ReadOnlyException;
+import org.keycloak.storage.StorageId;
+
+import org.jboss.logging.Logger;
 
 public class JansUserModel implements UserModel {
     
@@ -25,17 +31,27 @@ public class JansUserModel implements UserModel {
     private static final String GIVEN_NAME_ATTR_NAME = "givenName";
     private static final String MAIL_ATTR_NAME = "mail";
     private static final String EMAIL_VERIFIED_ATTR_NAME = "emailVerified";
+
+    private static final Logger log = Logger.getLogger(JansUserModel.class);
+
     private final JansPerson jansPerson;
+    private final StorageId storageId;
+    private final ComponentModel storageProviderModel;
+    private final KeycloakSession session;
 
-    public JansUserModel(final JansPerson jansPerson) {
+    public JansUserModel(KeycloakSession session, ComponentModel storageProviderModel, JansPerson jansPerson) {
 
+        this.session = session;
+        this.storageProviderModel = storageProviderModel;
         this.jansPerson = jansPerson;
+        String userId = jansPerson.customAttributeValue(INUM_ATTR_NAME);
+        this.storageId = new StorageId(storageProviderModel.getId(),userId);
     }
 
     @Override
     public String getId() {
         
-        return jansPerson.customAttributeValue(INUM_ATTR_NAME);
+        return storageId.getId();
     }
 
     @Override

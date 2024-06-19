@@ -3,7 +3,6 @@ package io.jans.kc.spi.custom.impl;
 import java.util.List;
 
 import io.jans.kc.model.JansUserAttributeModel;
-import io.jans.kc.model.JansUserModel;
 import io.jans.kc.model.internal.JansPerson;
 import io.jans.kc.spi.custom.JansThinBridgeProvider;
 import io.jans.kc.spi.custom.JansThinBridgeInitException;
@@ -72,45 +71,51 @@ public class DefaultJansThinBridgeProvider implements JansThinBridgeProvider {
     }
 
     @Override
-    public JansUserModel getUserByUsername(final String username) {
+    public JansPerson getJansUserByUsername(final String username) {
 
         try {
             final Filter uidSearchFilter = Filter.createEqualityFilter(UID_ATTR_NAME,username);
             final JansPerson person = findPerson(uidSearchFilter,defaultUserReturnAttributes);
             if(person == null) {
+                log.debugv("User with uid {0} not found in janssen",username);
                 return null;
             }
-            return new JansUserModel(person);
+            log.debugv("User with uid {0} was found in janssen",username);
+            return person;
         }catch(Exception e) {
             throw new JansThinBridgeOperationException("Error fetching jans user with username " + username,e);
         }
     }
 
     @Override
-    public JansUserModel getUserByEmail(final String email) {
+    public JansPerson getJansUserByEmail(final String email) {
 
         try {
             final Filter mailSearchFilter = Filter.createEqualityFilter(MAIL_ATTR_NAME, email);
             final JansPerson person = findPerson(mailSearchFilter,defaultUserReturnAttributes);
             if(person == null) {
+                log.debugv("User with email {0} not found in janssen",email);
                 return null;
             }
-            return new JansUserModel(person);
+            log.debugv("User with email {0} was found in janssen",email);
+            return person;
         }catch(Exception e) {
             throw new JansThinBridgeOperationException("Error fetching jans user with email " + email ,e);
         }
     }
 
     @Override
-    public JansUserModel getUserByInum(final String inum) {
+    public JansPerson getJansUserByInum(final String inum) {
 
         try {
             final Filter inumSearchFilter = Filter.createEqualityFilter(INUM_ATTR_NAME,inum);
             final JansPerson person = findPerson(inumSearchFilter,defaultUserReturnAttributes);
             if(person == null) {
+                log.debugv("User with inum not found in janssen",inum);
                 return null;
             }
-            return new JansUserModel(person);
+            log.debugv("User with inum {0} found in janssen",inum);
+            return person;
         }catch(Exception e) {
             throw new JansThinBridgeOperationException("Error fetching jans user with inum "+inum,e);
         }

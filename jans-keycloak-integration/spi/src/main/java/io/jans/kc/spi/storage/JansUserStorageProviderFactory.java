@@ -8,15 +8,17 @@ import io.jans.kc.spi.ProviderIDs;
 import io.jans.kc.spi.JansSpiInitException;
 import io.jans.kc.spi.custom.JansThinBridgeProvider;
 
+import org.jboss.logging.Logger;
+
 public class JansUserStorageProviderFactory implements UserStorageProviderFactory<JansUserStorageProvider> {
     
 
     private static final String PROVIDER_ID = ProviderIDs.JANS_USER_STORAGE_PROVIDER;
+    private static final Logger log = Logger.getLogger(JansUserStorageProviderFactory.class);
 
     @Override
     public String getId() {
 
-        //TODO implement this
         return PROVIDER_ID;
     }
 
@@ -27,6 +29,6 @@ public class JansUserStorageProviderFactory implements UserStorageProviderFactor
         if(jansThinBridgeProvider == null) {
             throw new JansSpiInitException("Could not obtain reference to thin bridge provider");
         }
-        return new JansUserStorageProvider(jansThinBridgeProvider);
+        return new JansUserStorageProvider(session,model,jansThinBridgeProvider);
     }
 }
