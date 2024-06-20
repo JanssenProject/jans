@@ -165,6 +165,7 @@ parser.add_argument("--endpoint-args",
                     help="Arguments to pass endpoint separated by comma. For example limit:5,status:INACTIVE")
 
 parser.add_argument("--schema-sample", help="Get sample json schema template")
+parser.add_argument("--schema", help="Get the operation schema which describes all the keys of the schema and its values in detail.")
 
 parser.add_argument("-CC", "--config-api-mtls-client-cert", help="Path to SSL Certificate file")
 parser.add_argument("-CK", "--config-api-mtls-client-key", help="Path to SSL Key file")
@@ -1434,9 +1435,7 @@ class JCA_CLI:
 
         return schema_
 
-
-    def get_sample_schema(self, schema_name):
-
+    def get_schema_dict(self, schema_name):
         if ':' in schema_name:
             plugin_name, schema_str = schema_name.split(':')
         else:
@@ -1450,6 +1449,14 @@ class JCA_CLI:
         if schema is None:
             print(self.colored_text("Schema not found.", error_color))
             return
+
+        return schema
+
+    def get_sample_schema(self, schema_name):
+
+        schema = self.get_schema_dict(schema_name)
+        if not schema:
+            sys.exit()
 
         sample_schema = OrderedDict()
 
@@ -1488,6 +1495,59 @@ class JCA_CLI:
 
         print(json.dumps(sample_schema, indent=2))
 
+    def get_schema(self, schema_name):
+
+        schema = self.get_schema_dict(schema_name)
+        if not schema:
+            sys.exit()
+
+        print_list = []
+        def get_prop_def(prop_name, prop):
+            propl = [prop_name]
+            ptype = prop.get('type', '__NA__')
+            enum = None
+            if ptype == 'array' and 'items' in prop:
+                if 'type' in prop['items']:
+                    ptype += ' of ' + prop['items']['type']
+                if 'enum' in prop['items']:
+                    enum = 'enum: ' + str(prop['items']['enum'])
+            pprop = [ptype]
+            if enum:
+                pprop.append(enum)
+
+            for props in prop:
+                if props in ('type', 'properties', 'items', 'title', '__schema_name__'):
+                    continue
+                pprop.append(props+': ' + str(prop[props]))
+
+            if ptype == 'object':
+                for sub_prop_name in prop.get('properties', {}):
+                    pprop.append(get_prop_def(sub_prop_name, prop['properties'][sub_prop_name]))
+
+
+            propl.append(pprop)
+
+            return propl
+
+        for prop_name in schema.get('properties', {}):
+            prop_def = get_prop_def(prop_name, schema['properties'][prop_name])
+            print_list.append(prop_def)
+
+        max_title_len = 0
+        for p in print_list:
+            len_= len(p[0]) 
+            if len_ > max_title_len:
+                max_title_len = len_
+        required = schema.get('required', [])
+        for pname, pprop in print_list:
+            if pname in required:
+                pname += '*'
+            print(pname.ljust(max_title_len+2), pprop[0])
+            for p in pprop[1:]:
+                if isinstance(p, list):
+                    print(' ' *(max_title_len+4), p[0]+':', p[1][0])
+                else:
+                    print(' ' *(max_title_len+2), p)
 
     def unescaped_split(self, s, delimeter, escape_char='\\'):
         ret_val = []
@@ -1536,6 +1596,8 @@ def main():
             cli_object.help_for(args.info)
         elif args.schema_sample:
             cli_object.get_sample_schema(args.schema_sample)
+        elif args.schema:
+            cli_object.get_schema(args.schema)
         elif args.operation_id:
             cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
         elif args.output_access_token:
