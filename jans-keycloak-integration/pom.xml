@@ -59,7 +59,6 @@
     <modules>
       <module>authenticator</module>
       <module>storage-spi</module>
-      <module>job-scheduler</module>
       <module>spi</module>
     </modules>
 
