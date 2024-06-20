@@ -280,7 +280,8 @@ class Config:
 
         self.jansScriptFiles = [
                             os.path.join(self.install_dir, 'static/scripts/logmanager.sh'),
-                            os.path.join(self.install_dir, 'static/scripts/testBind.py')
+                            os.path.join(self.install_dir, 'static/scripts/testBind.py'),
+                            os.path.join(self.install_dir, 'static/scripts/jans'),
                             ]
 
         self.redhat_services = ['httpd', 'rsyslog']

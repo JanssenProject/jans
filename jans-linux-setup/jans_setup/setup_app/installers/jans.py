@@ -315,6 +315,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         for script in Config.jansScriptFiles:
             self.copyFile(script, Config.jansOptBinFolder)
+            self.run([paths.cmd_chmod, '+x', script])
 
         self.logIt("Rendering encode.py")
         encode_script = self.readFile(os.path.join(Config.templateFolder, 'encode.py'))
