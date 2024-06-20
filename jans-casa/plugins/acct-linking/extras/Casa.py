@@ -1,5 +1,6 @@
 
 from io.jans.agama.model import Flow
+from io.jans.as.model.util import Base64Util
 from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService
@@ -18,9 +19,9 @@ from io.jans.service import CacheService
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
-from java.lang import Integer
+from java.lang import Integer, String
 from java.util import Collections, HashMap, HashSet, ArrayList, Arrays, Date
-from java.nio.charset import Charset
+from java.nio.charset import StandardCharsets
 from java.net import URLEncoder
 
 from org.apache.http.params import CoreConnectionPNames
@@ -652,7 +653,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         return None
 
                     response_bytes = httpService.getResponseContent(http_response)
-                    response_string = httpService.convertEntityToString(response_bytes, Charset.forName("UTF-8"))
+                    response_string = httpService.convertEntityToString(response_bytes, StandardCharsets.UTF_8)
                     httpService.consume(http_response)
                 finally:
                     http_service_response.closeConnection()
@@ -687,21 +688,17 @@ class PersonAuthentication(PersonAuthenticationType):
             
             params = ["response_type", "client_id", "scope", "redirect_uri", "state"]
             attrs = CdiUtil.bean(Identity).getSessionId().getSessionAttributes()
-            
+
+            # set the provider to use
+            flowParams = { "providerId" : providerId }
+            flowParams = Base64Util.base64urlencode(String(json.dumps(flowParams)).getBytes(StandardCharsets.UTF_8))
+
             authzParams = {}
-            # use passport-* instead of casa
-            authzParams["acr_values"] = "agama"
-
-            # set the provider to use            
-            flowParams = URLEncoder.encode(json.dumps({ "providerId" : providerId }))        
-            authzParams["agama_flow"] = self.agamaFQN + "-" + flowParams
-
-            # avoids flow updating the profile of user if he has been provisioned previously
-            authzParams["skipProfileUpdate"] = "true"
+            authzParams["acr_values"] = "agama_" + self.agamaFQN + "-" + flowParams
             
             # copy the params in the current casa request
             for param in params:
-                authzParams[param] = URLEncoder.encode(attrs.get(param), "UTF-8")
+                authzParams[param] = URLEncoder.encode(attrs.get(param), StandardCharsets.UTF_8)
         
             url = "/jans-auth/restv1/authorize?"
             for param in authzParams:
