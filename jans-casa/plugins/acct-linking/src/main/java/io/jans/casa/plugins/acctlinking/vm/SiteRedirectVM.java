@@ -3,6 +3,7 @@ package io.jans.casa.plugins.acctlinking.vm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import io.jans.as.model.util.Base64Util;
 import io.jans.casa.conf.OIDCClientSettings;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.misc.WebUtils;
@@ -27,6 +28,8 @@ import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventQueues;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SiteRedirectVM {
 
@@ -142,8 +145,7 @@ public class SiteRedirectVM {
         Map<String, String> custMap = new HashMap<>();
         
         if (provider != null) {
-            custMap.put("acr_values", "agama");
-            custMap.put("agama_flow", makeAgamaFlowParam(provider));
+            custMap.put("acr_values", "agama_" + als.CASA_AGAMA_FLOW + "-" + buildFlowParams(provider));
         }
 
         //prompt is needed because the user could have previously linked an account and in a new
@@ -155,7 +157,7 @@ public class SiteRedirectVM {
 
     }
     
-    private String makeAgamaFlowParam(String provider) {
+    private String buildFlowParams(String provider) {
         
         String key = "" + Math.random();
         int sec = Long.valueOf(AccountsLinkingVM.ENROLL_TIME_MS).intValue() / 1000;
@@ -168,11 +170,12 @@ public class SiteRedirectVM {
         String s = null;
         try {
             s = mapper.writeValueAsString(Map.of("providerId", provider, "uidRef", key));
+            s = Base64Util.base64urlencode(s.getBytes(UTF_8));
         } catch (JsonProcessingException e) {
             //this will never happen
             logger.error(e.getMessage());            
         }
-        return als.CASA_AGAMA_FLOW + "-" + s;
+        return s;
 
     }
 
