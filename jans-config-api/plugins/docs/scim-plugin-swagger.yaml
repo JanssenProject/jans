@@ -114,6 +114,8 @@ components:
           type: boolean
         useLocalCache:
           type: boolean
+        skipDefinedPasswordValidation:
+          type: boolean
     JsonPatch:
       type: object
   securitySchemes:
