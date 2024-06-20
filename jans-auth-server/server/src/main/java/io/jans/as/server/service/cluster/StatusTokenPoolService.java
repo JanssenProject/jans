@@ -176,7 +176,7 @@ public class StatusTokenPoolService {
 
 			if (loadedTokenPool.getLockKey() == null) {
 				// No lock found
-				// Attempt to set random value in lockKey
+				// Attempt to set random value in LOCK_KEY
 				String lockKey = UUID.randomUUID().toString();
 				tokenPool.setLockKey(lockKey);
 
@@ -224,7 +224,7 @@ public class StatusTokenPoolService {
 		List<StatusTokenPool> tokenPools = getTokenPoolsExpired();
 		
 		for (StatusTokenPool tokenPool : tokenPools) {
-			// Attempt to set random value in lockKey
+			// Attempt to set random value in LOCK_KEY
 			String lockKey = UUID.randomUUID().toString();
 			tokenPool.setLockKey(lockKey);
 			
@@ -257,7 +257,7 @@ public class StatusTokenPoolService {
 			tokenPool.setNodeId(nodeId);
 			tokenPool.setLastUpdate(new Date());
 
-			// Attempt to set random value in lockKey
+			// Attempt to set random value in LOCK_KEY
 			String lockKey = UUID.randomUUID().toString();
 			tokenPool.setLockKey(lockKey);
 

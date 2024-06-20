@@ -1,11 +1,11 @@
 package io.jans.model.cluster;
 
-import java.util.Date;
-
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
+
+import java.util.Date;
 
 /**
  * @author Yuriy Movchan
@@ -40,6 +40,18 @@ public class ClusterNode extends BaseEntry {
 		this.id = id;
 	}
 
+	// workaround: io.jans.orm.exception.PropertyNotFoundException: Could not find a getter for jansNum in class io.jans.model.cluster.ClusterNode
+    //  at io.jans.orm.reflect.property.BasicPropertyAccessor.createGetter(BasicPropertyAccessor.java:214)
+	public Integer getJansNum() {
+	    return getId();
+    }
+
+    // workaround: io.jans.orm.exception.PropertyNotFoundException: Could not find a getter for jansNum in class io.jans.model.cluster.ClusterNode
+    //  at io.jans.orm.reflect.property.BasicPropertyAccessor.createGetter(BasicPropertyAccessor.java:214)
+    public void setJansNum(Integer id) {
+        setId(id);
+    }
+
 	public String getType() {
 		return type;
 	}
@@ -72,4 +84,15 @@ public class ClusterNode extends BaseEntry {
 		this.lockKey = lockKey;
 	}
 
+    @Override
+    public String toString() {
+        return "ClusterNode{" +
+                "id=" + id +
+                ", type='" + type + '\'' +
+                ", creationDate=" + creationDate +
+                ", lastUpdate=" + lastUpdate +
+                ", lockKey='" + lockKey + '\'' +
+                ", dn='" + getDn() + '\'' +
+                "} ";
+    }
 }

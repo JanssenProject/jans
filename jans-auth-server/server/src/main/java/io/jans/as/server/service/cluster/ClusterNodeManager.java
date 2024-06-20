@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service.cluster;
 
+import com.google.common.base.Preconditions;
 import io.jans.as.server.service.cdi.event.TokenPoolUpdateEvent;
 import io.jans.model.cluster.ClusterNode;
 import io.jans.service.cdi.async.Asynchronous;
@@ -41,16 +42,19 @@ public class ClusterNodeManager {
 
 	private AtomicBoolean isActive;
 	
-	private ClusterNode clusterNode;
+	private ClusterNode node;
 
 	@PostConstruct
 	public void init() {
-		log.info("Initializing Cluster Manager ...");
+		log.info("Initializing Cluster Node Manager ...");
 		this.isActive = new AtomicBoolean(false);
 		
-		this.clusterNode = clusterNodeService.allocate();
-
-		log.info("Assigned cluster node id '{}' for this instance", clusterNode.getId());
+		this.node = clusterNodeService.allocate();
+		if (node != null) {
+            log.info("Assigned cluster node id '{}' for this instance", node.getId());
+        } else {
+		    log.error("Failed to initialize Cluster Node Manager.");
+        }
 	}
 
 	public void initTimer() {
@@ -74,7 +78,7 @@ public class ClusterNodeManager {
 		}
 
 		try {
-			updateClusterNode();
+			updateNode();
 		} catch (Throwable ex) {
 			log.error("Exception happened while reloading nodes", ex);
 		} finally {
@@ -82,18 +86,22 @@ public class ClusterNodeManager {
 		}
 	}
 
-	private void updateClusterNode() {
-		clusterNodeService.refresh(clusterNode);
+	private void updateNode() {
+        checkNodeNotNull();
+		clusterNodeService.refresh(node);
 	}
 
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
-        log.info("Stopping cluster manager...");
-        clusterNodeService.release(clusterNode);
+        log.info("Stopped cluster manager");
     }
     
     public Integer getClusterNodeId() {
-    	return clusterNode.getId();
+        checkNodeNotNull();
+    	return node.getId();
     }
 
+    private void checkNodeNotNull() {
+        Preconditions.checkNotNull(node, "Failed to allocate cluster node.");
+    }
 }
