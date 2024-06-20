@@ -14,10 +14,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version 1.0, 06/03/2024
  */
 @DataEntry(sortBy = "jansNum")
-@ObjectClass(value = "jansTokenPool")
-public class StatusTokenPool extends BaseEntry {
+@ObjectClass(value = "jansStatusIdxPool")
+public class StatusIndexPool extends BaseEntry {
 
 	private static final long serialVersionUID = -2122431771066187529L;
+	public static final String JANS_NUM_ATTRIBUTE_NAME = "jansNum";
 
 	@AttributeName(ignoreDuringUpdate = true, name = "jansNum")
     private Integer id;

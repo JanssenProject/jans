@@ -19,6 +19,7 @@
         "archivedJwks": "ou=archived_jwks,o=jans",
         "ciba": "ou=ciba,o=jans",
         "ssa": "ou=ssa,o=jans",
-        "node": "ou=node,o=jans"
+        "node": "ou=node,o=jans",
+        "statusIndexPool": "ou=status_index_pool,o=jans"
     }
 }

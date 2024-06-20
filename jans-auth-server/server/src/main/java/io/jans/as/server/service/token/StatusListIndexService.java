@@ -2,8 +2,8 @@ package io.jans.as.server.service.token;
 
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.cluster.ClusterNodeManager;
-import io.jans.as.server.service.cluster.StatusTokenPoolService;
-import io.jans.model.token.StatusTokenPool;
+import io.jans.as.server.service.cluster.StatusIndexPoolService;
+import io.jans.model.token.StatusIndexPool;
 import io.jans.model.tokenstatus.StatusList;
 import io.jans.model.tokenstatus.TokenStatus;
 import io.jans.util.Pair;
@@ -27,7 +27,7 @@ public class StatusListIndexService {
     private Logger log;
 
     @Inject
-    private StatusTokenPoolService statusTokenPoolService;
+    private StatusIndexPoolService statusTokenPoolService;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -37,7 +37,7 @@ public class StatusListIndexService {
 
     private final ReentrantLock allocatedLock = new ReentrantLock();
 	
-    private StatusTokenPool tokenPool = null;
+    private StatusIndexPool tokenPool = null;
 
     public void updateStatusAtIndex(int index, TokenStatus status) {
         try {
@@ -48,7 +48,7 @@ public class StatusListIndexService {
             log.trace("Updating status list at index {} with status {} ...", index, status);
 
             final int bitSize = appConfiguration.getStatusListBitSize();
-            final StatusTokenPool indexHolder = statusTokenPoolService.getTokenPoolByIndex(index);
+            final StatusIndexPool indexHolder = statusTokenPoolService.getPoolByIndex(index);
             final String data = indexHolder.getData();
 
             final StatusList statusList = StringUtils.isNotBlank(data) ? StatusList.fromEncoded(data, bitSize) : new StatusList(bitSize);
@@ -69,9 +69,9 @@ public class StatusListIndexService {
         return nextIndex().getFirst();
     }
 
-    public Pair<Integer, StatusTokenPool> nextIndex() {
+    public Pair<Integer, StatusIndexPool> nextIndex() {
     	// Create copy of variable to make sure that another Thread not changed it
-    	StatusTokenPool localTokenPool = tokenPool;
+    	StatusIndexPool localTokenPool = tokenPool;
     	int newIndex = -1;
     	if (localTokenPool != null) {
     		newIndex = localTokenPool.nextIndex();
@@ -95,7 +95,7 @@ public class StatusListIndexService {
                 }
 			}
 			
-			// Allocate new ToeknPool
+			// Allocate new TokenPool
 			tokenPool = statusTokenPoolService.allocate(clusterManager.getClusterNodeId());
 
 			newIndex = tokenPool.nextIndex();

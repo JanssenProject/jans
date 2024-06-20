@@ -75,7 +75,7 @@ public class DiscoveryService {
         jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
 
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST))
-            jsonObj.put(TOKEN_STATUS_LIST_ENDPOINT, getTokenStatusListEndpoint());
+            jsonObj.put(STATUS_LIST_ENDPOINT, getTokenStatusListEndpoint());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN))
             jsonObj.put(REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_SESSION))
@@ -289,7 +289,7 @@ public class DiscoveryService {
         if (StringUtils.isNotBlank(appConfiguration.getMtlsTokenEndpoint()))
             aliases.put(TOKEN_ENDPOINT, appConfiguration.getMtlsTokenEndpoint());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
-            aliases.put(TOKEN_STATUS_LIST_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/token_status_list"));
+            aliases.put(STATUS_LIST_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/token_status_list"));
         if (StringUtils.isNotBlank(appConfiguration.getMtlsJwksUri()))
             aliases.put(JWKS_URI, appConfiguration.getMtlsJwksUri());
         if (StringUtils.isNotBlank(appConfiguration.getMtlsCheckSessionIFrame()))

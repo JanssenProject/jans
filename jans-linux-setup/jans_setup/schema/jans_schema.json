@@ -5305,7 +5305,7 @@
         "objectclass"
       ],
       "names": [
-        "jansTokenPool"
+        "jansStatusIdxPool"
       ],
       "oid": "jansObjClass",
       "sup": [

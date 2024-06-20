@@ -69,6 +69,8 @@ public class BaseDnConfiguration {
     private String archivedJwks;
     @XmlElement(name = "node")
     private String node;
+    @XmlElement(name = "statusIndexPool")
+    private String statusIndexPool;
 
     public String getArchivedJwks() {
         return archivedJwks;
@@ -254,4 +256,11 @@ public class BaseDnConfiguration {
 		this.node = node;
 	}
 
+    public String getStatusIndexPool() {
+        return statusIndexPool;
+    }
+
+    public void setStatusIndexPool(String statusIndexPool) {
+        this.statusIndexPool = statusIndexPool;
+    }
 }

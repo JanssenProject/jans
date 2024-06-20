@@ -153,6 +153,11 @@ objectClass: top
 objectClass: organizationalUnit
 ou: node
 
+dn: ou=status_index_pool,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: status_index_pool
+
 dn: ou=document,o=jans
 objectClass: top
 objectClass: organizationalUnit

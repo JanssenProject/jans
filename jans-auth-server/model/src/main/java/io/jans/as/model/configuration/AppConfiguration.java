@@ -213,8 +213,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The status list response JWT lifetime (used to set exp claim in JWT).")
     private int statusListResponseJwtLifetime = DEFAULT_STATUS_LIST_RESPONSE_JWT_LIFETIME;
 
-    @DocProperty(description = "Specifies how many token status list indexes AS can reserve at once (when token_status_list feature flag is enabled). Defaults to 100.")
-    private int tokenIndexAllocationBlockSize = DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE;
+    @DocProperty(description = "Specifies how many token status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100.")
+    private int statusListIndexAllocationBlockSize = DEFAULT_TOKEN_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE;
 
     @DocProperty(description = "Specifies which LDAP attribute is used for the subject identifier claim")
     private String openidSubAttribute;
@@ -2435,12 +2435,12 @@ public class AppConfiguration implements Configuration {
         this.statusListBitSize = statusListBitSize;
     }
 
-    public int getTokenIndexAllocationBlockSize() {
-        return tokenIndexAllocationBlockSize;
+    public int getStatusListIndexAllocationBlockSize() {
+        return statusListIndexAllocationBlockSize;
     }
 
-    public void setTokenIndexAllocationBlockSize(int tokenIndexAllocationBlockSize) {
-        this.tokenIndexAllocationBlockSize = tokenIndexAllocationBlockSize;
+    public void setStatusListIndexAllocationBlockSize(int statusListIndexAllocationBlockSize) {
+        this.statusListIndexAllocationBlockSize = statusListIndexAllocationBlockSize;
     }
 
     public int getCleanServiceInterval() {
