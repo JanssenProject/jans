@@ -2264,9 +2264,108 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Logging
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Logging
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#log-configuration-for-jans-auth" class="md-nav__link">
+    Log Configuration For jans-auth
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#find-logging-configuration" class="md-nav__link">
+    Find Logging Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-logging-configuration" class="md-nav__link">
+    Update Logging Configuration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using-text-based-ui
+  </a>
+  
+    <nav class="md-nav" aria-label="Using-text-based-ui">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logging-screen" class="md-nav__link">
+    Logging Screen
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default-log-location" class="md-nav__link">
+    Default Log Location
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-native-deployments" class="md-nav__link">
+    Cloud-Native Deployments
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -8385,6 +8484,89 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#log-configuration-for-jans-auth" class="md-nav__link">
+    Log Configuration For jans-auth
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#find-logging-configuration" class="md-nav__link">
+    Find Logging Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-logging-configuration" class="md-nav__link">
+    Update Logging Configuration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using-text-based-ui
+  </a>
+  
+    <nav class="md-nav" aria-label="Using-text-based-ui">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logging-screen" class="md-nav__link">
+    Logging Screen
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default-log-location" class="md-nav__link">
+    Default Log Location
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-native-deployments" class="md-nav__link">
+    Cloud-Native Deployments
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -8426,88 +8608,167 @@
 
 
 <h1 id="log-management">Log Management<a class="headerlink" href="#log-management" title="Permanent link">#</a></h1>
-<blockquote>
-<p>Prerequisite: Know how to use the Janssen CLI in <a href="../config-tools/jans-cli/">command-line mode</a></p>
-</blockquote>
-<p>To <code>view/update</code> logging configuration, let's get the information of logging Configuration.</p>
-<p><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationLogging</code></p>
-<div class="highlight"><pre><span></span><code>Operation ID: get-config-logging
-  Description: Returns Jans Authorization Server logging settings.
-Operation ID: put-config-logging
-  Description: Updates Jans Authorization Server logging settings.
-  Schema: /components/schemas/LoggingConfiguration
-
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration
-</code></pre></div>
-<h1 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">#</a></h1>
+<p>Logging for Janssen Server modules is managed at the individual module level.
+Meaning there is no single switch or configuration that will enable or disable
+logs for all modules. Each module can be individually configured and can be
+configured differently when it comes to logging.</p>
+<p>Logging for <code>jans-auth</code> service is what we are going to discuss in detail 
+in this document.
+Logging for other modules is configured by changing the module's 
+property values. Use the documentation on how to update configuration 
+properties for 
+corresponding modules to update logging related properties. For instance:</p>
 <ul>
-<li><a href="#log-management">Log Management</a></li>
-<li><a href="#find-logging-configuration">Find Logging Configuration</a></li>
-<li><a href="#update-logging-configuration">Update Logging Configuration</a></li>
+<li><a href="">Updating properties for Fido2 module</a></li>
+<li><a href="">Updating properties for SCIM module</a></li>
 </ul>
-<h2 id="find-logging-configuration">Find Logging Configuration<a class="headerlink" href="#find-logging-configuration" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-logging
-
-Getting access token for scope https://jans.io/oauth/config/logging.readonly
-{
-  &quot;loggingLevel&quot;: &quot;INFO&quot;,
-  &quot;loggingLayout&quot;: &quot;text&quot;,
-  &quot;httpLoggingEnabled&quot;: false,
-  &quot;disableJdkLogger&quot;: true,
-  &quot;enabledOAuthAuditLogging&quot;: false,
-  &quot;externalLoggerConfiguration&quot;: null,
-  &quot;httpLoggingExcludePaths&quot;: null
-}
+<h2 id="log-configuration-for-jans-auth">Log Configuration For jans-auth<a class="headerlink" href="#log-configuration-for-jans-auth" title="Permanent link">#</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use the command line to perform actions from the terminal. Learn how to 
+use Jans CLI <a href="../config-tools/jans-cli/">here</a> or jump straight to 
+the <a href="#using-command-line">Using Command Line</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use a fully functional text-based user interface from the terminal. 
+Learn how to use Jans Text-based UI (TUI) 
+<a href="../config-tools/jans-tui/">here</a> or jump straight to the
+<a href="#using-text-based-ui">Using-text-based-ui</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use REST API for programmatic access or invoke via tools like CURL or 
+Postman. Learn how to use Janssen Server Config API 
+<a href="../config-tools/config-api/">here</a> or Jump straight to the
+<a href="#using-configuration-rest-api">Using Configuration REST API</a></p>
+</div>
+</div>
+</div>
+<h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
+<p>In the Janssen Server, you can deploy and customize the Logging Configuration using the
+command line. To get the details of Janssen command line operations relevant to
+Logging configuration, you can check the operations under 
+<code>ConfigurationLogging</code> task using the
+command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationLogging
 </code></pre></div>
-<h2 id="update-logging-configuration">Update Logging Configuration<a class="headerlink" href="#update-logging-configuration" title="Permanent link">#</a></h2>
-<p>To update logging configuration, get the schema first:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration &gt; /tmp/log-config.json
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-config-logging
+  Description: Returns Jans Authorization Server logging settings
+Operation ID: put-config-logging
+  Description: Updates Jans Authorization Server logging settings
+  Schema: Logging
 
-
-{
-  &quot;loggingLevel&quot;: &quot;FATAL&quot;,
-  &quot;loggingLayout&quot;: &quot;text&quot;,
-  &quot;httpLoggingEnabled&quot;: true,
-  &quot;disableJdkLogger&quot;: true,
-  &quot;enabledOAuthAuditLogging&quot;: false,
-  &quot;externalLoggerConfiguration&quot;: null,
-  &quot;httpLoggingExcludePaths&quot;: [
-    &quot;/auth/img&quot;,
-    &quot;/auth/stylesheet&quot;
-  ]
-}
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema Logging
 </code></pre></div>
+<h3 id="find-logging-configuration">Find Logging Configuration<a class="headerlink" href="#find-logging-configuration" title="Permanent link">#</a></h3>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-logging
+</code></pre></div>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;httpLoggingEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;enabledOAuthAuditLogging&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;externalLoggerConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;httpLoggingExcludePaths&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="update-logging-configuration">Update Logging Configuration<a class="headerlink" href="#update-logging-configuration" title="Permanent link">#</a></h3>
+<p>To update logging configuration, get the schema first:
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema Logging &gt; /tmp/log-config.json
+</code></pre></div>
+The schema can now be found in the log-config.json file.
+Check the <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml#/Configuration%20%E2%80%93%20Logging/put-config-logging">update logging schema model</a></p>
 <p>let's update the schema:
-<div class="highlight"><pre><span></span><code>nano /tmp/log-config.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>nano /tmp/log-config.json
 </code></pre></div></p>
-<p>Here I have updated <code>loggingLevel</code> to <code>DEBUG</code> and <code>enabledOAuditLogging</code> to <code>true</code> as below image.</p>
-<p><img alt="updated logging" src="../../../assets/image-cl-update-logging-03042021.png" /></p>
+<p>As seen below, I have added <code>loggingLevel</code> for the value <code>INFO</code> 
+and <code>enabledOAuditLogging</code> for the value <code>false</code>.</p>
+<div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;httpLoggingEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;enabledOAuthAuditLogging&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;externalLoggerConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;httpLoggingExcludePaths&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <p>Let's do the operation:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-logging --data /tmp/log-config.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-logging <span class="se">\</span>
+ --data /tmp/log-config.json
 </code></pre></div>
 <p>You will get the updated result as below:</p>
-<div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/logging.write
-Server Response:
-{
-  &quot;loggingLevel&quot;: &quot;DEBUG&quot;,
-  &quot;loggingLayout&quot;: &quot;json&quot;,
-  &quot;httpLoggingEnabled&quot;: false,
-  &quot;disableJdkLogger&quot;: false,
-  &quot;enabledOAuthAuditLogging&quot;: true,
-  &quot;externalLoggerConfiguration&quot;: null,
-  &quot;httpLoggingExcludePaths&quot;: [
-    &quot;/auth/img&quot;,
-    &quot;/auth/stylesheet&quot;
-  ]
-}
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;httpLoggingEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;enabledOAuthAuditLogging&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;externalLoggerConfiguration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;httpLoggingExcludePaths&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h2 id="using-text-based-ui">Using-text-based-ui<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
+<p>In Janssen, You can manage Logging configuration using
+the <a href="../config-tools/jans-tui/">Text-Based UI</a> also.</p>
+<p>You can start TUI using the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo /opt/jans/jans-cli/jans_cli_tui.py
 </code></pre></div>
+<h3 id="logging-screen">Logging Screen<a class="headerlink" href="#logging-screen" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>Navigate to <code>Auth Server</code> -&gt; <code>Logging</code> to open the Logging screen as shown
+in the image below.</p>
+</li>
+<li>
+<p>Logging screen allows the administrator to set logging parameters as per
+the requirements.</p>
+</li>
+</ul>
+<p><img alt="image" src="../../../assets/tui-logging-config.png" /></p>
+<h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
+<p>Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring logging. Endpoint details are published in the <a href="../../reference/openapi/">Swagger
+document</a>.</p>
+<h2 id="default-log-location">Default Log Location<a class="headerlink" href="#default-log-location" title="Permanent link">#</a></h2>
+<p>On a VM installation, logs for <code>jans-auth</code> module are generated at
+<code>/opt/jans/jetty/jans-auth/logs/</code>.</p>
+<h2 id="cloud-native-deployments">Cloud-Native Deployments<a class="headerlink" href="#cloud-native-deployments" title="Permanent link">#</a></h2>
+<p>Logging configuration for a cloud-native deployment is <a href="../../kubernetes-ops/logs/">detailed here</a></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-08-03T16:21:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-08-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-20T08:23:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-20</span>
       
         <br>
         Created:
