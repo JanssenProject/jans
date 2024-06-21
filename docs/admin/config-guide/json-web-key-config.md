@@ -8,60 +8,78 @@ tags:
 
 # JSON Web Key (JWK)
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](config-tools/jans-cli/README.md)
+The Janssen Server provides multiple configuration tools to perform these
+tasks.
 
-This operation is used to get the JSON Web Key Set (JWKS) from OP host. The JWKS is a set of keys containing the public keys that should be used to verify any JSON Web Token (JWT) issued by the authorization server.
+=== "Use Command-line"
 
-There are few operations we can do using `jans-cli` commands. To get list of operations id run below command:
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to 
+    the [configuration steps](#using-command-line)
 
-```
+
+=== "Use REST API"
+
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](./config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
+
+
+
+##  Using Command Line
+
+
+In the Janssen Server, you can deploy and customize the JSON Web key using the
+command Line. To get the details of Janssen command line operations relevant to
+JSON Web Key, you can check the operations under `ConfigurationJwkJsonWebKeyJwk` task using the
+command below:
+
+
+```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --info ConfigurationJwkJsonWebKeyJwk
 ```
 
-It returns operations id with details information.
-
-```
-Operation ID: get-config-jwks
-  Description: Gets list of JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].
-Operation ID: put-config-jwks
-  Description: Puts/replaces JSON Web Keys (JWKS).
-  Schema: /components/schemas/WebKeysConfiguration
-Operation ID: patch-config-jwks
-  Description: Patch JSON Web Keys (JWKS).
-  Schema: Array of /components/schemas/PatchRequest
-Operation ID: post-config-jwks-key
-  Description: Adds a new key to JSON Web Keys (JWKS).
-  Schema: /components/schemas/JsonWebKey
-Operation ID: put-config-jwk-kid
+```text title="Sample Output"
+Operation ID: get-jwk-by-kid
   Description: Get a JSON Web Key based on kid
-  url-suffix: kid
-Operation ID: patch-config-jwk-kid
-  Description: Patch a specific JSON Web Key based on kid
-  url-suffix: kid
-  Schema: Array of /components/schemas/PatchRequest
+  Parameters:
+  kid: The unique identifier for the key [string]
 Operation ID: delete-config-jwk-kid
   Description: Delete a JSON Web Key based on kid
-  url-suffix: kid
+  Parameters:
+  kid: The unique identifier for the key [string]
+Operation ID: patch-config-jwk-kid
+  Description: Patch a specific JSON Web Key based on kid
+  Parameters:
+  kid: The unique identifier for the key [string]
+  Schema: Array of JsonPatch
+Operation ID: get-config-jwks
+  Description: Gets list of JSON Web Key (JWK) used by server
+Operation ID: put-config-jwks
+  Description: Replaces JSON Web Keys
+  Schema: WebKeysConfiguration
+Operation ID: patch-config-jwks
+  Description: Patches JSON Web Keys
+  Schema: Array of JsonPatch
+Operation ID: post-config-jwks-key
+  Description: Configuration – JWK - JSON Web Key (JWK)
+  Schema: JSONWebKey
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
-
-
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema JSONWebKey
 ```
 Let's explore each of these operations.
 
-## Get Configurations list of JWKs
+### Get Configurations list of JWKs
 
 We can get list of all configurations of the jwk configuration within a single command like this:
 
-```
+```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-jwks
 ```
-
 It will return all the jwk configuration information as below:
 
-
-```
-Getting access token for scope https://jans.io/oauth/config/jwks.readonly
+```text title="Sample Output"
 {
   "keys": [
     {
@@ -115,41 +133,32 @@ Getting access token for scope https://jans.io/oauth/config/jwks.readonly
   ]
 ```
 
-## Adds new JSON Web key (JWK)
+### Adds new JSON Web key (JWK)
 
-In case we need to add new key, we can use this operation id. To add a new key, we need to follow the schema definition. If we look at the description, we can see a schema definition available.
+In case we need to add new key, we can use this operation id. 
+To add a new key, we need to follow the schema definition. If we look at the description, 
+we can see a schema definition available.
 
-```
+```text 
 Operation ID: post-config-jwks-key
-  Description: Adds a new key to JSON Web Keys (JWKS).
-  Schema: /components/schemas/JsonWebKey
+  Description: Configuration – JWK - JSON Web Key (JWK)
+  Schema: JSONWebKey
 ```
 
 So, let's get the schema file and update it with keys data:
 
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --schema JSONWebKey > /tmp/jwk.json
 ```
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/JsonWebKey > /tmp/jwk.json
-```
-
-```
-{
-  "kid": "string",
-  "kty": "string",
-  "use": "string",
-  "alg": "string",
-  "crv": null,
-  "exp": "integer",
-  "x5c": [],
-  "n": null,
-  "e": null,
-  "x": null,
-  "y": null
-}
-```
+The `post-config-jwks-key` uses the `JSONWebKey` schema to describe the configuration change.
+Refer [here](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml#/Configuration%20%E2%80%93%20JWK%20-%20JSON%20Web%20Key%20(JWK)/post-config-jwks-key) 
+to know more about schema.
 
 Let's update the json file; In our case, I have added sample data for testing purpose only.
 
-```
+```bash title="Input"
+"name": "Connect RSA-OAEP Encryption Key 2",
+"descr": "Encryption Key 2: Elliptic Curve Diffie-Hellman Ephemeral Static key agreement using Concat KDF",
 "kid": "dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5",
 "kty": "RSA",
 "use": "enc",
@@ -167,52 +176,34 @@ Let's update the json file; In our case, I have added sample data for testing pu
 
 Now let's post this keys into the list using below command:
 
-```
+```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id post-config-jwks-key --data /tmp/jwk.json
 ```
-
+You can check with `get-config-jwks` operation id for new JSON Web key
 
 ## Update / Replace JSON Web Key (JWK)
 
 To `update / replace` any JWK configuration, let get the schema first.
 
-```
-Operation ID: put-config-jwks
-  Description: Puts/replaces JSON Web Keys (JWKS).
-  Schema: /components/schemas/WebKeysConfiguration
+```text
+  Operation ID: put-config-jwks
+  Description: Replaces JSON Web Keys
+  Schema: WebKeysConfiguration
 ```
 
 To get the schema file:
 
-```
- /opt/jans/jans-cli/config-cli.py --schema /components/schemas/WebKeysConfiguration > /tmp/path-jwk.json
-```
-
-```
-root@testjans:~# cat /tmp/path-jwk.json
-
-{
-  "keys": {
-    "kid": null,
-    "kty": null,
-    "use": null,
-    "alg": null,
-    "crv": null,
-    "exp": null,
-    "x5c": [],
-    "n": null,
-    "e": null,
-    "x": null,
-    "y": null
-  }
-}
+```bash title="Command"
+ /opt/jans/jans-cli/config-cli.py --schema WebKeysConfiguration > /tmp/path-jwk.json
 ```
 
-It's a json file containing `key-value` pair. Each of these properties in the key is defined by the JWK specification [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517), and for algorithm-specific properties, in [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518).
+In the path-jwk.json, you will find an example. For further information, 
+please refer to [here](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml#/Configuration%20%E2%80%93%20JWK%20-%20JSON%20Web%20Key%20(JWK)/put-config-jwks)
 
+It's a json file containing `key-value` pair. Each of these properties in the key is defined by 
+the JWK specification [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517), and for algorithm-specific properties, in [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518).
 
-### Properties
-
+#### Properties
 
 |name|Description|
 |:---:|:---|
@@ -232,7 +223,8 @@ If you want to explore more, please go through the reference link.
 
 Let's update the json file to create a new key configuration.
 
-```
+
+```json title="Key"
 {
    "keys":
    [{
@@ -253,17 +245,16 @@ Let's update the json file to create a new key configuration.
 }
 ```
 
-Please remember if `kid` already matched then this will be replaced otherwise a new key configuration will be created in the Janssen server.
+Please remember if `kid` already matched then this will be replaced otherwise a new 
+key configuration will be created in the Janssen server.
 
 Now let's put the updated data into the Janssen server.
 
-```
-/opt/jans/jans-cli/config-cli.py --operation-id put-config-jwks --data /tmp/path-jwk.json
+```bash title="Command"
+ /opt/jans/jans-cli/config-cli.py --operation-id put-config-jwks --data /tmp/path-jwk.json
 ```
 
-```
-Getting access token for scope https://jans.io/oauth/config/jwks.write
-Server Response:
+```json title="Output Sample"
 {
   "keys": [
     {
@@ -285,21 +276,28 @@ Server Response:
 }
 ```
 
-Please remember, This operation replaces all JWKs having in the Janssen server with new ones. So, In this case, if you want to keep olds JWKs, you have to put them as well in the schema file.
+Please remember, This operation replaces all JWKs having in the Janssen server with new ones. So,
+In this case, if you want to keep olds JWKs, you have to put them as well in the schema file.
 
-## Get a JSON Web Key Based on kid
+### Get a JSON Web Key Based on kid
 
-We know that `get-config-jwks` operation-id returns all the json web keys available in the Janssen Server. With this operation-id, We can get any specific jwk matched with kid. If we know the `kid`, we can simply use the below command:
+With this operation-id, We can get any specific jwk matched with `kid`.
+If we know the `kid`, we can simply use the below command:
 
-```bash
-/opt/jans/jans-cli/config-cli.py --operation-id put-config-jwk-kid --url-suffix kid:new-key-test-id
+```text
+Operation ID: get-jwk-by-kid
+Description: Get a JSON Web Key based on kid
+Parameters:
+kid: The unique identifier for the key [string]
 ```
 
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --operation-id get-jwk-by-kid --url-suffix kid:new-key-test-id
+```
 It returns the details as below:
 
-```json
-Getting access token for scope https://jans.io/oauth/config/jwks.readonly
-{
+```json title="Sample Output"
+ {
   "kid": "new-key-test-id",
   "kty": "RSA",
   "use": "enc",
@@ -313,22 +311,22 @@ Getting access token for scope https://jans.io/oauth/config/jwks.readonly
   "e": "AQAB",
   "x": null,
   "y": null
-}
+ }
 ```
 
-## Patch JSON Web Key (JWK) by kid
+### Patch JSON Web Key (JWK) by kid
 
 With this operation id, we can modify JSON Web Keys partially of its properties.
 
-```bash
+```text
 Operation ID: patch-config-jwks
-  Description: Patch JSON Web Keys (JWKS).
-  Schema: Array of /components/schemas/PatchRequest
+  Description: Patches JSON Web Keys
+  Schema: Array of JsonPatch
 ```
 
 In this case, We are going to a test data JWK that already added in jwk list of the Janssen server.
 
-```json
+```json 
 {
       "kid": "new-key-test-id",
       "kty": "RSA",
@@ -346,9 +344,14 @@ In this case, We are going to a test data JWK that already added in jwk list of 
     }
 ```
 
-We can see here `kid` is `new-key-test-id`. Before going to patch this key, let's define the schema first. In this example; We are going to change `use` from `enc` to `sig`. So our schema definition as below:
+The `patch-config-jwks` operation uses the [JSON Patch ](https://jsonpatch.com/#the-patch) schema to describe 
+the configuration change. Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
 
-```json
+We can see here `kid` is `new-key-test-id`. Before going to patch this key, 
+let's define the schema first. In this example; We are going to change `use` from `enc` to `sig`. 
+So our schema definition as below:
+
+```json title="Input"
 [
 {
   "op": "replace",
@@ -358,21 +361,17 @@ We can see here `kid` is `new-key-test-id`. Before going to patch this key, let'
 ]
 ```
 
-Please, remember, you can do multiple operation within a single command because this schema definition support `array` of multiple operations.
-
 Now let's do the operation with below command line.
 
-```bash
-/opt/jans/jans-cli/config-cli.py --operation-id patch-config-jwk-kid --url-suffix kid:new-key-test-id --data /tmp/schema.json
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --operation-id patch-config-jwk-kid \
+--url-suffix kid:new-key-test-id --data /tmp/schema.json
 ```
 
 You need to change `kid` and `data` path according to your own.
 Updated Json Web Key:
 
-```json
-
-Getting access token for scope https://jans.io/oauth/config/jwks.write
-Server Response:
+```json title="Key"
 {
   "kid": "new-key-test-id",
   "kty": "RSA",
@@ -393,14 +392,24 @@ Server Response:
 
 We see it has replaced `use` from `enc` to `sig`.
 
-Please read about [patch method](config-tools/jans-cli/README.md#quick-patch-operations), You can get some idea how this patch method works to modify particular properties of any task.
+Please read about [patch method](config-tools/jans-cli/README.md#quick-patch-operations),
+You can get some idea how this patch method works to modify particular properties of any task.
 
-## Delete Json Web Key using kid
+### Delete Json Web Key using kid
 
 It's pretty simple to delete json web key using its `kid`. The command line is:
 
-```bash
-/opt/jans/jans-cli/config-cli.py --operation-id delete-config-jwk-kid --url-suffix kid:new-key-test-id
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --operation-id delete-config-jwk-kid \
+--url-suffix kid:new-key-test-id
 ```
 
 It will delete the jwk if it matches with the given `kid`.
+
+
+
+## Using Configuration REST API
+
+Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring the Json Web key. Endpoint details are published in the [Swagger
+document](./../reference/openapi.md).
