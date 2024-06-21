@@ -1,11 +1,11 @@
-use wasm_bindgen::UnwrapThrowExt;
-
 #[derive(serde::Deserialize, serde::Serialize, Debug, Default)]
 pub struct Tokens {
+	// generates entities
 	#[serde(rename = "access_token")]
 	pub(crate) access: String,
 	#[serde(rename = "id_token")]
 	pub(crate) id: String,
+
 	#[serde(rename = "userinfo_token")]
 	pub(crate) user_info: String,
 	#[serde(rename = "tx_token")]
@@ -14,19 +14,45 @@ pub struct Tokens {
 	pub(crate) sse_url: String,
 }
 
-#[derive(serde::Deserialize, serde::Serialize)]
-pub struct Request {
-	pub principal: String,
-	pub action: String,
-	pub resource: String,
+#[derive(serde::Serialize, Debug)]
+pub(crate) struct OpenIdDynamicClientRequest<'a> {
+	pub(crate) client_name: &'static str,
+	pub(crate) application_type: &'static str,
+	pub(crate) redirect_uris: &'a [&'static str], // basically a list of callback urls
+	pub(crate) token_endpoint_auth_method: &'static str,
+	pub(crate) software_statement: &'a str,
+	pub(crate) contacts: &'a [&'static str],
 }
 
-impl From<Request> for cedar_policy::Request {
-	fn from(value: Request) -> cedar_policy::Request {
-		let principal = value.principal.parse().unwrap_throw();
-		let action = value.action.parse().unwrap_throw();
-		let resource = value.resource.parse().unwrap_throw();
+#[derive(serde::Deserialize, Debug)]
+pub(crate) struct TrustedIssuer {
+	pub(crate) name: String,
+	pub(crate) description: String,
+	pub(crate) openid_configuration_endpoint: String,
+}
 
-		cedar_policy::Request::new(Some(principal), Some(action), Some(resource), cedar_policy::Context::empty(), None).unwrap_throw()
-	}
+#[derive(serde::Deserialize, Debug)]
+pub struct OpenIdConfiguration {
+	pub(crate) issuer: String,
+	pub(crate) authorization_endpoint: String,
+	pub(crate) registration_endpoint: String,
+	pub(crate) token_endpoint: String,
+	pub(crate) jwks_uri: String,
+}
+
+#[derive(serde::Deserialize, Debug)]
+pub(crate) struct OpenIdDynamicClient {
+	pub(crate) client_id: String,
+	pub(crate) client_secret: Option<String>,
+}
+
+#[derive(serde::Serialize, Debug)]
+pub(crate) struct OpenIdGrantRequest<'a> {
+	pub(crate) scope: &'a str,
+	pub(crate) grant_type: &'a str,
+}
+
+#[derive(serde::Deserialize, Debug)]
+pub(crate) struct OpenIdGrantResponse {
+	pub(crate) access_token: String,
 }
