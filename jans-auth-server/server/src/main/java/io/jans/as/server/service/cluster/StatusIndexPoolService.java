@@ -6,23 +6,24 @@
 
 package io.jans.as.server.service.cluster;
 
+import static io.jans.as.server.service.cluster.ClusterNodeService.LOCK_KEY;
+
+import java.util.Date;
+import java.util.List;
+
+import org.slf4j.Logger;
+
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.model.token.StatusIndexPool;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-
-import static io.jans.as.server.service.cluster.ClusterNodeService.LOCK_KEY;
 
 /**
  * @author Yuriy Movchan
@@ -90,18 +91,13 @@ public class StatusIndexPoolService {
      * @return pool
      */
     public StatusIndexPool getPoolLast() {
-        final List<StatusIndexPool> all = getAllPools();
-        final StatusIndexPool max = Collections.max(all, Comparator.comparing(StatusIndexPool::getId));
-        log.debug("Last node: {}", max);
-        return max;
+    	String baseDn = staticConfiguration.getBaseDn().getNode();
+    	PagedResult<StatusIndexPool> pagedResult = entryManager.findPagedEntries(baseDn, StatusIndexPool.class, Filter.createPresenceFilter("jansNum"), null, "jansNum", SortOrder.DESCENDING, 0, 1, 1);
+		if (pagedResult.getEntriesCount() >= 1) {
+			return setIndexes(pagedResult.getEntries().get(0));
+		}
 
-        // todo - we need to use paged version when it is fixed in entry manager
-//		PagedResult<StatusIndexPool> pagedResult = entryManager.findPagedEntries(baseDn, StatusIndexPool.class, Filter.createEqualityFilter("jansNodeId", nodeId), null, "jansNum", SortOrder.DESCENDING, 1, 1, 1);
-//		if (pagedResult.getEntriesCount() >= 1) {
-//			return setIndexes(pagedResult.getEntries().get(0));
-//		}
-//
-//		return null;
+		return null;
     }
 
     /**
@@ -132,13 +128,15 @@ public class StatusIndexPoolService {
      *
      * @return list of pools
      */
-    public List<StatusIndexPool> getPoolsExpired(int nodeId) {
+    public List<StatusIndexPool> getPoolsExpired() {
         final String baseDn = baseDn();
 
-        Filter expFilter = Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn, new Date()));
-        Filter nodeFilter = Filter.createEqualityFilter("jansNodeId", nodeId);
-        Filter filter = Filter.createANDFilter(nodeFilter, expFilter);
-        return setIndexes(entryManager.findEntries(baseDn, StatusIndexPool.class, filter));
+        Date expirationDate = new Date(System.currentTimeMillis() - DELAY_AFTER_EXPIRATION);
+        
+		Filter filter = Filter.createORFilter(Filter.createEqualityFilter("exp", null),
+				Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn, expirationDate)));
+
+		return setIndexes(entryManager.findEntries(baseDn, StatusIndexPool.class, filter));
     }
 
     protected void persist(StatusIndexPool pool) {
@@ -186,7 +184,7 @@ public class StatusIndexPoolService {
         log.debug("Allocating status index pool, node {}, LOCK_KEY {}... ", nodeId, LOCK_KEY);
 
         // Try to use existing expired entry
-        List<StatusIndexPool> expiredPools = getPoolsExpired(nodeId);
+        List<StatusIndexPool> expiredPools = getPoolsExpired();
 
         log.debug("Allocation - found {} expired status index pools, node {}.", expiredPools.size(), nodeId);
 
@@ -207,6 +205,11 @@ public class StatusIndexPoolService {
 
                 // If lock is ours reset entry and return it
                 if (LOCK_KEY.equals(lockedPool.getLockKey())) {
+                	// Assign record for specific nodeId 
+                	lockedPool.setNodeId(nodeId);
+
+                    update(lockedPool);
+
                     log.debug("Re-using existing status index pool {}, node {}, LOCK_KEY {}", lockedPool.getId(), nodeId, LOCK_KEY);
                     return lockedPool;
                 }
@@ -230,11 +233,13 @@ public class StatusIndexPoolService {
             pool.setNodeId(nodeId);
             pool.setLastUpdate(new Date());
             pool.setLockKey(LOCK_KEY);
-            pool.setExpirationDate(expirationDate);
 
             // Do persist operation in try/catch for safety and do not throw error to upper
             // levels
             try {
+            	expirationDate = new Date(System.currentTimeMillis() + 2 * appConfiguration.getAccessTokenLifetime() * 1000);
+                pool.setExpirationDate(expirationDate);
+
                 persist(pool);
 
                 // Load pool after update

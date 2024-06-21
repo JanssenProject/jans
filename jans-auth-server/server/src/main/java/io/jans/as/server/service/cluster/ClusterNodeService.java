@@ -11,6 +11,8 @@ import io.jans.exception.ConfigurationException;
 import io.jans.model.cluster.ClusterNode;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -94,18 +96,14 @@ public class ClusterNodeService {
 	public ClusterNode getClusterNodeLast() {
 		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNode();
 
-        final List<ClusterNode> allNodes = entryManager.findEntries(clusterNodesBaseDn, ClusterNode.class, getTypeFilter(), new String[0]);
-        final ClusterNode max = Collections.max(allNodes, Comparator.comparing(ClusterNode::getId));
-        log.debug("Last node: {}", max);
-        return max;
+		PagedResult<ClusterNode> pagedResult = entryManager.findPagedEntries(clusterNodesBaseDn, ClusterNode.class,
+				Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH), null, "jansNum", SortOrder.DESCENDING,
+				0, 1, 1);
+		if (pagedResult.getEntriesCount() >= 1) {
+			return pagedResult.getEntries().get(0);
+		}
 
-        // todo - we need to use paged version when it is fixed in entry manager
-//        PagedResult<ClusterNode> pagedResult = entryManager.findPagedEntries(clusterNodesBaseDn, ClusterNode.class, getTypeFilter(), null, "jansNum", SortOrder.DESCENDING, 0, 1, 1);
-//        if (pagedResult.getEntriesCount() >= 1) {
-//            return pagedResult.getEntries().get(0);
-//        }
-//
-//		return null;
+		return null;
 	}
 
 	/**
@@ -119,10 +117,11 @@ public class ClusterNodeService {
             throw new ConfigurationException("ou=node is not configured in static configuration of AS (jansConfStatic).");
         }
 
-        Date expirationDate = new Date(System.currentTimeMillis() - DELAY_AFTER_EXPIRATION);
+		Date expirationDate = new Date(System.currentTimeMillis() - DELAY_AFTER_EXPIRATION);
 
-        Filter filter = Filter.createANDFilter(getTypeFilter(),
-                Filter.createLessOrEqualFilter("jansLastUpd", entryManager.encodeTime(clusterNodesBaseDn, expirationDate)));
+		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH),
+				Filter.createORFilter(Filter.createEqualityFilter("jansLastUpd", null), Filter.createLessOrEqualFilter(
+						"jansLastUpd", entryManager.encodeTime(clusterNodesBaseDn, expirationDate))));
 
 		return entryManager.findEntries(clusterNodesBaseDn, ClusterNode.class, filter);
 	}
