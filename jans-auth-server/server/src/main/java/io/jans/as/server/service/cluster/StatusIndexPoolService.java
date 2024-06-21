@@ -53,7 +53,7 @@ public class StatusIndexPoolService {
 
     @PostConstruct
     public void init() {
-        log.info("Initializing Token Pool Service ...");
+        log.info("Initializing Status Index Pool Service ...");
         indexAllocationBlockSize = appConfiguration.getStatusListIndexAllocationBlockSize();
     }
 
@@ -108,7 +108,7 @@ public class StatusIndexPoolService {
      * Gets pool by global status list index
      *
      * @param index status list index
-     * @return token pool
+     * @return pool
      */
     public StatusIndexPool getPoolByIndex(int index) {
         int poolId = index / indexAllocationBlockSize;
@@ -119,7 +119,7 @@ public class StatusIndexPoolService {
     /**
      * Returns a list of all StatusIndexPools associated with ClusterNode
      *
-     * @return list of TokenPools
+     * @return list of pools
      */
     public List<StatusIndexPool> getNodePools(Integer nodeId) {
         String baseDn = baseDn();
@@ -183,8 +183,12 @@ public class StatusIndexPoolService {
     }
 
     public StatusIndexPool allocate(int nodeId) {
+        log.debug("Allocating status index pool, node {}, LOCK_KEY {}... ", nodeId, LOCK_KEY);
+
         // Try to use existing expired entry
         List<StatusIndexPool> expiredPools = getPoolsExpired(nodeId);
+
+        log.debug("Allocation - found {} expired status index pools, node {}.", expiredPools.size(), nodeId);
 
         // expiration date of the pool is double of access token lifetime
         Date expirationDate = new Date(System.currentTimeMillis() + 2 * appConfiguration.getAccessTokenLifetime() * 1000);
@@ -198,30 +202,31 @@ public class StatusIndexPoolService {
 
                 update(pool);
 
-                // Load token after update
-                StatusIndexPool lockedTokenPool = getPoolByDn(pool.getDn());
+                // Load pool after update
+                StatusIndexPool lockedPool = getPoolByDn(pool.getDn());
 
                 // If lock is ours reset entry and return it
-                if (LOCK_KEY.equals(lockedTokenPool.getLockKey())) {
-                    return lockedTokenPool;
+                if (LOCK_KEY.equals(lockedPool.getLockKey())) {
+                    log.debug("Re-using existing status index pool {}, node {}, LOCK_KEY {}", lockedPool.getId(), nodeId, LOCK_KEY);
+                    return lockedPool;
                 }
             } catch (EntryPersistenceException ex) {
-                log.trace("Unexpected error happened during entry lock", ex);
+                log.trace("Unexpected error happened during entry lock, node " + nodeId, ex);
             }
         }
 
         // There are no free entries. server need to add new one with next index
         int attempt = 1;
         do {
-            log.debug("Attempting to persist new status index pool. Attempt {} out of {}", attempt, ATTEMPT_LIMIT);
+            log.debug("Attempting to persist new status index pool. Attempt {} out of {}. Node {}.", attempt, ATTEMPT_LIMIT, nodeId);
 
-            StatusIndexPool lastTokenPool = getPoolLast();
+            StatusIndexPool lastPool = getPoolLast();
 
-            int lastTokenPoolIndex = lastTokenPool == null ? 0 : lastTokenPool.getId() + 1;
+            int lastPoolIndex = lastPool == null ? 0 : lastPool.getId() + 1;
 
             StatusIndexPool pool = new StatusIndexPool();
-            pool.setId(lastTokenPoolIndex);
-            pool.setDn(createDn(lastTokenPoolIndex));
+            pool.setId(lastPoolIndex);
+            pool.setDn(createDn(lastPoolIndex));
             pool.setNodeId(nodeId);
             pool.setLastUpdate(new Date());
             pool.setLockKey(LOCK_KEY);
@@ -232,24 +237,24 @@ public class StatusIndexPoolService {
             try {
                 persist(pool);
 
-                // Load token after update
-                StatusIndexPool lockedTokenPool = getPoolByDn(pool.getDn());
+                // Load pool after update
+                StatusIndexPool lockedPool = getPoolByDn(pool.getDn());
 
                 // if lock is ours return it
-                if (LOCK_KEY.equals(lockedTokenPool.getLockKey())) {
-                    log.debug("Successfully created new status index pool {}", lockedTokenPool.getId());
-                    return setIndexes(lockedTokenPool);
+                if (LOCK_KEY.equals(lockedPool.getLockKey())) {
+                    log.debug("Successfully created new status index pool {}, node {}", lockedPool.getId(), nodeId);
+                    return setIndexes(lockedPool);
                 } else {
-                    log.debug("Failed to create new status index pool {}", lockedTokenPool.getId());
+                    log.debug("Failed to create new status index pool {}, node {}", lockedPool.getId(), nodeId);
                 }
             } catch (EntryPersistenceException ex) {
-                log.trace("Unexpected error happened during entry lock", ex);
+                log.trace("Unexpected error happened during entry lock, node " + nodeId, ex);
             }
             attempt++;
         } while (attempt <= ATTEMPT_LIMIT);
 
         // This should not happens
-        throw new EntryPersistenceException("Failed to allocate StatusIndexPool!!!");
+        throw new EntryPersistenceException(String.format("Failed to allocate StatusIndexPool for node %s!!!", nodeId));
     }
 
     private StatusIndexPool setIndexes(StatusIndexPool pool) {

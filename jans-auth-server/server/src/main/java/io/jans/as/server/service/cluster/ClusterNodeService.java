@@ -143,7 +143,7 @@ public class ClusterNodeService {
 	// all logs must be INFO here, because allocate method is called during initialization before
     // LoggerService set loggingLevel from config.
 	public ClusterNode allocate() {
-        log.info("Allocation, LOCK_KEY {}... ", LOCK_KEY);
+        log.info("Allocating node, LOCK_KEY {}... ", LOCK_KEY);
 
 		// Try to use existing expired entry (node is expired if not used for 3 minutes)
 		List<ClusterNode> expiredNodes = getClusterNodesExpired();
