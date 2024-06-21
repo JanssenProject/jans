@@ -1,8 +1,4 @@
-use std::{
-	collections::BTreeMap,
-	io::{Cursor, Read},
-	str,
-};
+use std::{borrow::Cow, collections::BTreeMap, str};
 
 use cedar_policy::*;
 use http::ResponseEx;
@@ -44,15 +40,13 @@ pub async fn start() {
 	// load default OpenID Configuration
 	let config = open_id_config(CONFIG.openid_config_url).await;
 
-	// Get PolicyStore zip
-	let mut zip = match CONFIG.policy_store.strategy {
-		"local" => None,
+	// Get PolicyStore JSON
+	let source = match CONFIG.policy_store.strategy {
+		"local" => Cow::Borrowed(include_bytes!("../policy-store/default.json").as_slice()),
 		"remote" => {
-			let res = http::get(CONFIG.policy_store.uri, &[]).await.expect("Can't fetch Policy Store zip");
-			let bytes = res.into_bytes().await.expect("Can't convert Policy Store response to bytes");
-			let bytes = Cursor::new(bytes);
-
-			Some(zip::ZipArchive::new(bytes).expect("Can't open Policy Store zip"))
+			let res = http::get(CONFIG.policy_store.uri, &[]).await.expect("Unable fetch Policy Store");
+			let bytes = res.into_bytes().await.expect("Can't convert Policy Store response to String");
+			Cow::Owned(bytes)
 		}
 		"authenticated" => {
 			let client: types::OpenIdDynamicClient = {
@@ -76,12 +70,19 @@ pub async fn start() {
 			let grant: types::OpenIdGrantResponse = {
 				// https://gluu.org/docs/gluu-server/4.0/admin-guide/oauth2/
 				let token = if let Some(client_secret) = client.client_secret {
-					window().unwrap().btoa(&format!("{}:{}", client.client_id, client_secret)).unwrap()
+					format!("{}:{}", client.client_id, client_secret)
 				} else {
 					console::warn_1(&JsValue::from_str("Client Secret is not provided"));
-					window().unwrap().btoa(&client.client_id).unwrap()
+					client.client_id
 				};
-				let auth = format!("Basic {}", token);
+
+				#[wasm_bindgen]
+				extern "C" {
+					#[wasm_bindgen(js_name = btoa)]
+					pub fn js_btoa(input: &str) -> String;
+				}
+
+				let auth = format!("Basic {}", js_btoa(&token));
 
 				let grant = types::OpenIdGrantRequest {
 					scope: "cedarling",
@@ -99,10 +100,10 @@ pub async fn start() {
 				let url = format!("{}/config?id={}", CONFIG.lock_master.url, CONFIG.lock_master.policy_store_id);
 				let auth = format!("Bearer {}", grant.access_token);
 				let res = http::get(&url, &[("Authorization", &auth)]).await.expect("Unable to fetch policies from remote location");
-				Cursor::new(res.into_bytes().await.expect("Unable to convert response to bytes"))
+				Cow::Owned(res.into_bytes().await.expect("Unable to convert response to bytes"))
 			};
 
-			Some(zip::ZipArchive::new(buffer).expect("Can't open Policy Store zip"))
+			buffer
 		}
 		strategy => {
 			let msg = format!("Unknown Policy Store Strategy: {}", strategy);
@@ -110,64 +111,47 @@ pub async fn start() {
 		}
 	};
 
+	// Decompress if necessary
+	let source = match CONFIG.decompress_policy_store {
+		true => Cow::Owned(miniz_oxide::inflate::decompress_to_vec_zlib(&source).unwrap()),
+		false => source,
+	};
+
+	// Parse JSON
+	let mut policy_store = serde_json::from_slice::<serde_json::Value>(&source).unwrap();
+	let policy_store = policy_store.as_object_mut().expect("Expect top level policy store to be an object");
+
 	// Load Schema
-	let _schema = match zip {
-		Some(ref mut zip) => {
-			let file = zip.by_name("schema.txt").expect("Can't find `schema.txt` in Policy Store");
-			let (schema, warnings) = Schema::from_file_natural(file).unwrap();
-
-			for warning in warnings {
-				let msg = format!("Schema Parser generated Warning: {}", warning);
-				let msg = JsValue::from_str(&msg);
-				console::warn_1(&msg)
-			}
-
-			cedar::schema(Some(schema))
-		}
-		None => {
-			let schema = include_str!("../policy-store/schema.txt");
-			let (schema, warnings) = Schema::from_str_natural(schema).unwrap();
-
-			for warning in warnings {
-				let msg = format!("Schema Parser generated Warning: {}", warning);
-				let msg = JsValue::from_str(&msg);
-				console::warn_1(&msg)
-			}
-
-			cedar::schema(Some(schema))
-		}
+	let schema = {
+		let schema = policy_store.remove("Schema").expect("Can't find Schema in policy store");
+		Schema::from_json_value(schema).unwrap()
 	};
 
 	// Load PolicySet
-	let _policies = match zip {
-		Some(ref mut zip) => {
-			let mut file = zip.by_name("policies.txt").expect("Can't find `policies.txt` in Policy Store");
-			let mut string = String::new();
-			file.read_to_string(&mut string).unwrap_throw();
+	let policies = {
+		let mut policies = policy_store.remove("PolicySet").expect("Can't find PolicySet in policy store");
+		let policies = policies.as_array_mut().expect("Expect PolicySet to be an array");
 
-			cedar::policies(Some(string.parse().unwrap_throw()))
-		}
-		None => {
-			let policies = include_str!("../policy-store/policies.txt");
-			cedar::policies(Some(policies.parse().unwrap_throw()))
-		}
+		let iter = policies.drain(..).into_iter().map(|policy| Policy::from_json(None, policy).unwrap());
+		PolicySet::from_policies(iter).unwrap()
 	};
 
 	// Load trusted issuers
-	let _issuers = match zip {
-		Some(ref mut zip) => {
-			let file = zip.by_name("trusted-issuers.json").expect("Can't find `trusted-issuers.json` in Policy Store");
-			let issuers = serde_json::from_reader(file).expect("Can't parse `trusted-issuers.json` in Policy Store");
+	let trusted_issuers = {
+		let mut issuers = policy_store.remove("TrustedIssuers").expect("Can't find TrustedIssuers in policy store");
+		let issuers = issuers.as_array_mut().expect("Expect TrustedIssuers to be an array");
 
-			cedar::trusted_issuers(Some(issuers))
-		}
-		None => {
-			let issuers = include_str!("../policy-store/trusted-issuers.json");
-			let issuers = serde_json::from_str(issuers).expect("Can't parse `trusted-issuers.json` in Policy Store");
-
-			cedar::trusted_issuers(Some(issuers))
-		}
+		issuers
+			.drain(..)
+			.into_iter()
+			.map(|issuer| serde_json::from_value(issuer).unwrap())
+			.collect::<Vec<types::TrustedIssuer>>()
 	};
+
+	// Store PolicyStore data
+	cedar::schema(Some(schema));
+	cedar::policies(Some(policies));
+	cedar::trusted_issuers(Some(trusted_issuers));
 
 	// check whether config updates are enabled
 	if CONFIG.dynamic_configuration {
