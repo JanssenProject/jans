@@ -1,0 +1,21 @@
+[
+	{
+		"name": "Google",
+		"Description": "Consumer IDP",
+		"openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
+		"access_tokens": {
+			"trusted": true
+		},
+		"id_tokens": {
+			"trusted": true,
+			"principal_identifier": "email"
+		},
+		"userinfo_tokens": {
+			"trusted": true,
+			"role_mapping": "role"
+		},
+		"tx_tokens": {
+			"trusted": true
+		}
+	}
+]

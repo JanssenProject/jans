@@ -1,7 +1,15 @@
-schema_url = "https://api.github.com/repos/nynymike/cedar-playground/contents/gluu_lock.cedarschema?ref=main"
+# https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties
 
-# Policy Store Settings
-[policy_store]
-use_static_store = false
-remote_uri = "https://api.github.com/repos/nynymike/cedar-playground/contents/gluu_lock.cedarschema?ref=main"
-use_brotli_decompression = false # Whether the policy store is to be decopmressed using Brotli
+# whether Cedarling should listen for SSE config updates
+dynamic-configuration = false
+openid-config-url = "https://account.gluu.org/.well-known/openid-configuration"
+
+[policy-store]
+# How to get policy store, can be local, remote or authenticated
+strategy = "local"
+uri = "https://api.github.com/repos/nynymike/cedar-playground/contents/gluu_lock.cedarschema?ref=main"
+
+[lock-master]
+url = "*"
+ssa_jwt = "eyJhbG"
+policy_store_id = "test#5"

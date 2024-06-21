@@ -1,22 +1,23 @@
 use cedar_policy::*;
-use wasm_bindgen::UnwrapThrowExt;
+
+use crate::types;
 
 // SAFETY: Webassembly is single-threaded, so this is safe. The statics are also scoped
-pub(crate) fn entities(swap: Option<Entities>) -> &'static Entities {
-	static mut ENTITIES: Option<Entities> = None;
-
-	unsafe {
-		swap.map(|s| ENTITIES = Some(s));
-		ENTITIES.as_ref().unwrap_throw()
-	}
-}
-
 pub(crate) fn policies(swap: Option<PolicySet>) -> &'static PolicySet {
 	static mut ENTITIES: Option<PolicySet> = None;
 
 	unsafe {
 		swap.map(|s| ENTITIES = Some(s));
-		ENTITIES.as_ref().unwrap_throw()
+		ENTITIES.as_ref().unwrap()
+	}
+}
+
+pub(crate) fn trusted_issuers(swap: Option<Vec<types::TrustedIssuer>>) -> &'static [types::TrustedIssuer] {
+	static mut ENTITIES: Vec<types::TrustedIssuer> = Vec::new();
+
+	unsafe {
+		swap.map(|s| ENTITIES = s);
+		ENTITIES.as_slice()
 	}
 }
 
@@ -27,9 +28,4 @@ pub(crate) fn schema(swap: Option<Schema>) -> Option<&'static Schema> {
 		swap.map(|s| ENTITIES = Some(s));
 		ENTITIES.as_ref()
 	}
-}
-
-pub(crate) fn authorizer() -> &'static Authorizer {
-	static mut AUTHORIZER: Option<Authorizer> = None;
-	unsafe { AUTHORIZER.get_or_insert_with(|| Authorizer::new()) }
 }
