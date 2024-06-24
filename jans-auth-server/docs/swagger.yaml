@@ -2675,7 +2675,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /token_status_list:
+  /status_list:
     get:
       tags:
         - Status List

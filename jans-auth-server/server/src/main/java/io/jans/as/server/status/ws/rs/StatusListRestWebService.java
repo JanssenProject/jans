@@ -22,7 +22,7 @@ public class StatusListRestWebService {
     private StatusListService statusService;
 
     @GET
-    @Path("/token_status_list")
+    @Path("/status_list")
     @Consumes({CONTENT_TYPE_STATUSLIST_JSON, CONTENT_TYPE_STATUSLIST_JWT})
     @Produces({CONTENT_TYPE_STATUSLIST_JSON, CONTENT_TYPE_STATUSLIST_JWT})
     public Response requestStatusList(@HeaderParam("Accept") String acceptHeader) {

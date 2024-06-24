@@ -9031,7 +9031,7 @@ components:
             - REVOKE_TOKEN
             - REVOKE_SESSION
             - GLOBAL_TOKEN_REVOCATION
-            - TOKEN_STATUS_LIST
+            - STATUS_LIST
             - ACTIVE_SESSION
             - END_SESSION
             - STATUS_SESSION

@@ -234,7 +234,7 @@ public class DiscoveryService {
     }
 
     public String getTokenStatusListEndpoint() {
-        return endpointUrl("/token_status_list");
+        return endpointUrl("/status_list");
     }
 
 
@@ -289,7 +289,7 @@ public class DiscoveryService {
         if (StringUtils.isNotBlank(appConfiguration.getMtlsTokenEndpoint()))
             aliases.put(TOKEN_ENDPOINT, appConfiguration.getMtlsTokenEndpoint());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.STATUS_LIST) && StringUtils.isNotBlank(appConfiguration.getMtlsEndSessionEndpoint()))
-            aliases.put(STATUS_LIST_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/token_status_list"));
+            aliases.put(STATUS_LIST_ENDPOINT, endpointUrl(appConfiguration.getMtlsEndSessionEndpoint(), "/status_list"));
         if (StringUtils.isNotBlank(appConfiguration.getMtlsJwksUri()))
             aliases.put(JWKS_URI, appConfiguration.getMtlsJwksUri());
         if (StringUtils.isNotBlank(appConfiguration.getMtlsCheckSessionIFrame()))
