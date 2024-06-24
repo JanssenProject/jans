@@ -88,11 +88,11 @@ public class HashBasedOIDCMetaCache implements OIDCMetaCache{
 
     private void performHouseCleaning() {
 
-        for(String issuer: cacheEntries.keySet()) {
-            Map<String,CacheEntry> issuerCache = cacheEntries.get(issuer);
-           for(Map.Entry<String,CacheEntry> entry : issuerCache.entrySet()) {
-             if(entry.getValue().isExpired()) {
-                issuerCache.remove(entry.getKey());
+        for(Map.Entry<String,Map<String,CacheEntry>> cacheEntry: cacheEntries.entrySet()) {
+            Map<String,CacheEntry> issuerCache = cacheEntries.get(cacheEntry.getKey());
+           for(Map.Entry<String,CacheEntry> issuerEntry : issuerCache.entrySet()) {
+             if(issuerEntry.getValue().isExpired()) {
+                issuerCache.remove(issuerEntry.getKey());
              }
            }
         }

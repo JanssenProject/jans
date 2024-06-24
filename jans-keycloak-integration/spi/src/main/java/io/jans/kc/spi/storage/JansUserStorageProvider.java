@@ -44,7 +44,7 @@ public class JansUserStorageProvider implements UserStorageProvider, UserLookupP
             log.infov("getUserByUsername(). Username: {0}",username);
             JansPerson person = jansThinBridge.getJansUserByUsername(username);
             if(person != null) {
-                return new JansUserModel(session,model,person);
+                return new JansUserModel(model,person);
             }
             return null;
         }catch(JansThinBridgeOperationException e) {
@@ -60,7 +60,7 @@ public class JansUserStorageProvider implements UserStorageProvider, UserLookupP
             log.infov("getUserByEmail(). Email : {0}",email);
             JansPerson person = jansThinBridge.getJansUserByEmail(email);
             if(person != null) {
-                return new JansUserModel(session,model,person);
+                return new JansUserModel(model,person);
             }
             return null;
         }catch(JansThinBridgeOperationException e) {
@@ -78,7 +78,7 @@ public class JansUserStorageProvider implements UserStorageProvider, UserLookupP
             final String inum = storageId.getExternalId();
             JansPerson person = jansThinBridge.getJansUserByInum(inum);
             if(person != null) {
-                return new JansUserModel(session,model,person);
+                return new JansUserModel(model,person);
             }
             return null;
         }catch(JansThinBridgeOperationException e) {

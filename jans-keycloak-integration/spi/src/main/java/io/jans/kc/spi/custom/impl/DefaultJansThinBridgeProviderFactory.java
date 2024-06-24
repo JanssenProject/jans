@@ -6,7 +6,6 @@ import io.jans.kc.spi.custom.JansThinBridgeProvider;
 import io.jans.kc.spi.custom.JansThinBridgeProviderFactory;
 import io.jans.kc.spi.ProviderIDs;
 import io.jans.kc.spi.custom.JansThinBridgeInitException;
-import io.jans.kc.spi.custom.JansThinBridgeInitException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
@@ -75,51 +74,23 @@ public class DefaultJansThinBridgeProviderFactory implements JansThinBridgeProvi
 
     @Override
     public void init(Config.Scope config) {
-
-
+        //nothing to do during init for now
     }
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
-
+        //nothing to do during postInit for now
     }
 
     @Override
     public void close() {
-
-
+        //nothing to do during cost for now
     }
 
     @Override
     public String getId() {
 
         return PROVIDER_ID;
-    }
-
-   
-
-    private final FileConfiguration loadBaseConfiguration(final String filename) {
-
-        try {
-            return new FileConfiguration(filename);
-        }catch(Exception e) {
-            log.errorv(e,"Failed to load configuration from {0}",filename);
-            final String errordesc = (filename != null ? " from file " + filename : ". Invalid filename specified");
-            throw new JansThinBridgeInitException("Failed to load configuration" + errordesc);
-        }
-    } 
-
-    private final StringEncrypter createStringEncrypterFromSaltFile(final String path) {
-
-        try {
-            final String salt = cryptographicSaltFromFile(path);
-            if(StringUtils.isEmpty(salt)) {
-                return null;
-            }
-            return StringEncrypter.instance(salt);
-        }catch(StringEncrypter.EncryptionException e) {
-            throw new JansThinBridgeInitException("Failed to create string encrypted",e);
-        }
     }
 
     private final String cryptographicSaltFromFile(final String path) {
@@ -132,7 +103,7 @@ public class DefaultJansThinBridgeProviderFactory implements JansThinBridgeProvi
 
         try {
             FileConfiguration config = persistenceConfiguration.getConfiguration();
-            Properties connprops = (Properties) config.getProperties();
+            Properties connprops = config.getProperties();
             return PropertiesDecrypter.decryptAllProperties(StringEncrypter.defaultInstance(),connprops,salt);
         }catch(StringEncrypter.EncryptionException e) {
             throw new JansThinBridgeInitException("Failed to decrypt persistence connection parameters",e);

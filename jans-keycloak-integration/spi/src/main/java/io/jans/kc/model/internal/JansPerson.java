@@ -108,7 +108,7 @@ public class JansPerson implements Serializable {
         List<String> ret = new ArrayList<>();
         for(Object val : values) {
             if(val instanceof String strval) {
-                ret.add((String) strval);
+                ret.add(strval);
             }else {
                 ret.add(val.toString());
             }

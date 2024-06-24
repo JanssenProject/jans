@@ -4,7 +4,6 @@ import io.jans.kc.model.JansUserAttributeModel;
 import io.jans.kc.spi.ProviderIDs;
 import io.jans.kc.spi.custom.JansThinBridgeOperationException;
 import io.jans.kc.spi.custom.JansThinBridgeProvider;
-import io.jans.model.GluuStatus;
 
 import java.util.List;
 
@@ -56,24 +55,19 @@ public class JansSamlUserAttributeMapper extends AbstractSAMLProtocolMapper impl
             .build();
     }
 
-    public JansSamlUserAttributeMapper() {
-
-
-    }
-
     @Override
     public void init(Config.Scope scope) {
-
+        //nothing for now to do in init 
     }
 
     @Override
     public void close() {
-
+        //nothing for now to do in close
     }
 
     @Override 
     public void postInit(KeycloakSessionFactory factory) {
-
+        //nothing to do for now in postInit
     }
 
     @Override

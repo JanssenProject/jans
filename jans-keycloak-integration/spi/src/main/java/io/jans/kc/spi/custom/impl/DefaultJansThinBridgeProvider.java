@@ -5,7 +5,6 @@ import java.util.List;
 import io.jans.kc.model.JansUserAttributeModel;
 import io.jans.kc.model.internal.JansPerson;
 import io.jans.kc.spi.custom.JansThinBridgeProvider;
-import io.jans.kc.spi.custom.JansThinBridgeInitException;
 import io.jans.kc.spi.custom.JansThinBridgeOperationException;
 
 import io.jans.model.JansAttribute;
@@ -37,7 +36,7 @@ public class DefaultJansThinBridgeProvider implements JansThinBridgeProvider {
     
     @Override
     public void close() {
-        
+        //for now , nothing to do during the close of the provider
     }
 
     @Override 

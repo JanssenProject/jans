@@ -12,7 +12,6 @@ import org.keycloak.component.ComponentModel;
 
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.GroupModel;
-import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.RoleModel;
 import org.keycloak.models.SubjectCredentialManager;
@@ -33,7 +32,7 @@ public class JansUserModel implements UserModel {
     private final JansPerson jansPerson;
     private final StorageId storageId;
 
-    public JansUserModel(KeycloakSession session, ComponentModel storageProviderModel, JansPerson jansPerson) {
+    public JansUserModel(ComponentModel storageProviderModel, JansPerson jansPerson) {
 
         this.jansPerson = jansPerson;
         String userId = jansPerson.customAttributeValue(INUM_ATTR_NAME);

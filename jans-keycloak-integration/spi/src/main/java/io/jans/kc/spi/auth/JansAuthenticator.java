@@ -2,11 +2,8 @@ package io.jans.kc.spi.auth;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
-
 import java.security.SecureRandom;
-import java.text.MessageFormat;
 
 import java.util.HashMap;
 import java.util.List;
@@ -101,6 +98,10 @@ public class JansAuthenticator implements Authenticator {
             log.errorv(e,"OIDC Error obtaining the authorization url");
             Response response = context.form().createForm(JANS_AUTH_ERROR_FTL);
             context.failure(AuthenticationFlowError.INTERNAL_ERROR,response);
+        }catch(NullPointerException e) {
+            log.errorv(e,"NullPointerException obtaining the authorization url");
+            Response response = context.form().createForm(JANS_AUTH_ERROR_FTL);
+            context.failure(AuthenticationFlowError.INTERNAL_ERROR,response);
         }
     }
 
@@ -113,14 +114,14 @@ public class JansAuthenticator implements Authenticator {
             return;
         }
 
-        String openid_code = getOpenIdCode(context);
-        if(openid_code == null) {
+        String openidCode = getOpenIdCode(context);
+        if(openidCode == null) {
             log.errorv("Missing authentication code during response processing");
             context.failure(AuthenticationFlowError.INTERNAL_ERROR,onMissingAuthenticationCode(context));
             return;
         }
 
-        OIDCTokenRequest tokenrequest = createTokenRequest(config, openid_code, createRedirectUri(context));
+        OIDCTokenRequest tokenrequest = createTokenRequest(config, openidCode, createRedirectUri(context));
         try {
             OIDCTokenResponse tokenresponse = oidcService.requestTokens(config.normalizedIssuerUrl(), tokenrequest);
             if(!tokenresponse.indicatesSuccess()) {
@@ -170,20 +171,19 @@ public class JansAuthenticator implements Authenticator {
 
     @Override
     public void setRequiredActions(KeycloakSession session, RealmModel model, UserModel user) {
-
-        return;
+        //for now no required actions to specify
     }
 
     @Override
     public List<RequiredActionFactory> getRequiredActions(KeycloakSession session) {
 
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
     public void close() {
 
-        return;
+        // nothing to do for now when then authenticator is shutdown
     }
 
     private Configuration extractAndValidateConfiguration(AuthenticationFlowContext  context) {
@@ -230,7 +230,7 @@ public class JansAuthenticator implements Authenticator {
 
     private Map<String,String> parseQueryParameters(String params) {
 
-        Map<String,String> ret = new HashMap<String,String>();
+        Map<String,String> ret = new HashMap<>();
         if(params == null) {
             return ret;
         }
@@ -260,20 +260,20 @@ public class JansAuthenticator implements Authenticator {
             return null;
         }
 
-        String server_url = config.getConfig().get(JansAuthenticatorConfigProp.SERVER_URL.getName());
-        String client_id  = config.getConfig().get(JansAuthenticatorConfigProp.CLIENT_ID.getName());
-        String client_secret = config.getConfig().get(JansAuthenticatorConfigProp.CLIENT_SECRET.getName());
+        String serverUrl = config.getConfig().get(JansAuthenticatorConfigProp.SERVER_URL.getName());
+        String clientId  = config.getConfig().get(JansAuthenticatorConfigProp.CLIENT_ID.getName());
+        String clientSecret = config.getConfig().get(JansAuthenticatorConfigProp.CLIENT_SECRET.getName());
         String issuer = config.getConfig().get(JansAuthenticatorConfigProp.ISSUER.getName());
-        String extra_scopes = config.getConfig().get(JansAuthenticatorConfigProp.EXTRA_SCOPES.getName());
-        List<String> parsed_extra_scopes = new ArrayList<>();
-        if(extra_scopes != null) {
-            String [] tokens = extra_scopes.split(",");
+        String extraScopes = config.getConfig().get(JansAuthenticatorConfigProp.EXTRA_SCOPES.getName());
+        List<String> parsedExtraScopes = new ArrayList<>();
+        if(extraScopes != null) {
+            String [] tokens = extraScopes.split(",");
             for(String token : tokens) {
-                parsed_extra_scopes.add(token.trim());
+                parsedExtraScopes.add(token.trim());
             }
         }
 
-        return new Configuration(server_url,client_id,client_secret,issuer,parsed_extra_scopes);
+        return new Configuration(serverUrl,clientId,clientSecret,issuer,parsedExtraScopes);
     }
 
     private final String generateOIDCState() {
@@ -364,7 +364,7 @@ public class JansAuthenticator implements Authenticator {
         public void addError(String error) {
 
             if(errors == null) {
-                this.errors = new ArrayList<String>();
+                this.errors = new ArrayList<>();
             }
             this.errors.add(error);
         }
@@ -418,18 +418,18 @@ public class JansAuthenticator implements Authenticator {
 
         public String normalizedIssuerUrl() {
 
-            String effective_url = issuerUrl;
-            if(effective_url == null) {
-                effective_url = serverUrl;
+            String effectiveUrl = issuerUrl;
+            if(effectiveUrl == null) {
+                effectiveUrl = serverUrl;
             }
-            if(effective_url == null) {
+            if(effectiveUrl == null) {
                 return null;
             }
             
-            if(effective_url.charAt(effective_url.length() -1) == '/') {
-                return effective_url.substring(0, effective_url.length() -1);
+            if(effectiveUrl.charAt(effectiveUrl.length() -1) == '/') {
+                return effectiveUrl.substring(0, effectiveUrl.length() -1);
             }
-            return effective_url;
+            return effectiveUrl;
         } 
         
     }

@@ -41,12 +41,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.jboss.logging.Logger;
 
 public class NimbusOIDCService implements OIDCService {
 
-    private static final Logger log = Logger.getLogger(NimbusOIDCService.class);
-
+    
     private OIDCMetaCache metaCache;
 
     public NimbusOIDCService(OIDCMetaCache metaCache) {
@@ -134,8 +132,8 @@ public class NimbusOIDCService implements OIDCService {
 
         BearerAccessToken bearertoken  = ((NimbusOIDCAccessToken) accesstoken).asBearerToken();
         try {
-            HTTPResponse http_response = new UserInfoRequest(getUserInfoEndpoint(issuerUrl),bearertoken).toHTTPRequest().send();
-            UserInfoResponse userinforesponse = UserInfoResponse.parse(http_response);
+            HTTPResponse httpResponse = new UserInfoRequest(getUserInfoEndpoint(issuerUrl),bearertoken).toHTTPRequest().send();
+            UserInfoResponse userinforesponse = UserInfoResponse.parse(httpResponse);
             return new NimbusOIDCUserInfoResponse(userinforesponse);
         } catch (IOException e) {
            throw new OIDCUserInfoRequestError("I/O error trying to obtain user info",e);
@@ -205,9 +203,7 @@ public class NimbusOIDCService implements OIDCService {
         try {
             Issuer issuer = new Issuer(issuerUrl);
             return OIDCProviderMetadata.resolve(issuer);
-        }catch(GeneralException e) {
-            throw new OIDCMetaError("Could not obtain metadata from server",e);
-        }catch(IOException e) {
+        }catch(GeneralException | IOException e) {
             throw new OIDCMetaError("Could not obtain metadata from server",e);
         }
     }

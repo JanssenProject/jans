@@ -32,11 +32,11 @@ public class JansAuthResponseResourceProviderFactory implements RealmResourcePro
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
-
+        //nothing to do here post init 
     }
 
     @Override
     public void close() {
-
+        //nothing to do here on close
     }
 }

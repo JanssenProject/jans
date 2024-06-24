@@ -25,8 +25,6 @@ public class NimbusOIDCTokenResponse implements OIDCTokenResponse {
             Tokens tokens = atresponse.getTokens();
             this.accessToken = new NimbusOIDCAccessToken(tokens.getAccessToken());
             this.refreshToken = new NimbusOIDCRefreshToken(tokens.getRefreshToken());
-        }else {
-
         }
     }
 

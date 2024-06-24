@@ -59,19 +59,19 @@ public class JansAuthenticatorFactory implements AuthenticatorFactory {
     @Override
     public void init(Config.Scope config) {
         
-        return;
+        //nothing to do for now during initialization
     }
 
     @Override
     public void close() {
 
-        return;
+        //nothing to do for now during shutdown
     }
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
 
-        return;
+        //nothing to do postInit
     }
 
     @Override

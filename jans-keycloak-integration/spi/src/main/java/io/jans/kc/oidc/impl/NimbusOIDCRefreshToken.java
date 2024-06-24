@@ -12,4 +12,8 @@ public class NimbusOIDCRefreshToken implements OIDCRefreshToken{
         this.refreshToken = refreshToken;
     }
 
+    private RefreshToken refreshTokenRef() {
+
+        return this.refreshToken;
+    }
 }

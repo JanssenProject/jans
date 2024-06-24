@@ -48,7 +48,7 @@ public class JansAuthResponseResourceProvider implements RealmResourceProvider {
 
     @Override
     public void close() {
-
+        //nothing to do for now 
     }
 
     @GET
@@ -91,10 +91,10 @@ public class JansAuthResponseResourceProvider implements RealmResourceProvider {
         return (actionuri != null);
     }
 
-    private final void saveAuthResultInRealm(RealmModel realm, String code, String session_state) {
+    private final void saveAuthResultInRealm(RealmModel realm, String code, String sessionState) {
 
         realm.setAttribute(SessionAttributes.JANS_OIDC_CODE,code);
-        realm.setAttribute(SessionAttributes.JANS_SESSION_STATE,session_state);
+        realm.setAttribute(SessionAttributes.JANS_SESSION_STATE,sessionState);
     }
 
     private final Response createResponseWithForm(String formtemplate,Map<String,String> attributes) {
@@ -102,8 +102,8 @@ public class JansAuthResponseResourceProvider implements RealmResourceProvider {
         LoginFormsProvider lfp = session.getProvider(LoginFormsProvider.class);
 
         if(attributes != null && !attributes.isEmpty()) {
-            for(String key: attributes.keySet()) {
-                lfp.setAttribute(key,attributes.get(key));
+            for(Map.Entry<String,String> attrEntry: attributes.entrySet()) {
+                lfp.setAttribute(attrEntry.getKey(),attrEntry.getValue());
             }
         }
         return lfp.createForm(formtemplate);
@@ -111,14 +111,14 @@ public class JansAuthResponseResourceProvider implements RealmResourceProvider {
 
     private final Response createErrorResponse(String errmsgid) {
 
-        Map<String,String> attributes = new HashMap<String,String>();
+        Map<String,String> attributes = new HashMap<>();
         attributes.put(ERR_MSG_TPL_PARAM,errmsgid);
         return createResponseWithForm(JANS_AUTH_RESPONSE_ERR_FTL,attributes);
     }
 
     private final Response createFinalizeAuthResponse(String actionuri) {
 
-        Map<String,String> attributes  = new HashMap<String,String>();
+        Map<String,String> attributes  = new HashMap<>();
         attributes.put(ACTION_URI_TPL_PARAM,actionuri);
         return createResponseWithForm(JANS_AUTH_RESPONSE_COMPLETE_FTL, attributes);
     }
