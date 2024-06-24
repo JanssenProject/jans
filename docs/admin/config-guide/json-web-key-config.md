@@ -150,9 +150,61 @@ So, let's get the schema file and update it with keys data:
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --schema JSONWebKey > /tmp/jwk.json
 ```
-The `post-config-jwks-key` uses the `JSONWebKey` schema to describe the configuration change.
-Refer [here](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml#/Configuration%20%E2%80%93%20JWK%20-%20JSON%20Web%20Key%20(JWK)/post-config-jwks-key) 
-to know more about schema.
+
+You can use the above command without a file to get the format of the `JSONWebKey` schema
+
+```text title="Schema Format"
+
+name           string
+descr          string
+kid            string
+kty            string
+               enum: ['EC', 'RSA', 'OKP', 'oct']
+use            string
+               enum: ['sig', 'enc']
+alg            string
+               enum: ['RS256', 'RS384', 'RS512', 'ES256', 'ES256K', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'EdDSA', 'RSA1_5', 'RSA-OAEP', 'RSA-OAEP-256', 'ECDH-ES', 'ECDH-ES+A128KW', 'ECDH-ES+A192KW', 'ECDH-ES+A256KW', 'A128KW', 'A192KW', 'A256KW', 'A128GCMKW', 'A192GCMKW', 'A256GCMKW', 'PBES2-HS256+A128KW', 'PBES2-HS384+A192KW', 'PBES2-HS512+A256KW', 'dir']
+exp            integer
+               format: int64
+crv            string
+               enum: ['P-256', 'P-256K', 'P-384', 'P-521', 'Ed25519', 'Ed448']
+x5c            array of string
+n              string
+e              string
+x              string
+y              string
+key_ops_type   array of string
+               enum: ["KeyOps{value='connect'} CONNECT", "KeyOps{value='ssa'} SSA", "KeyOps{value='all'} ALL"]
+```
+
+you can also use the following command for `JSONWebKey` schema example.
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --schema-sample JSONWebKey
+```
+
+```text title="Schema Example"
+{
+  "name": "string",
+  "descr": "string",
+  "kid": "string",
+  "kty": "oct",
+  "use": "sig",
+  "alg": "dir",
+  "exp": 94,
+  "crv": "Ed25519",
+  "x5c": [
+    "string"
+  ],
+  "n": "string",
+  "e": "string",
+  "x": "string",
+  "y": "string",
+  "key_ops_type": [
+    "KeyOps{value='ssa'} SSA"
+  ]
+}
+```
+
 
 Let's update the json file; In our case, I have added sample data for testing purpose only.
 
