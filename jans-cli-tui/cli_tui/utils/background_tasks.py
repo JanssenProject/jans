@@ -11,6 +11,8 @@ async def get_attributes_coroutine(app) -> None:
     start_index = 1
     limit = 100
 
+    app.logger.info("Backrgound Task: retreiving attributes")
+
     while True:
 
         cli_args = {'operation_id': 'get-attributes', 'endpoint_args': f'limit:{limit},startIndex:{start_index}'}
@@ -36,6 +38,8 @@ async def get_attributes_coroutine(app) -> None:
 
 async def retrieve_enabled_scripts() -> None:
     'Coroutine for retreiving enabled scripts'
+
+    app.logger.info("Backrgound Task: retreiving enabled scripts")
 
     cli_args = {'operation_id': 'get-config-scripts', 'endpoint_args': 'fieldValuePair:enabled=true'}
     response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
