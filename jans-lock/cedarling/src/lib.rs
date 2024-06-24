@@ -17,7 +17,7 @@ pub(crate) async fn start() {
 
 	// load policy store
 	let config = startup::open_id_config(CONFIG.openid_config_url).await;
-	let policy_store = startup::get_policy_store(&config).await;
+	let policy_store = startup::get_policy_store(config).await;
 
 	// Persist Policy Store Data
 	startup::persist_policy_store_data(policy_store);

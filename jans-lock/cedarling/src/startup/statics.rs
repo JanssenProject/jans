@@ -1,5 +1,7 @@
 //! SAFETY: Webassembly is single-threaded, so this is safe. The statics are also scoped and the references are read only
 
+#![allow(clippy::option_map_unit_fn)]
+
 use super::types;
 use cedar_policy::*;
 

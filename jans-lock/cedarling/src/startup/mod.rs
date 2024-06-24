@@ -130,7 +130,7 @@ pub fn persist_policy_store_data(mut policy_store: serde_json::Map<String, serde
 		let mut policies = policy_store.remove("PolicySet").expect_throw("Can't find PolicySet in policy store");
 		let policies = policies.as_array_mut().expect_throw("expect_throw PolicySet to be an array");
 
-		let iter = policies.drain(..).into_iter().map(|policy| Policy::from_json(None, policy).unwrap_throw());
+		let iter = policies.drain(..).map(|policy| Policy::from_json(None, policy).unwrap_throw());
 		PolicySet::from_policies(iter).unwrap_throw()
 	};
 
@@ -138,12 +138,7 @@ pub fn persist_policy_store_data(mut policy_store: serde_json::Map<String, serde
 	let trusted_issuers = {
 		let mut issuers = policy_store.remove("TrustedIssuers").expect_throw("Can't find TrustedIssuers in policy store");
 		let issuers = issuers.as_array_mut().expect_throw("expect_throw TrustedIssuers to be an array");
-
-		issuers
-			.drain(..)
-			.into_iter()
-			.map(|issuer| serde_json::from_value(issuer).unwrap_throw())
-			.collect::<Vec<types::TrustedIssuer>>()
+		issuers.drain(..).map(|issuer| serde_json::from_value(issuer).unwrap_throw()).collect::<Vec<types::TrustedIssuer>>()
 	};
 
 	// Persist PolicyStore data
