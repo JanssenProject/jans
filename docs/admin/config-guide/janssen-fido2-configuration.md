@@ -7,131 +7,213 @@ tags:
 
 # Janssen FIDO2 Configuration
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](config-tools/jans-cli/README.md)
+The Janssen Server provides multiple configuration tools to perform these 
+tasks.
 
-Using Janssen CLI, You can `get/update` Fido2 properties.
-To get the information of Janssen Fido2 CLI, run the following command:
+=== "Use Command-line"
 
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
+
+=== "Use Text-based UI"
+
+    Use a fully functional text-based user interface from the terminal. 
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](./config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
+
+=== "Use REST API"
+
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](./config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
+
+##  Using Command Line
+
+
+In the Janssen Server, you can deploy and customize the FIDO2 Configuration using the
+command line. To get the details of Janssen command line operations relevant to
+FIDO2 Configuration, you can check the operations under `Fido2Configuration` task using the
+command below:
+
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --info Fido2Configuration
 ```
-/opt/jans/jans-cli/config-cli.py --info ConfigurationFido2
 
+It will show the details of the available operation-ids for Fido2.
+
+```text title="Sample Output"
 Operation ID: get-properties-fido2
-  Description: Gets Jans Authorization Server Fido2 configuration properties.
+  Description: Gets Jans Authorization Server Fido2 configuration properties
 Operation ID: put-properties-fido2
-  Description: Updates Fido2 configuration properties.
-  Schema: /components/schemas/JansFido2DynConfiguration
+  Description: Updates Fido2 configuration properties
+  Schema: Fido2:AppConfiguration
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/JansFido2DynConfiguration
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema Fido2:AppConfiguration
 ```
 
-Table of Contents
-=================
-
-* [Janssen FIDO2 Configuration](#janssen-fido2-configuration)
-  * [Find FIDO2 Configuration Properties](#find-fido2-configuration-properties)
-  * [Update FIDO2 Configuration Properties](#update-fido2-configuration-properties)
-
-## Find FIDO2 Configuration Properties
+### Find FIDO2 Configuration Properties
 
 To get the properties of Janssen Fido2 Configuration, run below command:
-`/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2`
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2
+```
 
 It will return the result as below:
 
-```text
-Getting access token for scope https://jans.io/oauth/config/fido2.readonly
+```json title="Sample Output" linenums="1"
 {
-  "issuer": "https://testjans.gluu.com",
-  "baseEndpoint": "https://testjans.gluu.com/fido2/restv1",
+  "issuer": "https://jans-project.lxd",
+  "baseEndpoint": "https://jans-project.lxd/jans-fido2/restv1",
   "cleanServiceInterval": 60,
   "cleanServiceBatchChunkSize": 10000,
-  "useLocalCache": false,
-  "disableJdkLogger": false,
-  "loggingLevel": "DEBUG",
+  "useLocalCache": true,
+  "disableJdkLogger": true,
+  "loggingLevel": "INFO",
   "loggingLayout": "text",
-  "externalLoggerConfiguration": null,
   "metricReporterInterval": 300,
   "metricReporterKeepDataDays": 15,
-  "metricReporterEnabled": false,
+  "metricReporterEnabled": true,
   "personCustomObjectClassList": [
     "jansCustomPerson",
     "jansPerson"
   ],
+  "superGluuEnabled": false,
+  "sessionIdPersistInCache": false,
+  "oldU2fMigrationEnabled": true,
+  "errorReasonEnabled": false,
   "fido2Configuration": {
-    "authenticatorCertsFolder": null,
-    "mdsCertsFolder": null,
-    "mdsTocsFolder": null,
-    "serverMetadataFolder": null,
+    "authenticatorCertsFolder": "/etc/jans/conf/fido2/authenticator_cert",
+    "mdsCertsFolder": "/etc/jans/conf/fido2/mds/cert",
+    "mdsTocsFolder": "/etc/jans/conf/fido2/mds/toc",
+    "checkU2fAttestations": false,
+    "userAutoEnrollment": false,
+    "unfinishedRequestExpiration": 180,
+    "authenticationHistoryExpiration": 1296000,
+    "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
+    "requestedCredentialTypes": [
+      "RS256",
+      "ES256"
+    ],
     "requestedParties": [
       {
-        "name": null,
-        "domains": []
+        "name": "https://jans-project.lxd",
+        "domains": [
+          "jans-project.lxd"
+        ]
       }
     ],
-    "userAutoEnrollment": false,
-    "unfinishedRequestExpiration": null,
-    "authenticationHistoryExpiration": null,
-    "requestedCredentialTypes": []
+    "skipDownloadMdsEnabled": false,
+    "skipValidateMdsInAttestationEnabled": false,
+    "assertionOptionsGenerateEndpointEnabled": true
   }
 }
+
 ```
 
-## Update FIDO2 Configuration Properties
+### Update FIDO2 Configuration Properties
 
 To perform this operation, let's check the schema first.
 
-```text
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/JansFido2DynConfiguration > /tmp/fido2-schema.json
+```text title="Command"
+/opt/jans/jans-cli/config-cli.py --schema Fido2:AppConfiguration > \
+/tmp/fido2-schema.json
 ```
 
-This command will create a fido2 schema file on `/tmp/`. You can edit this file depending on the requirements:
+This command will create a fido2 schema file on `/tmp/`.
+You can edit this file depending on the requirements:
 
-![janssen fido2 configuration](../../assets/image-cl-fido2-update-03042021.png)
+I have updated to `logginglabel:INFO` from `NULL` and `jans` value for 
+`authenticatorCertsFolder`.
+also added the `issuer` and `baseEndpoint` data.
 
 Now let's do the operation:
 
-```text
-/opt/jans/jans-cli/config-cli.py --operation-id put-properties-fido2 --data /tmp/fido2-schema.json
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --operation-id put-properties-fido2 \
+--data /tmp/fido2-schema.json
+```
 
-Getting access token for scope https://jans.io/oauth/config/fido2.write
-Server Response:
+```json title="Sample Output" linenums="1"
 {
-  "issuer": "https://server.example.com/",
-  "baseEndpoint": "https://server.example.com/fido2/restv1",
-  "cleanServiceInterval": null,
-  "cleanServiceBatchChunkSize": null,
+  "issuer": "https://jans-project.lxd",
+  "baseEndpoint": "https://jans-project.lxd/jans-fido2/restv1",
+  "cleanServiceInterval": 108,
+  "cleanServiceBatchChunkSize": 4,
   "useLocalCache": false,
-  "disableJdkLogger": false,
+  "disableJdkLogger": true,
   "loggingLevel": "INFO",
-  "loggingLayout": null,
-  "externalLoggerConfiguration": null,
-  "metricReporterInterval": null,
-  "metricReporterKeepDataDays": null,
-  "metricReporterEnabled": true,
-  "personCustomObjectClassList": [],
+  "loggingLayout": "string",
+  "externalLoggerConfiguration": "string",
+  "metricReporterInterval": 93,
+  "metricReporterKeepDataDays": 26,
+  "metricReporterEnabled": false,
+  "personCustomObjectClassList": [
+    "string"
+  ],
+  "superGluuEnabled": true,
+  "sessionIdPersistInCache": true,
+  "oldU2fMigrationEnabled": true,
+  "errorReasonEnabled": true,
   "fido2Configuration": {
-    "authenticatorCertsFolder": null,
-    "mdsCertsFolder": null,
-    "mdsTocsFolder": null,
-    "serverMetadataFolder": null,
-    "requestedParties": [
-      {
-        "name": null,
-        "domains": null
-      },
-      {
-        "name": null,
-        "domains": null
-      }
-    ],
-    "userAutoEnrollment": true,
-    "unfinishedRequestExpiration": null,
-    "authenticationHistoryExpiration": null,
-    "requestedCredentialTypes": []
+    "authenticatorCertsFolder": "jans",
+    "checkU2fAttestations": false,
+    "userAutoEnrollment": false,
+    "unfinishedRequestExpiration": 120,
+    "authenticationHistoryExpiration": 1296000,
+    "skipDownloadMdsEnabled": false,
+    "skipValidateMdsInAttestationEnabled": false,
+    "assertionOptionsGenerateEndpointEnabled": false
   }
 }
 ```
 
-You may find that I have updated to `logginglabel:INFO` from `NULL`.
+##  Using Text-based UI
+
+In Janssen, You can manage FIDO2 Configuration using 
+the [Text-Based UI](./config-tools/jans-tui/README.md) also.
+
+You can start TUI using the command below:
+
+```bash title="Command"
+sudo /opt/jans/jans-cli/jans_cli_tui.py
+```
+
+Navigate to `FIDO` on that screen.
+Users are presented with two options:`Dynamic Configuration` 
+and `Static Configuration`.
+
+### Dynamic Configuration Screen
+
+* Various fields are accessible on this page, where users can input 
+accurate data corresponding to each field.
+* Once all valid information has been inputted, the user has the option
+to save the dynamic configuration.
+
+![image](../../assets/FIDO2-dynamic-configuration-TUI.png)
 
 
+### Static Configuration Screen 
+
+* On the static configuration page, users have the ability to 
+input valid data for the corresponding field.
+
+![image](../../assets/FIDO2-Static-configuration-TUI.png)
+
+* The two fields available for `Party` are `Name` and `Domains`.
+ 
+![image](../../assets/FIDO2-add-party-TUI.png)  
+
+* After entering all the necessary information, the user is given the 
+choice to save the Static configuration.
+
+
+## Using Configuration REST API
+
+Janssen Server Configuration REST API exposes relevant endpoints for 
+managing and configuring the FIDO2 Configuration. Endpoint details 
+are published in the [Swagger document](./../reference/openapi.md).
