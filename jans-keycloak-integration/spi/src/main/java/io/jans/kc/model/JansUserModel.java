@@ -1,7 +1,6 @@
 package io.jans.kc.model;
 
 import io.jans.kc.model.internal.JansPerson;
-import io.jans.orm.model.base.CustomObjectAttribute;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,8 +19,6 @@ import org.keycloak.models.SubjectCredentialManager;
 import org.keycloak.storage.ReadOnlyException;
 import org.keycloak.storage.StorageId;
 
-import org.jboss.logging.Logger;
-
 public class JansUserModel implements UserModel {
     
     private static final String INUM_ATTR_NAME = "inum";
@@ -31,18 +28,13 @@ public class JansUserModel implements UserModel {
     private static final String GIVEN_NAME_ATTR_NAME = "givenName";
     private static final String MAIL_ATTR_NAME = "mail";
     private static final String EMAIL_VERIFIED_ATTR_NAME = "emailVerified";
-
-    private static final Logger log = Logger.getLogger(JansUserModel.class);
+    private static final String USER_READ_ONLY_EXCEPTION_MSG = "User is read-only for this update";
 
     private final JansPerson jansPerson;
     private final StorageId storageId;
-    private final ComponentModel storageProviderModel;
-    private final KeycloakSession session;
 
     public JansUserModel(KeycloakSession session, ComponentModel storageProviderModel, JansPerson jansPerson) {
 
-        this.session = session;
-        this.storageProviderModel = storageProviderModel;
         this.jansPerson = jansPerson;
         String userId = jansPerson.customAttributeValue(INUM_ATTR_NAME);
         this.storageId = new StorageId(storageProviderModel.getId(),userId);
@@ -63,7 +55,7 @@ public class JansUserModel implements UserModel {
     @Override
     public void setUsername(String username) {
 
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
@@ -83,7 +75,7 @@ public class JansUserModel implements UserModel {
     @Override
     public void setCreatedTimestamp(Long timestamp) {
 
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
@@ -93,31 +85,28 @@ public class JansUserModel implements UserModel {
         if(enabledStr == null) {
             return false;
         }
-        if("active".equals(enabledStr)) {
-            return true;
-        }
-        return false;
+        return "active".equals(enabledStr);
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
     public void setSingleAttribute(String name, String value)  {
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
     public void setAttribute(String name, List<String> value) {
 
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
     public void removeAttribute(String name) {
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
 
@@ -170,12 +159,12 @@ public class JansUserModel implements UserModel {
 
     @Override
     public void addRequiredAction(String action) {
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
     public void removeRequiredAction(String action) {
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
@@ -187,7 +176,7 @@ public class JansUserModel implements UserModel {
     @Override
     public void setFirstName(String firstName) {
 
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
@@ -199,7 +188,7 @@ public class JansUserModel implements UserModel {
     @Override
     public void setLastName(String lastName) {
 
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
@@ -211,7 +200,7 @@ public class JansUserModel implements UserModel {
     @Override
     public void setEmail(final String email) {
 
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
@@ -231,7 +220,7 @@ public class JansUserModel implements UserModel {
     @Override
     public void setEmailVerified(boolean verified) {
         
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
@@ -255,13 +244,13 @@ public class JansUserModel implements UserModel {
     @Override
     public void joinGroup(GroupModel group) {
         
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
     public void leaveGroup(GroupModel group) {
 
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
@@ -279,7 +268,7 @@ public class JansUserModel implements UserModel {
     @Override
     public void setFederationLink(String link) {
 
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
@@ -291,7 +280,7 @@ public class JansUserModel implements UserModel {
     @Override
     public void setServiceAccountClientLink(String clientInternalId) {
 
-        throw new ReadOnlyException("User is read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
@@ -321,7 +310,7 @@ public class JansUserModel implements UserModel {
     @Override
     public void grantRole(RoleModel role) {
 
-        throw new ReadOnlyException("User is in read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
     @Override
@@ -333,7 +322,7 @@ public class JansUserModel implements UserModel {
     @Override
     public void deleteRoleMapping(RoleModel role) {
 
-        throw new ReadOnlyException("User is in read-only for this update");
+        throw new ReadOnlyException(USER_READ_ONLY_EXCEPTION_MSG);
     }
 
 }

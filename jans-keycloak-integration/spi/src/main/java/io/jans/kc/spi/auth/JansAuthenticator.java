@@ -5,12 +5,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 
+import java.security.SecureRandom;
 import java.text.MessageFormat;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.ArrayList;
 
 import jakarta.ws.rs.core.Response;
@@ -267,9 +267,9 @@ public class JansAuthenticator implements Authenticator {
         String extra_scopes = config.getConfig().get(JansAuthenticatorConfigProp.EXTRA_SCOPES.getName());
         List<String> parsed_extra_scopes = new ArrayList<>();
         if(extra_scopes != null) {
-            String [] tokens = extra_scopes.split("\\s*,\\s*");
+            String [] tokens = extra_scopes.split(",");
             for(String token : tokens) {
-                parsed_extra_scopes.add(token);
+                parsed_extra_scopes.add(token.trim());
             }
         }
 
@@ -302,7 +302,7 @@ public class JansAuthenticator implements Authenticator {
         int leftlimit = 48; 
         int rightlimit = 122;
     
-        return new Random().ints(leftlimit,rightlimit+1)
+        return new SecureRandom().ints(leftlimit,rightlimit+1)
                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
                .limit(length)
                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)

@@ -95,13 +95,15 @@ public class App {
             }
             System.exit(-1);
             return;
+        }catch(InterruptedException e) {
+            log.error("Application interrupted",e);
+            throw e;
         }catch(Exception e) {
             log.error("Fatal error starting application",e);
             if(jobScheduler != null ) {
                 jobScheduler.stop();
             }
             System.exit(-1);
-            return;
         }
 
     }

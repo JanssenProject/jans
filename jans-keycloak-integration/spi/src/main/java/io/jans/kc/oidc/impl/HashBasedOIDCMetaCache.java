@@ -2,16 +2,13 @@ package io.jans.kc.oidc.impl;
 
 import java.util.Map;
 
-import org.jboss.logging.Logger;
-
 import io.jans.kc.oidc.OIDCMetaCache;
 
 import java.util.HashMap;
 
 public class HashBasedOIDCMetaCache implements OIDCMetaCache{
     
-    private static final Logger log  = Logger.getLogger(HashBasedOIDCMetaCache.class);
-    private static final long DEFAULT_CACHE_TTL = 20*60; // 20 seconds 
+    private static final long DEFAULT_CACHE_TTL = 20*60l; // 20 seconds 
 
     private long cacheEntryTtl;
 
@@ -28,7 +25,7 @@ public class HashBasedOIDCMetaCache implements OIDCMetaCache{
             this.cacheEntryTtl = DEFAULT_CACHE_TTL;
         }
         this.cacheEntryTtl = this.cacheEntryTtl * 1000; // convert to milliseconds
-        this.cacheEntries = new HashMap<String,Map<String,CacheEntry>>();
+        this.cacheEntries = new HashMap<>();
     }
 
     @Override
@@ -63,42 +60,41 @@ public class HashBasedOIDCMetaCache implements OIDCMetaCache{
 
     private Object getIssuerCacheEntryValue(String issuer, String key) {
         
-        Map<String,CacheEntry> issuer_cache = cacheEntries.get(issuer);
-        return issuer_cache.get(key).getValue();
+        Map<String,CacheEntry> issuerCache = cacheEntries.get(issuer);
+        return issuerCache.get(key).getValue();
     }
 
     private void createIfNotExistIssuerCacheEntry(String issuer) {
 
-        if(!cacheEntries.containsKey(issuer)) {
-            cacheEntries.put(issuer,new HashMap<String,CacheEntry>());
-        }
+        cacheEntries.computeIfAbsent(issuer, k-> new HashMap<>());
     }
 
     private void addIssuerCacheEntry(String issuer,String key, Object value) {
 
         Map<String,CacheEntry> issuerCache = cacheEntries.get(issuer);
-        for(String existingkey : issuerCache.keySet()) {
-            if(existingkey.equalsIgnoreCase(key)) {
+        if(issuerCache == null) {
+            return;
+        }
+
+        for(Map.Entry<String,CacheEntry> entry : issuerCache.entrySet()) {
+            if(entry.getKey().equalsIgnoreCase(key)) {
                 //update cache entry
-                CacheEntry cache_entry = issuerCache.get(existingkey);
-                cache_entry.updateValue(value);
+                entry.getValue().updateValue(value);
                 return;
             }
         }
-
         issuerCache.put(key,new CacheEntry(cacheEntryTtl, value));
     }
 
     private void performHouseCleaning() {
 
         for(String issuer: cacheEntries.keySet()) {
-            Map<String,CacheEntry> issuer_cache = cacheEntries.get(issuer);
-            for(String key :issuer_cache.keySet()) {
-                CacheEntry cache_entry = issuer_cache.get(key);
-                if(cache_entry.isExpired()) {
-                    issuer_cache.remove(key);
-                }
-            }
+            Map<String,CacheEntry> issuerCache = cacheEntries.get(issuer);
+           for(Map.Entry<String,CacheEntry> entry : issuerCache.entrySet()) {
+             if(entry.getValue().isExpired()) {
+                issuerCache.remove(entry.getKey());
+             }
+           }
         }
     }
 

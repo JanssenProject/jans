@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.jans.model.JansAttribute;
 import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.CustomObjectAttribute;
 
@@ -20,11 +19,6 @@ public class JansPerson implements Serializable {
 
     @AttributesList(name="name",value="values",multiValued="multiValued")
     private List<CustomObjectAttribute> customAttributes = new ArrayList<>();
-
-
-    public JansPerson() {
-
-    }
 
     public String getDn() {
 
@@ -72,7 +66,7 @@ public class JansPerson implements Serializable {
         for(CustomObjectAttribute customAttribute : customAttributes) {
             if(customAttribute.getName().equals(name)) {
                 List<Object> values = customAttribute.getValues();
-                if(values == null || values.size() == 0) {
+                if(values == null || values.isEmpty()) {
                     return new ArrayList<>();
                 }
                 return convertToString(values);
@@ -95,7 +89,7 @@ public class JansPerson implements Serializable {
         for(CustomObjectAttribute customAttribute : customAttributes) {
             if(customAttribute.getName().equals(attributeName)) {
                 List<Object> values = customAttribute.getValues();
-                if(values == null || values.size() == 0) {
+                if(values == null || values.isEmpty()) {
                     return null;
                 }
                 List<String> ret = convertToString(values);
@@ -113,8 +107,8 @@ public class JansPerson implements Serializable {
 
         List<String> ret = new ArrayList<>();
         for(Object val : values) {
-            if(val instanceof String) {
-                ret.add((String) val);
+            if(val instanceof String strval) {
+                ret.add((String) strval);
             }else {
                 ret.add(val.toString());
             }

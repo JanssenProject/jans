@@ -17,8 +17,8 @@ public class OIDCAuthRequest {
         this.clientId = null;
         this.state = null;
         this.nonce = null;
-        this.scopes = new ArrayList<String>();
-        this.responseTypes = new ArrayList<String>();
+        this.scopes = new ArrayList<>();
+        this.responseTypes = new ArrayList<>();
         this.redirectUri = null;
     }
 

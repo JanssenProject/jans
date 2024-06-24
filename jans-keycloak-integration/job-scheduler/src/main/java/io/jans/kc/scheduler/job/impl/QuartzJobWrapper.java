@@ -38,8 +38,6 @@ public class QuartzJobWrapper implements Job {
             io.jans.kc.scheduler.job.Job job = (io.jans.kc.scheduler.job.Job) constructor.newInstance();
             ExecutionContext effectivecontext = new QuartzExecutionContext(context.getMergedJobDataMap());
             job.run(effectivecontext);
-        } catch(ReflectiveOperationException e) {
-            throw new JobExecutionException("Failed to run job " + jobname,e);
         }catch(Exception e) {
             throw new JobExecutionException("Failed to run job " + jobname,e);
         }
