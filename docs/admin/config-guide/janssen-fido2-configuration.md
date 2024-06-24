@@ -123,13 +123,105 @@ To perform this operation, let's check the schema first.
 /opt/jans/jans-cli/config-cli.py --schema Fido2:AppConfiguration > \
 /tmp/fido2-schema.json
 ```
+Above command will create a fido2 schema file on `/tmp/`.
 
-This command will create a fido2 schema file on `/tmp/`.
-You can edit this file depending on the requirements:
+You can use the above command without a file to get the format of the `Fido2:AppConfiguration` schema
 
-I have updated to `logginglabel:INFO` from `NULL` and `jans` value for 
+```text title="Schema Format"
+issuer                        string
+baseEndpoint                  string
+cleanServiceInterval          integer
+                              format: int32
+cleanServiceBatchChunkSize    integer
+                              format: int32
+useLocalCache                 boolean
+disableJdkLogger              boolean
+loggingLevel                  string
+loggingLayout                 string
+externalLoggerConfiguration   string
+metricReporterInterval        integer
+                              format: int32
+metricReporterKeepDataDays    integer
+                              format: int32
+metricReporterEnabled         boolean
+personCustomObjectClassList   array of string
+superGluuEnabled              boolean
+sessionIdPersistInCache       boolean
+oldU2fMigrationEnabled        boolean
+errorReasonEnabled            boolean
+fido2Configuration            object
+                                authenticatorCertsFolder: string
+                                mdsAccessToken: string
+                                mdsCertsFolder: string
+                                mdsTocsFolder: string
+                                checkU2fAttestations: boolean
+                                userAutoEnrollment: boolean
+                                unfinishedRequestExpiration: integer
+                                authenticationHistoryExpiration: integer
+                                serverMetadataFolder: string
+                                requestedCredentialTypes: array of string
+                                requestedParties: array
+                                metadataUrlsProvider: string
+                                skipDownloadMdsEnabled: boolean
+                                skipValidateMdsInAttestationEnabled: boolean
+                                assertionOptionsGenerateEndpointEnabled: boolean
+```
+
+you can also use the following command for `Fido2:AppConfiguration` schema example.
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --schema-sample Fido2:AppConfiguration
+
+```
+
+```text title="Schema Example"
+{
+  "issuer": "string",
+  "baseEndpoint": "string",
+  "cleanServiceInterval": 23,
+  "cleanServiceBatchChunkSize": 156,
+  "useLocalCache": false,
+  "disableJdkLogger": true,
+  "loggingLevel": "string",
+  "loggingLayout": "string",
+  "externalLoggerConfiguration": "string",
+  "metricReporterInterval": 197,
+  "metricReporterKeepDataDays": 110,
+  "metricReporterEnabled": false,
+  "personCustomObjectClassList": [
+    "string"
+  ],
+  "superGluuEnabled": false,
+  "sessionIdPersistInCache": true,
+  "oldU2fMigrationEnabled": true,
+  "errorReasonEnabled": true,
+  "fido2Configuration": {
+    "authenticatorCertsFolder": "string",
+    "mdsAccessToken": "string",
+    "mdsCertsFolder": "string",
+    "mdsTocsFolder": "string",
+    "checkU2fAttestations": true,
+    "userAutoEnrollment": false,
+    "unfinishedRequestExpiration": 124,
+    "authenticationHistoryExpiration": 118,
+    "serverMetadataFolder": "string",
+    "requestedCredentialTypes": [
+      "string"
+    ],
+    "requestedParties": null,
+    "metadataUrlsProvider": "string",
+    "skipDownloadMdsEnabled": false,
+    "skipValidateMdsInAttestationEnabled": false,
+    "assertionOptionsGenerateEndpointEnabled": false
+  }
+}
+
+
+```
+
+
+I have updated to `logginglabel:INFO` from `user` and `jans` value for 
 `authenticatorCertsFolder`.
-also added the `issuer` and `baseEndpoint` data.
 
 Now let's do the operation:
 
@@ -142,34 +234,50 @@ Now let's do the operation:
 {
   "issuer": "https://jans-project.lxd",
   "baseEndpoint": "https://jans-project.lxd/jans-fido2/restv1",
-  "cleanServiceInterval": 108,
-  "cleanServiceBatchChunkSize": 4,
-  "useLocalCache": false,
+  "cleanServiceInterval": 60,
+  "cleanServiceBatchChunkSize": 10000,
+  "useLocalCache": true,
   "disableJdkLogger": true,
-  "loggingLevel": "INFO",
-  "loggingLayout": "string",
-  "externalLoggerConfiguration": "string",
-  "metricReporterInterval": 93,
-  "metricReporterKeepDataDays": 26,
-  "metricReporterEnabled": false,
+  "loggingLevel": "user",
+  "loggingLayout": "text",
+  "metricReporterInterval": 300,
+  "metricReporterKeepDataDays": 15,
+  "metricReporterEnabled": true,
   "personCustomObjectClassList": [
-    "string"
+    "jansCustomPerson",
+    "jansPerson"
   ],
-  "superGluuEnabled": true,
-  "sessionIdPersistInCache": true,
+  "superGluuEnabled": false,
+  "sessionIdPersistInCache": false,
   "oldU2fMigrationEnabled": true,
-  "errorReasonEnabled": true,
+  "errorReasonEnabled": false,
   "fido2Configuration": {
     "authenticatorCertsFolder": "jans",
+    "mdsCertsFolder": "/etc/jans/conf/fido2/mds/cert",
+    "mdsTocsFolder": "/etc/jans/conf/fido2/mds/toc",
     "checkU2fAttestations": false,
     "userAutoEnrollment": false,
-    "unfinishedRequestExpiration": 120,
+    "unfinishedRequestExpiration": 180,
     "authenticationHistoryExpiration": 1296000,
+    "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
+    "requestedCredentialTypes": [
+      "RS256",
+      "ES256"
+    ],
+    "requestedParties": [
+      {
+        "name": "https://jans-project.lxd",
+        "domains": [
+          "jans-project.lxd"
+        ]
+      }
+    ],
     "skipDownloadMdsEnabled": false,
     "skipValidateMdsInAttestationEnabled": false,
-    "assertionOptionsGenerateEndpointEnabled": false
+    "assertionOptionsGenerateEndpointEnabled": true
   }
 }
+
 ```
 
 ##  Using Text-based UI
