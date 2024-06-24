@@ -96,9 +96,14 @@ public class ClusterNodeService {
 	public ClusterNode getClusterNodeLast() {
 		String clusterNodesBaseDn = staticConfiguration.getBaseDn().getNode();
 
+		int count = 1;
+		if (PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(entryManager.getPersistenceType(clusterNodesBaseDn))) {
+			count = Integer.MAX_VALUE;
+		}
+
 		PagedResult<ClusterNode> pagedResult = entryManager.findPagedEntries(clusterNodesBaseDn, ClusterNode.class,
 				Filter.createEqualityFilter("jansType", CLUSTER_TYPE_JANS_AUTH), null, "jansNum", SortOrder.DESCENDING,
-				0, 1, 1);
+				0, count, count);
 		if (pagedResult.getEntriesCount() >= 1) {
 			return pagedResult.getEntries().get(0);
 		}
