@@ -1,19 +1,3 @@
-#[derive(serde::Deserialize, serde::Serialize, Debug, Default)]
-pub struct Tokens {
-	// generates entities
-	#[serde(rename = "access_token")]
-	pub(crate) access: String,
-	#[serde(rename = "id_token")]
-	pub(crate) id: String,
-
-	#[serde(rename = "userinfo_token")]
-	pub(crate) user_info: String,
-	#[serde(rename = "tx_token")]
-	pub(crate) tx: String,
-	#[serde(rename = "sse")]
-	pub(crate) sse_url: String,
-}
-
 #[derive(serde::Serialize, Debug)]
 pub(crate) struct OpenIdDynamicClientRequest<'a> {
 	pub(crate) client_name: &'static str,

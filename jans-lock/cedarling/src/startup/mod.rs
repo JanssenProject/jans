@@ -4,8 +4,11 @@ use cedar_policy::*;
 use wasm_bindgen::{prelude::*, throw_str};
 use web_sys::*;
 
-use super::{persistent, http, types, CONFIG};
+use super::{http, CONFIG};
 use http::ResponseEx;
+
+mod statics;
+mod types;
 
 pub async fn open_id_config(issuer_url: &'static str) -> &'static types::OpenIdConfiguration {
 	static mut OPENID_CONFIGURATION_STORE: BTreeMap<&'static str, types::OpenIdConfiguration> = BTreeMap::new();
@@ -28,7 +31,7 @@ pub async fn open_id_config(issuer_url: &'static str) -> &'static types::OpenIdC
 pub async fn get_policy_store(config: &types::OpenIdConfiguration) -> serde_json::Map<String, serde_json::Value> {
 	// Get PolicyStore JSON
 	let source = match CONFIG.policy_store.strategy {
-		"local" => Cow::Borrowed(include_bytes!("../policy-store/default.json").as_slice()),
+		"local" => Cow::Borrowed(include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/policy-store/default.json")).as_slice()),
 		"remote" => {
 			let res = http::get(CONFIG.policy_store.uri, &[]).await.expect_throw("Unable fetch Policy Store");
 			let bytes = res.into_bytes().await.expect_throw("Can't convert Policy Store response to String");
@@ -144,7 +147,7 @@ pub fn persist_policy_store_data(mut policy_store: serde_json::Map<String, serde
 	};
 
 	// Persist PolicyStore data
-	persistent::schema(Some(schema));
-	persistent::policies(Some(policies));
-	persistent::trusted_issuers(Some(trusted_issuers));
+	statics::schema(Some(schema));
+	statics::policies(Some(policies));
+	statics::trusted_issuers(Some(trusted_issuers));
 }

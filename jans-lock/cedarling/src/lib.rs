@@ -1,8 +1,6 @@
 use wasm_bindgen::prelude::*;
 
 pub(crate) mod http;
-pub(crate) mod persistent;
-pub(crate) mod types;
 
 mod authz;
 mod sse;

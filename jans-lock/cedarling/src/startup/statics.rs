@@ -1,8 +1,8 @@
+//! SAFETY: Webassembly is single-threaded, so this is safe. The statics are also scoped and the references are read only
+
+use super::types;
 use cedar_policy::*;
 
-use crate::types;
-
-// SAFETY: Webassembly is single-threaded, so this is safe. The statics are also scoped
 pub(crate) fn policies(swap: Option<PolicySet>) -> &'static PolicySet {
 	static mut POLICIES: Option<PolicySet> = None;
 
