@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 cedar-policy = { version = "3.2.0", features = ["wasm"] }
-static-toml = "1.2.0"
+static-toml = { version = "1.2.0", default-features = false }
 miniz_oxide = { version = "0.7.4", default-features = false, features = [
 	"with-alloc",
 ] }

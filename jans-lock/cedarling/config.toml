@@ -10,7 +10,7 @@ openid-config-url = "https://account.gluu.org/.well-known/openid-configuration"
 dynamic-configuration = false
 
 [policy-store]
-# How to get policy store, can be local, remote or authenticated
+# How to get policy store, can be local, remote or lock-master
 strategy = "local"
 uri = "https://api.github.com/repos/nynymike/cedar-playground/contents/gluu_lock.cedarschema?ref=main"
 

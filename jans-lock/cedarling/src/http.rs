@@ -10,7 +10,7 @@ extern "C" {
 	pub fn fetch_with_request_and_init(input: &Request, init: &RequestInit) -> js_sys::Promise;
 }
 
-pub async fn get(url: &str, headers: &[(&str, &str)]) -> Option<Response> {
+pub(crate) async fn get(url: &str, headers: &[(&str, &str)]) -> Option<Response> {
 	let mut opts = RequestInit::new();
 	opts.method("GET");
 	opts.mode(RequestMode::NoCors);
@@ -30,7 +30,8 @@ pub async fn get(url: &str, headers: &[(&str, &str)]) -> Option<Response> {
 	res.dyn_into::<Response>().ok()
 }
 
-pub enum PostBody<'a, T: serde::Serialize = ()> {
+#[allow(dead_code)]
+pub(crate) enum PostBody<'a, T: serde::Serialize = ()> {
 	None,
 	Json(T),
 	Form(T),
@@ -38,7 +39,7 @@ pub enum PostBody<'a, T: serde::Serialize = ()> {
 	Bytes(Vec<u8>),
 }
 
-pub async fn post<'a, T: serde::Serialize>(url: &str, body: PostBody<'a, T>, headers: &[(&'a str, &'a str)]) -> Option<Response> {
+pub(crate) async fn post<'a, T: serde::Serialize>(url: &str, body: PostBody<'a, T>, headers: &[(&'a str, &'a str)]) -> Option<Response> {
 	let mut opts = RequestInit::new();
 	let h = Headers::new().unwrap();
 
