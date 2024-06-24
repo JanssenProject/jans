@@ -78,7 +78,6 @@ public class JansAuthenticator implements Authenticator {
                 log.error("Invalid redirect URI");
                 response = context.form().createForm(JANS_AUTH_ERROR_FTL);
                 context.failure(AuthenticationFlowError.INTERNAL_ERROR,response);
-                response.close();
                 return;
             }
             URI actionuri = createActionUrl(context);
@@ -103,12 +102,10 @@ public class JansAuthenticator implements Authenticator {
             saveRealmStringData(context,SessionAttributes.JANS_OIDC_STATE,state);
 
             context.challenge(response);
-            response.close();
         }catch(OIDCMetaError e) {
             log.errorv(e,"OIDC Error obtaining the authorization url");
             response = context.form().createForm(JANS_AUTH_ERROR_FTL);
             context.failure(AuthenticationFlowError.INTERNAL_ERROR,response);
-            response.close();
         }
     }
 
