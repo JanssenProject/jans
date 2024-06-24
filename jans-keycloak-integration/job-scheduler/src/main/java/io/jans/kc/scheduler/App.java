@@ -97,7 +97,7 @@ public class App {
             return;
         }catch(InterruptedException e) {
             log.error("Application interrupted",e);
-            System.exit(-1);
+            Thread.currentThread().interrupt();
         }catch(Exception e) {
             log.error("Fatal error starting application",e);
             if(jobScheduler != null ) {

@@ -70,8 +70,17 @@ public class JansAuthenticator implements Authenticator {
             return;
         }
 
+        Response response = null;
         try {
             URI redirecturi = createRedirectUri(context);
+
+            if(redirecturi == null) {
+                log.error("Invalid redirect URI");
+                response = context.form().createForm(JANS_AUTH_ERROR_FTL);
+                context.failure(AuthenticationFlowError.INTERNAL_ERROR,response);
+                response.close();
+                return;
+            }
             URI actionuri = createActionUrl(context);
 
             String state = generateOIDCState();
@@ -82,7 +91,7 @@ public class JansAuthenticator implements Authenticator {
             URI loginurl = oidcService.createAuthorizationUrl(config.normalizedIssuerUrl(), oidcauthrequest);
             URI loginurlnoparams = UriBuilder.fromUri(loginurl.toString()).replaceQuery(null).build();
             
-            Response response = context
+            response = context
                 .form()
                 .setActionUri(actionuri)
                 .setAttribute(JANS_LOGIN_URL_ATTRIBUTE,loginurlnoparams.toString())
@@ -94,14 +103,12 @@ public class JansAuthenticator implements Authenticator {
             saveRealmStringData(context,SessionAttributes.JANS_OIDC_STATE,state);
 
             context.challenge(response);
+            response.close();
         }catch(OIDCMetaError e) {
             log.errorv(e,"OIDC Error obtaining the authorization url");
-            Response response = context.form().createForm(JANS_AUTH_ERROR_FTL);
+            response = context.form().createForm(JANS_AUTH_ERROR_FTL);
             context.failure(AuthenticationFlowError.INTERNAL_ERROR,response);
-        }catch(NullPointerException e) {
-            log.errorv(e,"NullPointerException obtaining the authorization url");
-            Response response = context.form().createForm(JANS_AUTH_ERROR_FTL);
-            context.failure(AuthenticationFlowError.INTERNAL_ERROR,response);
+            response.close();
         }
     }
 
