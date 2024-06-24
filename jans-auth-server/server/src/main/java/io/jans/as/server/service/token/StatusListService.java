@@ -55,12 +55,12 @@ public class StatusListService {
     private WebKeysConfiguration webKeysConfiguration;
 
     public Response requestStatusList(String acceptHeader) {
-        log.debug("Attempting to request token_status_list, acceptHeader: {} ...", acceptHeader);
+        log.debug("Attempting to request status_list, acceptHeader: {} ...", acceptHeader);
 
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.STATUS_LIST);
 
         try {
-            final List<StatusIndexPool> pools = statusTokenPoolService.getAllTokenPools();
+            final List<StatusIndexPool> pools = statusTokenPoolService.getAllPools();
             final StatusList statusList = join(pools);
 
             final boolean isJsonRequested = CONTENT_TYPE_STATUSLIST_JSON.equalsIgnoreCase(acceptHeader);

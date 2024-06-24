@@ -6,13 +6,6 @@
 
 package io.jans.as.server.service.cluster;
 
-import static io.jans.as.server.service.cluster.ClusterNodeService.LOCK_KEY;
-
-import java.util.Date;
-import java.util.List;
-
-import org.slf4j.Logger;
-
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.model.token.StatusIndexPool;
@@ -24,6 +17,12 @@ import io.jans.orm.search.filter.Filter;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+
+import java.util.Date;
+import java.util.List;
+
+import static io.jans.as.server.service.cluster.ClusterNodeService.LOCK_KEY;
 
 /**
  * @author Yuriy Movchan
@@ -91,8 +90,15 @@ public class StatusIndexPoolService {
      * @return pool
      */
     public StatusIndexPool getPoolLast() {
-    	String baseDn = staticConfiguration.getBaseDn().getNode();
-    	PagedResult<StatusIndexPool> pagedResult = entryManager.findPagedEntries(baseDn, StatusIndexPool.class, Filter.createPresenceFilter("jansNum"), null, "jansNum", SortOrder.DESCENDING, 0, 1, 1);
+    	String baseDn = baseDn();
+
+        int count = 1;
+        if (PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(entryManager.getPersistenceType(baseDn))) {
+            count = Integer.MAX_VALUE;
+        }
+
+    	PagedResult<StatusIndexPool> pagedResult = entryManager.findPagedEntries(baseDn, StatusIndexPool.class,
+                Filter.createPresenceFilter("jansNum"), null, "jansNum", SortOrder.DESCENDING, 0, count, count);
 		if (pagedResult.getEntriesCount() >= 1) {
 			return setIndexes(pagedResult.getEntries().get(0));
 		}
@@ -197,6 +203,7 @@ public class StatusIndexPoolService {
                 pool.setLockKey(LOCK_KEY);
                 pool.setExpirationDate(expirationDate);
                 pool.setLastUpdate(new Date());
+                pool.setNodeId(nodeId);
 
                 update(pool);
 
@@ -204,12 +211,7 @@ public class StatusIndexPoolService {
                 StatusIndexPool lockedPool = getPoolByDn(pool.getDn());
 
                 // If lock is ours reset entry and return it
-                if (LOCK_KEY.equals(lockedPool.getLockKey())) {
-                	// Assign record for specific nodeId 
-                	lockedPool.setNodeId(nodeId);
-
-                    update(lockedPool);
-
+                if (LOCK_KEY.equals(lockedPool.getLockKey()) && lockedPool.getNodeId().equals(nodeId)) {
                     log.debug("Re-using existing status index pool {}, node {}, LOCK_KEY {}", lockedPool.getId(), nodeId, LOCK_KEY);
                     return lockedPool;
                 }
@@ -246,7 +248,7 @@ public class StatusIndexPoolService {
                 StatusIndexPool lockedPool = getPoolByDn(pool.getDn());
 
                 // if lock is ours return it
-                if (LOCK_KEY.equals(lockedPool.getLockKey())) {
+                if (LOCK_KEY.equals(lockedPool.getLockKey()) && lockedPool.getNodeId().equals(nodeId)) {
                     log.debug("Successfully created new status index pool {}, node {}", lockedPool.getId(), nodeId);
                     return setIndexes(lockedPool);
                 } else {
