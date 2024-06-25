@@ -6,8 +6,6 @@ import re
 from base64 import b64decode
 
 import pem
-from apispec import APISpec
-from apispec.ext.marshmallow import MarshmallowPlugin
 from fqdn import FQDN
 from marshmallow import EXCLUDE
 from marshmallow import post_load
@@ -21,10 +19,9 @@ from marshmallow.fields import Nested
 from marshmallow.fields import String
 from marshmallow.validate import ContainsOnly
 from marshmallow.validate import Length
+from marshmallow.validate import OneOf
 from marshmallow.validate import Predicate
 from marshmallow.validate import Range
-
-from jans.pycloudlib.version import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +40,24 @@ OPTIONAL_SCOPES = (
     "couchbase",
     "redis",
     "sql",
+)
+
+AUTH_SIG_KEYS = (
+    "RS256",
+    "RS384",
+    "RS512",
+    "ES256",
+    "ES384",
+    "ES512",
+    "PS256",
+    "PS384",
+    "PS512",
+)
+
+AUTH_ENC_KEYS = (
+    "RSA1_5",
+    "RSA-OAEP",
+    "ECDH-ES",
 )
 
 
@@ -231,7 +246,7 @@ class ConfigmapSchema(Schema):
         description="Country name (2 letter code)"
     )
 
-    email = Email(
+    admin_email = Email(
         required=True,
         description="Email address",
     )
@@ -241,7 +256,7 @@ class ConfigmapSchema(Schema):
         description="Fully qualified domain name (FQDN)",
     )
 
-    org_name = String(
+    orgName = String(
         required=True,
         description="Organization name",
     )
@@ -251,6 +266,7 @@ class ConfigmapSchema(Schema):
         description="State or Province Name",
     )
 
+    # @TODO: change to string-based list
     optional_scopes = List(
         String(),
         validate=ContainsOnly(OPTIONAL_SCOPES),
@@ -259,14 +275,14 @@ class ConfigmapSchema(Schema):
     )
 
     auth_sig_keys = String(
-        load_default="",
-        dump_default="",
+        load_default=" ".join(AUTH_SIG_KEYS),
+        dump_default=" ".join(AUTH_SIG_KEYS),
         description="Signature keys to generate",
     )
 
     auth_enc_keys = String(
-        load_default="",
-        dump_default="",
+        load_default=" ".join(AUTH_ENC_KEYS),
+        dump_default=" ".join(AUTH_ENC_KEYS),
         description="Encryption keys to generate",
     )
 
@@ -280,10 +296,222 @@ class ConfigmapSchema(Schema):
         description="Initial expiration time (in hours) for generated keys",
     )
 
+    admin_inum = String(
+        load_default="",
+        dump_default="",
+        description="Inum for admin user",
+    )
+
+    admin_ui_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of admin-ui app",
+    )
+
+    casa_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of jans-casa app",
+    )
+
+    jans_idp_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of jans-idp app",
+    )
+
+    jca_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of jans-config-api app",
+    )
+
+    scim_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of jans-scim app",
+    )
+
+    tui_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of jans-tui app",
+    )
+
+    test_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of test app",
+    )
+
+    saml_scim_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of saml-scim app",
+    )
+
+    kc_master_auth_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of Keycloak master auth app",
+    )
+
+    kc_saml_openid_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of Keycloak SAML OpenID app",
+    )
+
+    kc_scheduler_api_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of Keycloak scheduler API app",
+    )
+
+    token_server_admin_ui_client_id = String(
+        load_default="",
+        dump_default="",
+        description="Client ID of token server app",
+    )
+
+    auth_key_rotated_at = String(
+        load_default="",
+        dump_default="",
+        description="Timestamp of last auth keys regeneration",
+    )
+
+    auth_legacyIdTokenClaims = String(
+        validate=[
+            OneOf(["false", "true"]),
+        ],
+        load_default="false",
+        dump_default="false",
+        description="Enable legacy ID token claim",
+    )
+
+    auth_openidScopeBackwardCompatibility = String(
+        validate=[
+            OneOf(["false", "true"]),
+        ],
+        load_default="false",
+        dump_default="false",
+        description="Enable backward-compat OpenID scope",
+    )
+
+    # @TODO: change to HARDCODED value instead
+    auth_openid_jks_fn = String(
+        load_default="/etc/certs/auth-keys.jks",
+        dump_default="/etc/certs/auth-keys.jks",
+        description="Path to keystore file contains private keys for jans-auth",
+    )
+
+    # @TODO: change to HARDCODED value instead
+    auth_openid_jwks_fn = String(
+        load_default="/etc/certs/auth-keys.json",
+        dump_default="/etc/certs/auth-keys.json",
+        description="Path to JSON file contains public keys for jans-auth",
+    )
+
+    # @TODO: change to HARDCODED value instead
+    ldapTrustStoreFn = String(
+        load_default="/etc/certs/opendj.pkcs12",
+        dump_default="/etc/certs/opendj.pkcs12",
+        description="Path to keystore file used for connecting to LDAP (OpenDJ)",
+    )
+
+    # @TODO: change to HARDCODED value instead
+    ldap_binddn = String(
+        load_default="cn=Directory Manager",
+        dump_default="cn=Directory Manager",
+        description="Bind DN for LDAP (OpenDJ)",
+    )
+
+    # @TODO: change to HARDCODED value instead
+    ldap_site_binddn = String(
+        load_default="cn=Directory Manager",
+        dump_default="cn=Directory Manager",
+        description="Bind DN for LDAP (OpenDJ)",
+    )
+
+    # @TODO: change to HARDCODED value instead
+    default_openid_jks_dn_name = String(
+        load_default="CN=Janssen Auth CA Certificates",
+        dump_default="CN=Janssen Auth CA Certificates",
+        description="CommonName for jans-auth CA certificate",
+    )
+
+    kc_admin_username = String(
+        load_default="admin",
+        dump_default="admin",
+        description="Admin username of Keycloak",
+    )
+
+    ldap_init_host = String(
+        load_default="ldap",
+        dump_default="ldap",
+        description="Initial hostname for LDAP (OpenDJ)",
+    )
+
+    ldap_init_port = String(
+        load_default="1636",
+        dump_default="1636",
+        description="Initial port for LDAP (OpenDJ)",
+    )
+
+    ldap_peers = String(
+        load_default="",
+        dump_default="",
+        description="Mapping of LDAP (OpenDJ) peers contains host and its ports",
+    )
+
+    ldap_port = String(
+        load_default="1389",
+        dump_default="1389",
+        description="Port for LDAP (OpenDJ)",
+    )
+
+    ldaps_port = String(
+        load_default="1636",
+        dump_default="1636",
+        description="Secure port for LDAP (OpenDJ)",
+    )
+
+    smtp_alias = String(
+        load_default="smtp_sig_ec256",
+        dump_default="smtp_sig_ec256",
+        description="Alias for SMTP entry in truststore",
+    )
+
+    smtp_signing_alg = String(
+        load_default="SHA256withECDSA",
+        dump_default="SHA256withECDSA",
+        description="SMTP signing algorithm",
+    )
+
     @validates("hostname")
     def validate_fqdn(self, value):
         if not FQDN(value).is_valid:
             raise ValidationError("Invalid FQDN format.")
+
+    @post_load
+    def transform_data(self, in_data, **kwargs):
+        in_data["auth_sig_keys"] = transform_auth_keys(in_data["auth_sig_keys"], AUTH_SIG_KEYS)
+        in_data["auth_enc_keys"] = transform_auth_keys(in_data["auth_enc_keys"], AUTH_ENC_KEYS)
+        return in_data
+
+
+def transform_auth_keys(value, default_keys):
+    keys = []
+
+    for k in value.split():
+        k = k.strip()
+        if k not in default_keys:
+            continue
+        keys.append(k)
+
+    # if empty, fallback to default
+    keys = keys or default_keys
+    return " ".join(keys)
 
 
 class ConfigurationSchema(Schema):
@@ -295,17 +523,6 @@ class ConfigurationSchema(Schema):
 
     # contains configmap schema
     _configmap = Nested(ConfigmapSchema)
-
-
-def get_schema_spec():
-    spec = APISpec(
-        title="Janssen cloud-native configuration",
-        version=__version__,
-        openapi_version="3.0.2",
-        plugins=[MarshmallowPlugin()],
-    )
-    spec.components.schema("Configuration", schema=ConfigurationSchema)
-    return spec.to_dict()
 
 
 def params_from_file(path):
