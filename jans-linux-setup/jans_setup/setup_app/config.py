@@ -207,7 +207,7 @@ class Config:
         self.install_casa = False
         self.installOxd = False
         self.install_jans_cli = True
-        self.install_jans_link = True
+        self.install_jans_link = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
