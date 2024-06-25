@@ -163,7 +163,7 @@ public class GrantService {
             }
 
             statusListPool.execute(() -> {
-                statusListIndexService.updateStatusAtIndex(token.getAttributes().getStatusListIndex(), TokenStatus.REVOKED);
+                statusListIndexService.updateStatusAtIndex(token.getAttributes().getStatusListIndex(), TokenStatus.INVALID);
             });
         } catch (Exception e) {
             log.error(e.getMessage(), e);
