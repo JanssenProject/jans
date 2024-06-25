@@ -28,7 +28,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String issuer;
     private String authorizationEndpoint;
     private String authorizationChallengeEndpoint;
-    private String tokenStatusListEndpoint;
+    private String statusListEndpoint;
     private String tokenEndpoint;
     private String revocationEndpoint;
     private String sessionRevocationEndpoint;
@@ -241,21 +241,21 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     }
 
     /**
-     * Gets token status list
+     * Gets status list
      *
-     * @return token status list
+     * @return status list
      */
-    public String getTokenStatusListEndpoint() {
-        return tokenStatusListEndpoint;
+    public String getStatusListEndpoint() {
+        return statusListEndpoint;
     }
 
     /**
-     * Sets token status list
+     * Sets status list
      *
-     * @param tokenStatusListEndpoint token status list
+     * @param statusListEndpoint status list
      */
-    public void setTokenStatusListEndpoint(String tokenStatusListEndpoint) {
-        this.tokenStatusListEndpoint = tokenStatusListEndpoint;
+    public void setStatusListEndpoint(String statusListEndpoint) {
+        this.statusListEndpoint = statusListEndpoint;
     }
 
     /**
@@ -1319,7 +1319,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 "issuer='" + issuer + '\'' +
                 ", authorizationEndpoint='" + authorizationEndpoint + '\'' +
                 ", authorizationChallengeEndpoint='" + authorizationChallengeEndpoint + '\'' +
-                ", tokenStatusListEndpoint='" + tokenStatusListEndpoint + '\'' +
+                ", statusListEndpoint='" + statusListEndpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
                 ", revocationEndpoint='" + revocationEndpoint + '\'' +
                 ", userInfoEndpoint='" + userInfoEndpoint + '\'' +

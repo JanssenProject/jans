@@ -94,7 +94,7 @@ public abstract class BaseTest {
     protected String gluuConfigurationEndpoint;
     protected String tokenEndpoint;
     protected String tokenRevocationEndpoint;
-    protected String tokenStatusListEndpoint;
+    protected String statusListEndpoint;
     protected String userInfoEndpoint;
     protected String clientInfoEndpoint;
     protected String checkSessionIFrame;
@@ -305,12 +305,12 @@ public abstract class BaseTest {
         this.authorizationChallengeEndpoint = authorizationChallengeEndpoint;
     }
 
-    public String getTokenStatusListEndpoint() {
-        return tokenStatusListEndpoint;
+    public String getStatusListEndpoint() {
+        return statusListEndpoint;
     }
 
-    public void setTokenStatusListEndpoint(String tokenStatusListEndpoint) {
-        this.tokenStatusListEndpoint = tokenStatusListEndpoint;
+    public void setStatusListEndpoint(String statusListEndpoint) {
+        this.statusListEndpoint = statusListEndpoint;
     }
 
     public String getTokenEndpoint() {
@@ -1009,7 +1009,7 @@ public abstract class BaseTest {
 
             authorizationEndpoint = response.getAuthorizationEndpoint();
             authorizationChallengeEndpoint = response.getAuthorizationChallengeEndpoint();
-            tokenStatusListEndpoint = response.getTokenStatusListEndpoint();
+            statusListEndpoint = response.getStatusListEndpoint();
             tokenEndpoint = response.getTokenEndpoint();
             tokenRevocationEndpoint = response.getRevocationEndpoint();
             userInfoEndpoint = response.getUserInfoEndpoint();
@@ -1034,7 +1034,7 @@ public abstract class BaseTest {
 
             authorizationEndpoint = context.getCurrentXmlTest().getParameter("authorizationEndpoint");
             authorizationChallengeEndpoint = context.getCurrentXmlTest().getParameter("authorizationChallengeEndpoint");
-            tokenStatusListEndpoint = context.getCurrentXmlTest().getParameter("tokenStatusListEndpoint");
+            statusListEndpoint = context.getCurrentXmlTest().getParameter("statusListEndpoint");
             tokenEndpoint = context.getCurrentXmlTest().getParameter("tokenEndpoint");
             tokenRevocationEndpoint = context.getCurrentXmlTest().getParameter("tokenRevocationEndpoint");
             userInfoEndpoint = context.getCurrentXmlTest().getParameter("userInfoEndpoint");

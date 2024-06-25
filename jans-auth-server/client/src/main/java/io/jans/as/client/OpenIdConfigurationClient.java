@@ -105,7 +105,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         response.setIssuer(jsonObj.optString(ISSUER, null));
         response.setAuthorizationEndpoint(jsonObj.optString(AUTHORIZATION_ENDPOINT, null));
         response.setAuthorizationChallengeEndpoint(jsonObj.optString(AUTHORIZATION_CHALLENGE_ENDPOINT, null));
-        response.setTokenStatusListEndpoint(jsonObj.optString(STATUS_LIST_ENDPOINT, null));
+        response.setStatusListEndpoint(jsonObj.optString(STATUS_LIST_ENDPOINT, null));
         response.setTokenEndpoint(jsonObj.optString(TOKEN_ENDPOINT, null));
         response.setRevocationEndpoint(jsonObj.optString(REVOCATION_ENDPOINT, null));
         response.setSessionRevocationEndpoint(jsonObj.optString(SESSION_REVOCATION_ENDPOINT, null));
