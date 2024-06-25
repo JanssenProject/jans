@@ -152,8 +152,8 @@ public class ManagedSamlClient {
             clientRepresentation.setAuthenticationFlowBindingOverrides(authnFlowBindingOverrides);
 
             //set default saml attributes
-            samlShoulDocumentsBeSigned(false);
-            samlSignAssertions(false);
+            samlShoulDocumentsBeSigned(true);
+            samlSignAssertions(true);
             samlForcePostBinding(false);
             samlEncryptAssertions(false);
             samlForceArtifactBinding(false);
