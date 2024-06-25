@@ -21,7 +21,7 @@ paths:
       - Lock - Configuration
       summary: Gets Lock configuration properties
       description: Gets Lock configuration properties
-      operationId: get-lock-properties
+      operationId: get-lock-properties_1
       responses:
         "200":
           description: Ok
@@ -41,7 +41,7 @@ paths:
       - Lock - Configuration
       summary: Update Lock configuration properties
       description: Update Lock configuration properties
-      operationId: put-lock-properties
+      operationId: put-lock-properties_1
       requestBody:
         description: GluuAttribute object
         content:
@@ -71,7 +71,7 @@ paths:
       - Lock - Configuration
       summary: Partially modifies Lock configuration properties.
       description: Partially modifies Lock configuration properties.
-      operationId: patch-lock-properties
+      operationId: patch-lock-properties_1
       requestBody:
         description: String representing patch-document.
         content:
