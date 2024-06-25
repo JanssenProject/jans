@@ -39,7 +39,7 @@ async def get_attributes_coroutine(app) -> None:
 async def retrieve_enabled_scripts() -> None:
     'Coroutine for retreiving enabled scripts'
 
-    app.logger.info("Backrgound Task: retreiving enabled scripts")
+    common_data.app.logger.info("Backrgound Task: retreiving enabled scripts")
 
     cli_args = {'operation_id': 'get-config-scripts', 'endpoint_args': 'fieldValuePair:enabled=true'}
     response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
@@ -50,3 +50,16 @@ async def retrieve_enabled_scripts() -> None:
 
     result = response.json()
     common_data.enabled_scripts = result['entries']
+
+
+
+async def get_admin_ui_roles() -> None:
+    'Coroutine for getting admin ui roles'
+
+    common_data.app.logger.info("Backrgound Task: retreiving admin-ui roles")
+    cli_args = {'operation_id': 'get-all-adminui-roles'}
+    common_data.app.start_progressing(_("Retreiving admin UI roles from server..."))
+    response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
+    common_data.app.stop_progressing()
+    common_data.admin_ui_roles = response.json()
+
