@@ -163,7 +163,10 @@ public class GrantService {
             }
 
             statusListPool.execute(() -> {
-                statusListIndexService.updateStatusAtIndex(token.getAttributes().getStatusListIndex(), TokenStatus.INVALID);
+                final Integer index = token.getAttributes().getStatusListIndex();
+                if (index != null && index > 0) {
+                    statusListIndexService.updateStatusAtIndexes(Lists.newArrayList(index), TokenStatus.INVALID);
+                }
             });
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -184,9 +187,30 @@ public class GrantService {
 
     public void removeSilently(List<TokenEntity> entries) {
         if (entries != null && !entries.isEmpty()) {
+            List<Integer> indexes = new ArrayList<>();
             for (TokenEntity t : entries) {
-                removeSilently(t);
+                try {
+                    remove(t);
+
+                    if (StringUtils.isNotBlank(t.getAuthorizationCode())) {
+                        cacheService.remove(CacheGrant.cacheKey(t.getAuthorizationCode(), t.getGrantId()));
+                    }
+                    if (shouldSaveInCache()) {
+                        cacheService.remove(t.getTokenCode());
+                    }
+
+                    final Integer index = t.getAttributes().getStatusListIndex();
+                    if (index != null && index >= 0) {
+                        indexes.add(index);
+                    }
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
             }
+
+            statusListPool.execute(() -> {
+                statusListIndexService.updateStatusAtIndexes(indexes, TokenStatus.INVALID);
+            });
         }
     }
 

@@ -40,6 +40,7 @@ import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -190,15 +191,21 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
     }
 
     private void removeAllTokens(TokenTypeHint tth, ExecutionContext executionContext) {
-        final List<TokenEntity> tokens = grantService.getGrantsOfClient(executionContext.getClient().getClientId());
+        final String clientId = executionContext.getClient().getClientId();
+        final List<TokenEntity> tokens = grantService.getGrantsOfClient(clientId);
+        log.debug("Revoking all tokens of client {}...", clientId);
+
+        List<TokenEntity> tokensToRemove = new ArrayList<>();
         for (TokenEntity token : tokens) {
             if (tth == null ||
                     (tth == TokenTypeHint.ACCESS_TOKEN && token.getTokenTypeEnum() == TokenType.ACCESS_TOKEN) ||
                     (tth == TokenTypeHint.TX_TOKEN && token.getTokenTypeEnum() == TokenType.TX_TOKEN) ||
                     (tth == TokenTypeHint.REFRESH_TOKEN && token.getTokenTypeEnum() == TokenType.REFRESH_TOKEN)) {
-                grantService.removeSilently(token);
+               tokensToRemove.add(token);
             }
         }
+        grantService.removeSilently(tokensToRemove);
+        log.debug("Revoked all tokens of client {}.", clientId);
     }
 
     private AuthorizationGrant findAuthorizationGrant(String token, TokenTypeHint tth) {
