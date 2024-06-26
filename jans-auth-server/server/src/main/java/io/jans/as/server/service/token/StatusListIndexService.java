@@ -12,6 +12,9 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -39,29 +42,52 @@ public class StatusListIndexService {
 	
     private StatusIndexPool tokenPool = null;
 
-    public void updateStatusAtIndex(int index, TokenStatus status) {
+    public synchronized void updateStatusAtIndexes(List<Integer> indexes, TokenStatus status) {
         try {
-            if (index < 0) {
+            log.debug("Updating status list at indexes {} with status {} ...", indexes, status);
+
+            if (indexes == null || indexes.isEmpty()) {
                 return; // invalid
             }
 
-            log.trace("Updating status list at index {} with status {} ...", index, status);
-
             final int bitSize = appConfiguration.getStatusListBitSize();
-            final StatusIndexPool indexHolder = statusTokenPoolService.getPoolByIndex(index);
-            final String data = indexHolder.getData();
 
-            final StatusList statusList = StringUtils.isNotBlank(data) ? StatusList.fromEncoded(data, bitSize) : new StatusList(bitSize);
-            statusList.set(index, status.getValue());
+            // first load pool for indexes and update in-memory
+            Map<Integer, StatusIndexPool> pools = new HashMap<>();
+            for (Integer index : indexes) {
+                int poolId = index / appConfiguration.getStatusListIndexAllocationBlockSize();
 
-            indexHolder.setData(statusList.getLst());
+                StatusIndexPool indexHolder = pools.get(poolId);
+                if (indexHolder == null) {
+                    indexHolder = statusTokenPoolService.getPoolByIndex(index);
+                    log.debug("Found pool {} by index {}", indexHolder.getDn(), index);
+                    pools.put(indexHolder.getId(), indexHolder);
+                }
 
-            statusTokenPoolService.updateWithLock(indexHolder);
+                final String data = indexHolder.getData();
 
-            log.trace("Updated status list at index {} with status {} successfully.", index, status);
+                final StatusList statusList = StringUtils.isNotBlank(data) ? StatusList.fromEncoded(data, bitSize) : new StatusList(bitSize);
+                statusList.set(index, status.getValue());
+
+                indexHolder.setData(statusList.getLst());
+            }
+
+            for (StatusIndexPool pool : pools.values()) {
+                updateWithLockSilently(pool);
+            }
+
+            log.debug("Updated status list at index {} with status {} successfully.", indexes, status);
 
         } catch (Exception e) {
-            log.error("Failed to update token list status at index " + index + " with status " + status, e);
+            log.error("Failed to update token list status at index " + indexes + " with status " + status, e);
+        }
+    }
+
+    private void updateWithLockSilently(StatusIndexPool pool) {
+        try {
+            statusTokenPoolService.updateWithLock(pool);
+        } catch (Exception e) {
+            log.error("Failed to persist status index pool " + pool.getId(), e);
         }
     }
 
