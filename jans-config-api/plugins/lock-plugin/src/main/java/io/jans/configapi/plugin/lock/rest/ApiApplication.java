@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
-@ApplicationPath("/lock")
+@ApplicationPath(Constants.LOCK)
 @OpenAPIDefinition(info = @Info(title = "Jans Config API - Lock", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "support@gluu.org"),
 
 license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
@@ -24,7 +24,13 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
 @OAuthScope(name = Constants.LOCK_CONFIG_READ_ACCESS, description = "View Lock configuration related information"),
-@OAuthScope(name = Constants.LOCK_CONFIG_WRITE_ACCESS, description = "Manage Lock configuration related information")}
+@OAuthScope(name = Constants.LOCK_CONFIG_WRITE_ACCESS, description = "Manage Lock configuration related information"),
+@OAuthScope(name = Constants.LOCK_TELEMETRY_READ_ACCESS, description = "View Lock telemetry related information"),
+@OAuthScope(name = Constants.LOCK_TELEMETRY_WRITE_ACCESS, description = "Manage Lock telemetry related information"),
+@OAuthScope(name = Constants.LOCK_HEALTH_READ_ACCESS, description = "View Lock health related information"),
+@OAuthScope(name = Constants.LOCK_HEALTH_WRITE_ACCESS, description = "Manage Lock health related information")
+
+}
 )))
 public class ApiApplication extends Application {
 
@@ -33,6 +39,7 @@ public class ApiApplication extends Application {
         HashSet<Class<?>> classes = new HashSet<>();
 
         classes.add(LockConfigResource.class);
+        classes.add(AuditResource.class);
         
         return classes;
     }
