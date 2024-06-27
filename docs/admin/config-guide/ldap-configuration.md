@@ -18,6 +18,11 @@ tasks.
     the [Using Command Line](#using-command-line)
 
 
+=== "Use Text-based UI"
+
+    LDAP Configuration is not possible in Text-based UI.
+
+
 === "Use REST API"
 
     Use REST API for programmatic access or invoke via tools like CURL or 
@@ -114,21 +119,71 @@ Operation ID: post-config-database-ldap
 ```
 
 
-The `post-config-database-ldap` operation uses the `GluuLdapConfiguration` schema to
-describe the configuration change. Refer [here](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml#/Database%20-%20LDAP%20configuration/post-config-database-ldap)
-to know more about schema.
-
 Let's get the schema file and update it to push into the server.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --schema GluuLdapConfiguration > /tmp/ldap.json
 ```
+The `post-config-database-ldap` operation uses the `GluuLdapConfiguration` schema to
+describe the configuration change.
+
+For your information, you can obtain the format of the `GluuLdapConfiguration`
+schema by running the aforementioned command without a file.
+
+```text title="Schema Format"
+configId           string
+bindDN             string
+bindPassword       string
+servers            array of string
+maxConnections     integer
+                   format: int32
+useSSL             boolean
+baseDNs            array of string
+primaryKey         string
+localPrimaryKey    string
+useAnonymousBind   boolean
+enabled            boolean
+version            integer
+                   format: int32
+level              integer
+                   format: int32
+```
+
 An example of the schema is provided in the ldap.json file.
+
+you can also use the following command for `GluuLdapConfiguration` schema example.
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --schema-sample GluuLdapConfiguration
+```
+
+```json title="Schema Example"
+{
+  "configId": "string",
+  "bindDN": "string",
+  "bindPassword": "string",
+  "servers": [
+    "string"
+  ],
+  "maxConnections": 117,
+  "useSSL": false,
+  "baseDNs": [
+    "string"
+  ],
+  "primaryKey": "string",
+  "localPrimaryKey": "string",
+  "useAnonymousBind": false,
+  "enabled": false,
+  "version": 116,
+  "level": 179
+}
+
+```
 
 You need to modify `ldap.json` file with valid information. In our case,
 I have modified as below for testing only:
 
-```json 
+```json title="Input"
 {
   "configId": "test_ldap",
   "bindDN": "cn=directory manager",
@@ -151,7 +206,8 @@ I have modified as below for testing only:
 Now, lets post this configuration into the database.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id post-config-database-ldap --data /tmp/ldap.json
+/opt/jans/jans-cli/config-cli.py --operation-id post-config-database-ldap\
+ --data /tmp/ldap.json
 ```
 
 ```json title="Sample Output"
@@ -196,7 +252,8 @@ For example, let say we are going to change to `maxConnections` for `1000` to `1
 So lets modify the `/tmp/ldap.json` file as below:
 
 ```bash title="Comaand"
-/opt/jans/jans-cli/config-cli.py --operation-id put-config-database-ldap --data /tmp/ldap.json
+/opt/jans/jans-cli/config-cli.py --operation-id put-config-database-ldap \
+--data /tmp/ldap.json
 ```
 ```json title="Sample Command"
 {
@@ -226,7 +283,7 @@ In the above operation, we have updated `test_ldap.json`. Let's check the update
 with this operation by calling its name id. 
 
 ```bash title=""
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-ldap-by-name \
+/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-ldap-by-name\
 --url-suffix name:test_ldap
 ```
 
@@ -284,8 +341,10 @@ Operation ID: patch-config-database-ldap-by-name
 ```bash
 /opt/jans/jans-cli/config-cli.py --schema JsonPatch > /tmp/patch.json
 ```
-The `patch-config-database-ldap-by-name` uses the [JSON Patch](https://jsonpatch.com/#the-patch) schema to describe the configuration change.
-Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
+The `patch-config-database-ldap-by-name` uses the [JSON Patch](https://jsonpatch.com/#the-patch) 
+schema to describe the configuration change. Refer
+[here](config-tools/jans-cli/README.md#patch-request-schema) 
+to know more about schema.
 
 For example, let's say, we want to change the level of the `test_ldap` configuration. So, 
 Let's update the patch file as below:
