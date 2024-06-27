@@ -150,9 +150,8 @@ So, let's get the schema file and update it with keys data:
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --schema JSONWebKey > /tmp/jwk.json
 ```
-
-You can use the above command without a file to get the format of the `JSONWebKey` schema
-
+For your information, you can obtain the format of the `JSONWebKey`
+schema by running the aforementioned command without a file.
 ```text title="Schema Format"
 
 name           string
