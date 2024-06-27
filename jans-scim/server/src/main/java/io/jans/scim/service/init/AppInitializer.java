@@ -95,7 +95,6 @@ public class AppInitializer {
         customScriptManager.initTimer(Arrays.asList(
             CustomScriptType.SCIM, CustomScriptType.PERSISTENCE_EXTENSION, CustomScriptType.ID_GENERATOR));
         logger.info("Initialized!");
-
     }
 
     @Produces
