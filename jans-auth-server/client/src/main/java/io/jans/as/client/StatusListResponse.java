@@ -3,8 +3,11 @@ package io.jans.as.client;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.session.EndSessionErrorResponseType;
+import io.jans.model.tokenstatus.StatusList;
 import jakarta.ws.rs.core.Response;
 import org.json.JSONObject;
+
+import java.io.IOException;
 
 /**
  * @author Yuriy Z
@@ -23,6 +26,10 @@ public class StatusListResponse extends BaseResponseWithErrors<EndSessionErrorRe
         injectData(clientResponse);
     }
 
+    public StatusList getStatusList() throws IOException {
+        return StatusList.fromEncoded(lst, bits);
+    }
+
     @Override
     public EndSessionErrorResponseType fromString(String params) {
         return EndSessionErrorResponseType.fromString(params);
@@ -31,6 +38,10 @@ public class StatusListResponse extends BaseResponseWithErrors<EndSessionErrorRe
     public void injectData(Response clientResponse) {
         injectErrorIfExistSilently(entity);
         if (getErrorType() != null) {
+            return;
+        }
+
+        if (clientResponse.getStatus() != 200) {
             return;
         }
 

@@ -29,10 +29,11 @@ public class StatusListRestWebService {
         try {
             return statusService.requestStatusList(acceptHeader);
         } catch (WebApplicationException e) {
+            log.debug(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return Response.status(500).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
