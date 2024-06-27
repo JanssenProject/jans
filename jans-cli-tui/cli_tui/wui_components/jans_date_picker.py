@@ -18,13 +18,15 @@ from utils.multi_lang import _
 
 
 class change_loc(Enum):
-    DATE   = 0
+    DAY     = 0
     HOURS   = 1
     MINUTES = 2
     SECONDS = 3
+    MONTH   = 4
+    YEAR    = 5
 
     def next(self):
-        return self.__class__((self.value + 1) % 4)
+        return self.__class__((self.value + 1) % 6)
 
 
 class JansSelectDate:
@@ -40,15 +42,16 @@ class JansSelectDate:
             date (datetime.datetime): datetime object for current date
         """
         self.value = value
-        self.chstate = change_loc.DATE
+        self.chstate = change_loc.DAY
         self.cal = calendar.Calendar()
 
         self.container = HSplit(children=[
-            VSplit([
-                DynamicContainer(lambda: Label(' <' + self.value.strftime('%B').center(12) + '>')),
-                DynamicContainer(lambda: Label('   <' + str(self.value.year).center(6) + '>')),
-            ],
-            style="class:date-picker-monthandyear",padding=1),
+            Window(
+                content=FormattedTextControl(text=self._get_header_text),
+                height=1,
+                cursorline=False,
+                style="class:date-picker-monthandyear",
+            ),
             Label(' Mon Tue Wed Thu Fri Sat Sun', style='class:date-picker-weekdays-header'),
             Window(
                 content=FormattedTextControl(text=self._get_calender_text),
@@ -68,6 +71,17 @@ class JansSelectDate:
             ),
             ])
 
+    def _get_header_text(self)-> AnyFormattedText: 
+        headers = (self.value.strftime('%B').center(12), str(self.value.year).center(6))
+        headers_list = []
+
+        for i, header in enumerate(headers, 4):
+            if self.chstate.value == i:
+                headers_list.append(f'&lt; <style fg="ansired"><b>{header}</b></style> &gt;')
+            else:
+                headers_list.append(f'&lt; {header} &gt;')
+
+        return HTML('   '.join(headers_list))
 
     def _get_time_text(self)-> AnyFormattedText: 
         time_list = (f'{self.value.hour:02}', f'{self.value.minute:02}', f'{self.value.second:02}')
@@ -91,7 +105,7 @@ class JansSelectDate:
             if date.month != self.value.month:
                 fg = 'ansigray'
             elif date == self.value.date():
-                if self.chstate == change_loc.DATE:
+                if self.chstate == change_loc.DAY:
                     fg = 'ansired'
                 day_text = '<b>' + day_text + '</b>'
 
@@ -102,33 +116,41 @@ class JansSelectDate:
         return merge_formatted_text(result)
 
 
+    def _add_months(self, months):
+        month = self.value.month - 1 + months
+        year = self.value.year + month // 12
+        month = month % 12 + 1
+        day = min(self.value.day, calendar.monthrange(year, month)[1])
+        self.value = datetime.datetime(year, month, day, self.value.hour, self.value.minute, self.value.second)
+
+
     def up(self)-> None:
-        if self.chstate == change_loc.DATE:
+        if self.chstate == change_loc.DAY:
             self.value -= datetime.timedelta(days=7)
+        elif self.chstate == change_loc.MONTH:
+            self._add_months(1)
+        elif self.chstate == change_loc.YEAR:
+            self.value = self.value.replace(year=self.value.year+1)
         else:
             self.value -= datetime.timedelta(**{self.chstate.name.lower(): 1})
 
     def down(self)-> None:
-        if self.chstate == change_loc.DATE:
+        if self.chstate == change_loc.DAY:
             self.value += datetime.timedelta(days=7)
+        elif self.chstate == change_loc.MONTH:
+            self._add_months(-1)
+        elif self.chstate == change_loc.YEAR:
+            self.value = self.value.replace(year=self.value.year-1)
         else:
             self.value += datetime.timedelta(**{self.chstate.name.lower(): 1})
 
     def right(self)-> None:
-        if self.chstate == change_loc.DATE:
+        if self.chstate == change_loc.DAY:
             self.value += datetime.timedelta(days=1)
 
     def left(self)-> None:
-        if self.chstate == change_loc.DATE:
+        if self.chstate == change_loc.DAY:
             self.value -= datetime.timedelta(days=1)
-
-    def pageup(self) -> None:
-        if self.chstate == change_loc.DATE:
-            self.value = self.value.replace(year=self.value.year+1)
-
-    def pagedown(self) -> None:
-        if self.chstate == change_loc.DATE:
-            self.value = self.value.replace(year=self.value.year-1)
 
     def tab(self) -> None:
         self.chstate = self.chstate.next()
@@ -206,6 +228,10 @@ class DateSelectWidget:
         def _left(event):
             select_box_events('left')
 
+        @kb.add('delete')
+        def _delete(event):
+            self.value = None
+
         @kb.add('tab')
         def _tab(event):
             if self.select_box_float in self.app.layout.container.floats:
@@ -214,22 +240,14 @@ class DateSelectWidget:
                 focus_next(event)
 
         @kb.add('s-tab')
-        def _sssss(event):
+        def _stab(event):
+            _escape(event)
             focus_previous(event)
 
         @kb.add("escape")
         def _escape(event):
             if self.select_box_float in self.app.layout.container.floats:
                 self.app.layout.container.floats.remove(self.select_box_float) 
-
-        @kb.add('pageup')
-        def _pageup(event):
-            select_box_events('pageup')
-
-        @kb.add('pagedown', eager=True)
-        def _pagedown(event):
-            select_box_events('pagedown')
-
 
         return kb
 
