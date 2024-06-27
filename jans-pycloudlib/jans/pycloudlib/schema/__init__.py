@@ -146,7 +146,7 @@ class SecretSchema(Schema):
         description="Couchbase certificate",
     )
 
-    salt = String(
+    encoded_salt = String(
         load_default="",
         dump_default="",
         description="Salt for encoding/decoding sensitive secret",
@@ -194,6 +194,270 @@ class SecretSchema(Schema):
         description="Password for Keycloak RDBMS user",
     )
 
+    admin_ui_client_encoded_pw = String(
+        load_default="",
+        dump_default="",
+        description="Encoded password for admin-ui client",
+    )
+
+    admin_ui_client_pw = String(
+        load_default="",
+        dump_default="",
+        description="Password for admin-ui client",
+    )
+
+    auth_jks_base64 = String(
+        load_default="",
+        dump_default="",
+        description="Private keys (keystore) of jans-auth",
+    )
+
+    auth_openid_jks_pass = String(
+        load_default="",
+        dump_default="",
+        description="Password of jans-auth keystore",
+    )
+
+    auth_openid_key_base64 = String(
+        load_default="",
+        dump_default="",
+        description="Public keys (JWKS) of jans-auth",
+    )
+
+    casa_client_encoded_pw = String(
+        load_default="",
+        dump_default="",
+        description="Encoded password for jans-casa client",
+    )
+
+    casa_client_pw = String(
+        load_default="",
+        dump_default="",
+        description="Password for jans-casa client",
+    )
+
+    encoded_admin_password = String(
+        load_default="",
+        dump_default="",
+        description="LDAP-encoded password of admin",
+    )
+
+    encoded_ox_ldap_pw = String(
+        load_default="",
+        dump_default="",
+        description="Encoded password for Bind DN",
+    )
+
+    encoded_ldapTrustStorePass = String(
+        load_default="",
+        dump_default="",
+        description="Encoded password for LDAP (OpenDJ) truststore",
+    )
+
+    jans_idp_client_secret = String(
+        load_default="",
+        dump_default="",
+        description="Client secret of jans-idp app",
+    )
+
+    jans_idp_user_password = String(
+        load_default="",
+        dump_default="",
+        description="User password for jans-idp",
+    )
+
+    jca_client_encoded_pw = String(
+        load_default="",
+        dump_default="",
+        description="Encoded password for jans-config-api client",
+    )
+
+    jca_client_pw = String(
+        load_default="",
+        dump_default="",
+        description="Password for jans-config-api client",
+    )
+
+    kc_admin_password = String(
+        load_default="admin",
+        dump_default="admin",
+        description="Admin password of Keycloak",
+    )
+
+    kc_master_auth_client_encoded_pw = String(
+        load_default="",
+        dump_default="",
+        description="Client encoded secret of Keycloak master auth app",
+    )
+
+    kc_master_auth_client_pw = String(
+        load_default="",
+        dump_default="",
+        description="Client secret of Keycloak master auth app",
+    )
+
+    kc_saml_openid_client_encoded_pw = String(
+        load_default="",
+        dump_default="",
+        description="Client encoded secret of Keycloak SAML app",
+    )
+
+    kc_saml_openid_client_pw = String(
+        load_default="",
+        dump_default="",
+        description="Client secret of Keycloak SAML app",
+    )
+
+    kc_scheduler_api_client_encoded_pw = String(
+        load_default="",
+        dump_default="",
+        description="Client encoded secret of Keycloak scheduler API app",
+    )
+
+    kc_scheduler_api_client_pw = String(
+        load_default="",
+        dump_default="",
+        description="Client secret of Keycloak scheduler API app",
+    )
+
+    ldap_pkcs12_base64 = String(
+        load_default="",
+        dump_default="",
+        description="Private keys (keystore) of LDAP (OpenDJ)",
+    )
+
+    otp_configuration = String(
+        load_default="",
+        dump_default="",
+        description="OTP configuration string",
+    )
+
+    pairwiseCalculationKey = String(
+        load_default="",
+        dump_default="",
+        description="Pairwise calculation key",
+    )
+
+    pairwiseCalculationSalt = String(
+        load_default="",
+        dump_default="",
+        description="Pairwise calculation salt",
+    )
+
+    saml_scim_client_encoded_pw = String(
+        load_default="",
+        dump_default="",
+        description="Encoded password for test client",
+    )
+
+    saml_scim_client_pw = String(
+        load_default="",
+        dump_default="",
+        description="Password for saml-scim client",
+    )
+
+    scim_client_encoded_pw = String(
+        load_default="",
+        dump_default="",
+        description="Encoded password for jans-scim client",
+    )
+
+    scim_client_pw = String(
+        load_default="",
+        dump_default="",
+        description="Password for jans-scim client",
+    )
+
+    smtp_jks_base64 = String(
+        load_default="",
+        dump_default="",
+        description="Private keys (keystore) of SMTP",
+    )
+
+    smtp_jks_pass = String(
+        load_default="",
+        dump_default="",
+        description="Password of SMTP keystore",
+    )
+
+    smtp_jks_pass_enc = String(
+        load_default="",
+        dump_default="",
+        description="Encoded password of SMTP keystore",
+    )
+
+    ssl_ca_cert = CertKey(
+        load_default="",
+        dump_default="",
+        description="SSL certificate for CA",
+    )
+
+    ssl_ca_key = CertKey(
+        load_default="",
+        dump_default="",
+        description="SSL key for CA",
+    )
+
+    ssl_cert = CertKey(
+        load_default="",
+        dump_default="",
+        description="SSL certificate for the FQDN",
+    )
+
+    ssl_csr = CertKey(
+        load_default="",
+        dump_default="",
+        description="SSL certificate signing request for the FQDN",
+    )
+
+    ssl_key = CertKey(
+        load_default="",
+        dump_default="",
+        description="SSL key for the FQDN",
+    )
+
+    super_gluu_creds = String(
+        load_default="",
+        dump_default="",
+        description="SuperGluu credentials string",
+    )
+
+    test_client_encoded_pw = String(
+        load_default="",
+        dump_default="",
+        description="Encoded password for test client",
+    )
+
+    test_client_pw = String(
+        load_default="",
+        dump_default="",
+        description="Password for test client",
+    )
+
+    token_server_admin_ui_client_encoded_pw = String(
+        load_default="",
+        dump_default="",
+        description="Encoded password for token server client",
+    )
+
+    token_server_admin_ui_client_pw = String(
+        load_default="",
+        dump_default="",
+        description="Password for token server client",
+    )
+
+    tui_client_encoded_pw = String(
+        load_default="",
+        dump_default="",
+        description="Encoded password for TUI client",
+    )
+
+    tui_client_pw = String(
+        load_default="",
+        dump_default="",
+        description="Password for TUI client",
+    )
+
     @post_load
     def transform_b64(self, in_data, **kwargs):
         # list of attrs that maybe base64 string and need to be decoded
@@ -207,13 +471,13 @@ class SecretSchema(Schema):
                 in_data[attr] = b64decode(in_data[attr]).decode()
         return in_data
 
-    @validates("salt")
+    @validates("encoded_salt")
     def validate_salt(self, value):
         if value and len(value) != 24:
-            raise ValidationError("Length must be 24.")
+            raise ValidationError("Length must be 24")
 
         if value and not value.isalnum():
-            raise ValidationError("Only alphanumeric characters are allowed.")
+            raise ValidationError("Only alphanumeric characters are allowed")
 
     @validates("admin_pw")
     def validate_password(self, value, **kwargs):
