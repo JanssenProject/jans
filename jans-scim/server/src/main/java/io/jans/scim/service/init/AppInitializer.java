@@ -111,7 +111,6 @@ public class AppInitializer {
         } catch (StringEncrypter.EncryptionException ex) {
             throw new ConfigurationException("Failed to create StringEncrypter instance");
         }
-
     }
 
     @Produces
