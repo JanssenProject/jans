@@ -7,7 +7,8 @@ Type=simple
 Environment="JAVA_HOME=%(jre_home)s"
 Environment="KEYCLOAK_ADMIN=admin"
 Environment="KEYCLOAK_ADMIN_PASSWORD=admin"
-ExecStart=%(idp_config_data_dir)s/bin/kc.sh start-dev --log="console,file" --proxy edge --hostname=%(hostname)s --hostname-admin=%(hostname)s --hostname-path=/kc --hostname-strict-https=true --http-enabled=true --http-relative-path=/kc --http-host=127.0.0.1 --http-port=%(idp_config_http_port)s --log="console,file" --log-file="%(idp_config_data_dir)s/logs/keycloak.log" -Dlog.base="%(idp_config_data_dir)s/logs/%(service_name)s.log" -Djans.config.prop.path="%(idp_config_providers_dir)s"
+ExecStart=%(idp_config_data_dir)s/bin/kc.sh start-dev
+ExecStart="-Djans.base=%(jansBaseFolder)s"
 
 User=jetty
 Group=jetty
