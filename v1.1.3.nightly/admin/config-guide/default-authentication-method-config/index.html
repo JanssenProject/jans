@@ -8633,15 +8633,22 @@ To get its schema:</p>
 <p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema AuthenticationMethod <span class="se">\</span>
 &gt; /tmp/patch-default-auth.json
 </code></pre></div>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+The schema can now be found in the patch-default-auth.json file.</p>
+<p>For your information, you can obtain the format of the <code>AuthenticationMethod</code>
+schema by running the aforementioned command without a file.</p>
+<p><div class="highlight"><span class="filename">Schema Format</span><pre><span></span><code>defaultAcr   string
+</code></pre></div>
+you can also use the following command for <code>AuthenticationMethod</code> schema example.</p>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema-sample AuthenticationMethod
+</code></pre></div>
+<div class="highlight"><span class="filename">Schema Example</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div></p>
-<p>This command will create a <code>.json</code> file with a schema.
-It comes with a <code>string</code> value. We need to modify this file.
+<p>We need to modify the patch-default-auth.json file.
 We have seen that our default authentication method is <code>simple_password_auth</code>.
 We are going to update it with <code>passport_saml</code> authentication method.</p>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<div class="highlight"><span class="filename">input</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;passport_saml&quot;</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
@@ -8650,8 +8657,7 @@ We are going to update it with <code>passport_saml</code> authentication method.
 --data /tmp/patch-default-auth.json
 </code></pre></div>
 <p>It will show the updated result.</p>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="err">Server</span><span class="w"> </span><span class="err">Respo</span><span class="kc">nse</span><span class="p">:</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;passport_saml&quot;</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
@@ -8667,7 +8673,6 @@ in the image below. This screen lists the available authentication methods
 where the default method is marked with <code>x</code> under the <code>Default</code> column.</p>
 <p><img alt="image" src="../../../assets/tui-curr-authn-method.png" /></p>
 <h3 id="update-default-authentication-method_1">Update Default Authentication Method<a class="headerlink" href="#update-default-authentication-method_1" title="Permanent link">#</a></h3>
-<p><img alt="image" src="../../assets/tui-authn-method-detail.png" /></p>
 <p>Bring the tab focus to the authentication method that should be the new default
 method. Hit <code>Enter</code> to open the dialog as shown above. Using the checkbox for
 <code>Default Authen Method</code> the current method can be made the default 
@@ -8682,7 +8687,7 @@ in the <a href="../../reference/openapi/">Swagger document</a>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-11T10:19:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-11</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-27T17:10:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-27</span>
       
         <br>
         Created:

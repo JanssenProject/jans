@@ -2317,43 +2317,63 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#get-existing-ldap-configurations" class="md-nav__link">
     Get Existing LDAP Configurations
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#adds-a-new-ldap-configuration" class="md-nav__link">
     Adds a new LDAP Configuration
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#updating-ldap-database-configurations" class="md-nav__link">
     Updating LDAP Database Configurations
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#gets-ldap-database-configuration-by-its-name" class="md-nav__link">
     Gets LDAP Database Configuration by its name
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#delete-ldap-database-configurations" class="md-nav__link">
     Delete LDAP Database Configurations
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#patch-ldap-database-configurations" class="md-nav__link">
     Patch LDAP Database Configurations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
   </a>
   
 </li>
@@ -8458,43 +8478,63 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#get-existing-ldap-configurations" class="md-nav__link">
     Get Existing LDAP Configurations
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#adds-a-new-ldap-configuration" class="md-nav__link">
     Adds a new LDAP Configuration
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#updating-ldap-database-configurations" class="md-nav__link">
     Updating LDAP Database Configurations
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#gets-ldap-database-configuration-by-its-name" class="md-nav__link">
     Gets LDAP Database Configuration by its name
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#delete-ldap-database-configurations" class="md-nav__link">
     Delete LDAP Database Configurations
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#patch-ldap-database-configurations" class="md-nav__link">
     Patch LDAP Database Configurations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
   </a>
   
 </li>
@@ -8542,42 +8582,66 @@
 
 
 <h1 id="lightweight-directory-access-protocol-ldap-configuration">Lightweight Directory Access Protocol (LDAP) Configuration<a class="headerlink" href="#lightweight-directory-access-protocol-ldap-configuration" title="Permanent link">#</a></h1>
-<blockquote>
-<p>Prerequisite: Know how to use the Janssen CLI in <a href="../config-tools/jans-cli/">command-line mode</a></p>
-</blockquote>
-<p>Let's run the following command to get operation-id details of LDAP Database COnfiguration.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info DatabaseLDAPConfiguration
+<p>The Janssen Server provides multiple configuration tools to perform these
+tasks.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use the command line to perform actions from the terminal. Learn how to 
+use Jans CLI <a href="../config-tools/jans-cli/">here</a> or jump straight to 
+the <a href="#using-command-line">Using Command Line</a></p>
+</div>
+<div class="tabbed-block">
+<p>LDAP Configuration is not possible in Text-based UI.</p>
+</div>
+<div class="tabbed-block">
+<p>Use REST API for programmatic access or invoke via tools like CURL or 
+Postman. Learn how to use Janssen Server Config API 
+<a href="../config-tools/config-api/">here</a> or Jump straight to the
+<a href="#using-configuration-rest-api">Using Configuration REST API</a></p>
+</div>
+</div>
+</div>
+<h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
+<p>In the Janssen Server, you can deploy and customize the LDAP  using the
+command Line. To get the details of Janssen command line operations relevant to
+<code>LDAP</code>, you can check the operations under <code>DatabaseLdapConfiguration</code> task using the
+command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info DatabaseLdapConfiguration
 </code></pre></div>
 <p>It comes with the following options:</p>
-<div class="highlight"><pre><span></span><code>Operation ID: get-config-database-ldap
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-config-database-ldap
   Description: Gets list of existing LDAP configurations.
-Operation ID: post-config-database-ldap
-  Description: Adds a new LDAP configuration.
-  Schema: /components/schemas/LdapConfiguration
 Operation ID: put-config-database-ldap
-  Description: Updates LDAP configuration.
-  Schema: /components/schemas/LdapConfiguration
+  Description: Updates LDAP configuration
+  Schema: GluuLdapConfiguration
+Operation ID: post-config-database-ldap
+  Description: Adds a new LDAP configuration
+  Schema: GluuLdapConfiguration
 Operation ID: get-config-database-ldap-by-name
   Description: Gets an LDAP configuration by name.
-  url-suffix: name
+  Parameters:
+  name: Name of LDAP configuration [string]
 Operation ID: delete-config-database-ldap-by-name
-  Description: Deletes an LDAP configuration.
-  url-suffix: name
+  Description: Deletes an LDAP configuration
+  Parameters:
+  name: No description is provided for this parameter [string]
 Operation ID: patch-config-database-ldap-by-name
-  Description: Partially modify an LDAP configuration.
-  url-suffix: name
-  Schema: Array of /components/schemas/PatchRequest
+  Description: Patches a LDAP configuration by name
+  Parameters:
+  name: Name of LDAP configuration [string]
+  Schema: Array of JsonPatch
 Operation ID: post-config-database-ldap-test
-  Description: Tests an LDAP configuration.
-  Schema: /components/schemas/LdapConfiguration
+  Description: Tests an LDAP configuration
+  Schema: GluuLdapConfiguration
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/LdapConfiguration
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema GluuLdapConfiguration
 </code></pre></div>
-<h2 id="get-existing-ldap-configurations">Get Existing LDAP Configurations<a class="headerlink" href="#get-existing-ldap-configurations" title="Permanent link">#</a></h2>
+<h3 id="get-existing-ldap-configurations">Get Existing LDAP Configurations<a class="headerlink" href="#get-existing-ldap-configurations" title="Permanent link">#</a></h3>
 <p>To find the existing ldap configurations, let's run the following command:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-ldap
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-ldap
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="p">[</span><span class="w"></span>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">[</span><span class="w"></span>
 <span class="w">  </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;configId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;auth_ldap_server&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;bindDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn=directory manager&quot;</span><span class="p">,</span><span class="w"></span>
@@ -8599,163 +8663,235 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt
 <span class="w">  </span><span class="p">}</span><span class="w"></span>
 <span class="p">]</span><span class="w"></span>
 </code></pre></div>
-<h2 id="adds-a-new-ldap-configuration">Adds a new LDAP Configuration<a class="headerlink" href="#adds-a-new-ldap-configuration" title="Permanent link">#</a></h2>
-<p>At first, we have checked the existing ldap database configurations the janssen server have. Indeed we can create a new ldap configuration as well. </p>
+<h3 id="adds-a-new-ldap-configuration">Adds a new LDAP Configuration<a class="headerlink" href="#adds-a-new-ldap-configuration" title="Permanent link">#</a></h3>
+<p>At first, we have checked the existing ldap database configurations the janssen server have.
+Indeed we can create a new ldap configuration as well. </p>
 <div class="highlight"><pre><span></span><code>Operation ID: post-config-database-ldap
-  Description: Adds a new LDAP configuration.
-  Schema: /components/schemas/LdapConfiguration
+  Description: Adds a new LDAP configuration
+  Schema: GluuLdapConfiguration
 </code></pre></div>
 <p>Let's get the schema file and update it to push into the server.</p>
-<p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/LdapConfiguration &gt; /tmp/ldap.json
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema GluuLdapConfiguration &gt; /tmp/ldap.json
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>{
-  &quot;configId&quot;: &quot;auth_ldap_server&quot;,
-  &quot;bindDN&quot;: &quot;string&quot;,
-  &quot;bindPassword&quot;: &quot;string&quot;,
-  &quot;servers&quot;: &quot;array&quot;,
-  &quot;maxConnections&quot;: 2,
-  &quot;useSSL&quot;: &quot;boolean&quot;,
-  &quot;baseDNs&quot;: &quot;array&quot;,
-  &quot;primaryKey&quot;: &quot;SAMAccountName,uid, email&quot;,
-  &quot;localPrimaryKey&quot;: &quot;uid, email&quot;,
-  &quot;useAnonymousBind&quot;: false,
-  &quot;enabled&quot;: false,
-  &quot;version&quot;: null,
-  &quot;level&quot;: null
-}
+The <code>post-config-database-ldap</code> operation uses the <code>GluuLdapConfiguration</code> schema to
+describe the configuration change.</p>
+<p>For your information, you can obtain the format of the <code>GluuLdapConfiguration</code>
+schema by running the aforementioned command without a file.</p>
+<div class="highlight"><span class="filename">Schema Format</span><pre><span></span><code>configId           string
+bindDN             string
+bindPassword       string
+servers            array of string
+maxConnections     integer
+                   format: int32
+useSSL             boolean
+baseDNs            array of string
+primaryKey         string
+localPrimaryKey    string
+useAnonymousBind   boolean
+enabled            boolean
+version            integer
+                   format: int32
+level              integer
+                   format: int32
 </code></pre></div>
-You need to modify <code>ldap.json</code> file with valid information. In our case, I have modified as below for testing only:</p>
-<div class="highlight"><pre><span></span><code>{
-  &quot;configId&quot;: &quot;test_ldap&quot;,
-  &quot;bindDN&quot;: &quot;cn=directory manager&quot;,
-  &quot;bindPassword&quot;: &quot;password&quot;,
-  &quot;servers&quot;: [
-    &quot;localhost:1636&quot;
-    ],
-  &quot;maxConnections&quot;: 1000,
-  &quot;useSSL&quot;: &quot;true&quot;,
-  &quot;baseDNs&quot;: [&quot;ou=people,o=jans&quot;],
-  &quot;primaryKey&quot;: &quot;uid&quot;,
-  &quot;localPrimaryKey&quot;: &quot;uid&quot;,
-  &quot;useAnonymousBind&quot;: false,
-  &quot;enabled&quot;: false,
-  &quot;version&quot;: 0,
-  &quot;level&quot;: 0
-}
+<p>An example of the schema is provided in the ldap.json file.</p>
+<p>you can also use the following command for <code>GluuLdapConfiguration</code> schema example.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema-sample GluuLdapConfiguration
+</code></pre></div>
+<div class="highlight"><span class="filename">Schema Example</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;configId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;maxConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">117</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;baseDNs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;primaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;localPrimaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useAnonymousBind&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">116</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">179</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>You need to modify <code>ldap.json</code> file with valid information. In our case,
+I have modified as below for testing only:</p>
+<div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;configId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test_ldap&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn=directory manager&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;password&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;localhost:1636&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;maxConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;baseDNs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ou=people,o=jans&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;primaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;localPrimaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useAnonymousBind&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <p>Now, lets post this configuration into the database.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-database-ldap --data /tmp/ldap.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-database-ldap<span class="se">\</span>
+ --data /tmp/ldap.json
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/database/ldap.write
-Server Response:
-{
-  &quot;configId&quot;: &quot;test_ldap&quot;,
-  &quot;bindDN&quot;: &quot;cn=directory manager&quot;,
-  &quot;bindPassword&quot;: &quot;m+OTwmlCEho=&quot;,
-  &quot;servers&quot;: [
-    &quot;localhost:1636&quot;
-  ],
-  &quot;maxConnections&quot;: 1000,
-  &quot;useSSL&quot;: true,
-  &quot;baseDNs&quot;: [
-    &quot;ou=people,o=jans&quot;
-  ],
-  &quot;primaryKey&quot;: &quot;uid&quot;,
-  &quot;localPrimaryKey&quot;: &quot;uid&quot;,
-  &quot;useAnonymousBind&quot;: false,
-  &quot;enabled&quot;: false,
-  &quot;version&quot;: 0,
-  &quot;level&quot;: 0
-}
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;configId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test_ldap&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn=directory manager&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;m+OTwmlCEho=&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;localhost:1636&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;maxConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;baseDNs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;ou=people,o=jans&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;primaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;localPrimaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useAnonymousBind&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
-<p>Please note that <code>configId</code> should be a unique identifier name for each configuration. Otherwise you will get error while going to post duplicate configuration into the server. In that case, you can go through the next option to replace instead of adding a new one.</p>
-<h2 id="updating-ldap-database-configurations">Updating LDAP Database Configurations<a class="headerlink" href="#updating-ldap-database-configurations" title="Permanent link">#</a></h2>
+<p>Please note that <code>configId</code> should be a unique identifier name for each configuration. 
+Otherwise you will get error while going to post duplicate configuration into the server. 
+In that case, you can go through the next option to replace instead of adding a new one.</p>
+<h3 id="updating-ldap-database-configurations">Updating LDAP Database Configurations<a class="headerlink" href="#updating-ldap-database-configurations" title="Permanent link">#</a></h3>
 <p>With this operation, we can update any ldap database configuration.</p>
 <div class="highlight"><pre><span></span><code>Operation ID: put-config-database-ldap
-  Description: Updates LDAP configuration.
-  Schema: /components/schemas/LdapConfiguration
+  Description: Updates LDAP configuration
+  Schema: GluuLdapConfiguration
 </code></pre></div>
-<p>For example, let say we are going to change to <code>maxConnections</code> in the above <code>test_ldap</code> configuration. So lets modify the <code>/tmp/ldap.json</code> file as below:</p>
-<div class="highlight"><pre><span></span><code>{
-  &quot;configId&quot;: &quot;test_ldap&quot;,
-  &quot;bindDN&quot;: &quot;cn=directory manager&quot;,
-  &quot;bindPassword&quot;: &quot;Mh@006&quot;,
-  &quot;servers&quot;: [
-    &quot;localhost:1636&quot;
-    ],
-  &quot;maxConnections&quot;: 100,
-  &quot;useSSL&quot;: &quot;true&quot;,
-  &quot;baseDNs&quot;: [&quot;ou=people,o=jans&quot;],
-  &quot;primaryKey&quot;: &quot;uid&quot;,
-  &quot;localPrimaryKey&quot;: &quot;uid&quot;,
-  &quot;useAnonymousBind&quot;: false,
-  &quot;enabled&quot;: false,
-  &quot;version&quot;: 0,
-  &quot;level&quot;: 0
-}
+<p>For example, let say we are going to change to <code>maxConnections</code> for <code>1000</code> to <code>100</code> in the above <code>test_ldap</code> configuration.
+So lets modify the <code>/tmp/ldap.json</code> file as below:</p>
+<p><div class="highlight"><span class="filename">Comaand</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-database-ldap <span class="se">\</span>
+--data /tmp/ldap.json
 </code></pre></div>
-<p>Finally lets do the operation:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.oy --operation-id put-config-database-ldap --data /tmp/ldap.json
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;configId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test_ldap&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn=directory manager&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zHDUXV5vAPc=&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;localhost:1636&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;maxConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;baseDNs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;ou=people,o=jans&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;primaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;localPrimaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useAnonymousBind&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></p>
+<h3 id="gets-ldap-database-configuration-by-its-name">Gets LDAP Database Configuration by its name<a class="headerlink" href="#gets-ldap-database-configuration-by-its-name" title="Permanent link">#</a></h3>
+<p>In the above operation, we have updated <code>test_ldap.json</code>. Let's check the updated result 
+with this operation by calling its name id. </p>
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-ldap-by-name<span class="se">\</span>
+--url-suffix name:test_ldap
 </code></pre></div>
-<p>It will update the configuration if match with its <code>configId</code> otherwise return an error.</p>
-<h2 id="gets-ldap-database-configuration-by-its-name">Gets LDAP Database Configuration by its name<a class="headerlink" href="#gets-ldap-database-configuration-by-its-name" title="Permanent link">#</a></h2>
-<p>In the above operation, we have updated <code>test_ldap.json</code>. Let's check the updated result with this operation by calling its name id. </p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-ldap-by-name --url-suffix name:test_ldap
+<p>Here name is the <code>configId</code> of the configuration. If we run this command, it returns the 
+configuration details matched with configId.</p>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;configId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test_ldap&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn=directory manager&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3eFs1t1aRPsW4xtxvCiGQQ==&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;localhost:1636&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;maxConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;baseDNs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;ou=people,o=jans&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;primaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;localPrimaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useAnonymousBind&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
-<p>Here name is the <code>configId</code> of the configuration. If we run this command, it returns the configuration details matched with configId.</p>
-<div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/database/ldap.readonly
-{
-  &quot;configId&quot;: &quot;test_ldap&quot;,
-  &quot;bindDN&quot;: &quot;cn=directory manager&quot;,
-  &quot;bindPassword&quot;: &quot;3eFs1t1aRPsW4xtxvCiGQQ==&quot;,
-  &quot;servers&quot;: [
-    &quot;localhost:1636&quot;
-  ],
-  &quot;maxConnections&quot;: 100,
-  &quot;useSSL&quot;: true,
-  &quot;baseDNs&quot;: [
-    &quot;ou=people,o=jans&quot;
-  ],
-  &quot;primaryKey&quot;: &quot;uid&quot;,
-  &quot;localPrimaryKey&quot;: &quot;uid&quot;,
-  &quot;useAnonymousBind&quot;: false,
-  &quot;enabled&quot;: false,
-  &quot;version&quot;: 0,
-  &quot;level&quot;: 0
-}
-</code></pre></div>
-<h2 id="delete-ldap-database-configurations">Delete LDAP Database Configurations<a class="headerlink" href="#delete-ldap-database-configurations" title="Permanent link">#</a></h2>
+<h3 id="delete-ldap-database-configurations">Delete LDAP Database Configurations<a class="headerlink" href="#delete-ldap-database-configurations" title="Permanent link">#</a></h3>
 <p>In case, we need to delete any existing LDAP Database configuration we can do that as well.</p>
-<p>The command line:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-config-database-ldap-by-name --url-suffix name:test_ldap
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-config-database-ldap-by-name <span class="se">\</span>
+ --url-suffix name:test_ldap
 </code></pre></div>
 <p>It will delete data ldap database configuration matched with the name.</p>
-<h2 id="patch-ldap-database-configurations">Patch LDAP Database Configurations<a class="headerlink" href="#patch-ldap-database-configurations" title="Permanent link">#</a></h2>
-<p>If required, We can patch single information of a ldap database configuration by using its name id. In that case, we have to make an array of operations in schema file. So, let's get the schema file first.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest &gt; patch.json
+<p>Now you check with <code>get-config-database-ldap</code> operation</p>
+<h3 id="patch-ldap-database-configurations">Patch LDAP Database Configurations<a class="headerlink" href="#patch-ldap-database-configurations" title="Permanent link">#</a></h3>
+<p>If required, We can patch single information of a ldap database configuration by using its name id. 
+In that case, we have to make an array of operations in schema file. So, let's get the schema file first.</p>
+<div class="highlight"><pre><span></span><code>Operation ID: patch-config-database-ldap-by-name
+  Description: Patches a LDAP configuration by name
+  Parameters:
+  name: Name of LDAP configuration [string]
+  Schema: Array of JsonPatch
 </code></pre></div>
-<p>We know already that this operation support three types of value <code>op</code>, <code>path</code> and <code>value</code> to be replaced. For more info visit this <a href="../config-tools/jans-cli/#patch-request-schema">link</a></p>
-<p>For example, let's say, we want to change the level of the <code>test_ldap</code> configuration. So, Let's update the patch file as below:</p>
-<div class="highlight"><pre><span></span><code>[
-  {
-    &quot;op&quot;: &quot;replace&quot;,
-    &quot;path&quot;: &quot;level&quot;,
-    &quot;value&quot;: &quot;100&quot;
-  }
-]
+<p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema JsonPatch &gt; /tmp/patch.json
+</code></pre></div>
+The <code>patch-config-database-ldap-by-name</code> uses the <a href="https://jsonpatch.com/#the-patch">JSON Patch</a> 
+schema to describe the configuration change. Refer
+<a href="../config-tools/jans-cli/#patch-request-schema">here</a> 
+to know more about schema.</p>
+<p>For example, let's say, we want to change the level of the <code>test_ldap</code> configuration. So, 
+Let's update the patch file as below:</p>
+<div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">[</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;level&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </code></pre></div>
 <p>To patch data, the command looks like for this:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-database-ldap-by-name --url-suffix name:test_ldap --data patch.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-database-ldap-by-name<span class="se">\</span>
+ --url-suffix name:test_ldap --data /tmp/patch.json
 </code></pre></div>
-<p>It will update the configuration and will show the updated result as below image on the display.</p>
-<p><img alt="patch-ldap" src="../../../assets/image-cli-patch-ldap-configuration-03042021.png" /></p>
+<p>It will update the configuration and will show the updated result as below display.</p>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;configId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test_ldap&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindDN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cn=directory manager&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;bindPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Kn0cqLRFzk2ASG+kwAuY2Q==&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;localhost:1636&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;maxConnections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useSSL&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;baseDNs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;ou=people,o=jans&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;primaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;localPrimaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useAnonymousBind&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
+<p>Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring the Lightweight Directory Access Protocol. Endpoint details are published in the <a href="../../reference/openapi/">Swagger
+document</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-08-03T16:21:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-08-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-27T17:10:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-27</span>
       
         <br>
         Created:
