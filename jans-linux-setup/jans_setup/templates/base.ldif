@@ -152,3 +152,8 @@ dn: ou=document,o=jans
 objectClass: top
 objectClass: organizationalUnit
 ou: document
+
+dn: ou=lock-telemetry,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: lock-telemetry

@@ -3,7 +3,6 @@ package io.jans.configapi.plugin.lock.model.stat;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 
 import java.io.Serializable;
@@ -15,6 +14,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @DataEntry
 @ObjectClass(value = "jansTelemetryEntry")
 public class TelemetryEntry implements Serializable {
+ 
+    private static final long serialVersionUID = 1L;
 
     @DN
     private String dn;

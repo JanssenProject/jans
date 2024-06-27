@@ -40,6 +40,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
 import io.jans.configapi.plugin.lock.model.stat.TelemetryEntry;
+import io.jans.configapi.plugin.lock.service.AuditService;
 
 @Path(Constants.LOCK_CONFIG)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -50,7 +51,7 @@ public class AuditResource extends BaseResource {
     Logger logger;
 
     @Inject
-    LockConfigService lockConfigService;
+    AuditService auditService;
 
     @Operation(summary = "Save telemetry data", description = "Save telemetry data", operationId = "save-telemetry-data", tags = {
             "Lock - Telemetry" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -65,6 +66,7 @@ public class AuditResource extends BaseResource {
     public Response getTelemetryData(@Valid TelemetryEntry telemetryEntry) {
        
         logger.info("Post telemetryEntry():{}", telemetryEntry);
+        telemetryEntry =  auditService.addTelemetryData(telemetryEntry);
         return Response.ok(telemetryEntry).build();
         
     }
