@@ -72,19 +72,30 @@ To get its schema:
 /opt/jans/jans-cli/config-cli.py --schema AuthenticationMethod \
 > /tmp/patch-default-auth.json
 ```
-```json title="Sample Output"
-{
-  "defaultAcr": "string"
-}
+The schema can now be found in the patch-default-auth.json file.
 
+For your information, you can obtain the format of the `AuthenticationMethod`
+schema by running the aforementioned command without a file.
+
+```text title="Schema Format"
+defaultAcr   string
+```
+you can also use the following command for `AuthenticationMethod` schema example.
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --schema-sample AuthenticationMethod
+```
+```json title="Schema Example"
+{
+"defaultAcr": "string"
+}
 ```
 
-This command will create a `.json` file with a schema.
-It comes with a `string` value. We need to modify this file.
+We need to modify the patch-default-auth.json file.
 We have seen that our default authentication method is `simple_password_auth`.
 We are going to update it with `passport_saml` authentication method.
 
-```json title="Sample Output"
+```json title="input"
 {
   "defaultAcr": "passport_saml"
 }
@@ -101,7 +112,6 @@ Now let's trigger the operation using the above file.
 It will show the updated result.
 
 ```json title="Sample Output"
-Server Response:
 {
   "defaultAcr": "passport_saml"
 }
@@ -129,8 +139,6 @@ where the default method is marked with `x` under the `Default` column.
 
 
 ### Update Default Authentication Method
-
-![image](../../assets/tui-authn-method-detail.png)
 
 Bring the tab focus to the authentication method that should be the new default
 method. Hit `Enter` to open the dialog as shown above. Using the checkbox for
