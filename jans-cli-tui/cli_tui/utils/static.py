@@ -1,6 +1,8 @@
 from utils.multi_lang import _
 from enum import Enum
 
+ISOFORMAT = '%Y-%m-%dT%H:%M:%S'
+
 class DialogResult(Enum):
     CANCEL = 0
     ACCEPT = 1
