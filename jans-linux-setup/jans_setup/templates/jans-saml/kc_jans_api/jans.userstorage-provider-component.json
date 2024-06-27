@@ -1,6 +1,6 @@
 {
     "name":"jans-user-federation",
-    "providerId": "kc-jans-storage",
+    "providerId": "kc-jans-user-storage",
     "providerType": "org.keycloak.storage.UserStorageProvider",
     "parentId": "${jans_idp_realm}",
     "config": {
