@@ -49,6 +49,8 @@ public class AppConfiguration implements Configuration, Serializable {
     private Boolean metricReporterEnabled;
     @DocProperty(description = "Boolean value specifying whether to enable JDK Loggers")
     private Boolean disableJdkLogger = true;
+    @DocProperty(description = "Boolean value specifying whether to enable the logger refresh timer")
+    private boolean disableLoggerTimer;
     @DocProperty(description = "Boolean value specifying whether to enable local in-memory cache")
     private Boolean useLocalCache = false;
     @DocProperty(description = "Boolean value specifying whether to bypass the validation defined upon the password attribute")
@@ -189,6 +191,14 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setDisableJdkLogger(Boolean disableJdkLogger) {
         this.disableJdkLogger = disableJdkLogger;
+    }
+
+    public boolean isDisableLoggerTimer() {
+        return disableLoggerTimer;
+    }
+
+    public void setDisableLoggerTimer(boolean disableLoggerTimer) {
+        this.disableLoggerTimer = disableLoggerTimer;
     }
 
 	public Boolean getUseLocalCache() {
