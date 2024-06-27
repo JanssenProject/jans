@@ -90,6 +90,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, fo
 
 ```
 
+
 ### Update Logging Configuration
 
 To update logging configuration, get the schema first:
@@ -97,7 +98,39 @@ To update logging configuration, get the schema first:
 /opt/jans/jans-cli/config-cli.py --schema Logging > /tmp/log-config.json
 ```
 The schema can now be found in the log-config.json file.
-Check the [update logging schema model](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml#/Configuration%20%E2%80%93%20Logging/put-config-logging)
+
+For your information, you can obtain the format of the `Logging`
+schema by running the aforementioned command without a file.
+
+```text title="Schema Format"
+loggingLevel                  string
+loggingLayout                 string
+httpLoggingEnabled            boolean
+disableJdkLogger              boolean
+enabledOAuthAuditLogging      boolean
+externalLoggerConfiguration   string
+httpLoggingExcludePaths       array of string
+                              uniqueItems: True
+```
+
+you can also use the following command for `Logging` schema example.
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --schema-sample Logging
+```
+```text title="Schema Example"
+{
+  "loggingLevel": "string",
+  "loggingLayout": "string",
+  "httpLoggingEnabled": true,
+  "disableJdkLogger": false,
+  "enabledOAuthAuditLogging": true,
+  "externalLoggerConfiguration": "string",
+  "httpLoggingExcludePaths": [
+    "string"
+  ]
+}
+```
 
 let's update the schema:
 ```bash title="Command"
