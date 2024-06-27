@@ -189,7 +189,9 @@ class DialogUtils:
 
         return widgets
 
-def fromisoformat(dt_str):
+def fromisoformat(dt_str=None):
+    if not dt_str:
+        return
     dt, _, us = dt_str.partition(".")
     dt = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S")
     if us:
