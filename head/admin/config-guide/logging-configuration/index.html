@@ -8689,8 +8689,33 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&g
 <p>To update logging configuration, get the schema first:
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema Logging &gt; /tmp/log-config.json
 </code></pre></div>
-The schema can now be found in the log-config.json file.
-Check the <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml#/Configuration%20%E2%80%93%20Logging/put-config-logging">update logging schema model</a></p>
+The schema can now be found in the log-config.json file.</p>
+<p>For your information, you can obtain the format of the <code>Logging</code>
+schema by running the aforementioned command without a file.</p>
+<div class="highlight"><span class="filename">Schema Format</span><pre><span></span><code>loggingLevel                  string
+loggingLayout                 string
+httpLoggingEnabled            boolean
+disableJdkLogger              boolean
+enabledOAuthAuditLogging      boolean
+externalLoggerConfiguration   string
+httpLoggingExcludePaths       array of string
+                              uniqueItems: True
+</code></pre></div>
+<p>you can also use the following command for <code>Logging</code> schema example.</p>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema-sample Logging
+</code></pre></div>
+<div class="highlight"><span class="filename">Schema Example</span><pre><span></span><code>{
+  &quot;loggingLevel&quot;: &quot;string&quot;,
+  &quot;loggingLayout&quot;: &quot;string&quot;,
+  &quot;httpLoggingEnabled&quot;: true,
+  &quot;disableJdkLogger&quot;: false,
+  &quot;enabledOAuthAuditLogging&quot;: true,
+  &quot;externalLoggerConfiguration&quot;: &quot;string&quot;,
+  &quot;httpLoggingExcludePaths&quot;: [
+    &quot;string&quot;
+  ]
+}
+</code></pre></div></p>
 <p>let's update the schema:
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>nano /tmp/log-config.json
 </code></pre></div></p>
@@ -8768,7 +8793,7 @@ document</a>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-20T08:23:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-27T17:10:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-27</span>
       
         <br>
         Created:
