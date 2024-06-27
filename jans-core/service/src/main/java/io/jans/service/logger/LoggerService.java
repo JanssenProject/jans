@@ -59,6 +59,8 @@ public abstract class LoggerService {
 
     @Inject
     private Event<TimerEvent> timerEvent;
+    
+    private Level prevLogLevel;
 
     private AtomicBoolean isActive;
     
@@ -76,6 +78,8 @@ public abstract class LoggerService {
 
         final int delay = 15;
         final int interval = DEFAULT_INTERVAL;
+        
+        this.prevLogLevel = getCurrentLogLevel();
 
         timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new LoggerUpdateEvent(),
                 Scheduled.Literal.INSTANCE));
@@ -97,6 +101,7 @@ public abstract class LoggerService {
 
         try {
             updateLoggerConfiguration();
+            this.prevLogLevel = getCurrentLogLevel();
         } catch (Throwable ex) {
             log.error("Exception happened while updating newly added logger configuration", ex);
         } finally {
@@ -115,7 +120,7 @@ public abstract class LoggerService {
         Level level = Level.toLevel(loggingLevel, Level.INFO);
         LoggingLayoutType loggingLayout = LoggingLayoutType.getByValue(this.getLoggingLayout().toUpperCase());
 
-        updateAppendersAndLogLevel(loggingLayout, level);
+        updateAppendersAndLogLevel(loggingLayout, prevLogLevel, level);
     }
 
     public void updateLoggerSeverity(@Observes @ConfigurationUpdate Object appConfiguration) {
@@ -161,7 +166,7 @@ public abstract class LoggerService {
 
         log.info("Setting layout and loggers level to '{}`, `{}' after configuration update", loggingLayout, loggingLevel);
 
-        updateAppendersAndLogLevel(loggingLayout, level);
+        updateAppendersAndLogLevel(loggingLayout, prevLogLevel, level);
     }
 
     private void setDisableJdkLogger() {
@@ -204,26 +209,29 @@ public abstract class LoggerService {
         loggerContext.reconfigure();
     }
 
-    private void updateAppendersAndLogLevel(LoggingLayoutType loggingLayout, Level level) {
+    private void updateAppendersAndLogLevel(LoggingLayoutType loggingLayout, Level prevLevel, Level newLevel) {
         if (loggingLayout == LoggingLayoutType.TEXT) {
-            final LoggerContext ctx = LoggerContext.getContext(false);
-            ctx.getConfiguration().getRootLogger().setLevel(level);
-            ctx.reconfigure();
-            LoggerContext loggerContext = LoggerContext.getContext(false);
+        	if ( newLevel != prevLevel) {
+	            final LoggerContext ctx = LoggerContext.getContext(false);
+	            ctx.getConfiguration().getRootLogger().setLevel(newLevel);
+	            ctx.reconfigure();
+        	}
+
+        	LoggerContext loggerContext = LoggerContext.getContext(false);
 
             int count = 0;
             for (org.apache.logging.log4j.core.Logger logger : loggerContext.getLoggers()) {
                 String loggerName = logger.getName();
                 if (loggerName.startsWith("io.jans")) {
-                    if (logger.getLevel() != level) {
+                    if (logger.getLevel() != newLevel) {
                         count++;
-                        logger.setLevel(level);
+                        logger.setLevel(newLevel);
                     }
                 }
             }
 
             if (count > 0) {
-                log.info("Updated log level of '{}' loggers to {}", count, level.toString());
+                log.info("Updated log level of '{}' loggers to {}", count, newLevel.toString());
             }
         }
 //    	boolean runLoggersUpdate = false;
@@ -300,6 +308,18 @@ public abstract class LoggerService {
 //        	log.trace("Trigger loggers update after '{}' updates", loggerConfigUpdates + appenderConfigUpdates);
 //        	ctx.updateLoggers();
 //        }
+    }
+
+    private Level getCurrentLogLevel() {
+        String loggingLevel = getLoggingLevel();
+		if (StringHelper.isEmpty(loggingLevel) || StringUtils.isEmpty(this.getLoggingLayout())
+				|| StringHelper.equalsIgnoreCase("DEFAULT", loggingLevel)) {
+			return Level.INFO;
+		}
+
+        Level level = Level.toLevel(loggingLevel, Level.INFO);
+        
+        return level;
     }
     
     public abstract boolean isDisableJdkLogger();
