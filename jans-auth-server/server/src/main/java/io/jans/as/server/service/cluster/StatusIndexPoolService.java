@@ -216,7 +216,7 @@ public class StatusIndexPoolService {
                     return lockedPool;
                 }
             } catch (EntryPersistenceException ex) {
-                log.trace("Unexpected error happened during entry lock, node " + nodeId, ex);
+                log.debug("Unexpected error happened during entry lock, node " + nodeId, ex);
             }
         }
 
@@ -255,7 +255,7 @@ public class StatusIndexPoolService {
                     log.debug("Failed to create new status index pool {}, node {}", lockedPool.getId(), nodeId);
                 }
             } catch (EntryPersistenceException ex) {
-                log.trace("Unexpected error happened during entry lock, node " + nodeId, ex);
+                log.debug("Unexpected error happened during entry lock, node " + nodeId, ex);
             }
             attempt++;
         } while (attempt <= ATTEMPT_LIMIT);
@@ -265,6 +265,10 @@ public class StatusIndexPoolService {
     }
 
     private StatusIndexPool setIndexes(StatusIndexPool pool) {
+        return setIndexes(pool, indexAllocationBlockSize);
+    }
+
+    public static StatusIndexPool setIndexes(StatusIndexPool pool, int indexAllocationBlockSize) {
         if (pool == null) {
             return pool;
         }

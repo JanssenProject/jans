@@ -15,11 +15,13 @@ import io.jans.as.server.service.DiscoveryService;
 import io.jans.as.server.service.cluster.StatusIndexPoolService;
 import io.jans.model.token.StatusIndexPool;
 import io.jans.model.tokenstatus.StatusList;
+import io.jans.model.tokenstatus.TokenStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -100,11 +102,19 @@ public class StatusListService {
         StatusList result = new StatusList(bitSize);
         for (StatusIndexPool pool : pools) {
             try {
-                StatusList poolStatusList = StatusList.fromEncoded(pool.getData(), bitSize);
-                for (int i = 0; i < poolStatusList.getBitSetLength(); i++) {
-                    result.set(pool.getStartIndex() + i, poolStatusList.get(i));
+                final String data = pool.getData();
+                if (StringUtils.isBlank(data)) {
+                    continue;
                 }
 
+                StatusList poolStatusList = StatusList.fromEncoded(data, bitSize);
+                for (int i = 0; i < poolStatusList.getBitSetLength(); i++) {
+                    int value = poolStatusList.get(i);
+                    boolean isNotDefault = value != TokenStatus.VALID.getValue();
+                    if (isNotDefault) {
+                        result.set(i, value);
+                    }
+                }
             } catch (Exception e) {
                 String msg = String.format("Failed to process status list from pool: %s, nodeId: %s", pool.getId(), pool.getNodeId());
                 log.error(msg, e);
