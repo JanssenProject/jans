@@ -31,74 +31,74 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @ApplicationScoped
 public class ClusterNodeManager {
 
-	@Inject
-	private Logger log;
+    @Inject
+    private Logger log;
 
-	@Inject
-	private ClusterNodeService clusterNodeService;
+    @Inject
+    private ClusterNodeService clusterNodeService;
 
-	@Inject
-	private Event<TimerEvent> timerEvent;
+    @Inject
+    private Event<TimerEvent> timerEvent;
 
-	private AtomicBoolean isActive;
-	
-	private ClusterNode node;
+    private AtomicBoolean isActive;
 
-	@PostConstruct
-	public void init() {
-		log.info("Initializing Cluster Node Manager ...");
-		this.isActive = new AtomicBoolean(false);
-		
-		this.node = clusterNodeService.allocate();
-		if (node != null) {
+    private ClusterNode node;
+
+    @PostConstruct
+    public void init() {
+        log.info("Initializing Cluster Node Manager ...");
+        this.isActive = new AtomicBoolean(false);
+
+        this.node = clusterNodeService.allocate();
+        if (node != null) {
             log.info("Assigned cluster node id '{}' for this instance", node.getId());
         } else {
-		    log.error("Failed to initialize Cluster Node Manager.");
+            log.error("Failed to initialize Cluster Node Manager.");
         }
-	}
+    }
 
-	public void initTimer() {
-		log.debug("Initializing Policy Download Service Timer");
+    public void initTimer() {
+        log.debug("Initializing Policy Download Service Timer");
 
-		final int delayInSeconds = 30;
-		final int intervalInSeconds = 30;
+        final int delayInSeconds = 30;
+        final int intervalInSeconds = 30;
 
-		timerEvent.fire(new TimerEvent(new TimerSchedule(delayInSeconds, intervalInSeconds), new TokenPoolUpdateEvent(),
-				Scheduled.Literal.INSTANCE));
-	}
+        timerEvent.fire(new TimerEvent(new TimerSchedule(delayInSeconds, intervalInSeconds), new TokenPoolUpdateEvent(),
+                Scheduled.Literal.INSTANCE));
+    }
 
-	@Asynchronous
-	public void reloadNodesTimerEvent(@Observes @Scheduled TokenPoolUpdateEvent tokenPoolUpdateEvent) {
-		if (this.isActive.get()) {
-			return;
-		}
+    @Asynchronous
+    public void reloadNodesTimerEvent(@Observes @Scheduled TokenPoolUpdateEvent tokenPoolUpdateEvent) {
+        if (this.isActive.get()) {
+            return;
+        }
 
-		if (!this.isActive.compareAndSet(false, true)) {
-			return;
-		}
+        if (!this.isActive.compareAndSet(false, true)) {
+            return;
+        }
 
-		try {
-			updateNode();
-		} catch (Throwable ex) {
-			log.error("Exception happened while reloading nodes", ex);
-		} finally {
-			this.isActive.set(false);
-		}
-	}
+        try {
+            updateNode();
+        } catch (Throwable ex) {
+            log.error("Exception happened while reloading nodes", ex);
+        } finally {
+            this.isActive.set(false);
+        }
+    }
 
-	private void updateNode() {
+    private void updateNode() {
         checkNodeNotNull();
-		clusterNodeService.refresh(node);
-	}
+        clusterNodeService.refresh(node);
+    }
 
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("Stopped cluster manager");
     }
-    
+
     public Integer getClusterNodeId() {
         checkNodeNotNull();
-    	return node.getId();
+        return node.getId();
     }
 
     private void checkNodeNotNull() {

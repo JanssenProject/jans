@@ -34,11 +34,10 @@ import static io.jans.as.server.service.cluster.ClusterNodeService.LOCK_KEY;
 @ApplicationScoped
 public class StatusIndexPoolService {
 
+    public static final int ATTEMPT_LIMIT = 10;
     public static long DELAY_AFTER_EXPIRATION = 3 * 60 * 60 * 1000L; // 3 hours
     public static long LOCK_WAIT_BEFORE_UPDATE = 3 * 1000L; // 30 seconds
     public static long DELAY_IF_LOCKED = 500; // 50 milliseconds
-    public static final int ATTEMPT_LIMIT = 10;
-
     @Inject
     private Logger log;
 
@@ -53,6 +52,19 @@ public class StatusIndexPoolService {
 
     // Don't allow to change it after server start up. After setting new value we need to restart cluster
     private int indexAllocationBlockSize;
+
+    public static StatusIndexPool setIndexes(StatusIndexPool pool, int indexAllocationBlockSize) {
+        if (pool == null) {
+            return pool;
+        }
+
+        int index = pool.getId();
+
+        pool.setStartIndex(index * indexAllocationBlockSize);
+        pool.setEndIndex((index + 1) * indexAllocationBlockSize - 1);
+
+        return pool;
+    }
 
     @PostConstruct
     public void init() {
@@ -93,20 +105,20 @@ public class StatusIndexPoolService {
      * @return pool
      */
     public StatusIndexPool getPoolLast() {
-    	String baseDn = baseDn();
+        String baseDn = baseDn();
 
         int count = 1;
         if (PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(entryManager.getPersistenceType(baseDn))) {
             count = Integer.MAX_VALUE;
         }
 
-    	PagedResult<StatusIndexPool> pagedResult = entryManager.findPagedEntries(baseDn, StatusIndexPool.class,
+        PagedResult<StatusIndexPool> pagedResult = entryManager.findPagedEntries(baseDn, StatusIndexPool.class,
                 Filter.createPresenceFilter("jansNum"), null, "jansNum", SortOrder.DESCENDING, 0, count, count);
-		if (pagedResult.getEntriesCount() >= 1) {
-			return setIndexes(pagedResult.getEntries().get(0));
-		}
+        if (pagedResult.getEntriesCount() >= 1) {
+            return setIndexes(pagedResult.getEntries().get(0));
+        }
 
-		return null;
+        return null;
     }
 
     /**
@@ -141,11 +153,11 @@ public class StatusIndexPoolService {
         final String baseDn = baseDn();
 
         Date expirationDate = new Date(System.currentTimeMillis() - DELAY_AFTER_EXPIRATION);
-        
-		Filter filter = Filter.createORFilter(Filter.createEqualityFilter("exp", null),
-				Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn, expirationDate)));
 
-		return setIndexes(entryManager.findEntries(baseDn, StatusIndexPool.class, filter));
+        Filter filter = Filter.createORFilter(Filter.createEqualityFilter("exp", null),
+                Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn, expirationDate)));
+
+        return setIndexes(entryManager.findEntries(baseDn, StatusIndexPool.class, filter));
     }
 
     protected void persist(StatusIndexPool pool) {
@@ -246,7 +258,7 @@ public class StatusIndexPoolService {
             // Do persist operation in try/catch for safety and do not throw error to upper
             // levels
             try {
-            	expirationDate = new Date(System.currentTimeMillis() + 2 * appConfiguration.getAccessTokenLifetime() * 1000);
+                expirationDate = new Date(System.currentTimeMillis() + 2 * appConfiguration.getAccessTokenLifetime() * 1000);
                 pool.setExpirationDate(expirationDate);
 
                 persist(pool);
@@ -273,19 +285,6 @@ public class StatusIndexPoolService {
 
     private StatusIndexPool setIndexes(StatusIndexPool pool) {
         return setIndexes(pool, indexAllocationBlockSize);
-    }
-
-    public static StatusIndexPool setIndexes(StatusIndexPool pool, int indexAllocationBlockSize) {
-        if (pool == null) {
-            return pool;
-        }
-
-        int index = pool.getId();
-
-        pool.setStartIndex(index * indexAllocationBlockSize);
-        pool.setEndIndex((index + 1) * indexAllocationBlockSize - 1);
-
-        return pool;
     }
 
     private List<StatusIndexPool> setIndexes(List<StatusIndexPool> pools) {
