@@ -1,42 +1,29 @@
-#[derive(serde::Serialize, Debug)]
-pub(crate) struct OpenIdDynamicClientRequest<'a> {
-	pub(crate) client_name: &'static str,
-	pub(crate) application_type: &'static str,
-	pub(crate) redirect_uris: &'a [&'static str], // basically a list of callback urls
-	pub(crate) token_endpoint_auth_method: &'static str,
-	pub(crate) software_statement: &'a str,
-	pub(crate) contacts: &'a [&'static str],
+use std::collections::BTreeSet;
+
+#[derive(serde::Deserialize, Debug)]
+pub(crate) struct CedarlingConfig {
+	// policy store
+	pub(crate) policy_store: PolicyStoreConfig,
+	pub(crate) decompress_policy_store: bool,
+	pub(crate) trust_store_refresh_rate: Option<i32>,
+
+	// authz (set supported_signature_algorithms to None to disable signature validation)
+	pub(crate) supported_signature_algorithms: Option<BTreeSet<String>>,
 }
 
 #[derive(serde::Deserialize, Debug)]
-pub(crate) struct TrustedIssuer {
-	pub(crate) name: String,
-	pub(crate) description: String,
-	pub(crate) openid_configuration_endpoint: String,
-}
-
-#[derive(serde::Deserialize, Debug)]
-pub struct OpenIdConfiguration {
-	pub(crate) issuer: String,
-	pub(crate) authorization_endpoint: String,
-	pub(crate) registration_endpoint: String,
-	pub(crate) token_endpoint: String,
-	pub(crate) jwks_uri: String,
-}
-
-#[derive(serde::Deserialize, Debug)]
-pub(crate) struct OpenIdDynamicClient {
-	pub(crate) client_id: String,
-	pub(crate) client_secret: Option<String>,
-}
-
-#[derive(serde::Serialize, Debug)]
-pub(crate) struct OpenIdGrantRequest<'a> {
-	pub(crate) scope: &'a str,
-	pub(crate) grant_type: &'a str,
-}
-
-#[derive(serde::Deserialize, Debug)]
-pub(crate) struct OpenIdGrantResponse {
-	pub(crate) access_token: String,
+#[serde(tag = "strategy")]
+#[serde(rename_all = "kebab-case")]
+pub(crate) enum PolicyStoreConfig {
+	Local,
+	Remote {
+		url: String,
+	},
+	LockMaster {
+		url: String,
+		application_name: String,
+		policy_store_id: String,
+		enable_dynamic_configuration: bool,
+		ssa_jwt: String,
+	},
 }
