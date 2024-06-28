@@ -6,6 +6,7 @@ import io.jans.chip.model.DCResponse
 import io.jans.chip.model.LoginResponse
 import io.jans.chip.model.SSARegRequest
 import io.jans.chip.model.TokenResponse
+import io.jans.chip.model.appIntegrity.AppIntegrityResponse
 import io.jans.chip.model.fido.assertion.option.AssertionOptionRequest
 import io.jans.chip.model.fido.assertion.option.AssertionOptionResponse
 import io.jans.chip.model.fido.assertion.result.AssertionResultRequest
@@ -92,6 +93,9 @@ interface APIInterface {
 
     @POST
     suspend fun assertionResult(@Body request: AssertionResultRequest?, @Url url: String?): Response<ResponseBody>
+
+    @GET
+    suspend fun verifyIntegrityTokenOnAppServer(@Url url: String?): Response<AppIntegrityResponse>?
 
     /*@GET
     fun getFidoConfiguration(@Url url: String?): Call<FidoConfigurationResponse?>?

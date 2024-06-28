@@ -13,8 +13,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -27,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -43,16 +48,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.AppTheme
 import com.nimbusds.jwt.JWTClaimsSet
-import io.jans.jans_chip.R
+import com.spr.jetpack_loading.components.indicators.lineScaleIndicator.LineScaleIndicator
+import com.spr.jetpack_loading.enums.PunchType
 import io.jans.chip.factories.DPoPProofFactory
 import io.jans.chip.model.OIDCClient
 import io.jans.chip.model.OPConfiguration
 import io.jans.chip.model.UserInfoResponse
+import io.jans.chip.model.appIntegrity.AppIntegrityResponse
 import io.jans.chip.ui.screens.NavigationRoutes
 import io.jans.chip.ui.screens.authenticatedGraph
 import io.jans.chip.ui.screens.unauthenticatedGraph
 import io.jans.chip.utils.AppConfig
 import io.jans.chip.viewmodel.MainViewModel
+import io.jans.jans_chip.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -65,7 +73,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //mainViewModel.initModel(this)
         val mainViewModel = MainViewModel.getInstance(this)
+        var loading = true
+
         CoroutineScope(Dispatchers.IO).launch {
+
             mainViewModel.opConfigurationPresent = false
             mainViewModel.fidoConfigurationPresent = false
             mainViewModel.attestationOptionSuccess = false
@@ -139,10 +150,31 @@ class MainActivity : AppCompatActivity() {
                     mainViewModel.userIsAuthenticated = true
                 }
 
+
+                var appIntegrityEntity: String? =
+                    async { mainViewModel.checkAppIntegrityFromDatabase() }.await()
+                if (appIntegrityEntity == null) {
+                    val appIntegrityResponse: AppIntegrityResponse? =
+                        async { mainViewModel.checkAppIntegrity() }.await()
+                    if (appIntegrityResponse != null) {
+                        mainViewModel.errorInLoading = true
+                        mainViewModel.loadingErrorMessage =
+                            appIntegrityResponse.appIntegrity?.appRecognitionVerdict
+                                ?: "Unable to fetch App Integrity from Google Play Integrity"
+                    }
+                } else {
+                    mainViewModel.errorInLoading = true
+                    mainViewModel.loadingErrorMessage = "App Integrity: ${appIntegrityEntity}"
+                }
+                loading = false
             } catch (e: Exception) {
                 //catching exception
+                loading = false
+                mainViewModel.errorInLoading = true
+                mainViewModel.loadingErrorMessage = "Error in loading app: ${e.message}"
                 e.printStackTrace()
             }
+
         }
         setContent {
             AppTheme {
@@ -151,15 +183,43 @@ class MainActivity : AppCompatActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val loadingApp = remember { mutableStateOf(loading) }
                     val shouldShowDialog = remember { mutableStateOf(false) }
                     val dialogContent = remember { mutableStateOf("") }
+
                     shouldShowDialog.value = mainViewModel.errorInLoading
                     dialogContent.value = mainViewModel.loadingErrorMessage
                     AppAlertDialog(
                         shouldShowDialog = shouldShowDialog,
                         content = dialogContent
                     )
-                    MainApp()
+                    if (!loading) {
+                        MainApp()
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .navigationBarsPadding()
+                                .imePadding()
+                                .height(400.dp)
+                                .verticalScroll(rememberScrollState()),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Spacer(modifier = Modifier.height(40.dp))
+                            LineScaleIndicator(
+                                color = Color(0xFF134520),
+                                rectCount = 5,
+                                distanceOnXAxis = 30f,
+                                lineHeight = 100,
+                                animationDuration = 500,
+                                minScale = 0.3f,
+                                maxScale = 1.5f,
+                                punchType = PunchType.RANDOM_PUNCH,
+                                penThickness = 15f
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -244,7 +304,7 @@ fun Title(
 fun LogButton(
     // 1
     text: String,
-    isClickable : Boolean,
+    isClickable: Boolean,
     onClick: () -> Unit,
 ) {
     Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {

@@ -42,7 +42,6 @@ import coil.size.Scale
 import com.spr.jetpack_loading.components.indicators.lineScaleIndicator.LineScaleIndicator
 import com.spr.jetpack_loading.enums.PunchType
 import io.jans.chip.AppAlertDialog
-import io.jans.jans_chip.R
 import io.jans.chip.common.AuthAdaptor
 import io.jans.chip.model.LoginResponse
 import io.jans.chip.model.TokenResponse
@@ -58,6 +57,7 @@ import io.jans.chip.ui.theme.AppTheme
 import io.jans.chip.ui.theme.Janschip1Theme
 import io.jans.chip.utils.biometric.BiometricHelper
 import io.jans.chip.viewmodel.MainViewModel
+import io.jans.jans_chip.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -90,26 +90,17 @@ fun RegistrationScreen(
             shouldShowDialog = shouldShowDialog,
             content = dialogContent
         )
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .navigationBarsPadding()
-                .imePadding()
-                .verticalScroll(rememberScrollState())
-        ) {
-
-            // Back Button Icon
-            SmallClickableWithIconAndText(
+        if (loading) {
+            Column(
                 modifier = Modifier
-                    .padding(horizontal = AppTheme.dimens.paddingLarge)
-                    .padding(top = AppTheme.dimens.paddingLarge),
-                iconContentDescription = stringResource(id = R.string.navigate_back),
-                iconVector = Icons.Outlined.ArrowBack,
-                text = stringResource(id = R.string.back_to_login),
-                onClick = onNavigateBack
-            )
-
-            if (loading) {
+                    .fillMaxSize()
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .height(400.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 Spacer(modifier = Modifier.height(40.dp))
                 LineScaleIndicator(
                     color = Color(0xFF134520),
@@ -123,244 +114,271 @@ fun RegistrationScreen(
                     penThickness = 15f
                 )
             }
-            // Main card Content for Registration
-            ElevatedCard(
+        } else {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(AppTheme.dimens.paddingLarge)
+                    .fillMaxSize()
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .verticalScroll(rememberScrollState())
             ) {
 
-                Column(
+                // Back Button Icon
+                SmallClickableWithIconAndText(
                     modifier = Modifier
                         .padding(horizontal = AppTheme.dimens.paddingLarge)
-                        .padding(bottom = AppTheme.dimens.paddingExtraLarge)
+                        .padding(top = AppTheme.dimens.paddingLarge),
+                    iconContentDescription = stringResource(id = R.string.navigate_back),
+                    iconVector = Icons.Outlined.ArrowBack,
+                    text = stringResource(id = R.string.back_to_login),
+                    onClick = onNavigateBack
+                )
+
+                // Main card Content for Registration
+                ElevatedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(AppTheme.dimens.paddingLarge)
                 ) {
-                    // Heading Jetpack Compose
-                    MediumTitleText(
+
+                    Column(
                         modifier = Modifier
-                            .padding(top = AppTheme.dimens.paddingLarge)
-                            .fillMaxWidth(),
-                        text = stringResource(id = R.string.janssen),
-                        textAlign = TextAlign.Center
-                    )
+                            .padding(horizontal = AppTheme.dimens.paddingLarge)
+                            .padding(bottom = AppTheme.dimens.paddingExtraLarge)
+                    ) {
+                        // Heading Jetpack Compose
+                        MediumTitleText(
+                            modifier = Modifier
+                                .padding(top = AppTheme.dimens.paddingLarge)
+                                .fillMaxWidth(),
+                            text = stringResource(id = R.string.janssen),
+                            textAlign = TextAlign.Center
+                        )
 
-                    // Logo
-                    AsyncImage(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(128.dp)
-                            .padding(top = AppTheme.dimens.paddingSmall),
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(data = R.drawable.janssen_logo)
-                            .crossfade(enable = true)
-                            .scale(Scale.FILL)
-                            .build(),
-                        contentDescription = stringResource(id = R.string.enrol_account)
-                    )
-                    // Heading Registration
-                    TitleText(
-                        modifier = Modifier.padding(top = AppTheme.dimens.paddingLarge),
-                        text = stringResource(id = R.string.enrol_account)
-                    )
+                        // Logo
+                        AsyncImage(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(128.dp)
+                                .padding(top = AppTheme.dimens.paddingSmall),
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(data = R.drawable.janssen_logo)
+                                .crossfade(enable = true)
+                                .scale(Scale.FILL)
+                                .build(),
+                            contentDescription = stringResource(id = R.string.enrol_account)
+                        )
+                        // Heading Registration
+                        TitleText(
+                            modifier = Modifier.padding(top = AppTheme.dimens.paddingLarge),
+                            text = stringResource(id = R.string.enrol_account)
+                        )
 
-                    /**
-                     * Registration Inputs Composable
-                     */
-                    RegistrationInputs(
-                        registrationState = registrationState,
+                        /**
+                         * Registration Inputs Composable
+                         */
+                        RegistrationInputs(
+                            registrationState = registrationState,
 
-                        onEmailIdChange = { inputString ->
-                            val result = registrationViewModel.onUiEvent(
-                                registrationUiEvent = RegistrationUiEvent.EmailChanged(
-                                    inputValue = inputString
+                            onEmailIdChange = { inputString ->
+                                val result = registrationViewModel.onUiEvent(
+                                    registrationUiEvent = RegistrationUiEvent.EmailChanged(
+                                        inputValue = inputString
+                                    )
                                 )
-                            )
-                            if (result) {
-                                mainViewModel.setUsername(inputString)
-                            }
-                        },
+                                if (result) {
+                                    mainViewModel.setUsername(inputString)
+                                }
+                            },
 
-                        onPasswordChange = { inputString ->
-                            val result = registrationViewModel.onUiEvent(
-                                registrationUiEvent = RegistrationUiEvent.PasswordChanged(
-                                    inputValue = inputString
+                            onPasswordChange = { inputString ->
+                                val result = registrationViewModel.onUiEvent(
+                                    registrationUiEvent = RegistrationUiEvent.PasswordChanged(
+                                        inputValue = inputString
+                                    )
                                 )
-                            )
-                            if (result) {
-                                mainViewModel.setPassword(inputString)
-                            }
-                        },
+                                if (result) {
+                                    mainViewModel.setPassword(inputString)
+                                }
+                            },
 
-                        onSubmit = {
-                            var attestationOptionResponse: AttestationOptionResponse? = null
-                            var fidoConfiguration: FidoConfigurationResponse? = null
-                            if (isBiometricAvailable) {
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    loading = true
+                            onSubmit = {
+                                var attestationOptionResponse: AttestationOptionResponse? = null
+                                var fidoConfiguration: FidoConfigurationResponse? = null
+                                loading = true
+                                if (isBiometricAvailable) {
+                                    CoroutineScope(Dispatchers.Main).launch {
 
-                                    val loginResponse: LoginResponse? = async {
-                                        mainViewModel.processlogin(
-                                            mainViewModel.getUsername(),
-                                            mainViewModel.getPassword(),
-                                            "enroll",
-                                            null
-                                        )
-                                    }.await()
-
-                                    if (loginResponse?.isSuccessful == false) {
-                                        shouldShowDialog.value = true
-                                        dialogContent.value =
-                                            loginResponse.errorMessage.toString()
-                                        return@launch
-                                    }
-                                    val tokenResponse: TokenResponse? = async {
-                                        mainViewModel.getToken(
-                                            loginResponse?.authorizationCode,
-                                        )
-                                    }.await()
-                                    if (tokenResponse?.isSuccessful == false) {
-                                        shouldShowDialog.value = true
-                                        dialogContent.value =
-                                            tokenResponse.errorMessage.toString()
-                                        return@launch
-                                    }
-                                    val userInfoResponse: UserInfoResponse? =
-                                        async { mainViewModel.getUserInfo(tokenResponse?.accessToken) }.await()
-                                    if (userInfoResponse != null) {
-                                        mainViewModel.setUserInfoResponse(
-                                            userInfoResponse
-                                        )
-                                    }
-                                    if (userInfoResponse?.isSuccessful == false) {
-                                        shouldShowDialog.value = true
-                                        dialogContent.value =
-                                            userInfoResponse.errorMessage.toString()
-                                        return@launch
-                                    }
-
-                                    val opConfiguration =
-                                        async { mainViewModel.getOPConfigurationInDatabase() }.await()
-                                    if (opConfiguration?.isSuccessful == false) {
-                                        shouldShowDialog.value = true
-                                        dialogContent.value =
-                                            opConfiguration.errorMessage.toString()
-                                        loading = false
-                                        return@launch
-                                    }
-                                    val oidcClient =
-                                        async { mainViewModel.doDCR("openid authorization_challenge") }.await()
-                                    if (oidcClient?.isSuccessful == false) {
-                                        shouldShowDialog.value = true
-                                        dialogContent.value =
-                                            oidcClient.errorMessage.toString()
-                                        loading = false
-                                        return@launch
-                                    }
-                                    fidoConfiguration =
-                                        async { mainViewModel.fetchFidoConfiguration() }.await()
-                                    if (fidoConfiguration?.isSuccessful == false) {
-                                        shouldShowDialog.value = true
-                                        dialogContent.value =
-                                            fidoConfiguration?.errorMessage.toString()
-                                        loading = false
-                                        return@launch
-                                    }
-                                    attestationOptionResponse =
-                                        async {
-                                            mainViewModel.attestationOption(
-                                                mainViewModel.getUsername()
-                                            )
-                                        }.await()
-                                    if (attestationOptionResponse?.isSuccessful == false) {
-                                        shouldShowDialog.value = true
-                                        dialogContent.value =
-                                            attestationOptionResponse?.errorMessage.toString()
-                                        loading = false
-                                        return@launch
-                                    }
-
-                                    val authAdaptor = AuthAdaptor(context)
-                                    val publicKeyCredentialSource = async {
-                                        authAdaptor.getPublicKeyCredentialSource(
-                                            attestationOptionResponse,
-                                            fidoConfiguration?.issuer
-                                        )
-                                    }.await()
-
-                                    val signature =
-                                        async {
-                                            authAdaptor.generateSignature(
-                                                publicKeyCredentialSource
+                                        val loginResponse: LoginResponse? = async {
+                                            mainViewModel.processlogin(
+                                                mainViewModel.getUsername(),
+                                                mainViewModel.getPassword(),
+                                                "enroll",
+                                                null
                                             )
                                         }.await()
 
-                                    BiometricHelper.registerUserBiometrics(context,
-                                        signature!!,
-                                        onSuccess = { plainText ->
-                                            CoroutineScope(Dispatchers.Main).launch {
+                                        if (loginResponse?.isSuccessful == false) {
+                                            shouldShowDialog.value = true
+                                            dialogContent.value =
+                                                loginResponse.errorMessage.toString()
+                                            loading = false
+                                            return@launch
+                                        }
+                                        val tokenResponse: TokenResponse? = async {
+                                            mainViewModel.getToken(
+                                                loginResponse?.authorizationCode,
+                                            )
+                                        }.await()
+                                        if (tokenResponse?.isSuccessful == false) {
+                                            shouldShowDialog.value = true
+                                            dialogContent.value =
+                                                tokenResponse.errorMessage.toString()
+                                            loading = false
+                                            return@launch
+                                        }
+                                        val userInfoResponse: UserInfoResponse? =
+                                            async { mainViewModel.getUserInfo(tokenResponse?.accessToken) }.await()
+                                        if (userInfoResponse != null) {
+                                            mainViewModel.setUserInfoResponse(
+                                                userInfoResponse
+                                            )
+                                        }
+                                        if (userInfoResponse?.isSuccessful == false) {
+                                            shouldShowDialog.value = true
+                                            dialogContent.value =
+                                                userInfoResponse.errorMessage.toString()
+                                            loading = false
+                                            return@launch
+                                        }
 
-                                                val attestationResultRequest: AttestationResultRequest? =
-                                                    async {
-                                                        authAdaptor.register(
-                                                            attestationOptionResponse,
-                                                            fidoConfiguration?.issuer,
-                                                            publicKeyCredentialSource
+                                        val opConfiguration =
+                                            async { mainViewModel.getOPConfigurationInDatabase() }.await()
+                                        if (opConfiguration?.isSuccessful == false) {
+                                            shouldShowDialog.value = true
+                                            dialogContent.value =
+                                                opConfiguration.errorMessage.toString()
+                                            loading = false
+                                            return@launch
+                                        }
+                                        val oidcClient =
+                                            async { mainViewModel.doDCR("openid authorization_challenge") }.await()
+                                        if (oidcClient?.isSuccessful == false) {
+                                            shouldShowDialog.value = true
+                                            dialogContent.value =
+                                                oidcClient.errorMessage.toString()
+                                            loading = false
+                                            return@launch
+                                        }
+                                        fidoConfiguration =
+                                            async { mainViewModel.fetchFidoConfiguration() }.await()
+                                        if (fidoConfiguration?.isSuccessful == false) {
+                                            shouldShowDialog.value = true
+                                            dialogContent.value =
+                                                fidoConfiguration?.errorMessage.toString()
+                                            loading = false
+                                            return@launch
+                                        }
+                                        attestationOptionResponse =
+                                            async {
+                                                mainViewModel.attestationOption(
+                                                    mainViewModel.getUsername()
+                                                )
+                                            }.await()
+                                        if (attestationOptionResponse?.isSuccessful == false) {
+                                            shouldShowDialog.value = true
+                                            dialogContent.value =
+                                                attestationOptionResponse?.errorMessage.toString()
+                                            loading = false
+                                            return@launch
+                                        }
+
+                                        val authAdaptor = AuthAdaptor(context)
+                                        val publicKeyCredentialSource = async {
+                                            authAdaptor.getPublicKeyCredentialSource(
+                                                attestationOptionResponse,
+                                                fidoConfiguration?.issuer
+                                            )
+                                        }.await()
+
+                                        val signature =
+                                            async {
+                                                authAdaptor.generateSignature(
+                                                    publicKeyCredentialSource
+                                                )
+                                            }.await()
+
+                                        BiometricHelper.registerUserBiometrics(context,
+                                            signature!!,
+                                            onSuccess = { plainText ->
+                                                CoroutineScope(Dispatchers.Main).launch {
+
+                                                    val attestationResultRequest: AttestationResultRequest? =
+                                                        async {
+                                                            authAdaptor.register(
+                                                                attestationOptionResponse,
+                                                                fidoConfiguration?.issuer,
+                                                                publicKeyCredentialSource
+                                                            )
+                                                        }.await()
+                                                    if (attestationResultRequest?.isSuccessful == false) {
+                                                        shouldShowDialog.value = true
+                                                        dialogContent.value =
+                                                            attestationResultRequest.errorMessage.toString()
+                                                        loading = false
+                                                        return@launch
+                                                    }
+
+                                                    val attestationResultResponse = async {
+                                                        mainViewModel.attestationResult(
+                                                            attestationResultRequest
                                                         )
                                                     }.await()
-                                                if (attestationResultRequest?.isSuccessful == false) {
-                                                    shouldShowDialog.value = true
-                                                    dialogContent.value =
-                                                        attestationResultRequest.errorMessage.toString()
-                                                    loading = false
-                                                    return@launch
-                                                }
+                                                    if (attestationResultResponse?.isSuccessful == false) {
+                                                        shouldShowDialog.value = true
+                                                        dialogContent.value =
+                                                            attestationResultResponse.errorMessage.toString()
+                                                        loading = false
+                                                        return@launch
+                                                    }
+                                                    mainViewModel.attestationOptionResponse = true
+                                                    //showSignUpBottomSheet = false
 
-                                                val attestationResultResponse = async {
-                                                    mainViewModel.attestationResult(
-                                                        attestationResultRequest
+                                                    registrationViewModel.onUiEvent(
+                                                        registrationUiEvent = RegistrationUiEvent.Submit
                                                     )
-                                                }.await()
-                                                if (attestationResultResponse?.isSuccessful == false) {
-                                                    shouldShowDialog.value = true
-                                                    dialogContent.value =
-                                                        attestationResultResponse.errorMessage.toString()
                                                     loading = false
-                                                    return@launch
                                                 }
-                                                mainViewModel.attestationOptionResponse = true
-                                                //showSignUpBottomSheet = false
-
-                                                registrationViewModel.onUiEvent(registrationUiEvent = RegistrationUiEvent.Submit)
-                                                loading = false
-                                            }
-                                        })
+                                            })
+                                    }
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Biometric authentication is not available!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    "Biometric authentication is not available!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                loading = false
                             }
-                        }
-                    )
-                    Row(
-                        modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Don't have an account?
-                        Text(text = stringResource(id = R.string.already_have_login))
-
-                        //Register
-                        Text(
-                            modifier = Modifier
-                                .padding(start = AppTheme.dimens.paddingExtraSmall)
-                                .clickable { onNavigateBack.invoke() },
-                            fontWeight = FontWeight.Bold,
-                            text = stringResource(id = R.string.login),
-                            color = MaterialTheme.colorScheme.primary
                         )
+                        Row(
+                            modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Don't have an account?
+                            Text(text = stringResource(id = R.string.already_have_login))
+
+                            //Register
+                            Text(
+                                modifier = Modifier
+                                    .padding(start = AppTheme.dimens.paddingExtraSmall)
+                                    .clickable { onNavigateBack.invoke() },
+                                fontWeight = FontWeight.Bold,
+                                text = stringResource(id = R.string.login),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
