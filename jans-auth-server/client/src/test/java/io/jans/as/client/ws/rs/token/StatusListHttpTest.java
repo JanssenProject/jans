@@ -157,4 +157,13 @@ public class StatusListHttpTest extends BaseTest {
         StatusList before = StatusList.fromEncoded("eNoDAAAAAAE", 2);
         StatusList after = StatusList.fromEncoded("eNoLYGEYhIAFADIjAFk", 2);
     }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Test(enabled = false)
+    public void statusListPerformanceLoad(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri) throws IOException, InvalidJwtException, InterruptedException {
+        for (int i = 0; i < 10; i++) {
+            statusList(userId, userSecret, redirectUris, redirectUri);
+        }
+    }
 }
