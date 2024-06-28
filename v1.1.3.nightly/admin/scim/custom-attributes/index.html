@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#custom-attributes" class="md-skip">
           Skip to content
         </a>
       
@@ -6874,22 +6874,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#custom-attributes" class="md-nav__link">
+    Custom Attributes
   </a>
   
 </li>
@@ -8431,22 +8417,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#custom-attributes" class="md-nav__link">
+    Custom Attributes
   </a>
   
 </li>
@@ -8495,19 +8467,43 @@
 
   <h1>Adding Custom Attributes</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h2 id="custom-attributes">Custom Attributes<a class="headerlink" href="#custom-attributes" title="Permanent link">#</a></h2>
+<p><a href="https://datatracker.ietf.org/doc/html/rfc7643">RFC 7643</a> defines the schema for resource types in SCIM (see section 3.3). In other words, it defines structures in terms of attributes to represent users and groups as well as attribute types, mutability, cardinality, and so on.</p>
+<p>Although the schema covers many attributes one might think of, at times you will need to add your own attributes for specific needs. This is where user extensions pitch in, they allow you to create custom attributes for SCIM. To do so, you will have to:</p>
+<ul>
+<li>
+<p>Add an attribute to LDAP schema</p>
+</li>
+<li>
+<p>Include the new attribute in an LDAP's objectclass such as jansPerson</p>
+</li>
+<li>
+<p>Register and activate your new attribute through <strong>Jans TUI</strong>.</p>
+</li>
+</ul>
+<p>Please visit this <a href="https://docs.jans.io/head/admin/config-guide/attribute-configuration/">page</a> for a more detailed explanation. When registering the attribute in the <strong>TUI</strong>, please ensure you have set the <code>Include in SCIM Extension</code> parameter to <code>true</code>.</p>
+<p><img alt="attribute" src="https://github.com/JanssenProject/jans/assets/43112579/61d0aff6-75fa-4e6b-8db6-2eeb3332cfe5" /></p>
+<p>Once you submit this form, your attribute will be part of the <code>User Extension</code>. You can verify this by inspecting the <code>Schema</code> endpoint:</p>
+<div class="highlight"><pre><span></span><code>https://&lt;host-name&gt;/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:extension:gluu:2.0:User
+</code></pre></div>
+<p><img alt="output-json" src="https://github.com/JanssenProject/jans/assets/43112579/41804347-4084-4bb4-8bc5-05fc220ae394" /></p>
+<p>In the JSON response, your new added attribute will appear.</p>
+<p>To customize the URI associated to the extension (whose default value is <code>urn:ietf:params:scim:schemas:extension:gluu:2.0:User</code>
+), you can use TUI:</p>
+<ul>
+<li>Navigate to <code>SCIM</code> using Jans TUI <code>/opt/jans/jans-cli/jans_cli_tui.py</code></li>
+<li>Locate the Scim properties section</li>
+<li>Set a value in the field <code>User Extension Schema URI</code></li>
+<li>Save the changes</li>
+</ul>
+<p><img alt="scim-extention" src="https://github.com/JanssenProject/jans/assets/43112579/fb5b9d5c-8b17-4be0-af6c-d36389de82d2" /></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-10-26T06:08:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-10-26</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-28T14:48:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-28</span>
       
         <br>
         Created:

@@ -8583,6 +8583,23 @@
 <p>The Janssen Server allows administrators to set and manage the default
 authentication method for the authentication server.
 The Janssen Server provides multiple configuration tools to perform these tasks.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only one of the available authentication methods can be set as the default.
+While setting the Default authentication method, the Janssen Server 
+checks if the same authentication is available and active.</p>
+<p>See 
+<a href="../custom-scripts-config/#update-an-existing-custom-script">script documentation</a> 
+to know how to enable/disable authentication methods using custom scripts.</p>
+<p>If the script is not active then the following error notification is 
+returned by API.
+<code>{
+    "code": "400",
+    "message": "INVALID_ACR",
+    "description": "Authentication script {acr} is not active"
+}</code></p>
+<p>Also, to understand how Janssen Server picks the authentication method <em>in absence</em> of default authentication method, refer to <a href="../../auth-server/openid-features/acrs/#flowchart---how-the-jans-as-derives-an-acr-value-for-a-user-session-">ACR documentation</a></p>
+</div>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -8687,7 +8704,7 @@ in the <a href="../../reference/openapi/">Swagger document</a>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-27T17:10:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-28T14:48:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-28</span>
       
         <br>
         Created:
