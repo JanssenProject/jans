@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.NullExpression;
 import com.querydsl.core.types.Operation;
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.Path;
@@ -208,7 +209,11 @@ public class SqlFilterConverter {
 	        		return ConvertedExpression.build(operation, jsonAttributes);
     			}
             }
-        	return ConvertedExpression.build(ExpressionUtils.eq(columnExpression, buildTypedExpression(tableMapping, currentGenericFilter)), jsonAttributes);
+    		Expression typedExpression = buildTypedExpression(tableMapping, currentGenericFilter);
+    		if (typedExpression instanceof NullExpression) {
+    			return ConvertedExpression.build(ExpressionUtils.isNull(columnExpression), jsonAttributes);
+    		}
+        	return ConvertedExpression.build(ExpressionUtils.eq(columnExpression, typedExpression), jsonAttributes);
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {

@@ -105,7 +105,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         try {
             tokenService.requestRpt(
                     "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
-                    GrantType.OXAUTH_UMA_TICKET.getValue(),
+                    GrantType.UMA_TICKET.getValue(),
                     permissionFlowTest.ticket,
                     null, null, null, null, null);
         } catch (ClientErrorException ex) {
@@ -164,7 +164,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
         UmaTokenResponse response = tokenService.requestRpt(
                 "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
-                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.UMA_TICKET.getValue(),
                 claimsGatheringTicket,
                 null, null, null, null, null);
         assertIt(response);
@@ -184,7 +184,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
         UmaTokenResponse response = tokenService.requestRpt(
                 "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
-                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.UMA_TICKET.getValue(),
                 claimsGatheringTicket,
                 null, null, null, this.rpt, "oxd");
         assertIt(response);
