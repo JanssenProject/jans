@@ -6,7 +6,9 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 import jakarta.persistence.Transient;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -94,6 +96,14 @@ public class StatusIndexPool extends BaseEntry {
 	public void setLockKey(String lockKey) {
 		this.lockKey = lockKey;
 	}
+
+	public List<Integer> enumerateAllIndexes() {
+	    List<Integer> indexes = new ArrayList<>();
+	    for (int i = getStartIndex(); i <= getEndIndex(); i++ ) {
+	        indexes.add(i);
+        }
+	    return indexes;
+    }
 
 	public Integer getStartIndex() {
 		return startIndex;

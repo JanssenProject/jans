@@ -8,12 +8,15 @@ package io.jans.as.server.service.cluster;
 
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.service.token.StatusListIndexService;
 import io.jans.model.token.StatusIndexPool;
+import io.jans.model.tokenstatus.TokenStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
+import io.jans.service.cdi.util.CdiUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -213,6 +216,10 @@ public class StatusIndexPoolService {
                 // If lock is ours reset entry and return it
                 if (LOCK_KEY.equals(lockedPool.getLockKey()) && lockedPool.getNodeId().equals(nodeId)) {
                     log.debug("Re-using existing status index pool {}, node {}, LOCK_KEY {}", lockedPool.getId(), nodeId, LOCK_KEY);
+
+                    // mark all indexes which we are re-using as VALID
+                    StatusListIndexService indexService = CdiUtil.bean(StatusListIndexService.class);
+                    indexService.updateStatusAtIndexes(lockedPool.enumerateAllIndexes(), TokenStatus.VALID);
                     return lockedPool;
                 }
             } catch (EntryPersistenceException ex) {
