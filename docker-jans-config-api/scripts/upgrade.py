@@ -60,6 +60,7 @@ def _transform_api_dynamic_config(conf):
         ("disableAuditLogger", False),
         ("assetMgtConfiguration", {}),
         ("maxCount", 200),
+        ("acrValidationEnabled", True),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value

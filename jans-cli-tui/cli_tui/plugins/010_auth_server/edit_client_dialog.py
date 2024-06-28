@@ -1,8 +1,11 @@
 import copy
+import json
+import asyncio
+import threading
 
 from collections import OrderedDict
 from functools import partial
-from typing import Any
+from typing import Any, Optional, Sequence, Callable
 
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import (
@@ -22,32 +25,26 @@ from prompt_toolkit.layout import Window
 from prompt_toolkit.filters import Condition
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.application.current import get_app
-from asyncio import Future, ensure_future
-from utils.static import DialogResult, cli_style
+from prompt_toolkit.buffer import Buffer
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.eventloop import get_event_loop
+
+from utils.static import DialogResult, cli_style, ISOFORMAT
 from utils.multi_lang import _
-from utils.utils import common_data
+from utils.utils import common_data, fromisoformat, DialogUtils
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_date_picker import DateSelectWidget
-from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_label_container import JansLabelContainer
 from wui_components.jans_label_widget import JansLabelWidget
 
 
-
 from view_uma_dialog import ViewUMADialog
-import threading
-from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.formatted_text import AnyFormattedText
-from typing import Optional, Sequence
-from typing import Callable
-from prompt_toolkit.eventloop import get_event_loop
-import asyncio
 
-import json
+
 ERROR_GETTING_CLIENTS = _("Error getting clients")
 ATTRIBUTE_SCHEMA_PATH = '#/components/schemas/ClientAttributes'
 URL_SUFFIX_FORMATTER = 'inum:{}'
@@ -188,6 +185,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         # remove authenticationMethod, it is read only
         self.data.pop('authenticationMethod', None)
+
+        exp_date = self.data.pop('expirationDate', None)
+        if exp_date:
+            self.data['expirationDate'] = exp_date.strftime(ISOFORMAT)
 
         if self.save_handler:
             self.save_handler(self)
@@ -942,9 +943,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.myparent.getTitledWidget(
                 _("Client Expiration Date"),
                 name='expirationDate',
-                widget=DateSelectWidget(
-                    value=self.data.get('expirationDate', ''), parent=self
-                ),
+                widget=DateSelectWidget(app=common_data.app, value=fromisoformat(self.data.get('expirationDate', ''))),
                 jans_help=self.myparent.get_help_from_schema(
                     schema, 'expirationDate'),
                 style='class:outh-client-widget'

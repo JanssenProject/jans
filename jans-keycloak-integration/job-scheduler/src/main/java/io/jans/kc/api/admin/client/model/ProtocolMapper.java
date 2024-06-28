@@ -125,6 +125,12 @@ public class ProtocolMapper {
             return this;
         }
 
+        public SamlUserAttributeMapperBuilder jansAttributeName(final String attributename) {
+
+            config.put("jans.attribute.name",attributename);
+            return this;
+        }
+
         public ProtocolMapper build() {
 
             return this.mapper;

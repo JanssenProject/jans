@@ -25,7 +25,7 @@
       <File>${app.logdir}/scheduler.log</File>
       <append>true</append>
       <rollingPolicy class="TimeBasedRollingPolicy">
-        <fileNamePattern>${app.logdir}/scheduler-%d{yyyy-mm-dd}.log.gz</fileNamePattern>
+        <fileNamePattern>${app.logdir}/scheduler-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
         <maxHistory>${app.logging.loghistory:-180}</maxHistory>
       </rollingPolicy>
 

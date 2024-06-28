@@ -17,7 +17,7 @@ def get_setup_options():
         'install_scim_server': True if base.current_app.profile == 'jans' else False,
         'installOxd': False,
         'installFido2': True,
-        'install_jans_link': True,
+        'install_jans_link': False,
         'install_jans_keycloak_link': False,
         'install_casa': False,
         'install_jans_saml': False,
@@ -101,8 +101,8 @@ def get_setup_options():
         if base.argsp.no_fido2:
             setupOptions['installFido2'] = False
 
-        if base.argsp.no_link:
-            setupOptions['install_jans_link'] = False
+        if base.argsp.install_jans_link:
+            setupOptions['install_jans_link'] = True
 
         if base.argsp.install_jans_keycloak_link:
             setupOptions['install_jans_keycloak_link'] = True

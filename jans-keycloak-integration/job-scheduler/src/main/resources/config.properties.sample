@@ -28,4 +28,4 @@ app.job.trustrelationship-sync.schedule-interval=PT10M
 # keycloak resources configuration 
 app.keycloak.resources.realm=jans
 app.keycloak.resources.authn.browser.flow-alias=janssen login
-app.keycloak.resources.saml.user-attribute-mapper=saml-user-attribute-mapper
+app.keycloak.resources.saml.user-attribute-mapper=kc-jans-saml-user-attribute-mapper

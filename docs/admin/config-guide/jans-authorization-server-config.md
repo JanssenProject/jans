@@ -488,10 +488,6 @@ It returns all the information of the Jans Authorization server.
       "returnInResponse": false
     },
     {
-      "paramName": "agama_flow",
-      "returnInResponse": false
-    },
-    {
       "paramName": "customParam2",
       "returnInResponse": false
     }

@@ -1,10 +1,9 @@
-use cedarling::utils;
-use wasm_bindgen::UnwrapThrowExt;
+use cedarling::http::{self, ResponseEx};
 use wasm_bindgen_test::*;
 
 #[wasm_bindgen_test]
 async fn test() {
-	let data = utils::get("https://site-scraper.sokorototo.workers.dev/").await.unwrap_throw();
-	let string = std::str::from_utf8(&data).unwrap_throw();
+	let data = http::get("https://site-scraper.sokorototo.workers.dev/", &[]).await.unwrap();
+	let string = data.into_string().await.unwrap();
 	assert_eq!(string, "site-scraper v0.2.0");
 }
