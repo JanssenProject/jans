@@ -230,8 +230,8 @@ public class UmaValidationService {
     public void validateGrantType(String grantType) {
         log.trace("Validate grantType: {}", grantType);
 
-        if (!GrantType.OXAUTH_UMA_TICKET.getValue().equals(grantType)) {
-            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID, "No required grant_type: " + GrantType.OXAUTH_UMA_TICKET.getValue());
+        if (!GrantType.UMA_TICKET.getValue().equals(grantType)) {
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID, "No required grant_type: " + GrantType.UMA_TICKET.getValue());
         }
     }
 

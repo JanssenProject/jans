@@ -353,6 +353,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 result.setDpopJkt(tokenEntity.getAttributes().getDpopJkt());
                 result.setTokenEntity(tokenEntity);
                 result.setReferenceId(tokenEntity.getReferenceId());
+                result.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                 if (StringUtils.isNotBlank(grantId)) {
                     result.setGrantId(grantId);
                 }
@@ -382,6 +383,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                                 final AuthorizationCodeGrant g = (AuthorizationCodeGrant) result;
                                 code.setX5ts256(g.getX5ts256());
                                 code.setReferenceId(tokenEntity.getReferenceId());
+                                code.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                                 g.setAuthorizationCode(code);
                             }
                             break;
@@ -389,6 +391,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                             final RefreshToken refreshToken = new RefreshToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
                             refreshToken.setX5ts256(result.getX5ts256());
                             refreshToken.setReferenceId(tokenEntity.getReferenceId());
+                            refreshToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setRefreshTokens(Collections.singletonList(refreshToken));
                             break;
                         case ACCESS_TOKEN:
@@ -396,6 +399,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                             accessToken.setDpop(tokenEntity.getDpop());
                             accessToken.setX5ts256(result.getX5ts256());
                             accessToken.setReferenceId(tokenEntity.getReferenceId());
+                            accessToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setAccessTokens(Collections.singletonList(accessToken));
                             break;
                         case TX_TOKEN:
@@ -403,18 +407,21 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                             txToken.setDpop(tokenEntity.getDpop());
                             txToken.setX5ts256(result.getX5ts256());
                             txToken.setReferenceId(tokenEntity.getReferenceId());
+                            txToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setTxTokens(Collections.singletonList(txToken));
                             break;
                         case ID_TOKEN:
                             final IdToken idToken = new IdToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
                             idToken.setX5ts256(result.getX5ts256());
                             idToken.setReferenceId(tokenEntity.getReferenceId());
+                            idToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setIdToken(idToken);
                             break;
                         case LONG_LIVED_ACCESS_TOKEN:
                             final AccessToken longLivedAccessToken = new AccessToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
                             longLivedAccessToken.setX5ts256(result.getX5ts256());
                             longLivedAccessToken.setReferenceId(tokenEntity.getReferenceId());
+                            longLivedAccessToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setLongLivedAccessToken(longLivedAccessToken);
                             break;
                     }

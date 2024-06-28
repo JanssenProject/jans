@@ -374,8 +374,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 {
                         Arrays.asList(),
                         Arrays.asList(),
-                        Arrays.asList(GrantType.OXAUTH_UMA_TICKET),
-                        Arrays.asList(GrantType.OXAUTH_UMA_TICKET),
+                        Arrays.asList(GrantType.UMA_TICKET),
+                        Arrays.asList(GrantType.UMA_TICKET),
                         userId, userSecret, redirectUris, redirectUri, sectorIdentifierUri, postLogoutRedirectUri, logoutUri
                 },
                 //
@@ -424,8 +424,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 {
                         Arrays.asList(ResponseType.CODE),
                         Arrays.asList(ResponseType.CODE),
-                        Arrays.asList(GrantType.OXAUTH_UMA_TICKET),
-                        Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN, GrantType.OXAUTH_UMA_TICKET),
+                        Arrays.asList(GrantType.UMA_TICKET),
+                        Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN, GrantType.UMA_TICKET),
                         userId, userSecret, redirectUris, redirectUri, sectorIdentifierUri, postLogoutRedirectUri, logoutUri
                 },
                 //
@@ -474,8 +474,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 {
                         Arrays.asList(ResponseType.TOKEN),
                         Arrays.asList(ResponseType.TOKEN),
-                        Arrays.asList(GrantType.OXAUTH_UMA_TICKET),
-                        Arrays.asList(GrantType.IMPLICIT, GrantType.OXAUTH_UMA_TICKET),
+                        Arrays.asList(GrantType.UMA_TICKET),
+                        Arrays.asList(GrantType.IMPLICIT, GrantType.UMA_TICKET),
                         userId, userSecret, redirectUris, redirectUri, sectorIdentifierUri, postLogoutRedirectUri, logoutUri
                 },
                 //
@@ -524,8 +524,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 {
                         Arrays.asList(ResponseType.ID_TOKEN),
                         Arrays.asList(ResponseType.ID_TOKEN),
-                        Arrays.asList(GrantType.OXAUTH_UMA_TICKET),
-                        Arrays.asList(GrantType.IMPLICIT, GrantType.OXAUTH_UMA_TICKET),
+                        Arrays.asList(GrantType.UMA_TICKET),
+                        Arrays.asList(GrantType.IMPLICIT, GrantType.UMA_TICKET),
                         userId, userSecret, redirectUris, redirectUri, sectorIdentifierUri, postLogoutRedirectUri, logoutUri
                 },
                 //
@@ -574,8 +574,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 {
                         Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN),
                         Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN),
-                        Arrays.asList(GrantType.OXAUTH_UMA_TICKET),
-                        Arrays.asList(GrantType.IMPLICIT, GrantType.OXAUTH_UMA_TICKET),
+                        Arrays.asList(GrantType.UMA_TICKET),
+                        Arrays.asList(GrantType.IMPLICIT, GrantType.UMA_TICKET),
                         userId, userSecret, redirectUris, redirectUri, sectorIdentifierUri, postLogoutRedirectUri, logoutUri
                 },
                 //
@@ -624,8 +624,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 {
                         Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN),
                         Arrays.asList(ResponseType.CODE, ResponseType.TOKEN, ResponseType.ID_TOKEN),
-                        Arrays.asList(GrantType.OXAUTH_UMA_TICKET),
-                        Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN, GrantType.IMPLICIT, GrantType.OXAUTH_UMA_TICKET),
+                        Arrays.asList(GrantType.UMA_TICKET),
+                        Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN, GrantType.IMPLICIT, GrantType.UMA_TICKET),
                         userId, userSecret, redirectUris, redirectUri, sectorIdentifierUri, postLogoutRedirectUri, logoutUri
                 },
                 //
@@ -674,8 +674,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 {
                         Arrays.asList(ResponseType.CODE, ResponseType.TOKEN),
                         Arrays.asList(ResponseType.CODE, ResponseType.TOKEN),
-                        Arrays.asList(GrantType.OXAUTH_UMA_TICKET),
-                        Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN, GrantType.IMPLICIT, GrantType.OXAUTH_UMA_TICKET),
+                        Arrays.asList(GrantType.UMA_TICKET),
+                        Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN, GrantType.IMPLICIT, GrantType.UMA_TICKET),
                         userId, userSecret, redirectUris, redirectUri, sectorIdentifierUri, postLogoutRedirectUri, logoutUri
                 },
                 //
@@ -724,8 +724,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 {
                         Arrays.asList(ResponseType.CODE, ResponseType.TOKEN, ResponseType.ID_TOKEN),
                         Arrays.asList(ResponseType.CODE, ResponseType.TOKEN, ResponseType.ID_TOKEN),
-                        Arrays.asList(GrantType.OXAUTH_UMA_TICKET),
-                        Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN, GrantType.IMPLICIT, GrantType.OXAUTH_UMA_TICKET),
+                        Arrays.asList(GrantType.UMA_TICKET),
+                        Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN, GrantType.IMPLICIT, GrantType.UMA_TICKET),
                         userId, userSecret, redirectUris, redirectUri, sectorIdentifierUri, postLogoutRedirectUri, logoutUri
                 },
         };
