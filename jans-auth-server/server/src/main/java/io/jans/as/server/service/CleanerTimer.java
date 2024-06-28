@@ -51,7 +51,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @ApplicationScoped
 @DependsOn("appInitializer")
-@Named
 public class CleanerTimer {
 
     public static final int BATCH_SIZE = 1000;
