@@ -1153,6 +1153,7 @@ class JCA_CLI:
             return response
 
     def exit_with_error(self, error_text):
+        self.cli_logger.error(error_text)
         error_text += '\n'
         sys.stderr.write(self.colored_text(error_text, error_color))
         print()
