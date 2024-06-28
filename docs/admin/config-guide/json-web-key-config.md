@@ -15,8 +15,15 @@ tasks.
 
     Use the command line to perform actions from the terminal. Learn how to 
     use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to 
-    the [configuration steps](#using-command-line)
+    the [Using Command Line](#using-command-line)
 
+
+=== "Use Text-based UI"
+
+    Use a fully functional text-based user interface from the terminal. 
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](./config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
 
 === "Use REST API"
 
@@ -79,7 +86,7 @@ We can get list of all configurations of the jwk configuration within a single c
 ```
 It will return all the jwk configuration information as below:
 
-```text title="Sample Output"
+```json title="Sample Output"
 {
   "keys": [
     {
@@ -245,11 +252,30 @@ To `update / replace` any JWK configuration, let get the schema first.
 To get the schema file:
 
 ```bash title="Command"
- /opt/jans/jans-cli/config-cli.py --schema WebKeysConfiguration > /tmp/path-jwk.json
+ /opt/jans/jans-cli/config-cli.py --schema WebKeysConfiguration \
+ > /tmp/path-jwk.json
 ```
 
-In the path-jwk.json, you will find an example. For further information, 
-please refer to [here](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml#/Configuration%20%E2%80%93%20JWK%20-%20JSON%20Web%20Key%20(JWK)/put-config-jwks)
+For your information, you can obtain the format of the `WebKeysConfiguration` schema 
+by running the aforementioned command without a file.
+
+```text title="Schema Format"
+keys   array
+       description: 
+```
+
+In the path-jwk.json, you will find an example.
+
+you can also use the following command for `WebKeysConfiguration` schema example.
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --schema-sample WebKeysConfiguration
+```
+```json title="Schema Example"
+{
+  "keys": null
+}
+``` 
 
 It's a json file containing `key-value` pair. Each of these properties in the key is defined by 
 the JWK specification [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517), and for algorithm-specific properties, in [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518).
@@ -302,7 +328,8 @@ key configuration will be created in the Janssen server.
 Now let's put the updated data into the Janssen server.
 
 ```bash title="Command"
- /opt/jans/jans-cli/config-cli.py --operation-id put-config-jwks --data /tmp/path-jwk.json
+ /opt/jans/jans-cli/config-cli.py --operation-id put-config-jwks \
+ --data /tmp/path-jwk.json
 ```
 
 ```json title="Output Sample"
@@ -343,7 +370,8 @@ kid: The unique identifier for the key [string]
 ```
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-jwk-by-kid --url-suffix kid:new-key-test-id
+/opt/jans/jans-cli/config-cli.py --operation-id get-jwk-by-kid \
+--url-suffix kid:new-key-test-id
 ```
 It returns the details as below:
 
@@ -457,6 +485,29 @@ It's pretty simple to delete json web key using its `kid`. The command line is:
 
 It will delete the jwk if it matches with the given `kid`.
 
+
+##  Using Text-based UI
+
+In Janssen, you can view the JSON web keys using
+the [Text-Based UI](./config-tools/jans-tui/README.md) also.
+
+You can start TUI using the command below:
+
+```bash title="Command"
+sudo /opt/jans/jans-cli/jans_cli_tui.py
+```
+
+### JSON Web Key (JWK) Screen
+
+Navigate to `Auth Server` -> `Keys` to open the JSON Web Key screen as shown
+in the image below.
+
+* After clicking on `Get keys`,
+You can view Key's list on this page. You cannot perform any operations in text-based UI.
+
+* Only you can perform operations using the command line.
+
+![image](../../assets/tui-json-web-key.png)
 
 
 ## Using Configuration REST API
