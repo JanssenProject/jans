@@ -220,7 +220,7 @@ public class UmaRptService {
             UmaRPT rpt = new UmaRPT(code, creationDate, expirationDate, null, client.getClientId());
             rpt.setPermissions(getPermissionDns(permissions));
             persist(rpt);
-            statService.reportUmaToken(GrantType.OXAUTH_UMA_TICKET);
+            statService.reportUmaToken(GrantType.UMA_TICKET);
             return rpt;
         } catch (Exception e) {
             if (log.isErrorEnabled()) {

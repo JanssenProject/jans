@@ -58,6 +58,8 @@ public abstract class AbstractToken implements Serializable, Deletable {
     @AttributeName(name = "jansId")
     private String referenceId;
 
+    private Integer statusListIndex;
+
     @Expiration
     private int ttl;
 
@@ -230,6 +232,24 @@ public abstract class AbstractToken implements Serializable, Deletable {
      */
     public void setReferenceId(String referenceId) {
         this.referenceId = referenceId;
+    }
+
+    /**
+     * Gets status list index
+     *
+     * @return status list index
+     */
+    public Integer getStatusListIndex() {
+        return statusListIndex;
+    }
+
+    /**
+     * Sets status list index
+     *
+     * @param statusListIndex status list index
+     */
+    public void setStatusListIndex(Integer statusListIndex) {
+        this.statusListIndex = statusListIndex;
     }
 
     /**
