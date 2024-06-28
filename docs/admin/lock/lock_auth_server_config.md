@@ -40,6 +40,9 @@ It has 2 section for PostgreSQL (`postgresConfiguration`) and Redis (`redisConfi
 
 Full list of properties defined in jans-config-api-swagger.yaml.
 
+You can configure these properties in the TUI `Auth Server > Messages` section.
+
+![image](https://github.com/JanssenProject/jans/assets/39133739/b1e969a6-1b60-4daa-bbca-23983a4d3cd8)
 
 Second configuration is needed for Jans Auth. In current version Jans Auth calls message API after access_token persistence/removal from/to DB from `GarntService`. Jans Messages API library provides generic API to hide actual PubSub messages publishing/receiving implementation.
 
@@ -52,6 +55,10 @@ This is default configuration after server install:
     }
 ```
 First property control sending messages to PubSub server. Second one `tokenMessagesChannel` specify channel name to send token messages.
+
+You can configure there properties in TUI `Auth Server > Properties` section.
+
+![image](https://github.com/JanssenProject/jans/assets/39133739/87282ed5-ce8f-49f4-9481-b82ae1b10abe)
 
 The format of messages which Jans Auth issue is JSON. And it has minimum data for quick processing. Here is message pattern:
 
