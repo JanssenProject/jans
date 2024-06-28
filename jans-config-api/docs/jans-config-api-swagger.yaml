@@ -191,10 +191,22 @@ paths:
                 $ref: '#/components/schemas/AuthenticationMethod'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/config/acrs.write
@@ -770,6 +782,10 @@ paths:
                 $ref: '#/components/schemas/ApiError'
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "404":
           description: Not Found
           content:
@@ -7971,6 +7987,15 @@ components:
       properties:
         defaultAcr:
           type: string
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
+          type: string
     Deployment:
       type: object
       properties:
@@ -8052,15 +8077,6 @@ components:
           type: array
           items:
             type: object
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        description:
-          type: string
     Document:
       type: object
       properties:
@@ -8235,11 +8251,13 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanEdit:
-          type: boolean
         adminCanView:
           type: boolean
+        userCanEdit:
+          type: boolean
         userCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -9854,10 +9872,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -9898,6 +9916,10 @@ components:
           type: boolean
           description: Flag to enable/disable check if custom attribue is declared
             in schema. Default value `true`.
+        acrValidationEnabled:
+          type: boolean
+          description: Flag to enable/disable check if acr customScript is enabled.
+            Default value `true`.
         apiApprovedIssuer:
           type: array
           description: List of approved external Auth server to validate token.
