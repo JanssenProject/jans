@@ -3,6 +3,7 @@ package io.jans.configapi.plugin.lock.model.stat;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 
 import java.io.Serializable;
@@ -50,8 +51,9 @@ public class TelemetryEntry implements Serializable {
     @AttributeName(name = "requestCounter")
     private long evaluationRequestsCount;
 
-    @JsonProperty("policyRequestData")
-    private Map<String, Map<String, Long>> policyRequestData;
+    @AttributeName(name = "attr")
+    @JsonObject
+    private Map<String, String> policyRequestData;
 
     public String getDn() {
         return dn;
@@ -141,11 +143,11 @@ public class TelemetryEntry implements Serializable {
         this.evaluationRequestsCount = evaluationRequestsCount;
     }
 
-    public Map<String, Map<String, Long>> getPolicyRequestData() {
+    public Map<String, String> getPolicyRequestData() {
         return policyRequestData;
     }
 
-    public void setPolicyRequestData(Map<String, Map<String, Long>> policyRequestData) {
+    public void setPolicyRequestData(Map<String, String> policyRequestData) {
         this.policyRequestData = policyRequestData;
     }
 

@@ -15,7 +15,7 @@ servers:
 tags:
 - name: Lock - Configuration
 paths:
-  /lock/lockConfig/telemetry:
+  /lock/audit/telemetry:
     post:
       tags:
       - Lock - Telemetry
@@ -40,7 +40,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/lock-telemetry.write
+        - https://jans.io/oauth/lock/telemetry.write
   /lock/lockConfig:
     get:
       tags:
@@ -211,15 +211,12 @@ components:
         evaluationRequestsCount:
           type: integer
           format: int64
-        memoryusage:
-          type: string
         policyRequestData:
           type: object
           additionalProperties:
-            type: object
-            additionalProperties:
-              type: integer
-              format: int64
+            type: string
+        memoryusage:
+          type: string
     JsonPatch:
       type: object
   securitySchemes:
@@ -233,9 +230,9 @@ components:
               information
             https://jans.io/oauth/lock-config.write: Manage Lock configuration related
               information
-            https://jans.io/oauth/lock-telemetry.readonly: View Lock telemetry related
+            https://jans.io/oauth/lock/telemetry.readonly: View Lock telemetry related
               information
-            https://jans.io/oauth/lock-telemetry.write: Manage Lock telemetry related
+            https://jans.io/oauth/lock/telemetry.write: Manage Lock telemetry related
               information
-            https://jans.io/oauth/lock-health.readonly: View Lock health related information
-            https://jans.io/oauth/lock-health.write: Manage Lock health related information
+            https://jans.io/oauth/lock/health.readonly: View Lock health related information
+            https://jans.io/oauth/lock/health.write: Manage Lock health related information

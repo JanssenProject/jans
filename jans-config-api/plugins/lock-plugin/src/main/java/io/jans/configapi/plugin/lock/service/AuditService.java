@@ -54,6 +54,8 @@ public class AuditService {
         if(StringUtils.isBlank(id)) {
             id = this.generateInumForNewTelemetryEntry();
             telemetryEntry.setId(id);
+            
+            telemetryEntry.setDn(this.getDnForTelemetryEntry(id)); 
         }
         persistenceEntryManager.persist(telemetryEntry);
         

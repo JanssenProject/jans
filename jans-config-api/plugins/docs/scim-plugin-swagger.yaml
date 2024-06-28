@@ -112,6 +112,8 @@ components:
           type: boolean
         disableJdkLogger:
           type: boolean
+        disableLoggerTimer:
+          type: boolean
         useLocalCache:
           type: boolean
         skipDefinedPasswordValidation:

@@ -42,7 +42,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.configapi.plugin.lock.model.stat.TelemetryEntry;
 import io.jans.configapi.plugin.lock.service.AuditService;
 
-@Path(Constants.LOCK_CONFIG)
+@Path(Constants.AUDIT)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AuditResource extends BaseResource {

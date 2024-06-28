@@ -144,10 +144,17 @@ public abstract class BaseHttpService implements Serializable {
 				.setConnectionManager(connectionManager).build();
 	}
 
-	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType) {
+	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType, String authType) {
         HttpPost httpPost = new HttpPost(uri);
+
+        if(StringHelper.isEmpty(authType)) { 
+            authType = "Basic "; 
+        }
+        else {
+            authType = authType +" "; 
+        }
         if (StringHelper.isNotEmpty(authData)) {
-        	httpPost.setHeader("Authorization", "Basic " + authData);
+        	httpPost.setHeader("Authorization", authType + authData);
         }
 
         if (headers != null) {
@@ -171,11 +178,11 @@ public abstract class BaseHttpService implements Serializable {
 	}
 
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData) {
-		return executePost(httpClient, uri, authData, headers, postData, null);
+		return executePost(httpClient, uri, authData, headers, postData, null, null);
 	}
 
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, String postData, ContentType contentType) {
-        return executePost(httpClient, uri, authData, null, postData, contentType);
+        return executePost(httpClient, uri, authData, null, postData, contentType, null);
 	}
 
 	public String encodeBase64(String value) {
