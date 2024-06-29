@@ -23,6 +23,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -283,6 +284,35 @@ fun AppAlertDialog(shouldShowDialog: MutableState<Boolean>, content: MutableStat
 }
 
 @Composable
+fun AppLoaderDialog(shouldShowDialog: MutableState<Boolean>) {
+    if (shouldShowDialog.value) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding()
+                .imePadding()
+                .height(400.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Spacer(modifier = Modifier.height(40.dp))
+            LineScaleIndicator(
+                color = Color(0xFF134520),
+                rectCount = 5,
+                distanceOnXAxis = 30f,
+                lineHeight = 100,
+                animationDuration = 500,
+                minScale = 0.3f,
+                maxScale = 1.5f,
+                punchType = PunchType.RANDOM_PUNCH,
+                penThickness = 15f
+            )
+        }
+    }
+}
+
+@Composable
 fun Title(
     // 1
     text: String,
@@ -345,19 +375,22 @@ fun UserInfoRow(
                     fontFamily = FontFamily.Default,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                )
+                ),
+                modifier = Modifier
+                    .padding(5.dp),
             )
         }
-        Spacer(
-            modifier = Modifier.width(10.dp),
-        )
+        Divider(color = Color.Gray, thickness = 1.dp)
         Row {
             Text(
                 text = value,
                 style = TextStyle(
                     fontFamily = FontFamily.Default,
                     fontSize = 20.sp,
-                )
+
+                    ),
+                modifier = Modifier
+                    .padding(5.dp),
             )
         }
     }

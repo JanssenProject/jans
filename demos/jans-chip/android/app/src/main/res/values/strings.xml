@@ -12,7 +12,7 @@
     <string name="no_passkey_enrolled">No passkey enrolled.</string>
     <string name="already_have_login">Already enrolled?</string>
     <!--Dashboard-->
-    <string name="dashboard_title_welcome">Welcome</string>
+    <string name="dashboard_title_welcome">Welcome </string>
 
     <string name="username">Username</string>
     <string name="password">Password</string>
@@ -43,7 +43,6 @@
     <string name="registration_password_label">Password</string>
     <string name="back_to_login">Back to Login</string>
     <string name="empty_string"/>
-
 
     <!--Registration Error Messages-->
 

@@ -21,9 +21,9 @@ class RegistrationViewModel : ViewModel() {
         when (registrationUiEvent) {
 
             // Email id changed event
-            is RegistrationUiEvent.EmailChanged -> {
+            is RegistrationUiEvent.UsernameChanged -> {
                 registrationState.value = registrationState.value.copy(
-                    emailId = registrationUiEvent.inputValue,
+                    username = registrationUiEvent.inputValue,
                     errorState = registrationState.value.errorState.copy(
                         emailIdErrorState = if (registrationUiEvent.inputValue.trim().isEmpty()) {
                             // Email id empty state
@@ -78,7 +78,7 @@ class RegistrationViewModel : ViewModel() {
      * @return false -> inputs are invalid
      */
     private fun validateInputs(): Boolean {
-        val emailString = registrationState.value.emailId.trim()
+        val username = registrationState.value.username.trim()
         //val mobileNumberString = registrationState.value.mobileNumber.trim()
         val passwordString = registrationState.value.password.trim()
         //val confirmPasswordString = registrationState.value.confirmPassword.trim()
@@ -86,7 +86,7 @@ class RegistrationViewModel : ViewModel() {
         return when {
 
             // Email empty
-            emailString.isEmpty() -> {
+            username.isEmpty() -> {
                 registrationState.value = registrationState.value.copy(
                     errorState = RegistrationErrorState(
                         emailIdErrorState = emailEmptyErrorState

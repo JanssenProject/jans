@@ -24,6 +24,7 @@ import io.jans.chip.AppAlertDialog
 import io.jans.chip.LogButton
 import io.jans.chip.UserInfoRow
 import io.jans.chip.model.LogoutResponse
+import io.jans.chip.ui.common.customComposableViews.TitleText
 import io.jans.chip.ui.screens.unauthenticated.login.LoginViewModel
 import io.jans.chip.ui.screens.unauthenticated.login.state.LoginUiEvent
 import io.jans.chip.viewmodel.MainViewModel
@@ -59,6 +60,7 @@ fun DashboardScreen(
 
         if (mainViewModel.clientRegistered && (mainViewModel.attestationOptionResponse || mainViewModel.assertionOptionResponse)) {
             if (mainViewModel.userIsAuthenticated) {
+                TitleText(text = stringResource(id = R.string.dashboard_title_welcome) + " " + mainViewModel.getUsername())
                 if (mainViewModel.getUserInfoResponse().response != null) {
                     val userInfo = JSONObject(mainViewModel.getUserInfoResponse().response.toString())
                     val keys = userInfo.keys()

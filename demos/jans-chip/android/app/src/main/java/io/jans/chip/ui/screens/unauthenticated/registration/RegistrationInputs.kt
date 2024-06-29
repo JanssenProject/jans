@@ -1,5 +1,6 @@
 package io.jans.chip.ui.screens.unauthenticated.registration
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,13 +26,13 @@ fun RegistrationInputs(
 ) {
     // Login Inputs Section
     Column(modifier = Modifier.fillMaxWidth()) {
-
+        Log.d(">>>>>>>>>>>>>>>>>>>>>>>", registrationState.isLoading.toString())
         // Email ID
         EmailTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = AppTheme.dimens.paddingLarge),
-            value = registrationState.emailId,
+            value = registrationState.username,
             onValueChange = onEmailIdChange,
             label = stringResource(id = R.string.username),
             isError = registrationState.errorState.emailIdErrorState.hasError,

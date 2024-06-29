@@ -72,12 +72,11 @@ fun LoginScreen(
     val mainViewModel = MainViewModel.getInstance(context)
     val isBiometricAvailable = remember { BiometricHelper.isBiometricAvailable(context) }
     val authAdaptor = AuthAdaptor(context)
-    var loading by remember { mutableStateOf(false) }
     val shouldShowDialog = remember { mutableStateOf(false) }
     val dialogContent = remember { mutableStateOf("") }
     val creds: List<PublicKeyCredentialSource>? =
         authAdaptor.getAllCredentials()
-    val loginState by remember {
+    var loginState by remember {
         loginViewModel.loginState
     }
 
@@ -94,7 +93,7 @@ fun LoginScreen(
             shouldShowDialog = shouldShowDialog,
             content = dialogContent
         )
-        if (loading) {
+        if (loginState.isLoading) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -105,7 +104,6 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Spacer(modifier = Modifier.height(40.dp))
                 LineScaleIndicator(
                     color = Color(0xFF134520),
                     rectCount = 5,
@@ -185,7 +183,6 @@ fun LoginScreen(
                             contentDescription = stringResource(id = R.string.use_saved_passkey)
                         )
                         // Heading Login
-
                         // Login Inputs Composable
                         if (creds == null || creds.isEmpty()) {
                             MediumTitleText(
@@ -211,16 +208,17 @@ fun LoginScreen(
                                     subheading = ele.rpId,
                                     icon = R.drawable.passkey_icon,
                                     onContinueClick = {
-                                        loading = true
+
                                         if (isBiometricAvailable) {
                                             CoroutineScope(Dispatchers.Main).launch {
+                                                loginState = loginState.copy(isLoading = true)
                                                 val fidoConfiguration =
                                                     async { mainViewModel.fetchFidoConfiguration() }.await()
                                                 if (fidoConfiguration?.isSuccessful == false) {
                                                     shouldShowDialog.value = true
                                                     dialogContent.value =
                                                         fidoConfiguration.errorMessage.toString()
-                                                    loading = false
+                                                    loginState = loginState.copy(isLoading = false)
                                                     return@launch
                                                 }
                                                 val assertionOptionResponse: AssertionOptionResponse? =
@@ -229,7 +227,7 @@ fun LoginScreen(
                                                     shouldShowDialog.value = true
                                                     dialogContent.value =
                                                         assertionOptionResponse.errorMessage.toString()
-                                                    loading = false
+                                                    loginState = loginState.copy(isLoading = false)
                                                     return@launch
                                                 }
                                                 val authAdaptor = AuthAdaptor(context)
@@ -253,6 +251,7 @@ fun LoginScreen(
                                                     signature!!,
                                                     onSuccess = { plainText ->
                                                         CoroutineScope(Dispatchers.Main).launch {
+                                                            mainViewModel.setUsername(ele.userDisplayName)
                                                             if (assertionOptionResponse != null) {
                                                                 val assertionResultRequest: AssertionResultRequest =
                                                                     async {
@@ -267,7 +266,7 @@ fun LoginScreen(
                                                                         true
                                                                     dialogContent.value =
                                                                         assertionResultRequest.errorMessage.toString()
-                                                                    loading = false
+                                                                    loginState = loginState.copy(isLoading = false)
                                                                     return@launch
                                                                 }
 
@@ -289,7 +288,7 @@ fun LoginScreen(
                                                                         true
                                                                     dialogContent.value =
                                                                         loginResponse.errorMessage.toString()
-                                                                    loading = false
+                                                                    loginState = loginState.copy(isLoading = false)
                                                                     return@launch
                                                                 }
                                                                 val tokenResponse: TokenResponse? =
@@ -303,7 +302,7 @@ fun LoginScreen(
                                                                         true
                                                                     dialogContent.value =
                                                                         tokenResponse.errorMessage.toString()
-                                                                    loading = false
+                                                                    loginState = loginState.copy(isLoading = false)
                                                                     return@launch
                                                                 }
                                                                 val userInfoResponse: UserInfoResponse? =
@@ -322,7 +321,7 @@ fun LoginScreen(
                                                                         true
                                                                     dialogContent.value =
                                                                         userInfoResponse.errorMessage.toString()
-                                                                    loading = false
+                                                                    loginState = loginState.copy(isLoading = false)
                                                                     return@launch
                                                                 }
                                                             }
@@ -331,7 +330,7 @@ fun LoginScreen(
                                                             loginViewModel.onUiEvent(
                                                                 loginUiEvent = LoginUiEvent.Submit
                                                             )
-                                                            loading = false
+                                                            loginState = loginState.copy(isLoading = false)
                                                             //Toast.makeText(context,"Biometric authentication successful!$plainText", Toast.LENGTH_SHORT).show()
                                                         }
                                                     })
@@ -343,8 +342,8 @@ fun LoginScreen(
                                                 "Biometric authentication is not available!",
                                                 Toast.LENGTH_SHORT
                                             ).show()
+                                            loginState = loginState.copy(isLoading = false)
                                         }
-                                        loading = false
                                     })
                             }
                         }

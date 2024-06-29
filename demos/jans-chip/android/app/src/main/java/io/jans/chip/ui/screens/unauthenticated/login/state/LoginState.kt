@@ -6,10 +6,11 @@ import io.jans.chip.ui.common.state.ErrorState
  * Login State holding ui input values
  */
 data class LoginState(
-    val emailOrMobile: String = "",
+    val username: String = "",
     val password: String = "",
     val errorState: LoginErrorState = LoginErrorState(),
-    val isLoginSuccessful: Boolean = false
+    val isLoginSuccessful: Boolean = false,
+    val isLoading: Boolean = false
 )
 
 /**

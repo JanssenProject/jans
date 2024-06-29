@@ -76,12 +76,12 @@ class LoginViewModel : ViewModel() {
      * @return false -> inputs are invalid
      */
     private fun validateInputs(): Boolean {
-        val emailOrMobileString = loginState.value.emailOrMobile.trim()
+        val username = loginState.value.username.trim()
         val passwordString = loginState.value.password
         return when {
 
             // Email/Mobile empty
-            emailOrMobileString.isEmpty() -> {
+            username.isEmpty() -> {
                 loginState.value = loginState.value.copy(
                     errorState = LoginErrorState(
                         emailOrMobileErrorState = emailOrMobileEmptyErrorState
