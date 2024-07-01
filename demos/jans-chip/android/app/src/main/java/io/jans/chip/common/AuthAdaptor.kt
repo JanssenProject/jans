@@ -43,6 +43,16 @@ class AuthAdaptor(context: Context) {
         return credentialSafe?.allCredentialSource
     }
 
+    fun isCredentialsPresent(username: String): Boolean {
+        val allCredentials = getAllCredentials()
+        allCredentials?.forEach { ele ->
+            if(ele.userDisplayName == username) {
+                return true
+            }
+        }
+        return false
+    }
+
     private fun generateAuthenticatorMakeCredentialOptions(responseFromAPI: AttestationOptionResponse?, origin: String?): AuthenticatorMakeCredentialOptions {
         val options = AuthenticatorMakeCredentialOptions()
         options.rpEntity = RpEntity()

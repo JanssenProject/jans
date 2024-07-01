@@ -45,7 +45,7 @@
     <string name="empty_string"/>
 
     <!--Registration Error Messages-->
-
+    <string name="username_already_enrolled">Username already enrolled</string>
     <string name="registration_error_msg_empty_mobile">Please enter your mobile number</string>
     <string name="registration_error_msg_empty_password">Please enter your password</string>
     <string name="registration_error_msg_empty_confirm_password">Please confirm your password</string>

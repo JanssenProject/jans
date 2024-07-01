@@ -202,7 +202,12 @@ fun RegistrationScreen(
                             onSubmit = {
                                 var attestationOptionResponse: AttestationOptionResponse? = null
                                 var fidoConfiguration: FidoConfigurationResponse? = null
-
+                                val authAdaptor = AuthAdaptor(context)
+                                if(authAdaptor.isCredentialsPresent(mainViewModel.getUsername())) {
+                                    shouldShowDialog.value = true
+                                    dialogContent.value = "Username already enrolled!"
+                                    return@RegistrationInputs
+                                }
                                 if (isBiometricAvailable) {
                                     CoroutineScope(Dispatchers.Main).launch {
                                         registrationState = registrationState.copy(isLoading = true)
@@ -292,7 +297,6 @@ fun RegistrationScreen(
                                             return@launch
                                         }
 
-                                        val authAdaptor = AuthAdaptor(context)
                                         val publicKeyCredentialSource = async {
                                             authAdaptor.getPublicKeyCredentialSource(
                                                 attestationOptionResponse,
