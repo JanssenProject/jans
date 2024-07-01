@@ -50,10 +50,13 @@ $ wasm-pack test --chrome # --firefox or --safari
 
 ### Usage 🔧
 
-From within your JS project, you'll need to import the exported `cedarling` functions from the `cedarling.js` file. For example:
+From within your JS project, you'll need to import the exported `cedarling` functions from the `cedarling.js` file.
 
 ```js
-import { init, authz } from "cedarling.js"
+// Cedarling Initialization Flow
+// INFO: The cedarling must be initialized once and no more than once
+
+import { init } from "cedarling.js"
 
 const config = {
 	policyStore: {
@@ -94,8 +97,24 @@ const lockMaster = {
 	// `ssaJwt`: Software Statement used by the cedarling during OAuth Dynamic Client registration
 	ssaJwt: "..."
 }
+
+// To initialize the cedarling, run init(config)
+init(config);
+```
+
+---
+
+```js
+// Cedarling Authorization Flow
+
+import { init, authz } from "cedarling.js"
+
+// Ensure the cedarling is initialized before calling authz
+init(..);
+
+// 🚧 (WIP)
 ```
 
 ### Lock Master SSE Interface 🚧
 
-> A specification for the actual Policy Update is in incubation
+> A specification for Policy Updates is in incubation
