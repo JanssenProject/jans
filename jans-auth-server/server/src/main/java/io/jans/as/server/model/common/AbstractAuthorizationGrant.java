@@ -73,6 +73,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private String claims;
     private String dpopJkt;
     private String referenceId;
+    private Integer statusListIndex;
 
     private String acrValues;
     private String sessionDn;
@@ -105,6 +106,14 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     public void setReferenceId(String referenceId) {
         this.referenceId = referenceId;
+    }
+
+    public Integer getStatusListIndex() {
+        return statusListIndex;
+    }
+
+    public void setStatusListIndex(Integer statusListIndex) {
+        this.statusListIndex = statusListIndex;
     }
 
     public String getDpopJkt() {
