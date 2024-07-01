@@ -17,13 +17,13 @@
 
 ### Auth Challenge Script
 
-Add following [Auth Challenge Script](./docs/authChallengeScript.md) in Jans Server with following details.
+Add following [Auth Challenge Script](./docs/authChallengeScript.java) in Jans Server (before using the App) with following details.
 
 - **Name of Script** : passkey_auth_challenge
 - **Script Type** : Authorization Challenge
 - **Programming Language** : Java
 - **Location Type**: Database
-- Add `fido2_server_uri` custom property with https://{fido_server_url} as value
+- Add `fido2_server_uri` custom property with https://{fido_server_url} as value. Replace `{fido_server_url}` with fido server hostname.
 
 ### Workspace Setup
 
