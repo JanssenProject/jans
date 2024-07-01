@@ -12,18 +12,18 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.LockMessageConfig;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.CacheGrant;
+import io.jans.as.server.service.token.StatusListIndexService;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.token.TokenEntity;
 import io.jans.model.token.TokenType;
+import io.jans.model.tokenstatus.TokenStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
 import io.jans.service.MessageService;
-import io.jans.service.cache.CacheConfiguration;
 import io.jans.util.StringHelper;
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
@@ -39,9 +41,15 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
  * @author Javier Rojas Blum
  * @version November 28, 2018
  */
-@Stateless
-@Named
+@ApplicationScoped
 public class GrantService {
+
+    private static final ExecutorService statusListPool = Executors.newFixedThreadPool(5, runnable -> {
+        Thread thread = new Thread(runnable);
+        thread.setName("grant_service_status_list_pool");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     @Inject
     private Logger log;
@@ -65,7 +73,7 @@ public class GrantService {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private CacheConfiguration cacheConfiguration;
+    private StatusListIndexService statusListIndexService;
 
     public static String generateGrantId() {
         return UUID.randomUUID().toString();
@@ -153,6 +161,13 @@ public class GrantService {
             if (shouldSaveInCache()) {
                 cacheService.remove(token.getTokenCode());
             }
+
+            statusListPool.execute(() -> {
+                final Integer index = token.getAttributes().getStatusListIndex();
+                if (index != null && index > 0) {
+                    statusListIndexService.updateStatusAtIndexes(Lists.newArrayList(index), TokenStatus.INVALID);
+                }
+            });
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -172,9 +187,30 @@ public class GrantService {
 
     public void removeSilently(List<TokenEntity> entries) {
         if (entries != null && !entries.isEmpty()) {
+            List<Integer> indexes = new ArrayList<>();
             for (TokenEntity t : entries) {
-                removeSilently(t);
+                try {
+                    remove(t);
+
+                    if (StringUtils.isNotBlank(t.getAuthorizationCode())) {
+                        cacheService.remove(CacheGrant.cacheKey(t.getAuthorizationCode(), t.getGrantId()));
+                    }
+                    if (shouldSaveInCache()) {
+                        cacheService.remove(t.getTokenCode());
+                    }
+
+                    final Integer index = t.getAttributes().getStatusListIndex();
+                    if (index != null && index >= 0) {
+                        indexes.add(index);
+                    }
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
             }
+
+            statusListPool.execute(() -> {
+                statusListIndexService.updateStatusAtIndexes(indexes, TokenStatus.INVALID);
+            });
         }
     }
 

@@ -102,6 +102,15 @@
         <artifactId>oauth2-oidc-sdk</artifactId>
     </dependency>
     <!-- end nimbus dependencies -->
+
+    <!-- jboss dependencies -->
+    <dependency>
+      <groupId>io.quarkus.resteasy.reactive</groupId>
+      <artifactId>resteasy-reactive</artifactId>
+      <version>3.8.5</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- end jboss dependencies -->
   </dependencies>
 
   <build>

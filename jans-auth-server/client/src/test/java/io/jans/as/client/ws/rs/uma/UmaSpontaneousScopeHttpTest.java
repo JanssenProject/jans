@@ -116,7 +116,7 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
 
         UmaTokenResponse response = tokenService.requestRpt(
                 "Basic " + AccessProtectedResourceFlowHttpTest.encodeCredentials(clientResponse.getClientId(), clientResponse.getClientSecret()),
-                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.UMA_TICKET.getValue(),
                 permissionFlowTest.ticket,
                 null, null, null, null, null);
         assertIt(response);
