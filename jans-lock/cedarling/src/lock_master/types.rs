@@ -9,6 +9,7 @@ pub(crate) struct LockMasterConfig {
 #[derive(serde::Serialize, Debug)]
 pub(crate) struct OAuthDynamicClientRequest<'a> {
 	pub(crate) client_name: &'a str,
+	pub(crate) grant_types: &'a [&'a str],
 	pub(crate) application_type: &'static str,
 	pub(crate) redirect_uris: &'a [&'static str],
 	pub(crate) token_endpoint_auth_method: &'static str,

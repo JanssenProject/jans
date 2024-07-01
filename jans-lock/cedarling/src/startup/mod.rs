@@ -4,7 +4,7 @@ use cedar_policy::*;
 use wasm_bindgen::{prelude::*, throw_str};
 use web_sys::*;
 
-use crate::{http, crypto, lock_master};
+use crate::{crypto, http, lock_master};
 use http::ResponseEx;
 
 pub(crate) mod types;

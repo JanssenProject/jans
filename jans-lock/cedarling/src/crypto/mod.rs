@@ -11,10 +11,8 @@ mod types;
 
 pub(crate) fn init(config: &startup::types::CedarlingConfig, mut policy_store: serde_json::Map<String, serde_json::Value>) {
 	// insert supported jwt signature algorithms
-	if let Some(s) = &config.supported_signature_algorithms {
-		let supported = s.iter().map(|s| jsonwebtoken::Algorithm::from_str(s).unwrap_throw()).collect();
-		SUPPORTED_ALGORITHMS.set(supported).expect_throw("SUPPORTED_ALGORITHMS is already initialized")
-	}
+	let supported = config.supported_signature_algorithms.iter().map(|s| jsonwebtoken::Algorithm::from_str(s).unwrap_throw()).collect();
+	SUPPORTED_ALGORITHMS.set(supported).expect_throw("SUPPORTED_ALGORITHMS is already initialized");
 
 	// Load trusted issuers
 	let trusted_issuers = {

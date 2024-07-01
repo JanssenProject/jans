@@ -62,6 +62,7 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 		let client_req = types::OAuthDynamicClientRequest {
 			client_name: application_name,
 			application_type: "web",
+			grant_types: &["client_credentials"],
 			redirect_uris: &[],
 			token_endpoint_auth_method: "client_secret_basic",
 			software_statement: ssa_jwt,
@@ -76,7 +77,7 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 	};
 
 	let grant: types::OAuthGrantResponse = {
-		// https://gluu.org/docs/gluu-server/4.0/admin-guide/oauth2/
+		// https://docs.jans.io/v1.1.2/admin/auth-server/endpoints/token/
 		let token = if let Some(client_secret) = client.client_secret {
 			format!("{}:{}", client.client_id, client_secret)
 		} else {
@@ -90,10 +91,11 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 		};
 
 		// send
-		let url = format!("{}/token", openid_config.token_endpoint);
 		let auth = format!("Basic {}", js_btoa(&token));
 		let headers = [("Authorization", auth.as_str())];
-		let res = http::post(&url, http::PostBody::Form(&grant), &headers).await.expect_throw("Unable to get Access Token");
+		let res = http::post(&openid_config.token_endpoint, http::PostBody::Form(&grant), &headers)
+			.await
+			.expect_throw("Unable to get Access Token");
 
 		res.into_json().await.expect_throw("Unable to parse Access Token Response")
 	};
