@@ -29,12 +29,6 @@
    domain, not self-signed certificate) and desired scopes on the register screen
    to start testing.
 
-## To-Dos
-
-- Add FIDO authentication in app.
-
-
-
 **Reference:**
 - https://github.com/JanssenProject/jans/wiki/Mobile-DPoP-FIDO-Authn
 - https://github.com/JanssenProject/jans/wiki/DPoP-Mobile-App-POC
