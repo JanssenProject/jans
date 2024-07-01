@@ -10,21 +10,17 @@ import io.jans.net.InetAddressUtility;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.SimpleBranch;
-import net.agkn.hll.HLL;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.DependsOn;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import net.agkn.hll.HLL;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import java.text.SimpleDateFormat;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -79,7 +75,9 @@ public class StatService {
                 return false;
             }
             log.info("Initializing Stat Service");
-            initNodeId();
+
+            final Date now = new Date();
+            initNodeId(now);
             if (StringUtils.isBlank(nodeId)) {
                 log.error("Failed to initialize stat service. statNodeId is not set in configuration.");
                 return false;
@@ -89,7 +87,6 @@ public class StatService {
                 return false;
             }
 
-            final Date now = new Date();
             prepareMonthlyBranch(now);
 
             log.trace("Monthly branch created: {}", monthlyDn);
@@ -133,7 +130,9 @@ public class StatService {
     }
 
     private void setupCurrentEntry(Date now) {
-        final String month = periodDateFormat.format(now);
+        final String month = monthString(now);
+        initNodeId(now);
+
         String dn = String.format("jansId=%s,%s", nodeId, monthlyDn); // jansId=<id>,ou=yyyyMM,ou=stat,o=gluu
 
         if (currentEntry != null && month.equals(currentEntry.getStat().getMonth())) {
@@ -148,7 +147,7 @@ public class StatService {
                 currentEntry = entryFromPersistence;
                 log.trace("Stat entry loaded.");
 
-                if (currentEntry != null && StringUtils.isBlank(currentEntry.getMonth()) && currentEntry.getStat() != null) {
+                if (StringUtils.isBlank(currentEntry.getMonth()) && currentEntry.getStat() != null) {
                     currentEntry.setMonth(currentEntry.getStat().getMonth());
                 }
                 return;
@@ -157,43 +156,41 @@ public class StatService {
             log.trace("Stat entry is not found in persistence.");
         }
 
-        if (currentEntry == null) {
-            log.trace("Creating stat entry ...");
-            hll = newHll();
-            tokenCounters = new ConcurrentHashMap<>();
-            final String monthString = periodDateFormat.format(new Date());
+        log.trace("Creating stat entry ...");
+        hll = newHll();
+        tokenCounters = new ConcurrentHashMap<>();
+        final String monthString = periodDateFormat.format(new Date());
 
-            currentEntry = new StatEntry();
-            currentEntry.setId(nodeId);
-            currentEntry.setDn(dn);
-            currentEntry.setUserHllData(Base64.getEncoder().encodeToString(hll.toBytes()));
+        currentEntry = new StatEntry();
+        currentEntry.setId(nodeId);
+        currentEntry.setDn(dn);
+        currentEntry.setUserHllData(Base64.getEncoder().encodeToString(hll.toBytes()));
 
-            currentEntry.getStat().setMonth(monthString);
-            currentEntry.setMonth(monthString);
-            entryManager.persist(currentEntry);
-            log.trace("Created stat entry.");
-        }
+        currentEntry.getStat().setMonth(monthString);
+        currentEntry.setMonth(monthString);
+        entryManager.persist(currentEntry);
+        log.trace("Created stat entry.");
     }
 
     public HLL newHll() {
         return new HLL(LOG_2_M, REGWIDTH);
     }
 
-    private void initNodeId() {
+    private void initNodeId(Date now) {
         if (StringUtils.isNotBlank(nodeId)) {
             return;
         }
 
         try {
-            nodeId = InetAddressUtility.getMACAddressOrNull();
+            nodeId = InetAddressUtility.getMACAddressOrNull() + "_" + monthString(now);
             if (StringUtils.isNotBlank(nodeId)) {
                 return;
             }
 
-            nodeId = UUID.randomUUID().toString();
+            nodeId = UUID.randomUUID().toString() + "_" + monthString(now);
         } catch (Exception e) {
             log.error("Failed to identify nodeId.", e);
-            nodeId = UUID.randomUUID().toString();
+            nodeId = UUID.randomUUID().toString() + "_" + monthString(now);
         }
     }
 
@@ -205,9 +202,13 @@ public class StatService {
         return staticConfiguration.getBaseDn().getStat();
     }
 
+    public String monthString(Date now) {
+        return periodDateFormat.format(now); // yyyyMM
+    }
+
     private void prepareMonthlyBranch(Date now) {
         final String baseDn = getBaseDn();
-        final String month = periodDateFormat.format(now); // yyyyMM
+        final String month = monthString(now); // yyyyMM
         monthlyDn = String.format("ou=%s,%s", month, baseDn); // ou=yyyyMM,ou=stat,o=gluu
 
         if (!entryManager.hasBranchesSupport(baseDn)) {
