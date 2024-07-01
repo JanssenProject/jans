@@ -200,8 +200,6 @@ fun RegistrationScreen(
                             },
 
                             onSubmit = {
-                                var attestationOptionResponse: AttestationOptionResponse? = null
-                                var fidoConfiguration: FidoConfigurationResponse? = null
                                 val authAdaptor = AuthAdaptor(context)
                                 if(authAdaptor.isCredentialsPresent(mainViewModel.getUsername())) {
                                     shouldShowDialog.value = true
@@ -258,18 +256,8 @@ fun RegistrationScreen(
                                                 registrationState.copy(isLoading = false)
                                             return@launch
                                         }
-                                        val opConfiguration =
-                                            async { mainViewModel.getOPConfigurationInDatabase() }.await()
-                                        if (opConfiguration?.isSuccessful == false) {
-                                            shouldShowDialog.value = true
-                                            dialogContent.value =
-                                                opConfiguration.errorMessage.toString()
 
-                                            registrationState =
-                                                registrationState.copy(isLoading = false)
-                                            return@launch
-                                        }
-                                        fidoConfiguration =
+                                        val fidoConfiguration: FidoConfigurationResponse? =
                                             async { mainViewModel.fetchFidoConfiguration() }.await()
                                         if (fidoConfiguration?.isSuccessful == false) {
                                             shouldShowDialog.value = true
@@ -280,7 +268,7 @@ fun RegistrationScreen(
                                                 registrationState.copy(isLoading = false)
                                             return@launch
                                         }
-                                        attestationOptionResponse =
+                                        val attestationOptionResponse: AttestationOptionResponse? =
                                             async {
                                                 mainViewModel.attestationOption(
                                                     mainViewModel.getUsername()
