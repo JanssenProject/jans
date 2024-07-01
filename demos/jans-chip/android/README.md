@@ -15,6 +15,16 @@
 
 ![](./docs/authentication.png)
 
+### Auth Challenge Script
+
+Add following [Auth Challenge Script](./docs/authChallengeScript.md) in Jans Server with following details.
+
+- **Name of Script** : passkey_auth_challenge
+- **Script Type** : Authorization Challenge
+- **Programming Language** : Java
+- **Location Type**: Database
+- Add `fido2_server_uri` custom property with https://{fido_server_url} as value
+
 ### Workspace Setup
 
 1. Clone `jans` monorepo.
@@ -25,9 +35,7 @@
 3. Press `ctrl` key twice on Android Studio to open `Run Anything` dialog.
 4. Enter `gradle wrapper --gradle-version 8.0` and press enter key. This will generate gradle wrapper at `{jans_monorep_path}\demos\jans-chip\gradle\wrapper`. 
 5. Build and run project on an emmulator (in Android Studio).
-6. After launch add configuration endpoint of Janssen Server (with a trusted
-   domain, not self-signed certificate) and desired scopes on the register screen
-   to start testing.
+
 
 **Reference:**
 - https://github.com/JanssenProject/jans/wiki/Mobile-DPoP-FIDO-Authn
