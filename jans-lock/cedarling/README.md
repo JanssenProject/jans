@@ -76,7 +76,7 @@ const config = {
 
 // the "local" strategy is a fallback option. the cedarling will use a statically embedded policy store, located in `/policy-store/default.json`
 const local = {
-	strategy: "local
+	strategy: "local"
 };
 
 // the "remote" strategy is only slightly more complex than "local", with the only difference being you provide a http `url` from which a simple GET request is used to acquire the Policy Store
