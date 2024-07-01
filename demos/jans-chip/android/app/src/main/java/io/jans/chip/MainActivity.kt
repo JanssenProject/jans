@@ -65,6 +65,7 @@ import io.jans.jans_chip.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -72,7 +73,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //mainViewModel.initModel(this)
         val mainViewModel = MainViewModel.getInstance(this)
         var loading = true
 
@@ -89,13 +89,12 @@ class MainActivity : AppCompatActivity() {
 
             //get openid configuration
             try {
+                val jwtClaimsSet: JWTClaimsSet = DPoPProofFactory.getClaimsFromSSA()
                 var opConfiguration: OPConfiguration? =
                     async { mainViewModel.getOPConfigurationInDatabase() }.await()
                 if (opConfiguration != null) {
                     mainViewModel.opConfigurationPresent = true
-                }
-                if (opConfiguration == null) {
-                    val jwtClaimsSet: JWTClaimsSet = DPoPProofFactory.getClaimsFromSSA()
+                } else {
                     val issuer: String = jwtClaimsSet.getClaim("iss").toString()
                     mainViewModel.setOpConfigUrl(issuer + AppConfig.OP_CONFIG_URL)
                     opConfiguration = async { mainViewModel.fetchOPConfiguration() }.await()
@@ -104,16 +103,13 @@ class MainActivity : AppCompatActivity() {
                         mainViewModel.loadingErrorMessage = "Error in fetching OP Configuration"
                         throw Exception("Error in fetching OP Configuration")
                     }
-                    mainViewModel.opConfigurationPresent = true
                 }
 
                 //get FIDO configuration
                 val fidoConfiguration = async { mainViewModel.getFidoConfigInDatabase() }.await()
                 if (fidoConfiguration != null) {
                     mainViewModel.fidoConfigurationPresent = true
-                }
-                if (fidoConfiguration == null) {
-                    val jwtClaimsSet: JWTClaimsSet = DPoPProofFactory.getClaimsFromSSA()
+                } else {
                     val issuer: String = jwtClaimsSet.getClaim("iss").toString()
                     mainViewModel.setFidoConfigUrl(issuer + AppConfig.FIDO_CONFIG_URL)
                     val fidoConfigurationResponse =
@@ -124,15 +120,13 @@ class MainActivity : AppCompatActivity() {
                         mainViewModel.loadingErrorMessage = "Error in fetching FIDO Configuration"
                         throw Exception("Error in fetching FIDO Configuration")
                     }
-                    mainViewModel.fidoConfigurationPresent = true
                 }
                 //check OIDC client
                 var oidcClient: OIDCClient? = async { mainViewModel.getClientInDatabase() }.await()
 
                 if (oidcClient != null) {
                     mainViewModel.clientRegistered = true
-                }
-                if (oidcClient == null) {
+                } else {
                     oidcClient = mainViewModel.doDCRUsingSSA(
                         AppConfig.SSA,
                         AppConfig.ALLOWED_REGISTRATION_SCOPES

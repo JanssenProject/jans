@@ -40,8 +40,7 @@ class AuthAdaptor(context: Context) {
 
     fun getAllCredentials(): List<PublicKeyCredentialSource>? {
         val credentialSafe: CredentialSafe? = authenticator?.credentialSafe
-        val creds: List<PublicKeyCredentialSource>? = credentialSafe?.allCredentialSource
-        return creds
+        return credentialSafe?.allCredentialSource
     }
 
     private fun generateAuthenticatorMakeCredentialOptions(responseFromAPI: AttestationOptionResponse?, origin: String?): AuthenticatorMakeCredentialOptions {
@@ -94,7 +93,7 @@ class AuthAdaptor(context: Context) {
             val clientDataJSON = generateClientDataJSON(
                 responseFromAPI?.challenge,
                 "webauthn.create",
-                origin/*"https://admin-ui-test.gluu.org"*/
+                origin
             )
             val response = clientDataJSON?.let {
                 io.jans.chip.model.fido.attestation.result.Response(
@@ -119,9 +118,7 @@ class AuthAdaptor(context: Context) {
             if (response != null) {
                 attestationResultRequest?.response = response
             }
-            //attestationResult(attestationResultRequest)
             return attestationResultRequest
-            //Toast.makeText(ctx, "attestationObjectBytes : " + attestationObjectBytes.toString(), Toast.LENGTH_SHORT).show();
         } catch (e: Exception) {
             val attestationResultRequest = AttestationResultRequest(null, null, null)
             attestationResultRequest.isSuccessful = false
@@ -191,7 +188,7 @@ class AuthAdaptor(context: Context) {
         return clientDataJSON.replace("\n", "")
     }
 
-    fun decode(src: String?): ByteArray? {
+    private fun decode(src: String?): ByteArray? {
         return Base64.decode(src, Base64.URL_SAFE)
     }
 
@@ -263,7 +260,6 @@ class AuthAdaptor(context: Context) {
             response.signature = urlEncodeToString(assertionObject?.signature).replace("\n", "")
             assertionResultRequest.response = response
             return assertionResultRequest
-            //assertionResult(assertionResultRequest)
         } catch (e: Exception) {
             val assertionResultRequest = AssertionResultRequest()
             assertionResultRequest.isSuccessful = false

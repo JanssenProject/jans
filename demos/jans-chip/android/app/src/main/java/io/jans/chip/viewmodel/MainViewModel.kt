@@ -244,10 +244,8 @@ class MainViewModel : ViewModel() {
     }
 
     suspend fun assertionOption(username: String): AssertionOptionResponse? {
-        val assertionOptionResponse: AssertionOptionResponse? =
-            fidoAssertionRepository.assertionOption(username)
 
-        return assertionOptionResponse
+        return fidoAssertionRepository.assertionOption(username)
     }
 
     suspend fun assertionResult(assertionResultRequest: AssertionResultRequest?): AssertionResultResponse {

@@ -26,7 +26,6 @@ fun RegistrationInputs(
 ) {
     // Login Inputs Section
     Column(modifier = Modifier.fillMaxWidth()) {
-        Log.d(">>>>>>>>>>>>>>>>>>>>>>>", registrationState.isLoading.toString())
         // Email ID
         EmailTextField(
             modifier = Modifier

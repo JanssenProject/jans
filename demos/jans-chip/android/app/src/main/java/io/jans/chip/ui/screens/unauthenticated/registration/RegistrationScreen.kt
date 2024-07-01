@@ -202,7 +202,7 @@ fun RegistrationScreen(
                             onSubmit = {
                                 var attestationOptionResponse: AttestationOptionResponse? = null
                                 var fidoConfiguration: FidoConfigurationResponse? = null
-                                //registrationState.isLoading = true
+
                                 if (isBiometricAvailable) {
                                     CoroutineScope(Dispatchers.Main).launch {
                                         registrationState = registrationState.copy(isLoading = true)
@@ -219,7 +219,6 @@ fun RegistrationScreen(
                                             shouldShowDialog.value = true
                                             dialogContent.value =
                                                 loginResponse.errorMessage.toString()
-                                            //loading.value = false
                                             registrationState =
                                                 registrationState.copy(isLoading = false)
                                             return@launch
@@ -233,7 +232,7 @@ fun RegistrationScreen(
                                             shouldShowDialog.value = true
                                             dialogContent.value =
                                                 tokenResponse.errorMessage.toString()
-                                            //loading.value = false
+
                                             registrationState =
                                                 registrationState.copy(isLoading = false)
                                             return@launch
@@ -249,7 +248,7 @@ fun RegistrationScreen(
                                             shouldShowDialog.value = true
                                             dialogContent.value =
                                                 userInfoResponse.errorMessage.toString()
-                                            //loading.value = false
+
                                             registrationState =
                                                 registrationState.copy(isLoading = false)
                                             return@launch
@@ -261,18 +260,7 @@ fun RegistrationScreen(
                                             shouldShowDialog.value = true
                                             dialogContent.value =
                                                 opConfiguration.errorMessage.toString()
-                                            //loading.value = false
-                                            registrationState =
-                                                registrationState.copy(isLoading = false)
-                                            return@launch
-                                        }
-                                        val oidcClient =
-                                            async { mainViewModel.doDCR("openid authorization_challenge") }.await()
-                                        if (oidcClient?.isSuccessful == false) {
-                                            shouldShowDialog.value = true
-                                            dialogContent.value =
-                                                oidcClient.errorMessage.toString()
-                                            //loading.value = false
+
                                             registrationState =
                                                 registrationState.copy(isLoading = false)
                                             return@launch
@@ -283,7 +271,7 @@ fun RegistrationScreen(
                                             shouldShowDialog.value = true
                                             dialogContent.value =
                                                 fidoConfiguration?.errorMessage.toString()
-                                            //loading.value = false
+
                                             registrationState =
                                                 registrationState.copy(isLoading = false)
                                             return@launch
@@ -298,7 +286,7 @@ fun RegistrationScreen(
                                             shouldShowDialog.value = true
                                             dialogContent.value =
                                                 attestationOptionResponse?.errorMessage.toString()
-                                            //loading.value = false
+
                                             registrationState =
                                                 registrationState.copy(isLoading = false)
                                             return@launch
@@ -311,7 +299,6 @@ fun RegistrationScreen(
                                                 fidoConfiguration?.issuer
                                             )
                                         }.await()
-
                                         val signature =
                                             async {
                                                 authAdaptor.generateSignature(
@@ -336,7 +323,7 @@ fun RegistrationScreen(
                                                         shouldShowDialog.value = true
                                                         dialogContent.value =
                                                             attestationResultRequest.errorMessage.toString()
-                                                        //loading.value = false
+
                                                         registrationState =
                                                             registrationState.copy(isLoading = false)
                                                         return@launch
@@ -351,18 +338,17 @@ fun RegistrationScreen(
                                                         shouldShowDialog.value = true
                                                         dialogContent.value =
                                                             attestationResultResponse.errorMessage.toString()
-                                                        //loading.value = false
+
                                                         registrationState =
                                                             registrationState.copy(isLoading = false)
                                                         return@launch
                                                     }
                                                     mainViewModel.attestationOptionResponse = true
-                                                    //showSignUpBottomSheet = false
 
                                                     registrationViewModel.onUiEvent(
                                                         registrationUiEvent = RegistrationUiEvent.Submit
                                                     )
-                                                    //loading.value = false
+
                                                     registrationState =
                                                         registrationState.copy(isLoading = false)
                                                 }
@@ -377,8 +363,6 @@ fun RegistrationScreen(
                                     registrationState =
                                         registrationState.copy(isLoading = false)
                                 }
-                                //loading.value = false
-                                //registrationState = registrationState.copy(isLoading = false)
                             }
                         )
                         Row(

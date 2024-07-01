@@ -2,6 +2,7 @@ package io.jans.chip.repository
 
 import android.content.Context
 import android.util.Base64
+import android.util.Log
 import io.jans.chip.model.OPConfiguration
 import io.jans.chip.retrofit.ApiAdapter
 import io.jans.chip.AppDatabase
@@ -30,7 +31,7 @@ class LogoutRepository(context: Context) {
         }
         val opConfiguration: OPConfiguration = opConfigurationList[0]
         val oidcClient: OIDCClient = oidcClientList[0]
-
+        Log.d("oidcClient.recentGeneratedAccessToken", oidcClient.recentGeneratedAccessToken.toString())
         // Create a call to perform the logout
         val response: Response<Void> =
             ApiAdapter.getInstance(opConfiguration.issuer).logout(
