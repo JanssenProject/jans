@@ -258,7 +258,6 @@ fun RegistrationScreen(
                                                 registrationState.copy(isLoading = false)
                                             return@launch
                                         }
-
                                         val opConfiguration =
                                             async { mainViewModel.getOPConfigurationInDatabase() }.await()
                                         if (opConfiguration?.isSuccessful == false) {
