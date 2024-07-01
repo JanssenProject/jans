@@ -211,11 +211,11 @@ components:
         evaluationRequestsCount:
           type: integer
           format: int64
-        policyRequestData:
+        policyStats:
           type: object
           additionalProperties:
             type: string
-        memoryusage:
+        memoryUsage:
           type: string
     JsonPatch:
       type: object

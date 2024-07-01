@@ -3911,7 +3911,21 @@
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
-    }
+    },
+	{
+      "desc": "Policy stats details",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "policyStats"
+      ],
+      "json": true,
+      "multivalued": true,
+      "rdbm_json_column": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
   ],
   "objectClasses": [
     {

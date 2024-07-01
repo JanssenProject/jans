@@ -45,15 +45,15 @@ public class TelemetryEntry implements Serializable {
     @AttributeName(name = "averageTimeNs")
     private long avgPolicyEvaluationTimeNs;
 
-    @JsonProperty("memoryusage")
-    private String memUsageMb;
+    @JsonProperty("memoryUsage")
+    private String memoryUsage;
 
     @AttributeName(name = "requestCounter")
     private long evaluationRequestsCount;
 
-    @AttributeName(name = "attr")
+    @AttributeName(name = "policyStats")
     @JsonObject
-    private Map<String, String> policyRequestData;
+    private Map<String, String> policyStats;
 
     public String getDn() {
         return dn;
@@ -127,12 +127,12 @@ public class TelemetryEntry implements Serializable {
         this.avgPolicyEvaluationTimeNs = avgPolicyEvaluationTimeNs;
     }
 
-    public String getMemUsageMb() {
-        return memUsageMb;
+    public String getMemoryUsage() {
+        return memoryUsage;
     }
 
-    public void setMemUsageMb(String memUsageMb) {
-        this.memUsageMb = memUsageMb;
+    public void setMemoryUsage(String memoryUsage) {
+        this.memoryUsage = memoryUsage;
     }
 
     public long getEvaluationRequestsCount() {
@@ -143,12 +143,12 @@ public class TelemetryEntry implements Serializable {
         this.evaluationRequestsCount = evaluationRequestsCount;
     }
 
-    public Map<String, String> getPolicyRequestData() {
-        return policyRequestData;
+    public Map<String, String> getPolicyStats() {
+        return policyStats;
     }
 
-    public void setPolicyRequestData(Map<String, String> policyRequestData) {
-        this.policyRequestData = policyRequestData;
+    public void setPolicyStats(Map<String, String> policyStats) {
+        this.policyStats = policyStats;
     }
 
     @Override
@@ -157,8 +157,8 @@ public class TelemetryEntry implements Serializable {
                 + ", lastPolicyLoadSize=" + lastPolicyLoadSize + ", status=" + status + ", policySuccessLoadCounter="
                 + policySuccessLoadCounter + ", policyFailedLoadCounter=" + policyFailedLoadCounter
                 + ", lastPolicyEvaluationTimeNs=" + lastPolicyEvaluationTimeNs + ", avgPolicyEvaluationTimeNs="
-                + avgPolicyEvaluationTimeNs + ", memUsageMb=" + memUsageMb + ", evaluationRequestsCount="
-                + evaluationRequestsCount + ", policyRequestData=" + policyRequestData + "]";
+                + avgPolicyEvaluationTimeNs + ", memoryUsage=" + memoryUsage + ", evaluationRequestsCount="
+                + evaluationRequestsCount + ", policyStats=" + policyStats + "]";
     }
 
 }

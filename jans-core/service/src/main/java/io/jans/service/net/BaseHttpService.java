@@ -184,6 +184,9 @@ public abstract class BaseHttpService implements Serializable {
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, String postData, ContentType contentType) {
         return executePost(httpClient, uri, authData, null, postData, contentType, null);
 	}
+	public HttpServiceResponse executePost(String uri, String authData, Map<String, String> headers, String postData, ContentType contentType, String authType) {
+	    return executePost(this.getHttpsClient(), uri, authData, null, postData, contentType, authType);
+	}
 
 	public String encodeBase64(String value) {
 		try {

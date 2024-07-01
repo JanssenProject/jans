@@ -61,7 +61,17 @@
 
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-core-service</artifactId>
+			<artifactId>jans-lock-server</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-model</artifactId>
 		</dependency>
 
 		<!-- CDI -->
