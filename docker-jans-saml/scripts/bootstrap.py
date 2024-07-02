@@ -3,12 +3,22 @@ from __future__ import annotations
 import base64
 import logging.config
 import os
+import shutil
 import typing as _t
 from functools import cached_property
 from string import Template
 from uuid import uuid4
 
 from jans.pycloudlib import get_manager
+from jans.pycloudlib.persistence import render_couchbase_properties
+from jans.pycloudlib.persistence import render_base_properties
+from jans.pycloudlib.persistence import render_hybrid_properties
+from jans.pycloudlib.persistence import render_ldap_properties
+from jans.pycloudlib.persistence import render_salt
+from jans.pycloudlib.persistence import sync_couchbase_truststore
+from jans.pycloudlib.persistence import sync_ldap_truststore
+from jans.pycloudlib.persistence import render_sql_properties
+from jans.pycloudlib.persistence import render_spanner_properties
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
@@ -17,7 +27,6 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import get_random_chars
-
 from settings import LOGGING_CONFIG
 from utils import get_kc_db_password
 
@@ -34,26 +43,78 @@ manager = get_manager()
 
 
 def render_keycloak_conf():
+    hostname = manager.config.get("hostname")
+
     ctx = {
-        "hostname": manager.config.get("hostname"),
-        "db_password": get_kc_db_password(),
+        "hostname": hostname,
+        "kc_hostname": hostname,
+        "kc_db_password": get_kc_db_password(),
         "saml_scim_client_id": manager.config.get("saml_scim_client_id"),
         "saml_scim_client_pw": manager.secret.get("saml_scim_client_pw"),
-        "jans_auth_token_endpoint": "jans-auth/restv1/token",
+        "idp_config_http_port": os.environ.get("CN_SAML_HTTP_PORT", "8083"),
+        "idp_config_http_host": os.environ.get("CN_SAML_HTTP_HOST", "0.0.0.0"),   # nosec: B104
+        "idp_config_data_dir": "/opt/keycloak",
     }
 
     with open("/app/templates/jans-saml/keycloak.conf") as f:
-        defaults = f.read()
-
-    with open("/app/templates/jans-saml/keycloak.extra.conf") as f:
-        extras = f.read()
+        tmpl = f.read()
 
     with open("/opt/keycloak/conf/keycloak.conf", "w") as f:
-        tmpl = "\n".join([defaults, extras])
         f.write(tmpl % ctx)
 
 
 def main():
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+
+    render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
+    render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
+
+    mapper = PersistenceMapper()
+    persistence_groups = mapper.groups().keys()
+
+    if persistence_type == "hybrid":
+        hybrid_prop = "/etc/jans/conf/jans-hybrid.properties"
+        if not os.path.exists(hybrid_prop):
+            render_hybrid_properties(hybrid_prop)
+
+    if "ldap" in persistence_groups:
+        render_ldap_properties(
+            manager,
+            "/app/templates/jans-ldap.properties",
+            "/etc/jans/conf/jans-ldap.properties",
+        )
+        sync_ldap_truststore(manager)
+
+    if "couchbase" in persistence_groups:
+        render_couchbase_properties(
+            manager,
+            "/app/templates/jans-couchbase.properties",
+            "/etc/jans/conf/jans-couchbase.properties",
+        )
+        # need to resolve whether we're using default or user-defined couchbase cert
+        sync_couchbase_truststore(manager)
+
+    if "sql" in persistence_groups:
+        db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
+
+        render_sql_properties(
+            manager,
+            f"/app/templates/jans-{db_dialect}.properties",
+            "/etc/jans/conf/jans-sql.properties",
+        )
+
+    if "spanner" in persistence_groups:
+        render_spanner_properties(
+            manager,
+            "/app/templates/jans-spanner.properties",
+            "/etc/jans/conf/jans-spanner.properties",
+        )
+
+    shutil.copyfile(
+        "/app/templates/jans-saml/quarkus.properties",
+        "/opt/keycloak/conf/quarkus.properties",
+    )
+
     with manager.lock.create_lock("saml-setup"):
         persistence_setup = PersistenceSetup(manager)
         persistence_setup.import_ldif_files()
