@@ -117,6 +117,7 @@ class LockPersistenceSetup:
             "hostname": self.manager.config.get("hostname"),
             "jans_opa_host": "localhost",
             "jans_opa_port": 8181,
+            "base_endpoint": "jans-auth",
         }
 
         # pre-populate lock_dynamic_conf_base64

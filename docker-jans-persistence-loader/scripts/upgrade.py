@@ -710,11 +710,19 @@ class Upgrade:
         if self.backend.type != "couchbase":
             entry.attrs["jansConfStatic"] = json.loads(entry.attrs["jansConfStatic"])
 
-        conf, should_update = _transform_auth_static_config(entry.attrs["jansConfStatic"])
+        should_update = False
+
+        # compare config from persistence with the ones from assets
+        with open("/app/templates/jans-auth/jans-auth-static-conf.json") as f:
+            new_conf = json.loads(f.read())
+
+            if entry.attrs["jansConfStatic"] != new_conf:
+                entry.attrs["jansConfStatic"] = new_conf
+                should_update = True
 
         if should_update:
             if self.backend.type != "couchbase":
-                entry.attrs["jansConfStatic"] = json.dumps(conf)
+                entry.attrs["jansConfStatic"] = json.dumps(entry.attrs["jansConfStatic"])
 
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
@@ -859,19 +867,6 @@ class Upgrade:
             revision = entry.attrs.get("jansRevision") or 1
             entry.attrs["jansRevision"] = revision + 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
-
-
-def _transform_auth_static_config(conf):
-    should_update = False
-
-    for key, dn in [
-        ("ssa", "ou=ssa,o=jans"),
-        ("archivedJwks", "ou=archived_jwks,o=jans"),
-    ]:
-        if key not in conf["baseDn"]:
-            conf["baseDn"][key] = dn
-            should_update = True
-    return conf, should_update
 
 
 def _transform_smtp_config(default_smtp_conf, smtp_conf):

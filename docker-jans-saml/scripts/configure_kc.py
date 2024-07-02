@@ -373,6 +373,7 @@ def main():
         "kc_saml_openid_client_id": manager.config.get("kc_saml_openid_client_id"),
         "kc_saml_openid_client_pw": manager.secret.get("kc_saml_openid_client_pw"),
         "hostname": manager.config.get("hostname"),
+        "admin_email": manager.config.get("admin_email"),
     }
 
     base_dir = os.path.join(tempfile.gettempdir(), "kc_jans_api")
