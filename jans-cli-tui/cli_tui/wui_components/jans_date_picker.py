@@ -34,16 +34,19 @@ class JansSelectDate:
     def __init__(
         self,
         value: datetime.datetime,
+        min_date: Optional[datetime.datetime]=None
         )-> HSplit:
         
         """Date selection float
 
         Args:
             date (datetime.datetime): datetime object for current date
+            min_date (optional): datetime.datetime object or collable
         """
         self.value = value
         self.chstate = change_loc.DAY
         self.cal = calendar.Calendar()
+        self.min_date = min_date
 
         self.container = HSplit(children=[
             Window(
@@ -115,24 +118,32 @@ class JansSelectDate:
 
         return merge_formatted_text(result)
 
+    def set_value(self, new_value):
+        check = self.min_date() if callable(self.min_date) else self.min_date
+        if self.min_date and new_value < check:
+            return
+        self.value = new_value
+
 
     def _add_months(self, months):
         month = self.value.month - 1 + months
         year = self.value.year + month // 12
         month = month % 12 + 1
         day = min(self.value.day, calendar.monthrange(year, month)[1])
-        self.value = datetime.datetime(year, month, day, self.value.hour, self.value.minute, self.value.second)
+        new_value = datetime.datetime(year, month, day, self.value.hour, self.value.minute, self.value.second)
+        self.set_value(new_value)
 
 
     def up(self)-> None:
         if self.chstate == change_loc.DAY:
-            self.value -= datetime.timedelta(days=7)
+            self.set_value(self.value - datetime.timedelta(days=7))
         elif self.chstate == change_loc.MONTH:
             self._add_months(1)
         elif self.chstate == change_loc.YEAR:
-            self.value = self.value.replace(year=self.value.year+1)
+            self.set_value(self.value.replace(year=self.value.year+1))
         else:
-            self.value -= datetime.timedelta(**{self.chstate.name.lower(): 1})
+            self.set_value(self.value - datetime.timedelta(**{self.chstate.name.lower(): 1}))
+
 
     def down(self)-> None:
         if self.chstate == change_loc.DAY:
@@ -140,7 +151,8 @@ class JansSelectDate:
         elif self.chstate == change_loc.MONTH:
             self._add_months(-1)
         elif self.chstate == change_loc.YEAR:
-            self.value = self.value.replace(year=self.value.year-1)
+            new_value = self.value.replace(year=self.value.year-1)
+            self.set_value(new_value)
         else:
             self.value += datetime.timedelta(**{self.chstate.name.lower(): 1})
 
@@ -150,7 +162,8 @@ class JansSelectDate:
 
     def left(self)-> None:
         if self.chstate == change_loc.DAY:
-            self.value -= datetime.timedelta(days=1)
+            new_value = self.value - datetime.timedelta(days=1)
+            self.set_value(new_value)
 
     def tab(self) -> None:
         self.chstate = self.chstate.next()
@@ -164,13 +177,15 @@ class DateSelectWidget:
     def __init__(
         self,
         app: Application,
-        value: Optional[datetime.datetime]=None
+        value: Optional[datetime.datetime]=None,
+        min_date: Optional[datetime.datetime]=None
     ) -> Window:
 
         """Date Pickler widget to select exact time and date
 
         Args:
             value (datetime): datetime object
+            min_date (optional): datetime object
         """
         self.value = value
         self.app = app
@@ -183,7 +198,7 @@ class DateSelectWidget:
             height= 10
             )
 
-        self.select_box = JansSelectDate(self.value or datetime.datetime.now())
+        self.select_box = JansSelectDate(self.value or datetime.datetime.now(), min_date=min_date)
         self.select_box_float = Float(content=self.select_box, xcursor=True, ycursor=True)
 
 
