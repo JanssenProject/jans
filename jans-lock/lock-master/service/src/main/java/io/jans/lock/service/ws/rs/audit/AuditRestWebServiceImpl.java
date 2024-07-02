@@ -43,6 +43,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
@@ -98,7 +100,9 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
 		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
 		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 		builder.entity("{\"res\" : \"ok\"}");
-
+		
+		this.authUtil.getAppConfiguration();
+		
 		this.postData(null);
 		return builder.build();
 	}

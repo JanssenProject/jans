@@ -1,14 +1,16 @@
 package io.jans.lock.service.util;
 
+
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
+import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.net.HttpService;
-import io.jans.lock.service.ws.rs.audit.CloseableHttpClient;
 import io.jans.model.net.HttpServiceResponse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
@@ -29,14 +31,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ApplicationScoped
 public class AuthUtil {
     
+    private static final String CONTENT_TYPE = "Content-Type";
+
+    
     @Inject
     Logger log;
+    
+    @Inject
+    AppConfiguration appConfiguration;
 
     @Inject 
     HttpService httpService;
     
     
-    public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
+    public TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
         log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
                 clientId, clientSecret, scope);
@@ -69,7 +77,7 @@ public class AuthUtil {
         return null;
     }
     
-    private String getToken() {
+    public String getToken() {
         log.error("\n\n Request for token \n\n");
         String tokenUrl = "https://pujavs-probable-alpaca.gluu.info/jans-auth/restv1/token"; 
         String clientId = "1800.59d18a30-51df-4f96-a83f-f31d413e9e5b";
@@ -78,7 +86,7 @@ public class AuthUtil {
         String scopes = "https://jans.io/oauth/lock/telemetry.write";
         String accessToken = null;
         Integer expiresIn = 0;
-        TokenResponse tokenResponse = authUtil.requestAccessToken(tokenUrl, clientId, clientSecret, scopes);
+        TokenResponse tokenResponse = requestAccessToken(tokenUrl, clientId, clientSecret, scopes);
                 if (tokenResponse != null) {
 
                     log.debug("Token Response - tokenScope: {}, tokenAccessToken: {} ", tokenResponse.getScope(),
@@ -108,5 +116,23 @@ public class AuthUtil {
         log.error("response:{}", response);
         
     }
+    
+    
+    public void getAppConfiguration() {
+        log.error("appConfiguration:{}", appConfiguration);
+        log.error("appConfiguration.getApiClientId():{}", appConfiguration.getApiClientId());
+        log.error("appConfiguration.getApiClientPassword():{}", appConfiguration.getApiClientPassword());
+        log.error("appConfiguration.getTokenUrl():{}", appConfiguration.getTokenUrl());
+        log.error(" appConfiguration.getEndpointDetails():{}", appConfiguration.getEndpointDetails());
+    }
+    
+    
+    private static Builder getClientBuilder(String url) {
+        return ClientBuilder.newClient().target(url).request();
+    }
+
+    
+    
+    
 
 }

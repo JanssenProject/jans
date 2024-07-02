@@ -1,36 +1,42 @@
 {
-   "baseEndpoint" : "https://%(hostname)s/%(base_endpoint)s/v1",
-
-   "tokenChannels":[
-         "jans_token"
-      ],
-
-   "cleanServiceInterval":60,
-   "cleanServiceBatchChunkSize":10000,
-
-   "disableJdkLogger":true,
-
-   "loggingLevel":"INFO",
-   "loggingLayout":"text",
-   "externalLoggerConfiguration":"",
-
-   "metricReporterInterval":300,
-   "metricReporterKeepDataDays":15,
-   "metricReporterEnabled":true,
-   "errorReasonEnabled": false,
-   
-   "opaConfiguration": {
-        "baseUrl" : "http://%(jans_opa_host)s:%(jans_opa_port)s/v1/",
-        "accessToken" : ""
-   },
-
-   "policiesJsonUris": [
-   ],
-   "policiesJsonUrisAuthorizationToken" : "",
-
-   "policiesZipUris": [
-   ],
-   "policiesZipUrisAuthorizationToken" : "",
-
-   "pdpType": "OPA"
+  "baseEndpoint": "https://%(hostname)s/%(base_endpoint)s/v1",
+  "clientId": "${jca_client_id}",
+  "clientPassword": "${jca_client_encoded_pw}",
+  "tokenUrl": "${tokenEndpoint}",
+  "endpointDetails": {
+    "jans-config-api/lock/audit/telemetry": [
+      "https://jans.io/oauth/lock/telemetry.readonly",
+      "https://jans.io/oauth/lock/telemetry.write"
+    ],
+    "jans-config-api/lock/audit": [
+      "https://jans.io/oauth/lock/audit.readonly",
+      "https://jans.io/oauth/lock/audit.write"
+    ],
+    "jans-config-api/lock/audit/health": [
+      "https://jans.io/oauth/lock/health.readonly",
+      "https://jans.io/oauth/lock/health.write"
+    ]
+  },
+  "tokenChannels": [
+    "jans_token"
+  ],
+  "cleanServiceInterval": 60,
+  "cleanServiceBatchChunkSize": 10000,
+  "disableJdkLogger": true,
+  "loggingLevel": "INFO",
+  "loggingLayout": "text",
+  "externalLoggerConfiguration": "",
+  "metricReporterInterval": 300,
+  "metricReporterKeepDataDays": 15,
+  "metricReporterEnabled": true,
+  "errorReasonEnabled": false,
+  "opaConfiguration": {
+    "baseUrl": "http://%(jans_opa_host)s:%(jans_opa_port)s/v1/",
+    "accessToken": ""
+  },
+  "policiesJsonUris": [],
+  "policiesJsonUrisAuthorizationToken": "",
+  "policiesZipUris": [],
+  "policiesZipUrisAuthorizationToken": "",
+  "pdpType": "OPA"
 }
