@@ -49,8 +49,6 @@ def render_keycloak_conf():
         "hostname": hostname,
         "kc_hostname": hostname,
         "kc_db_password": get_kc_db_password(),
-        "saml_scim_client_id": manager.config.get("saml_scim_client_id"),
-        "saml_scim_client_pw": manager.secret.get("saml_scim_client_pw"),
         "idp_config_http_port": os.environ.get("CN_SAML_HTTP_PORT", "8083"),
         "idp_config_http_host": os.environ.get("CN_SAML_HTTP_HOST", "0.0.0.0"),   # nosec: B104
         "idp_config_data_dir": "/opt/keycloak",
@@ -210,8 +208,6 @@ class PersistenceSetup:
         encoded_salt = self.manager.secret.get("encoded_salt")
 
         for id_prefix, ctx_name in [
-            # scim client for saml
-            (2100, "saml_scim"),
             # KC client for saml
             (2101, "kc_saml_openid"),
             # KC scheduler API client
